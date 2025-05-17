@@ -1,0 +1,126 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+
+import {DownloadService} from '../../core/services/download.service';
+
+const DEFAULT_ARTIFACT_NAME = 'default_artifact_name';
+
+@Component({
+  selector: 'app-artifact-tab',
+  templateUrl: './artifact-tab.component.html',
+  styleUrl: './artifact-tab.component.scss',
+  standalone: false,
+})
+export class ArtifactTabComponent implements OnChanges {
+  @Input() artifacts: any[] = [];
+
+  selectedArtifacts: any[] = [];
+
+  constructor(private downloadService: DownloadService) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['artifacts']) {
+      this.selectedArtifacts = [];
+
+      for (const artifactId of this.getDistinctArtifactIds()) {
+        this.selectedArtifacts.push(
+          this.getSortedArtifactsFromId(artifactId)[0],
+        );
+      }
+    }
+  }
+
+  protected downloadArtifact(artifact: any) {
+    this.downloadService.downloadBase64Data(
+      artifact.data,
+      artifact.mimeType,
+      artifact.id,
+    );
+  }
+
+  protected getArtifactName(artifactId: string) {
+    return artifactId ?? DEFAULT_ARTIFACT_NAME;
+  }
+
+  protected isArtifactImage(artifact: any) {
+    if (!artifact || !artifact.mimeType) {
+      return false;
+    }
+
+    return artifact.mimeType.startsWith('image/');
+  }
+
+  protected getDistinctArtifactIds() {
+    return [...new Set(this.artifacts.map((artifact) => artifact.id))];
+  }
+
+  protected getSortedArtifactsFromId(artifactId: string) {
+    return this.artifacts
+      .filter((artifact) => artifact.id === artifactId)
+      .sort((a, b) => {
+        return b.versionId - a.versionId;
+      });
+  }
+
+  protected onArtifactVersionChange(event: any, index: number) {
+    this.selectedArtifacts[index] = event.value;
+  }
+
+  protected openBase64InNewTab(fullBase64DataUrl: string) {
+    try {
+      if (!fullBase64DataUrl || !fullBase64DataUrl.startsWith('data:') ||
+          fullBase64DataUrl.indexOf(';base64,') === -1) {
+        return;
+      }
+
+      const mimeTypePart = fullBase64DataUrl.substring(
+          fullBase64DataUrl.indexOf(':') + 1,
+          fullBase64DataUrl.indexOf(';base64,'));
+
+      const base64DataString = fullBase64DataUrl.substring(
+          fullBase64DataUrl.indexOf(';base64,') + ';base64,'.length);
+
+      if (!mimeTypePart || !base64DataString) {
+        return;
+      }
+
+      const byteCharacters = atob(base64DataString);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+
+      const blob = new Blob([byteArray], {type: mimeTypePart});
+
+      const blobUrl = URL.createObjectURL(blob);
+
+      const newWindow = window.open(blobUrl, '_blank');
+      if (newWindow) {
+        newWindow.focus();
+      } else {
+        alert(
+            'Pop-up blocked! Please allow pop-ups for this site to open the data in a new tab.');
+      }
+    } catch (e) {
+      alert(
+          'Could not open the data. It might be invalid or too large. Check the browser console for errors.');
+    }
+  }
+}

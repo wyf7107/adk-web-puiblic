@@ -47,7 +47,7 @@ import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.c
 function fixBase64String(base64: string): string {
   base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
 
-  // Add missing padding to ensure length is a multiple of 4
+  // Fix base64 padding
   while (base64.length % 4 !== 0) {
     base64 += '=';
   }

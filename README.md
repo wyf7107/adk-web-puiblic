@@ -9,7 +9,7 @@
       <img src="https://raw.githubusercontent.com/google/adk-python/main/assets/agent-development-kit.png" width="256"/>
     </h2>
     <h3 align="center">
-      An open-source, code-first Python toolkit for building, evaluating, and deploying sophisticated AI agents with flexibility and control.
+      Agent Development Kit Web is the built-in developer UI that integrated with Google Agent Development Kit for easier agent development and debug.
     </h3>
     <h3 align="center">
       Important Links:
@@ -31,7 +31,9 @@ Adk web is the built-in dev UI that comes along with adk for easier development 
 
 - **Install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
 
-- **Install [google-adk](https://github.com/google/adk-python)**
+- **Install [google-adk (Python)](https://github.com/google/adk-python)** 
+
+- **Install [google-adk (Java)](https://github.com/google/adk-java/)** 
 
 
 ## 🚀 Running adk web

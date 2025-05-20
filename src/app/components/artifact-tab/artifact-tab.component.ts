@@ -16,8 +16,10 @@
  */
 
 import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 import {DownloadService} from '../../core/services/download.service';
+import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 
 const DEFAULT_ARTIFACT_NAME = 'default_artifact_name';
 
@@ -32,7 +34,10 @@ export class ArtifactTabComponent implements OnChanges {
 
   selectedArtifacts: any[] = [];
 
-  constructor(private downloadService: DownloadService) {}
+  constructor(
+      private downloadService: DownloadService,
+      private dialog: MatDialog,
+  ) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['artifacts']) {
@@ -40,7 +45,7 @@ export class ArtifactTabComponent implements OnChanges {
 
       for (const artifactId of this.getDistinctArtifactIds()) {
         this.selectedArtifacts.push(
-          this.getSortedArtifactsFromId(artifactId)[0],
+            this.getSortedArtifactsFromId(artifactId)[0],
         );
       }
     }
@@ -48,9 +53,9 @@ export class ArtifactTabComponent implements OnChanges {
 
   protected downloadArtifact(artifact: any) {
     this.downloadService.downloadBase64Data(
-      artifact.data,
-      artifact.mimeType,
-      artifact.id,
+        artifact.data,
+        artifact.mimeType,
+        artifact.id,
     );
   }
 
@@ -58,28 +63,33 @@ export class ArtifactTabComponent implements OnChanges {
     return artifactId ?? DEFAULT_ARTIFACT_NAME;
   }
 
-  protected isArtifactImage(artifact: any) {
-    if (!artifact || !artifact.mimeType) {
-      return false;
-    }
-
-    return artifact.mimeType.startsWith('image/');
-  }
-
   protected getDistinctArtifactIds() {
     return [...new Set(this.artifacts.map((artifact) => artifact.id))];
   }
 
   protected getSortedArtifactsFromId(artifactId: string) {
-    return this.artifacts
-      .filter((artifact) => artifact.id === artifactId)
-      .sort((a, b) => {
-        return b.versionId - a.versionId;
-      });
+    return this.artifacts.filter((artifact) => artifact.id === artifactId)
+        .sort((a, b) => {
+          return b.versionId - a.versionId;
+        });
   }
 
   protected onArtifactVersionChange(event: any, index: number) {
     this.selectedArtifacts[index] = event.value;
+  }
+
+  protected openViewImageDialog(fullBase64DataUrl: string) {
+    if (!fullBase64DataUrl || !fullBase64DataUrl.startsWith('data:') ||
+        fullBase64DataUrl.indexOf(';base64,') === -1) {
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ViewImageDialogComponent, {
+      width: '1280px',
+      data: {
+        imageData: fullBase64DataUrl,
+      },
+    });
   }
 
   protected openBase64InNewTab(fullBase64DataUrl: string) {
@@ -122,5 +132,22 @@ export class ArtifactTabComponent implements OnChanges {
       alert(
           'Could not open the data. It might be invalid or too large. Check the browser console for errors.');
     }
+  }
+
+  protected isArtifactImage(mimeType: string): boolean {
+    if (!mimeType) {
+      return false;
+    }
+
+    return mimeType.startsWith('image/');
+  }
+
+  protected openArtifact(fullBase64DataUrl: string, mimeType: string) {
+    if (this.isArtifactImage(mimeType)) {
+      this.openViewImageDialog(fullBase64DataUrl);
+      return;
+    }
+
+    this.openBase64InNewTab(fullBase64DataUrl);
   }
 }

@@ -21,7 +21,7 @@
     <div class="artifact-metadata">
       <button
         class="link-style-button"
-        (click)="openBase64InNewTab(selectedArtifacts[i].data)"
+        (click)="openArtifact(selectedArtifacts[i].data, selectedArtifacts[i].mimeType)"
       >
         {{getArtifactName(artifactId)}}
       </button>
@@ -54,10 +54,10 @@
     </div>
 
     <img
-      *ngIf="isArtifactImage(selectedArtifacts[i])"
       class="generated-image"
       [src]="selectedArtifacts[i].data ?? ''"
       alt="artifact.id"
+      (click)="openViewImageDialog(selectedArtifacts[i].data)"
     />
   </div>
 </div>

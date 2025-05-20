@@ -38,6 +38,7 @@ interface EvaluationResult {
   overallEvalMetricResults?: any[];
   evalMetricResultPerInvocation?: any[];
   sessionId: string;
+  sessionDetails: any;
 }
 
 interface UIEvaluationResult {
@@ -363,14 +364,12 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   getHistorySession(evalCaseResult: EvaluationResult) {
-    this.sessionService
-        .getSession(this.userId, this.appName, evalCaseResult.sessionId)
-        .subscribe((res) => {
-          this.addEvalCaseResultToEvents(res, evalCaseResult);
-          const session = this.fromApiResultToSession(res);
+    this.addEvalCaseResultToEvents(
+        evalCaseResult.sessionDetails, evalCaseResult);
 
-          this.sessionSelected.emit(session);
-        });
+    const session = this.fromApiResultToSession(evalCaseResult.sessionDetails);
+
+    this.sessionSelected.emit(session);
   }
 
   protected getEvaluationResult() {
@@ -414,6 +413,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
                             evalMetricResultPerInvocation:
                                 result.evalMetricResultPerInvocation,
                             sessionId: result.sessionId,
+                            sessionDetails: result.sessionDetails,
                           };
                         }),
                   };

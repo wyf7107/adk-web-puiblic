@@ -164,10 +164,11 @@
 .input-field {
   flex-grow: 1;
 
-  input {
+  textarea {
     color: white;
     border: none;
     padding: 10px;
+    box-sizing: content-box;
 
     &::placeholder {
       color: #8e918f;
@@ -283,6 +284,12 @@ button {
 
 .function-event-button {
   background-color: white;
+}
+
+:host ::ng-deep .message-text {
+  p {
+    white-space: pre-line;
+  }
 }
 
 :host ::ng-deep .mat-mdc-text-field-wrapper {

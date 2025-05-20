@@ -202,7 +202,8 @@
             <div>
               <div *ngIf="message.thought" class="thought-chip">Thought</div>
               <div>
-                <markdown *ngIf="message.text" 
+                <markdown *ngIf="message.text"
+                class="message-text"
                 [data]="message.text"
                 [ngStyle]="{'font-style':message.thought?'italic':'normal',
                   'color': message.thought ? '#9aa0a6': 'white'
@@ -285,14 +286,17 @@
               </div>
             </div>
           </div>
-          <input
+          <textarea
             class="chat-input-box"
             matInput
+            cdkTextareaAutosize
+            cdkAutosizeMinRows="1"
+            cdkAutosizeMaxRows="10"
             [(ngModel)]="userInput"
             (keydown.enter)="sendMessage($event)"
             placeholder="Type a Message..."
             style="caret-color: white;"
-          />
+          ></textarea>
           <div class="chat-input-actions">
             <button mat-icon-button (click)="fileInput.click()" class="function-event-button" style="margin-right:10px">
               <mat-icon>attach_file</mat-icon>

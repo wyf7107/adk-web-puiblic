@@ -45,6 +45,7 @@ import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 
 function fixBase64String(base64: string): string {
+  // Replace URL-safe characters if they exist
   base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
 
   // Fix base64 padding

@@ -28,6 +28,7 @@ export class AgentService {
   apiServerDomain = URLUtil.getApiServerBaseUrl();
   private _currentApp = new BehaviorSubject<string>('');
   currentApp = this._currentApp.asObservable();
+  private isLoading = new BehaviorSubject<boolean>(false);
 
   constructor(
     private http: HttpClient,
@@ -40,6 +41,10 @@ export class AgentService {
 
   setApp(name: string) {
     this._currentApp.next(name);
+  }
+
+  getLoadingState(): BehaviorSubject<boolean> {
+    return this.isLoading;
   }
 
   run(req: AgentRunRequest) {
@@ -56,6 +61,7 @@ export class AgentService {
 
   runSse(req: AgentRunRequest) {
     const url = this.apiServerDomain + `/run_sse`;
+    this.isLoading.next(true);
     return new Observable<string>((observer) => {
       const self = this;
       fetch(url, {
@@ -72,27 +78,25 @@ export class AgentService {
           let lastData: string | null = null;
 
           const read = () => {
-            reader
-              ?.read()
-              .then(({done, value}) => {
-                if (done) {
-                  return observer.complete();
-                }
+            reader?.read()
+                .then(({done, value}) => {
+                  if (done) {
+                    return observer.complete();
+                  }
 
-                const chunk = decoder.decode(value, {stream: true});
-                const lines = chunk
-                  .split(/\r?\n/)
-                  .filter((line) => line.startsWith('data:'));
-                lines.forEach((line) => {
-                  const data = line.replace(/^data:\s*/, '');
-                  self.zone.run(() => observer.next(data));
+                  const chunk = decoder.decode(value, {stream: true});
+                  const lines = chunk.split(/\r?\n/).filter(
+                      (line) => line.startsWith('data:'));
+                  lines.forEach((line) => {
+                    const data = line.replace(/^data:\s*/, '');
+                    self.zone.run(() => observer.next(data));
+                  });
+
+                  read();  // Read the next chunk
+                })
+                .catch((err) => {
+                  self.zone.run(() => observer.error(err));
                 });
-
-                read(); // Read the next chunk
-              })
-              .catch((err) => {
-                self.zone.run(() => observer.error(err));
-              });
           };
 
           read();

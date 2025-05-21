@@ -64,6 +64,11 @@
   background-color: #131314;
 }
 
+.loading-bar {
+  width: 100px;
+  margin: 15px;
+}
+
 .chat-messages {
   flex-grow: 1;
   overflow-y: auto;
@@ -292,6 +297,10 @@ button {
     word-break: break-word;
     overflow-wrap: break-word;
   }
+}
+
+:host ::ng-deep .mdc-linear-progress__buffer-dots {
+  background: white;
 }
 
 :host ::ng-deep .mat-mdc-text-field-wrapper {

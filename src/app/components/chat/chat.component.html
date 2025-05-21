@@ -188,6 +188,9 @@
             <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
           </button>
           <mat-card class="message-card" [ngClass]="{'eval-fail': message.evalStatus === 2}">
+            @if (message.isLoading) {
+              <mat-progress-bar class="loading-bar" mode="buffer"></mat-progress-bar>
+            }
             <div class="attachments" *ngIf="message.attachments">
               <div class="attachment" *ngFor="let file of message.attachments">
                 <ng-container *ngIf="file.file.type.startsWith('image/')">

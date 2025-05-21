@@ -204,6 +204,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.agentService.getApp().subscribe((app) => {
       this.appName = app;
     });
+
+    this.agentService.getLoadingState().subscribe((isLoading: boolean) => {
+      if (isLoading) {
+        this.messages.push({role: 'bot', isLoading: true});
+      } else if (this.messages[this.messages.length - 1].isLoading) {
+        this.messages.pop();
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -270,6 +278,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.streamingTextMessage = null;
     this.agentService.runSse(req).subscribe({
       next: async (chunk) => {
+        this.agentService.getLoadingState().next(false);
         if (chunk.startsWith('{"error"')) {
           this.openSnackBar(chunk, 'OK');
           return;

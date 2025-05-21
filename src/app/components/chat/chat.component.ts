@@ -37,6 +37,7 @@ import {EventService} from '../../core/services/event.service';
 import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
+import {isArtifactImage, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
@@ -126,6 +127,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
 
   selectedFiles: {file: File; url: string}[] = [];
   private previousMessageCount = 0;
+
+  protected isArtifactImage = isArtifactImage;
+  protected openBase64InNewTab = openBase64InNewTab;
 
   // Sync query params with value from agent picker.
   private readonly router = inject(Router);
@@ -519,6 +523,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
           this.messages[currentIndex] = {
             role: 'bot',
             inlineData: {
+              name: this.createDefaultArtifactName(mimeType),
               data: base64Data,
               mimeType: mimeType,
             },
@@ -992,5 +997,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
         imageData: this.rawSvgString,
       },
     });
+  }
+
+  private createDefaultArtifactName(mimeType: string): string {
+    if (!mimeType || !mimeType.includes('/')) {
+      return '';
+    }
+
+    return mimeType.replace('/', '.');
   }
 }

@@ -225,7 +225,19 @@
               <div>Output: {{message.codeExecutionResult.output}}</div>
             </div>
             <div *ngIf="message.inlineData && message.role === 'bot'">
-              <img class="generated-image" alt="image" [src]="message.inlineData.data" />
+              <div *ngIf="isArtifactImage(message.inlineData.mimeType)">
+                <img class="generated-image" alt="image" [src]="message.inlineData.data" />
+              </div>
+
+              <div *ngIf="!isArtifactImage(message.inlineData.mimeType)">
+                <button
+                  class="link-style-button"
+                  (click)="openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
+                >
+                  {{ message.inlineData.name }}
+                </button>
+              </div>
+
             </div>
             <button
               mat-stroked-button

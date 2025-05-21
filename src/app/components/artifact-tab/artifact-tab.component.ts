@@ -23,6 +23,61 @@ import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.c
 
 const DEFAULT_ARTIFACT_NAME = 'default_artifact_name';
 
+/**
+ * Returns true if the mime type is an image type.
+ */
+export function isArtifactImage(mimeType: string): boolean {
+  if (!mimeType) {
+    return false;
+  }
+
+  return mimeType.startsWith('image/');
+}
+
+/**
+ * Opens the base64 data in a new tab.
+ */
+export function openBase64InNewTab(dataUrl: string, mimeType: string) {
+  try {
+    if (!dataUrl) {
+      return;
+    }
+
+    let base64DataString = dataUrl;
+
+    if (dataUrl.startsWith('data:') && dataUrl.includes(';base64,')) {
+      base64DataString = base64DataString.substring(
+          base64DataString.indexOf(';base64,') + ';base64,'.length);
+    }
+
+    if (!mimeType || !base64DataString) {
+      return;
+    }
+
+    const byteCharacters = atob(base64DataString);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const blob = new Blob([byteArray], {type: mimeType});
+
+    const blobUrl = URL.createObjectURL(blob);
+
+    const newWindow = window.open(blobUrl, '_blank');
+    if (newWindow) {
+      newWindow.focus();
+    } else {
+      alert(
+          'Pop-up blocked! Please allow pop-ups for this site to open the data in a new tab.');
+    }
+  } catch (e) {
+    alert(
+        'Could not open the data. It might be invalid or too large. Check the browser console for errors.');
+  }
+}
+
 @Component({
   selector: 'app-artifact-tab',
   templateUrl: './artifact-tab.component.html',
@@ -33,6 +88,9 @@ export class ArtifactTabComponent implements OnChanges {
   @Input() artifacts: any[] = [];
 
   selectedArtifacts: any[] = [];
+
+  protected isArtifactImage = isArtifactImage;
+  protected openBase64InNewTab = openBase64InNewTab;
 
   constructor(
       private downloadService: DownloadService,
@@ -92,62 +150,12 @@ export class ArtifactTabComponent implements OnChanges {
     });
   }
 
-  protected openBase64InNewTab(fullBase64DataUrl: string) {
-    try {
-      if (!fullBase64DataUrl || !fullBase64DataUrl.startsWith('data:') ||
-          fullBase64DataUrl.indexOf(';base64,') === -1) {
-        return;
-      }
-
-      const mimeTypePart = fullBase64DataUrl.substring(
-          fullBase64DataUrl.indexOf(':') + 1,
-          fullBase64DataUrl.indexOf(';base64,'));
-
-      const base64DataString = fullBase64DataUrl.substring(
-          fullBase64DataUrl.indexOf(';base64,') + ';base64,'.length);
-
-      if (!mimeTypePart || !base64DataString) {
-        return;
-      }
-
-      const byteCharacters = atob(base64DataString);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-
-      const blob = new Blob([byteArray], {type: mimeTypePart});
-
-      const blobUrl = URL.createObjectURL(blob);
-
-      const newWindow = window.open(blobUrl, '_blank');
-      if (newWindow) {
-        newWindow.focus();
-      } else {
-        alert(
-            'Pop-up blocked! Please allow pop-ups for this site to open the data in a new tab.');
-      }
-    } catch (e) {
-      alert(
-          'Could not open the data. It might be invalid or too large. Check the browser console for errors.');
-    }
-  }
-
-  protected isArtifactImage(mimeType: string): boolean {
-    if (!mimeType) {
-      return false;
-    }
-
-    return mimeType.startsWith('image/');
-  }
-
   protected openArtifact(fullBase64DataUrl: string, mimeType: string) {
     if (this.isArtifactImage(mimeType)) {
       this.openViewImageDialog(fullBase64DataUrl);
       return;
     }
 
-    this.openBase64InNewTab(fullBase64DataUrl);
+    this.openBase64InNewTab(fullBase64DataUrl, mimeType);
   }
 }

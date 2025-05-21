@@ -40,6 +40,7 @@ import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownModule} from 'ngx-markdown';
 
 import {ArtifactTabComponent} from './artifact-tab/artifact-tab.component';
+import {AudioPlayerComponent} from './audio-player/audio-player.component';
 import {ChatComponent} from './chat/chat.component';
 import {AddEvalSessionDialogComponent} from './eval-tab/add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {EvalTabComponent} from './eval-tab/eval-tab.component';
@@ -65,6 +66,7 @@ const COMPONENTS = [
   StateTabComponent,
   TraceChartComponent,
   ViewImageDialogComponent,
+  AudioPlayerComponent,
 ];
 
 @NgModule({

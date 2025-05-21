@@ -212,7 +212,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.agentService.getLoadingState().subscribe((isLoading: boolean) => {
       if (isLoading) {
         this.messages.push({role: 'bot', isLoading: true});
-      } else if (this.messages[this.messages.length - 1].isLoading) {
+      } else if (this.messages[this.messages.length - 1] &&
+        this.messages[this.messages.length - 1].isLoading) {
         this.messages.pop();
       }
     });
@@ -325,6 +326,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
           role: 'bot',
           text: this.processThoughtText(newChunk),
           thought: part.thought ? true : false,
+          eventId: chunkJson.id
         };
 
         if (chunkJson.groundingMetadata &&
@@ -434,7 +436,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
         text: part.text,
         evalStatus: e.evalStatus,
         actualInvocationToolUses: e.actualInvocationToolUses,
-        expectedInvocationToolUses: e.expectedInvocationToolUses,
+        expectedInvocationToolUses: e.expectedInvocationToolUses
       };
       if (e.groundingMetadata && e.groundingMetadata.searchEntryPoint &&
           e.groundingMetadata.searchEntryPoint.renderedContent) {
@@ -639,6 +641,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.showSidePanel = true;
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
+
 
     this.eventService.getEventTrace(this.selectedEvent.id).subscribe((res) => {
       this.llmRequest = JSON.parse(res[this.llmRequestKey]);

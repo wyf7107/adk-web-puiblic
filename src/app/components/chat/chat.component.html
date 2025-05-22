@@ -107,13 +107,19 @@
             <div class="event-graph-container">
               <div *ngIf="renderedEventGraph" [innerHtml]="renderedEventGraph" (click)="openViewImageDialog()"></div>
             </div>
-            <ngx-json-viewer [json]="selectedEvent"></ngx-json-viewer>
+            <div class="json-viewer-container">
+              <ngx-json-viewer [json]="selectedEvent"></ngx-json-viewer>
+            </div>
           </mat-tab>
           <mat-tab label="Request">
-            <ngx-json-viewer [json]="llmRequest"></ngx-json-viewer>
+            <div class="json-viewer-container">
+              <ngx-json-viewer [json]="llmRequest"></ngx-json-viewer>
+            </div>
           </mat-tab>
           <mat-tab label="Response">
-            <ngx-json-viewer [json]="llmResponse"></ngx-json-viewer>
+            <div class="json-viewer-container">
+              <ngx-json-viewer [json]="llmResponse"></ngx-json-viewer>
+            </div>
           </mat-tab>
         </mat-tab-group>
       </div>

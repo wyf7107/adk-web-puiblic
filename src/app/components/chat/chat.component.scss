@@ -387,7 +387,13 @@ button {
   );
 }
 
+.json-viewer-container {
+  margin: 10px;
+}
+
 .event-paginator {
+  margin-top: -8px;
+  margin-right: auto;
   background-color: inherit;
   display: flex;
   justify-content: center;
@@ -414,11 +420,6 @@ button {
 .details-content {
   color: white;
   font-size: 14px;
-}
-
-.event-paginator {
-  margin-top: -8px;
-  margin-right: 160px;
 }
 
 .adk-checkbox {

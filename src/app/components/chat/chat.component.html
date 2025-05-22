@@ -239,7 +239,11 @@
                 <img class="generated-image" alt="image" [src]="message.inlineData.data" />
               </div>
 
-              <div *ngIf="!isArtifactImage(message.inlineData.mimeType)">
+              <div *ngIf="isArtifactAudio(message.inlineData.mimeType)">
+                <app-audio-player [base64data]="message.inlineData.data"></app-audio-player>
+              </div>
+
+              <div *ngIf="!isArtifactImage(message.inlineData.mimeType) && !isArtifactAudio(message.inlineData.mimeType)">
                 <button
                   class="link-style-button"
                   (click)="openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"

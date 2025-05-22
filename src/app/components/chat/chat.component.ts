@@ -38,7 +38,8 @@ import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
-import {isArtifactImage, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
+import {isArtifactAudio, isArtifactImage, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
+import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
@@ -131,6 +132,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
 
   protected isArtifactImage = isArtifactImage;
   protected openBase64InNewTab = openBase64InNewTab;
+  protected isArtifactAudio = isArtifactAudio;
 
   // Sync query params with value from agent picker.
   private readonly router = inject(Router);

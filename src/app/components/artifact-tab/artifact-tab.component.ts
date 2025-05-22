@@ -34,6 +34,18 @@ export function isArtifactImage(mimeType: string): boolean {
   return mimeType.startsWith('image/');
 }
 
+
+/**
+ * Returns true if the mime type is an audio type.
+ */
+export function isArtifactAudio(mimeType: string): boolean {
+  if (!mimeType) {
+    return false;
+  }
+
+  return mimeType.startsWith('audio/');
+}
+
 /**
  * Opens the base64 data in a new tab.
  */

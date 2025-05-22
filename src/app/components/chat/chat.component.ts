@@ -682,6 +682,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.webSocketService.closeConnection();
   }
 
+  onAppSelection(event: any) {
+    if (this.isAudioRecording) {
+      this.stopAudioRecording();
+      this.isAudioRecording = false;
+    }
+    if (this.isVideoRecording) {
+      this.stopVideoRecording();
+      this.isVideoRecording = false;
+    }
+  }
+
   toggleAudioRecording() {
     this.isAudioRecording ? this.stopAudioRecording() :
                             this.startAudioRecording();

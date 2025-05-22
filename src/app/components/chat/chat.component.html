@@ -30,6 +30,7 @@
           <div class="app-select-container">
             <mat-select
               class="app-select"
+              (selectionChange)="onAppSelection($event)"
               [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
               [formControl]="selectedAppControl">
               @if ((apps$ | async); as availableApps) {

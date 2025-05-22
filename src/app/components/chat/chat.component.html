@@ -15,30 +15,33 @@
 -->
 
 <mat-drawer-container class="drawer-container" autosize>
-  <mat-drawer class="sidenav" #sidenav mode="side" style="color:white;" [opened]="true" [style.width.px]="showSidePanel ? 510 : 56" [disableClose]="true">
+  @if (!showSidePanel) {
+    <span class="material-symbols-outlined"
+        style="position: absolute;width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-left: 20px;margin-top: 20px;"
+        (click)="toggleSidePanel()">left_panel_open</span>
+  }
+  <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
     <div style="margin-top:20px; margin-left:20px; display:flex;">
       <div style="width: 100%">
-        <div class="drawer-header">
-          <mat-icon (click)="toggleSidePanel()">menu</mat-icon>
-          @if (showSidePanel) {
-            <div class="app-select-container">
-              <mat-select
-                class="app-select"
-                [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
-                [formControl]="selectedAppControl">
-                @if ((apps$ | async); as availableApps) {
-                  @for (appName of availableApps; track appName) {
-                    <mat-option [value]="appName">{{ appName }}</mat-option>
-                  }
+      <div class="drawer-header">
+        <span class="material-symbols-outlined"
+            style="color: #C4C7C5;cursor: pointer;"
+            (click)="toggleSidePanel()">left_panel_close</span>
+          <div class="app-select-container">
+            <mat-select
+              class="app-select"
+              [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
+              [formControl]="selectedAppControl">
+              @if ((apps$ | async); as availableApps) {
+                @for (appName of availableApps; track appName) {
+                  <mat-option [value]="appName">{{ appName }}</mat-option>
                 }
-                @if (selectedAppControl.value && isLoadingApps()) {
-                  <mat-option [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
-                }
-              </mat-select>
-            </div>
-          } @else {
-            <span> No apps Avaiable in current directory</span>
-          }
+              }
+              @if (selectedAppControl.value && isLoadingApps()) {
+                <mat-option [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
+              }
+            </mat-select>
+          </div>
       </div>
       </div>
     </div>
@@ -115,6 +118,7 @@
         </mat-tab-group>
       </div>
     </div>
+    <div class="resize-handler"></div>
   </mat-drawer>
   <div class="chat-container">
     <div class="chat-toolbar" *ngIf="appName != ''">

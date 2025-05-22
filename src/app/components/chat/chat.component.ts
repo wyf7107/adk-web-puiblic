@@ -20,7 +20,7 @@ import {AfterViewChecked, AfterViewInit, Component, ElementRef, inject, OnDestro
 import {FormControl} from '@angular/forms';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatPaginatorIntl} from '@angular/material/paginator';
-import {MatSidenav} from '@angular/material/sidenav';
+import {MatDrawer} from '@angular/material/sidenav';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
@@ -37,6 +37,7 @@ import {EventService} from '../../core/services/event.service';
 import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
+import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {isArtifactImage, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
@@ -85,7 +86,7 @@ class CustomPaginatorIntl extends MatPaginatorIntl {
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
                                       AfterViewChecked {
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
-  @ViewChild('sidenav') sidenav!: MatSidenav;
+  @ViewChild('sideDrawer') sideDrawer!: MatDrawer;
   @ViewChild(EventTabComponent) eventTabComponent!: EventTabComponent;
   @ViewChild(SessionTabComponent) sessionTab!: SessionTabComponent;
   @ViewChild(EvalTabComponent) evalTab!: EvalTabComponent;
@@ -221,7 +222,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
 
   ngAfterViewInit() {
     this.showSidePanel = true;
-    this.sidenav.open();
+    this.sideDrawer.open();
   }
 
   ngAfterViewChecked() {
@@ -637,7 +638,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     const key = this.messages[i].eventId;
 
 
-    this.sidenav.open();
+    this.sideDrawer.open();
     this.showSidePanel = true;
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
@@ -762,6 +763,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   }
 
   toggleSidePanel() {
+    if (this.showSidePanel) {
+      this.sideDrawer.close();
+    } else {
+      this.sideDrawer.open();
+    }
     this.showSidePanel = !this.showSidePanel;
   }
 

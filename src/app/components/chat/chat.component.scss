@@ -16,6 +16,13 @@
 
 @use '@angular/material' as mat;
 
+
+.expand-side-drawer {
+  position: relative;
+  top: 4%;
+  left: 1%;
+}
+
 .drawer-container {
   height: 100%;
   background-color: #131314;
@@ -205,16 +212,15 @@
   z-index: 1000;
 }
 
-.sidenav {
+.side-drawer {
   background-color: #1b1b1b;
   color: white;
   border-radius: 0;
 }
 
 .tabs-container {
+  width: 100%;
   margin-top: 20px;
-  padding-left: 10px;
-  padding-right: 10px;
 }
 
 .tab-label {
@@ -333,12 +339,21 @@ button {
   }
 }
 
-:host ::ng-deep .mat-drawer-inner-container {
-  width: 500px;
-}
-
 .mat-mdc-select-placeholder {
   margin-left: 20px;
+}
+
+.resize-handler {
+  background: #5f6368;
+  width: 4px;
+  border-radius: 4px;
+  position: absolute;
+  display: block;
+  height: 20%;
+  top: 40%;
+  right: 0;
+  z-index: 9999;
+  cursor: ew-resize;
 }
 
 .new-session-button {
@@ -384,6 +399,7 @@ button {
 
 .details-panel-container {
   position: absolute;
+  width: 100%;
   height: 98%;
   left: 0;
   right: 0;

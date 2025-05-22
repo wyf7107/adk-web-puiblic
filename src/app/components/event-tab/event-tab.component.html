@@ -17,7 +17,7 @@
 <div class="events-wrapper">
   <div *ngIf="eventsMap.size>0" class="events-container">
     <div class="event-header">
-      <p *ngIf="!isTraceView()">Conversations with agent</p>
+      <p *ngIf="!isTraceView()">Conversations</p>
       <p *ngIf="isTraceView()">Trace</p>
       <mat-button-toggle-group name="fontStyle" aria-label="Font Style" style="scale: 0.8" [(ngModel)]="view" *ngIf="traceData">
         <mat-button-toggle value="events">Events</mat-button-toggle>

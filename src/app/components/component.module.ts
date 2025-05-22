@@ -39,6 +39,8 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownModule} from 'ngx-markdown';
 
+import {ResizableDrawerDirective} from '../directives/resizable-drawer.directive';
+
 import {ArtifactTabComponent} from './artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from './audio-player/audio-player.component';
 import {ChatComponent} from './chat/chat.component';
@@ -67,6 +69,7 @@ const COMPONENTS = [
   TraceChartComponent,
   ViewImageDialogComponent,
   AudioPlayerComponent,
+  ResizableDrawerDirective,
 ];
 
 @NgModule({

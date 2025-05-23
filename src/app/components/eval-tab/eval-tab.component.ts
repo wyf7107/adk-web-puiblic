@@ -16,7 +16,7 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, ViewChildren,} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, ViewChildren} from '@angular/core';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog} from '@angular/material/dialog';
 import {MatTableDataSource} from '@angular/material/table';
@@ -70,6 +70,7 @@ interface AppEvaluationResult {
   selector: 'app-eval-tab',
   templateUrl: './eval-tab.component.html',
   styleUrl: './eval-tab.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: false,
 })
 export class EvalTabComponent implements OnInit, OnChanges {
@@ -79,6 +80,8 @@ export class EvalTabComponent implements OnInit, OnChanges {
   @Input() sessionId: string = '';
   @Output() readonly sessionSelected = new EventEmitter<Session>();
   @Output() readonly shouldShowTab = new EventEmitter<boolean>();
+
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
   evalsets: any[] = [];
@@ -173,6 +176,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
         .subscribe((res) => {
           this.evalCases = res;
           this.dataSource = new MatTableDataSource<string>(this.evalCases);
+          this.changeDetectorRef.detectChanges();
         });
   }
 

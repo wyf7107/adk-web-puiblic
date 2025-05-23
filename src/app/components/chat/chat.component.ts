@@ -804,7 +804,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     let index = 0;
 
     session.events.forEach((event: any) => {
-      event.content.parts.forEach((part: any) => {
+      event.content?.parts?.forEach((part: any) => {
         this.storeMessage(part, event, index);
         index += 1;
         if (event.author && event.author !== 'user') {

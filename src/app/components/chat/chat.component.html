@@ -334,10 +334,10 @@
             </button>
             <div>
               <button  mat-icon-button matSuffix (click)="toggleAudioRecording()" [ngStyle]="{'background-color': isAudioRecording? 'rgb(234, 67, 53)': 'rgb(51, 53, 55)'}">
-                <mat-icon [innerText]="isAudioRecording? 'stop': 'mic'"></mat-icon>
+                <mat-icon>mic</mat-icon>
               </button>
               <button  mat-icon-button matSuffix (click)="toggleVideoRecording()" [ngStyle]="{'background-color': isVideoRecording? 'rgb(234, 67, 53)': 'rgb(51, 53, 55)'}">
-                <mat-icon [innerText]="isVideoRecording? 'stop': 'videocam'"></mat-icon>
+                <mat-icon>videocam</mat-icon>
               </button>
             </div>
           </div>

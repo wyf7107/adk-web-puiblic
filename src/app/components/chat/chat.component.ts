@@ -77,6 +77,9 @@ class CustomPaginatorIntl extends MatPaginatorIntl {
   };
 }
 
+const BIDI_STREAMING_RESTART_WARNING =
+    'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.';
+
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
@@ -113,6 +116,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   showSidePanel = true;
   useSse = false;
   currentSessionState = {};
+
+  // TODO: Remove this once backend supports restarting bidi streaming.
+  sessionHasUsedBidi = new Set<string>();
 
   eventData = new Map<string, any>();
   traceData: any[] = [];
@@ -174,14 +180,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
 
   constructor(
       private sanitizer: DomSanitizer,
-      private sesisonService: SessionService,
+      private sessionService: SessionService,
       private artifactService: ArtifactService,
       private audioService: AudioService,
       private webSocketService: WebSocketService,
       private videoService: VideoService,
       private dialog: MatDialog,
       private eventService: EventService,
-      private sessionService: SessionService,
       private route: ActivatedRoute,
   ) {}
 
@@ -249,7 +254,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   }
 
   createSession() {
-    this.sesisonService.createSession(this.userId, this.appName)
+    this.sessionService.createSession(this.userId, this.appName)
         .subscribe((res) => {
           this.currentSessionState = res.state;
           this.sessionId = res.id;
@@ -696,10 +701,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   toggleAudioRecording() {
     this.isAudioRecording ? this.stopAudioRecording() :
                             this.startAudioRecording();
-    this.isAudioRecording = !this.isAudioRecording;
   }
 
   startAudioRecording() {
+    if (this.sessionHasUsedBidi.has(this.sessionId)) {
+      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK')
+      return;
+    }
+
+    this.isAudioRecording = true;
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     this.webSocketService.connect(
         `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${
@@ -708,20 +718,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.audioService.startRecording();
     this.messages.push({role: 'user', text: 'Speaking...'});
     this.messages.push({role: 'bot', text: 'Speaking...'});
+    this.sessionHasUsedBidi.add(this.sessionId);
   }
 
   stopAudioRecording() {
     this.audioService.stopRecording();
     this.webSocketService.closeConnection();
+    this.isAudioRecording = false;
   }
 
   toggleVideoRecording() {
     this.isVideoRecording ? this.stopVideoRecording() :
                             this.startVideoRecording();
-    this.isVideoRecording = !this.isVideoRecording;
   }
 
   startVideoRecording() {
+    if (this.sessionHasUsedBidi.has(this.sessionId)) {
+      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK')
+      return;
+    }
+
+    this.isVideoRecording = true;
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     this.webSocketService.connect(
         `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${
@@ -730,12 +747,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.videoService.startRecording(this.videoContainer);
     this.audioService.startRecording();
     this.messages.push({role: 'user', text: 'Speaking...'});
+    this.sessionHasUsedBidi.add(this.sessionId);
   }
 
   stopVideoRecording() {
     this.audioService.stopRecording();
     this.videoService.stopRecording(this.videoContainer);
     this.webSocketService.closeConnection();
+    this.isVideoRecording = false;
   }
 
   private getAsyncFunctionsFromParts(pendingIds: any[], parts: any[]) {

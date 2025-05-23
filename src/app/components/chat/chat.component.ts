@@ -1012,11 +1012,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     return this.sanitizer.bypassSecurityTrustHtml(content);
   }
 
-  openViewImageDialog() {
+  openViewImageDialog(imageData: string|null) {
     const dialogRef = this.dialog.open(ViewImageDialogComponent, {
-      width: '1280px',
       data: {
-        imageData: this.rawSvgString,
+        imageData,
       },
     });
   }

@@ -106,7 +106,7 @@
         <mat-tab-group>
           <mat-tab label="Event">
             <div class="event-graph-container">
-              <div *ngIf="renderedEventGraph" [innerHtml]="renderedEventGraph" (click)="openViewImageDialog()"></div>
+              <div *ngIf="renderedEventGraph" [innerHtml]="renderedEventGraph" (click)="openViewImageDialog(rawSvgString)"></div>
             </div>
             <div class="json-viewer-container">
               <ngx-json-viewer [json]="selectedEvent"></ngx-json-viewer>
@@ -237,7 +237,8 @@
             </div>
             <div *ngIf="message.inlineData && message.role === 'bot'">
               <div *ngIf="isArtifactImage(message.inlineData.mimeType)">
-                <img class="generated-image" alt="image" [src]="message.inlineData.data" />
+                <img class="generated-image" alt="image" [src]="message.inlineData.data"
+                (click)="openViewImageDialog(message.inlineData.data)"/>
               </div>
 
               <div *ngIf="isArtifactAudio(message.inlineData.mimeType)">

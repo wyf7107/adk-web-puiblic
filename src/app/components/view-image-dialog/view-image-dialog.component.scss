@@ -1,16 +1,3 @@
-.dialog-content {
-  position: relative;
-  padding: 20px;
-  border-radius: 12px; /* Rounded corners */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  max-width: 90vw; /* Max width relative to viewport */
-  max-height: 90vh; /* Max height relative to viewport */
-  display: flex;
-  flex-direction: column;
-  overflow: hidden; /* Hide overflow for image */
-  font-family: 'Inter', sans-serif;
-}
-
 .close-button {
   position: absolute;
   top: 5px;
@@ -46,8 +33,6 @@
   justify-content: center;
   align-items: center;
   overflow: auto; /* Allow scrolling if image is larger than dialog */
-  margin-top: 20px; /* Space for the close button */
-  margin-bottom: 10px;
 }
 
 .image-wrapper img,
@@ -58,13 +43,6 @@
   border-radius: 8px; /* Rounded corners for the image */
 }
 
-.svg-container {
-  /* Specific styles for SVG to ensure it scales correctly */
-  display: block; /* Important for SVG to take full width/height */
-  width: auto; /* Allow SVG to scale */
-  height: auto; /* Allow SVG to scale */
-}
-
 .no-image-placeholder {
   color: #888;
   font-style: italic;
@@ -72,12 +50,12 @@
   padding: 20px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1768px) {
   .dialog-content {
     padding: 15px;
     border-radius: 8px;
-    max-width: 95vw;
-    max-height: 95vh;
+    max-width: 195vw;
+    max-height: 195vh;
   }
 
   .close-button {

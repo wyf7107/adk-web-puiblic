@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,7 @@
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {AppModule} from './app/app.module';
 
-fetch('/assets/config/runtime-config.json')
+fetch('./assets/config/runtime-config.json')
   .then((response) => response.json())
   .then((config) => {
     (window as any)['runtimeConfig'] = config;

@@ -328,6 +328,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   }
 
   private processPart(chunkJson: any, part: any, index: number) {
+    const renderedContent =
+        chunkJson.groundingMetadata?.searchEntryPoint?.renderedContent;
     if (part.text) {
       const newChunk = part.text;
       if (!this.streamingTextMessage) {
@@ -338,9 +340,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
           eventId: chunkJson.id
         };
 
-        if (chunkJson.groundingMetadata &&
-            chunkJson.groundingMetadata.searchEntryPoint &&
-            chunkJson.groundingMetadata.searchEntryPoint.renderedContent) {
+        if (renderedContent) {
           this.streamingTextMessage.renderedContent =
               chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
         }
@@ -353,6 +353,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
           return;
         }
       } else {
+        if (renderedContent) {
+          this.streamingTextMessage.renderedContent =
+              chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
+        }
+
         if (newChunk == this.streamingTextMessage.text) {
           this.storeEvents(part, chunkJson, index);
           this.eventMessageIndexArray[index] = newChunk;

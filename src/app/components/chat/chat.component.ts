@@ -603,8 +603,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
       },
     });
     this.agentService.run(authResponse).subscribe((res) => {
+      this.processRunResponse(res);
+    });
+  }
+
+  private processRunResponse(response: any) {
       let index = this.eventMessageIndexArray.length - 1;
-      for (const e of res) {
+      for (const e of response) {
         if (e.content) {
           for (let part of e.content.parts) {
             index += 1;
@@ -612,7 +617,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
           }
         }
       }
-    });
   }
 
   openDialog(): void {
@@ -630,10 +634,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     dialogRef.afterClosed().subscribe((t) => {
       if (t) {
         this.removeFinishedLongRunningEvents(t.events);
-        this.messages.push({
-          role: 'bot',
-          text: t.text,
-        });
+        this.processRunResponse(t.response);
       }
     });
   }
@@ -647,12 +648,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   clickEvent(i: number) {
     const key = this.messages[i].eventId;
 
-
     this.sideDrawer.open();
     this.showSidePanel = true;
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
-
 
     this.eventService.getEventTrace(this.selectedEvent.id).subscribe((res) => {
       this.llmRequest = JSON.parse(res[this.llmRequestKey]);

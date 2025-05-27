@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, Input} from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {AgentService} from '../../core/services/agent.service';
@@ -71,16 +71,12 @@ export class PendingEventDialogComponent {
         },
       });
     }
-    this.agentService.run(req).subscribe((res) => {
+    this.agentService.run(req).subscribe((response) => {
       this.sending = false;
-      for (const e of res) {
-        if (e.content.parts[0].text) {
-          this.dialogRef.close({
-            text: e.content.parts[0].text,
-            events: [this.selectedEvent],
-          });
-        }
-      }
+      this.dialogRef.close({
+        response,
+        events: [this.selectedEvent],
+      });
     });
   }
 }

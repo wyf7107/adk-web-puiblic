@@ -38,7 +38,7 @@ import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
-import {isArtifactAudio, isArtifactImage, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
+import {getMediaTypeFromMimetype, isArtifactAudio, isArtifactImage, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
@@ -139,6 +139,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   protected isArtifactImage = isArtifactImage;
   protected openBase64InNewTab = openBase64InNewTab;
   protected isArtifactAudio = isArtifactAudio;
+  protected MediaType = MediaType;
 
   // Sync query params with value from agent picker.
   private readonly router = inject(Router);
@@ -536,6 +537,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
               name: this.createDefaultArtifactName(mimeType),
               data: base64Data,
               mimeType: mimeType,
+              mediaType: getMediaTypeFromMimetype(mimeType),
             },
           };
 
@@ -547,6 +549,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
               data: base64Data,
               mimeType,
               versionId,
+              mediaType: getMediaTypeFromMimetype(mimeType),
             },
           ];
         });

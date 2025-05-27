@@ -19,9 +19,43 @@ import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 import {DownloadService} from '../../core/services/download.service';
+import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 
 const DEFAULT_ARTIFACT_NAME = 'default_artifact_name';
+
+/**
+ * The supported media types for artifacts.
+ */
+export enum MediaType {
+  IMAGE = 'image',
+  AUDIO = 'audio',
+  UNSPECIFIED = 'unspecified',
+}
+
+/*
+ * Returns the media type from the mime type.
+ *
+ * This function iterates through the MediaType enum values and checks if the
+ * mime type starts with the enum value + '/'.
+ *
+ * If no matching prefix is found, it returns UNSPECIFIED.
+ */
+export function getMediaTypeFromMimetype(mimetype: string): MediaType {
+  const lowerMime = mimetype.toLowerCase();
+
+  for (const enumValue of Object.values(MediaType)) {
+    if (enumValue === MediaType.UNSPECIFIED) {
+      continue;
+    }
+
+    if (lowerMime.startsWith(enumValue + '/')) {
+      return enumValue as MediaType;
+    }
+  }
+
+  return MediaType.UNSPECIFIED;
+}
 
 /**
  * Returns true if the mime type is an image type.
@@ -101,7 +135,9 @@ export class ArtifactTabComponent implements OnChanges {
 
   selectedArtifacts: any[] = [];
 
+  protected isArtifactAudio = isArtifactAudio;
   protected isArtifactImage = isArtifactImage;
+  protected MediaType = MediaType;
   protected openBase64InNewTab = openBase64InNewTab;
 
   constructor(

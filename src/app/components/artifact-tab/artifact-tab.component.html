@@ -53,12 +53,19 @@
       </button>
     </div>
 
-    <img
-      *ngIf="isArtifactImage(selectedArtifacts[i].mimeType)"
-      class="generated-image"
-      [src]="selectedArtifacts[i].data ?? ''"
-      alt="artifact.id"
-      (click)="openViewImageDialog(selectedArtifacts[i].data)"
-    />
+    <div [ngSwitch]="selectedArtifacts[i].mediaType">
+      <div *ngSwitchCase="MediaType.IMAGE">
+        <img
+          class="generated-image"
+          [src]="selectedArtifacts[i].data ?? ''"
+          alt="artifact.id"
+          (click)="openViewImageDialog(selectedArtifacts[i].data)"
+        />
+      </div>
+
+      <div *ngSwitchCase="MediaType.AUDIO">
+        <app-audio-player [base64data]="selectedArtifacts[i].data"></app-audio-player>
+      </div>
+    </div>
   </div>
 </div>

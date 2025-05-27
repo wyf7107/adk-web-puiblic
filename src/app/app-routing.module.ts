@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,14 +21,9 @@ import {AppComponent} from './app.component';
 
 const routes: Routes = [
   {
-    path: 'dev-ui',
-    component: AppComponent,
-  },
-  {
     path: '',
-    redirectTo: 'dev-ui',
-    pathMatch: 'full',
-  },
+    component: AppComponent,
+  }
 ];
 
 @NgModule({

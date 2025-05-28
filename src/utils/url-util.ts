@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +29,7 @@ export class URLUtil {
 
     // Construct base URL using origin property
     // Origin includes protocol, hostname, and port
-    return urlObject.origin + '/dev-ui';
+    return urlObject.origin + '/dev-ui/';
   }
 
   /**

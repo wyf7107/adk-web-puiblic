@@ -17,7 +17,7 @@
 <div class="eval-container">
     <div class="eval-set-actions" *ngIf="selectedEvalSet == ''">
         <div>All eval sets</div>
-        <mat-icon style="cursor: pointer;" (click)="openNewEvalSetDialog()">add</mat-icon>
+        <mat-icon style="cursor: pointer;" (click)="openNewEvalSetDialog()" matTooltip="Create new evaluation set">add</mat-icon>
     </div>
     <div *ngIf="evalsets.length == 0">
         <div class="empty-eval-info">
@@ -56,7 +56,7 @@
             <div *ngIf="!showEvalHistory">
                 <div class="evaluation-tab-header">
                     <button class="run-eval-btn" (click)="runEval()">Run Evaluation</button>
-                    <mat-icon class="evaluation-history-icon" (click)="toggleEvalHistoryButton()">history</mat-icon>
+                    <mat-icon class="evaluation-history-icon" (click)="toggleEvalHistoryButton()" matTooltip="View eval run history">history</mat-icon>
                 </div>
                 <div class="mat-table-container" style="margin-top:16px;">
                     <table mat-table [dataSource]="dataSource">
@@ -84,7 +84,7 @@
                         <th mat-header-cell *matHeaderCellDef> Result </th>
                         <td mat-cell *matCellDef="let element">
                             <button *ngIf="getEvalResultForCase(element)"
-                            [ngClass]="getEvalResultForCase(element) == 1 ? 'result-btn pass': 'result-btn fail'" (click)="getSession(element)">
+                            [ngClass]="getEvalResultForCase(element) == 1 ? 'result-btn pass': 'result-btn fail'" (click)="getSession(element)" matTooltip="View eval run result">
                                 <span class="material-symbols-outlined">
                                     {{ getEvalResultForCase(element) == 1 ? "check": "close" }}
                                 </span>

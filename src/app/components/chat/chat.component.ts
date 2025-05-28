@@ -16,7 +16,7 @@
  */
 
 import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewChecked, AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal,} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal,} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatPaginatorIntl} from '@angular/material/paginator';
@@ -25,7 +25,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {instance} from '@viz-js/viz';
-import {catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap} from 'rxjs';
+import {BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap} from 'rxjs';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
@@ -87,8 +87,7 @@ const BIDI_STREAMING_RESTART_WARNING =
   standalone: false,
   providers: [{provide: MatPaginatorIntl, useClass: CustomPaginatorIntl}],
 })
-export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
-                                      AfterViewChecked {
+export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('sideDrawer') sideDrawer!: MatDrawer;
   @ViewChild(EventTabComponent) eventTabComponent!: EventTabComponent;
@@ -116,6 +115,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   showSidePanel = true;
   useSse = false;
   currentSessionState = {};
+  private readonly messagesSubject = new BehaviorSubject<any[]>([]);
+  private readonly streamingTextMessageSubject =
+      new BehaviorSubject<any|null>(null);
+  private readonly scrollInterruptedSubject = new BehaviorSubject(true);
 
   // TODO: Remove this once backend supports restarting bidi streaming.
   sessionHasUsedBidi = new Set<string>();
@@ -221,9 +224,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.agentService.getLoadingState().subscribe((isLoading: boolean) => {
       if (isLoading) {
         this.messages.push({role: 'bot', isLoading: true});
+        this.messagesSubject.next(this.messages);
       } else if (this.messages[this.messages.length - 1] &&
         this.messages[this.messages.length - 1].isLoading) {
         this.messages.pop();
+        this.messagesSubject.next(this.messages);
+      }
+    });
+
+    combineLatest([
+      this.messagesSubject, this.scrollInterruptedSubject,
+      this.streamingTextMessageSubject
+    ]).subscribe(([messages, scrollInterrupted, streamingTextMessage]) => {
+      if (!scrollInterrupted) {
+        setTimeout(() => {
+          this.scrollToBottom();
+        }, 100);
       }
     });
   }
@@ -233,12 +249,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.sideDrawer.open();
   }
 
-  ngAfterViewChecked() {
-    if (this.messages.length !== this.previousMessageCount) {
-      this.scrollContainer.nativeElement.scrollTop =
-          this.scrollContainer.nativeElement.scrollHeight;
-      this.previousMessageCount = this.messages.length;
-    }
+  scrollToBottom() {
+    setTimeout(() => {
+      this.scrollContainer.nativeElement.scrollTo({
+        top: this.scrollContainer.nativeElement.scrollHeight,
+        behavior: 'smooth',
+      });
+    });
   }
 
   selectApp(appName: string) {
@@ -264,6 +281,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   }
 
   async sendMessage(event: Event) {
+    if (this.messages.length === 0) {
+      this.scrollContainer.nativeElement.addEventListener('wheel', () => {
+        this.scrollInterruptedSubject.next(true);
+      });
+      this.scrollContainer.nativeElement.addEventListener('touchmove', () => {
+        this.scrollInterruptedSubject.next(true);
+      });
+    }
+    this.scrollInterruptedSubject.next(false);
+
     event.preventDefault();
     if (!this.userInput.trim()) return;
 
@@ -274,8 +301,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
                                                           url: file.url,
                                                         }));
       this.messages.push({role: 'user', attachments: messageAttachments});
+      this.messagesSubject.next(this.messages);
     }
     this.messages.push({role: 'user', text: this.userInput});
+    this.messagesSubject.next(this.messages);
 
     const req: AgentRunRequest = {
       appName: this.appName,
@@ -346,6 +375,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
         }
 
         this.messages.push(this.streamingTextMessage);
+        this.messagesSubject.next(this.messages);
         if (!this.useSse) {
           this.storeEvents(part, chunkJson, index);
           this.eventMessageIndexArray[index] = newChunk;
@@ -365,6 +395,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
           return;
         }
         this.streamingTextMessage.text += newChunk;
+        this.streamingTextMessageSubject.next(this.streamingTextMessage);
       }
     } else {
       this.storeEvents(part, chunkJson, index);
@@ -458,6 +489,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
             e.groundingMetadata.searchEntryPoint.renderedContent;
       }
       this.messages.push(message);
+      this.messagesSubject.next(this.messages);
       this.eventMessageIndexArray[index] = part.text;
     } else if (part.functionCall) {
       this.messages.push({
@@ -468,6 +500,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
         actualInvocationToolUses: e.actualInvocationToolUses,
         expectedInvocationToolUses: e.expectedInvocationToolUses,
       });
+      this.messagesSubject.next(this.messages);
       this.eventMessageIndexArray[index] = part.functionCall;
     } else if (part.functionResponse) {
       this.messages.push({
@@ -478,6 +511,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
         actualInvocationToolUses: e.actualInvocationToolUses,
         expectedInvocationToolUses: e.expectedInvocationToolUses,
       });
+      this.messagesSubject.next(this.messages);
 
       this.eventMessageIndexArray[index] = part.functionResponse;
     } else if (part.executableCode) {
@@ -488,6 +522,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
         actualInvocationToolUses: e.actualInvocationToolUses,
         expectedInvocationToolUses: e.expectedInvocationToolUses,
       });
+      this.messagesSubject.next(this.messages);
       this.eventMessageIndexArray[index] = part.executableCode;
     } else if (part.codeExecutionResult) {
       this.messages.push({
@@ -518,6 +553,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
         mimeType: 'image/png',
       },
     });
+    this.messagesSubject.next(this.messages);
 
     const currentIndex = this.messages.length - 1;
 
@@ -725,6 +761,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.audioService.startRecording();
     this.messages.push({role: 'user', text: 'Speaking...'});
     this.messages.push({role: 'bot', text: 'Speaking...'});
+    this.messagesSubject.next(this.messages);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
 
@@ -754,6 +791,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
     this.videoService.startRecording(this.videoContainer);
     this.audioService.startRecording();
     this.messages.push({role: 'user', text: 'Speaking...'});
+    this.messagesSubject.next(this.messages);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
 

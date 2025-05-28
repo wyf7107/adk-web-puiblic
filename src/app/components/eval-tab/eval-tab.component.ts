@@ -16,7 +16,7 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges, ViewChildren} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, QueryList, signal, SimpleChanges, ViewChildren} from '@angular/core';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog} from '@angular/material/dialog';
 import {MatTableDataSource} from '@angular/material/table';
@@ -91,9 +91,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
   dataSource = new MatTableDataSource<string>(this.evalCases);
   selection = new SelectionModel<string>(true, []);
 
-  showEvalHistory = false;
+  showEvalHistory = signal(false);
 
-  evalRunning = false;
+  evalRunning = signal(false);
   evalMetrics = [
     {
       metricName: 'tool_trajectory_avg_score',
@@ -181,10 +181,10 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   runEval() {
-    this.evalRunning = true;
+    this.evalRunning.set(true);
     if (this.selection.selected.length == 0) {
       alert('No case selected!');
-      this.evalRunning = false;
+      this.evalRunning.set(false);
       return;
     }
     this.evalService
@@ -195,7 +195,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
             this.evalMetrics,
             )
         .subscribe((res) => {
-          this.evalRunning = false;
+          this.evalRunning.set(false);
           this.evalResult = res;
 
           this.getEvaluationResult();
@@ -208,7 +208,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   clearSelectedEvalSet() {
-    if (!!this.showEvalHistory) {
+    if (!!this.showEvalHistory()) {
       this.toggleEvalHistoryButton();
       return;
     }
@@ -296,7 +296,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   toggleEvalHistoryButton() {
-    this.showEvalHistory = !this.showEvalHistory;
+    this.showEvalHistory.set(!this.showEvalHistory());
   }
 
   protected getEvalHistoryOfCurrentSet() {

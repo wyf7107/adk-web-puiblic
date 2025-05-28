@@ -52,8 +52,8 @@
             </div>
         </div>
 
-        <div *ngIf="evalCases.length > 0 && !evalRunning">
-            <div *ngIf="!showEvalHistory">
+        <div *ngIf="evalCases.length > 0 && !evalRunning()">
+            <div *ngIf="!showEvalHistory()">
                 <div class="evaluation-tab-header">
                     <button class="run-eval-btn" (click)="runEval()">Run Evaluation</button>
                     <mat-icon class="evaluation-history-icon" (click)="toggleEvalHistoryButton()" matTooltip="View eval run history">history</mat-icon>
@@ -99,7 +99,7 @@
                 </div>
             </div>
 
-            <div *ngIf="showEvalHistory">
+            <div *ngIf="showEvalHistory()">
                 <div *ngFor="let evalResult of getEvalHistoryOfCurrentSetSorted()">
                     <div class="status-card">
                         <div class="status-card__overview">
@@ -137,7 +137,7 @@
             </div>
         </div>
 
-        <button class="save-session-btn" (click)="openNewEvalCaseDialog()" *ngIf="!evalRunning && !showEvalHistory">
+        <button class="save-session-btn" (click)="openNewEvalCaseDialog()" *ngIf="!evalRunning() && !showEvalHistory()">
             <div class="save-session-btn-detail">
                 <mat-icon>add</mat-icon>
                 <div class="save-session-btn-text">
@@ -146,7 +146,7 @@
             </div>
         </button>
 
-        <div *ngIf="evalRunning">
+        <div *ngIf="evalRunning()">
             <mat-spinner class="eval-spinner" [diameter]="28" [strokeWidth]="3"></mat-spinner>
         </div>
     </div>

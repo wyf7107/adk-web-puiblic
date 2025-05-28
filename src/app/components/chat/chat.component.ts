@@ -25,7 +25,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {instance} from '@viz-js/viz';
-import {catchError, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap,} from 'rxjs';
+import {catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap} from 'rxjs';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
@@ -943,17 +943,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy,
   }
 
   private syncSelectedAppFromUrl() {
-    this.router.events
-        .pipe(
-            filter((e) => e instanceof NavigationEnd),
-            map(() => this.activatedRoute.snapshot.queryParams),
-            )
-        .subscribe((params) => {
-          const app = params['app'];
-          if (app) {
-            this.selectedAppControl.setValue(app);
-          }
-        });
+    combineLatest([
+      this.router.events.pipe(
+          filter((e) => e instanceof NavigationEnd),
+          map(() => this.activatedRoute.snapshot.queryParams),
+          ),
+      this.apps$
+    ]).subscribe(([params, apps]) => {
+      if (apps && apps.length) {
+        const app = params['app'];
+        if (app && apps.includes(app)) {
+          this.selectedAppControl.setValue(app);
+        } else if (app) {
+          this.openSnackBar(`Agent '${app}' not found`, 'OK');
+        }
+      }
+    });
   }
 
   private updateSelectedAppUrl() {

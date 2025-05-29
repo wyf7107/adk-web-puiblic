@@ -243,26 +243,43 @@
               <div>Outcome: {{message.codeExecutionResult.outcome}}</div>
               <div>Output: {{message.codeExecutionResult.output}}</div>
             </div>
-            <div *ngIf="message.inlineData && message.role === 'bot'">
-              <div [ngSwitch]="message.inlineData.mediaType">
-                <div *ngSwitchCase="MediaType.IMAGE">
-                  <img class="generated-image" alt="image" [src]="message.inlineData.data"
-                  (click)="openViewImageDialog(message.inlineData.data)"/>
+            @if (message.inlineData) {
+              @if (message.role === 'bot') {
+                <div>
+                  <div [ngSwitch]="message.inlineData.mediaType">
+                    <div *ngSwitchCase="MediaType.IMAGE">
+                      <img class="generated-image" alt="image" [src]="message.inlineData.data"
+                      (click)="openViewImageDialog(message.inlineData.data)"/>
+                    </div>
+                    <div *ngSwitchCase="MediaType.AUDIO">
+                      <app-audio-player [base64data]="message.inlineData.data"></app-audio-player>
+                    </div>
+                    <div *ngSwitchDefault>
+                      <button
+                        class="link-style-button"
+                        (click)="openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
+                      >
+                        {{ message.inlineData.name }}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div *ngSwitchCase="MediaType.AUDIO">
-                  <app-audio-player [base64data]="message.inlineData.data"></app-audio-player>
+              } @else {
+                <div>
+                  @if (message.inlineData.mimeType.startsWith('image/')) {
+                    <div>
+                      <img class="image-preview-chat" alt="image" [src]="message.inlineData.data"
+                      (click)="openViewImageDialog(message.inlineData.data)"/>
+                    </div>
+                  } @else {
+                    <div>
+                      <mat-icon>insert_drive_file</mat-icon>
+                      <a [href]="message.inlineData.data" download>{{ message.inlineData.displayName }}</a>
+                    </div>
+                  }
                 </div>
-                <div *ngSwitchDefault>
-                  <button
-                    class="link-style-button"
-                    (click)="openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
-                  >
-                    {{ message.inlineData.name }}
-                  </button>
-                </div>
-              </div>
-
-            </div>
+              }
+            }
             <button
               mat-stroked-button
               class="function-event-button"

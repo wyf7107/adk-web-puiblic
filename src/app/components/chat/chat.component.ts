@@ -297,6 +297,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.userInput.trim()) return;
 
     // Add user message
+    this.messages.push({role: 'user', text: this.userInput});
+    this.messagesSubject.next(this.messages);
     if (this.selectedFiles.length > 0) {
       const messageAttachments = this.selectedFiles.map((file) => ({
                                                           file: file.file,
@@ -305,8 +307,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.messages.push({role: 'user', attachments: messageAttachments});
       this.messagesSubject.next(this.messages);
     }
-    this.messages.push({role: 'user', text: this.userInput});
-    this.messagesSubject.next(this.messages);
 
     const req: AgentRunRequest = {
       appName: this.appName,
@@ -411,6 +411,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       for (const file of this.selectedFiles) {
         parts.push({
           inlineData: {
+            displayName: file.file.name,
             data: await this.readFileAsBytes(file.file),
             mimeType: file.file.type,
           },
@@ -477,13 +478,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
-    if (part.text) {
+    if (part.inlineData) {
+      const base64Data =
+          this.formatBase64Data(part.inlineData.data, part.inlineData.mimeType);
+      this.messages.push({
+        role: e.author === 'user' ? 'user' : 'bot',
+        inlineData: {
+          displayName: part.inlineData.displayName,
+          data: base64Data,
+          mimeType: part.inlineData.mimeType,
+        },
+      });
+      this.messagesSubject.next(this.messages);
+      this.eventMessageIndexArray[index] = part.inlineData;
+    } else if (part.text) {
       let message: any = {
         role: e.author === 'user' ? 'user' : 'bot',
         text: part.text,
         evalStatus: e.evalStatus,
         actualInvocationToolUses: e.actualInvocationToolUses,
-        expectedInvocationToolUses: e.expectedInvocationToolUses
+        expectedInvocationToolUses: e.expectedInvocationToolUses,
       };
       if (e.groundingMetadata && e.groundingMetadata.searchEntryPoint &&
           e.groundingMetadata.searchEntryPoint.renderedContent) {
@@ -545,6 +559,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  private formatBase64Data(data: string, mimeType: string) {
+    const fixedBase64Data = fixBase64String(data);
+    return `data:${mimeType};base64,${fixedBase64Data}`;
+  }
+
   private renderArtifact(artifactId: string, versionId: string) {
     // Add a placeholder message for the artifact
     // Feed the placeholder with the artifact data after it's fetched
@@ -569,10 +588,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             )
         .subscribe((res) => {
           const mimeType = res.inlineData.mimeType;
-
-          const fixedBase64Data = fixBase64String(res.inlineData.data);
-
-          const base64Data = `data:${mimeType};base64,${fixedBase64Data}`;
+          const base64Data =
+              this.formatBase64Data(res.inlineData.data, mimeType);
 
           this.messages[currentIndex] = {
             role: 'bot',

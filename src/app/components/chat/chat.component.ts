@@ -39,7 +39,7 @@ import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
-import {getMediaTypeFromMimetype, isArtifactAudio, isArtifactImage, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
+import {getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
@@ -137,12 +137,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   llmRequestKey = 'gcp.vertex.agent.llm_request';
   llmResponseKey = 'gcp.vertex.agent.llm_response';
 
+  getMediaTypeFromMimetype = getMediaTypeFromMimetype;
+
   selectedFiles: {file: File; url: string}[] = [];
   private previousMessageCount = 0;
 
-  protected isArtifactImage = isArtifactImage;
   protected openBase64InNewTab = openBase64InNewTab;
-  protected isArtifactAudio = isArtifactAudio;
   protected MediaType = MediaType;
 
   // Sync query params with value from agent picker.

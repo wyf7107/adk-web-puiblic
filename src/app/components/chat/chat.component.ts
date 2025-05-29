@@ -33,6 +33,7 @@ import {Session} from '../../core/models/Session';
 import {AgentService} from '../../core/services/agent.service';
 import {ArtifactService} from '../../core/services/artifact.service';
 import {AudioService} from '../../core/services/audio.service';
+import {DownloadService} from '../../core/services/download.service';
 import {EventService} from '../../core/services/event.service';
 import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
@@ -192,6 +193,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       private dialog: MatDialog,
       private eventService: EventService,
       private route: ActivatedRoute,
+      private downloadService: DownloadService,
   ) {}
 
   ngOnInit(): void {
@@ -649,15 +651,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private processRunResponse(response: any) {
-      let index = this.eventMessageIndexArray.length - 1;
-      for (const e of response) {
-        if (e.content) {
-          for (let part of e.content.parts) {
-            index += 1;
-            this.processPart(e, part, index);
-          }
+    let index = this.eventMessageIndexArray.length - 1;
+    for (const e of response) {
+      if (e.content) {
+        for (let part of e.content.parts) {
+          index += 1;
+          this.processPart(e, part, index);
         }
       }
+    }
   }
 
   openDialog(): void {
@@ -1095,5 +1097,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return mimeType.replace('/', '.');
+  }
+
+  protected exportSession() {
+    this.sessionService.getSession(this.userId, this.appName, this.sessionId)
+        .subscribe((res) => {
+          console.log(res);
+          this.downloadService.downloadObjectAsJson(
+              res, `session-${this.sessionId}.json`);
+        });
   }
 }

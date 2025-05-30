@@ -372,6 +372,8 @@ button {
 }
 
 .app-select-container {
+  width: 30%;
+  margin-top: 12px;
   background-color: #212123;
   margin-left: 20px;
   height: 30px;
@@ -381,10 +383,9 @@ button {
   padding-right: 20px;
   border-radius: 10px;
   padding-top: 5px;
-  margin-top: -2px;
 }
 
-.drawer-header {
+.app-select-container {
   @include mat.select-overrides(
     (
       placeholder-text-color: #8ab4f8,
@@ -609,4 +610,20 @@ button {
   cursor: pointer;
   outline: none;
   font-size: 14px;
+}
+
+.drawer-logo {
+  margin-left: 9px;
+  display: flex;
+  align-items: center;
+
+  img {
+    margin-right: 9px;
+  }
+  
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.1px;
 }

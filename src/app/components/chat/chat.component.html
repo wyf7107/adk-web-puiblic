@@ -29,24 +29,28 @@
             style="color: #C4C7C5;cursor: pointer;"
             matTooltip="Collapse panel"
           (click)="toggleSidePanel()">left_panel_close</span>
-          <div class="app-select-container">
-            <mat-select
-              class="app-select"
-              (selectionChange)="onAppSelection($event)"
-              [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
-              [formControl]="selectedAppControl">
-              @if ((apps$ | async); as availableApps) {
-                @for (appName of availableApps; track appName) {
-                  <mat-option [value]="appName">{{ appName }}</mat-option>
-                }
-              }
-              @if (selectedAppControl.value && isLoadingApps()) {
-                <mat-option [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
-              }
-            </mat-select>
+          <div class="drawer-logo">
+            <img src="assets/ADK-512-color.svg" width="32px" height="32px">
+            Agent Development Kit
           </div>
         </div>
       </div>
+    </div>
+    <div class="app-select-container">
+      <mat-select
+        class="app-select"
+        (selectionChange)="onAppSelection($event)"
+        [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
+        [formControl]="selectedAppControl">
+        @if ((apps$ | async); as availableApps) {
+          @for (appName of availableApps; track appName) {
+            <mat-option [value]="appName">{{ appName }}</mat-option>
+          }
+        }
+        @if (selectedAppControl.value && isLoadingApps()) {
+          <mat-option [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
+        }
+      </mat-select>
     </div>
     @if (appName != '' && showSidePanel) {
       <div class="tabs-container">

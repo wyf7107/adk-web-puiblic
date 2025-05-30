@@ -80,6 +80,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   @Input() sessionId: string = '';
   @Output() readonly sessionSelected = new EventEmitter<Session>();
   @Output() readonly shouldShowTab = new EventEmitter<boolean>();
+  @Output() readonly evalNotInstalledMsg = new EventEmitter<string>();
 
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
@@ -194,6 +195,12 @@ export class EvalTabComponent implements OnInit, OnChanges {
             this.selection.selected,
             this.evalMetrics,
             )
+        .pipe(catchError((error) => {
+          if (error.error?.detail?.includes('not installed')) {
+            this.evalNotInstalledMsg.emit(error.error.detail);
+          }
+          return of([]);
+        }))
         .subscribe((res) => {
           this.evalRunning.set(false);
           this.evalResult = res;

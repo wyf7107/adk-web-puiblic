@@ -875,6 +875,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.shouldShowEvalTab.set(shouldShow);
   }
 
+  protected handleEvalNotInstalled(errorMsg: string) {
+    if (errorMsg) {
+      this.openSnackBar(errorMsg, 'OK');
+    }
+  }
+
   protected updateWithSelectedSession(session: Session) {
     if (!session || !session.id || !session.events || !session.state) {
       return;

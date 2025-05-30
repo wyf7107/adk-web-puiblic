@@ -17,18 +17,18 @@
 <mat-drawer-container class="drawer-container" autosize>
   @if (!showSidePanel) {
     <span class="material-symbols-outlined"
-        style="position: absolute;width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-left: 20px;margin-top: 20px;"
-        matTooltip="Open panel"
-        (click)="toggleSidePanel()">left_panel_open</span>
+      style="position: absolute;width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-left: 20px;margin-top: 20px;"
+      matTooltip="Open panel"
+    (click)="toggleSidePanel()">left_panel_open</span>
   }
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
     <div style="margin-top:20px; margin-left:20px; display:flex;">
       <div style="width: 100%">
-      <div class="drawer-header">
-        <span class="material-symbols-outlined"
+        <div class="drawer-header">
+          <span class="material-symbols-outlined"
             style="color: #C4C7C5;cursor: pointer;"
             matTooltip="Collapse panel"
-            (click)="toggleSidePanel()">left_panel_close</span>
+          (click)="toggleSidePanel()">left_panel_close</span>
           <div class="app-select-container">
             <mat-select
               class="app-select"
@@ -45,125 +45,133 @@
               }
             </mat-select>
           </div>
-      </div>
-      </div>
-    </div>
-    <div class="tabs-container" *ngIf="appName != '' && showSidePanel">
-      <mat-tab-group>
-        <mat-tab class="tabs-header">
-          <ng-template mat-tab-label>
-            <span class="tab-label">Events</span>
-          </ng-template>
-          <app-event-tab [eventsMap]="eventData" [traceData]="traceData" (selectedEvent)="selectEvent($event)"></app-event-tab>
-        </mat-tab>
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <span class="tab-label">State</span>
-          </ng-template>
-          <app-state-tab [sessionState]="currentSessionState"></app-state-tab>
-        </mat-tab>
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <span class="tab-label">Artifacts</span>
-          </ng-template>
-          <app-artifact-tab [artifacts]="artifacts">
-          </app-artifact-tab>
-        </mat-tab>
-        <mat-tab>
-          <ng-template mat-tab-label>
-            <span class="tab-label">Sessions</span>
-          </ng-template>
-          <app-session-tab [userId]="userId" [appName]="appName" [sessionId]="sessionId"
-            (sessionSelected)="updateWithSelectedSession($event)" (sessionReloaded)="updateSessionState($event)">
-          </app-session-tab>
-        </mat-tab>
-        @if (shouldShowEvalTab()) {
-          <mat-tab>
-            <ng-template mat-tab-label>
-              <span class="tab-label">Eval</span>
-            </ng-template>
-            <app-eval-tab [appName]="appName" [userId]="userId" [sessionId]="sessionId"
-              (shouldShowTab)="handleShouldShowEvalTab($event)" (sessionSelected)="updateWithSelectedSession($event)"></app-eval-tab>
-          </mat-tab>
-        }
-      </mat-tab-group>
-    </div>
-    <div class="details-panel-container" *ngIf="this.selectedEvent && showSidePanel">
-      <div class="details-content">
-        <div style="display: flex;justify-content: flex-end; margin-top: 10px">
-          <mat-paginator
-            class="event-paginator"
-            [length]="eventData.size"
-            [pageSize]="1"
-            [pageIndex]="selectedEventIndex"
-            (page)="handlePageEvent($event)"
-            aria-label="Select event">
-          </mat-paginator>
-          <button mat-mini-fab>
-            <mat-icon (click)="closeSelectedEvent()">close</mat-icon>
-          </button>
         </div>
       </div>
-      <div>
+    </div>
+    @if (appName != '' && showSidePanel) {
+      <div class="tabs-container">
         <mat-tab-group>
-          <mat-tab label="Event">
-            <div class="event-graph-container">
-              <div *ngIf="renderedEventGraph" [innerHtml]="renderedEventGraph" (click)="openViewImageDialog(rawSvgString)"></div>
-            </div>
-            <div class="json-viewer-container">
-              <ngx-json-viewer [json]="selectedEvent"></ngx-json-viewer>
-            </div>
+          <mat-tab class="tabs-header">
+            <ng-template mat-tab-label>
+              <span class="tab-label">Events</span>
+            </ng-template>
+            <app-event-tab [eventsMap]="eventData" [traceData]="traceData" (selectedEvent)="selectEvent($event)"></app-event-tab>
           </mat-tab>
-          <mat-tab label="Request">
-            <div class="json-viewer-container">
-              <ngx-json-viewer [json]="llmRequest"></ngx-json-viewer>
-            </div>
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="tab-label">State</span>
+            </ng-template>
+            <app-state-tab [sessionState]="currentSessionState"></app-state-tab>
           </mat-tab>
-          <mat-tab label="Response">
-            <div class="json-viewer-container">
-              <ngx-json-viewer [json]="llmResponse"></ngx-json-viewer>
-            </div>
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="tab-label">Artifacts</span>
+            </ng-template>
+            <app-artifact-tab [artifacts]="artifacts">
+            </app-artifact-tab>
           </mat-tab>
+          <mat-tab>
+            <ng-template mat-tab-label>
+              <span class="tab-label">Sessions</span>
+            </ng-template>
+            <app-session-tab [userId]="userId" [appName]="appName" [sessionId]="sessionId"
+              (sessionSelected)="updateWithSelectedSession($event)" (sessionReloaded)="updateSessionState($event)">
+            </app-session-tab>
+          </mat-tab>
+          @if (shouldShowEvalTab()) {
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <span class="tab-label">Eval</span>
+              </ng-template>
+              <app-eval-tab [appName]="appName" [userId]="userId" [sessionId]="sessionId"
+              (shouldShowTab)="handleShouldShowEvalTab($event)" (sessionSelected)="updateWithSelectedSession($event)"></app-eval-tab>
+            </mat-tab>
+          }
         </mat-tab-group>
       </div>
-    </div>
+    }
+    @if (this.selectedEvent && showSidePanel) {
+      <div class="details-panel-container">
+        <div class="details-content">
+          <div style="display: flex;justify-content: flex-end; margin-top: 10px">
+            <mat-paginator
+              class="event-paginator"
+              [length]="eventData.size"
+              [pageSize]="1"
+              [pageIndex]="selectedEventIndex"
+              (page)="handlePageEvent($event)"
+              aria-label="Select event">
+            </mat-paginator>
+            <button mat-mini-fab>
+              <mat-icon (click)="closeSelectedEvent()">close</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div>
+          <mat-tab-group>
+            <mat-tab label="Event">
+              <div class="event-graph-container">
+                @if (renderedEventGraph) {
+                  <div [innerHtml]="renderedEventGraph" (click)="openViewImageDialog(rawSvgString)"></div>
+                }
+              </div>
+              <div class="json-viewer-container">
+                <ngx-json-viewer [json]="selectedEvent"></ngx-json-viewer>
+              </div>
+            </mat-tab>
+            <mat-tab label="Request">
+              <div class="json-viewer-container">
+                <ngx-json-viewer [json]="llmRequest"></ngx-json-viewer>
+              </div>
+            </mat-tab>
+            <mat-tab label="Response">
+              <div class="json-viewer-container">
+                <ngx-json-viewer [json]="llmResponse"></ngx-json-viewer>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </div>
+      </div>
+    }
     <div class="resize-handler"></div>
   </mat-drawer>
   <div class="chat-container">
-    <div class="chat-toolbar" *ngIf="appName != ''">
-      <div style="display: flex;">
-        <div class="toolbar-session-text">Session ID</div>
-        <div class="toolbar-session-id">{{sessionId}}</div>
-      </div>
-      <div class="toolbar-actions">
-        <div class="toolbar-sse-toggle">
-          <mat-slide-toggle
+    @if (appName != '') {
+      <div class="chat-toolbar">
+        <div style="display: flex;">
+          <div class="toolbar-session-text">Session ID</div>
+          <div class="toolbar-session-id">{{sessionId}}</div>
+        </div>
+        <div class="toolbar-actions">
+          <div class="toolbar-sse-toggle">
+            <mat-slide-toggle
               class="example-margin"
               [checked]="enableSseIndicator()"
               (change)="toggleSse()">
-            Token Streaming
-          </mat-slide-toggle>
-        </div>
-        <mat-divider [vertical]="true" style="margin-left: 8px; margin-right: 8px; height: 22px"></mat-divider>
-        <div style="display: flex; align-items:center">
-          <div (click)="onNewSessionClick()" class="toolbar-new-sesison">
-            <mat-icon>add</mat-icon>
-            New Session
+              Token Streaming
+            </mat-slide-toggle>
           </div>
-          <span class="material-symbols-outlined"
-            matTooltip="Delete current session"
+          <mat-divider [vertical]="true" style="margin-left: 8px; margin-right: 8px; height: 22px"></mat-divider>
+          <div style="display: flex; align-items:center">
+            <div (click)="onNewSessionClick()" class="toolbar-new-sesison">
+              <mat-icon>add</mat-icon>
+              New Session
+            </div>
+            <span class="material-symbols-outlined"
+              matTooltip="Delete current session"
               style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
               (click)="deleteSession(sessionId)">
-            delete
-          </span>
-          <span class="material-symbols-outlined"
-              style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;" 
+              delete
+            </span>
+            <span class="material-symbols-outlined"
+              style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
               (click)="exportSession()" >
-            download
-          </span>
+              download
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    }
     <mat-card class="chat-card">
       @if (!selectedAppControl.value) {
         @if (isLoadingApps()) {
@@ -188,197 +196,241 @@
           </div>
         }
       }
-      <button
-        mat-fab
-        color="primary"
-        class="fab-button"
-        *ngIf="longRunningEvents.length > 0"
-        (click)="openDialog()"
-      >
-        <mat-icon>priority_high</mat-icon>
-      </button>
-      <div #autoScroll class="chat-messages" *ngIf="appName != ''">
-        <div #videoContainer></div>
-        <div
-          *ngFor="let message of messages; let i = index"
-          [ngClass]="{'user-message': message.role === 'user', 'bot-message': message.role === 'bot'}"
-        >
-          <button *ngIf="message.role === 'bot'" mat-mini-fab (click)="clickEvent(i)" [matTooltip]="selectedAppControl.value">
-            <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-          </button>
-          <mat-card class="message-card" [ngClass]="{'eval-fail': message.evalStatus === 2}">
-            @if (message.isLoading) {
-              <mat-progress-bar class="loading-bar" mode="buffer"></mat-progress-bar>
-            }
-            <div class="attachments" *ngIf="message.attachments">
-              <div class="attachment" *ngFor="let file of message.attachments">
-                <ng-container *ngIf="file.file.type.startsWith('image/')">
-                  <img [src]="file.url" alt="attachment" class="image-preview-chat">
-                </ng-container>
-                <ng-container *ngIf="!file.file.type.startsWith('image/')">
-                  <mat-icon>insert_drive_file</mat-icon>
-                  <a [href]="file.url" download>{{ file.file.name }}</a>
-                </ng-container>
-              </div>
-            </div>
-            <div>
-              <div *ngIf="message.thought" class="thought-chip">Thought</div>
-              <div>
-                <markdown *ngIf="message.text"
-                class="message-text"
-                [data]="message.text"
+      @if (longRunningEvents.length > 0) {
+        <button
+          mat-fab
+          color="primary"
+          class="fab-button"
+          (click)="openDialog()"
+          >
+          <mat-icon>priority_high</mat-icon>
+        </button>
+      }
+      @if (appName != '') {
+        <div #autoScroll class="chat-messages">
+          <div #videoContainer></div>
+          @for (message of messages; track message; let i = $index) {
+            <div
+              [ngClass]="{'user-message': message.role === 'user', 'bot-message': message.role === 'bot'}"
+              >
+              @if (message.role === 'bot') {
+                <button mat-mini-fab (click)="clickEvent(i)" [matTooltip]="selectedAppControl.value">
+                  <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+                </button>
+              }
+              <mat-card class="message-card" [ngClass]="{'eval-fail': message.evalStatus === 2}">
+                @if (message.isLoading) {
+                  <mat-progress-bar class="loading-bar" mode="buffer"></mat-progress-bar>
+                }
+                @if (message.attachments) {
+                  <div class="attachments">
+                    @for (file of message.attachments; track file) {
+                      <div class="attachment">
+                        @if (file.file.type.startsWith('image/')) {
+                          <img [src]="file.url" alt="attachment" class="image-preview-chat">
+                        }
+                        @if (!file.file.type.startsWith('image/')) {
+                          <mat-icon>insert_drive_file</mat-icon>
+                          <a [href]="file.url" download>{{ file.file.name }}</a>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+                <div>
+                  @if (message.thought) {
+                    <div class="thought-chip">Thought</div>
+                  }
+                  <div>
+                    @if (message.text) {
+                      <markdown
+                        class="message-text"
+                        [data]="message.text"
                 [ngStyle]="{'font-style':message.thought?'italic':'normal',
                   'color': message.thought ? '#9aa0a6': 'white'
                 }"
-                ></markdown>
-              </div>
-              <div *ngIf="message.renderedContent">
-                <div [innerHTML]="renderGooglerSearch(message.renderedContent)"></div>
-              </div>
-            </div>
-            <code *ngIf="message.executableCode">
-              {{message.executableCode.code}}
-            </code>
-            <div *ngIf="message.codeExecutionResult">
-              <div>Outcome: {{message.codeExecutionResult.outcome}}</div>
-              <div>Output: {{message.codeExecutionResult.output}}</div>
-            </div>
-            @if (message.inlineData) {
-              @if (message.role === 'bot') {
-                <div>
-                  <div [ngSwitch]="message.inlineData.mediaType">
-                    <div *ngSwitchCase="MediaType.IMAGE">
-                      <img class="generated-image" alt="image" [src]="message.inlineData.data"
-                      (click)="openViewImageDialog(message.inlineData.data)"/>
-                    </div>
-                    <div *ngSwitchCase="MediaType.AUDIO">
-                      <app-audio-player [base64data]="message.inlineData.data"></app-audio-player>
-                    </div>
-                    <div *ngSwitchCase="MediaType.TEXT">
-                      <div class="html-artifact-container">
-                        <mat-icon>description</mat-icon>
-                        <button
-                          class="link-style-button"
-                          (click)=" openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
-                        >
-                          {{ message.inlineData.name }}
-                        </button>
-                      </div>
-                    </div>
-                    <div *ngSwitchDefault>
-                      <button
-                        class="link-style-button"
-                        (click)="openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
-                      >
-                        {{ message.inlineData.name }}
-                      </button>
-                    </div>
+                      ></markdown>
+                    }
                   </div>
-                </div>
-              } @else {
-                <div>
-                  @if (message.inlineData.mimeType.startsWith('image/')) {
+                  @if (message.renderedContent) {
                     <div>
-                      <img class="image-preview-chat" alt="image" [src]="message.inlineData.data"
-                      (click)="openViewImageDialog(message.inlineData.data)"/>
-                    </div>
-                  } @else {
-                    <div>
-                      <mat-icon>insert_drive_file</mat-icon>
-                      <a [href]="message.inlineData.data" download>{{ message.inlineData.displayName }}</a>
+                      <div [innerHTML]="renderGooglerSearch(message.renderedContent)"></div>
                     </div>
                   }
                 </div>
+                @if (message.executableCode) {
+                  <code>
+                    {{message.executableCode.code}}
+                  </code>
+                }
+                @if (message.codeExecutionResult) {
+                  <div>
+                    <div>Outcome: {{message.codeExecutionResult.outcome}}</div>
+                    <div>Output: {{message.codeExecutionResult.output}}</div>
+                  </div>
+                }
+                @if (message.inlineData) {
+                  @if (message.role === 'bot') {
+                    <div>
+                      <div>
+                        @switch (message.inlineData.mediaType) {
+                          @case (MediaType.IMAGE) {
+                            <div>
+                              <img class="generated-image" alt="image" [src]="message.inlineData.data"
+                                (click)="openViewImageDialog(message.inlineData.data)"/>
+                            </div>
+                          }
+                          @case (MediaType.AUDIO) {
+                            <div>
+                              <app-audio-player [base64data]="message.inlineData.data"></app-audio-player>
+                            </div>
+                          }
+                          @case (MediaType.TEXT) {
+                            <div>
+                              <div class="html-artifact-container">
+                                <mat-icon>description</mat-icon>
+                                <button
+                                  class="link-style-button"
+                                  (click)=" openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
+                                  >
+                                  {{ message.inlineData.name }}
+                                </button>
+                              </div>
+                            </div>
+                          }
+                          @default {
+                            <div>
+                              <button
+                                class="link-style-button"
+                                (click)="openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
+                                >
+                                {{ message.inlineData.name }}
+                              </button>
+                            </div>
+                          }
+                        }
+                      </div>
+                    </div>
+                  } @else {
+                    <div>
+                      @if (message.inlineData.mimeType.startsWith('image/')) {
+                        <div>
+                          <img class="image-preview-chat" alt="image" [src]="message.inlineData.data"
+                            (click)="openViewImageDialog(message.inlineData.data)"/>
+                        </div>
+                      } @else {
+                        <div>
+                          <mat-icon>insert_drive_file</mat-icon>
+                          <a [href]="message.inlineData.data" download>{{ message.inlineData.displayName }}</a>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+                @if (message.functionCall) {
+                  <button
+                    mat-stroked-button
+                    class="function-event-button"
+                    (click)="clickEvent(i)"
+                    >
+                    <mat-icon>bolt</mat-icon>
+                    {{ message.functionCall.name }}
+                  </button>
+                }
+                @if (message.functionResponse) {
+                  <button
+                    mat-stroked-button
+                    class="function-event-button"
+                    (click)="clickEvent(i)"
+                    >
+                    <mat-icon>check</mat-icon>
+                    {{ message.functionResponse.name }}
+                  </button>
+                }
+                @if (message.actualInvocationToolUses && message.evalStatus === 2) {
+                  <div class="tool-uses-container">
+                    <div class="actual-tool-uses">
+                      <div class="tool-uses-header">Actual tool uses:</div>
+                      <ngx-json-viewer [json]="message.actualInvocationToolUses"></ngx-json-viewer>
+                    </div>
+                    <div class="expected-tool-uses">
+                      <div class="tool-uses-header">Expected tool uses:</div>
+                      <ngx-json-viewer [json]="message.expectedInvocationToolUses"></ngx-json-viewer>
+                    </div>
+                  </div>
+                }
+              </mat-card>
+              <div [ngClass]="{'eval-pass': message.evalStatus === 1, 'eval-fail': message.evalStatus === 2}">
+                <span class="material-symbols-outlined">{{ message.evalStatus === 1 ? 'check' : message.evalStatus === 2 ? 'close' : '' }}</span>
+                <span>{{ message.evalStatus === 1 ? 'Pass' : message.evalStatus === 2 ? 'Fail' : '' }}</span>
+              </div>
+              @if (message.role === 'user') {
+                <button mat-mini-fab>
+                  <mat-icon>person</mat-icon>
+                </button>
               }
-            }
-            <button
-              mat-stroked-button
-              class="function-event-button"
-              *ngIf="message.functionCall"
-              (click)="clickEvent(i)"
-            >
-              <mat-icon>bolt</mat-icon>
-              {{ message.functionCall.name }}
-            </button>
-            <button
-              mat-stroked-button
-              class="function-event-button"
-              *ngIf="message.functionResponse"
-              (click)="clickEvent(i)"
-            >
-              <mat-icon>check</mat-icon>
-              {{ message.functionResponse.name }}
-            </button>
-            @if (message.actualInvocationToolUses && message.evalStatus === 2) {
-              <div class="tool-uses-container">
-                <div class="actual-tool-uses">
-                  <div class="tool-uses-header">Actual tool uses:</div>
-                  <ngx-json-viewer [json]="message.actualInvocationToolUses"></ngx-json-viewer>
-                </div>
-                <div class="expected-tool-uses">
-                  <div class="tool-uses-header">Expected tool uses:</div>
-                  <ngx-json-viewer [json]="message.expectedInvocationToolUses"></ngx-json-viewer>
-                </div>
-              </div>
-            }
-          </mat-card>
-          <div [ngClass]="{'eval-pass': message.evalStatus === 1, 'eval-fail': message.evalStatus === 2}">
-              <span class="material-symbols-outlined">{{ message.evalStatus === 1 ? 'check' : message.evalStatus === 2 ? 'close' : '' }}</span>
-              <span>{{ message.evalStatus === 1 ? 'Pass' : message.evalStatus === 2 ? 'Fail' : '' }}</span>
-          </div>
-          <button *ngIf="message.role === 'user'" mat-mini-fab>
-            <mat-icon>person</mat-icon>
-          </button>
+            </div>
+          }
         </div>
-      </div>
-      <div class="chat-input" *ngIf="appName != ''">
-        <input type="file" multiple hidden (change)="onFileSelect($event)" #fileInput>
-        <mat-form-field class="input-field" appearance="outline">
-          <div class="file-preview" *ngIf="selectedFiles.length && appName != ''">
-            <div *ngFor="let file of selectedFiles; let i = index">
-              <div *ngIf="file.file.type.startsWith('image/')" class="image-container">
-                <img [src]="file.url" alt="preview" class="image-preview">
-                <button mat-icon-button (click)="removeFile(i)" class="delete-button">
-                  <mat-icon color="warn">close</mat-icon>
+      }
+      @if (appName != '') {
+        <div class="chat-input">
+          <input type="file" multiple hidden (change)="onFileSelect($event)" #fileInput>
+          <mat-form-field class="input-field" appearance="outline">
+            @if (selectedFiles.length && appName != '') {
+              <div class="file-preview">
+                @for (file of selectedFiles; track file; let i = $index) {
+                  <div>
+                    @if (file.file.type.startsWith('image/')) {
+                      <div class="image-container">
+                        <img [src]="file.url" alt="preview" class="image-preview">
+                        <button mat-icon-button (click)="removeFile(i)" class="delete-button">
+                          <mat-icon color="warn">close</mat-icon>
+                        </button>
+                      </div>
+                    }
+                    @if (!file.file.type.startsWith('image/')) {
+                      <div class="file-container">
+                        <button mat-icon-button (click)="removeFile(i)" class="delete-button">
+                          <mat-icon color="warn">close</mat-icon>
+                        </button>
+                        <div class="file-info">
+                          <mat-icon>insert_drive_file</mat-icon>
+                          <span>{{ file.file.name }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            <textarea
+              class="chat-input-box"
+              matInput
+              cdkTextareaAutosize
+              cdkAutosizeMinRows="1"
+              cdkAutosizeMaxRows="10"
+              [(ngModel)]="userInput"
+              (keydown.enter)="sendMessage($event)"
+              placeholder="Type a Message..."
+              style="caret-color: white;"
+            ></textarea>
+            <div class="chat-input-actions">
+              <button mat-icon-button (click)="fileInput.click()" class="function-event-button" style="margin-right:10px" matTooltip="Upload local file">
+                <mat-icon>attach_file</mat-icon>
+              </button>
+              <div>
+                <button  mat-icon-button matSuffix (click)="toggleAudioRecording()" [ngStyle]="{'background-color': isAudioRecording? 'rgb(234, 67, 53)': 'rgb(51, 53, 55)'}" [matTooltip]="isAudioRecording ? 'Turn off microphone' : 'Use microphone'">
+                  <mat-icon>mic</mat-icon>
+                </button>
+                <button  mat-icon-button matSuffix (click)="toggleVideoRecording()" [ngStyle]="{'background-color': isVideoRecording? 'rgb(234, 67, 53)': 'rgb(51, 53, 55)'}" [matTooltip]="isVideoRecording ? 'Turn off camera' : 'Use camera'">
+                  <mat-icon>videocam</mat-icon>
                 </button>
               </div>
-              <div *ngIf="!file.file.type.startsWith('image/')" class="file-container">
-                <button mat-icon-button (click)="removeFile(i)" class="delete-button">
-                  <mat-icon color="warn">close</mat-icon>
-                </button>
-                <div class="file-info">
-                  <mat-icon>insert_drive_file</mat-icon>
-                  <span>{{ file.file.name }}</span>
-                </div>
-              </div>
             </div>
-          </div>
-          <textarea
-            class="chat-input-box"
-            matInput
-            cdkTextareaAutosize
-            cdkAutosizeMinRows="1"
-            cdkAutosizeMaxRows="10"
-            [(ngModel)]="userInput"
-            (keydown.enter)="sendMessage($event)"
-            placeholder="Type a Message..."
-            style="caret-color: white;"
-          ></textarea>
-          <div class="chat-input-actions">
-            <button mat-icon-button (click)="fileInput.click()" class="function-event-button" style="margin-right:10px" matTooltip="Upload local file">
-              <mat-icon>attach_file</mat-icon>
-            </button>
-            <div>
-              <button  mat-icon-button matSuffix (click)="toggleAudioRecording()" [ngStyle]="{'background-color': isAudioRecording? 'rgb(234, 67, 53)': 'rgb(51, 53, 55)'}" [matTooltip]="isAudioRecording ? 'Turn off microphone' : 'Use microphone'">
-                <mat-icon>mic</mat-icon>
-              </button>
-              <button  mat-icon-button matSuffix (click)="toggleVideoRecording()" [ngStyle]="{'background-color': isVideoRecording? 'rgb(234, 67, 53)': 'rgb(51, 53, 55)'}" [matTooltip]="isVideoRecording ? 'Turn off camera' : 'Use camera'">
-                <mat-icon>videocam</mat-icon>
-              </button>
-            </div>
-          </div>
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+        </div>
+      }
     </mat-card>
   </div>
 </mat-drawer-container>

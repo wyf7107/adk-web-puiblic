@@ -15,30 +15,48 @@
 -->
 
 <div class="events-wrapper">
-  <div *ngIf="eventsMap.size>0" class="events-container">
-    <div class="event-header">
-      <p *ngIf="!isTraceView()">Conversations</p>
-      <p *ngIf="isTraceView()">Trace</p>
-      <mat-button-toggle-group name="fontStyle" aria-label="Font Style" style="scale: 0.8" [(ngModel)]="view" *ngIf="traceData">
-        <mat-button-toggle value="events">Events</mat-button-toggle>
-        <mat-button-toggle value="trace">Trace</mat-button-toggle>
-      </mat-button-toggle-group>
+  @if (eventsMap.size>0) {
+    <div class="events-container">
+      <div class="event-header">
+        @if (!isTraceView()) {
+          <p>Conversations</p>
+        }
+        @if (isTraceView()) {
+          <p>Trace</p>
+        }
+        @if (traceData) {
+          <mat-button-toggle-group name="fontStyle" aria-label="Font Style" style="scale: 0.8" [(ngModel)]="view">
+            <mat-button-toggle value="events">Events</mat-button-toggle>
+            <mat-button-toggle value="trace">Trace</mat-button-toggle>
+          </mat-button-toggle-group>
+        }
+      </div>
+      @if (!isTraceView()) {
+        <mat-list class="event-list">
+          @for (jsonData of eventsMap | keyvalue: mapOrderPreservingSort; track jsonData; let i = $index) {
+            <mat-list-item (click)="selectEvent(jsonData.key)">
+              <span class="event-index">{{i}}</span>
+              <span>{{jsonData.value.title}}</span>
+            </mat-list-item>
+          }
+        </mat-list>
+      }
+      @if (isTraceView()) {
+        <mat-list class="event-list">
+          @for (invoc of invocTraces | keyvalue: mapOrderPreservingSort; track invoc; let i = $index) {
+            <mat-list-item (click)="openDialog(invoc.key)">
+              <span class="event-index">{{i}}</span>
+              <span>Invocation {{findInvocIdFromTraceId(invoc.key)}}</span>
+            </mat-list-item>
+          }
+        </mat-list>
+      }
     </div>
-    <mat-list *ngIf="!isTraceView()" class="event-list">
-      <mat-list-item *ngFor="let jsonData of eventsMap | keyvalue: mapOrderPreservingSort; let i = index" (click)="selectEvent(jsonData.key)">
-        <span class="event-index">{{i}}</span>
-        <span>{{jsonData.value.title}}</span>
-      </mat-list-item>
-    </mat-list>
-    <mat-list *ngIf="isTraceView()" class="event-list">
-      <mat-list-item *ngFor="let invoc of invocTraces | keyvalue: mapOrderPreservingSort; let i = index" (click)="openDialog(invoc.key)">
-        <span class="event-index">{{i}}</span>
-        <span>Invocation {{findInvocIdFromTraceId(invoc.key)}}</span>
-      </mat-list-item>
-    </mat-list>
-  </div>
-  <div *ngIf="eventsMap.size==0">
-    <p>No conversations</p>
-  </div>
+  }
+  @if (eventsMap.size==0) {
+    <div>
+      <p>No conversations</p>
+    </div>
+  }
 </div>
 

@@ -14,22 +14,29 @@
  limitations under the License.
 -->
 
-<h2 mat-dialog-title *ngIf="!selectedEvent">Events List</h2>
-<h2 mat-dialog-title *ngIf="selectedEvent">Send Response To Pending Event</h2>
+@if (!selectedEvent) {
+  <h2 mat-dialog-title>Events List</h2>
+}
+@if (selectedEvent) {
+  <h2 mat-dialog-title>Send Response To Pending Event</h2>
+}
 <mat-dialog-content>
-    <div *ngIf="selectedEvent">
-        <p>Name</p>
-        <p>{{ selectedEvent.name }}</p>
-        <p>Args</p>
-        <p>{{ argsToJson(selectedEvent.args) }}</p>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Response</mat-label>
-          <textarea matInput [(ngModel)]="selectedEvent.response"></textarea>
-        </mat-form-field>
-      </div>
+  @if (selectedEvent) {
+    <div>
+      <p>Name</p>
+      <p>{{ selectedEvent.name }}</p>
+      <p>Args</p>
+      <p>{{ argsToJson(selectedEvent.args) }}</p>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Response</mat-label>
+        <textarea matInput [(ngModel)]="selectedEvent.response"></textarea>
+      </mat-form-field>
+    </div>
+  }
 </mat-dialog-content>
 <mat-dialog-actions>
-  <button mat-button *ngIf="selectedEvent && selectedEvent.response" (click)="sendResponse()" [disabled]="sending">{{ sending? "Sending...": "Send" }}</button>
+  @if (selectedEvent && selectedEvent.response) {
+    <button mat-button (click)="sendResponse()" [disabled]="sending">{{ sending? "Sending...": "Send" }}</button>
+  }
   <button mat-button mat-dialog-close>Close</button>
 </mat-dialog-actions>

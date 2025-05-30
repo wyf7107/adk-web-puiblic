@@ -103,6 +103,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   messages: any[] = [];
   lastTextChunk: string = '';
   streamingTextMessage: any|null = null;
+  latestThought: string = '';
   artifacts: any[] = [];
   userInput: string = '';
   userId = 'user';
@@ -120,6 +121,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly streamingTextMessageSubject =
       new BehaviorSubject<any|null>(null);
   private readonly scrollInterruptedSubject = new BehaviorSubject(true);
+  private readonly isModelThinkingSubject = new BehaviorSubject(false);
 
   // TODO: Remove this once backend supports restarting bidi streaming.
   sessionHasUsedBidi = new Set<string>();
@@ -223,12 +225,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.appName = app;
     });
 
-    this.agentService.getLoadingState().subscribe((isLoading: boolean) => {
-      if (isLoading) {
+    combineLatest([
+      this.agentService.getLoadingState(), this.isModelThinkingSubject
+    ]).subscribe(([isLoading, isModelThinking]) => {
+      const lastMessage = this.messages[this.messages.length - 1];
+
+      if (isLoading && !lastMessage?.isLoading) {
         this.messages.push({role: 'bot', isLoading: true});
         this.messagesSubject.next(this.messages);
-      } else if (this.messages[this.messages.length - 1] &&
-        this.messages[this.messages.length - 1].isLoading) {
+      } else if (lastMessage?.isLoading && !isModelThinking) {
         this.messages.pop();
         this.messagesSubject.next(this.messages);
       }
@@ -323,7 +328,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.streamingTextMessage = null;
     this.agentService.runSse(req).subscribe({
       next: async (chunk) => {
-        this.agentService.getLoadingState().next(false);
         if (chunk.startsWith('{"error"')) {
           this.openSnackBar(chunk, 'OK');
           return;
@@ -361,9 +365,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private processPart(chunkJson: any, part: any, index: number) {
     const renderedContent =
         chunkJson.groundingMetadata?.searchEntryPoint?.renderedContent;
+
     if (part.text) {
+      this.isModelThinkingSubject.next(false);
+      this.agentService.getLoadingState().next(false);
       const newChunk = part.text;
-      if (!this.streamingTextMessage) {
+      if (part.thought) {
+        if (newChunk !== this.latestThought) {
+          this.storeEvents(part, chunkJson, index);
+          this.storeMessage(part, chunkJson, index);
+        }
+        this.latestThought = newChunk;
+      } else if (!this.streamingTextMessage) {
         this.streamingTextMessage = {
           role: 'bot',
           text: this.processThoughtText(newChunk),
@@ -399,9 +412,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.streamingTextMessage.text += newChunk;
         this.streamingTextMessageSubject.next(this.streamingTextMessage);
       }
-    } else {
+    } else if (!part.thought) {
+      this.isModelThinkingSubject.next(false);
+      this.agentService.getLoadingState().next(false);
       this.storeEvents(part, chunkJson, index);
       this.storeMessage(part, chunkJson, index);
+    } else {
+      this.isModelThinkingSubject.next(true);
     }
   }
 
@@ -495,6 +512,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       let message: any = {
         role: e.author === 'user' ? 'user' : 'bot',
         text: part.text,
+        thought: part.thought ? true : false,
         evalStatus: e.evalStatus,
         actualInvocationToolUses: e.actualInvocationToolUses,
         expectedInvocationToolUses: e.expectedInvocationToolUses,

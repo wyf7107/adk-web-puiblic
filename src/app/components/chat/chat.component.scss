@@ -176,7 +176,7 @@
 .chat-input {
   display: flex;
   padding: 10px;
-  width: 80%;
+  width: 60%;
   margin: 0 auto;
 }
 
@@ -201,9 +201,15 @@
 }
 
 .chat-input-actions {
+  width: 106%;
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
+
+  button {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
 }
 
 .fab-button {
@@ -302,6 +308,7 @@ button {
 
 .function-event-button {
   background-color: white;
+  margin-left: 0px;
 }
 
 :host ::ng-deep .message-text {
@@ -620,7 +627,7 @@ button {
   img {
     margin-right: 9px;
   }
-  
+
   font-size: 16px;
   font-style: normal;
   font-weight: 500;

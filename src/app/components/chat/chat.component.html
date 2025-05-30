@@ -254,6 +254,17 @@
                     <div *ngSwitchCase="MediaType.AUDIO">
                       <app-audio-player [base64data]="message.inlineData.data"></app-audio-player>
                     </div>
+                    <div *ngSwitchCase="MediaType.TEXT">
+                      <div class="html-artifact-container">
+                        <mat-icon>description</mat-icon>
+                        <button
+                          class="link-style-button"
+                          (click)=" openBase64InNewTab(message.inlineData.data, message.inlineData.mimeType)"
+                        >
+                          {{ message.inlineData.name }}
+                        </button>
+                      </div>
+                    </div>
                     <div *ngSwitchDefault>
                       <button
                         class="link-style-button"

@@ -30,6 +30,7 @@ const DEFAULT_ARTIFACT_NAME = 'default_artifact_name';
 export enum MediaType {
   IMAGE = 'image',
   AUDIO = 'audio',
+  TEXT = 'text',  // for text/html
   UNSPECIFIED = 'unspecified',
 }
 

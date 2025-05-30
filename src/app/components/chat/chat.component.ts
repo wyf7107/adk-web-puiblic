@@ -591,14 +591,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           const base64Data =
               this.formatBase64Data(res.inlineData.data, mimeType);
 
+          const mediaType = getMediaTypeFromMimetype(mimeType);
+
+          let inlineData = {
+            name: this.createDefaultArtifactName(mimeType),
+            data: base64Data,
+            mimeType: mimeType,
+            mediaType,
+          };
+
           this.messages[currentIndex] = {
             role: 'bot',
-            inlineData: {
-              name: this.createDefaultArtifactName(mimeType),
-              data: base64Data,
-              mimeType: mimeType,
-              mediaType: getMediaTypeFromMimetype(mimeType),
-            },
+            inlineData,
           };
 
           // To trigger ngOnChanges in the artifact tab component

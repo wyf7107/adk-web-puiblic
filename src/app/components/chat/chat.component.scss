@@ -28,8 +28,12 @@
   background-color: #131314;
 }
 
+.generated-image-container {
+  max-width: 400px;
+}
+
 .generated-image {
-  max-width: 33%;
+  max-width: 100%;
   border-radius: 8px;
 }
 

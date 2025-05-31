@@ -279,9 +279,9 @@
                       <div>
                         @switch (message.inlineData.mediaType) {
                           @case (MediaType.IMAGE) {
-                            <div>
+                            <div class="generated-image-container">
                               <img class="generated-image" alt="image" [src]="message.inlineData.data"
-                                (click)="openViewImageDialog(message.inlineData.data)"/>
+                              (click)="openViewImageDialog(message.inlineData.data)"/>
                             </div>
                           }
                           @case (MediaType.AUDIO) {

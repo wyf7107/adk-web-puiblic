@@ -26,6 +26,7 @@ import {catchError} from 'rxjs/operators';
 import {Session} from '../../core/models/Session';
 import {EvalService} from '../../core/services/eval.service';
 import {SessionService} from '../../core/services/session.service';
+import {FeatureFlagService} from '../../core/services/feature-flag.service';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
@@ -83,6 +84,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
   @Output() readonly evalNotInstalledMsg = new EventEmitter<string>();
 
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly flagService = inject(FeatureFlagService);
+
+  protected readonly isViewEvalCaseEnabled = this.flagService.isViewEvalCaseEnabled();
 
   displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
   evalsets: any[] = [];

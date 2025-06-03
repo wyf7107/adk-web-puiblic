@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,7 +39,7 @@ export class AudioService {
 
       this.audioContext = new AudioContext();
       await this.audioContext.audioWorklet.addModule(
-        '/assets/audio-processor.js',
+          './assets/audio-processor.js',
       );
 
       this.source = this.audioContext.createMediaStreamSource(this.stream);

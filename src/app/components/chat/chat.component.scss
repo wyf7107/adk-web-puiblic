@@ -451,6 +451,8 @@ button {
 }
 
 .drawer-header {
+  display: flex;
+  justify-content: space-between;
   @include mat.button-overrides(
     (
       filled-container-color: #89b4f8,

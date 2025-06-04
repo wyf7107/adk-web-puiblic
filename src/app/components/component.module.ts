@@ -28,15 +28,16 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatListModule} from '@angular/material/list';
-import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatRadioModule} from '@angular/material/radio';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownModule} from 'ngx-markdown';
 
@@ -45,6 +46,7 @@ import {ResizableDrawerDirective} from '../directives/resizable-drawer.directive
 import {ArtifactTabComponent} from './artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from './audio-player/audio-player.component';
 import {ChatComponent} from './chat/chat.component';
+import {EvalConfigDialogComponent} from './eval-config-dialog/eval-config-dialog.component';
 import {AddEvalSessionDialogComponent} from './eval-tab/add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {EvalTabComponent} from './eval-tab/eval-tab.component';
 import {NewEvalSetDialogComponentComponent} from './eval-tab/new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
@@ -69,6 +71,7 @@ const COMPONENTS = [
   StateTabComponent,
   TraceChartComponent,
   ViewImageDialogComponent,
+  EvalConfigDialogComponent,
   AudioPlayerComponent,
   ResizableDrawerDirective,
 ];
@@ -94,6 +97,7 @@ const COMPONENTS = [
     NgxJsonViewerModule,
     MatSidenavModule,
     MatTabsModule,
+    MatRadioModule,
     MatSelectModule,
     MatCheckboxModule,
     MatTableModule,

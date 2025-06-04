@@ -16,7 +16,7 @@
  */
 
 import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal,} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatPaginatorIntl} from '@angular/material/paginator';
@@ -86,6 +86,7 @@ const BIDI_STREAMING_RESTART_WARNING =
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
   standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [{provide: MatPaginatorIntl, useClass: CustomPaginatorIntl}],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -155,6 +156,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly selectedAppControl = new FormControl<string>('', {
     nonNullable: true,
   });
+
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   // Load apps
   private readonly agentService = inject(AgentService);
@@ -232,12 +235,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     ]).subscribe(([isLoading, isModelThinking]) => {
       const lastMessage = this.messages[this.messages.length - 1];
 
-      if (isLoading && !lastMessage?.isLoading) {
-        this.messages.push({role: 'bot', isLoading: true});
-        this.messagesSubject.next(this.messages);
+      if (isLoading) {
+        if (!lastMessage?.isLoading && !this.streamingTextMessage) {
+          this.messages.push({role: 'bot', isLoading: true});
+          this.messagesSubject.next(this.messages);
+        }
       } else if (lastMessage?.isLoading && !isModelThinking) {
         this.messages.pop();
         this.messagesSubject.next(this.messages);
+        this.changeDetectorRef.detectChanges();
       }
     });
 
@@ -345,6 +351,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             this.processPart(chunkJson, part, index);
           }
         }
+        this.changeDetectorRef.detectChanges();
       },
       error: (err) => console.error('SSE error:', err),
       complete: () => {
@@ -362,6 +369,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     // Clear input
     this.userInput = '';
+    this.changeDetectorRef.detectChanges();
   }
 
   private processPart(chunkJson: any, part: any, index: number) {
@@ -370,14 +378,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (part.text) {
       this.isModelThinkingSubject.next(false);
-      this.agentService.getLoadingState().next(false);
       const newChunk = part.text;
       if (part.thought) {
         if (newChunk !== this.latestThought) {
           this.storeEvents(part, chunkJson, index);
-          this.storeMessage(
-              part, chunkJson, index,
-              chunkJson.author === 'user' ? 'user' : 'bot');
+          let thoughtMessage = {
+            role: 'bot',
+            text: this.processThoughtText(newChunk),
+            thought: true,
+            eventId: chunkJson.id
+          };
+
+          this.insertMessageBeforeLoadingMessage(thoughtMessage);
         }
         this.latestThought = newChunk;
       } else if (!this.streamingTextMessage) {
@@ -393,8 +405,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
               chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
         }
 
-        this.messages.push(this.streamingTextMessage);
-        this.messagesSubject.next(this.messages);
+        this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
+
         if (!this.useSse) {
           this.storeEvents(part, chunkJson, index);
           this.eventMessageIndexArray[index] = newChunk;
@@ -418,7 +430,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     } else if (!part.thought) {
       this.isModelThinkingSubject.next(false);
-      this.agentService.getLoadingState().next(false);
       this.storeEvents(part, chunkJson, index);
       this.storeMessage(
           part, chunkJson, index, chunkJson.author === 'user' ? 'user' : 'bot');
@@ -549,9 +560,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (Object.keys(part).length > 0) {
-      this.messages.push(message);
-      this.messagesSubject.next(this.messages);
+      this.insertMessageBeforeLoadingMessage(message);
     }
+  }
+
+  private insertMessageBeforeLoadingMessage(message: any) {
+    const lastMessage = this.messages[this.messages.length - 1];
+    if (lastMessage?.isLoading) {
+      this.messages.splice(this.messages.length - 1, 0, message);
+    } else {
+      this.messages.push(message);
+    }
+    this.messagesSubject.next(this.messages);
   }
 
   private formatBase64Data(data: string, mimeType: string) {
@@ -562,16 +582,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private renderArtifact(artifactId: string, versionId: string) {
     // Add a placeholder message for the artifact
     // Feed the placeholder with the artifact data after it's fetched
-    this.messages.push({
+    let message = {
       role: 'bot',
       inlineData: {
         data: '',
         mimeType: 'image/png',
       },
-    });
-    this.messagesSubject.next(this.messages);
+    };
+    this.insertMessageBeforeLoadingMessage(message);
 
-    const currentIndex = this.messages.length - 1;
+    const currentIndex = this.messages.length - 2;
 
     this.artifactService
         .getArtifactVersion(
@@ -880,6 +900,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventData.clear();
     this.eventMessageIndexArray = [];
     this.messages = [];
+    this.messagesSubject.next(this.messages);
     this.artifacts = [];
   }
 

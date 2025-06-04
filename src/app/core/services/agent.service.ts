@@ -80,7 +80,9 @@ export class AgentService {
           const read = () => {
             reader?.read()
                 .then(({done, value}) => {
+                  this.isLoading.next(true);
                   if (done) {
+                    this.isLoading.next(false);
                     return observer.complete();
                   }
 

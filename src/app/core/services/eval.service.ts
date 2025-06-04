@@ -101,4 +101,14 @@ export class EvalService {
     }
     return new Observable<any>();
   }
+
+  getEvalCase(appName: string, evalSetId: string, evalCaseId: string) {
+    if (this.apiServerDomain != undefined) {
+      const url =
+        this.apiServerDomain +
+        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+      return this.http.get<any>(url, {});
+    }
+    return new Observable<any>();
+  }
 }

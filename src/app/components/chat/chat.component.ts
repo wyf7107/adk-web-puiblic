@@ -41,7 +41,7 @@ import {WebSocketService} from '../../core/services/websocket.service';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
-import {EvalTabComponent} from '../eval-tab/eval-tab.component';
+import {EvalCase, EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
@@ -98,6 +98,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private _snackBar = inject(MatSnackBar);
   shouldShowEvalTab = signal(true);
   enableSseIndicator = signal(false);
+  isChatMode = signal(true);
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages: any[] = [];
@@ -109,6 +110,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   userId = 'user';
   appName = '';
   sessionId = ``;
+  evalCaseId = ``;
   isAudioRecording = false;
   isVideoRecording = false;
   longRunningEvents: any[] = [];
@@ -373,7 +375,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (part.thought) {
         if (newChunk !== this.latestThought) {
           this.storeEvents(part, chunkJson, index);
-          this.storeMessage(part, chunkJson, index);
+          this.storeMessage(
+              part, chunkJson, index,
+              chunkJson.author === 'user' ? 'user' : 'bot');
         }
         this.latestThought = newChunk;
       } else if (!this.streamingTextMessage) {
@@ -416,7 +420,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isModelThinkingSubject.next(false);
       this.agentService.getLoadingState().next(false);
       this.storeEvents(part, chunkJson, index);
-      this.storeMessage(part, chunkJson, index);
+      this.storeMessage(
+          part, chunkJson, index, chunkJson.author === 'user' ? 'user' : 'bot');
     } else {
       this.isModelThinkingSubject.next(true);
     }
@@ -462,8 +467,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private storeMessage(part: any, e: any, index: number) {
-    if (e.longRunningToolIds && e.longRunningToolIds.length > 0) {
+  private storeMessage(part: any, e: any, index: number, role: string) {
+    if (e?.longRunningToolIds && e.longRunningToolIds.length > 0) {
       this.getAsyncFunctionsFromParts(e.longRunningToolIds, e.content.parts);
       const func = this.longRunningEvents[0];
       if (func.args.authConfig &&
@@ -488,84 +493,51 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.functionCallEventId = e.id;
       }
     }
-    if (e.actions && e.actions.artifactDelta) {
+    if (e?.actions && e.actions.artifactDelta) {
       for (const key in e.actions.artifactDelta) {
         if (e.actions.artifactDelta.hasOwnProperty(key)) {
           this.renderArtifact(key, e.actions.artifactDelta[key]);
         }
       }
     }
+
+    let message: any = {
+      role,
+      evalStatus: e?.evalStatus,
+      actualInvocationToolUses: e?.actualInvocationToolUses,
+      expectedInvocationToolUses: e?.expectedInvocationToolUses,
+    };
     if (part.inlineData) {
       const base64Data =
           this.formatBase64Data(part.inlineData.data, part.inlineData.mimeType);
-      this.messages.push({
-        role: e.author === 'user' ? 'user' : 'bot',
-        inlineData: {
-          displayName: part.inlineData.displayName,
-          data: base64Data,
-          mimeType: part.inlineData.mimeType,
-        },
-      });
-      this.messagesSubject.next(this.messages);
+      message.inlineData = {
+        displayName: part.inlineData.displayName,
+        data: base64Data,
+        mimeType: part.inlineData.mimeType,
+      };
       this.eventMessageIndexArray[index] = part.inlineData;
     } else if (part.text) {
-      let message: any = {
-        role: e.author === 'user' ? 'user' : 'bot',
-        text: part.text,
-        thought: part.thought ? true : false,
-        evalStatus: e.evalStatus,
-        actualInvocationToolUses: e.actualInvocationToolUses,
-        expectedInvocationToolUses: e.expectedInvocationToolUses,
-      };
-      if (e.groundingMetadata && e.groundingMetadata.searchEntryPoint &&
+      message.text = part.text;
+      message.thought = part.thought ? true : false;
+      if (e?.groundingMetadata && e.groundingMetadata.searchEntryPoint &&
           e.groundingMetadata.searchEntryPoint.renderedContent) {
         message.renderedContent =
             e.groundingMetadata.searchEntryPoint.renderedContent;
       }
-      this.messages.push(message);
-      this.messagesSubject.next(this.messages);
       this.eventMessageIndexArray[index] = part.text;
     } else if (part.functionCall) {
-      this.messages.push({
-        role: e.author === 'user' ? 'user' : 'bot',
-        functionCall: part.functionCall,
-        eventId: e.id,
-        evalStatus: e.evalStatus,
-        actualInvocationToolUses: e.actualInvocationToolUses,
-        expectedInvocationToolUses: e.expectedInvocationToolUses,
-      });
-      this.messagesSubject.next(this.messages);
+      message.functionCall = part.functionCall;
+      message.eventId = e?.id;
       this.eventMessageIndexArray[index] = part.functionCall;
     } else if (part.functionResponse) {
-      this.messages.push({
-        role: e.author === 'user' ? 'user' : 'bot',
-        functionResponse: part.functionResponse,
-        eventId: e.id,
-        evalStatus: e.evalStatus,
-        actualInvocationToolUses: e.actualInvocationToolUses,
-        expectedInvocationToolUses: e.expectedInvocationToolUses,
-      });
-      this.messagesSubject.next(this.messages);
-
+      message.functionResponse = part.functionResponse;
+      message.eventId = e.id;
       this.eventMessageIndexArray[index] = part.functionResponse;
     } else if (part.executableCode) {
-      this.messages.push({
-        role: e.author === 'user' ? 'user' : 'bot',
-        executableCode: part.executableCode,
-        evalStatus: e.evalStatus,
-        actualInvocationToolUses: e.actualInvocationToolUses,
-        expectedInvocationToolUses: e.expectedInvocationToolUses,
-      });
-      this.messagesSubject.next(this.messages);
+      message.executableCode = part.executableCode;
       this.eventMessageIndexArray[index] = part.executableCode;
     } else if (part.codeExecutionResult) {
-      this.messages.push({
-        role: e.author === 'user' ? 'user' : 'bot',
-        codeExecutionResult: part.codeExecutionResult,
-        evalStatus: e.evalStatus,
-        actualInvocationToolUses: e.actualInvocationToolUses,
-        expectedInvocationToolUses: e.expectedInvocationToolUses,
-      });
+      message.codeExecutionResult = part.codeExecutionResult;
       this.eventMessageIndexArray[index] = part.codeExecutionResult;
       if (e.actions && e.actions.artifact_delta) {
         for (const key in e.actions.artifact_delta) {
@@ -574,6 +546,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         }
       }
+    }
+
+    if (Object.keys(part).length > 0) {
+      this.messages.push(message);
+      this.messagesSubject.next(this.messages);
     }
   }
 
@@ -899,6 +876,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  private resetEventsAndMessages() {
+    this.eventData.clear();
+    this.eventMessageIndexArray = [];
+    this.messages = [];
+    this.artifacts = [];
+  }
+
   protected updateWithSelectedSession(session: Session) {
     if (!session || !session.id || !session.events || !session.state) {
       return;
@@ -906,17 +890,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sessionId = session.id;
     this.currentSessionState = session.state;
+    this.evalCaseId = ``;
+    this.isChatMode.set(true);
 
-    // reset event and message data
-    this.eventData.clear();
-    this.eventMessageIndexArray = [];
-    this.messages = [];
-    this.artifacts = [];
+    this.resetEventsAndMessages();
     let index = 0;
 
     session.events.forEach((event: any) => {
       event.content?.parts?.forEach((part: any) => {
-        this.storeMessage(part, event, index);
+        this.storeMessage(
+            part, event, index, event.author === 'user' ? 'user' : 'bot');
         index += 1;
         if (event.author && event.author !== 'user') {
           this.storeEvents(part, event, index);
@@ -927,6 +910,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventService.getTrace(this.sessionId).subscribe(res => {
       this.traceData = res;
     })
+  }
+
+  protected updateWithSelectedEvalCase(evalCase: EvalCase) {
+    this.evalCaseId = evalCase.evalId;
+    this.isChatMode.set(false);
+
+    this.resetEventsAndMessages();
+    let index = 0;
+
+    for (const invocation of evalCase.conversation) {
+      if (invocation.userContent?.parts) {
+        for (const part of invocation.userContent.parts) {
+          this.storeMessage(part, null, index, 'user');
+          index++;
+        }
+      }
+
+      if (invocation.finalResponse?.parts) {
+        for (const part of invocation.finalResponse.parts) {
+          this.storeMessage(part, null, index, 'bot');
+          index++;
+        }
+      }
+    }
   }
 
   protected updateSessionState(session: Session) {

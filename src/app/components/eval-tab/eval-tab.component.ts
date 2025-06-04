@@ -24,6 +24,7 @@ import {of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
 import {Session} from '../../core/models/Session';
+import {Invocation} from '../../core/models/types';
 import {EvalService} from '../../core/services/eval.service';
 import {FeatureFlagService} from '../../core/services/feature-flag.service';
 import {SessionService} from '../../core/services/session.service';
@@ -31,6 +32,13 @@ import {EvalMetric} from '../eval-config-dialog/eval-config-dialog.component';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
+
+export interface EvalCase {
+  evalId: string;
+  conversation: Invocation[];
+  sessionInput: any;
+  creationTimestamp: number;
+}
 
 interface EvaluationResult {
   setId: string;
@@ -83,6 +91,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   @Output() readonly sessionSelected = new EventEmitter<Session>();
   @Output() readonly shouldShowTab = new EventEmitter<boolean>();
   @Output() readonly evalNotInstalledMsg = new EventEmitter<string>();
+  @Output() readonly evalCaseSelected = new EventEmitter<EvalCase>();
 
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly flagService = inject(FeatureFlagService);
@@ -93,6 +102,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   evalsets: any[] = [];
   selectedEvalSet: string = '';
   evalCases: any[] = [];
+  selectedEvalCase: EvalCase|null = null;
 
   dataSource = new MatTableDataSource<string>(this.evalCases);
   selection = new SelectionModel<string>(true, []);
@@ -390,6 +400,13 @@ export class EvalTabComponent implements OnInit, OnChanges {
     const session = this.fromApiResultToSession(evalCaseResult.sessionDetails);
 
     this.sessionSelected.emit(session);
+  }
+
+  protected getEvalCase(element: any) {
+    this.evalService.getEvalCase(this.appName, this.selectedEvalSet, element)
+        .subscribe((res) => {
+          this.evalCaseSelected.emit(res);
+        });
   }
 
   protected getEvaluationResult() {

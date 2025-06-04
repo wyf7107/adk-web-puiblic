@@ -88,7 +88,7 @@
                 <span class="tab-label">Eval</span>
               </ng-template>
               <app-eval-tab [appName]="appName" [userId]="userId" [sessionId]="sessionId"
-              (shouldShowTab)="handleShouldShowEvalTab($event)" (sessionSelected)="updateWithSelectedSession($event)"></app-eval-tab>
+              (shouldShowTab)="handleShouldShowEvalTab($event)" (sessionSelected)="updateWithSelectedSession($event)" (evalCaseSelected)="updateWithSelectedEvalCase($event)"></app-eval-tab>
             </mat-tab>
           }
         </mat-tab-group>
@@ -142,39 +142,46 @@
   <div class="chat-container">
     @if (appName != '') {
       <div class="chat-toolbar">
-        <div style="display: flex;">
-          <div class="toolbar-session-text">Session ID</div>
-          <div class="toolbar-session-id">{{sessionId}}</div>
-        </div>
-        <div class="toolbar-actions">
-          <div class="toolbar-sse-toggle">
-            <mat-slide-toggle
-              class="example-margin"
-              [checked]="enableSseIndicator()"
-              (change)="toggleSse()">
-              Token Streaming
-            </mat-slide-toggle>
+        @if (evalCaseId) {
+          <div style="display: flex;">
+            <div class="toolbar-session-text">Eval Case ID</div>
+            <div class="toolbar-session-id">{{evalCaseId}}</div>
           </div>
-          <mat-divider [vertical]="true" style="margin-left: 8px; margin-right: 8px; height: 22px"></mat-divider>
-          <div style="display: flex; align-items:center">
-            <div (click)="onNewSessionClick()" class="toolbar-new-sesison">
-              <mat-icon>add</mat-icon>
-              New Session
+        } @else {
+          <div style="display: flex;">
+            <div class="toolbar-session-text">Session ID</div>
+            <div class="toolbar-session-id">{{sessionId}}</div>
+          </div>
+          <div class="toolbar-actions">
+            <div class="toolbar-sse-toggle">
+              <mat-slide-toggle
+                class="example-margin"
+                [checked]="enableSseIndicator()"
+                (change)="toggleSse()">
+                Token Streaming
+              </mat-slide-toggle>
             </div>
-            <span class="material-symbols-outlined"
-              matTooltip="Delete current session"
-              style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
-              (click)="deleteSession(sessionId)">
-              delete
-            </span>
-            <span class="material-symbols-outlined"
-              matTooltip="Export current session"
-              style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
-              (click)="exportSession()" >
-              download
-            </span>
+            <mat-divider [vertical]="true" style="margin-left: 8px; margin-right: 8px; height: 22px"></mat-divider>
+            <div style="display: flex; align-items:center">
+              <div (click)="onNewSessionClick()" class="toolbar-new-sesison">
+                <mat-icon>add</mat-icon>
+                New Session
+              </div>
+              <span class="material-symbols-outlined"
+                matTooltip="Delete current session"
+                style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
+                (click)="deleteSession(sessionId)">
+                delete
+              </span>
+              <span class="material-symbols-outlined"
+                matTooltip="Export current session"
+                style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
+                (click)="exportSession()" >
+                download
+              </span>
+            </div>
           </div>
-        </div>
+        }
       </div>
     }
     <mat-card class="chat-card">
@@ -378,7 +385,7 @@
           }
         </div>
       }
-      @if (appName != '') {
+      @if (appName != '' && isChatMode()) {
         <div class="chat-input">
           <input type="file" multiple hidden (change)="onFileSelect($event)" #fileInput>
           <mat-form-field class="input-field" appearance="outline">

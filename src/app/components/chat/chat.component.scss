@@ -284,7 +284,7 @@ button {
 }
 
 .app-select {
-  width: 180px;
+  width: 100%;
 }
 
 .empty-state-container {
@@ -325,6 +325,10 @@ button {
 
 :host ::ng-deep .mdc-linear-progress__buffer-dots {
   background: white;
+}
+
+:host ::ng-deep .mat-mdc-select-arrow-wrapper {
+  margin-left: 4px;
 }
 
 :host ::ng-deep .mat-mdc-text-field-wrapper {

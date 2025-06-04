@@ -25,8 +25,9 @@ import {catchError} from 'rxjs/operators';
 
 import {Session} from '../../core/models/Session';
 import {EvalService} from '../../core/services/eval.service';
-import {SessionService} from '../../core/services/session.service';
 import {FeatureFlagService} from '../../core/services/feature-flag.service';
+import {SessionService} from '../../core/services/session.service';
+import {EvalMetric} from '../eval-config-dialog/eval-config-dialog.component';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
@@ -99,11 +100,15 @@ export class EvalTabComponent implements OnInit, OnChanges {
   showEvalHistory = signal(false);
 
   evalRunning = signal(false);
-  evalMetrics = [
+  evalMetrics: EvalMetric[] = [
     {
       metricName: 'tool_trajectory_avg_score',
       threshold: 1,
     },
+    {
+      metricName: 'response_match_score',
+      threshold: 0.7,
+    }
   ];
   evalResult: EvaluationResult[] = [];
   readonly dialog = inject(MatDialog);

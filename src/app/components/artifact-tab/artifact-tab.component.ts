@@ -192,7 +192,8 @@ export class ArtifactTabComponent implements OnChanges {
     }
 
     const dialogRef = this.dialog.open(ViewImageDialogComponent, {
-      width: '1280px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
       data: {
         imageData: fullBase64DataUrl,
       },

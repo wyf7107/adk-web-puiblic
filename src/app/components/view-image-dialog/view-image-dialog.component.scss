@@ -37,8 +37,8 @@
 
 .image-wrapper img,
 .image-wrapper .svg-container {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
   object-fit: contain; /* Ensure image fits within bounds without cropping */
   border-radius: 8px; /* Rounded corners for the image */
 }
@@ -51,13 +51,6 @@
 }
 
 @media (max-width: 1768px) {
-  .dialog-content {
-    padding: 15px;
-    border-radius: 8px;
-    max-width: 195vw;
-    max-height: 195vh;
-  }
-
   .close-button {
     top: 5px;
     right: 5px;

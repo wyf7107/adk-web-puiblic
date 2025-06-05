@@ -36,6 +36,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatSliderModule} from '@angular/material/slider';
 import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -104,6 +105,7 @@ const COMPONENTS = [
     MatTabsModule,
     MatRadioModule,
     MatSelectModule,
+    MatSliderModule,
     MatCheckboxModule,
     MatTableModule,
     MatExpansionModule,

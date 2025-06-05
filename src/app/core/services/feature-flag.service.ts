@@ -20,6 +20,8 @@ import { ActivatedRoute } from '@angular/router';
 
 export const VIEW_EVAL_CASE = 'view_eval_case';
 
+export const SET_EVAL_CONFIG = 'set_eval_config';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,5 +32,9 @@ export class FeatureFlagService {
 
   isViewEvalCaseEnabled() {
     return this.route.snapshot.queryParams[VIEW_EVAL_CASE] === 'true';
+  }
+
+  isSetEvalConfigEnabled() {
+    return this.route.snapshot.queryParams[SET_EVAL_CONFIG] === 'true';
   }
 }

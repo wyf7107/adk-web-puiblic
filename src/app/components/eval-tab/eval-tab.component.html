@@ -64,7 +64,7 @@
           @if (!showEvalHistory()) {
             <div>
               <div class="evaluation-tab-header">
-                <button class="run-eval-btn" (click)="runEval()">Run Evaluation</button>
+                <button class="run-eval-btn" (click)="isSetEvalConfigEnabled ? openEvalConfigDialog() : runEval()">Run Evaluation</button>
                 <mat-icon class="evaluation-history-icon" (click)="toggleEvalHistoryButton()" matTooltip="View eval run history">history</mat-icon>
               </div>
               <div class="mat-table-container" style="margin-top:16px;">

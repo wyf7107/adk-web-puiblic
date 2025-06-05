@@ -28,7 +28,7 @@ import {Invocation} from '../../core/models/types';
 import {EvalService} from '../../core/services/eval.service';
 import {FeatureFlagService} from '../../core/services/feature-flag.service';
 import {SessionService} from '../../core/services/session.service';
-import {EvalMetric} from '../eval-config-dialog/eval-config-dialog.component';
+import {EvalConfigDialogComponent, EvalMetric} from '../eval-config-dialog/eval-config-dialog.component';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
@@ -97,6 +97,8 @@ export class EvalTabComponent implements OnInit, OnChanges {
   private readonly flagService = inject(FeatureFlagService);
 
   protected readonly isViewEvalCaseEnabled = this.flagService.isViewEvalCaseEnabled();
+  protected readonly isSetEvalConfigEnabled =
+      this.flagService.isSetEvalConfigEnabled();
 
   displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
   evalsets: any[] = [];
@@ -460,5 +462,12 @@ export class EvalTabComponent implements OnInit, OnChanges {
                 });
           }
         });
+  }
+
+  protected openEvalConfigDialog() {
+    const dialogRef = this.dialog.open(EvalConfigDialogComponent, {
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+    });
   }
 }

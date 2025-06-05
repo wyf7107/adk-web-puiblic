@@ -20,7 +20,7 @@
     @for (node of flatTree; track node) {
       <div class="trace-row">
         <div class="trace-indent">
-          @for (_ of [].constructor(node.level); track _) {
+          @for (i of getArray(node.level); track $index) {
             <div class="indent-connector">
             </div>
           }

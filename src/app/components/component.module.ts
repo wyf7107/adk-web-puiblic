@@ -32,6 +32,7 @@ import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatRadioModule} from '@angular/material/radio';
+import {MatExpansionModule} from '@angular/material/expansion';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
@@ -57,6 +58,8 @@ import {DeleteSessionDialogComponent} from './session-tab/delete-session-dialog/
 import {SessionTabComponent} from './session-tab/session-tab.component';
 import {StateTabComponent} from './state-tab/state-tab.component';
 import {ViewImageDialogComponent} from './view-image-dialog/view-image-dialog.component';
+import { TraceTabComponent } from './trace-tab/trace-tab.component';
+import { TraceTreeComponent } from './trace-tab/trace-tree/trace-tree.component';
 
 const COMPONENTS = [
   ChatComponent,
@@ -74,6 +77,8 @@ const COMPONENTS = [
   EvalConfigDialogComponent,
   AudioPlayerComponent,
   ResizableDrawerDirective,
+  TraceTabComponent,
+  TraceTreeComponent
 ];
 
 @NgModule({
@@ -101,6 +106,7 @@ const COMPONENTS = [
     MatSelectModule,
     MatCheckboxModule,
     MatTableModule,
+    MatExpansionModule,
     MatTooltipModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,

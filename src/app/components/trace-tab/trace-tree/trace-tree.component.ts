@@ -14,9 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { Component, Inject, OnInit } from "@angular/core";
-import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import {Component, Input} from '@angular/core';
 
 export interface Span {
   name: string;
@@ -33,7 +31,7 @@ interface SpanNode extends Span {
   children: SpanNode[];
   depth: number;
   duration: number;
-  id: string; // Using span_id as string ID
+  id: string;  // Using span_id as string ID
 }
 
 interface TimeTick {
@@ -42,16 +40,17 @@ interface TimeTick {
 }
 
 @Component({
-  selector: 'app-trace-chart',
-  templateUrl: './trace-chart.component.html',
-  styleUrl: './trace-chart.component.scss',
+  selector: 'app-trace-tree',
+  templateUrl: './trace-tree.component.html',
+  styleUrl: './trace-tree.component.scss',
   standalone: false
 })
-export class TraceChartComponent implements OnInit {
+export class TraceTreeComponent {
+  @Input() spans: any[] = [];
   tree: Span[] = [];
   baseStartTimeMs = 0;
   totalDurationMs = 1;
-  flatTree: { span: Span; level: number }[] = [];
+  flatTree: {span: Span; level: number}[] = [];
   traceLabelIconMap = new Map<string, string>([
     ['Invocation', 'start'],
     ['agent_run', 'directions_run'],
@@ -59,21 +58,17 @@ export class TraceChartComponent implements OnInit {
     ['call_llm', 'chat'],
   ]);
 
-  constructor(
-    public dialogRef: MatDialogRef<TraceChartComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {}
-
   ngOnInit(): void {
-    this.tree = this.buildSpanTree(this.data.spans);
+    this.tree = this.buildSpanTree(this.spans);
     this.flatTree = this.flattenTree(this.tree);
-    const times = this.getGlobalTimes(this.data.spans);
+    const times = this.getGlobalTimes(this.spans);
     this.baseStartTimeMs = times.start;
     this.totalDurationMs = times.duration;
   }
 
+
   buildSpanTree(spans: Span[]): Span[] {
-    const spanClones = spans.map(span => ({ ...span })); 
+    const spanClones = spans.map(span => ({...span}));
     const spanMap = new Map<string, Span>();
     const roots: Span[] = [];
 
@@ -94,7 +89,7 @@ export class TraceChartComponent implements OnInit {
   getGlobalTimes(spans: Span[]) {
     const start = Math.min(...spans.map(s => this.toMs(s.start_time)));
     const end = Math.max(...spans.map(s => this.toMs(s.end_time)));
-    return { start, duration: end - start };
+    return {start, duration: end - start};
   }
 
   toMs(nanos: number): number {
@@ -102,18 +97,23 @@ export class TraceChartComponent implements OnInit {
   }
 
   getRelativeStart(span: Span): number {
-    return ((this.toMs(span.start_time) - this.baseStartTimeMs) / this.totalDurationMs) * 100;
+    return ((this.toMs(span.start_time) - this.baseStartTimeMs) /
+            this.totalDurationMs) *
+        100;
   }
 
   getRelativeWidth(span: Span): number {
-    return ((this.toMs(span.end_time) - this.toMs(span.start_time)) / this.totalDurationMs) * 100;
+    return ((this.toMs(span.end_time) - this.toMs(span.start_time)) /
+            this.totalDurationMs) *
+        100;
   }
 
   flattenTree(spans: Span[], level: number = 0): any[] {
-    const tree = spans.flatMap(span => [
-      { span, level },
-      ...(span.children ? this.flattenTree(span.children, level + 1) : [])
-    ]);
+    const tree = spans.flatMap(
+        span =>
+            [{span, level},
+             ...(span.children ? this.flattenTree(span.children, level + 1) :
+                                 [])]);
     return tree
   }
 
@@ -123,10 +123,10 @@ export class TraceChartComponent implements OnInit {
         return value;
       }
     }
-    return "start";
+    return 'start';
   }
 
   getArray(n: number): number[] {
-    return Array.from({ length: n });
+    return Array.from({length: n});
   }
 }

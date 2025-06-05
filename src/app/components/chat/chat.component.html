@@ -55,6 +55,14 @@
     @if (appName != '' && showSidePanel) {
       <div class="tabs-container">
         <mat-tab-group>
+          @if (traceTabEnabled) {
+            <mat-tab class="tabs-header">
+              <ng-template mat-tab-label>
+                <span class="tab-label">Trace</span>
+              </ng-template>
+              <app-trace-tab [traceData]="traceData"></app-trace-tab>
+            </mat-tab>
+          }
           <mat-tab class="tabs-header">
             <ng-template mat-tab-label>
               <span class="tab-label">Events</span>

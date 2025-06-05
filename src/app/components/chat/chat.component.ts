@@ -47,6 +47,7 @@ import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
+import { FeatureFlagService } from '../../core/services/feature-flag.service';
 
 function fixBase64String(base64: string): string {
   // Replace URL-safe characters if they exist
@@ -189,6 +190,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       shareReplay(),
   );
+
+  // Trace tab 
+  traceTabEnabled = true;
 
   constructor(
       private sanitizer: DomSanitizer,

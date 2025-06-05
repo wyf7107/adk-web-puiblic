@@ -23,7 +23,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {MatCardModule} from '@angular/material/card';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatChipsModule} from '@angular/material/chips';
-import {MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle,} from '@angular/material/dialog';
+import {MatDialogActions, MatDialogClose, MatDialogContent, MatDialogModule, MatDialogTitle} from '@angular/material/dialog';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -40,6 +40,7 @@ import {MatSliderModule} from '@angular/material/slider';
 import {MatTableModule} from '@angular/material/table';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownModule} from 'ngx-markdown';
 
@@ -48,10 +49,10 @@ import {ResizableDrawerDirective} from '../directives/resizable-drawer.directive
 import {ArtifactTabComponent} from './artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from './audio-player/audio-player.component';
 import {ChatComponent} from './chat/chat.component';
-import {EvalConfigDialogComponent} from './eval-config-dialog/eval-config-dialog.component';
 import {AddEvalSessionDialogComponent} from './eval-tab/add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {EvalTabComponent} from './eval-tab/eval-tab.component';
 import {NewEvalSetDialogComponentComponent} from './eval-tab/new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
+import {RunEvalConfigDialogComponent} from './eval-tab/run-eval-config-dialog/run-eval-config-dialog.component';
 import {EventTabComponent} from './event-tab/event-tab.component';
 import {TraceChartComponent} from './event-tab/trace-chart/trace-chart.component';
 import {PendingEventDialogComponent} from './pending-event-dialog/pending-event-dialog.component';
@@ -75,7 +76,7 @@ const COMPONENTS = [
   StateTabComponent,
   TraceChartComponent,
   ViewImageDialogComponent,
-  EvalConfigDialogComponent,
+  RunEvalConfigDialogComponent,
   AudioPlayerComponent,
   ResizableDrawerDirective,
   TraceTabComponent,
@@ -111,11 +112,13 @@ const COMPONENTS = [
     MatExpansionModule,
     MatTooltipModule,
     MatProgressBarModule,
+    BrowserAnimationsModule,
     MatProgressSpinnerModule,
     MarkdownModule.forRoot(),
     MatSlideToggleModule,
     ReactiveFormsModule,
     MatChipsModule,
+    MatDialogModule,
     MatButtonToggleModule
   ],
 })

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
@@ -39,12 +39,12 @@ export interface EvalConfigData {
 }
 
 @Component({
-  selector: 'app-eval-config-dialog',
-  templateUrl: './eval-config-dialog.component.html',
-  styleUrls: ['./eval-config-dialog.component.scss'],
+  selector: 'app-run-eval-config-dialog',
+  templateUrl: './run-eval-config-dialog.component.html',
+  styleUrls: ['./run-eval-config-dialog.component.scss'],
   standalone: false,
 })
-export class EvalConfigDialogComponent implements OnInit {
+export class RunEvalConfigDialogComponent {
   // FormGroup to manage the dialog's form controls
   evalForm: FormGroup;
 
@@ -53,35 +53,27 @@ export class EvalConfigDialogComponent implements OnInit {
 
   /**
    * @constructor
-   * @param {MatDialogRef<EvalConfigDialogComponent>} dialogRef - Reference to
-   *     the dialog opened.
+   * @param {MatDialogRef<RunEvalConfigDialogComponent>} dialogRef - Reference
+   *     to the dialog opened.
    * @param {FormBuilder} fb - Angular's FormBuilder for creating reactive
    *     forms.
    * @param {EvalConfigData} data - Data injected into the dialog (e.g., initial
    *     values).
    */
   constructor(
-      public dialogRef: MatDialogRef<EvalConfigDialogComponent>,
+      public dialogRef: MatDialogRef<RunEvalConfigDialogComponent>,
       private fb: FormBuilder,
       @Inject(MAT_DIALOG_DATA) public data: EvalConfigData) {
     // Initialize the form with controls and validators
     this.evalForm = this.fb.group({
-      metric: [
-        this.data?.evalMetrics[0]?.metricName || 'Response match score',
-        Validators.required
-      ],
-      threshold: [
-        this.data?.evalMetrics[0]?.threshold || 1.0,
-        [Validators.required, Validators.min(0), Validators.max(1)]
-      ]
+      tool_trajectory_avg_score_threshold:
+          [1.0, [Validators.required, Validators.min(0), Validators.max(1)]],
+      response_match_score_threshold:
+          [0.7, [Validators.required, Validators.min(0), Validators.max(1)]]
     });
   }
 
-  ngOnInit(): void {
-    // You could add more complex initialization logic here if needed
-  }
-
-  onSave(): void {
+  onStart(): void {
     if (this.evalForm.valid) {
       const {metric, threshold} = this.evalForm.value;
       this.dialogRef.close({metric, threshold});
@@ -91,26 +83,5 @@ export class EvalConfigDialogComponent implements OnInit {
   onCancel(): void {
     this.dialogRef.close(
         null);  // Return null or undefined to indicate cancellation
-  }
-
-  getMetricErrorMessage(): string {
-    if (this.evalForm.controls['metric'].hasError('required')) {
-      return 'You must select a metric';
-    }
-    return '';
-  }
-
-  getThresholdErrorMessage(): string {
-    const thresholdControl = this.evalForm.controls['threshold'];
-    if (thresholdControl.hasError('required')) {
-      return 'Threshold is required';
-    }
-    if (thresholdControl.hasError('min')) {
-      return 'Threshold must be at least 0';
-    }
-    if (thresholdControl.hasError('max')) {
-      return 'Threshold cannot exceed 1';
-    }
-    return '';
   }
 }

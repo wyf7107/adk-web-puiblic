@@ -20,16 +20,14 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatSliderModule} from '@angular/material/slider';
-import {NoopAnimationsModule} from '@angular/platform-browser/animations';  // Required for MatDialog
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
-import {EvalConfig} from '../eval-config';  // Adjust path if necessary
+import {RunEvalConfigDialogComponent} from './run-eval-config-dialog.component';
 
-import {EvalConfigDialogComponent} from './eval-config-dialog.component';
-
-describe('EvalConfigDialogComponent', () => {
-  let component: EvalConfigDialogComponent;
-  let fixture: ComponentFixture<EvalConfigDialogComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<EvalConfigDialogComponent>>;
+describe('RunEvalConfigDialogComponent', () => {
+  let component: RunEvalConfigDialogComponent;
+  let fixture: ComponentFixture<RunEvalConfigDialogComponent>;
+  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<RunEvalConfigDialogComponent>>;
 
   // Mock MatDialogRef
   const mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
@@ -37,7 +35,7 @@ describe('EvalConfigDialogComponent', () => {
   beforeEach(async () => {
     await TestBed
         .configureTestingModule({
-          declarations: [EvalConfigDialogComponent],
+          declarations: [RunEvalConfigDialogComponent],
           imports: [
             ReactiveFormsModule, MatDialogModule, MatRadioModule,
             MatSliderModule,
@@ -54,10 +52,10 @@ describe('EvalConfigDialogComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EvalConfigDialogComponent);
+    fixture = TestBed.createComponent(RunEvalConfigDialogComponent);
     component = fixture.componentInstance;
     dialogRefSpy = TestBed.inject(MatDialogRef) as
-        jasmine.SpyObj<MatDialogRef<EvalConfigDialogComponent>>;
+        jasmine.SpyObj<MatDialogRef<RunEvalConfigDialogComponent>>;
     fixture.detectChanges();  // Initialize the component and trigger change
                               // detection
   });
@@ -136,7 +134,7 @@ describe('EvalConfigDialogComponent', () => {
     });
 
     // Recreate the component with the new data
-    fixture = TestBed.createComponent(EvalConfigDialogComponent);
+    fixture = TestBed.createComponent(RunEvalConfigDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();  // Initialize the component
 
@@ -182,7 +180,7 @@ describe('EvalConfigDialogComponent', () => {
        // Simulate closing and re-opening by destroying and recreating the
        // component
        fixture.destroy();
-       fixture = TestBed.createComponent(EvalConfigDialogComponent);
+       fixture = TestBed.createComponent(RunEvalConfigDialogComponent);
        component = fixture.componentInstance;
        fixture.detectChanges();
 

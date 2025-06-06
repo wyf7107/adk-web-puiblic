@@ -412,6 +412,12 @@
                     matTooltip="Edit eval case message"
                     (click)="editEvalCase(message)">edit
                   </span>
+                  <span
+                    class="material-symbols-outlined eval-case-edit-button"
+                    matTooltip="Delete eval case message"
+                    (click)="deleteEvalCaseMessage(message, i)">
+                    delete
+                  </span>
                 </div>
               }
               @if (message.role === 'user') {

@@ -1007,9 +1007,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected saveEditMessage(message: any) {
-    message.isEditing = false;
     this.isEvalCaseEditing.set(false);
-    message.text = this.userEditEvalCaseMessage;
+    message.isEditing = false;
+    message.text =
+        this.userEditEvalCaseMessage ? this.userEditEvalCaseMessage : ' ';
+
     this.evalCase!.conversation[message.invocationIndex]
         .finalResponse!.parts![message.finalResponsePartIndex] = {
       text: this.userEditEvalCaseMessage
@@ -1022,6 +1024,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
     this.userEditEvalCaseMessage = '';
+  }
+
+  protected deleteEvalCaseMessage(message: any, index: number) {
+    this.messages.splice(index, 1);
+    this.messagesSubject.next(this.messages);
+
+    this.evalCase!.conversation[message.invocationIndex]
+        .finalResponse!.parts!.splice(message.finalResponsePartIndex, 1);
+    this.evalService
+        .updateEvalCase(
+            this.appName, this.evalSetId, this.evalCase!.evalId, this.evalCase!)
+        .subscribe((res) => {
+          this.openSnackBar('Eval case message deleted', 'OK');
+        });
   }
 
   protected updateSessionState(session: Session) {

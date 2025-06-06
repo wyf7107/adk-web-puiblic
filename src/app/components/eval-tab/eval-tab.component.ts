@@ -20,7 +20,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inj
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog} from '@angular/material/dialog';
 import {MatTableDataSource} from '@angular/material/table';
-import {of} from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
 import {Session} from '../../core/models/Session';
@@ -93,7 +93,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
   @Output() readonly evalNotInstalledMsg = new EventEmitter<string>();
   @Output() readonly evalCaseSelected = new EventEmitter<EvalCase>();
   @Output() readonly evalSetIdSelected = new EventEmitter<string>();
+  @Output() readonly shouldReturnToSession = new EventEmitter<boolean>();
 
+  private readonly evalCasesSubject = new BehaviorSubject<string[]>([]);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly flagService = inject(FeatureFlagService);
 
@@ -105,8 +107,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
   displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
   evalsets: any[] = [];
   selectedEvalSet: string = '';
-  evalCases: any[] = [];
+  evalCases: string[] = [];
   selectedEvalCase: EvalCase|null = null;
+  deletedEvalCaseIndex: number = -1;
 
   dataSource = new MatTableDataSource<string>(this.evalCases);
   selection = new SelectionModel<string>(true, []);
@@ -132,7 +135,18 @@ export class EvalTabComponent implements OnInit, OnChanges {
   constructor(
       private evalService: EvalService,
       private sessionService: SessionService,
-  ) {}
+  ) {
+    this.evalCasesSubject.subscribe((evalCases: string[]) => {
+      if (!this.selectedEvalCase && this.deletedEvalCaseIndex >= 0 &&
+          evalCases.length > 0) {
+        this.selectNewEvalCase(evalCases);
+        this.deletedEvalCaseIndex = -1;
+      } else if (evalCases.length === 0) {
+        this.shouldReturnToSession.emit(true);
+      }
+    });
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['appName']) {
       this.selectedEvalSet = '';
@@ -142,6 +156,14 @@ export class EvalTabComponent implements OnInit, OnChanges {
     }
   }
   ngOnInit(): void {}
+
+  selectNewEvalCase(evalCases: string[]) {
+    let caseToSelect = this.deletedEvalCaseIndex;
+    if (this.deletedEvalCaseIndex === evalCases.length) {
+      caseToSelect = 0;
+    }
+    this.getEvalCase(evalCases[caseToSelect]);
+  }
 
   getEvalSet() {
     if (this.appName != '') {
@@ -200,6 +222,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
         .subscribe((res) => {
           this.evalCases = res;
           this.dataSource = new MatTableDataSource<string>(this.evalCases);
+          this.evalCasesSubject.next(this.evalCases);
           this.changeDetectorRef.detectChanges();
         });
   }
@@ -412,6 +435,16 @@ export class EvalTabComponent implements OnInit, OnChanges {
           this.selectedEvalCase = res;
           this.evalCaseSelected.emit(res);
           this.evalSetIdSelected.emit(this.selectedEvalSet);
+        });
+  }
+
+  deleteEvalCase(evalCaseId: string) {
+    this.evalService
+        .deleteEvalCase(this.appName, this.selectedEvalSet, evalCaseId)
+        .subscribe((res) => {
+          this.deletedEvalCaseIndex = this.evalCases.indexOf(evalCaseId);
+          this.selectedEvalCase = null;
+          this.listEvalCases();
         });
   }
 

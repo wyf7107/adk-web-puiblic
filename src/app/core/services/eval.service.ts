@@ -126,4 +126,10 @@ export class EvalService {
       creationTimestamp: updatedEvalCase.creationTimestamp,
     });
   }
+
+  deleteEvalCase(appName: string, evalSetId: string, evalCaseId: string) {
+    const url = this.apiServerDomain +
+        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+    return this.http.delete<any>(url, {});
+  }
 }

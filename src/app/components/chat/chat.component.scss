@@ -138,6 +138,7 @@
   background-color: #303030;
   max-width: 100%;
   border: none;
+  font-family: "Google Sans", "Helvetica Neue", sans-serif;
 }
 
 .message-textarea:focus {
@@ -540,6 +541,14 @@ button {
 .toolbar-actions {
   display: flex;
   align-items: center;
+}
+
+.toolbar-icon {
+  width: 24px;
+  height: 24px;
+  color: #c4c7c5;
+  cursor: pointer;
+  margin-right: 16px;
 }
 
 .toolbar-new-sesison {

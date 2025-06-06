@@ -54,7 +54,7 @@
     </div>
     @if (appName != '' && showSidePanel) {
       <div class="tabs-container">
-        <mat-tab-group>
+        <mat-tab-group (selectedTabChange)="handleTabChange($event)">
           @if (traceTabEnabled) {
             <mat-tab class="tabs-header">
               <ng-template mat-tab-label>
@@ -96,7 +96,11 @@
                 <span class="tab-label">Eval</span>
               </ng-template>
               <app-eval-tab [appName]="appName" [userId]="userId" [sessionId]="sessionId"
-              (shouldShowTab)="handleShouldShowEvalTab($event)" (sessionSelected)="updateWithSelectedSession($event)" (evalCaseSelected)="updateWithSelectedEvalCase($event)" (evalSetIdSelected)="updateSelectedEvalSetId($event)"></app-eval-tab>
+                (shouldShowTab)="handleShouldShowEvalTab($event)"
+                (sessionSelected)="updateWithSelectedSession($event)"
+                (evalCaseSelected)="updateWithSelectedEvalCase($event)"
+                (evalSetIdSelected)="updateSelectedEvalSetId($event)"
+                (shouldReturnToSession)="handleReturnToSession($event)"></app-eval-tab>
             </mat-tab>
           }
         </mat-tab-group>
@@ -170,6 +174,11 @@
               [hidden]="!hasEvalCaseChanged()">
               Save
             </button>
+            <span class="material-symbols-outlined toolbar-icon"
+                matTooltip="Delete current eval case"
+                (click)="deleteEvalCase()">
+                delete
+              </span>
           </div>
         } @else {
           <div style="display: flex;">
@@ -191,15 +200,13 @@
                 <mat-icon>add</mat-icon>
                 New Session
               </div>
-              <span class="material-symbols-outlined"
+              <span class="material-symbols-outlined toolbar-icon"
                 matTooltip="Delete current session"
-                style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
                 (click)="deleteSession(sessionId)">
                 delete
               </span>
-              <span class="material-symbols-outlined"
+              <span class="material-symbols-outlined toolbar-icon"
                 matTooltip="Export current session"
-                style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
                 (click)="exportSession()" >
                 download
               </span>

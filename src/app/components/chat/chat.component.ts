@@ -905,8 +905,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showSidePanel = !this.showSidePanel;
   }
 
+  protected handleTabChange(event: any) {
+    if (!this.isChatMode()) {
+      this.handleReturnToSession(true);
+    }
+  }
+
   protected handleShouldShowEvalTab(shouldShow: boolean) {
     this.shouldShowEvalTab.set(shouldShow);
+  }
+
+  protected handleReturnToSession(event: boolean) {
+    this.sessionTab.getSession(this.sessionId);
+    this.isChatMode.set(true);
   }
 
   protected handleEvalNotInstalled(errorMsg: string) {
@@ -1052,12 +1063,34 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected deleteEvalCaseMessage(message: any, index: number) {
+    this.hasEvalCaseChanged.set(true);
     this.messages.splice(index, 1);
     this.messagesSubject.next(this.messages);
 
     this.updatedEvalCase = structuredClone(this.evalCase!);
     this.updatedEvalCase!.conversation[message.invocationIndex]
         .finalResponse!.parts!.splice(message.finalResponsePartIndex, 1);
+  }
+
+  protected deleteEvalCase() {
+    const dialogData: DeleteSessionDialogData = {
+      title: 'Confirm delete',
+      message: `Are you sure you want to delete ${this.evalCase!.evalId}?`,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    };
+
+    const dialogRef = this.dialog.open(DeleteSessionDialogComponent, {
+      width: '600px',
+      data: dialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.evalTab.deleteEvalCase(this.evalCase!.evalId);
+        this.openSnackBar('Eval case deleted', 'OK')
+      }
+    });
   }
 
   protected updateSessionState(session: Session) {

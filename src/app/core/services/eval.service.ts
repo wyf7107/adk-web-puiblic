@@ -18,7 +18,9 @@
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
+
 import {URLUtil} from '../../../utils/url-util';
+import {EvalCase} from '../../components/eval-tab/eval-tab.component';
 
 @Injectable({
   providedIn: 'root',
@@ -110,5 +112,18 @@ export class EvalService {
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
+  }
+
+  updateEvalCase(
+      appName: string, evalSetId: string, evalCaseId: string,
+      updatedEvalCase: EvalCase) {
+    const url = this.apiServerDomain +
+        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+    return this.http.put<any>(url, {
+      evalId: evalCaseId,
+      conversation: updatedEvalCase.conversation,
+      sessionInput: updatedEvalCase.sessionInput,
+      creationTimestamp: updatedEvalCase.creationTimestamp,
+    });
   }
 }

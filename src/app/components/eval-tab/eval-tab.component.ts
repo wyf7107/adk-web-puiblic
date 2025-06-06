@@ -92,6 +92,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   @Output() readonly shouldShowTab = new EventEmitter<boolean>();
   @Output() readonly evalNotInstalledMsg = new EventEmitter<string>();
   @Output() readonly evalCaseSelected = new EventEmitter<EvalCase>();
+  @Output() readonly evalSetIdSelected = new EventEmitter<string>();
 
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly flagService = inject(FeatureFlagService);
@@ -409,6 +410,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
     this.evalService.getEvalCase(this.appName, this.selectedEvalSet, element)
         .subscribe((res) => {
           this.evalCaseSelected.emit(res);
+          this.evalSetIdSelected.emit(this.selectedEvalSet);
         });
   }
 

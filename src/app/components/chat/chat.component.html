@@ -96,7 +96,7 @@
                 <span class="tab-label">Eval</span>
               </ng-template>
               <app-eval-tab [appName]="appName" [userId]="userId" [sessionId]="sessionId"
-              (shouldShowTab)="handleShouldShowEvalTab($event)" (sessionSelected)="updateWithSelectedSession($event)" (evalCaseSelected)="updateWithSelectedEvalCase($event)"></app-eval-tab>
+              (shouldShowTab)="handleShouldShowEvalTab($event)" (sessionSelected)="updateWithSelectedSession($event)" (evalCaseSelected)="updateWithSelectedEvalCase($event)" (evalSetIdSelected)="updateSelectedEvalSetId($event)"></app-eval-tab>
             </mat-tab>
           }
         </mat-tab-group>
@@ -150,10 +150,10 @@
   <div class="chat-container">
     @if (appName != '') {
       <div class="chat-toolbar">
-        @if (evalCaseId) {
+        @if (evalCase) {
           <div style="display: flex;">
             <div class="toolbar-session-text">Eval Case ID</div>
-            <div class="toolbar-session-id">{{evalCaseId}}</div>
+            <div class="toolbar-session-id">{{evalCase.evalId}}</div>
           </div>
         } @else {
           <div style="display: flex;">
@@ -263,13 +263,33 @@
                   }
                   <div>
                     @if (message.text) {
-                      <markdown
-                        class="message-text"
-                        [data]="message.text"
-                [ngStyle]="{'font-style':message.thought?'italic':'normal',
-                  'color': message.thought ? '#9aa0a6': 'white'
-                }"
-                      ></markdown>
+                      @if (message.isEditing) {
+                        <div class="edit-message-container">
+                          <textarea class="message-textarea" [(ngModel)]="userEditEvalCaseMessage" rows="6" cols="80"></textarea>
+                          <div class="edit-message-buttons-container">
+                            <span class="material-symbols-outlined"
+                              matTooltip="Cancel editing"
+                              style="width: 24px;height: 24px;color: #C4C7C5;cursor: pointer; margin-right: 16px;"
+                              (click)="cancelEditMessage(message)">
+                              close
+                            </span>
+                            <span class="material-symbols-outlined"
+                              matTooltip="Save eval case message"
+                              style="width: 24px;height: 24px;color:rgb(97, 151, 202);cursor: pointer; margin-right: 16px;"
+                              (click)="saveEditMessage(message)">
+                              check
+                            </span>
+                          </div>
+                        </div>
+                      } @else {
+                        <markdown
+                          class="message-text"
+                          [data]="message.text"
+                          [ngStyle]="{'font-style':message.thought?'italic':'normal',
+                            'color': message.thought ? '#9aa0a6': 'white'
+                          }"
+                        ></markdown>
+                      }
                     }
                   </div>
                   @if (message.renderedContent) {
@@ -384,6 +404,16 @@
                 <span class="material-symbols-outlined">{{ message.evalStatus === 1 ? 'check' : message.evalStatus === 2 ? 'close' : '' }}</span>
                 <span>{{ message.evalStatus === 1 ? 'Pass' : message.evalStatus === 2 ? 'Fail' : '' }}</span>
               </div>
+              @if (evalCase && message.role === 'bot' && message.text) {
+                <div>
+                  <span
+                    class="material-symbols-outlined eval-case-edit-button"
+                    [ngClass]="{'hidden': isEvalCaseEditing()}"
+                    matTooltip="Edit eval case message"
+                    (click)="editEvalCase(message)">edit
+                  </span>
+                </div>
+              }
               @if (message.role === 'user') {
                 <button mat-mini-fab>
                   <mat-icon>person</mat-icon>

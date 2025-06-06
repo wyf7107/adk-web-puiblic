@@ -128,6 +128,15 @@
   }
 }
 
+.message-textarea {
+  max-width: 100%;
+}
+
+.edit-message-buttons-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .message-card .tool-uses-container {
   visibility: hidden;
   position: absolute;
@@ -162,6 +171,11 @@
   font-weight: 700;
 }
 
+.eval-case-edit-button {
+  cursor: pointer;
+  margin-left: 2px;
+}
+
 .eval-pass {
   display: flex;
   color: #44c265;
@@ -182,6 +196,10 @@
   padding: 10px;
   width: 60%;
   margin: 0 auto;
+}
+
+.hidden {
+  visibility: hidden;
 }
 
 .input-field {

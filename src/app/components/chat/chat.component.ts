@@ -34,6 +34,7 @@ import {AgentService} from '../../core/services/agent.service';
 import {ArtifactService} from '../../core/services/artifact.service';
 import {AudioService} from '../../core/services/audio.service';
 import {DownloadService} from '../../core/services/download.service';
+import {EvalService} from '../../core/services/eval.service';
 import {EventService} from '../../core/services/event.service';
 import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
@@ -101,6 +102,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   shouldShowEvalTab = signal(true);
   enableSseIndicator = signal(false);
   isChatMode = signal(true);
+  isEvalCaseEditing = signal(false);
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages: any[] = [];
@@ -109,10 +111,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   latestThought: string = '';
   artifacts: any[] = [];
   userInput: string = '';
+  userEditEvalCaseMessage: string = '';
   userId = 'user';
   appName = '';
   sessionId = ``;
-  evalCaseId = ``;
+  evalCase: EvalCase|null = null;
+  evalSetId = '';
   isAudioRecording = false;
   isVideoRecording = false;
   longRunningEvents: any[] = [];
@@ -205,6 +209,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       private eventService: EventService,
       private route: ActivatedRoute,
       private downloadService: DownloadService,
+      private evalService: EvalService,
   ) {}
 
   ngOnInit(): void {
@@ -482,7 +487,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private storeMessage(part: any, e: any, index: number, role: string) {
+  private storeMessage(
+      part: any, e: any, index: number, role: string, invocationIndex?: number,
+      finalResponsePartIndex?: number) {
     if (e?.longRunningToolIds && e.longRunningToolIds.length > 0) {
       this.getAsyncFunctionsFromParts(e.longRunningToolIds, e.content.parts);
       const func = this.longRunningEvents[0];
@@ -521,6 +528,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       evalStatus: e?.evalStatus,
       actualInvocationToolUses: e?.actualInvocationToolUses,
       expectedInvocationToolUses: e?.expectedInvocationToolUses,
+      invocationIndex: invocationIndex !== undefined ? invocationIndex :
+                                                       undefined,
+      finalResponsePartIndex: finalResponsePartIndex !== undefined ?
+          finalResponsePartIndex :
+          undefined,
     };
     if (part.inlineData) {
       const base64Data =
@@ -546,7 +558,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.eventMessageIndexArray[index] = part.functionCall;
     } else if (part.functionResponse) {
       message.functionResponse = part.functionResponse;
-      message.eventId = e.id;
+      message.eventId = e?.id;
       this.eventMessageIndexArray[index] = part.functionResponse;
     } else if (part.executableCode) {
       message.executableCode = part.executableCode;
@@ -915,7 +927,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sessionId = session.id;
     this.currentSessionState = session.state;
-    this.evalCaseId = ``;
+    this.evalCase = null;
     this.isChatMode.set(true);
 
     this.resetEventsAndMessages();
@@ -938,11 +950,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {
-    this.evalCaseId = evalCase.evalId;
+    this.evalCase = evalCase;
     this.isChatMode.set(false);
 
     this.resetEventsAndMessages();
     let index = 0;
+    let invocationIndex = 0;
 
     for (const invocation of evalCase.conversation) {
       if (invocation.userContent?.parts) {
@@ -952,13 +965,63 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
-      if (invocation.finalResponse?.parts) {
-        for (const part of invocation.finalResponse.parts) {
-          this.storeMessage(part, null, index, 'bot');
+      if (invocation.intermediateData?.toolUses) {
+        for (const toolUse of invocation.intermediateData.toolUses) {
+          const functionCallPart = {functionCall: {name: toolUse.name}};
+          this.storeMessage(functionCallPart, null, index, 'bot');
+          index++;
+
+          const functionResponsePart = {functionResponse: {name: toolUse.name}};
+          this.storeMessage(functionResponsePart, null, index, 'bot');
           index++;
         }
       }
+
+      if (invocation.finalResponse?.parts) {
+        let finalResponsePartIndex = 0;
+        for (const part of invocation.finalResponse.parts) {
+          this.storeMessage(
+              part, null, index, 'bot', invocationIndex,
+              finalResponsePartIndex);
+          index++;
+          finalResponsePartIndex++;
+        }
+      }
+      invocationIndex++;
     }
+  }
+
+  protected updateSelectedEvalSetId(evalSetId: string) {
+    this.evalSetId = evalSetId;
+  }
+
+  protected editEvalCase(message: any) {
+    this.isEvalCaseEditing.set(true);
+    this.userEditEvalCaseMessage = message.text;
+    message.isEditing = true;
+  }
+
+  protected cancelEditMessage(message: any) {
+    message.isEditing = false;
+    this.isEvalCaseEditing.set(false);
+  }
+
+  protected saveEditMessage(message: any) {
+    message.isEditing = false;
+    this.isEvalCaseEditing.set(false);
+    message.text = this.userEditEvalCaseMessage;
+    this.evalCase!.conversation[message.invocationIndex]
+        .finalResponse!.parts![message.finalResponsePartIndex] = {
+      text: this.userEditEvalCaseMessage
+    };
+    this.evalService
+        .updateEvalCase(
+            this.appName, this.evalSetId, this.evalCase!.evalId, this.evalCase!)
+        .subscribe((res) => {
+          this.openSnackBar('Eval case updated', 'OK');
+        });
+
+    this.userEditEvalCaseMessage = '';
   }
 
   protected updateSessionState(session: Session) {

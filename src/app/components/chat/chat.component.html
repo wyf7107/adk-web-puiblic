@@ -155,6 +155,22 @@
             <div class="toolbar-session-text">Eval Case ID</div>
             <div class="toolbar-session-id">{{evalCase.evalId}}</div>
           </div>
+          <div class="toolbar-actions">
+            <button
+                mat-button
+                (click)="cancelEditEvalCase()"
+                style="height: 30px;"
+                [hidden]="!hasEvalCaseChanged()">
+              Cancel
+            </button>
+            <button
+              mat-flat-button
+              (click)="saveEvalCase()"
+              style="height: 30px;"
+              [hidden]="!hasEvalCaseChanged()">
+              Save
+            </button>
+          </div>
         } @else {
           <div style="display: flex;">
             <div class="toolbar-session-text">Session ID</div>
@@ -265,7 +281,7 @@
                     @if (message.text) {
                       @if (message.isEditing) {
                         <div class="edit-message-container">
-                          <textarea class="message-textarea" [(ngModel)]="userEditEvalCaseMessage" rows="6" cols="80"></textarea>
+                          <textarea #messageTextarea class="message-textarea" [(ngModel)]="userEditEvalCaseMessage" rows="4" cols="80"></textarea>
                           <div class="edit-message-buttons-container">
                             <span class="material-symbols-outlined"
                               matTooltip="Cancel editing"
@@ -414,6 +430,7 @@
                   </span>
                   <span
                     class="material-symbols-outlined eval-case-edit-button"
+                    [ngClass]="{'disabled': isEvalCaseEditing()}"
                     matTooltip="Delete eval case message"
                     (click)="deleteEvalCaseMessage(message, i)">
                     delete

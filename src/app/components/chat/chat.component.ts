@@ -36,6 +36,7 @@ import {AudioService} from '../../core/services/audio.service';
 import {DownloadService} from '../../core/services/download.service';
 import {EvalService} from '../../core/services/eval.service';
 import {EventService} from '../../core/services/event.service';
+import {FeatureFlagService} from '../../core/services/feature-flag.service';
 import {SessionService} from '../../core/services/session.service';
 import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
@@ -48,7 +49,6 @@ import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
-import { FeatureFlagService } from '../../core/services/feature-flag.service';
 
 function fixBase64String(base64: string): string {
   // Replace URL-safe characters if they exist
@@ -98,11 +98,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(SessionTabComponent) sessionTab!: SessionTabComponent;
   @ViewChild(EvalTabComponent) evalTab!: EvalTabComponent;
   @ViewChild('autoScroll') private scrollContainer!: ElementRef;
+  @ViewChild('messageTextarea') private textarea: ElementRef|undefined;
   private _snackBar = inject(MatSnackBar);
   shouldShowEvalTab = signal(true);
   enableSseIndicator = signal(false);
   isChatMode = signal(true);
   isEvalCaseEditing = signal(false);
+  hasEvalCaseChanged = signal(false);
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages: any[] = [];
@@ -116,6 +118,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   appName = '';
   sessionId = ``;
   evalCase: EvalCase|null = null;
+  updatedEvalCase: EvalCase|null = null;
   evalSetId = '';
   isAudioRecording = false;
   isVideoRecording = false;
@@ -999,6 +1002,32 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isEvalCaseEditing.set(true);
     this.userEditEvalCaseMessage = message.text;
     message.isEditing = true;
+    setTimeout(() => {
+      this.textarea?.nativeElement.focus();
+      let textLength = this.textarea?.nativeElement.value.length;
+      if (message.text.charAt(textLength - 1) === '\n') {
+        textLength--;
+      }
+      this.textarea?.nativeElement.setSelectionRange(textLength, textLength);
+    }, 0);
+  }
+
+  protected saveEvalCase() {
+    this.evalService
+        .updateEvalCase(
+            this.appName, this.evalSetId, this.updatedEvalCase!.evalId,
+            this.updatedEvalCase!)
+        .subscribe((res) => {
+          this.openSnackBar('Eval case updated', 'OK');
+          this.hasEvalCaseChanged.set(false);
+        });
+  }
+
+  protected cancelEditEvalCase() {
+    this.hasEvalCaseChanged.set(false);
+    this.isEvalCaseEditing.set(false);
+    this.updatedEvalCase = null;
+    this.updateWithSelectedEvalCase(this.evalCase!);
   }
 
   protected cancelEditMessage(message: any) {
@@ -1007,21 +1036,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected saveEditMessage(message: any) {
+    this.hasEvalCaseChanged.set(true);
     this.isEvalCaseEditing.set(false);
     message.isEditing = false;
     message.text =
         this.userEditEvalCaseMessage ? this.userEditEvalCaseMessage : ' ';
 
-    this.evalCase!.conversation[message.invocationIndex]
+    this.updatedEvalCase = structuredClone(this.evalCase!);
+    this.updatedEvalCase!.conversation[message.invocationIndex]
         .finalResponse!.parts![message.finalResponsePartIndex] = {
       text: this.userEditEvalCaseMessage
     };
-    this.evalService
-        .updateEvalCase(
-            this.appName, this.evalSetId, this.evalCase!.evalId, this.evalCase!)
-        .subscribe((res) => {
-          this.openSnackBar('Eval case updated', 'OK');
-        });
 
     this.userEditEvalCaseMessage = '';
   }
@@ -1030,14 +1055,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.messages.splice(index, 1);
     this.messagesSubject.next(this.messages);
 
-    this.evalCase!.conversation[message.invocationIndex]
+    this.updatedEvalCase = structuredClone(this.evalCase!);
+    this.updatedEvalCase!.conversation[message.invocationIndex]
         .finalResponse!.parts!.splice(message.finalResponsePartIndex, 1);
-    this.evalService
-        .updateEvalCase(
-            this.appName, this.evalSetId, this.evalCase!.evalId, this.evalCase!)
-        .subscribe((res) => {
-          this.openSnackBar('Eval case message deleted', 'OK');
-        });
   }
 
   protected updateSessionState(session: Session) {

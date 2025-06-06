@@ -99,7 +99,6 @@ const COMPONENTS = [
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
-    MatButtonModule,
     MatListModule,
     NgxJsonViewerModule,
     MatSidenavModule,

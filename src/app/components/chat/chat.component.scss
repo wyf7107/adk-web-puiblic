@@ -16,7 +16,6 @@
 
 @use '@angular/material' as mat;
 
-
 .expand-side-drawer {
   position: relative;
   top: 4%;
@@ -128,8 +127,22 @@
   }
 }
 
+.bot-message:focus-within {
+  .message-card {
+    background-color: #131314;
+    border: 1px solid #8ab4f8;
+  }
+}
+
 .message-textarea {
+  background-color: #303030;
   max-width: 100%;
+  border: none;
+}
+
+.message-textarea:focus {
+  background-color: #131314;
+  outline: none;
 }
 
 .edit-message-buttons-container {
@@ -334,6 +347,11 @@ button {
   margin-left: 0px;
 }
 
+:host ::ng-deep .mat-mdc-unelevated-button:not(:disabled) {
+  color: #202124;
+  background-color: #8AB4F8;
+}
+
 :host ::ng-deep .message-text {
   p {
     white-space: pre-line;
@@ -521,6 +539,7 @@ button {
 
 .toolbar-actions {
   display: flex;
+  align-items: center;
 }
 
 .toolbar-new-sesison {

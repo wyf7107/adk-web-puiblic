@@ -409,6 +409,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   protected getEvalCase(element: any) {
     this.evalService.getEvalCase(this.appName, this.selectedEvalSet, element)
         .subscribe((res) => {
+          this.selectedEvalCase = res;
           this.evalCaseSelected.emit(res);
           this.evalSetIdSelected.emit(this.selectedEvalSet);
         });

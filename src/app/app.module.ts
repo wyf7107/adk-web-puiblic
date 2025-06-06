@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,7 +49,6 @@ import {WebSocketService} from './core/services/websocket.service';
     MatFormFieldModule,
     MatButtonModule,
     BrowserAnimationsModule,
-    MatButtonModule,
   ],
   providers: [
     SessionService,
@@ -63,4 +63,5 @@ import {WebSocketService} from './core/services/websocket.service';
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+}

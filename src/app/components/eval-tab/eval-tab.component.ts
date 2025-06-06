@@ -473,6 +473,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
     const dialogRef = this.dialog.open(RunEvalConfigDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',
+      data: {
+        evalMetrics: this.evalMetrics,
+      },
     });
 
     dialogRef.afterClosed().subscribe((evalMetrics) => {
@@ -495,8 +498,6 @@ export class EvalTabComponent implements OnInit, OnChanges {
     if (results.length === 0) {
       return this.evalMetrics;
     }
-
-    console.log(results[0]);
 
     if (typeof results[0].overallEvalMetricResults === 'undefined' ||
         !results[0].overallEvalMetricResults ||

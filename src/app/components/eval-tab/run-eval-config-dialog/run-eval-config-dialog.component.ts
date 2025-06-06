@@ -66,11 +66,22 @@ export class RunEvalConfigDialogComponent {
       @Inject(MAT_DIALOG_DATA) public data: EvalConfigData) {
     // Initialize the form with controls and validators
     this.evalForm = this.fb.group({
-      tool_trajectory_avg_score_threshold:
-          [1.0, [Validators.required, Validators.min(0), Validators.max(1)]],
-      response_match_score_threshold:
-          [0.7, [Validators.required, Validators.min(0), Validators.max(1)]]
+      tool_trajectory_avg_score_threshold: [
+        this.getEvalMetricThresholdFromData('tool_trajectory_avg_score'),
+        [Validators.required, Validators.min(0), Validators.max(1)]
+      ],
+      response_match_score_threshold: [
+        this.getEvalMetricThresholdFromData('response_match_score'),
+        [Validators.required, Validators.min(0), Validators.max(1)]
+      ]
     });
+  }
+
+  private getEvalMetricThresholdFromData(metricName: string): number {
+    return this.data.evalMetrics
+               .find((metric) => metric.metricName === metricName)
+               ?.threshold ??
+        0;
   }
 
   onStart(): void {

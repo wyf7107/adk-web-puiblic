@@ -45,7 +45,7 @@ interface EvaluationResult {
   evalId: string;
   finalEvalStatus: number;
   evalMetricResults: any[];
-  overallEvalMetricResults?: any[];
+  overallEvalMetricResults: any[];
   evalMetricResultPerInvocation?: any[];
   sessionId: string;
   sessionDetails: any;
@@ -96,7 +96,8 @@ export class EvalTabComponent implements OnInit, OnChanges {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly flagService = inject(FeatureFlagService);
 
-  protected readonly isViewEvalCaseEnabled = this.flagService.isViewEvalCaseEnabled();
+  protected readonly isViewEvalCaseEnabled =
+      this.flagService.isViewEvalCaseEnabled();
   protected readonly isSetEvalConfigEnabled =
       this.flagService.isSetEvalConfigEnabled();
 
@@ -453,6 +454,8 @@ export class EvalTabComponent implements OnInit, OnChanges {
                                 result.evalMetricResultPerInvocation,
                             sessionId: result.sessionId,
                             sessionDetails: result.sessionDetails,
+                            overallEvalMetricResults:
+                                result.overallEvalMetricResults ?? [],
                           };
                         }),
                   };
@@ -476,6 +479,36 @@ export class EvalTabComponent implements OnInit, OnChanges {
 
         this.runEval();
       }
+    });
+  }
+
+  protected getEvalMetrics(evalResult: any|undefined) {
+    if (!evalResult || !evalResult.evaluationResults ||
+        !evalResult.evaluationResults.evaluationResults) {
+      return this.evalMetrics;
+    }
+
+    const results = evalResult.evaluationResults.evaluationResults;
+
+    if (results.length === 0) {
+      return this.evalMetrics;
+    }
+
+    console.log(results[0]);
+
+    if (typeof results[0].overallEvalMetricResults === 'undefined' ||
+        !results[0].overallEvalMetricResults ||
+        results[0].overallEvalMetricResults.length === 0) {
+      return this.evalMetrics;
+    }
+
+    const overallEvalMetricResults = results[0].overallEvalMetricResults;
+
+    return overallEvalMetricResults.map((result: any) => {
+      return {
+        metricName: result.metricName,
+        threshold: result.threshold,
+      };
     });
   }
 }

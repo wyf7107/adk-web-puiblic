@@ -200,6 +200,19 @@
     font-weight: 500;
   }
 
+  &__metrics {
+    display: flex;
+    align-items: center;
+    font-size: 0.75em;
+    font-weight: 300;
+    margin-top: 3px;
+  }
+
+  &__metric {
+    width: 180px;
+    color: #bbb;
+  }
+
   &__failed {
     color: #ff6b6b;
   }

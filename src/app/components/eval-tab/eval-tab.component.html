@@ -130,6 +130,16 @@
                             </div>
                           }
                         </div>
+                        @if (getEvalMetrics(evalResult)) {
+                          <div class="status-card__metrics">
+                            @for (evalMetric of getEvalMetrics(evalResult); track evalMetric) {
+                              <span class="status-card__metric"> {{ evalMetric.metricName }}:
+                                {{ evalMetric.threshold }}
+                              </span>
+                            }
+                          </div>
+                        }
+
                       </div>
                       <div class="status-card__action">
                         <mat-icon (click)="toggleHistoryStatusCard(evalResult.timestamp)">{{ getEvaluationStatusCardActionButtonIcon(evalResult.timestamp) }}</mat-icon>

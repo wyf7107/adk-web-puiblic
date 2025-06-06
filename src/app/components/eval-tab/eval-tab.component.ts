@@ -469,5 +469,13 @@ export class EvalTabComponent implements OnInit, OnChanges {
       maxWidth: '90vw',
       maxHeight: '90vh',
     });
+
+    dialogRef.afterClosed().subscribe((evalMetrics) => {
+      if (!!evalMetrics) {
+        this.evalMetrics = evalMetrics;
+
+        this.runEval();
+      }
+    });
   }
 }

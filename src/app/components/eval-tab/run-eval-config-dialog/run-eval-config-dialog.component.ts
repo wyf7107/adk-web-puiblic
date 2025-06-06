@@ -75,8 +75,23 @@ export class RunEvalConfigDialogComponent {
 
   onStart(): void {
     if (this.evalForm.valid) {
-      const {metric, threshold} = this.evalForm.value;
-      this.dialogRef.close({metric, threshold});
+      const {
+        tool_trajectory_avg_score_threshold,
+        response_match_score_threshold
+      } = this.evalForm.value;
+
+      const evalMetrics: EvalMetric[] = [
+        {
+          metricName: 'tool_trajectory_avg_score',
+          threshold: tool_trajectory_avg_score_threshold,
+        },
+        {
+          metricName: 'response_match_score',
+          threshold: response_match_score_threshold,
+        }
+      ];
+
+      this.dialogRef.close(evalMetrics);
     }
   }
 

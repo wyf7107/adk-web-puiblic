@@ -288,7 +288,11 @@
                     @if (message.text) {
                       @if (message.isEditing) {
                         <div class="edit-message-container">
-                          <textarea #messageTextarea class="message-textarea" [(ngModel)]="userEditEvalCaseMessage" rows="4" cols="80"></textarea>
+                          <textarea #messageTextarea class="message-textarea"
+                            [(ngModel)]="userEditEvalCaseMessage"
+                            rows="4"
+                            cols="80"
+                            (keydown)="handleKeydown($event, message)"></textarea>
                           <div class="edit-message-buttons-container">
                             <span class="material-symbols-outlined"
                               matTooltip="Cancel editing"
@@ -437,7 +441,7 @@
                   </span>
                   <span
                     class="material-symbols-outlined eval-case-edit-button"
-                    [ngClass]="{'disabled': isEvalCaseEditing()}"
+                    [ngClass]="{'hidden': isEvalCaseEditing()}"
                     matTooltip="Delete eval case message"
                     (click)="deleteEvalCaseMessage(message, i)">
                     delete

@@ -1062,6 +1062,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userEditEvalCaseMessage = '';
   }
 
+  protected handleKeydown(event: KeyboardEvent, message: any) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.saveEditMessage(message);
+    } else if (event.key === 'Escape') {
+      this.cancelEditMessage(message);
+    }
+  }
+
   protected deleteEvalCaseMessage(message: any, index: number) {
     this.hasEvalCaseChanged.set(true);
     this.messages.splice(index, 1);

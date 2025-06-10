@@ -509,6 +509,11 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   protected openEvalConfigDialog() {
+    if (this.selection.selected.length == 0) {
+      alert('No case selected!');
+      return;
+    }
+
     const dialogRef = this.dialog.open(RunEvalConfigDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',

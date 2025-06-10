@@ -15,7 +15,7 @@
 -->
 
 <mat-drawer-container class="drawer-container" autosize>
-  @if (!showSidePanel) {
+  @if (!showSidePanel && appName === "") {
     <span
       class="material-symbols-outlined"
       style="
@@ -186,6 +186,23 @@
   <div class="chat-container">
     @if (appName != "") {
       <div class="chat-toolbar">
+        @if (!showSidePanel) {
+          <span
+            class="material-symbols-outlined"
+            style="
+              width: 24px;
+              height: 24px;
+              color: #c4c7c5;
+              cursor: pointer;
+              margin-left: 20px;
+              margin-top: -2px;
+              z-index: 9999;
+            "
+            matTooltip="Open panel"
+            (click)="toggleSidePanel()"
+            >left_panel_open</span
+          >
+        }
         @if (evalCase) {
           <div style="display: flex">
             <div class="toolbar-session-text">Eval Case ID</div>

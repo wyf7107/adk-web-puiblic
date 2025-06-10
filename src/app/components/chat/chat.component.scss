@@ -561,9 +561,14 @@ button {
   height: 48px;
   background: #1b1b1b;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   z-index: 10;
+}
+
+.toolbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .toolbar-session-text {
@@ -588,11 +593,6 @@ button {
   line-height: 20px;
   letter-spacing: 0.25px;
   margin-left: 5px;
-}
-
-.toolbar-actions {
-  display: flex;
-  align-items: center;
 }
 
 .toolbar-icon {

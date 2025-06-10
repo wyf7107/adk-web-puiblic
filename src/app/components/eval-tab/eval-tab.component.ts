@@ -357,7 +357,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
       event.actualFinalResponse =
           invocationResult.actualInvocation.finalResponse.parts[0].text;
       event.expectedFinalResponse =
-          invocationResult.expectedInvocation.finalResponse.parts[0].text;
+          invocationResult.expectedInvocation.finalResponse.parts[0]?.text;
     }
   }
 

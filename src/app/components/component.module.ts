@@ -62,6 +62,8 @@ import {StateTabComponent} from './state-tab/state-tab.component';
 import {ViewImageDialogComponent} from './view-image-dialog/view-image-dialog.component';
 import { TraceTabComponent } from './trace-tab/trace-tab.component';
 import { TraceTreeComponent } from './trace-tab/trace-tree/trace-tree.component';
+import { ResizableBottomDirective } from '../directives/resizable-bottom.directive';
+import { TraceEventComponent } from './trace-tab/trace-event/trace-event.component';
 
 const COMPONENTS = [
   ChatComponent,
@@ -79,8 +81,10 @@ const COMPONENTS = [
   RunEvalConfigDialogComponent,
   AudioPlayerComponent,
   ResizableDrawerDirective,
+  ResizableBottomDirective,
   TraceTabComponent,
-  TraceTreeComponent
+  TraceTreeComponent,
+  TraceEventComponent
 ];
 
 @NgModule({

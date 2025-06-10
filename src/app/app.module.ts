@@ -36,6 +36,7 @@ import {EventService} from './core/services/event.service';
 import {SessionService} from './core/services/session.service';
 import {VideoService} from './core/services/video.service';
 import {WebSocketService} from './core/services/websocket.service';
+import { TraceService } from './core/services/trace.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -60,6 +61,7 @@ import {WebSocketService} from './core/services/websocket.service';
     EvalService,
     ArtifactService,
     DownloadService,
+    TraceService
   ],
   bootstrap: [AppComponent],
 })

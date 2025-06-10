@@ -14,37 +14,55 @@
  limitations under the License.
 -->
 
-<div style="margin-top: 15px;">
-    <div class="trace-container">
-        @for (node of flatTree; track node) {
-        <div class="trace-row">
-            <div class="trace-row-left">
-                <div class="trace-indent">
-                    @for (i of getArray(node.level); track $index) {
-                    <div class="indent-connector">
-                    </div>
-                    }
-                </div>
-                <span class="material-symbols-outlined" style="margin-right: 8px;">
-                    {{ getSpanIcon(node.span.name) }}
-                </span>
-                <div class="trace-label" [style.width.px]="400 - node.level * 20">
-                    {{ node.span.name }}
-                    <!-- <span class="trace-duration">
-            ({{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms)
-          </span> -->
-                </div>
-            </div>
-            <div class="trace-bar-container">
-                <div class="trace-bar" [style.left.%]="getRelativeStart(node.span)"
-                    [style.width.%]="getRelativeWidth(node.span)">
-                    {{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms
-                </div>
-                @if (getRelativeWidth(node.span) < 10) {
-                    <span style="position: absolute;color: #8DABBF" [style.left.%]="getRelativeStart(node.span) + 5">{{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms</span>
-                }
-            </div>
+<div style="margin-top: 15px">
+  <div class="invocation-id">Invocation ID: {{invocationId}}</div>
+  <div class="trace-container">
+    @for (node of flatTree; track node) {
+    <div
+      class="trace-row"
+      (click)="selectRow(node)"
+      [class.selected]="rowSelected(node)"
+      (mouseenter)="onHover(node)"
+      (mouseleave)="onHoverOut()"
+    >
+      <div class="trace-row-left">
+        <div class="trace-indent">
+          @for (i of getArray(node.level); track $index) {
+          <div class="indent-connector"></div>
+          }
         </div>
+        <span
+          class="material-symbols-outlined"
+          style="margin-right: 8px"
+          [ngStyle]="{ color: isEventRow(node)? '#8AB4F8' : 'white' }"
+        >
+          {{ getSpanIcon(node.span.name) }}
+        </span>
+        <div
+          class="trace-label"
+          [style.width.px]="400 - node.level * 20"
+          [ngStyle]="{ color: isEventRow(node)? '#8AB4F8' : 'white' }"
+        >
+          {{ node.span.name }}
+        </div>
+      </div>
+      <div class="trace-bar-container">
+        <div
+          class="trace-bar"
+          [style.left.%]="getRelativeStart(node.span)"
+          [style.width.%]="getRelativeWidth(node.span)"
+        >
+          {{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms
+        </div>
+        @if (getRelativeWidth(node.span) < 10) {
+        <span
+          style="position: absolute; color: #8dabbf"
+          [style.left.%]="getRelativeStart(node.span) + 5"
+          >{{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms</span
+        >
         }
+      </div>
     </div>
+    }
+  </div>
 </div>

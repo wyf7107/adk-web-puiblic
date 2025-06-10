@@ -14,30 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 
-export interface Span {
-  name: string;
-  start_time: number;
-  end_time: number;
-  span_id: string;
-  parent_span_id?: string;
-  trace_id: string;
-  attributes?: any;
-  children?: Span[];
-}
+import {Span} from '../../../core/models/Trace';
+import {TraceService} from '../../../core/services/trace.service';
 
-interface SpanNode extends Span {
-  children: SpanNode[];
-  depth: number;
-  duration: number;
-  id: string;  // Using span_id as string ID
-}
-
-interface TimeTick {
-  position: number;
-  label: string;
-}
 
 @Component({
   selector: 'app-trace-tree',
@@ -47,7 +28,9 @@ interface TimeTick {
 })
 export class TraceTreeComponent {
   @Input() spans: any[] = [];
+  @Input() invocationId: string = '';
   tree: Span[] = [];
+  eventData: Map<string, any>|undefined;
   baseStartTimeMs = 0;
   totalDurationMs = 1;
   flatTree: {span: Span; level: number}[] = [];
@@ -57,6 +40,9 @@ export class TraceTreeComponent {
     ['tool', 'build'],
     ['call_llm', 'chat'],
   ]);
+  selectedRow: Span|undefined = undefined;
+
+  constructor(private traceService: TraceService) {}
 
   ngOnInit(): void {
     this.tree = this.buildSpanTree(this.spans);
@@ -64,6 +50,9 @@ export class TraceTreeComponent {
     const times = this.getGlobalTimes(this.spans);
     this.baseStartTimeMs = times.start;
     this.totalDurationMs = times.duration;
+    this.traceService.selectedTraceRow$.subscribe(
+        span => this.selectedRow = span);
+    this.traceService.eventData$.subscribe(e => this.eventData = e);
   }
 
 
@@ -128,5 +117,41 @@ export class TraceTreeComponent {
 
   getArray(n: number): number[] {
     return Array.from({length: n});
+  }
+
+  selectRow(node: any) {
+    if (this.selectedRow && this.selectedRow.span_id == node.span.span_id) {
+      this.traceService.selectedRow(undefined);
+      this.traceService.setHoveredMessages(undefined, this.invocationId)
+      return;
+    }
+    this.traceService.selectedRow(node.span);
+    this.traceService.setHoveredMessages(node.span, this.invocationId)
+  }
+
+  rowSelected(node: any) {
+    return this.selectedRow == node.span
+  }
+
+  isEventRow(node: any) {
+    if (!node.span.attributes) {
+      return false;
+    }
+    const eventId = node?.span.attributes['gcp.vertex.agent.event_id'] if (
+        eventId && this.eventData && this.eventData.has(eventId)) {
+      return true;
+    }
+    return false;
+  }
+
+  onHover(n: any) {
+    this.traceService.setHoveredMessages(n.span, this.invocationId)
+  }
+
+  onHoverOut() {
+    this.traceService.setHoveredMessages(undefined, this.invocationId);
+    if (this.selectedRow) {
+      this.traceService.setHoveredMessages(this.selectedRow, this.invocationId);
+    }
   }
 }

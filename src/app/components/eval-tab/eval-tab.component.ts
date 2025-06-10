@@ -316,19 +316,49 @@ export class EvalTabComponent implements OnInit, OnChanges {
           currentInvocationIndex++;
         } else {
           const invocationResult = invocationResults[currentInvocationIndex];
-          event.evalStatus = invocationResult.evalMetricResults[0].evalStatus;
+          let evalStatus = 1;
+          let failedMetric = '';
+          let score = 1;
+          let threshold = 1;
+          for (const evalMetricResult of invocationResult.evalMetricResults) {
+            if (evalMetricResult.evalStatus === 2) {
+              evalStatus = 2;
+              failedMetric = evalMetricResult.metricName;
+              score = evalMetricResult.score;
+              threshold = evalMetricResult.threshold;
+              break;
+            }
+          }
+          event.evalStatus = evalStatus;
 
           if (i === res.events.length - 1 ||
               res.events[i + 1].author === 'user') {
-            event.actualInvocationToolUses = this.formatToolUses(
-                invocationResult.actualInvocation.intermediateData.toolUses);
-            event.expectedInvocationToolUses = this.formatToolUses(
-                invocationResult.expectedInvocation.intermediateData.toolUses);
+            this.addEvalFieldsToBotEvent(
+                event, invocationResult, failedMetric, score, threshold);
           }
         }
       }
     }
     return res;
+  }
+
+  private addEvalFieldsToBotEvent(
+      event: any, invocationResult: any, failedMetric: string, score: number,
+      threshold: number) {
+    event.failedMetric = failedMetric;
+    event.evalScore = score;
+    event.evalThreshold = threshold;
+    if (event.failedMetric === 'tool_trajectory_avg_score') {
+      event.actualInvocationToolUses = this.formatToolUses(
+          invocationResult.actualInvocation.intermediateData.toolUses);
+      event.expectedInvocationToolUses = this.formatToolUses(
+          invocationResult.expectedInvocation.intermediateData.toolUses);
+    } else if (event.failedMetric === 'response_match_score') {
+      event.actualFinalResponse =
+          invocationResult.actualInvocation.finalResponse.parts[0].text;
+      event.expectedFinalResponse =
+          invocationResult.expectedInvocation.finalResponse.parts[0].text;
+    }
   }
 
   private fromApiResultToSession(res: any): Session {

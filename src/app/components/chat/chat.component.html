@@ -459,17 +459,36 @@
               <mat-icon>check</mat-icon>
               {{ message.functionResponse.name }}
             </button>
-            } @if (message.actualInvocationToolUses && message.evalStatus === 2) {
-            <div class="tool-uses-container">
-              <div class="actual-tool-uses">
-                <div class="tool-uses-header">Actual tool uses:</div>
-                <ngx-json-viewer [json]="message.actualInvocationToolUses"></ngx-json-viewer>
+            } @if (message.failedMetric && message.evalStatus === 2) {
+              <div class="eval-compare-container">
+                <div class="actual-expected-compare-container">
+                  @if (message.actualInvocationToolUses) {
+                    <div class="actual-result">
+                      <div class="eval-response-header header-actual">Actual tool uses:</div>
+                      <ngx-json-viewer [json]="message.actualInvocationToolUses"></ngx-json-viewer>
+                    </div>
+                    <div class="expected-result">
+                      <div class="eval-response-header header-expected">Expected tool uses:</div>
+                      <ngx-json-viewer [json]="message.expectedInvocationToolUses"></ngx-json-viewer>
+                    </div>
+                  } @else if (message.actualFinalResponse) {
+                    <div class="actual-result">
+                      <div class="eval-response-header header-actual">Actual response:</div>
+                      <div>{{message.actualFinalResponse}}</div>
+                    </div>
+                    <div class="expected-result">
+                      <div class="eval-response-header header-expected">Expected response:</div>
+                      <div>{{message.expectedFinalResponse}}</div>
+                    </div>
+                  }
+                </div>
+                @if (message.evalScore !== undefined && message.evalThreshold !== undefined) {
+                  <div class="score-threshold-container">
+                    <span class="header-actual">Match score: {{message.evalScore}}</span>
+                    <span class="header-expected">Threshold: {{message.evalThreshold}}</span>
+                  </div>
+                }
               </div>
-              <div class="expected-tool-uses">
-                <div class="tool-uses-header">Expected tool uses:</div>
-                <ngx-json-viewer [json]="message.expectedInvocationToolUses"></ngx-json-viewer>
-              </div>
-            </div>
             }
           </mat-card>
           <div

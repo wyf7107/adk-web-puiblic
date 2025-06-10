@@ -155,12 +155,11 @@
   justify-content: flex-end;
 }
 
-.message-card .tool-uses-container {
+.message-card .eval-compare-container {
   visibility: hidden;
   position: absolute;
   left: 10px;
   z-index: 10;
-  display: flex;
   background-color: #484848;
   overflow: hidden;
   border-radius: 20px;
@@ -168,25 +167,51 @@
   margin-bottom: 10px;
   font-size: 16px;
 
-  .actual-tool-uses {
+  .actual-result {
     border-right: 2px solid #8a8686;
     padding-right: 8px;
+    min-width: 350px;
+    max-width: 350px;
   }
 
-  .expected-tool-uses {
+  .expected-result {
     padding-left: 12px;
+    min-width: 350px;
+    max-width: 350px;
   }
 }
 
-.message-card:hover .tool-uses-container {
+.message-card:hover .eval-compare-container {
   visibility: visible;
 }
 
-.tool-uses-header {
+.actual-expected-compare-container {
+  display: flex;
+}
+
+.score-threshold-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+  margin-top: 15px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.eval-response-header {
   padding-bottom: 5px;
   border-bottom: 2px solid #8a8686;
   font-style: italic;
   font-weight: 700;
+}
+
+.header-expected {
+  color: #44c265;
+}
+
+.header-actual {
+  color: #ff8983;
 }
 
 .eval-case-edit-button {

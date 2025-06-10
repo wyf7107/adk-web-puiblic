@@ -554,8 +554,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let message: any = {
       role,
       evalStatus: e?.evalStatus,
+      failedMetric: e?.failedMetric,
+      evalScore: e?.evalScore,
+      evalThreshold: e?.evalThreshold,
       actualInvocationToolUses: e?.actualInvocationToolUses,
       expectedInvocationToolUses: e?.expectedInvocationToolUses,
+      actualFinalResponse: e?.actualFinalResponse,
+      expectedFinalResponse: e?.expectedFinalResponse,
       invocationIndex: invocationIndex !== undefined ? invocationIndex :
         undefined,
       finalResponsePartIndex: finalResponsePartIndex !== undefined ?

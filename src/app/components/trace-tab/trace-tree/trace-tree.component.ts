@@ -137,8 +137,8 @@ export class TraceTreeComponent {
     if (!node.span.attributes) {
       return false;
     }
-    const eventId = node?.span.attributes['gcp.vertex.agent.event_id'] if (
-        eventId && this.eventData && this.eventData.has(eventId)) {
+    const eventId = node?.span.attributes['gcp.vertex.agent.event_id'];
+    if (eventId && this.eventData && this.eventData.has(eventId)) {
       return true;
     }
     return false;

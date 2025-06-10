@@ -33,11 +33,11 @@ export class FeatureFlagService {
   constructor() {}
 
   isViewEvalCaseEnabled() {
-    return this.route.snapshot.queryParams[VIEW_EVAL_CASE] === 'true';
+    return true;
   }
 
   isSetEvalConfigEnabled() {
-    return this.route.snapshot.queryParams[SET_EVAL_CONFIG] === 'true';
+    return true;
   }
 
   isImportSessionEnabled() {

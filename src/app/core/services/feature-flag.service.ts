@@ -22,6 +22,8 @@ export const VIEW_EVAL_CASE = 'view_eval_case';
 
 export const SET_EVAL_CONFIG = 'set_eval_config';
 
+export const IMPORT_SESSION = 'import_session';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -36,5 +38,9 @@ export class FeatureFlagService {
 
   isSetEvalConfigEnabled() {
     return this.route.snapshot.queryParams[SET_EVAL_CONFIG] === 'true';
+  }
+
+  isImportSessionEnabled() {
+    return this.route.snapshot.queryParams[IMPORT_SESSION] === 'true';
   }
 }

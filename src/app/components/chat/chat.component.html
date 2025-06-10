@@ -160,25 +160,34 @@
             <div class="toolbar-session-id">{{evalCase.evalId}}</div>
           </div>
           <div class="toolbar-actions">
-            <button
+            @if (this.isEvalEditMode()) {
+              <button
                 mat-button
                 (click)="cancelEditEvalCase()"
+                style="height: 30px;">
+                Cancel
+              </button>
+              <button
+                mat-flat-button
+                (click)="saveEvalCase()"
                 style="height: 30px;"
-                [hidden]="!hasEvalCaseChanged()">
-              Cancel
-            </button>
-            <button
-              mat-flat-button
-              (click)="saveEvalCase()"
-              style="height: 30px;"
-              [hidden]="!hasEvalCaseChanged()">
-              Save
-            </button>
-            <span class="material-symbols-outlined toolbar-icon"
+                [disabled]="!hasEvalCaseChanged() || isEvalCaseEditing()">
+                Save
+              </button>
+            } @else {
+              <span
+                class="material-symbols-outlined toolbar-icon"
+                matTooltip="Edit current eval case"
+                (click)="editEvalCase()">
+                edit
+              </span>
+              <span
+                class="material-symbols-outlined toolbar-icon"
                 matTooltip="Delete current eval case"
                 (click)="deleteEvalCase()">
                 delete
               </span>
+            }
           </div>
         } @else {
           <div style="display: flex;">
@@ -431,13 +440,14 @@
                 <span class="material-symbols-outlined">{{ message.evalStatus === 1 ? 'check' : message.evalStatus === 2 ? 'close' : '' }}</span>
                 <span>{{ message.evalStatus === 1 ? 'Pass' : message.evalStatus === 2 ? 'Fail' : '' }}</span>
               </div>
-              @if (evalCase && message.role === 'bot' && message.text) {
+              @if (evalCase && message.role === 'bot' && message.text && isEvalEditMode()) {
                 <div>
                   <span
                     class="material-symbols-outlined eval-case-edit-button"
                     [ngClass]="{'hidden': isEvalCaseEditing()}"
                     matTooltip="Edit eval case message"
-                    (click)="editEvalCase(message)">edit
+                    (click)="editEvalCaseMessage(message)">
+                    edit
                   </span>
                   <span
                     class="material-symbols-outlined eval-case-edit-button"

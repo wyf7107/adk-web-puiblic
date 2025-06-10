@@ -105,6 +105,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   isChatMode = signal(true);
   isEvalCaseEditing = signal(false);
   hasEvalCaseChanged = signal(false);
+  isEvalEditMode = signal(false);
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages: any[] = [];
@@ -526,6 +527,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+    if (e?.evalStatus) {
+      this.isChatMode.set(false);
+    }
+
     let message: any = {
       role,
       evalStatus: e?.evalStatus,
@@ -796,6 +801,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.stopVideoRecording();
       this.isVideoRecording = false;
     }
+    this.evalTab?.resetEvalResults();
   }
 
   toggleAudioRecording() {
@@ -917,6 +923,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected handleReturnToSession(event: boolean) {
     this.sessionTab.getSession(this.sessionId);
+    this.evalTab.resetEvalCase();
     this.isChatMode.set(true);
   }
 
@@ -1009,7 +1016,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.evalSetId = evalSetId;
   }
 
-  protected editEvalCase(message: any) {
+  protected editEvalCaseMessage(message: any) {
     this.isEvalCaseEditing.set(true);
     this.userEditEvalCaseMessage = message.text;
     message.isEditing = true;
@@ -1030,15 +1037,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             this.updatedEvalCase!)
         .subscribe((res) => {
           this.openSnackBar('Eval case updated', 'OK');
-          this.hasEvalCaseChanged.set(false);
+          this.resetEditEvalCaseVars()
         });
   }
 
   protected cancelEditEvalCase() {
+    this.resetEditEvalCaseVars();
+    this.updateWithSelectedEvalCase(this.evalCase!);
+  }
+
+  private resetEditEvalCaseVars() {
     this.hasEvalCaseChanged.set(false);
     this.isEvalCaseEditing.set(false);
+    this.isEvalEditMode.set(false);
     this.updatedEvalCase = null;
-    this.updateWithSelectedEvalCase(this.evalCase!);
   }
 
   protected cancelEditMessage(message: any) {
@@ -1079,6 +1091,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updatedEvalCase = structuredClone(this.evalCase!);
     this.updatedEvalCase!.conversation[message.invocationIndex]
         .finalResponse!.parts!.splice(message.finalResponsePartIndex, 1);
+  }
+
+  protected editEvalCase() {
+    this.isEvalEditMode.set(true);
   }
 
   protected deleteEvalCase() {

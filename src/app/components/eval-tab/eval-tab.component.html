@@ -87,7 +87,7 @@
                   <ng-container matColumnDef="evalId">
                     <th mat-header-cell *matHeaderCellDef> Case ID </th>
                     @if (isViewEvalCaseEnabled) {
-                      <td mat-cell class="eval-case-id" [class.selected-eval-case]="element === selectedEvalCase?.evalId" *matCellDef="let element" (click)="getEvalCase(element)"> {{element}} </td>
+                      <td mat-cell class="eval-case-id" [class.selected-eval-case]="element === selectedEvalCase()?.evalId" *matCellDef="let element" (click)="getEvalCase(element)"> {{element}} </td>
                     } @else {
                       <td mat-cell *matCellDef="let element"> {{element}} </td>
                     }

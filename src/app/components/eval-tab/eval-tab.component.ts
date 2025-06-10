@@ -108,7 +108,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   evalsets: any[] = [];
   selectedEvalSet: string = '';
   evalCases: string[] = [];
-  selectedEvalCase: EvalCase|null = null;
+  selectedEvalCase = signal<EvalCase|null>(null);
   deletedEvalCaseIndex: number = -1;
 
   dataSource = new MatTableDataSource<string>(this.evalCases);
@@ -142,7 +142,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
       private sessionService: SessionService,
   ) {
     this.evalCasesSubject.subscribe((evalCases: string[]) => {
-      if (!this.selectedEvalCase && this.deletedEvalCaseIndex >= 0 &&
+      if (!this.selectedEvalCase() && this.deletedEvalCaseIndex >= 0 &&
           evalCases.length > 0) {
         this.selectNewEvalCase(evalCases);
         this.deletedEvalCaseIndex = -1;
@@ -437,10 +437,18 @@ export class EvalTabComponent implements OnInit, OnChanges {
   protected getEvalCase(element: any) {
     this.evalService.getEvalCase(this.appName, this.selectedEvalSet, element)
         .subscribe((res) => {
-          this.selectedEvalCase = res;
+          this.selectedEvalCase.set(res);
           this.evalCaseSelected.emit(res);
           this.evalSetIdSelected.emit(this.selectedEvalSet);
         });
+  }
+
+  resetEvalCase() {
+    this.selectedEvalCase.set(null);
+  }
+
+  resetEvalResults() {
+    this.evalResult = [];
   }
 
   deleteEvalCase(evalCaseId: string) {
@@ -448,7 +456,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
         .deleteEvalCase(this.appName, this.selectedEvalSet, evalCaseId)
         .subscribe((res) => {
           this.deletedEvalCaseIndex = this.evalCases.indexOf(evalCaseId);
-          this.selectedEvalCase = null;
+          this.selectedEvalCase.set(null);
           this.listEvalCases();
         });
   }

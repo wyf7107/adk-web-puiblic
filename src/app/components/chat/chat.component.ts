@@ -204,24 +204,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // Trace tab 
   traceTabEnabled = true;
 
+  // Import session
+  importSessionEnabled = false;
+
   // Trace detail
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
 
   constructor(
-    private sanitizer: DomSanitizer,
-    private sessionService: SessionService,
-    private artifactService: ArtifactService,
-    private audioService: AudioService,
-    private webSocketService: WebSocketService,
-    private videoService: VideoService,
-    private dialog: MatDialog,
-    private eventService: EventService,
-    private route: ActivatedRoute,
-    private downloadService: DownloadService,
-    private evalService: EvalService,
-    private traceService: TraceService
-  ) { }
+      private sanitizer: DomSanitizer,
+      private sessionService: SessionService,
+      private artifactService: ArtifactService,
+      private audioService: AudioService,
+      private webSocketService: WebSocketService,
+      private videoService: VideoService,
+      private dialog: MatDialog,
+      private eventService: EventService,
+      private route: ActivatedRoute,
+      private downloadService: DownloadService,
+      private evalService: EvalService,
+      private traceService: TraceService,
+  ) {}
 
   ngOnInit(): void {
     this.syncSelectedAppFromUrl();
@@ -1375,5 +1378,40 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   shouldMessageHighlighted(index: number) {
     return this.hoveredEventMessageIndices.includes(index);
+  }
+
+  protected importSession() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+
+    input.onchange = () => {
+      if (!input.files || input.files.length === 0) {
+        return;
+      }
+
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          try {
+            const sessionData = JSON.parse(e.target.result as string);
+            if (!sessionData.userId || !sessionData.appName ||
+                !sessionData.events) {
+              this.openSnackBar('Invalid session file format', 'OK');
+              return;
+            }
+            // TODO: import session
+          } catch (error) {
+            this.openSnackBar('Error parsing session file', 'OK');
+          }
+        }
+      };
+
+      reader.readAsText(file);
+    };
+
+    input.click();
   }
 }

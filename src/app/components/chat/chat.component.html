@@ -274,6 +274,13 @@
               >
                 download
               </span>
+              @if (importSessionEnabled) {
+                <span class="material-symbols-outlined toolbar-icon"
+                  matTooltip="Import session"
+                  (click)="importSession()" >
+                  upload
+                </span>
+              }
             </div>
           </div>
         }

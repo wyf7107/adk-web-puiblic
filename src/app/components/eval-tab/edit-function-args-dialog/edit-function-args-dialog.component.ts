@@ -29,14 +29,26 @@ export interface EditFunctionArgsData {
   standalone: false,
 })
 export class EditFunctionArgsDialogComponent implements OnInit {
+  protected readonly editorOptions = {
+    theme: 'vs-dark',
+    automaticLayout: true,
+    language: 'json',
+    minimap: {enabled: false},
+    scrollBeyondLastLine: false
+  };
+
+  protected toolArgs = '';
+
   constructor(
       public dialogRef: MatDialogRef<EditFunctionArgsDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) public data: EditFunctionArgsData) {}
+      @Inject(MAT_DIALOG_DATA) public data: EditFunctionArgsData) {
+    this.toolArgs = JSON.stringify(data, null, 2);
+  }
 
   ngOnInit(): void {}
 
   onSave(): void {
-    this.dialogRef.close(null);
+    this.dialogRef.close(this.toolArgs);
   }
 
   onCancel(): void {

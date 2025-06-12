@@ -608,7 +608,7 @@
                       class="material-symbols-outlined eval-case-edit-button"
                       [ngClass]="{ hidden: isEvalCaseEditing() }"
                       matTooltip="Edit function arguments"
-                      (click)="editFunctionArgs(message)"
+                      (click)="editFunctionArgs(message.functionCall.args)"
                     >
                       edit
                     </span>

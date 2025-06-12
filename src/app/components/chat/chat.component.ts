@@ -1022,7 +1022,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (invocation.intermediateData?.toolUses) {
         for (const toolUse of invocation.intermediateData.toolUses) {
-          const functionCallPart = { functionCall: { name: toolUse.name } };
+          const functionCallPart = {
+            functionCall: {name: toolUse.name, args: toolUse.args}
+          };
           this.storeMessage(functionCallPart, null, index, 'bot');
           index++;
 
@@ -1064,11 +1066,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 0);
   }
 
-  protected editFunctionArgs(message: any) {
+  protected editFunctionArgs(toolArgs: any) {
     const dialogRef = this.dialog.open(EditFunctionArgsDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',
-      data: {args: {}},
+      data: {args: toolArgs},
     });
   }
 

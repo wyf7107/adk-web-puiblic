@@ -274,7 +274,7 @@
               >
                 download
               </span>
-              @if (importSessionEnabled) {
+              @if (importSessionEnabledObs | async) {
                 <span class="material-symbols-outlined toolbar-icon"
                   matTooltip="Import session"
                   (click)="importSession()" >

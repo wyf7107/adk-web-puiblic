@@ -582,25 +582,38 @@
                   message.evalStatus === 1 ? "Pass" : message.evalStatus === 2 ? "Fail" : ""
                 }}</span>
               </div>
-              @if (evalCase && message.role === "bot" && message.text && isEvalEditMode()) {
-                <div>
-                  <span
-                    class="material-symbols-outlined eval-case-edit-button"
-                    [ngClass]="{ hidden: isEvalCaseEditing() }"
-                    matTooltip="Edit eval case message"
-                    (click)="editEvalCaseMessage(message)"
-                  >
-                    edit
-                  </span>
-                  <span
-                    class="material-symbols-outlined eval-case-edit-button"
-                    [ngClass]="{ hidden: isEvalCaseEditing() }"
-                    matTooltip="Delete eval case message"
-                    (click)="deleteEvalCaseMessage(message, i)"
-                  >
-                    delete
-                  </span>
-                </div>
+              @if (evalCase && message.role === "bot" && isEvalEditMode()) {
+                @if (message.text) {
+                  <div>
+                    <span
+                      class="material-symbols-outlined eval-case-edit-button"
+                      [ngClass]="{ hidden: isEvalCaseEditing() }"
+                      matTooltip="Edit eval case message"
+                      (click)="editEvalCaseMessage(message)"
+                    >
+                      edit
+                    </span>
+                    <span
+                      class="material-symbols-outlined eval-case-edit-button"
+                      [ngClass]="{ hidden: isEvalCaseEditing() }"
+                      matTooltip="Delete eval case message"
+                      (click)="deleteEvalCaseMessage(message, i)"
+                    >
+                      delete
+                    </span>
+                  </div>
+                } @else if ((isEditFunctionArgsEnabledObs | async) && message.functionCall) {
+                  <div>
+                    <span
+                      class="material-symbols-outlined eval-case-edit-button"
+                      [ngClass]="{ hidden: isEvalCaseEditing() }"
+                      matTooltip="Edit function arguments"
+                      (click)="editFunctionArgs(message)"
+                    >
+                      edit
+                    </span>
+                  </div>
+                }
               }
               @if (message.role === "user") {
                 <button mat-mini-fab>

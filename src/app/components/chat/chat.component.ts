@@ -15,41 +15,42 @@
  * limitations under the License.
  */
 
-import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatPaginatorIntl } from '@angular/material/paginator';
-import { MatDrawer } from '@angular/material/sidenav';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { instance } from '@viz-js/viz';
-import { BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap } from 'rxjs';
+import {HttpErrorResponse} from '@angular/common/http';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatPaginatorIntl} from '@angular/material/paginator';
+import {MatDrawer} from '@angular/material/sidenav';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {instance} from '@viz-js/viz';
+import {BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap} from 'rxjs';
 
-import { URLUtil } from '../../../utils/url-util';
-import { AgentRunRequest } from '../../core/models/AgentRunRequest';
-import { Session } from '../../core/models/Session';
-import { AgentService } from '../../core/services/agent.service';
-import { ArtifactService } from '../../core/services/artifact.service';
-import { AudioService } from '../../core/services/audio.service';
-import { DownloadService } from '../../core/services/download.service';
-import { EvalService } from '../../core/services/eval.service';
-import { EventService } from '../../core/services/event.service';
-import { FeatureFlagService } from '../../core/services/feature-flag.service';
-import { SessionService } from '../../core/services/session.service';
-import { VideoService } from '../../core/services/video.service';
-import { WebSocketService } from '../../core/services/websocket.service';
-import { ResizableDrawerDirective } from '../../directives/resizable-drawer.directive';
-import { getMediaTypeFromMimetype, MediaType, openBase64InNewTab } from '../artifact-tab/artifact-tab.component';
-import { AudioPlayerComponent } from '../audio-player/audio-player.component';
-import { EvalCase, EvalTabComponent } from '../eval-tab/eval-tab.component';
-import { EventTabComponent } from '../event-tab/event-tab.component';
-import { PendingEventDialogComponent } from '../pending-event-dialog/pending-event-dialog.component';
-import { DeleteSessionDialogComponent, DeleteSessionDialogData, } from '../session-tab/delete-session-dialog/delete-session-dialog.component';
-import { SessionTabComponent } from '../session-tab/session-tab.component';
-import { ViewImageDialogComponent } from '../view-image-dialog/view-image-dialog.component';
-import { TraceService } from '../../core/services/trace.service';
+import {URLUtil} from '../../../utils/url-util';
+import {AgentRunRequest} from '../../core/models/AgentRunRequest';
+import {Session} from '../../core/models/Session';
+import {AgentService} from '../../core/services/agent.service';
+import {ArtifactService} from '../../core/services/artifact.service';
+import {AudioService} from '../../core/services/audio.service';
+import {DownloadService} from '../../core/services/download.service';
+import {EvalService} from '../../core/services/eval.service';
+import {EventService} from '../../core/services/event.service';
+import {FeatureFlagService} from '../../core/services/feature-flag.service';
+import {SessionService} from '../../core/services/session.service';
+import {TraceService} from '../../core/services/trace.service';
+import {VideoService} from '../../core/services/video.service';
+import {WebSocketService} from '../../core/services/websocket.service';
+import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
+import {getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
+import {AudioPlayerComponent} from '../audio-player/audio-player.component';
+import {EditFunctionArgsDialogComponent} from '../eval-tab/edit-function-args-dialog/edit-function-args-dialog.component';
+import {EvalCase, EvalTabComponent} from '../eval-tab/eval-tab.component';
+import {EventTabComponent} from '../event-tab/event-tab.component';
+import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
+import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
+import {SessionTabComponent} from '../session-tab/session-tab.component';
+import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 
 function fixBase64String(base64: string): string {
   // Replace URL-safe characters if they exist
@@ -209,6 +210,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // Import session
   importSessionEnabledObs: Observable<boolean> =
       this.featureFlagService.isImportSessionEnabled();
+
+  // Edit eval tool use
+  isEditFunctionArgsEnabledObs =
+      this.featureFlagService.isEditFunctionArgsEnabled();
 
   // Trace detail
   bottomPanelVisible = false;
@@ -1057,6 +1062,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       this.textarea?.nativeElement.setSelectionRange(textLength, textLength);
     }, 0);
+  }
+
+  protected editFunctionArgs(message: any) {
+    const dialogRef = this.dialog.open(EditFunctionArgsDialogComponent, {
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: {args: {}},
+    });
   }
 
   protected saveEvalCase() {

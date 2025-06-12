@@ -21,10 +21,9 @@ import {Observable, pipe} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 export const VIEW_EVAL_CASE = 'view_eval_case';
-
 export const SET_EVAL_CONFIG = 'set_eval_config';
-
 export const IMPORT_SESSION = 'import_session';
+export const EDIT_FUNCTION_ARGS = 'edit_function_args';
 
 @Injectable({
   providedIn: 'root'
@@ -45,6 +44,12 @@ export class FeatureFlagService {
   isImportSessionEnabled(): Observable<boolean> {
     return this.route.queryParams.pipe(
         map((params) => params[IMPORT_SESSION] === 'true'),
+    );
+  }
+
+  isEditFunctionArgsEnabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+        map((params) => params[EDIT_FUNCTION_ARGS] === 'true'),
     );
   }
 }

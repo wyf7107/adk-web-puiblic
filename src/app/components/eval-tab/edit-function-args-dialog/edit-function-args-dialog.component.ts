@@ -19,6 +19,7 @@ import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
 export interface EditFunctionArgsData {
+  functionName: string;
   args?: any;
 }
 
@@ -38,17 +39,24 @@ export class EditFunctionArgsDialogComponent implements OnInit {
   };
 
   protected toolArgs = '';
+  protected functionName = '';
 
   constructor(
       public dialogRef: MatDialogRef<EditFunctionArgsDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public data: EditFunctionArgsData) {
-    this.toolArgs = JSON.stringify(data, null, 2);
+    this.toolArgs = JSON.stringify(data.args, null, 2);
+    this.functionName = data.functionName;
   }
 
   ngOnInit(): void {}
 
   onSave(): void {
-    this.dialogRef.close(this.toolArgs);
+    try {
+      const parsedArgs = JSON.parse(this.toolArgs);
+      this.dialogRef.close(parsedArgs);
+    } catch (e) {
+      alert('Invalid JSON: ' + e);
+    }
   }
 
   onCancel(): void {

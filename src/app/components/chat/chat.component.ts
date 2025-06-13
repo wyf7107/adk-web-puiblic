@@ -523,8 +523,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private storeMessage(
-    part: any, e: any, index: number, role: string, invocationIndex?: number,
-    finalResponsePartIndex?: number) {
+      part: any, e: any, index: number, role: string, invocationIndex?: number,
+      additionalIndeces?: any) {
     if (e?.longRunningToolIds && e.longRunningToolIds.length > 0) {
       this.getAsyncFunctionsFromParts(e.longRunningToolIds, e.content.parts);
       const func = this.longRunningEvents[0];
@@ -573,10 +573,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       actualFinalResponse: e?.actualFinalResponse,
       expectedFinalResponse: e?.expectedFinalResponse,
       invocationIndex: invocationIndex !== undefined ? invocationIndex :
-        undefined,
-      finalResponsePartIndex: finalResponsePartIndex !== undefined ?
-        finalResponsePartIndex :
-        undefined,
+                                                       undefined,
+      finalResponsePartIndex:
+          additionalIndeces?.finalResponsePartIndex !== undefined ?
+          additionalIndeces.finalResponsePartIndex :
+          undefined,
+      toolUseIndex: additionalIndeces?.toolUseIndex !== undefined ?
+          additionalIndeces.toolUseIndex :
+          undefined,
     };
     if (part.inlineData) {
       const base64Data =
@@ -1021,12 +1025,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       if (invocation.intermediateData?.toolUses) {
+        let toolUseIndex = 0;
         for (const toolUse of invocation.intermediateData.toolUses) {
           const functionCallPart = {
             functionCall: {name: toolUse.name, args: toolUse.args}
           };
-          this.storeMessage(functionCallPart, null, index, 'bot');
+          this.storeMessage(
+              functionCallPart, null, index, 'bot', invocationIndex,
+              {toolUseIndex});
           index++;
+          toolUseIndex++;
 
           const functionResponsePart = { functionResponse: { name: toolUse.name } };
           this.storeMessage(functionResponsePart, null, index, 'bot');
@@ -1038,8 +1046,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         let finalResponsePartIndex = 0;
         for (const part of invocation.finalResponse.parts) {
           this.storeMessage(
-            part, null, index, 'bot', invocationIndex,
-            finalResponsePartIndex);
+              part, null, index, 'bot', invocationIndex,
+              {finalResponsePartIndex});
           index++;
           finalResponsePartIndex++;
         }
@@ -1066,11 +1074,28 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }, 0);
   }
 
-  protected editFunctionArgs(toolArgs: any) {
+  protected editFunctionArgs(message: any) {
+    this.isEvalCaseEditing.set(true);
     const dialogRef = this.dialog.open(EditFunctionArgsDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',
-      data: {args: toolArgs},
+      data: {
+        functionName: message.functionCall.name,
+        args: message.functionCall.args
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      this.isEvalCaseEditing.set(false);
+      if (result) {
+        this.hasEvalCaseChanged.set(true);
+        message.functionCall.args = result;
+
+        this.updatedEvalCase = structuredClone(this.evalCase!);
+        this.updatedEvalCase!.conversation[message.invocationIndex]
+            .intermediateData!.toolUses![message.toolUseIndex]
+            .args = result;
+      }
     });
   }
 

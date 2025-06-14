@@ -1445,7 +1445,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
               this.openSnackBar('Invalid session file format', 'OK');
               return;
             }
-            // TODO: import session
+            this.sessionService
+                .importSession(
+                    sessionData.userId, sessionData.appName, sessionData.events)
+                .subscribe((res) => {
+                  this.openSnackBar('Session imported', 'OK');
+                  this.sessionTab.refreshSession();
+                });
           } catch (error) {
             this.openSnackBar('Error parsing session file', 'OK');
           }

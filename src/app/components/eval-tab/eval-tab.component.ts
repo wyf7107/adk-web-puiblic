@@ -132,7 +132,10 @@ export class EvalTabComponent implements OnInit, OnChanges {
         metricName: 'tool_trajectory_avg_score',
         threshold: 1,
       }];
-  evalResult: EvaluationResult[] = [];
+
+  // Key: evalSetId
+  // Value: EvaluationResult[]
+  currentEvalResultBySet: Map<string, EvaluationResult[]> = new Map();
   readonly dialog = inject(MatDialog);
 
   protected appEvaluationResults: AppEvaluationResult = {};
@@ -254,7 +257,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
         }))
         .subscribe((res) => {
           this.evalRunning.set(false);
-          this.evalResult = res;
+          this.currentEvalResultBySet.set(this.selectedEvalSet, res);
 
           this.getEvaluationResult();
         });
@@ -289,8 +292,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   getEvalResultForCase(caseId: string) {
-    const el = this.evalResult.filter((c) => c.evalId == caseId);
-    if (el.length == 0) {
+    const el = this.currentEvalResultBySet.get(this.selectedEvalSet)
+                   ?.filter((c) => c.evalId == caseId);
+    if (!el || el.length == 0) {
       return undefined;
     }
     return el[0].finalEvalStatus;
@@ -372,11 +376,13 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   getSession(evalId: string) {
-    const evalCaseResult = this.evalResult.filter((c) => c.evalId == evalId)[0];
-    const sessionId = evalCaseResult.sessionId;
+    const evalCaseResult =
+        this.currentEvalResultBySet.get(this.selectedEvalSet)
+            ?.filter((c) => c.evalId == evalId)[0];
+    const sessionId = evalCaseResult!.sessionId;
     this.sessionService.getSession(this.userId, this.appName, sessionId)
         .subscribe((res) => {
-          this.addEvalCaseResultToEvents(res, evalCaseResult);
+          this.addEvalCaseResultToEvents(res, evalCaseResult!);
           const session = this.fromApiResultToSession(res);
 
           this.sessionSelected.emit(session);
@@ -478,7 +484,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   resetEvalResults() {
-    this.evalResult = [];
+    this.currentEvalResultBySet.clear();
   }
 
   deleteEvalCase(evalCaseId: string) {

@@ -33,14 +33,6 @@ export class FeatureFlagService {
 
   constructor() {}
 
-  isViewEvalCaseEnabled() {
-    return true;
-  }
-
-  isSetEvalConfigEnabled() {
-    return true;
-  }
-
   isImportSessionEnabled(): Observable<boolean> {
     return this.route.queryParams.pipe(
         map((params) => params[IMPORT_SESSION] === 'true'),

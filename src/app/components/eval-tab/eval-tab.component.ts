@@ -23,6 +23,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {BehaviorSubject, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
+import {DEFAULT_EVAL_METRICS, EvalMetric} from '../../core/models/EvalMetric';
 import {Session} from '../../core/models/Session';
 import {Invocation} from '../../core/models/types';
 import {EvalService} from '../../core/services/eval.service';
@@ -31,7 +32,7 @@ import {SessionService} from '../../core/services/session.service';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
-import {EvalMetric, RunEvalConfigDialogComponent} from './run-eval-config-dialog/run-eval-config-dialog.component';
+import {RunEvalConfigDialogComponent} from './run-eval-config-dialog/run-eval-config-dialog.component';
 
 export interface EvalCase {
   evalId: string;
@@ -99,11 +100,6 @@ export class EvalTabComponent implements OnInit, OnChanges {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly flagService = inject(FeatureFlagService);
 
-  protected readonly isViewEvalCaseEnabled =
-      this.flagService.isViewEvalCaseEnabled();
-  protected readonly isSetEvalConfigEnabled =
-      this.flagService.isSetEvalConfigEnabled();
-
   displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
   evalsets: any[] = [];
   selectedEvalSet: string = '';
@@ -117,21 +113,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   showEvalHistory = signal(false);
 
   evalRunning = signal(false);
-  evalMetrics: EvalMetric[] = this.isSetEvalConfigEnabled ?
-      [
-        {
-          metricName: 'tool_trajectory_avg_score',
-          threshold: 1,
-        },
-        {
-          metricName: 'response_match_score',
-          threshold: 0.7,
-        }
-      ] :
-      [{
-        metricName: 'tool_trajectory_avg_score',
-        threshold: 1,
-      }];
+  evalMetrics: EvalMetric[] = DEFAULT_EVAL_METRICS;
 
   // Key: evalSetId
   // Value: EvaluationResult[]

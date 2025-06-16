@@ -204,9 +204,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly featureFlagService = inject(FeatureFlagService);
 
-  // Trace tab 
-  traceTabEnabled = true;
-
   // Import session
   importSessionEnabledObs: Observable<boolean> =
       this.featureFlagService.isImportSessionEnabled();

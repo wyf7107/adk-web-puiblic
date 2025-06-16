@@ -19,15 +19,7 @@ import {Component, Inject} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
-/**
- * @interface EvalMetric
- * @description Represents a single evaluation metric and its associated
- * threshold.
- */
-export interface EvalMetric {
-  metricName: string;
-  threshold: number;
-}
+import {EvalMetric} from '../../../core/models/EvalMetric';
 
 /**
  * @interface EvalConfigData
@@ -48,8 +40,7 @@ export class RunEvalConfigDialogComponent {
   // FormGroup to manage the dialog's form controls
   evalForm: FormGroup;
 
-  // Available evaluation metrics, matching the image
-  metrics: string[] = ['Tool trajectory avg score', 'Response match score'];
+  evalMetrics: EvalMetric[] = [];
 
   /**
    * @constructor
@@ -75,11 +66,11 @@ export class RunEvalConfigDialogComponent {
         [Validators.required, Validators.min(0), Validators.max(1)]
       ]
     });
+    this.evalMetrics = this.data.evalMetrics;
   }
 
   private getEvalMetricThresholdFromData(metricName: string): number {
-    return this.data.evalMetrics
-               .find((metric) => metric.metricName === metricName)
+    return this.evalMetrics.find((metric) => metric.metricName === metricName)
                ?.threshold ??
         0;
   }
@@ -91,18 +82,15 @@ export class RunEvalConfigDialogComponent {
         response_match_score_threshold
       } = this.evalForm.value;
 
-      const evalMetrics: EvalMetric[] = [
-        {
-          metricName: 'tool_trajectory_avg_score',
-          threshold: tool_trajectory_avg_score_threshold,
-        },
-        {
-          metricName: 'response_match_score',
-          threshold: response_match_score_threshold,
+      for (const metric of this.evalMetrics) {
+        if (metric.metricName === 'tool_trajectory_avg_score') {
+          metric.threshold = tool_trajectory_avg_score_threshold;
+        } else if (metric.metricName === 'response_match_score') {
+          metric.threshold = response_match_score_threshold;
         }
-      ];
+      }
 
-      this.dialogRef.close(evalMetrics);
+      this.dialogRef.close(this.evalMetrics);
     }
   }
 

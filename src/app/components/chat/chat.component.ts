@@ -599,6 +599,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         message.renderedContent =
           e.groundingMetadata.searchEntryPoint.renderedContent;
       }
+      message.eventId = e?.id;
       this.eventMessageIndexArray[index] = part.text;
     } else if (part.functionCall) {
       message.functionCall = part.functionCall;
@@ -851,6 +852,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isVideoRecording = false;
     }
     this.evalTab?.resetEvalResults();
+    this.traceData = [];
+    this.bottomPanelVisible = false;
   }
 
   toggleAudioRecording() {
@@ -992,7 +995,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!session || !session.id || !session.events || !session.state) {
       return;
     }
-
+    this.traceService.resetTraceService();
     this.sessionId = session.id;
     this.currentSessionState = session.state;
     this.evalCase = null;
@@ -1012,9 +1015,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    this.eventService.getTrace(this.sessionId).subscribe(res => {
-      this.traceData = res;
-    })
+    this.eventService.getTrace(this.sessionId)
+        .subscribe(res => {
+          this.traceData = res;
+          this.traceService.setEventData(this.eventData);
+          this.traceService.setMessages(this.messages);
+        }) this.bottomPanelVisible = false;
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {
@@ -1206,6 +1212,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventMessageIndexArray = [];
     this.messages = [];
     this.artifacts = [];
+    this.traceData = [];
+    this.bottomPanelVisible = false;
 
     // Close eval history if opened
     if (!!this.evalTab.showEvalHistory) {

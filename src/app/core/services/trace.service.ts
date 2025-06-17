@@ -82,4 +82,10 @@ export class TraceService {
         }
         this.hoveredMessageIndiciesSource.next(messageIndices);
     }
+
+    resetTraceService() {
+        this.eventDataSource.next(undefined);
+        this.messagesSource.next([]);
+        this.hoveredMessageIndiciesSource.next([])
+    }
 }

@@ -745,12 +745,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         response: authConfig,
       },
     });
-    this.agentService.run(authResponse).subscribe((res) => {
-      this.processRunResponse(res);
+
+    let response: any[] = [];
+    this.agentService.runSse(authResponse).subscribe({
+      next: async (chunk) => {
+        const chunkJson = JSON.parse(chunk);
+        response.push(chunkJson);
+      },
+      error: (err) => console.error('SSE error:', err),
+      complete: () => {
+        this.processRunSseResponse(response);
+      },
     });
   }
 
-  private processRunResponse(response: any) {
+  private processRunSseResponse(response: any) {
     let index = this.eventMessageIndexArray.length - 1;
     for (const e of response) {
       if (e.content) {
@@ -777,7 +786,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((t) => {
       if (t) {
         this.removeFinishedLongRunningEvents(t.events);
-        this.processRunResponse(t.response);
+        this.processRunSseResponse(t.response);
       }
     });
   }

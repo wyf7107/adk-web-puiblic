@@ -33,6 +33,7 @@ export class PendingEventDialogComponent {
   sessionId: string;
   functionCallEventId: string;
   sending: boolean = false;
+  response: any[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<PendingEventDialogComponent>,
@@ -71,12 +72,20 @@ export class PendingEventDialogComponent {
         },
       });
     }
-    this.agentService.run(req).subscribe((response) => {
-      this.sending = false;
-      this.dialogRef.close({
-        response,
-        events: [this.selectedEvent],
-      });
+
+    this.agentService.runSse(req).subscribe({
+      next: async (chunk) => {
+        const chunkJson = JSON.parse(chunk);
+        this.response.push(chunkJson);
+      },
+      error: (err) => console.error('SSE error:', err),
+      complete: () => {
+        this.sending = false;
+        this.dialogRef.close({
+          response: this.response,
+          events: [this.selectedEvent],
+        });
+      },
     });
   }
 }

@@ -47,18 +47,6 @@ export class AgentService {
     return this.isLoading;
   }
 
-  run(req: AgentRunRequest) {
-    const headers = {
-      'Content-type': 'application/json',
-    };
-    const options = {
-      headers: headers,
-    };
-
-    const url = this.apiServerDomain + `/run`;
-    return this.http.post<any>(url, req, options);
-  }
-
   runSse(req: AgentRunRequest) {
     const url = this.apiServerDomain + `/run_sse`;
     this.isLoading.next(true);

@@ -95,6 +95,7 @@ export class AgentService {
                       JSON.parse(data);
                       self.zone.run(() => observer.next(data));
                     });
+                    lastData = '';
                   } catch (e) {
                     // the data is not a valid json, it could be an incomplete
                     // chunk. we ignore it and wait for the next chunk.

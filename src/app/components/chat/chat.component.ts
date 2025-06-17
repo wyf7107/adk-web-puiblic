@@ -212,6 +212,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   isEditFunctionArgsEnabledObs =
       this.featureFlagService.isEditFunctionArgsEnabled();
 
+  // Session url
+  isSessionUrlEnabledObs = this.featureFlagService.isSessionUrlEnabled();
+
   // Trace detail
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
@@ -1317,6 +1320,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           queryParamsHandling: 'merge',
         });
       });
+  }
+
+  private updateSelectedSessionUrl() {
+    this.selectedSessionControl.valueChanges
+        .pipe(distinctUntilChanged(), filter(Boolean))
+        .subscribe((session: string) => {
+          this.selectSession(session);
+        });
   }
 
   handlePageEvent(event: any) {

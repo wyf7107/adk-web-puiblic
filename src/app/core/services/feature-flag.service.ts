@@ -20,10 +20,9 @@ import {ActivatedRoute} from '@angular/router';
 import {Observable, pipe} from 'rxjs';
 import {map} from 'rxjs/operators';
 
-export const VIEW_EVAL_CASE = 'view_eval_case';
-export const SET_EVAL_CONFIG = 'set_eval_config';
 export const IMPORT_SESSION = 'import_session';
 export const EDIT_FUNCTION_ARGS = 'edit_function_args';
+export const SESSION_URL = 'session_url';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +41,12 @@ export class FeatureFlagService {
   isEditFunctionArgsEnabled(): Observable<boolean> {
     return this.route.queryParams.pipe(
         map((params) => params[EDIT_FUNCTION_ARGS] === 'true'),
+    );
+  }
+
+  isSessionUrlEnabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+        map((params) => params[SESSION_URL] === 'true'),
     );
   }
 }

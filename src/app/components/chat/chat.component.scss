@@ -120,6 +120,11 @@
   display: inline-block;
 }
 
+.function-event-button {
+  background-color: white;
+  margin: 5px 5px 10px;
+}
+
 .user-message {
   display: flex;
   justify-content: flex-end;
@@ -384,10 +389,6 @@ button {
   }
 }
 
-.function-event-button {
-  background-color: white;
-  margin-left: 0px;
-}
 
 :host ::ng-deep .mat-mdc-unelevated-button:not(:disabled) {
   color: #202124;

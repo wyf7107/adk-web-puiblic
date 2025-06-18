@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {FormControl} from '@angular/forms';
@@ -232,6 +233,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       private downloadService: DownloadService,
       private evalService: EvalService,
       private traceService: TraceService,
+      private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -334,6 +336,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.currentSessionState = res.state;
         this.sessionId = res.id;
         this.sessionTab.refreshSession();
+
+        this.isSessionUrlEnabledObs.subscribe((enabled) => {
+          if (enabled) {
+            this.updateSelectedSessionUrl();
+          }
+        });
       });
   }
 
@@ -1340,11 +1348,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private updateSelectedSessionUrl() {
-    this.selectedSessionControl.valueChanges
-        .pipe(distinctUntilChanged(), filter(Boolean))
-        .subscribe((session: string) => {
-          this.selectSession(session);
-        });
+    const url = this.router
+                    .createUrlTree([], {
+                      queryParams: {'session': this.sessionId},
+                      queryParamsHandling: 'merge',
+                    })
+                    .toString();
+    this.location.replaceState(url);
   }
 
   handlePageEvent(event: any) {

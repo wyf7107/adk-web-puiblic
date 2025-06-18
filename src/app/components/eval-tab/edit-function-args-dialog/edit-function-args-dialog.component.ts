@@ -15,8 +15,10 @@
  * limitations under the License.
  */
 
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+
+import {JsonEditorComponent} from '../../json-editor/json-editor.component';
 
 export interface EditFunctionArgsData {
   functionName: string;
@@ -30,6 +32,7 @@ export interface EditFunctionArgsData {
   standalone: false,
 })
 export class EditFunctionArgsDialogComponent implements OnInit {
+  @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
   protected toolArgs = '';
   protected functionName = '';
 
@@ -44,6 +47,7 @@ export class EditFunctionArgsDialogComponent implements OnInit {
 
   onSave(): void {
     try {
+      this.toolArgs = this.jsonEditorComponent.getJsonString();
       const parsedArgs = JSON.parse(this.toolArgs);
       this.dialogRef.close(parsedArgs);
     } catch (e) {

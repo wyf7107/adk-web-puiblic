@@ -57,6 +57,7 @@ import {NewEvalSetDialogComponentComponent} from './eval-tab/new-eval-set-dialog
 import {RunEvalConfigDialogComponent} from './eval-tab/run-eval-config-dialog/run-eval-config-dialog.component';
 import {EventTabComponent} from './event-tab/event-tab.component';
 import {TraceChartComponent} from './event-tab/trace-chart/trace-chart.component';
+import {JsonEditorComponent} from './json-editor/json-editor.component';
 import {PendingEventDialogComponent} from './pending-event-dialog/pending-event-dialog.component';
 import {DeleteSessionDialogComponent} from './session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from './session-tab/session-tab.component';
@@ -86,7 +87,8 @@ const COMPONENTS = [
   ResizableBottomDirective,
   TraceTabComponent,
   TraceTreeComponent,
-  TraceEventComponent
+  TraceEventComponent,
+  JsonEditorComponent,
 ];
 
 @NgModule({

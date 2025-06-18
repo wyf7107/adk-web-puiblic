@@ -43,7 +43,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownModule} from 'ngx-markdown';
-import {MonacoEditorModule} from 'ngx-monaco-editor-v2';
 
 import {ResizableBottomDirective} from '../directives/resizable-bottom.directive';
 import {ResizableDrawerDirective} from '../directives/resizable-drawer.directive';
@@ -66,11 +65,6 @@ import {TraceEventComponent} from './trace-tab/trace-event/trace-event.component
 import {TraceTabComponent} from './trace-tab/trace-tab.component';
 import {TraceTreeComponent} from './trace-tab/trace-tree/trace-tree.component';
 import {ViewImageDialogComponent} from './view-image-dialog/view-image-dialog.component';
-
-// workaround from https://github.com/microsoft/monaco-editor/issues/4778
-const monacoConfig = {
-  baseUrl: window.location.origin + '/assets/monaco/min/vs'
-};
 
 const COMPONENTS = [
   ChatComponent,
@@ -131,7 +125,6 @@ const COMPONENTS = [
     MatChipsModule,
     MatDialogModule,
     MatButtonToggleModule,
-    MonacoEditorModule.forRoot(monacoConfig),
   ],
 })
 export class ComponentModule {

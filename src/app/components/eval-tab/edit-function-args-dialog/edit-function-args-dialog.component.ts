@@ -30,14 +30,6 @@ export interface EditFunctionArgsData {
   standalone: false,
 })
 export class EditFunctionArgsDialogComponent implements OnInit {
-  protected readonly editorOptions = {
-    theme: 'vs-dark',
-    automaticLayout: true,
-    language: 'json',
-    minimap: {enabled: false},
-    scrollBeyondLastLine: false
-  };
-
   protected toolArgs = '';
   protected functionName = '';
 

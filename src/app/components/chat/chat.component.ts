@@ -1023,12 +1023,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    this.eventService.getTrace(this.sessionId)
-        .subscribe(res => {
-          this.traceData = res;
-          this.traceService.setEventData(this.eventData);
-          this.traceService.setMessages(this.messages);
-        }) this.bottomPanelVisible = false;
+    this.eventService.getTrace(this.sessionId).subscribe(res => {
+      this.traceData = res;
+      this.traceService.setEventData(this.eventData);
+      this.traceService.setMessages(this.messages);
+    });
+
+    this.bottomPanelVisible = false;
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {

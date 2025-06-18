@@ -577,6 +577,11 @@ button {
   z-index: 10;
 }
 
+.attachment {
+  display: flex;
+  align-items: center;
+}
+
 .toolbar-actions {
   margin-left: auto;
   display: flex;

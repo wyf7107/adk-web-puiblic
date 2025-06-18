@@ -320,14 +320,41 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   selectApp(appName: string) {
     if (appName != this.appName) {
       this.agentService.setApp(appName);
-      this.createSession();
-      this.eventData = new Map<string, any>();
-      this.eventMessageIndexArray = [];
-      this.messages = [];
-      this.artifacts = [];
-      this.userInput = '';
-      this.longRunningEvents = [];
+
+      this.isSessionUrlEnabledObs.subscribe((sessionUrlEnabled) => {
+        const sessionUrl = this.activatedRoute.snapshot.queryParams['session'];
+
+        if (!sessionUrlEnabled || !sessionUrl) {
+          this.createSessionAndReset();
+        }
+
+        if (sessionUrl) {
+          this.sessionService.getSession(this.userId, this.appName, sessionUrl)
+              .pipe(take(1), catchError((error) => {
+                      this.openSnackBar(
+                          'Can not find specified session. Create a new one.',
+                          'OK');
+                      this.createSessionAndReset();
+                      return of(null);
+                    }))
+              .subscribe((session) => {
+                if (session) {
+                  this.updateWithSelectedSession(session);
+                }
+              });
+        }
+      });
     }
+  }
+
+  private createSessionAndReset() {
+    this.createSession();
+    this.eventData = new Map<string, any>();
+    this.eventMessageIndexArray = [];
+    this.messages = [];
+    this.artifacts = [];
+    this.userInput = '';
+    this.longRunningEvents = [];
   }
 
   createSession() {

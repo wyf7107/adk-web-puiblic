@@ -1036,6 +1036,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.evalCase = null;
     this.isChatMode.set(true);
 
+    this.isSessionUrlEnabledObs.subscribe((enabled) => {
+      if (enabled) {
+        this.updateSelectedSessionUrl();
+      }
+    });
+
     this.resetEventsAndMessages();
     let index = 0;
 

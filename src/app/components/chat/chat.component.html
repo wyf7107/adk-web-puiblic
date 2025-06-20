@@ -558,13 +558,23 @@
                 </mat-card>
               }
               @if (message.functionCall) {
-                <button mat-stroked-button class="function-event-button" (click)="clickEvent(i)">
+                <button
+                  mat-stroked-button 
+                  class="function-event-button" 
+                  [ngStyle]="{'background-color': shouldMessageHighlighted(i) ? 'rgb(15, 82, 35)' : ''}"
+                  (click)="clickEvent(i)"
+                >
                   <mat-icon>bolt</mat-icon>
                   {{ message.functionCall.name }}
                 </button>
               }
               @if (message.functionResponse) {
-                <button mat-stroked-button class="function-event-button" (click)="clickEvent(i)">
+                <button
+                  mat-stroked-button 
+                  class="function-event-button" 
+                  [ngStyle]="{'background-color': shouldMessageHighlighted(i) ? 'rgb(15, 82, 35)' : ''}"
+                  (click)="clickEvent(i)"
+                >
                   <mat-icon>check</mat-icon>
                   {{ message.functionResponse.name }}
                 </button>

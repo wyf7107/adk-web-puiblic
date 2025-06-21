@@ -64,7 +64,7 @@
           @if (!showEvalHistory()) {
             <div>
               <div class="evaluation-tab-header">
-                <button class="run-eval-btn" (click)="isSetEvalConfigEnabled ? openEvalConfigDialog() : runEval()">Run Evaluation</button>
+                <button class="run-eval-btn" (click)="openEvalConfigDialog()">Run Evaluation</button>
                 <mat-icon class="evaluation-history-icon" (click)="toggleEvalHistoryButton()" matTooltip="View eval run history">history</mat-icon>
               </div>
               <div class="mat-table-container" style="margin-top:16px;">
@@ -86,11 +86,7 @@
                   <!-- Column Definitions -->
                   <ng-container matColumnDef="evalId">
                     <th mat-header-cell *matHeaderCellDef> Case ID </th>
-                    @if (isViewEvalCaseEnabled) {
-                      <td mat-cell class="eval-case-id" [class.selected-eval-case]="element === selectedEvalCase?.evalId" *matCellDef="let element" (click)="getEvalCase(element)"> {{element}} </td>
-                    } @else {
-                      <td mat-cell *matCellDef="let element"> {{element}} </td>
-                    }
+                    <td mat-cell class="eval-case-id" [class.selected-eval-case]="element === selectedEvalCase()?.evalId" *matCellDef="let element" (click)="getEvalCase(element)"> {{element}} </td>
                   </ng-container>
                   <ng-container matColumnDef="finalEvalStatus">
                     <th mat-header-cell *matHeaderCellDef> Result </th>

@@ -47,18 +47,6 @@ export class AgentService {
     return this.isLoading;
   }
 
-  run(req: AgentRunRequest) {
-    const headers = {
-      'Content-type': 'application/json',
-    };
-    const options = {
-      headers: headers,
-    };
-
-    const url = this.apiServerDomain + `/run`;
-    return this.http.post<any>(url, req, options);
-  }
-
   runSse(req: AgentRunRequest) {
     const url = this.apiServerDomain + `/run_sse`;
     this.isLoading.next(true);
@@ -75,7 +63,7 @@ export class AgentService {
         .then((response) => {
           const reader = response.body?.getReader();
           const decoder = new TextDecoder('utf-8');
-          let lastData: string | null = null;
+          let lastData = '';
 
           const read = () => {
             reader?.read()
@@ -85,15 +73,24 @@ export class AgentService {
                     this.isLoading.next(false);
                     return observer.complete();
                   }
-
                   const chunk = decoder.decode(value, {stream: true});
-                  const lines = chunk.split(/\r?\n/).filter(
-                      (line) => line.startsWith('data:'));
-                  lines.forEach((line) => {
-                    const data = line.replace(/^data:\s*/, '');
-                    self.zone.run(() => observer.next(data));
-                  });
-
+                  lastData += chunk;
+                  try {
+                    const lines = lastData.split(/\r?\n/).filter(
+                        (line) => line.startsWith('data:'));
+                    lines.forEach((line) => {
+                      const data = line.replace(/^data:\s*/, '');
+                      JSON.parse(data);
+                      self.zone.run(() => observer.next(data));
+                    });
+                    lastData = '';
+                  } catch (e) {
+                    // the data is not a valid json, it could be an incomplete
+                    // chunk. we ignore it and wait for the next chunk.
+                    if (e instanceof SyntaxError) {
+                      read();
+                    }
+                  }
                   read();  // Read the next chunk
                 })
                 .catch((err) => {

@@ -23,6 +23,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {BehaviorSubject, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
+import {DEFAULT_EVAL_METRICS, EvalMetric} from '../../core/models/EvalMetric';
 import {Session} from '../../core/models/Session';
 import {Invocation} from '../../core/models/types';
 import {EvalService} from '../../core/services/eval.service';
@@ -31,7 +32,7 @@ import {SessionService} from '../../core/services/session.service';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
-import {EvalMetric, RunEvalConfigDialogComponent} from './run-eval-config-dialog/run-eval-config-dialog.component';
+import {RunEvalConfigDialogComponent} from './run-eval-config-dialog/run-eval-config-dialog.component';
 
 export interface EvalCase {
   evalId: string;
@@ -99,16 +100,11 @@ export class EvalTabComponent implements OnInit, OnChanges {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly flagService = inject(FeatureFlagService);
 
-  protected readonly isViewEvalCaseEnabled =
-      this.flagService.isViewEvalCaseEnabled();
-  protected readonly isSetEvalConfigEnabled =
-      this.flagService.isSetEvalConfigEnabled();
-
   displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
   evalsets: any[] = [];
   selectedEvalSet: string = '';
   evalCases: string[] = [];
-  selectedEvalCase: EvalCase|null = null;
+  selectedEvalCase = signal<EvalCase|null>(null);
   deletedEvalCaseIndex: number = -1;
 
   dataSource = new MatTableDataSource<string>(this.evalCases);
@@ -117,17 +113,11 @@ export class EvalTabComponent implements OnInit, OnChanges {
   showEvalHistory = signal(false);
 
   evalRunning = signal(false);
-  evalMetrics: EvalMetric[] = [
-    {
-      metricName: 'tool_trajectory_avg_score',
-      threshold: 1,
-    },
-    {
-      metricName: 'response_match_score',
-      threshold: 0.7,
-    }
-  ];
-  evalResult: EvaluationResult[] = [];
+  evalMetrics: EvalMetric[] = DEFAULT_EVAL_METRICS;
+
+  // Key: evalSetId
+  // Value: EvaluationResult[]
+  currentEvalResultBySet: Map<string, EvaluationResult[]> = new Map();
   readonly dialog = inject(MatDialog);
 
   protected appEvaluationResults: AppEvaluationResult = {};
@@ -137,7 +127,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
       private sessionService: SessionService,
   ) {
     this.evalCasesSubject.subscribe((evalCases: string[]) => {
-      if (!this.selectedEvalCase && this.deletedEvalCaseIndex >= 0 &&
+      if (!this.selectedEvalCase() && this.deletedEvalCaseIndex >= 0 &&
           evalCases.length > 0) {
         this.selectNewEvalCase(evalCases);
         this.deletedEvalCaseIndex = -1;
@@ -249,7 +239,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
         }))
         .subscribe((res) => {
           this.evalRunning.set(false);
-          this.evalResult = res;
+          this.currentEvalResultBySet.set(this.selectedEvalSet, res);
 
           this.getEvaluationResult();
         });
@@ -284,8 +274,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   getEvalResultForCase(caseId: string) {
-    const el = this.evalResult.filter((c) => c.evalId == caseId);
-    if (el.length == 0) {
+    const el = this.currentEvalResultBySet.get(this.selectedEvalSet)
+                   ?.filter((c) => c.evalId == caseId);
+    if (!el || el.length == 0) {
       return undefined;
     }
     return el[0].finalEvalStatus;
@@ -311,19 +302,49 @@ export class EvalTabComponent implements OnInit, OnChanges {
           currentInvocationIndex++;
         } else {
           const invocationResult = invocationResults[currentInvocationIndex];
-          event.evalStatus = invocationResult.evalMetricResults[0].evalStatus;
+          let evalStatus = 1;
+          let failedMetric = '';
+          let score = 1;
+          let threshold = 1;
+          for (const evalMetricResult of invocationResult.evalMetricResults) {
+            if (evalMetricResult.evalStatus === 2) {
+              evalStatus = 2;
+              failedMetric = evalMetricResult.metricName;
+              score = evalMetricResult.score;
+              threshold = evalMetricResult.threshold;
+              break;
+            }
+          }
+          event.evalStatus = evalStatus;
 
           if (i === res.events.length - 1 ||
               res.events[i + 1].author === 'user') {
-            event.actualInvocationToolUses = this.formatToolUses(
-                invocationResult.actualInvocation.intermediateData.toolUses);
-            event.expectedInvocationToolUses = this.formatToolUses(
-                invocationResult.expectedInvocation.intermediateData.toolUses);
+            this.addEvalFieldsToBotEvent(
+                event, invocationResult, failedMetric, score, threshold);
           }
         }
       }
     }
     return res;
+  }
+
+  private addEvalFieldsToBotEvent(
+      event: any, invocationResult: any, failedMetric: string, score: number,
+      threshold: number) {
+    event.failedMetric = failedMetric;
+    event.evalScore = score;
+    event.evalThreshold = threshold;
+    if (event.failedMetric === 'tool_trajectory_avg_score') {
+      event.actualInvocationToolUses = this.formatToolUses(
+          invocationResult.actualInvocation.intermediateData.toolUses);
+      event.expectedInvocationToolUses = this.formatToolUses(
+          invocationResult.expectedInvocation.intermediateData.toolUses);
+    } else if (event.failedMetric === 'response_match_score') {
+      event.actualFinalResponse =
+          invocationResult.actualInvocation.finalResponse.parts[0].text;
+      event.expectedFinalResponse =
+          invocationResult.expectedInvocation.finalResponse.parts[0]?.text;
+    }
   }
 
   private fromApiResultToSession(res: any): Session {
@@ -337,11 +358,13 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   getSession(evalId: string) {
-    const evalCaseResult = this.evalResult.filter((c) => c.evalId == evalId)[0];
-    const sessionId = evalCaseResult.sessionId;
+    const evalCaseResult =
+        this.currentEvalResultBySet.get(this.selectedEvalSet)
+            ?.filter((c) => c.evalId == evalId)[0];
+    const sessionId = evalCaseResult!.sessionId;
     this.sessionService.getSession(this.userId, this.appName, sessionId)
         .subscribe((res) => {
-          this.addEvalCaseResultToEvents(res, evalCaseResult);
+          this.addEvalCaseResultToEvents(res, evalCaseResult!);
           const session = this.fromApiResultToSession(res);
 
           this.sessionSelected.emit(session);
@@ -432,10 +455,18 @@ export class EvalTabComponent implements OnInit, OnChanges {
   protected getEvalCase(element: any) {
     this.evalService.getEvalCase(this.appName, this.selectedEvalSet, element)
         .subscribe((res) => {
-          this.selectedEvalCase = res;
+          this.selectedEvalCase.set(res);
           this.evalCaseSelected.emit(res);
           this.evalSetIdSelected.emit(this.selectedEvalSet);
         });
+  }
+
+  resetEvalCase() {
+    this.selectedEvalCase.set(null);
+  }
+
+  resetEvalResults() {
+    this.currentEvalResultBySet.clear();
   }
 
   deleteEvalCase(evalCaseId: string) {
@@ -443,7 +474,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
         .deleteEvalCase(this.appName, this.selectedEvalSet, evalCaseId)
         .subscribe((res) => {
           this.deletedEvalCaseIndex = this.evalCases.indexOf(evalCaseId);
-          this.selectedEvalCase = null;
+          this.selectedEvalCase.set(null);
           this.listEvalCases();
         });
   }
@@ -504,6 +535,11 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   protected openEvalConfigDialog() {
+    if (this.selection.selected.length == 0) {
+      alert('No case selected!');
+      return;
+    }
+
     const dialogRef = this.dialog.open(RunEvalConfigDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',

@@ -15,12 +15,14 @@
  * limitations under the License.
  */
 
-import { Injectable, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import {inject, Injectable} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {Observable, pipe} from 'rxjs';
+import {map} from 'rxjs/operators';
 
-export const VIEW_EVAL_CASE = 'view_eval_case';
-
-export const SET_EVAL_CONFIG = 'set_eval_config';
+export const IMPORT_SESSION = 'import_session';
+export const EDIT_FUNCTION_ARGS = 'edit_function_args';
+export const SESSION_URL = 'session_url';
 
 @Injectable({
   providedIn: 'root'
@@ -30,11 +32,21 @@ export class FeatureFlagService {
 
   constructor() {}
 
-  isViewEvalCaseEnabled() {
-    return this.route.snapshot.queryParams[VIEW_EVAL_CASE] === 'true';
+  isImportSessionEnabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+        map((params) => params[IMPORT_SESSION] === 'true'),
+    );
   }
 
-  isSetEvalConfigEnabled() {
-    return this.route.snapshot.queryParams[SET_EVAL_CONFIG] === 'true';
+  isEditFunctionArgsEnabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+        map((params) => params[EDIT_FUNCTION_ARGS] === 'true'),
+    );
+  }
+
+  isSessionUrlEnabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+        map((params) => params[SESSION_URL] === 'true'),
+    );
   }
 }

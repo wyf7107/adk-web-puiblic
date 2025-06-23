@@ -17,7 +17,7 @@
 
 import {inject, Injectable} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {Observable, pipe} from 'rxjs';
+import {Observable, of, pipe} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 export const IMPORT_SESSION = 'import_session';
@@ -45,8 +45,6 @@ export class FeatureFlagService {
   }
 
   isSessionUrlEnabled(): Observable<boolean> {
-    return this.route.queryParams.pipe(
-        map((params) => params[SESSION_URL] === 'true'),
-    );
+    return of(true);
   }
 }

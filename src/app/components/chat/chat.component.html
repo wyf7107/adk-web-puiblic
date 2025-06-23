@@ -559,9 +559,9 @@
               }
               @if (message.functionCall) {
                 <button
-                  mat-stroked-button 
-                  class="function-event-button" 
-                  [ngStyle]="{'background-color': shouldMessageHighlighted(i) ? 'rgb(15, 82, 35)' : ''}"
+                  mat-stroked-button
+                  [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+                  class="function-event-button"
                   (click)="clickEvent(i)"
                 >
                   <mat-icon>bolt</mat-icon>
@@ -570,9 +570,9 @@
               }
               @if (message.functionResponse) {
                 <button
-                  mat-stroked-button 
-                  class="function-event-button" 
-                  [ngStyle]="{'background-color': shouldMessageHighlighted(i) ? 'rgb(15, 82, 35)' : ''}"
+                  mat-stroked-button
+                  [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+                  class="function-event-button"
                   (click)="clickEvent(i)"
                 >
                   <mat-icon>check</mat-icon>

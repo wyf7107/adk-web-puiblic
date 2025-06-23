@@ -23,6 +23,7 @@ import {map} from 'rxjs/operators';
 export const IMPORT_SESSION = 'import_session';
 export const EDIT_FUNCTION_ARGS = 'edit_function_args';
 export const SESSION_URL = 'session_url';
+export const A2A_CARD = 'a2a_card';
 
 @Injectable({
   providedIn: 'root'
@@ -46,5 +47,11 @@ export class FeatureFlagService {
 
   isSessionUrlEnabled(): Observable<boolean> {
     return of(true);
+  }
+
+  isA2ACardEnabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+        map((params) => params[A2A_CARD] === 'true'),
+    );
   }
 }

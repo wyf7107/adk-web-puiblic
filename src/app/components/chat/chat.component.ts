@@ -384,7 +384,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollInterruptedSubject.next(false);
 
     event.preventDefault();
-    if (!this.userInput.trim()) return;
+    if (!this.userInput.trim() && this.selectedFiles.length <= 0) return;
 
     if (event instanceof KeyboardEvent) {
       // support for japanese IME
@@ -394,8 +394,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Add user message
-    this.messages.push({ role: 'user', text: this.userInput });
-    this.messagesSubject.next(this.messages);
+    if (!!this.userInput.trim()) {
+      this.messages.push({role: 'user', text: this.userInput});
+      this.messagesSubject.next(this.messages);
+    }
+
+    // Add user message attachments
     if (this.selectedFiles.length > 0) {
       const messageAttachments = this.selectedFiles.map((file) => ({
         file: file.file,
@@ -525,7 +529,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async getUserMessageParts() {
-    let parts: any = [{ 'text': `${this.userInput}` }];
+    let parts: any = [];
+
+    if (!!this.userInput.trim()) {
+      parts.push({'text': `${this.userInput}`});
+    }
+
     if (this.selectedFiles.length > 0) {
       for (const file of this.selectedFiles) {
         parts.push({

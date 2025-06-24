@@ -1017,6 +1017,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected handleTabChange(event: any) {
     if (!this.isChatMode()) {
+      this.resetEditEvalCaseVars();
       this.handleReturnToSession(true);
     }
   }

@@ -182,9 +182,9 @@
     }
     <div class="resize-handler"></div>
   </mat-drawer>
-  <div class="chat-container" [ngClass]="{'edit-mode': isEvalEditMode()}">
+  <div class="chat-container">
     @if (appName != "") {
-      <div class="chat-toolbar">
+      <div class="chat-toolbar" [ngClass]="{'edit-mode': isEvalEditMode()}">
         @if (!showSidePanel) {
           <span
             class="material-symbols-outlined"

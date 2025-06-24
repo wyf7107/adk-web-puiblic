@@ -332,7 +332,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.sessionService.getSession(this.userId, this.appName, sessionUrl)
               .pipe(take(1), catchError((error) => {
                       this.openSnackBar(
-                          'Can not find specified session. Create a new one.',
+                          'Cannot find specified session. Creating a new one.',
                           'OK');
                       this.createSessionAndReset();
                       return of(null);

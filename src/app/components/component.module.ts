@@ -50,6 +50,8 @@ import {ResizableDrawerDirective} from '../directives/resizable-drawer.directive
 
 import {ArtifactTabComponent} from './artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from './audio-player/audio-player.component';
+import {BuilderTabsComponent} from './builder-tabs/builder-tabs.component';
+import {CanvasComponent} from './canvas/canvas.component';
 import {ChatComponent} from './chat/chat.component';
 import {AddEvalSessionDialogComponent} from './eval-tab/add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {EditFunctionArgsDialogComponent} from './eval-tab/edit-function-args-dialog/edit-function-args-dialog.component';
@@ -88,6 +90,8 @@ const COMPONENTS = [
   RunEvalConfigDialogComponent,
   EditFunctionArgsDialogComponent,
   AudioPlayerComponent,
+  BuilderTabsComponent,
+  CanvasComponent,
   ResizableDrawerDirective,
   ResizableBottomDirective,
   TraceTabComponent,

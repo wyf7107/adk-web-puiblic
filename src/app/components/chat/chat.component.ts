@@ -109,6 +109,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   isEvalCaseEditing = signal(false);
   hasEvalCaseChanged = signal(false);
   isEvalEditMode = signal(false);
+  isBuilderMode = signal(false); // Default to builder mode off
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages: any[] = [];
@@ -1220,6 +1221,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleSse() {
     this.useSse = !this.useSse;
+  }
+
+  toggleMode() {
+    this.isBuilderMode.set(!this.isBuilderMode());
   }
 
   selectEvent(key: string) {

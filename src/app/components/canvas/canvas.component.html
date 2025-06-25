@@ -1,0 +1,81 @@
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="canvas-container">
+  <div class="canvas-header">
+    <h3>ADK Workflow Designer</h3>
+    <div class="canvas-controls">
+      <button mat-icon-button matTooltip="Clear Canvas" (click)="clearCanvas()">
+        <mat-icon>clear</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Export Diagram" (click)="exportDiagram()">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+  </div>
+  
+  <div class="canvas-workspace"
+       (dragover)="onDragOver($event)"
+       (drop)="onDrop($event)"
+       (mousedown)="onMouseDown($event)"
+       (mousemove)="onMouseMove($event)"
+       (mouseup)="onMouseUp($event)">
+    
+    <canvas #canvas 
+            class="diagram-canvas">
+    </canvas>
+    
+    <div class="canvas-instructions" *ngIf="nodes.length === 0">
+      <div class="instruction-content">
+        <mat-icon class="instruction-icon">touch_app</mat-icon>
+        <h4>Start Building Your ADK</h4>
+        <p>Drag components from the left panel to create your workflow</p>
+        <div class="instruction-tips">
+          <div class="tip">
+            <mat-icon>drag_indicator</mat-icon>
+            <span>Drag to move nodes</span>
+          </div>
+          <div class="tip">
+            <mat-icon>link</mat-icon>
+            <span>Shift + Click to connect nodes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Connection Mode Indicator -->
+    <div class="connection-mode-indicator" *ngIf="isConnecting">
+      <div class="connection-indicator-content">
+        <mat-icon class="connection-icon">link</mat-icon>
+        <span>Connection Mode: Click on a target node to connect</span>
+        <button mat-icon-button (click)="cancelConnection()" matTooltip="Cancel Connection">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="canvas-footer">
+    <div class="node-count">
+      <mat-icon>widgets</mat-icon>
+      <span>{{ nodes.length }} components</span>
+    </div>
+    <div class="connection-count">
+      <mat-icon>timeline</mat-icon>
+      <span>{{ connections.length }} connections</span>
+    </div>
+  </div>
+</div>

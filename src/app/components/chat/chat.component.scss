@@ -45,7 +45,6 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  height: 100%;
 }
 
 .event-container {
@@ -142,6 +141,17 @@
   display: inline-block;
 }
 
+.function-event-button {
+  background-color: white;
+  margin: 5px 5px 10px;
+}
+
+.function-event-button-highlight {
+  background-color: rgb(15, 82, 35);
+  border-color: rgb(15, 82, 35) !important;
+  color: white !important;
+}
+
 .user-message {
   display: flex;
   justify-content: flex-end;
@@ -176,7 +186,7 @@
   background-color: #303030;
   max-width: 100%;
   border: none;
-  font-family: "Google Sans", "Helvetica Neue", sans-serif;
+  font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
 }
 
 .message-textarea:focus {
@@ -391,7 +401,7 @@ button {
   justify-content: center;
   align-items: center;
 
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Google Sans', sans-serif;
   font-weight: 400;
   letter-spacing: normal;
   line-height: 24px;
@@ -406,14 +416,9 @@ button {
   }
 }
 
-.function-event-button {
-  background-color: white;
-  margin-left: 0px;
-}
-
 :host ::ng-deep .mat-mdc-unelevated-button:not(:disabled) {
   color: #202124;
-  background-color: #8AB4F8;
+  background-color: #8ab4f8;
 }
 
 :host ::ng-deep .message-text {
@@ -599,6 +604,15 @@ button {
   z-index: 10;
 }
 
+.chat-toolbar.edit-mode {
+  background: #44c2651a;
+}
+
+.attachment {
+  display: flex;
+  align-items: center;
+}
+
 .toolbar-actions {
   margin-left: auto;
   display: flex;
@@ -620,7 +634,7 @@ button {
 
 .toolbar-session-id {
   color: #9aa0a6;
-  font-family: monospace;
+  font-family: 'Google Sans Mono', monospace;
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
@@ -739,8 +753,12 @@ button {
   width: 100%;
   height: 100%;
   display: block;
-
   object-fit: contain;
+}
+
+.event-graph-container ::ng-deep svg text {
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 11px;
 }
 
 :host ::ng-deep pre {
@@ -839,4 +857,12 @@ app-canvas {
     font-size: 14px;
     line-height: 1.5;
   }
+}
+
+.app-name-option,
+.app-select {
+  color: #9aa0a6;
+  font-family: 'Google Sans Mono', monospace;
+  font-style: normal;
+  font-weight: 400;
 }

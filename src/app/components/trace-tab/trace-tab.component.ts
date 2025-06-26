@@ -68,7 +68,7 @@ export class TraceTabComponent implements OnInit, OnChanges {
         JSON.parse(eventItem.attributes['gcp.vertex.agent.llm_request'])
     const userContent =
         requestJson.contents.filter((c: any) => c.role == 'user').at(-1)
-    return userContent.parts[0].text
+    return userContent.parts[0]?.text ?? '[attachment]';
   }
 
   findInvocIdFromTraceId(traceId: string) {

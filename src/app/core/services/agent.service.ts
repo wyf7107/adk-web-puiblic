@@ -47,18 +47,6 @@ export class AgentService {
     return this.isLoading;
   }
 
-  run(req: AgentRunRequest) {
-    const headers = {
-      'Content-type': 'application/json',
-    };
-    const options = {
-      headers: headers,
-    };
-
-    const url = this.apiServerDomain + `/run`;
-    return this.http.post<any>(url, req, options);
-  }
-
   runSse(req: AgentRunRequest) {
     const url = this.apiServerDomain + `/run_sse`;
     this.isLoading.next(true);
@@ -95,6 +83,7 @@ export class AgentService {
                       JSON.parse(data);
                       self.zone.run(() => observer.next(data));
                     });
+                    lastData = '';
                   } catch (e) {
                     // the data is not a valid json, it could be an incomplete
                     // chunk. we ignore it and wait for the next chunk.

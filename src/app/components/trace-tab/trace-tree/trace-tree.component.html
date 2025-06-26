@@ -15,7 +15,9 @@
 -->
 
 <div style="margin-top: 15px">
-  <div class="invocation-id">Invocation ID: {{invocationId}}</div>
+  <div class="invocation-id-container">Invocation ID: 
+    <div class="invocation-id">{{invocationId}}</div>
+  </div>
   <div class="trace-container">
     @for (node of flatTree; track node) {
     <div

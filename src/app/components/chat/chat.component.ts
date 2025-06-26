@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
 import {FormControl} from '@angular/forms';
@@ -213,6 +214,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   isEditFunctionArgsEnabledObs =
       this.featureFlagService.isEditFunctionArgsEnabled();
 
+  // Session url
+  isSessionUrlEnabledObs = this.featureFlagService.isSessionUrlEnabled();
+
   // Trace detail
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
@@ -230,6 +234,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       private downloadService: DownloadService,
       private evalService: EvalService,
       private traceService: TraceService,
+      private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -316,14 +321,41 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   selectApp(appName: string) {
     if (appName != this.appName) {
       this.agentService.setApp(appName);
-      this.createSession();
-      this.eventData = new Map<string, any>();
-      this.eventMessageIndexArray = [];
-      this.messages = [];
-      this.artifacts = [];
-      this.userInput = '';
-      this.longRunningEvents = [];
+
+      this.isSessionUrlEnabledObs.subscribe((sessionUrlEnabled) => {
+        const sessionUrl = this.activatedRoute.snapshot.queryParams['session'];
+
+        if (!sessionUrlEnabled || !sessionUrl) {
+          this.createSessionAndReset();
+        }
+
+        if (sessionUrl) {
+          this.sessionService.getSession(this.userId, this.appName, sessionUrl)
+              .pipe(take(1), catchError((error) => {
+                      this.openSnackBar(
+                          'Cannot find specified session. Creating a new one.',
+                          'OK');
+                      this.createSessionAndReset();
+                      return of(null);
+                    }))
+              .subscribe((session) => {
+                if (session) {
+                  this.updateWithSelectedSession(session);
+                }
+              });
+        }
+      });
     }
+  }
+
+  private createSessionAndReset() {
+    this.createSession();
+    this.eventData = new Map<string, any>();
+    this.eventMessageIndexArray = [];
+    this.messages = [];
+    this.artifacts = [];
+    this.userInput = '';
+    this.longRunningEvents = [];
   }
 
   createSession() {
@@ -332,6 +364,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.currentSessionState = res.state;
         this.sessionId = res.id;
         this.sessionTab.refreshSession();
+
+        this.isSessionUrlEnabledObs.subscribe((enabled) => {
+          if (enabled) {
+            this.updateSelectedSessionUrl();
+          }
+        });
       });
   }
 
@@ -347,11 +385,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollInterruptedSubject.next(false);
 
     event.preventDefault();
-    if (!this.userInput.trim()) return;
+    if (!this.userInput.trim() && this.selectedFiles.length <= 0) return;
+
+    if (event instanceof KeyboardEvent) {
+      // support for japanese IME
+      if (event.isComposing) {
+        return;
+      }
+    }
 
     // Add user message
-    this.messages.push({ role: 'user', text: this.userInput });
-    this.messagesSubject.next(this.messages);
+    if (!!this.userInput.trim()) {
+      this.messages.push({role: 'user', text: this.userInput});
+      this.messagesSubject.next(this.messages);
+    }
+
+    // Add user message attachments
     if (this.selectedFiles.length > 0) {
       const messageAttachments = this.selectedFiles.map((file) => ({
         file: file.file,
@@ -399,13 +448,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.streamingTextMessage = null;
         this.sessionTab.reloadSession(this.sessionId);
         this.eventService.getTrace(this.sessionId)
-          .pipe(catchError((error) => {
-            if (error.status === 404) {
-              return of(null);
-            }
-            return of([]);
-          }))
-          .subscribe(res => { this.traceData = res })
+            .pipe(catchError((error) => {
+              if (error.status === 404) {
+                return of(null);
+              }
+              return of([]);
+            }))
+            .subscribe(res => {
+              this.traceData = res;
+              this.changeDetectorRef.detectChanges();
+            });
         this.traceService.setMessages(this.messages);
       },
     });
@@ -481,7 +533,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async getUserMessageParts() {
-    let parts: any = [{ 'text': `${this.userInput}` }];
+    let parts: any = [];
+
+    if (!!this.userInput.trim()) {
+      parts.push({'text': `${this.userInput}`});
+    }
+
     if (this.selectedFiles.length > 0) {
       for (const file of this.selectedFiles) {
         parts.push({
@@ -597,6 +654,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         message.renderedContent =
           e.groundingMetadata.searchEntryPoint.renderedContent;
       }
+      message.eventId = e?.id;
       this.eventMessageIndexArray[index] = part.text;
     } else if (part.functionCall) {
       message.functionCall = part.functionCall;
@@ -743,12 +801,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         response: authConfig,
       },
     });
-    this.agentService.run(authResponse).subscribe((res) => {
-      this.processRunResponse(res);
+
+    let response: any[] = [];
+    this.agentService.runSse(authResponse).subscribe({
+      next: async (chunk) => {
+        const chunkJson = JSON.parse(chunk);
+        response.push(chunkJson);
+      },
+      error: (err) => console.error('SSE error:', err),
+      complete: () => {
+        this.processRunSseResponse(response);
+      },
     });
   }
 
-  private processRunResponse(response: any) {
+  private processRunSseResponse(response: any) {
     let index = this.eventMessageIndexArray.length - 1;
     for (const e of response) {
       if (e.content) {
@@ -775,7 +842,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((t) => {
       if (t) {
         this.removeFinishedLongRunningEvents(t.events);
-        this.processRunResponse(t.response);
+        this.processRunSseResponse(t.response);
       }
     });
   }
@@ -840,6 +907,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isVideoRecording = false;
     }
     this.evalTab?.resetEvalResults();
+    this.traceData = [];
+    this.bottomPanelVisible = false;
   }
 
   toggleAudioRecording() {
@@ -949,6 +1018,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected handleTabChange(event: any) {
     if (!this.isChatMode()) {
+      this.resetEditEvalCaseVars();
       this.handleReturnToSession(true);
     }
   }
@@ -981,11 +1051,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!session || !session.id || !session.events || !session.state) {
       return;
     }
-
+    this.traceService.resetTraceService();
     this.sessionId = session.id;
     this.currentSessionState = session.state;
     this.evalCase = null;
     this.isChatMode.set(true);
+
+    this.isSessionUrlEnabledObs.subscribe((enabled) => {
+      if (enabled) {
+        this.updateSelectedSessionUrl();
+      }
+    });
 
     this.resetEventsAndMessages();
     let index = 0;
@@ -1003,7 +1079,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.eventService.getTrace(this.sessionId).subscribe(res => {
       this.traceData = res;
-    })
+      this.traceService.setEventData(this.eventData);
+      this.traceService.setMessages(this.messages);
+    });
+
+    this.bottomPanelVisible = false;
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {
@@ -1195,6 +1275,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventMessageIndexArray = [];
     this.messages = [];
     this.artifacts = [];
+    this.traceData = [];
+    this.bottomPanelVisible = false;
 
     // Close eval history if opened
     if (!!this.evalTab.showEvalHistory) {
@@ -1322,6 +1404,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           queryParamsHandling: 'merge',
         });
       });
+  }
+
+  private updateSelectedSessionUrl() {
+    const url = this.router
+                    .createUrlTree([], {
+                      queryParams: {'session': this.sessionId},
+                      queryParamsHandling: 'merge',
+                    })
+                    .toString();
+    this.location.replaceState(url);
   }
 
   handlePageEvent(event: any) {

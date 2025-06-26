@@ -71,11 +71,11 @@
       >
         @if (apps$ | async; as availableApps) {
           @for (appName of availableApps; track appName) {
-            <mat-option [value]="appName">{{ appName }}</mat-option>
+            <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
           }
         }
         @if (selectedAppControl.value && isLoadingApps()) {
-          <mat-option [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
+          <mat-option class="app-name-option" [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
         }
       </mat-select>
     </div>
@@ -206,7 +206,7 @@
     <!-- Test Mode Layout (existing chat interface) -->
     <div class="chat-container">
       @if (appName != "") {
-        <div class="chat-toolbar">
+        <div class="chat-toolbar" [ngClass]="{'edit-mode': isEvalEditMode()}">
           @if (!showSidePanel) {
             <span
               class="material-symbols-outlined"
@@ -360,131 +360,148 @@
                   <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
                 </button>
               }
-              <mat-card
-                class="message-card"
-                [ngClass]="{ 'eval-fail': message.evalStatus === 2 }"
-                [ngStyle]="{
-                  'background-color': shouldMessageHighlighted(i) ? 'rgb(15, 82, 35)' : ''
-                }"
-              >
-                @if (message.isLoading) {
-                  <mat-progress-bar class="loading-bar" mode="buffer"></mat-progress-bar>
-                }
-                @if (message.attachments) {
-                  <div class="attachments">
-                    @for (file of message.attachments; track file) {
-                      <div class="attachment">
-                        @if (file.file.type.startsWith("image/")) {
-                          <img [src]="file.url" alt="attachment" class="image-preview-chat" />
+              @if (!message.functionCall && !message.functionResponse) {
+                <mat-card
+                  class="message-card"
+                  [ngClass]="{ 'eval-fail': message.evalStatus === 2 }"
+                  [ngStyle]="{
+                    'background-color': shouldMessageHighlighted(i) ? 'rgb(15, 82, 35)' : ''
+                  }"
+                >
+                  @if (message.isLoading) {
+                    <mat-progress-bar class="loading-bar" mode="buffer"></mat-progress-bar>
+                  }
+                  @if (message.attachments) {
+                    <div class="attachments">
+                      @for (file of message.attachments; track file) {
+                        <div class="attachment">
+                          @if (file.file.type.startsWith("image/")) {
+                            <img [src]="file.url" alt="attachment" class="image-preview-chat" />
+                          }
+                          @if (!file.file.type.startsWith("image/")) {
+                            <mat-icon>insert_drive_file</mat-icon>
+                            <a [href]="file.url" download>{{ file.file.name }}</a>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                  <div>
+                    @if (message.thought) {
+                      <div class="thought-chip">Thought</div>
+                    }
+                    <div>
+                      @if (message.text) {
+                        @if (message.isEditing) {
+                          <div class="edit-message-container">
+                            <textarea
+                              #messageTextarea
+                              class="message-textarea"
+                              [(ngModel)]="userEditEvalCaseMessage"
+                              rows="4"
+                              cols="80"
+                              (keydown)="handleKeydown($event, message)"
+                            ></textarea>
+                            <div class="edit-message-buttons-container">
+                              <span
+                                class="material-symbols-outlined"
+                                matTooltip="Cancel editing"
+                                style="
+                                  width: 24px;
+                                  height: 24px;
+                                  color: #c4c7c5;
+                                  cursor: pointer;
+                                  margin-right: 16px;
+                                "
+                                (click)="cancelEditMessage(message)"
+                              >
+                                close
+                              </span>
+                              <span
+                                class="material-symbols-outlined"
+                                matTooltip="Save eval case message"
+                                style="
+                                  width: 24px;
+                                  height: 24px;
+                                  color: rgb(97, 151, 202);
+                                  cursor: pointer;
+                                  margin-right: 16px;
+                                "
+                                (click)="saveEditMessage(message)"
+                              >
+                                check
+                              </span>
+                            </div>
+                          </div>
+                        } @else {
+                          <markdown
+                            class="message-text"
+                            [data]="message.text"
+                            [ngStyle]="{
+                              'font-style': message.thought ? 'italic' : 'normal',
+                              color: message.thought ? '#9aa0a6' : 'white'
+                            }"
+                          ></markdown>
                         }
-                        @if (!file.file.type.startsWith("image/")) {
-                          <mat-icon>insert_drive_file</mat-icon>
-                          <a [href]="file.url" download>{{ file.file.name }}</a>
-                        }
+                      }
+                    </div>
+                    @if (message.renderedContent) {
+                      <div>
+                        <div [innerHTML]="renderGooglerSearch(message.renderedContent)"></div>
                       </div>
                     }
                   </div>
-                }
-                <div>
-                  @if (message.thought) {
-                    <div class="thought-chip">Thought</div>
+                  @if (message.executableCode) {
+                    <code> {{ message.executableCode.code }} </code>
                   }
-                  <div>
-                    @if (message.text) {
-                      @if (message.isEditing) {
-                        <div class="edit-message-container">
-                          <textarea
-                            #messageTextarea
-                            class="message-textarea"
-                            [(ngModel)]="userEditEvalCaseMessage"
-                            rows="4"
-                            cols="80"
-                            (keydown)="handleKeydown($event, message)"
-                          ></textarea>
-                          <div class="edit-message-buttons-container">
-                            <span
-                              class="material-symbols-outlined"
-                              matTooltip="Cancel editing"
-                              style="
-                                width: 24px;
-                                height: 24px;
-                                color: #c4c7c5;
-                                cursor: pointer;
-                                margin-right: 16px;
-                              "
-                              (click)="cancelEditMessage(message)"
-                            >
-                              close
-                            </span>
-                            <span
-                              class="material-symbols-outlined"
-                              matTooltip="Save eval case message"
-                              style="
-                                width: 24px;
-                                height: 24px;
-                                color: rgb(97, 151, 202);
-                                cursor: pointer;
-                                margin-right: 16px;
-                              "
-                              (click)="saveEditMessage(message)"
-                            >
-                              check
-                            </span>
-                          </div>
-                        </div>
-                      } @else {
-                        <markdown
-                          class="message-text"
-                          [data]="message.text"
-                          [ngStyle]="{
-                            'font-style': message.thought ? 'italic' : 'normal',
-                            color: message.thought ? '#9aa0a6' : 'white'
-                          }"
-                        ></markdown>
-                      }
-                    }
-                  </div>
-                  @if (message.renderedContent) {
+                  @if (message.codeExecutionResult) {
                     <div>
-                      <div [innerHTML]="renderGooglerSearch(message.renderedContent)"></div>
+                      <div>Outcome: {{ message.codeExecutionResult.outcome }}</div>
+                      <div>Output: {{ message.codeExecutionResult.output }}</div>
                     </div>
                   }
-                </div>
-                @if (message.executableCode) {
-                  <code> {{ message.executableCode.code }} </code>
-                }
-                @if (message.codeExecutionResult) {
-                  <div>
-                    <div>Outcome: {{ message.codeExecutionResult.outcome }}</div>
-                    <div>Output: {{ message.codeExecutionResult.output }}</div>
-                  </div>
-                }
-                @if (message.inlineData) {
-                  @if (message.role === "bot") {
-                    <div>
+                  @if (message.inlineData) {
+                    @if (message.role === "bot") {
                       <div>
-                        @switch (message.inlineData.mediaType) {
-                          @case (MediaType.IMAGE) {
-                            <div class="generated-image-container">
-                              <img
-                                class="generated-image"
-                                alt="image"
-                                [src]="message.inlineData.data"
-                                (click)="openViewImageDialog(message.inlineData.data)"
-                              />
-                            </div>
-                          }
-                          @case (MediaType.AUDIO) {
-                            <div>
-                              <app-audio-player
-                                [base64data]="message.inlineData.data"
-                              ></app-audio-player>
-                            </div>
-                          }
-                          @case (MediaType.TEXT) {
-                            <div>
-                              <div class="html-artifact-container">
-                                <mat-icon>description</mat-icon>
+                        <div>
+                          @switch (message.inlineData.mediaType) {
+                            @case (MediaType.IMAGE) {
+                              <div class="generated-image-container">
+                                <img
+                                  class="generated-image"
+                                  alt="image"
+                                  [src]="message.inlineData.data"
+                                  (click)="openViewImageDialog(message.inlineData.data)"
+                                />
+                              </div>
+                            }
+                            @case (MediaType.AUDIO) {
+                              <div>
+                                <app-audio-player
+                                  [base64data]="message.inlineData.data"
+                                ></app-audio-player>
+                              </div>
+                            }
+                            @case (MediaType.TEXT) {
+                              <div>
+                                <div class="html-artifact-container">
+                                  <mat-icon>description</mat-icon>
+                                  <button
+                                    class="link-style-button"
+                                    (click)="
+                                      openBase64InNewTab(
+                                        message.inlineData.data,
+                                        message.inlineData.mimeType
+                                      )
+                                    "
+                                  >
+                                    {{ message.inlineData.name }}
+                                  </button>
+                                </div>
+                              </div>
+                            }
+                            @default {
+                              <div>
                                 <button
                                   class="link-style-button"
                                   (click)="
@@ -497,98 +514,93 @@
                                   {{ message.inlineData.name }}
                                 </button>
                               </div>
-                            </div>
+                            }
                           }
-                          @default {
-                            <div>
-                              <button
-                                class="link-style-button"
-                                (click)="
-                                  openBase64InNewTab(
-                                    message.inlineData.data,
-                                    message.inlineData.mimeType
-                                  )
-                                "
-                              >
-                                {{ message.inlineData.name }}
-                              </button>
-                            </div>
-                          }
+                        </div>
+                      </div>
+                    } @else {
+                      <div>
+                        @if (message.inlineData.mimeType.startsWith("image/")) {
+                          <div>
+                            <img
+                              class="image-preview-chat"
+                              alt="image"
+                              [src]="message.inlineData.data"
+                              (click)="openViewImageDialog(message.inlineData.data)"
+                            />
+                          </div>
+                        } @else {
+                          <div class="attachment">
+                            <mat-icon>insert_drive_file</mat-icon>
+                            <a [href]="message.inlineData.data" download>{{
+                              message.inlineData.displayName
+                            }}</a>
+                          </div>
                         }
                       </div>
-                    </div>
-                  } @else {
-                    <div>
-                      @if (message.inlineData.mimeType.startsWith("image/")) {
-                        <div>
-                          <img
-                            class="image-preview-chat"
-                            alt="image"
-                            [src]="message.inlineData.data"
-                            (click)="openViewImageDialog(message.inlineData.data)"
-                          />
-                        </div>
-                      } @else {
-                        <div>
-                          <mat-icon>insert_drive_file</mat-icon>
-                          <a [href]="message.inlineData.data" download>{{
-                            message.inlineData.displayName
-                          }}</a>
+                    }
+                  }
+                  @if (message.failedMetric && message.evalStatus === 2) {
+                    <div class="eval-compare-container">
+                      <div class="actual-expected-compare-container">
+                        @if (message.actualInvocationToolUses) {
+                          <div class="actual-result">
+                            <div class="eval-response-header header-actual">Actual tool uses:</div>
+                            <ngx-json-viewer
+                              [json]="message.actualInvocationToolUses"
+                            ></ngx-json-viewer>
+                          </div>
+                          <div class="expected-result">
+                            <div class="eval-response-header header-expected">
+                              Expected tool uses:
+                            </div>
+                            <ngx-json-viewer
+                              [json]="message.expectedInvocationToolUses"
+                            ></ngx-json-viewer>
+                          </div>
+                        } @else if (message.actualFinalResponse) {
+                          <div class="actual-result">
+                            <div class="eval-response-header header-actual">Actual response:</div>
+                            <div>{{ message.actualFinalResponse }}</div>
+                          </div>
+                          <div class="expected-result">
+                            <div class="eval-response-header header-expected">Expected response:</div>
+                            <div>{{ message.expectedFinalResponse }}</div>
+                          </div>
+                        }
+                      </div>
+                      @if (message.evalScore !== undefined && message.evalThreshold !== undefined) {
+                        <div class="score-threshold-container">
+                          <span class="header-actual">Match score: {{ message.evalScore }}</span>
+                          <span class="header-expected">Threshold: {{ message.evalThreshold }}</span>
                         </div>
                       }
                     </div>
                   }
-                }
-                @if (message.functionCall) {
-                  <button mat-stroked-button class="function-event-button" (click)="clickEvent(i)">
-                    <mat-icon>bolt</mat-icon>
-                    {{ message.functionCall.name }}
-                  </button>
-                }
-                @if (message.functionResponse) {
-                  <button mat-stroked-button class="function-event-button" (click)="clickEvent(i)">
-                    <mat-icon>check</mat-icon>
-                    {{ message.functionResponse.name }}
-                  </button>
-                }
-                @if (message.failedMetric && message.evalStatus === 2) {
-                  <div class="eval-compare-container">
-                    <div class="actual-expected-compare-container">
-                      @if (message.actualInvocationToolUses) {
-                        <div class="actual-result">
-                          <div class="eval-response-header header-actual">Actual tool uses:</div>
-                          <ngx-json-viewer
-                            [json]="message.actualInvocationToolUses"
-                          ></ngx-json-viewer>
-                        </div>
-                        <div class="expected-result">
-                          <div class="eval-response-header header-expected">
-                            Expected tool uses:
-                          </div>
-                          <ngx-json-viewer
-                            [json]="message.expectedInvocationToolUses"
-                          ></ngx-json-viewer>
-                        </div>
-                      } @else if (message.actualFinalResponse) {
-                        <div class="actual-result">
-                          <div class="eval-response-header header-actual">Actual response:</div>
-                          <div>{{ message.actualFinalResponse }}</div>
-                        </div>
-                        <div class="expected-result">
-                          <div class="eval-response-header header-expected">Expected response:</div>
-                          <div>{{ message.expectedFinalResponse }}</div>
-                        </div>
-                      }
-                    </div>
-                    @if (message.evalScore !== undefined && message.evalThreshold !== undefined) {
-                      <div class="score-threshold-container">
-                        <span class="header-actual">Match score: {{ message.evalScore }}</span>
-                        <span class="header-expected">Threshold: {{ message.evalThreshold }}</span>
-                      </div>
-                    }
-                  </div>
-                }
-              </mat-card>
+                </mat-card>
+              }
+              @if (message.functionCall) {
+                <button
+                  mat-stroked-button
+                  [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+                  class="function-event-button"
+                  (click)="clickEvent(i)"
+                >
+                  <mat-icon>bolt</mat-icon>
+                  {{ message.functionCall.name }}
+                </button>
+              }
+              @if (message.functionResponse) {
+                <button
+                  mat-stroked-button
+                  [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+                  class="function-event-button"
+                  (click)="clickEvent(i)"
+                >
+                  <mat-icon>check</mat-icon>
+                  {{ message.functionResponse.name }}
+                </button>
+              }
               <div
                 [ngClass]="{
                   'eval-pass': message.evalStatus === 1,

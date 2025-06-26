@@ -13,32 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.json-viewer-container {
-  padding-top: 8px;
-  padding-left: 12px;
-  padding-right: 12px;
-  background-color: #1b1b1b;
-}
 
-.event-graph-container {
-  text-align: center;
-  padding-top: 20px;
-}
+@import '../../../../node_modules/vanilla-jsoneditor/themes/jse-theme-dark.css';
 
-.event-graph-container ::ng-deep svg text {
-  font-family: 'Google Sans Mono', monospace;
-  font-size: 11px;
-}
-
-.wrapper {
-  position: relative;
-}
-
-.tab-header-action {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 48px; /* match tab header height */
-  z-index: 2;
-  margin-right: 10px;
+.json-editor-container {
+  height: 300px;
+  max-height: 300px;
 }

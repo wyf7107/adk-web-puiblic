@@ -36,7 +36,7 @@
           @for (jsonData of eventsMap | keyvalue: mapOrderPreservingSort; track jsonData; let i = $index) {
             <mat-list-item (click)="selectEvent(jsonData.key)">
               <span class="event-index">{{i}}</span>
-              <span>{{jsonData.value.title}}</span>
+              <span class="event-title">{{jsonData.value.title}}</span>
             </mat-list-item>
           }
         </mat-list>
@@ -59,4 +59,3 @@
     </div>
   }
 </div>
-

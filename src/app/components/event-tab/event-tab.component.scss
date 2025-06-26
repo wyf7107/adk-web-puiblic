@@ -17,61 +17,66 @@
 @use '@angular/material' as mat;
 
 .events-wrapper {
-    padding-left: 25px;
-    padding-right: 25px;
-    color: #9AA0A6;
-    font-size: 14px;
-    font-weight: 700;
+  padding-left: 25px;
+  padding-right: 25px;
+  color: #9aa0a6;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-
 .event-index {
-    color: #80868B;
-    font-family: Roboto;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 400;
-    margin-right: 10px;
+  color: #80868b;
+  font-family: Roboto;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  margin-right: 10px;
+}
+
+.event-title {
+  font-family: 'Google Sans Mono', monospace;
 }
 
 .spacer {
-    flex: 1 1 auto;
+  flex: 1 1 auto;
 }
 
 .events-container {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .event-container {
-    display: flex;
-    flex-direction: row;
-    margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  margin-top: 20px;
 }
 
 .function-event-button {
-    margin-top: 11px;
+  margin-top: 11px;
 }
 
 .event-list {
-    @include mat.list-overrides((
+  @include mat.list-overrides(
+    (
       active-indicator-color: orange,
       list-item-container-color: #2b2b2f,
       list-item-label-text-size: 14px,
       list-item-label-text-weight: 400,
       list-item-one-line-container-height: 52px,
-    ));
+    )
+  );
 }
 
 :host ::ng-deep .mdc-list-item {
-    border: 1px solid #5f6368;
-    cursor: pointer;
+  border: 1px solid #5f6368;
+  cursor: pointer;
 
-    &:hover {
-        background-color: #1c1b1c;
-    }
+  &:hover {
+    background-color: #1c1b1c;
+  }
 }
 
 .event-header {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
 }

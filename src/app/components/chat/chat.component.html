@@ -60,11 +60,11 @@
       >
         @if (apps$ | async; as availableApps) {
           @for (appName of availableApps; track appName) {
-            <mat-option [value]="appName">{{ appName }}</mat-option>
+            <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
           }
         }
         @if (selectedAppControl.value && isLoadingApps()) {
-          <mat-option [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
+          <mat-option class="app-name-option" [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
         }
       </mat-select>
     </div>

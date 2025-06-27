@@ -857,7 +857,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const key = this.messages[i].eventId;
     const selectedEvent = this.eventData.get(key);
 
-    return selectedEvent.author ?? this.selectedAppControl.value;
+    return selectedEvent?.author ?? this.selectedAppControl.value;
   }
 
   clickEvent(i: number) {

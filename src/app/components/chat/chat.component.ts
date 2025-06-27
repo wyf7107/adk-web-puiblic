@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import {Location} from '@angular/common';
+import {DOCUMENT, Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnDestroy, OnInit, signal, ViewChild, WritableSignal} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, inject, OnDestroy, OnInit, Renderer2, signal, ViewChild, WritableSignal} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatPaginatorIntl} from '@angular/material/paginator';
@@ -27,6 +27,7 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {instance} from '@viz-js/viz';
 import {BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap} from 'rxjs';
+import stc from 'string-to-color';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
@@ -234,6 +235,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       private evalService: EvalService,
       private traceService: TraceService,
       private location: Location,
+      private renderer: Renderer2,
+      @Inject(DOCUMENT) private document: Document,
   ) {}
 
   ngOnInit(): void {
@@ -326,6 +329,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (!sessionUrlEnabled || !sessionUrl) {
           this.createSessionAndReset();
+
+          return;
         }
 
         if (sessionUrl) {
@@ -579,6 +584,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private storeMessage(
       part: any, e: any, index: number, role: string, invocationIndex?: number,
       additionalIndeces?: any) {
+    if (!!e.author) {
+      this.createAgentIconColorClass(e.author);
+    }
+
     if (e?.longRunningToolIds && e.longRunningToolIds.length > 0) {
       this.getAsyncFunctionsFromParts(e.longRunningToolIds, e.content.parts);
       const func = this.longRunningEvents[0];
@@ -857,6 +866,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const selectedEvent = this.eventData.get(key);
 
     return selectedEvent?.author ?? this.selectedAppControl.value;
+  }
+
+  customIconColorClass(i: number) {
+    const agentName = this.getAgentNameFromEvent(i);
+    return `custom-icon-color-${stc(agentName).replace('#', '')}`;
+  }
+
+  createAgentIconColorClass(agentName: string) {
+    const agentIconColor = stc(agentName);
+
+    const agentIconColorClass =
+        `custom-icon-color-${agentIconColor.replace('#', '')}`;
+
+    // Inject the style for this unique class
+    this.injectCustomIconColorStyle(agentIconColorClass, agentIconColor);
   }
 
   clickEvent(i: number) {
@@ -1558,5 +1582,29 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     input.click();
+  }
+
+  // Helper method to dynamically inject the style
+  private injectCustomIconColorStyle(className: string, color: string): void {
+    // Check if the style already exists to prevent duplicates
+    if (this.document.getElementById(className)) {
+      return;
+    }
+
+    const style = this.renderer.createElement('style');
+    this.renderer.setAttribute(
+        style, 'id', className);  // Set an ID to check for existence later
+    this.renderer.setAttribute(style, 'type', 'text/css');
+
+    // Define the CSS
+    const css = `
+      .${className} {
+        background-color: ${color} !important;
+      }
+    `;
+
+    this.renderer.appendChild(style, this.renderer.createText(css));
+    this.renderer.appendChild(
+        this.document.head, style);  // Append to the head of the document
   }
 }

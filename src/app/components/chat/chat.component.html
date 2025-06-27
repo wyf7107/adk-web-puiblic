@@ -334,6 +334,7 @@
                   mat-mini-fab
                   (click)="clickEvent(i)"
                   [matTooltip]="getAgentNameFromEvent(i)"
+                  [class]="customIconColorClass(i)"
                 >
                   <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
                 </button>

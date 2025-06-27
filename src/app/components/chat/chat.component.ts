@@ -852,6 +852,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.longRunningEvents.filter(obj => !idsToExclude.has(obj.id));
   }
 
+  getAgentNameFromEvent(i: number) {
+    const key = this.messages[i].eventId;
+    const selectedEvent = this.eventData.get(key);
+
+    return selectedEvent.author ?? this.selectedAppControl.value;
+  }
+
   clickEvent(i: number) {
     const key = this.messages[i].eventId;
 

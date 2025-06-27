@@ -333,7 +333,7 @@
                 <button
                   mat-mini-fab
                   (click)="clickEvent(i)"
-                  [matTooltip]="selectedAppControl.value"
+                  [matTooltip]="getAgentNameFromEvent(i)"
                 >
                   <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
                 </button>

@@ -30,7 +30,8 @@
     "tslib": "^2.3.0",
     "uuid": "^11.1.0",
     "vanilla-jsoneditor": "^3.6.0",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.15.0",
+    "string-to-color": "2.2.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.1.7",

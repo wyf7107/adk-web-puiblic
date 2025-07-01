@@ -483,10 +483,10 @@ button {
 }
 
 .app-select-container {
-  width: 30%;
+  width: 35%;
   margin-top: 12px;
   background-color: #212123;
-  margin-left: 20px;
+  margin-left: 10px;
   height: 30px;
   display: flex;
   justify-content: space-between;
@@ -777,4 +777,5 @@ button {
   font-family: 'Google Sans Mono', monospace;
   font-style: normal;
   font-weight: 400;
+  padding-left: unset;
 }

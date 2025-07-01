@@ -55,6 +55,8 @@ export class RunEvalConfigDialogComponent {
       public dialogRef: MatDialogRef<RunEvalConfigDialogComponent>,
       private fb: FormBuilder,
       @Inject(MAT_DIALOG_DATA) public data: EvalConfigData) {
+    this.evalMetrics = this.data.evalMetrics;
+
     // Initialize the form with controls and validators
     this.evalForm = this.fb.group({
       tool_trajectory_avg_score_threshold: [
@@ -66,7 +68,6 @@ export class RunEvalConfigDialogComponent {
         [Validators.required, Validators.min(0), Validators.max(1)]
       ]
     });
-    this.evalMetrics = this.data.evalMetrics;
   }
 
   private getEvalMetricThresholdFromData(metricName: string): number {

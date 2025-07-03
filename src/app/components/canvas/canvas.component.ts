@@ -80,20 +80,18 @@ export class CanvasComponent implements AfterViewInit {
   private resizeCanvas() {
     const canvas = this.canvasRef.nativeElement;
     const container = canvas.parentElement!;
-    
-    // Get the actual display size
     const rect = container.getBoundingClientRect();
-    const displayWidth = rect.width;
-    const displayHeight = rect.height;
-    
-    // Set the canvas size to match the display size
-    canvas.width = displayWidth;
-    canvas.height = displayHeight;
-    
-    // Ensure the canvas style matches the actual size
-    canvas.style.width = displayWidth + 'px';
-    canvas.style.height = displayHeight + 'px';
-    
+
+    // Adjust for device pixel ratio to ensure crisp rendering on high-DPI screens
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    this.ctx.scale(dpr, dpr);
+
+    // Set the display size of the canvas
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+
     this.drawCanvas();
   }
 

@@ -1,0 +1,31 @@
+@if (type == "agent") {
+    <h2 mat-dialog-title>Agent</h2>
+    <mat-dialog-content>
+        <mat-checkbox [(ngModel)]="node.isRoot">Is root agent?</mat-checkbox>
+        @if (!node.isRoot) {
+            <p>Agent Name</p>
+            <mat-form-field>
+                <mat-label>Agent Name</mat-label>
+                <input matInput [(ngModel)]="node.agentName" />
+            </mat-form-field>
+        }
+        <p>Model</p>
+        <mat-form-field>
+            <mat-label>Model</mat-label>
+            <mat-select>
+                @for (model of models; track model) {
+                <mat-option [value]="model">{{model}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+        <p>Instructions</p>
+        <mat-form-field>
+            <mat-label>Instructions</mat-label>
+            <textarea matInput rows="5" cols="50" [(ngModel)]="node.instructions"></textarea>
+        </mat-form-field>
+    </mat-dialog-content>
+}
+<mat-dialog-actions>
+  <button mat-button (click)="createNode()">OK</button>
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

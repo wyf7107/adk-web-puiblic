@@ -16,6 +16,9 @@
  */
 
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { AgentNode } from '../../core/models/AgentBuilder';
+import { MatDialog } from '@angular/material/dialog';
+import { NodeCreateDialogComponent } from './node-create-dialog/node-create-dialog/node-create-dialog.component';
 
 interface DiagramNode {
   id: string;
@@ -25,6 +28,7 @@ interface DiagramNode {
   label: string;
   color: string;
   icon: string;
+  data: AgentNode;
 }
 
 interface DiagramConnection {
@@ -56,6 +60,8 @@ export class CanvasComponent implements AfterViewInit {
   private connectionIdCounter = 0;
   public isConnecting = false;
   private connectionStart: DiagramNode | null = null;
+
+  constructor(private dialog: MatDialog) {}
 
   ngAfterViewInit() {
     this.initializeCanvas();
@@ -106,11 +112,22 @@ export class CanvasComponent implements AfterViewInit {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    
-    this.addNode(componentType, x, y);
+    const dialogRef = this.dialog.open(NodeCreateDialogComponent, {
+          maxWidth: '220vw',
+          maxHeight: '220vh',
+          data: {
+            type: componentType,
+          },
+    });
+
+    dialogRef.afterClosed().subscribe((data) => {
+      if (data) {
+        this.addNode(componentType, x, y, data)
+      }
+    })
   }
 
-  private addNode(type: string, x: number, y: number) {
+  private addNode(type: string, x: number, y: number, data: AgentNode) {
     const nodeConfig = this.getNodeConfig(type);
     const node: DiagramNode = {
       id: `node_${this.nodeIdCounter++}`,
@@ -119,7 +136,8 @@ export class CanvasComponent implements AfterViewInit {
       y: y - 25,
       label: nodeConfig.label,
       color: nodeConfig.color,
-      icon: nodeConfig.icon
+      icon: nodeConfig.icon,
+      data: data
     };
     
     this.nodes.push(node);
@@ -366,5 +384,9 @@ export class CanvasComponent implements AfterViewInit {
   cancelConnection() {
     this.isConnecting = false;
     this.connectionStart = null;
+  }
+
+  save() {
+    console.log(this.nodes)
   }
 }

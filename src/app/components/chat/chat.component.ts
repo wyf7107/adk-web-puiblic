@@ -1021,16 +1021,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       // Listen for messages from the popup
       const listener = (event: MessageEvent) => {
-            if (event.origin !== window.location.origin) {
-              return;  // Ignore messages from unknown sources
-            }
-            const {authResponseUrl} = event.data;
-            if (authResponseUrl) {
-              resolve(authResponseUrl);
-              window.removeEventListener('message', listener);
-            } else {
-              console.log('OAuth failed', event);
-            }
+        if (event.origin !== window.location.origin) {
+          return;  // Ignore messages from unknown sources
+        }
+        const { authResponseUrl } = event.data;
+        if (authResponseUrl) {
+          resolve(authResponseUrl);
+          window.removeEventListener('message', listener);
+        } else {
+          console.log('OAuth failed', event);
+        }
       };
 
       window.addEventListener('message', listener);

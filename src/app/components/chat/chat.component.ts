@@ -589,7 +589,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private storeMessage(
       part: any, e: any, index: number, role: string, invocationIndex?: number,
       additionalIndeces?: any) {
-    if (!!e.author) {
+    if (e?.author) {
       this.createAgentIconColorClass(e.author);
     }
 

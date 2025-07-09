@@ -41,7 +41,6 @@ export class NodeCreateDialogComponent {
 
   createNode() {
     if (this.type == "agent") {
-      if (this.node.isRoot) { this.node.agentName = "root_agent" }
       this.node.agentType = this.selectedAgentType;
       this.node.model = this.selectedModel;
     }

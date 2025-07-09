@@ -33,10 +33,11 @@ export class CanvasUtils {
         const label = new Konva.Text({
             x: 20, // Position relative to the group
             y: 20, // Position relative to the group
-            text: node.icon + node.label,
+            text: node.icon + node.data.agentName,
             fontSize: 20,
             fontFamily: 'Google Sans',
             fill: '#E2E8F0',
+            name: 'agent-name',
         });
 
         const agentTypeChip = new Konva.Label({

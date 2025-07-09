@@ -319,6 +319,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       agentModelText.text(node.data.model)
       const agentInsText = group.findOne('.agent-instructions') as Konva.Text
       agentInsText.text(node.data.instructions)
+      const agentNameText = group.findOne('.agent-name') as Konva.Text
+      agentNameText.text(node.icon + node.data.agentName)
       group.draw();
     })
   }

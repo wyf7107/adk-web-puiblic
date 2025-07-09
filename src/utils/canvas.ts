@@ -122,6 +122,50 @@ export class CanvasUtils {
             }
         });
 
+        const addToolButton = new Konva.Rect({
+            x: 20,
+            y: rect.height() - 60,
+            width: 100,
+            height: 26,
+            fill: '#E2E8F0',
+            opacity: 0.75,
+            cornerRadius: 8,
+        })
+
+        const addToolButtonText = new Konva.Text({
+            x: 30,
+            y: rect.height() - 55,
+            width: 100,
+            height: 26,
+            text: 'Add Tools',
+            fill: 'black',
+            fontSize: 18,
+            fontFamily: 'Google Sans',
+        })
+
+        const addSubAgentsButton = new Konva.Rect({
+            x: 125,
+            y: rect.height() - 60,
+            width: 145,
+            height: 26,
+            fill: '#E2E8F0',
+            opacity: 0.75,
+            cornerRadius: 8,
+        })
+
+        const addSubAgentsButtonText = new Konva.Text({
+            x: 135,
+            y: rect.height() - 55,
+            width: 140,
+            height: 26,
+            text: 'Add Sub Agents',
+            fill: 'black',
+            fontSize: 18,
+            fontFamily: 'Google Sans',
+        })
+
+
+
         // Add the rectangle and label to the group
         group.add(rect);
         group.add(label);
@@ -130,6 +174,10 @@ export class CanvasUtils {
         group.add(instructionRect);
         group.add(instructionText);
         group.add(settingsIcon);
+        group.add(addToolButton);
+        group.add(addToolButtonText);
+        group.add(addSubAgentsButton);
+        group.add(addSubAgentsButtonText);
 
         layer.add(group);
         layer.draw();

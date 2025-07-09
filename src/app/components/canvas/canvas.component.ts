@@ -18,7 +18,7 @@
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit} from '@angular/core';
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
-import { NodeCreateDialogComponent } from './node-create-dialog/node-create-dialog/node-create-dialog.component';
+import { AgentNodeCreateDialogComponent } from './agent-node-create-dialog/agent-node-create-dialog.component';
 import Konva from "konva";
 import {CanvasUtils} from "../../../utils/canvas";
 
@@ -121,7 +121,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    const dialogRef = this.dialog.open(NodeCreateDialogComponent, {
+    const dialogRef = this.dialog.open(AgentNodeCreateDialogComponent, {
           maxWidth: '220vw',
           maxHeight: '220vh',
           data: {
@@ -302,7 +302,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   nodeSettingsClicked(node: DiagramNode, group: Konva.Group) {
-    const dialogRef = this.dialog.open(NodeCreateDialogComponent, {
+    const dialogRef = this.dialog.open(AgentNodeCreateDialogComponent, {
       maxWidth: '220vw',
       maxHeight: '220vh',
       data: {
@@ -366,7 +366,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   save() {
-    console.log(this.nodes)
+    const rootAgentNode = this.nodes.filter(n => n.type === 'agent' && n.data.isRoot)[0];
   }
 
   createKonvaCanvas(): void {

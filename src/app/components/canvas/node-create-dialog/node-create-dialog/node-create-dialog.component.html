@@ -9,10 +9,19 @@
                 <input matInput [(ngModel)]="node.agentName" />
             </mat-form-field>
         }
+        <p>Agent Type</p>
+        <mat-form-field>
+            <mat-label>Type</mat-label>
+            <mat-select [(ngModel)]="selectedAgentType">
+                @for (type of agentType; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
         <p>Model</p>
         <mat-form-field>
             <mat-label>Model</mat-label>
-            <mat-select>
+            <mat-select [(ngModel)]="selectedModel">
                 @for (model of models; track model) {
                 <mat-option [value]="model">{{model}}</mat-option>
                 }

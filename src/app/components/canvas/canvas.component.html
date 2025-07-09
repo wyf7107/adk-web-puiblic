@@ -33,13 +33,10 @@
   <div class="canvas-workspace"
        (dragover)="onDragOver($event)"
        (drop)="onDrop($event)"
-       (mousedown)="onMouseDown($event)"
        (mousemove)="onMouseMove($event)"
        (mouseup)="onMouseUp($event)">
-    
-    <canvas #canvas 
-            class="diagram-canvas">
-    </canvas>
+
+    <div id="konva-container"></div>
     
     <div class="canvas-instructions" *ngIf="nodes.length === 0">
       <div class="instruction-content">

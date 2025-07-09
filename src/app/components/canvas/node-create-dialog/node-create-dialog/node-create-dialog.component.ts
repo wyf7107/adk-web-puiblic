@@ -18,17 +18,32 @@ export class NodeCreateDialogComponent {
   models = [
     "gemini-2.5-flash"
   ]
+  agentType = [
+      'llmAgent',
+      'loopAgent',
+      'parallelAgent',
+      'sequentialAgent'
+  ]
+
+  selectedModel: string = "";
+  selectedAgentType: string = "";
 
   constructor(private dialog: MatDialog, 
     public dialogRef: MatDialogRef<NodeCreateDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,) {
       this.type = data.type;
+      if (data.type == "agent" && data.node) {
+        this.node = data.node;
+        this.selectedModel = this.node.model;
+        this.selectedAgentType = this.node.agentType;
+      }
     }
 
   createNode() {
     if (this.type == "agent") {
       if (this.node.isRoot) { this.node.agentName = "root_agent" }
-      this.node.agentType = "LlmAgent";
+      this.node.agentType = this.selectedAgentType;
+      this.node.model = this.selectedModel;
     }
     this.dialogRef.close(this.node);
   }

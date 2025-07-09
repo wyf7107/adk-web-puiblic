@@ -15,10 +15,12 @@
  * limitations under the License.
  */
 
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit} from '@angular/core';
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { NodeCreateDialogComponent } from './node-create-dialog/node-create-dialog/node-create-dialog.component';
+import Konva from "konva";
+import {CanvasUtils} from "../../../utils/canvas";
 
 interface DiagramNode {
   id: string;
@@ -47,10 +49,13 @@ interface DiagramConnection {
   styleUrl: './canvas.component.scss',
   standalone: false
 })
-export class CanvasComponent implements AfterViewInit {
+export class CanvasComponent implements AfterViewInit, OnInit {
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
-  
+
+  private stage!: Konva.Stage;
+  private layer!: Konva.Layer;
+
   private ctx!: CanvasRenderingContext2D;
   public nodes: DiagramNode[] = [];
   public connections: DiagramConnection[] = [];
@@ -63,8 +68,12 @@ export class CanvasComponent implements AfterViewInit {
 
   constructor(private dialog: MatDialog) {}
 
+  ngOnInit() {
+    this.createKonvaCanvas();
+  }
+
   ngAfterViewInit() {
-    this.initializeCanvas();
+    //this.initializeCanvas();
   }
 
   private initializeCanvas() {
@@ -146,30 +155,30 @@ export class CanvasComponent implements AfterViewInit {
 
   private getNodeConfig(type: string) {
     const configs = {
-      agent: { label: 'Agent', color: '#4285f4', icon: '🤖' },
+      agent: { label: 'Agent', color: '#1A202C', icon: '🤖' },
       tool: { label: 'Tool', color: '#34a853', icon: '🔧' }
     };
     return configs[type as keyof typeof configs] || configs.agent;
   }
 
-  onMouseDown(event: MouseEvent) {
-    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    
-    const clickedNode = this.getNodeAt(x, y);
-    if (clickedNode) {
-      if (event.shiftKey) {
-        // Start connection mode
-        this.startConnection(clickedNode);
-      } else {
-        // Start dragging
-        this.draggedNode = clickedNode;
-        this.dragOffset.x = x - clickedNode.x;
-        this.dragOffset.y = y - clickedNode.y;
-      }
-    }
-  }
+  // onMouseDown(event: MouseEvent) {
+  //   const rect = this.canvasRef.nativeElement.getBoundingClientRect();
+  //   const x = event.clientX - rect.left;
+  //   const y = event.clientY - rect.top;
+  //
+  //   const clickedNode = this.getNodeAt(x, y);
+  //   if (clickedNode) {
+  //     if (event.shiftKey) {
+  //       // Start connection mode
+  //       this.startConnection(clickedNode);
+  //     } else {
+  //       // Start dragging
+  //       this.draggedNode = clickedNode;
+  //       this.dragOffset.x = x - clickedNode.x;
+  //       this.dragOffset.y = y - clickedNode.y;
+  //     }
+  //   }
+  // }
 
   onMouseMove(event: MouseEvent) {
     if (this.draggedNode) {
@@ -245,39 +254,8 @@ export class CanvasComponent implements AfterViewInit {
   }
 
   private drawCanvas() {
-    const canvas = this.canvasRef.nativeElement;
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw grid
-    this.drawGrid();
-    
-    // Draw connections
-    this.drawConnections();
-    
     // Draw nodes
     this.drawNodes();
-  }
-
-  private drawGrid() {
-    const canvas = this.canvasRef.nativeElement;
-    this.ctx.strokeStyle = '#2a2a2a';
-    this.ctx.lineWidth = 1;
-    
-    // Vertical lines
-    for (let x = 0; x < canvas.width; x += 20) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(x, 0);
-      this.ctx.lineTo(x, canvas.height);
-      this.ctx.stroke();
-    }
-    
-    // Horizontal lines
-    for (let y = 0; y < canvas.height; y += 20) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, y);
-      this.ctx.lineTo(canvas.width, y);
-      this.ctx.stroke();
-    }
   }
 
   private drawConnections() {
@@ -317,33 +295,32 @@ export class CanvasComponent implements AfterViewInit {
   }
 
   private drawNode(node: DiagramNode) {
-    // Draw shadow
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    this.ctx.fillRect(node.x + 3, node.y + 3, 100, 50);
-    
-    // Draw node background
-    const gradient = this.ctx.createLinearGradient(node.x, node.y, node.x, node.y + 50);
-    gradient.addColorStop(0, node.color);
-    gradient.addColorStop(1, this.darkenColor(node.color, 0.3));
-    
-    this.ctx.fillStyle = gradient;
-    this.ctx.fillRect(node.x, node.y, 100, 50);
-    
-    // Draw border
-    this.ctx.strokeStyle = this.lightenColor(node.color, 0.2);
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeRect(node.x, node.y, 100, 50);
-    
-    // Draw icon
-    this.ctx.font = '20px Arial';
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText(node.icon, node.x + 25, node.y + 30);
-    
-    // Draw label
-    this.ctx.font = '12px Arial';
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillText(node.label, node.x + 70, node.y + 30);
+    switch (node.type) {
+      case 'agent':
+        CanvasUtils.drawAgentNode(this.layer, node, this.nodeSettingsClicked.bind(this));
+    }
+  }
+
+  nodeSettingsClicked(node: DiagramNode, group: Konva.Group) {
+    const dialogRef = this.dialog.open(NodeCreateDialogComponent, {
+      maxWidth: '220vw',
+      maxHeight: '220vh',
+      data: {
+        type: node.type,
+        node: node.data
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      node.data = result;
+      const agentTypeText = group.findOne('.agent-type') as Konva.Text
+      agentTypeText.text(node.data.agentType)
+      const agentModelText = group.findOne('.agent-model') as Konva.Text
+      agentModelText.text(node.data.model)
+      const agentInsText = group.findOne('.agent-instructions') as Konva.Text
+      agentInsText.text(node.data.instructions)
+      group.draw();
+    })
   }
 
   private darkenColor(color: string, factor: number): string {
@@ -388,5 +365,18 @@ export class CanvasComponent implements AfterViewInit {
 
   save() {
     console.log(this.nodes)
+  }
+
+  createKonvaCanvas(): void {
+    // Create the Konva Stage
+    this.stage = new Konva.Stage({
+      container: 'konva-container', // id of the div that will contain the canvas
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+
+    // Create a Layer for drawing
+    this.layer = new Konva.Layer();
+    this.stage.add(this.layer);
   }
 }

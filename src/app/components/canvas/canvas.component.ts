@@ -19,8 +19,8 @@ import {Component, ElementRef, ViewChild, AfterViewInit, OnInit} from '@angular/
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentNodeCreateDialogComponent } from './agent-node-create-dialog/agent-node-create-dialog.component';
-import Konva from "konva";
-import {CanvasUtils} from "../../../utils/canvas";
+import Konva from 'konva';
+import {CanvasUtils} from '../../../utils/canvas';
 
 interface DiagramNode {
   id: string;

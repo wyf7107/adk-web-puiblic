@@ -27,12 +27,14 @@ export class ToolNodeCreateDialogComponent {
       if (data.type == "tool" && data.node) {
         this.node = data.node;
         this.selectedToolType = this.node.toolType;
+        this.toolCode = this.node.toolCode ?? "";
       }
     }
 
   createNode() {
     if (this.type == "tool") {
       this.node.toolType = this.selectedToolType;
+      this.node.toolCode = this.toolCode;
     }
     this.dialogRef.close(this.node);
   }

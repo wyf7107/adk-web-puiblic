@@ -16,33 +16,12 @@
  */
 
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit} from '@angular/core';
-import { AgentNode } from '../../core/models/AgentBuilder';
+import { AgentNode, ToolNode, DiagramNode, DiagramConnection } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentNodeCreateDialogComponent } from './agent-node-create-dialog/agent-node-create-dialog.component';
 import { ToolNodeCreateDialogComponent } from './tool-node-create-dialog/tool-node-create-dialog.component';
 import Konva from 'konva';
 import {CanvasUtils} from '../../../utils/canvas';
-
-interface DiagramNode {
-  id: string;
-  type: string;
-  x: number;
-  y: number;
-  label: string;
-  color: string;
-  icon: string;
-  data: AgentNode;
-}
-
-interface DiagramConnection {
-  id: string;
-  fromNodeId: string;
-  toNodeId: string;
-  fromX: number;
-  fromY: number;
-  toX: number;
-  toY: number;
-}
 
 @Component({
   selector: 'app-canvas',
@@ -118,26 +97,34 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   onDrop(event: DragEvent) {
     event.preventDefault();
-    const componentType = event.dataTransfer!.getData('text/plain');
+    const componentType = event.dataTransfer!.getData('text/plain') as 'agent' | 'tool';
+
+    if (componentType !== 'agent' && componentType !== 'tool') {
+      return;
+    }
+
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    const dialogRef = this.dialog.open(AgentNodeCreateDialogComponent, {
-          maxWidth: '220vw',
-          maxHeight: '220vh',
-          data: {
-            type: componentType,
-          },
-    });
 
-    dialogRef.afterClosed().subscribe((data) => {
+    const dialogConfig = {
+      maxWidth: '220vw',
+      maxHeight: '220vh',
+      data: { type: componentType },
+    };
+
+    const dialogRef = componentType === 'agent'
+        ? this.dialog.open(AgentNodeCreateDialogComponent, dialogConfig)
+        : this.dialog.open(ToolNodeCreateDialogComponent, dialogConfig);
+
+    dialogRef.afterClosed().subscribe((data: AgentNode | ToolNode) => {
       if (data) {
-        this.addNode(componentType, x, y, data)
+        this.addNode(componentType, x, y, data);
       }
-    })
+    });
   }
 
-  private addNode(type: string, x: number, y: number, data: AgentNode) {
+  private addNode(type: 'agent' | 'tool', x: number, y: number, data: AgentNode | ToolNode) {
     const nodeConfig = this.getNodeConfig(type);
     const node: DiagramNode = {
       id: `node_${this.nodeIdCounter++}`,
@@ -154,7 +141,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.drawCanvas();
   }
 
-  private getNodeConfig(type: string) {
+  private getNodeConfig(type: 'agent' | 'tool') {
     const configs = {
       agent: { label: 'Agent', color: '#1A202C', icon: '🤖' },
       tool: { label: 'Tool', color: '#34a853', icon: '🔧' }
@@ -239,12 +226,23 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       const toNode = this.nodes.find(n => n.id === connection.toNodeId);
       
       if (fromNode && toNode) {
-        connection.fromX = fromNode.x + 50;
-        connection.fromY = fromNode.y + 25;
-        connection.toX = toNode.x + 50;
-        connection.toY = toNode.y + 25;
+        const fromDimensions = this.getNodeDimensions(fromNode.type);
+        const toDimensions = this.getNodeDimensions(toNode.type);
+
+        connection.fromX = fromNode.x + fromDimensions.width / 2;
+        connection.fromY = fromNode.y + fromDimensions.height / 2;
+        connection.toX = toNode.x + toDimensions.width / 2;
+        connection.toY = toNode.y + toDimensions.height / 2;
       }
     });
+  }
+
+  private getNodeDimensions(type: 'agent' | 'tool'): { width: number, height: number } {
+    if (type === 'agent') {
+      return { width: 300, height: 300 };
+    }
+    // type === 'tool'
+    return { width: 250, height: 150 };
   }
 
   private getNodeAt(x: number, y: number): DiagramNode | null {
@@ -255,8 +253,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   private drawCanvas() {
-    // Draw nodes
+    // Clear the layer to prevent drawing nodes on top of each other
+    this.layer.destroyChildren();
+    // Draw connections first so they appear behind the nodes
+    this.drawConnections();
     this.drawNodes();
+    // Use batchDraw for better performance
+    this.layer.batchDraw();
   }
 
   private drawConnections() {
@@ -266,27 +269,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   private drawArrow(fromX: number, fromY: number, toX: number, toY: number) {
-    const headlen = 10;
-    const dx = toX - fromX;
-    const dy = toY - fromY;
-    const angle = Math.atan2(dy, dx);
-    
-    // Draw line
-    this.ctx.strokeStyle = '#8ab4f8';
-    this.ctx.lineWidth = 3;
-    this.ctx.beginPath();
-    this.ctx.moveTo(fromX, fromY);
-    this.ctx.lineTo(toX, toY);
-    this.ctx.stroke();
-    
-    // Draw arrowhead
-    this.ctx.fillStyle = '#8ab4f8';
-    this.ctx.beginPath();
-    this.ctx.moveTo(toX, toY);
-    this.ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
-    this.ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
-    this.ctx.closePath();
-    this.ctx.fill();
+    const arrow = new Konva.Arrow({
+      points: [fromX, fromY, toX, toY],
+      pointerLength: 10,
+      pointerWidth: 10,
+      fill: '#8ab4f8',
+      stroke: '#8ab4f8',
+      strokeWidth: 3,
+    });
+    this.layer.add(arrow);
   }
 
   private drawNodes() {
@@ -303,11 +294,23 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           node,
           this.nodeSettingsClicked.bind(this),
           this.addToolClicked.bind(this),
+          this.nodeDragged.bind(this),
         );
+        break;
+      case 'tool':
+        CanvasUtils.drawToolNode(
+          this.layer,
+          node,
+          this.nodeSettingsClicked.bind(this),
+          this.nodeDragged.bind(this),
+        );
+        break;
     }
   }
 
   addToolClicked(node: DiagramNode, group: Konva.Group) {
+    if (node.type !== 'agent') return;
+
     const dialogRef = this.dialog.open(ToolNodeCreateDialogComponent, {
       maxWidth: '220vw',
       maxHeight: '220vh',
@@ -316,42 +319,81 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       },
     });
 
-    // dialogRef.afterClosed().subscribe(toolData => {
-    //   if (toolData) {
-    //     // Position the new tool node next to the agent node
-    //     const agentPosition = group.position();
-    //     const x = agentPosition.x + group.width() + 50;
-    //     const y = agentPosition.y;
+    dialogRef.afterClosed().subscribe((toolData: ToolNode) => {
+      if (toolData) {
+        // Position the new tool node next to the agent node
+        const agentPosition = group.position();
+        const x = agentPosition.x + group.width() + 50;
+        const y = agentPosition.y;
 
-    //     this.addNode('tool', x, y, toolData);
-    //     const newToolNode = this.nodes[this.nodes.length - 1];
-    //     this.createConnection(node, newToolNode);
-    //   }
-    // });
+        this.addNode('tool', x, y, toolData);
+      }
+    });
+  }
+
+  nodeDragged(node: DiagramNode, position: { x: number, y: number }) {
+    const targetNode = this.nodes.find(n => n.id === node.id);
+    if (targetNode) {
+      // Sync the model with the new view position
+      targetNode.x = position.x;
+      targetNode.y = position.y;
+      
+      // After dragging, we need to update connection positions and redraw
+      this.updateConnections();
+      this.drawCanvas();
+    }
   }
 
   nodeSettingsClicked(node: DiagramNode, group: Konva.Group) {
-    const dialogRef = this.dialog.open(AgentNodeCreateDialogComponent, {
-      maxWidth: '220vw',
-      maxHeight: '220vh',
-      data: {
-        type: node.type,
-        node: node.data
-      },
-    });
+    if (node.type === 'agent' && 'agentName' in node.data) {
+      const dialogRef = this.dialog.open(AgentNodeCreateDialogComponent, {
+        maxWidth: '220vw',
+        maxHeight: '220vh',
+        data: {
+          type: node.type,
+          node: node.data
+        },
+      });
 
-    dialogRef.afterClosed().subscribe(result => {
-      node.data = result;
-      const agentTypeText = group.findOne('.agent-type') as Konva.Text
-      agentTypeText.text(node.data.agentType)
-      const agentModelText = group.findOne('.agent-model') as Konva.Text
-      agentModelText.text(node.data.model)
-      const agentInsText = group.findOne('.agent-instructions') as Konva.Text
-      agentInsText.text(node.data.instructions)
-      const agentNameText = group.findOne('.agent-name') as Konva.Text
-      agentNameText.text(node.icon + node.data.agentName)
-      group.draw();
-    })
+      dialogRef.afterClosed().subscribe((result: AgentNode) => {
+        if (result) {
+          node.data = result;
+          const agentTypeText = group.findOne('.agent-type') as Konva.Text;
+          agentTypeText.text(node.data.agentType);
+          const agentModelText = group.findOne('.agent-model') as Konva.Text;
+          agentModelText.text(node.data.model);
+          const agentInsText = group.findOne('.agent-instructions') as Konva.Text;
+          agentInsText.text(node.data.instructions);
+          const agentNameText = group.findOne('.agent-name') as Konva.Text;
+          agentNameText.text(node.icon + node.data.agentName);
+          group.draw();
+        }
+      });
+    } else if (node.type === 'tool' && 'toolName' in node.data) {
+      const dialogRef = this.dialog.open(ToolNodeCreateDialogComponent, {
+        maxWidth: '220vw',
+        maxHeight: '220vh',
+        data: {
+          type: node.type,
+          node: node.data
+        },
+      });
+
+      dialogRef.afterClosed().subscribe((result: ToolNode) => {
+        if (result) {
+          node.data = result;
+          const toolNameText = group.findOne('.tool-name') as Konva.Text;
+          if (toolNameText) {
+            toolNameText.text(node.icon + (node.data as ToolNode).toolName);
+          }
+          const toolTypeText = group.findOne('.tool-type') as Konva.Text;
+          if (toolTypeText) {
+            toolTypeText.text((node.data as ToolNode).toolType);
+          }
+          group.draw();
+        }
+      });
+    }
   }
 
   private darkenColor(color: string, factor: number): string {
@@ -395,7 +437,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   save() {
-    const rootAgentNode = this.nodes.filter(n => n.type === 'agent' && n.data.isRoot)[0];
+    const rootAgentNode = this.nodes.find(n =>
+      n.type === 'agent' && (n.data as AgentNode).isRoot
+    );
   }
 
   createKonvaCanvas(): void {

@@ -1,25 +1,16 @@
-import {AgentNode, ToolNode} from "../app/core/models/AgentBuilder";
+import {AgentNode, DiagramNode, ToolNode} from '../app/core/models/AgentBuilder';
 import Konva from "konva";
-
-export interface DiagramNode {
-    id: string;
-    type: string;
-    x: number;
-    y: number;
-    label: string;
-    color: string;
-    icon: string;
-    data: AgentNode;
-}
-
 
 export class CanvasUtils {
 
-    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, addToolCallback: any) {
+    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, addToolCallback: any, dragEndCallback: any) {
+        if (node.type !== 'agent') return;
+        const agentData = node.data as AgentNode;
         const group = new Konva.Group({
-            x: 100, // Initial position of the group
-            y: 100, // Initial position of the group
+            x: node.x,
+            y: node.y,
             draggable: true, // Make the entire group draggable
+            id: node.id,
         });
         // Create the rectangle
         const rect = new Konva.Rect({
@@ -33,7 +24,7 @@ export class CanvasUtils {
         const label = new Konva.Text({
             x: 20, // Position relative to the group
             y: 20, // Position relative to the group
-            text: node.icon + node.data.agentName,
+            text: node.icon + agentData.agentName,
             fontSize: 20,
             fontFamily: 'Google Sans',
             fill: '#E2E8F0',
@@ -50,7 +41,7 @@ export class CanvasUtils {
             fill: 'yellow'
         }))
         agentTypeChip.add(new Konva.Text({
-            text: node.data.agentType,
+            text: agentData.agentType,
             fontFamily: 'Google Sans',
             fontSize: 18,
             padding: 5,
@@ -68,7 +59,7 @@ export class CanvasUtils {
             fill: 'yellow'
         }))
         modelChip.add(new Konva.Text({
-            text: node.data.model,
+            text: agentData.model,
             fontFamily: 'Google Sans',
             fontSize: 18,
             padding: 5,
@@ -79,7 +70,7 @@ export class CanvasUtils {
         const instructionText = new Konva.Text({
             x: 20,
             y: 120,
-            text: node.data.instructions,
+            text: agentData.instructions,
             height: 100,
             fontSize: 18,
             fontFamily: 'Google Sans',
@@ -186,8 +177,73 @@ export class CanvasUtils {
         group.add(addSubAgentsButton);
         group.add(addSubAgentsButtonText);
 
+        group.on('dragend', () => {
+            dragEndCallback?.(node, group.position());
+        });
+
         layer.add(group);
-        layer.draw();
     }
 
+    static drawToolNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, dragEndCallback: any) {
+        if (node.type !== 'tool') return;
+        const toolData = node.data as ToolNode;
+
+        const group = new Konva.Group({
+            x: node.x,
+            y: node.y,
+            draggable: true,
+            id: node.id,
+        });
+
+        const rect = new Konva.Rect({
+            width: 250,
+            height: 150,
+            fill: node.color,
+            cornerRadius: 10
+        });
+
+        const label = new Konva.Text({
+            x: 20,
+            y: 20,
+            text: node.icon + toolData.toolName,
+            fontSize: 20,
+            fontFamily: 'Google Sans',
+            fill: '#E2E8F0',
+            name: 'tool-name',
+        });
+
+        const toolTypeChip = new Konva.Label({
+            x: 20,
+            y: 50,
+            opacity: 0.75
+        });
+
+        toolTypeChip.add(new Konva.Tag({ fill: '#A0AEC0' }));
+        toolTypeChip.add(new Konva.Text({
+            text: toolData.toolType,
+            fontFamily: 'Google Sans',
+            fontSize: 18,
+            padding: 5,
+            fill: 'black',
+            name: 'tool-type'
+        }));
+
+        const settingsIcon = new Konva.Text({
+            x: rect.width() - 40,
+            y: 15,
+            text: 'settings',
+            fontSize: 24,
+            fontFamily: 'Material Icons',
+            fill: '#E2E8F0',
+        });
+
+        settingsIcon.on('click', () => settingsCallback?.(node, group));
+
+        group.on('dragend', () => {
+            dragEndCallback?.(node, group.position());
+        });
+
+        group.add(rect, label, toolTypeChip, settingsIcon);
+        layer.add(group);
+    }
 }

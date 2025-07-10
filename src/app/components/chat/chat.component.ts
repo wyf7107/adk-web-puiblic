@@ -449,6 +449,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             this.processPart(chunkJson, part, index);
             this.traceService.setEventData(this.eventData);
           }
+        } else if (chunkJson.errorMessage) {
+          this.processErrorMessage(chunkJson, index)
         }
         this.changeDetectorRef.detectChanges();
       },
@@ -473,6 +475,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Clear input
     this.userInput = '';
     this.changeDetectorRef.detectChanges();
+  }
+
+  private processErrorMessage(chunkJson: any, index: number) {
+    this.storeEvents(chunkJson, chunkJson, index) this
+        .insertMessageBeforeLoadingMessage(
+            {text: chunkJson.errorMessage, role: 'bot'})
   }
 
   private processPart(chunkJson: any, part: any, index: number) {
@@ -779,6 +787,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       title += 'executableCode:' + part.executableCode.code.slice(0, 10);
     } else if (part.codeExecutionResult) {
       title += 'codeExecutionResult:' + part.codeExecutionResult.outcome;
+    } else if (part.errorMessage) {
+      title += 'errorMessage:' + part.errorMessage
     }
     e.title = title;
 

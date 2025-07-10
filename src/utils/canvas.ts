@@ -239,11 +239,39 @@ export class CanvasUtils {
 
         settingsIcon.on('click', () => settingsCallback?.(node, group));
 
+        group.add(rect, label, toolTypeChip, settingsIcon);
+
+        if (toolData.toolCode) {
+            const codeSnippetRect = new Konva.Rect({
+                x: 20,
+                y: 90,
+                stroke: '#555',
+                strokeWidth: 1,
+                fill: '#2D3748',
+                width: 210,
+                height: 50,
+                cornerRadius: 5,
+            });
+
+            const codeSnippetText = new Konva.Text({
+                x: 20,
+                y: 90,
+                text: toolData.toolCode,
+                fontSize: 14,
+                fontFamily: 'monospace',
+                fill: '#E2E8F0',
+                width: 210,
+                height: 50,
+                padding: 5,
+                ellipsis: true,
+            });
+            group.add(codeSnippetRect, codeSnippetText);
+        }
+
         group.on('dragend', () => {
             dragEndCallback?.(node, group.position());
         });
 
-        group.add(rect, label, toolTypeChip, settingsIcon);
         layer.add(group);
     }
 }

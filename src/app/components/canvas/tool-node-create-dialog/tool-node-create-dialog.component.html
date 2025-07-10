@@ -1,6 +1,12 @@
 @if (type == "tool") {
     <h2 mat-dialog-title>Tool</h2>
     <mat-dialog-content>
+        <p>Tool Name</p>
+        <mat-form-field>
+            <mat-label>Tool Name</mat-label>
+            <input matInput [(ngModel)]="node.toolName" />
+        </mat-form-field>
+
         <p>Tool Type</p>
         <mat-form-field>
             <mat-label>Type</mat-label>

@@ -10,6 +10,11 @@
                 }
             </mat-select>
         </mat-form-field>
+
+        @if (selectedToolType === 'inlineTool') {
+            <p>Tool Code</p>
+            <app-code-editor [code]="toolCode" (codeChange)="toolCode = $event"></app-code-editor>
+        }
     </mat-dialog-content>
 }
 <mat-dialog-actions>

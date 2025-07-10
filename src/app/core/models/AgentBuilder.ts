@@ -9,4 +9,5 @@ export interface AgentNode {
 export interface ToolNode {
     toolName: string;
     toolType: string;
+    toolCode?: string;
 }

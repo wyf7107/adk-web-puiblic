@@ -11,15 +11,14 @@ import { ToolNode } from '../../../core/models/AgentBuilder';
 
 
 export class ToolNodeCreateDialogComponent {
-  type: string = "";
-
-  // Tool node
   node: ToolNode = {} as ToolNode;
   toolTypes = [
     'inlineTool'
   ]
 
+  type: string = "";
   selectedToolType: string = "";
+  toolCode: string = "";
 
   constructor(private dialog: MatDialog, 
     public dialogRef: MatDialogRef<ToolNodeCreateDialogComponent>,
@@ -37,5 +36,4 @@ export class ToolNodeCreateDialogComponent {
     }
     this.dialogRef.close(this.node);
   }
-
 }

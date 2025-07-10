@@ -124,13 +124,14 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     });
   }
 
-  private addNode(type: 'agent' | 'tool', x: number, y: number, data: AgentNode | ToolNode) {
+  private addNode(type: 'agent' | 'tool', x: number, y: number, data: AgentNode | ToolNode): DiagramNode {
     const nodeConfig = this.getNodeConfig(type);
+    const dimensions = this.getNodeDimensions(type);
     const node: DiagramNode = {
       id: `node_${this.nodeIdCounter++}`,
       type,
-      x: x - 50, // Center the node
-      y: y - 25,
+      x: x - (dimensions.width / 2), // Center the node
+      y: y - (dimensions.height / 2),
       label: nodeConfig.label,
       color: nodeConfig.color,
       icon: nodeConfig.icon,
@@ -139,6 +140,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     
     this.nodes.push(node);
     this.drawCanvas();
+    return node;
   }
 
   private getNodeConfig(type: 'agent' | 'tool') {
@@ -206,16 +208,19 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   private createConnection(fromNode: DiagramNode, toNode: DiagramNode) {
+    const fromDimensions = this.getNodeDimensions(fromNode.type);
+    const toDimensions = this.getNodeDimensions(toNode.type);
+
     const connection: DiagramConnection = {
       id: `connection_${this.connectionIdCounter++}`,
       fromNodeId: fromNode.id,
       toNodeId: toNode.id,
-      fromX: fromNode.x + 50,
-      fromY: fromNode.y + 25,
-      toX: toNode.x + 50,
-      toY: toNode.y + 25
+      fromX: fromNode.x + fromDimensions.width / 2,
+      fromY: fromNode.y + fromDimensions.height,
+      toX: toNode.x + toDimensions.width / 2,
+      toY: toNode.y
     };
-    
+
     this.connections.push(connection);
     this.drawCanvas();
   }
@@ -230,9 +235,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         const toDimensions = this.getNodeDimensions(toNode.type);
 
         connection.fromX = fromNode.x + fromDimensions.width / 2;
-        connection.fromY = fromNode.y + fromDimensions.height / 2;
+        connection.fromY = fromNode.y + fromDimensions.height;
         connection.toX = toNode.x + toDimensions.width / 2;
-        connection.toY = toNode.y + toDimensions.height / 2;
+        connection.toY = toNode.y;
       }
     });
   }
@@ -294,7 +299,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           node,
           this.nodeSettingsClicked.bind(this),
           this.addToolClicked.bind(this),
-          this.nodeDragged.bind(this),
+          this.nodeDragged.bind(this), // dragEndCallback
         );
         break;
       case 'tool':
@@ -302,7 +307,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           this.layer,
           node,
           this.nodeSettingsClicked.bind(this),
-          this.nodeDragged.bind(this),
+          this.nodeDragged.bind(this), // dragEndCallback
         );
         break;
     }
@@ -321,12 +326,17 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     dialogRef.afterClosed().subscribe((toolData: ToolNode) => {
       if (toolData) {
-        // Position the new tool node next to the agent node
+        // Position the new tool node below the agent node
         const agentPosition = group.position();
-        const x = agentPosition.x + group.width() + 50;
-        const y = agentPosition.y;
+        const agentDimensions = this.getNodeDimensions('agent');
+        const toolDimensions = this.getNodeDimensions('tool');
 
-        this.addNode('tool', x, y, toolData);
+        // Calculate the center for the new tool node
+        const x = agentPosition.x + (agentDimensions.width / 2);
+        const y = agentPosition.y + agentDimensions.height + 100 + (toolDimensions.height / 2);
+
+        const newToolNode = this.addNode('tool', x, y, toolData);
+        this.createConnection(node, newToolNode);
       }
     });
   }

@@ -19,6 +19,7 @@ import {Component, ElementRef, ViewChild, AfterViewInit, OnInit} from '@angular/
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentNodeCreateDialogComponent } from './agent-node-create-dialog/agent-node-create-dialog.component';
+import { ToolNodeCreateDialogComponent } from './tool-node-create-dialog/tool-node-create-dialog.component';
 import Konva from 'konva';
 import {CanvasUtils} from '../../../utils/canvas';
 
@@ -297,8 +298,36 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   private drawNode(node: DiagramNode) {
     switch (node.type) {
       case 'agent':
-        CanvasUtils.drawAgentNode(this.layer, node, this.nodeSettingsClicked.bind(this));
+        CanvasUtils.drawAgentNode(
+          this.layer,
+          node,
+          this.nodeSettingsClicked.bind(this),
+          this.addToolClicked.bind(this),
+        );
     }
+  }
+
+  addToolClicked(node: DiagramNode, group: Konva.Group) {
+    const dialogRef = this.dialog.open(ToolNodeCreateDialogComponent, {
+      maxWidth: '220vw',
+      maxHeight: '220vh',
+      data: {
+        type: 'tool',
+      },
+    });
+
+    // dialogRef.afterClosed().subscribe(toolData => {
+    //   if (toolData) {
+    //     // Position the new tool node next to the agent node
+    //     const agentPosition = group.position();
+    //     const x = agentPosition.x + group.width() + 50;
+    //     const y = agentPosition.y;
+
+    //     this.addNode('tool', x, y, toolData);
+    //     const newToolNode = this.nodes[this.nodes.length - 1];
+    //     this.createConnection(node, newToolNode);
+    //   }
+    // });
   }
 
   nodeSettingsClicked(node: DiagramNode, group: Konva.Group) {

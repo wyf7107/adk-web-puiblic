@@ -5,3 +5,8 @@ export interface AgentNode {
     model: string;
     instructions: string;
 }
+
+export interface ToolNode {
+    toolName: string;
+    toolType: string;
+}

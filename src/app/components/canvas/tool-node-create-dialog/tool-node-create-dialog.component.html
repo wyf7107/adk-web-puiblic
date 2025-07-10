@@ -1,0 +1,18 @@
+@if (type == "tool") {
+    <h2 mat-dialog-title>Tool</h2>
+    <mat-dialog-content>
+        <p>Tool Type</p>
+        <mat-form-field>
+            <mat-label>Type</mat-label>
+            <mat-select [(ngModel)]="selectedToolType">
+                @for (type of toolTypes; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+    </mat-dialog-content>
+}
+<mat-dialog-actions>
+  <button mat-button (click)="createNode()">OK</button>
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

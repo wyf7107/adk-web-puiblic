@@ -1,4 +1,4 @@
-import {AgentNode} from "../app/core/models/AgentBuilder";
+import {AgentNode, ToolNode} from "../app/core/models/AgentBuilder";
 import Konva from "konva";
 
 export interface DiagramNode {
@@ -15,7 +15,7 @@ export interface DiagramNode {
 
 export class CanvasUtils {
 
-    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, callback: any) {
+    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, addToolCallback: any) {
         const group = new Konva.Group({
             x: 100, // Initial position of the group
             y: 100, // Initial position of the group
@@ -117,8 +117,8 @@ export class CanvasUtils {
         });
 
         settingsIcon.on('click', function () {
-            if (callback) {
-                callback(node, group);
+            if (settingsCallback) {
+                settingsCallback(node, group);
             }
         });
 
@@ -143,6 +143,15 @@ export class CanvasUtils {
             fontFamily: 'Google Sans',
         })
 
+        const handleAddToolClick = () => {
+            if (addToolCallback) {
+                addToolCallback(node, group);
+            }
+        };
+        addToolButton.on('click', handleAddToolClick);
+        addToolButtonText.on('click', handleAddToolClick);
+
+
         const addSubAgentsButton = new Konva.Rect({
             x: 125,
             y: rect.height() - 60,
@@ -163,8 +172,6 @@ export class CanvasUtils {
             fontSize: 18,
             fontFamily: 'Google Sans',
         })
-
-
 
         // Add the rectangle and label to the group
         group.add(rect);

@@ -19,10 +19,10 @@ export class AgentNodeCreateDialogComponent {
     "gemini-2.5-flash"
   ]
   agentType = [
-      'llmAgent',
-      'loopAgent',
-      'parallelAgent',
-      'sequentialAgent'
+      'LlmAgent',
+      'LoopAgent',
+      'ParallelAgent',
+      'SequentialAgent'
   ]
 
   selectedModel: string = "";

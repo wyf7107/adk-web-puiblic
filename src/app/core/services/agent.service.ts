@@ -20,6 +20,7 @@ import {Injectable, NgZone} from '@angular/core';
 import {BehaviorSubject, Observable, of} from 'rxjs';
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../models/AgentRunRequest';
+import { AgentBuildRequest } from '../models/AgentBuilder';
 
 @Injectable({
   providedIn: 'root',
@@ -112,5 +113,14 @@ export class AgentService {
       return this.http.get<string[]>(url);
     }
     return new Observable<[]>();
+  }
+
+  agentBuild(req: AgentBuildRequest): Observable<boolean> {
+    if (this.apiServerDomain != undefined) {
+      const url =
+        this.apiServerDomain + `/builder/build`;
+      return this.http.post<any>(url, req);
+    }
+    return new Observable<false>();
   }
 }

@@ -21,6 +21,7 @@ export interface AgentNode {
     agentType: string;
     model: string;
     instructions: string;
+    subAgents?: AgentNode[];
     tools?: ToolNode[];
 }
 

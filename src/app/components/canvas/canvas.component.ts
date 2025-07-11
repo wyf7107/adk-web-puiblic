@@ -334,6 +334,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     dialogRef.afterClosed().subscribe((agentData: AgentNode) => {
       if (agentData) {
+        // Update the agent node's data model with the new subagent
+        const agentNode = node.data as AgentNode;
+        if (!agentNode.subAgents) {
+          agentNode.subAgents = [];
+        }
+        agentNode.subAgents.push(agentData);
+
         // Position the new tool node below the agent node
         const agentPosition = group.position();
         const agentDimensions = this.getNodeDimensions('agent');

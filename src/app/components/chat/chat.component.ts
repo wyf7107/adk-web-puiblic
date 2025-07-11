@@ -46,7 +46,7 @@ import {WebSocketService} from '../../core/services/websocket.service';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
-import {EditFunctionArgsDialogComponent} from '../eval-tab/edit-function-args-dialog/edit-function-args-dialog.component';
+import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 import {EvalCase, EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
@@ -1199,12 +1199,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected editFunctionArgs(message: any) {
     this.isEvalCaseEditing.set(true);
-    const dialogRef = this.dialog.open(EditFunctionArgsDialogComponent, {
+    const dialogRef = this.dialog.open(EditJsonDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',
       data: {
+        dialogHeader: 'Edit function arguments',
         functionName: message.functionCall.name,
-        args: message.functionCall.args
+        jsonContent: message.functionCall.args
       },
     });
 

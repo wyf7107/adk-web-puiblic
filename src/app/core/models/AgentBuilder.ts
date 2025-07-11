@@ -49,3 +49,11 @@ export interface DiagramConnection {
   toX: number;
   toY: number;
 }
+
+export interface AgentBuildRequest {
+  agentName: string;
+  agentType: string;
+  model: string;
+  description: string;
+  instruction: string;
+}

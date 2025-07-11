@@ -15,13 +15,16 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit} from '@angular/core';
-import { AgentNode, ToolNode, DiagramNode, DiagramConnection } from '../../core/models/AgentBuilder';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject} from '@angular/core';
+import { AgentNode, ToolNode, DiagramNode, DiagramConnection, AgentBuildRequest } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentNodeCreateDialogComponent } from './agent-node-create-dialog/agent-node-create-dialog.component';
 import { ToolNodeCreateDialogComponent } from './tool-node-create-dialog/tool-node-create-dialog.component';
 import Konva from 'konva';
 import {CanvasUtils} from '../../../utils/canvas';
+import { AgentService } from '../../core/services/agent.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-canvas',
@@ -30,6 +33,7 @@ import {CanvasUtils} from '../../../utils/canvas';
   standalone: false
 })
 export class CanvasComponent implements AfterViewInit, OnInit {
+  private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
 
@@ -46,7 +50,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   public isConnecting = false;
   private connectionStart: DiagramNode | null = null;
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, private agentService: AgentService, private router: Router) {}
 
   ngOnInit() {
     this.createKonvaCanvas();
@@ -483,6 +487,27 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const rootAgentNode = this.nodes.find(n =>
       n.type === 'agent' && (n.data as AgentNode).isRoot
     );
+    if (rootAgentNode) {
+      const agentData = rootAgentNode.data as AgentNode;
+      const req: AgentBuildRequest = {
+        agentName: agentData.agentName,
+        agentType: agentData.agentType,
+        model: agentData.model,
+        description: "You are a helpful agent",
+        instruction: agentData.instructions
+      }
+      this.agentService.agentBuild(req).subscribe((success) => {
+        if (success) {
+          this.router.navigate(['/'], {
+            queryParams: { app: agentData.agentName }
+          }).then(() => {
+            window.location.reload();
+          });
+        } else {
+          this._snackBar.open("Something went wrong, please try again", "OK");
+        }
+      })
+    }
   }
 
   createKonvaCanvas(): void {

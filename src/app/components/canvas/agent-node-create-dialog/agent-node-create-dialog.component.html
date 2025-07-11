@@ -1,7 +1,7 @@
 @if (type == "agent") {
     <h2 mat-dialog-title>Agent</h2>
     <mat-dialog-content>
-        <mat-checkbox [(ngModel)]="node.isRoot">Is root agent?</mat-checkbox>
+        <mat-checkbox [(ngModel)]="node.isRoot" [disabled]="!isRootAgentEditable">Is root agent?</mat-checkbox>
         <p>Agent Name</p>
         <mat-form-field>
             <mat-label>Agent Name</mat-label>

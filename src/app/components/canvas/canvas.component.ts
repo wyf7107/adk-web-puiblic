@@ -110,7 +110,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const dialogConfig = {
       maxWidth: '220vw',
       maxHeight: '220vh',
-      data: { type: componentType },
+      data: { type: componentType, isRootAgentEditable: true},
     };
 
     const dialogRef = componentType === 'agent'
@@ -298,6 +298,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           this.layer,
           node,
           this.nodeSettingsClicked.bind(this),
+          this.addSubAgentClicked.bind(this),
           this.addToolClicked.bind(this),
           this.nodeDragged.bind(this), // dragEndCallback
         );
@@ -311,6 +312,38 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         );
         break;
     }
+  }
+
+  addSubAgentClicked(node: DiagramNode, group: Konva.Group) {
+    if (node.type !== 'agent' || !('agentName' in node.data)) {
+      return ;
+    }
+    
+    const dialogRef = this.dialog.open(AgentNodeCreateDialogComponent, {
+      maxWidth: '220vw',
+      maxHeight: '220vh',
+      data: {
+        type: 'agent',
+        isRootAgentEditable: false,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((agentData: AgentNode) => {
+      if (agentData) {
+        // Position the new tool node below the agent node
+        const agentPosition = group.position();
+        const agentDimensions = this.getNodeDimensions('agent');
+        const toolDimensions = this.getNodeDimensions('tool');
+
+        // Calculate the center for the new tool node
+        const x = agentPosition.x + (agentDimensions.width / 2) + 200;
+        const y = agentPosition.y + agentDimensions.height + 100 + (agentDimensions.height / 2);
+
+        const newToolNode = this.addNode('agent', x, y, agentData);
+        this.createConnection(node, newToolNode);
+      }
+    });
+
   }
 
   addToolClicked(node: DiagramNode, group: Konva.Group) {
@@ -332,7 +365,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         const toolDimensions = this.getNodeDimensions('tool');
 
         // Calculate the center for the new tool node
-        const x = agentPosition.x + (agentDimensions.width / 2);
+        const x = agentPosition.x + (agentDimensions.width / 2) - 200;
         const y = agentPosition.y + agentDimensions.height + 100 + (toolDimensions.height / 2);
 
         const newToolNode = this.addNode('tool', x, y, toolData);

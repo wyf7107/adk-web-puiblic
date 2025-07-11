@@ -3,7 +3,7 @@ import Konva from "konva";
 
 export class CanvasUtils {
 
-    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, addToolCallback: any, dragEndCallback: any) {
+    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, addSubAgentCallback: any, addToolCallback: any, dragEndCallback: any) {
         if (node.type !== 'agent') return;
         const agentData = node.data as AgentNode;
         const group = new Konva.Group({
@@ -163,6 +163,14 @@ export class CanvasUtils {
             fontSize: 18,
             fontFamily: 'Google Sans',
         })
+
+        const handleAddSubAgentClick = () => {
+            if (addSubAgentCallback) {
+                addSubAgentCallback(node, group);
+            }
+        };
+        addSubAgentsButton.on('click', handleAddSubAgentClick);
+        addSubAgentsButtonText.on('click', handleAddSubAgentClick);
 
         // Add the rectangle and label to the group
         group.add(rect);

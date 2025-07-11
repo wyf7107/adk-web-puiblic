@@ -13,6 +13,8 @@ import { AgentNode } from '../../../core/models/AgentBuilder';
 export class AgentNodeCreateDialogComponent {
   type: string = "";
 
+  isRootAgentEditable: boolean = true;
+
   // Agent node
   node: AgentNode = {} as AgentNode;
   models = [
@@ -32,10 +34,13 @@ export class AgentNodeCreateDialogComponent {
     public dialogRef: MatDialogRef<AgentNodeCreateDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,) {
       this.type = data.type;
+      this.isRootAgentEditable = data.isRootAgentEditable;
+      
       if (data.type == "agent" && data.node) {
         this.node = data.node;
         this.selectedModel = this.node.model;
         this.selectedAgentType = this.node.agentType;
+        this.isRootAgentEditable = !!this.node.isRoot;
       }
     }
 

@@ -42,7 +42,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   private ctx!: CanvasRenderingContext2D;
   public nodes = signal<DiagramNode[]>([]);
-  public connections: DiagramConnection[] = [];
+  public connections = signal<DiagramConnection[]>([]);
   private draggedNode: DiagramNode | null = null;
   private dragOffset = { x: 0, y: 0 };
   private nodeIdCounter = 0;
@@ -225,12 +225,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       toY: toNode.y
     };
 
-    this.connections.push(connection);
+    this.connections.update(conns => [...conns, connection]);
     this.drawCanvas();
   }
 
   private updateConnections() {
-    this.connections.forEach(connection => {
+    this.connections().forEach(connection => {
       const fromNode = this.nodes().find(n => n.id === connection.fromNodeId);
       const toNode = this.nodes().find(n => n.id === connection.toNodeId);
       
@@ -272,7 +272,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   private drawConnections() {
-    this.connections.forEach(connection => {
+    this.connections().forEach(connection => {
       this.drawArrow(connection.fromX, connection.fromY, connection.toX, connection.toY);
     });
   }
@@ -475,7 +475,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   clearCanvas() {
     this.nodes.set([]);
-    this.connections = [];
+    this.connections.set([]);
     this.nodeIdCounter = 0;
     this.connectionIdCounter = 0;
     this.drawCanvas();

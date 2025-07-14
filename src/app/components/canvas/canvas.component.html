@@ -38,7 +38,7 @@
 
     <div id="konva-container"></div>
     
-    <div class="canvas-instructions" *ngIf="nodes.length === 0">
+    <div class="canvas-instructions" *ngIf="nodes().length === 0">
       <div class="instruction-content">
         <mat-icon class="instruction-icon">touch_app</mat-icon>
         <h4>Start Building Your ADK</h4>
@@ -71,7 +71,7 @@
   <div class="canvas-footer">
     <div class="node-count">
       <mat-icon>widgets</mat-icon>
-      <span>{{ nodes.length }} components</span>
+      <span>{{ nodes().length }} components</span>
     </div>
     <div class="connection-count">
       <mat-icon>timeline</mat-icon>

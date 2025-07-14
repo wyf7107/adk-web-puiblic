@@ -529,11 +529,59 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.stage = new Konva.Stage({
       container: 'konva-container', // id of the div that will contain the canvas
       width: window.innerWidth,
-      height: window.innerHeight
+      height: window.innerHeight,
+      draggable: true,
     });
 
     // Create a Layer for drawing
     this.layer = new Konva.Layer();
     this.stage.add(this.layer);
+
+    this.stage.on('wheel', (e) => {
+      e.evt.preventDefault();
+      const scaleBy = 1.1;
+      const oldScale = this.stage.scaleX();
+      const pointer = this.stage.getPointerPosition();
+
+      if (!pointer) return;
+
+      const mousePointTo = {
+        x: (pointer.x - this.stage.x()) / oldScale,
+        y: (pointer.y - this.stage.y()) / oldScale,
+      };
+
+      const newScale = e.evt.deltaY > 0 ? oldScale / scaleBy : oldScale * scaleBy;
+
+      this.stage.scale({ x: newScale, y: newScale });
+
+      const newPos = {
+        x: pointer.x - mousePointTo.x * newScale,
+        y: pointer.y - mousePointTo.y * newScale,
+      };
+      this.stage.position(newPos);
+      this.stage.batchDraw();
+    });
+  }
+
+  zoomIn() {
+    const scaleBy = 1.2;
+    const oldScale = this.stage.scaleX();
+    const newScale = oldScale * scaleBy;
+    this.stage.scale({ x: newScale, y: newScale });
+    this.stage.batchDraw();
+  }
+
+  zoomOut() {
+    const scaleBy = 1.2;
+    const oldScale = this.stage.scaleX();
+    const newScale = oldScale / scaleBy;
+    this.stage.scale({ x: newScale, y: newScale });
+    this.stage.batchDraw();
+  }
+
+  resetZoom() {
+    this.stage.scale({ x: 1, y: 1 });
+    this.stage.position({ x: 0, y: 0 });
+    this.stage.batchDraw();
   }
 }

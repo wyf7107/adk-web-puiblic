@@ -504,11 +504,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (rootAgentNode) {
       const agentData = rootAgentNode.data as AgentNode;
       const req: AgentBuildRequest = {
-        agentName: agentData.agentName,
-        agentType: agentData.agentType,
-        model: agentData.model,
-        description: "You are a helpful agent",
-        instruction: agentData.instructions
+        root: agentData,
       }
       this.agentService.agentBuild(req).subscribe((success) => {
         if (success) {

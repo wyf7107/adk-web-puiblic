@@ -53,9 +53,5 @@ export interface DiagramConnection {
 }
 
 export interface AgentBuildRequest {
-  agentName: string;
-  agentType: string;
-  model: string;
-  description: string;
-  instruction: string;
+  root: AgentNode;
 }

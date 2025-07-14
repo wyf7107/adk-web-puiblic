@@ -38,34 +38,38 @@
 
     <div id="konva-container"></div>
     
-    <div class="canvas-instructions" *ngIf="nodes().length === 0">
-      <div class="instruction-content">
-        <mat-icon class="instruction-icon">touch_app</mat-icon>
-        <h4>Start Building Your ADK</h4>
-        <p>Drag components from the left panel to create your workflow</p>
-        <div class="instruction-tips">
-          <div class="tip">
-            <mat-icon>drag_indicator</mat-icon>
-            <span>Drag to move nodes</span>
-          </div>
-          <div class="tip">
-            <mat-icon>link</mat-icon>
-            <span>Shift + Click to connect nodes</span>
+    @if (nodes().length === 0) {
+      <div class="canvas-instructions">
+        <div class="instruction-content">
+          <mat-icon class="instruction-icon">touch_app</mat-icon>
+          <h4>Start Building Your ADK</h4>
+          <p>Drag components from the left panel to create your workflow</p>
+          <div class="instruction-tips">
+            <div class="tip">
+              <mat-icon>drag_indicator</mat-icon>
+              <span>Drag to move nodes</span>
+            </div>
+            <div class="tip">
+              <mat-icon>link</mat-icon>
+              <span>Shift + Click to connect nodes</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    }
     
     <!-- Connection Mode Indicator -->
-    <div class="connection-mode-indicator" *ngIf="isConnecting">
-      <div class="connection-indicator-content">
-        <mat-icon class="connection-icon">link</mat-icon>
-        <span>Connection Mode: Click on a target node to connect</span>
-        <button mat-icon-button (click)="cancelConnection()" matTooltip="Cancel Connection">
-          <mat-icon>close</mat-icon>
-        </button>
+     @if (isConnecting) {
+      <div class="connection-mode-indicator">
+        <div class="connection-indicator-content">
+          <mat-icon class="connection-icon">link</mat-icon>
+          <span>Connection Mode: Click on a target node to connect</span>
+          <button mat-icon-button (click)="cancelConnection()" matTooltip="Cancel Connection">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </div>
-    </div>
+     }
   </div>
   
   <div class="canvas-footer">
@@ -75,7 +79,7 @@
     </div>
     <div class="connection-count">
       <mat-icon>timeline</mat-icon>
-      <span>{{ connections.length }} connections</span>
+      <span>{{ connections().length }} connections</span>
     </div>
   </div>
 </div>

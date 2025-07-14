@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
 import { AgentNode, ToolNode, DiagramNode, DiagramConnection, AgentBuildRequest } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentNodeCreateDialogComponent } from './agent-node-create-dialog/agent-node-create-dialog.component';
@@ -41,7 +41,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   private layer!: Konva.Layer;
 
   private ctx!: CanvasRenderingContext2D;
-  public nodes: DiagramNode[] = [];
+  public nodes = signal<DiagramNode[]>([]);
   public connections: DiagramConnection[] = [];
   private draggedNode: DiagramNode | null = null;
   private dragOffset = { x: 0, y: 0 };
@@ -142,7 +142,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       data: data
     };
     
-    this.nodes.push(node);
+    this.nodes.update(nodes => [...nodes, node]);
     this.drawCanvas();
     return node;
   }
@@ -231,8 +231,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   private updateConnections() {
     this.connections.forEach(connection => {
-      const fromNode = this.nodes.find(n => n.id === connection.fromNodeId);
-      const toNode = this.nodes.find(n => n.id === connection.toNodeId);
+      const fromNode = this.nodes().find(n => n.id === connection.fromNodeId);
+      const toNode = this.nodes().find(n => n.id === connection.toNodeId);
       
       if (fromNode && toNode) {
         const fromDimensions = this.getNodeDimensions(fromNode.type);
@@ -255,7 +255,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   private getNodeAt(x: number, y: number): DiagramNode | null {
-    return this.nodes.find(node => 
+    return this.nodes().find(node => 
       x >= node.x && x <= node.x + 100 &&
       y >= node.y && y <= node.y + 50
     ) || null;
@@ -290,8 +290,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   private drawNodes() {
-    this.nodes.forEach(node => {
-      this.drawNode(node);
+    this.nodes().forEach(node => {
+      this.drawNode(node)
     });
   }
 
@@ -393,7 +393,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   nodeDragged(node: DiagramNode, position: { x: number, y: number }) {
-    const targetNode = this.nodes.find(n => n.id === node.id);
+    const targetNode = this.nodes().find(n => n.id === node.id);
     if (targetNode) {
       // Sync the model with the new view position
       targetNode.x = position.x;
@@ -474,7 +474,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   clearCanvas() {
-    this.nodes = [];
+    this.nodes.set([]);
     this.connections = [];
     this.nodeIdCounter = 0;
     this.connectionIdCounter = 0;
@@ -498,7 +498,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   save() {
-    const rootAgentNode = this.nodes.find(n =>
+    const rootAgentNode = this.nodes().find(n =>
       n.type === 'agent' && (n.data as AgentNode).isRoot
     );
     if (rootAgentNode) {

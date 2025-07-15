@@ -273,11 +273,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   private drawConnections() {
     this.connections().forEach(connection => {
-      this.drawArrow(connection.fromX, connection.fromY, connection.toX, connection.toY);
+      this.drawArrow(connection.fromX, connection.fromY, connection.toX, connection.toY, connection.id);
     });
   }
 
-  private drawArrow(fromX: number, fromY: number, toX: number, toY: number) {
+  private drawArrow(fromX: number, fromY: number, toX: number, toY: number, id: string) {
     const arrow = new Konva.Arrow({
       points: [fromX, fromY, toX, toY],
       pointerLength: 10,
@@ -285,6 +285,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       fill: '#8ab4f8',
       stroke: '#8ab4f8',
       strokeWidth: 3,
+      id,
     });
     this.layer.add(arrow);
   }
@@ -304,6 +305,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           this.nodeSettingsClicked.bind(this),
           this.addSubAgentClicked.bind(this),
           this.addToolClicked.bind(this),
+          this.nodeDragging.bind(this),
           this.nodeDragged.bind(this), // dragEndCallback
         );
         break;
@@ -312,6 +314,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           this.layer,
           node,
           this.nodeSettingsClicked.bind(this),
+          this.nodeDragging.bind(this),
           this.nodeDragged.bind(this), // dragEndCallback
         );
         break;
@@ -403,6 +406,33 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.updateConnections();
       this.drawCanvas();
     }
+  }
+
+  nodeDragging(node: DiagramNode, group: Konva.Group) {
+    const position = group.position();
+    // Update connections
+    this.connections().forEach(conn => {
+      const fromNode = this.nodes().find(n => n.id === conn.fromNodeId);
+      const toNode = this.nodes().find(n => n.id === conn.toNodeId);
+
+      if (fromNode && toNode) {
+        const fromDimensions = this.getNodeDimensions(fromNode.type);
+        const toDimensions = this.getNodeDimensions(toNode.type);
+
+        if (conn.fromNodeId === node.id) {
+          const arrow = this.layer.findOne(`#${conn.id}`) as Konva.Arrow;
+          if (arrow) {
+            arrow.points([position.x + fromDimensions.width / 2, position.y + fromDimensions.height, conn.toX, conn.toY]);
+          }
+        } else if (conn.toNodeId === node.id) {
+          const arrow = this.layer.findOne(`#${conn.id}`) as Konva.Arrow;
+          if (arrow) {
+            arrow.points([conn.fromX, conn.fromY, position.x + toDimensions.width / 2, position.y]);
+          }
+        }
+      }
+    });
+    this.layer.batchDraw();
   }
 
   nodeSettingsClicked(node: DiagramNode, group: Konva.Group) {

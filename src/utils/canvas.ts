@@ -3,7 +3,7 @@ import Konva from "konva";
 
 export class CanvasUtils {
 
-    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, addSubAgentCallback: any, addToolCallback: any, dragEndCallback: any) {
+    static drawAgentNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, addSubAgentCallback: any, addToolCallback: any, dragMoveCallback: any, dragEndCallback: any) {
         if (node.type !== 'agent') return;
         const agentData = node.data as AgentNode;
         const group = new Konva.Group({
@@ -185,6 +185,10 @@ export class CanvasUtils {
         group.add(addSubAgentsButton);
         group.add(addSubAgentsButtonText);
 
+        group.on('dragmove', () => {
+            dragMoveCallback?.(node, group);
+        });
+
         group.on('dragend', () => {
             dragEndCallback?.(node, group.position());
         });
@@ -192,7 +196,7 @@ export class CanvasUtils {
         layer.add(group);
     }
 
-    static drawToolNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, dragEndCallback: any) {
+    static drawToolNode(layer: Konva.Layer, node: DiagramNode, settingsCallback: any, dragMoveCallback: any, dragEndCallback: any) {
         if (node.type !== 'tool') return;
         const toolData = node.data as ToolNode;
 
@@ -275,6 +279,10 @@ export class CanvasUtils {
             });
             group.add(codeSnippetRect, codeSnippetText);
         }
+
+        group.on('dragmove', () => {
+            dragMoveCallback?.(node, group);
+        });
 
         group.on('dragend', () => {
             dragEndCallback?.(node, group.position());

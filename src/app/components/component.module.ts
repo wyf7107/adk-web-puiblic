@@ -90,7 +90,6 @@ const COMPONENTS = [
   EditJsonDialogComponent,
   AudioPlayerComponent,
   BuilderTabsComponent,
-  CanvasComponent,
   ResizableDrawerDirective,
   ResizableBottomDirective,
   TraceTabComponent,
@@ -139,6 +138,7 @@ const COMPONENTS = [
     MatChipsModule,
     MatDialogModule,
     MatButtonToggleModule,
+    CanvasComponent
   ],
 })
 export class ComponentModule {

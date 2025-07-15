@@ -76,6 +76,11 @@
     #131314;
 }
 
+::ng-deep vflow .root-svg{
+  background-color: #1e1e1e !important;
+  color: white !important; 
+}
+
 .diagram-canvas {
   display: block;
   width: 100%;
@@ -320,5 +325,83 @@
     padding: 8px 16px;
     flex-direction: column;
     gap: 8px;
+  }
+}
+
+.custom-node {
+  width: 320px;
+  border: 1px solid gray;
+  border-radius: 5px;
+  align-items: center;
+
+  &:hover {
+    border: 3px dotted gray;
+
+    .empty-resource {
+      button {
+        display: block;
+      }
+    }
+  }
+}
+
+.node-title-wrapper {
+  border-bottom: 1px solid gray;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.node-title {
+  padding-left: 10px;
+  padding-right: 10px;
+  display: flex;
+}
+
+.agent-info {
+  margin-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  display: flex;
+}
+
+.info-chip {
+  padding: 5px;
+  border-radius: 10px;
+  background-color: green;
+  margin-right: 5px;
+}
+
+.agent-instructions {
+  margin-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid gray;
+}
+
+.instruction-title {
+  font-family: "Google Sans";
+  color: rgb(163, 163, 163);
+  margin-bottom: 10px;
+}
+
+.instructions {
+  font-family: "Google Sans";
+  margin-bottom: 10px;
+}
+
+.agent-resources {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.empty-resource {
+  margin-top: 10px;
+  color: rgb(163, 163, 163);
+  margin-bottom: 10px;
+  display: flex;
+
+  button {
+    display: none;
   }
 }

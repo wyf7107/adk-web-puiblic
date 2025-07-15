@@ -15,10 +15,10 @@
 -->
 
 <div class="dialog-container">
-  <h2 mat-dialog-title>Edit function arguments</h2>
+  <h2 mat-dialog-title>{{ data.dialogHeader }}</h2>
   <mat-dialog-content>
     {{ functionName }}
-    <app-json-editor [jsonString]="toolArgs"></app-json-editor>
+    <app-json-editor [jsonString]="jsonString"></app-json-editor>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancel</button>

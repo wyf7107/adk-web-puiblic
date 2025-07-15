@@ -52,8 +52,8 @@ import {AudioPlayerComponent} from './audio-player/audio-player.component';
 import {BuilderTabsComponent} from './builder-tabs/builder-tabs.component';
 import {CanvasComponent} from './canvas/canvas.component';
 import {ChatComponent} from './chat/chat.component';
+import {EditJsonDialogComponent} from './edit-json-dialog/edit-json-dialog.component';
 import {AddEvalSessionDialogComponent} from './eval-tab/add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
-import {EditFunctionArgsDialogComponent} from './eval-tab/edit-function-args-dialog/edit-function-args-dialog.component';
 import {EvalTabComponent} from './eval-tab/eval-tab.component';
 import {NewEvalSetDialogComponentComponent} from './eval-tab/new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
 import {RunEvalConfigDialogComponent} from './eval-tab/run-eval-config-dialog/run-eval-config-dialog.component';
@@ -87,7 +87,7 @@ const COMPONENTS = [
   TraceChartComponent,
   ViewImageDialogComponent,
   RunEvalConfigDialogComponent,
-  EditFunctionArgsDialogComponent,
+  EditJsonDialogComponent,
   AudioPlayerComponent,
   BuilderTabsComponent,
   CanvasComponent,

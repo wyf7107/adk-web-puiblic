@@ -17,18 +17,20 @@
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {EditFunctionArgsDialogComponent} from './edit-function-args-dialog.component';
+import {EditJsonDialogComponent} from './edit-function-args-dialog.component';
 
 describe('EditFunctionArgsDialogComponent', () => {
-  let component: EditFunctionArgsDialogComponent;
-  let fixture: ComponentFixture<EditFunctionArgsDialogComponent>;
+  let component: EditJsonDialogComponent;
+  let fixture: ComponentFixture<EditJsonDialogComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [EditFunctionArgsDialogComponent],
-    }).compileComponents();
+    await TestBed
+        .configureTestingModule({
+          imports: [EditJsonDialogComponent],
+        })
+        .compileComponents();
 
-    fixture = TestBed.createComponent(EditFunctionArgsDialogComponent);
+    fixture = TestBed.createComponent(EditJsonDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

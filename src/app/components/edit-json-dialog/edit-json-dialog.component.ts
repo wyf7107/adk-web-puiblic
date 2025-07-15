@@ -18,37 +18,38 @@
 import {Component, Inject, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 
-import {JsonEditorComponent} from '../../json-editor/json-editor.component';
+import {JsonEditorComponent} from '../json-editor/json-editor.component';
 
-export interface EditFunctionArgsData {
-  functionName: string;
-  args?: any;
+export interface EditJsonData {
+  dialogHeader: string;
+  functionName?: string;
+  jsonContent?: any;
 }
 
 @Component({
-  selector: 'app-edit-function-args-dialog',
-  templateUrl: './edit-function-args-dialog.component.html',
-  styleUrls: ['./edit-function-args-dialog.component.scss'],
+  selector: 'app-edit-json-dialog',
+  templateUrl: './edit-json-dialog.component.html',
+  styleUrls: ['./edit-json-dialog.component.scss'],
   standalone: false,
 })
-export class EditFunctionArgsDialogComponent implements OnInit {
+export class EditJsonDialogComponent implements OnInit {
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
-  protected toolArgs = '';
+  protected jsonString = '';
   protected functionName = '';
 
   constructor(
-      public dialogRef: MatDialogRef<EditFunctionArgsDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) public data: EditFunctionArgsData) {
-    this.toolArgs = JSON.stringify(data.args, null, 2);
-    this.functionName = data.functionName;
+      public dialogRef: MatDialogRef<EditJsonDialogComponent>,
+      @Inject(MAT_DIALOG_DATA) public data: EditJsonData) {
+    this.jsonString = JSON.stringify(data.jsonContent, null, 2);
+    this.functionName = data.functionName || '';
   }
 
   ngOnInit(): void {}
 
   onSave(): void {
     try {
-      this.toolArgs = this.jsonEditorComponent.getJsonString();
-      const parsedArgs = JSON.parse(this.toolArgs);
+      this.jsonString = this.jsonEditorComponent.getJsonString();
+      const parsedArgs = JSON.parse(this.jsonString);
       this.dialogRef.close(parsedArgs);
     } catch (e) {
       alert('Invalid JSON: ' + e);

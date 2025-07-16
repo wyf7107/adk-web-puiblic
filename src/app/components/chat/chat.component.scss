@@ -70,8 +70,7 @@
     color: #bdc1c6;
     cursor: pointer;
     display: flex;
-    align-items: center;
-    justify-content: center;
+
   }
 }
 
@@ -79,7 +78,6 @@
   display: flex;
   align-items: center;
   margin-left: auto;
-  margin-right: 20px;
 }
 
 .mode-toggle {
@@ -88,9 +86,7 @@
 }
 
 .build-test-toggle {
-  @include mat.slide-toggle-overrides(
-    (
-      label-text-size: 14px,
+  @include mat.slide-toggle-overrides((label-text-size: 14px,
       label-text-color: #9aa0a6,
       selected-track-color: #8ab4f9,
       selected-focus-track-color: #8ab4f9,
@@ -104,8 +100,22 @@
       with-icon-handle-size: 16px,
       unselected-track-color: #5f6368,
       unselected-handle-color: #9aa0a6,
-    )
-  );
+    ));
+}
+
+.builder-mode-button {
+  // color: #8ab4f8 !important;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s ease;
+  margin: 0 12px;
+
+  &:hover {
+    background-color: rgba(138, 180, 248, 0.2);
+    transform: scale(1.05);
+  }
+
 }
 
 .chat-card {
@@ -156,6 +166,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
+
   .message-card {
     background-color: #004a77;
     align-self: flex-end;
@@ -167,6 +178,7 @@
 .bot-message {
   display: flex;
   align-items: center;
+
   .message-card {
     background-color: #303030;
     align-self: flex-start;
@@ -464,6 +476,7 @@ button {
 
 :host ::ng-deep .mat-mdc-mini-fab {
   background-color: white;
+
   mat-icon {
     color: black;
   }
@@ -532,13 +545,10 @@ button {
 }
 
 .app-select-container {
-  @include mat.select-overrides(
-    (
-      placeholder-text-color: #8ab4f8,
+  @include mat.select-overrides((placeholder-text-color: #8ab4f8,
       enabled-trigger-text-color: #8ab4f8,
       enabled-arrow-color: #8ab4f8,
-    )
-  );
+    ));
 }
 
 .json-viewer-container {
@@ -588,12 +598,9 @@ button {
 .drawer-header {
   display: flex;
   justify-content: space-between;
-  @include mat.button-overrides(
-    (
-      filled-container-color: #89b4f8,
+  @include mat.button-overrides((filled-container-color: #89b4f8,
       filled-label-text-color: black,
-    )
-  );
+    ));
 }
 
 .chat-toolbar {
@@ -663,9 +670,7 @@ button {
 }
 
 .toolbar-sse-toggle {
-  @include mat.slide-toggle-overrides(
-    (
-      label-text-size: 14px,
+  @include mat.slide-toggle-overrides((label-text-size: 14px,
       label-text-color: #9aa0a6,
       selected-track-color: #8ab4f9,
       selected-focus-track-color: #8ab4f9,
@@ -677,8 +682,7 @@ button {
       track-width: 46px,
       track-outline-color: #1b73e8,
       with-icon-handle-size: 20px,
-    )
-  );
+    ));
 }
 
 .image-container {

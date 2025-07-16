@@ -15,148 +15,77 @@
 -->
 
 <div class="canvas-container">
-  <div class="canvas-header">
-    <h3>ADK Workflow Designer</h3>
-    <div class="canvas-controls">
-      <!-- <button mat-icon-button matTooltip="Clear Canvas" (click)="clearCanvas()">
-        <mat-icon>clear</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Export Diagram" (click)="save()">
-        <mat-icon>check</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Export Diagram" (click)="exportDiagram()">
-        <mat-icon>download</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Zoom In" (click)="zoomIn()">
-        <mat-icon>zoom_in</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Zoom Out" (click)="zoomOut()">
-        <mat-icon>zoom_out</mat-icon>
-      </button>
-      <button mat-icon-button matTooltip="Reset Zoom" (click)="resetZoom()">
-        <mat-icon>zoom_out_map</mat-icon>
-      </button> -->
-    </div>
-  </div>
-  
+  <!-- Exit Button -->
+  <button mat-icon-button matTooltip="Exit Builder Mode" (click)="exitBuilderMode()" class="exit-builder-button">
+    <mat-icon>close</mat-icon>
+  </button>
+
   <div class="canvas-workspace">
-    
-    @if (nodes.length > 0) {
-      <vflow view="auto" [nodes]="nodes" [edges]="edges">
-        <ng-template let-ctx nodeHtml>
-          <div class="custom-node" selectable [class.custom-node_selected]="ctx.selected()">
-            <div class="node-title-wrapper">
-              <div class="node-title">
-                <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span> root_agent
-              </div>
-            </div>
-            <div class="agent-info">
-              <div class="info-chip">
-                LlmAgent
-              </div>
-              <div class="info-chip">
-                Gemini-2.5-flash
-              </div>
-            </div>
-            <div class="agent-instructions">
-              <div class="instruction-title">Instructions</div>
-              <div class="instructions">
-                Please click the agent node and add instructions
-              </div>
-            </div>
-            <div class="agent-resources">
-                <div class="empty-resource">
-                  <div style="margin-right: 5px">Add tools or sub-agents to agent</div>
-                  <div class="add-resource-btn">
-                    <button matIconButton [matMenuTriggerFor]="menu" aria-label="Example icon-button with a menu">
-                      <mat-icon>add</mat-icon>
-                    </button>
-                    <mat-menu #menu="matMenu">
-                      <button mat-menu-item [matMenuTriggerFor]="tools">
-                        <mat-icon>build</mat-icon>
-                        <span>Tools</span>
-                      </button>
-                      <button mat-menu-item>
-                        <mat-icon>smart_toy</mat-icon>
-                        <span>Sub Agent</span>
-                      </button>
-                    </mat-menu>
-                    <mat-menu #tools="matMenu">
-                      <button mat-menu-item>
-                        <span>Inline Tool</span>
-                      </button>
-                      <button mat-menu-item>
-                        <span>Function Tool</span>
-                      </button>
-                      <button mat-menu-item>
-                        <span>MCP Toolset</span>
-                      </button>
-                    </mat-menu>
-                    <mat-menu #subAgent="matMenu">
-                      <button mat-menu-item>
-                        <mat-icon>dialpad</mat-icon>
-                        <span>Tools</span>
-                      </button>
-                      <button mat-menu-item disabled>
-                        <mat-icon>voicemail</mat-icon>
-                        <span>Check voice mail</span>
-                      </button>
-                      <button mat-menu-item>
-                        <mat-icon>notifications_off</mat-icon>
-                        <span>Disable alerts</span>
-                      </button>
-                    </mat-menu>
-                  </div>
-                </div>
-            </div>
-            <handle type="source" position="right" />
+
+    @if (nodes().length > 0) {
+    <vflow view="auto" [nodes]="nodes()" [edges]="edges()" [snapGrid]="[15, 15]" [draggable]="true"
+      [background]="{ type: 'dots', color: '#2f2f2f', gap: 15 }" [key]="nodesKey()" (nodeSelect)="onNodeClick($event)"
+      [selectedNodes]="selectedNodeId() ? [selectedNodeId()] : []" (click)="onCanvasClick($event)">
+
+      <ng-template let-ctx nodeHtml>
+        <div class="custom-node" [class.custom-node_selected]="ctx.selected()">
+          <div class="custom-node__content">
+            <div class="custom-node__text">{{ getNodeDisplayName(ctx.node.id) }}</div>
           </div>
-        </ng-template>
-      </vflow>
+          <handle type="source" position="bottom" />
+          <handle type="target" position="top" />
+        </div>
+      </ng-template>
+
+      <ng-template let-ctx edge>
+        <path fill="none" stroke="#8ab4f8" stroke-width="2" [attr.d]="ctx.path()" />
+      </ng-template>
+
+    </vflow>
+
+    <!-- Overlay buttons for each node -->
+    <div class="node-overlay-container">
+      @for (node of nodes(); track node.id) {
+      <button class="add-subagent-button" (click)="addSubAgent(node.id, $event)"
+        [style.left.px]="getNodeButtonPosition(node).x" [style.top.px]="getNodeButtonPosition(node).y"
+        title="Add subagent">
+        +
+      </button>
+      }
+    </div>
     }
-    
-    @if (nodes.length === 0) {
-      <div class="canvas-instructions">
-        <div class="instruction-content">
-          <mat-icon class="instruction-icon">touch_app</mat-icon>
-          <h4>Start Building Your ADK</h4>
-          <p>Drag components from the left panel to create your workflow</p>
-          <div class="instruction-tips">
-            <div class="tip">
-              <mat-icon>drag_indicator</mat-icon>
-              <span>Drag to move nodes</span>
-            </div>
-            <div class="tip">
-              <mat-icon>link</mat-icon>
-              <span>Shift + Click to connect nodes</span>
-            </div>
+
+    @if (nodes().length === 0) {
+    <div class="canvas-instructions">
+      <div class="instruction-content">
+        <mat-icon class="instruction-icon">touch_app</mat-icon>
+        <h4>Start Building Your ADK</h4>
+        <p>Drag components from the left panel to create your workflow</p>
+        <div class="instruction-tips">
+          <div class="tip">
+            <mat-icon>drag_indicator</mat-icon>
+            <span>Drag to move nodes</span>
+          </div>
+          <div class="tip">
+            <mat-icon>link</mat-icon>
+            <span>Shift + Click to connect nodes</span>
           </div>
         </div>
       </div>
+    </div>
     }
-    
+
     <!-- Connection Mode Indicator -->
-     @if (isConnecting) {
-      <div class="connection-mode-indicator">
-        <div class="connection-indicator-content">
-          <mat-icon class="connection-icon">link</mat-icon>
-          <span>Connection Mode: Click on a target node to connect</span>
-          <!-- <button mat-icon-button (click)="cancelConnection()" matTooltip="Cancel Connection">
+    @if (isConnecting) {
+    <div class="connection-mode-indicator">
+      <div class="connection-indicator-content">
+        <mat-icon class="connection-icon">link</mat-icon>
+        <span>Connection Mode: Click on a target node to connect</span>
+        <!-- <button mat-icon-button (click)="cancelConnection()" matTooltip="Cancel Connection">
             <mat-icon>close</mat-icon>
           </button> -->
-        </div>
       </div>
-     }
-  </div>
-  
-  <div class="canvas-footer">
-    <div class="node-count">
-      <mat-icon>widgets</mat-icon>
-      <span>{{ nodes.length }} components</span>
     </div>
-    <div class="connection-count">
-      <mat-icon>timeline</mat-icon>
-      <span>{{ connections().length }} connections</span>
-    </div>
+    }
   </div>
 </div>

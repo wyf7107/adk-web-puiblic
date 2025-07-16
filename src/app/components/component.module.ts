@@ -71,6 +71,7 @@ import {ViewImageDialogComponent} from './view-image-dialog/view-image-dialog.co
 import { AgentNodeCreateDialogComponent } from './canvas/agent-node-create-dialog/agent-node-create-dialog.component';
 import { CodeEditorComponent } from './code-editor/code-editor.component';
 import { ToolNodeCreateDialogComponent } from './canvas/tool-node-create-dialog/tool-node-create-dialog.component';
+import { AgentEditFormComponent } from './agent-edit-form/agent-edit-form.component';
 
 
 const COMPONENTS = [
@@ -99,6 +100,7 @@ const COMPONENTS = [
   AgentNodeCreateDialogComponent,
   CodeEditorComponent,
   ToolNodeCreateDialogComponent,
+  AgentEditFormComponent,
 ];
 
 @NgModule({

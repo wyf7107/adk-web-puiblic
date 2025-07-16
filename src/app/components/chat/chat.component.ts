@@ -53,6 +53,8 @@ import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
+import {AgentNode} from '../../core/models/AgentBuilder';
+import {AgentEditFormComponent} from '../agent-edit-form/agent-edit-form.component';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -138,6 +140,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   useSse = false;
   currentSessionState = {};
   root_agent = ROOT_AGENT;
+  currentAgentNode: AgentNode = {} as AgentNode;
 
   private readonly messagesSubject = new BehaviorSubject<any[]>([]);
   private readonly streamingTextMessageSubject =
@@ -1352,8 +1355,35 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.useSse = !this.useSse;
   }
 
-  toggleMode() {
-    this.isBuilderMode.set(!this.isBuilderMode());
+  openBuilderMode() {
+    this.isBuilderMode.set(true);
+    
+    // Set a default app name for builder mode
+    this.appName = 'new_agent';
+    
+    // Initialize with default agent values
+    this.currentAgentNode = {
+      isRoot: true,
+      agentName: 'agent_1',
+      agentType: 'LlmAgent',
+      model: 'gemini-2.5-flash',
+      instructions: 'You are a helpful assistant.'
+    };
+  }
+
+  exitBuilderMode() {
+    this.isBuilderMode.set(false);
+  }
+
+  onAgentUpdated(agentNode: AgentNode) {
+    this.currentAgentNode = agentNode;
+    // Here you can add logic to update the canvas or other components
+    console.log('Agent updated:', agentNode);
+  }
+
+  onNodeSelected(agentNode: AgentNode) {
+    this.currentAgentNode = agentNode;
+    console.log('Node selected:', agentNode);
   }
 
   selectEvent(key: string) {

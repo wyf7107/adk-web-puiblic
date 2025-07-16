@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
-import { DiagramNode, DiagramConnection } from '../../core/models/AgentBuilder';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, EventEmitter, Output, Input, OnChanges, NO_ERRORS_SCHEMA, ChangeDetectionStrategy, ChangeDetectorRef} from '@angular/core';
+import { DiagramNode, DiagramConnection, AgentNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
-import Konva from 'konva';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import {Vflow, DynamicNode, Edge} from 'ngx-vflow'
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
-import {MatButtonModule} from '@angular/material/button';;
+import {MatButtonModule} from '@angular/material/button';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
@@ -33,17 +33,17 @@ import {MatButtonModule} from '@angular/material/button';;
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, CommonModule],
+  schemas: [NO_ERRORS_SCHEMA],
+  changeDetection: ChangeDetectionStrategy.Default
 })
-export class CanvasComponent implements AfterViewInit, OnInit {
+export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
+  @Input() selectedAgentNode: AgentNode | null = null;
+  @Output() exitBuilderModeEvent = new EventEmitter<void>();
+  @Output() nodeSelectedEvent = new EventEmitter<AgentNode>();
   private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
-
-  private stage!: Konva.Stage;
-  private layer!: Konva.Layer;
-
-  private ctx!: CanvasRenderingContext2D;
   //public nodes = signal<DiagramNode[]>([]);
   public connections = signal<DiagramConnection[]>([]);
   private draggedNode: DiagramNode | null = null;
@@ -53,18 +53,33 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   public isConnecting = false;
   private connectionStart: DiagramNode | null = null;
 
-  nodeId = 1;
+  nodeId = 2; // Start from 2 since the first agent is already created
   edgeId = 1;
 
-  public nodes: DynamicNode[] = [];
+  public nodes = signal<any[]>([]);
+  public nodesKey = signal(0); // Key to force re-rendering
 
-  public edges: Edge[] = [];
+  public edges = signal<Edge[]>([]);
+  public selectedNodeId = signal<string | null>(null);
+  
+  // Store agent data for each node
+  private nodeAgentData = new Map<string, AgentNode>();
 
-  constructor(private dialog: MatDialog, private agentService: AgentService, private router: Router) {}
+  constructor(private dialog: MatDialog, private agentService: AgentService, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     //this.createKonvaCanvas();
     this.createRootAgent();
+  }
+
+  ngOnChanges() {
+    console.log('ngOnChanges called, selectedAgentNode:', this.selectedAgentNode);
+    console.log('nodes length:', this.nodes().length);
+    
+    if (this.selectedAgentNode && this.nodes().length > 0) {
+      // Update the first node (root agent) with the new data
+      this.updateNodeData('1', this.selectedAgentNode);
+    }
   }
 
   ngAfterViewInit() {
@@ -72,18 +87,199 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   createRootAgent() {
-    if (this.nodes.length == 0) {
-      this.nodeId = 1;
-      this.nodes.push({
-        id: this.nodeId.toString(),
+    if (this.nodes().length == 0) {
+      console.log('Creating root agent...');
+      
+      // Create default agent with specified default values
+      const defaultAgent: AgentNode = {
+        isRoot: true,
+        agentName: 'agent_1',
+        agentType: 'LlmAgent',
+        model: 'gemini-2.5-flash',
+        instructions: 'You are a helpful assistant.'
+      };
+      
+      // Create the root agent node
+      const rootNode: DynamicNode = {
+        id: '1',
         point: signal({ x: 100, y: 100 }),
         type: 'html-template',
-        data: signal({
-          customType: 'gradient',
-          text: 'I am a nice custom node with gradient',
-        })
-      })
+        draggable: signal(true)
+      };
+      
+      // Store the agent data separately
+      this.nodeAgentData.set('1', defaultAgent);
+      
+      // Set nodes with only the root agent
+      this.nodes.set([rootNode]);
+      console.log('Root agent created:', rootNode);
+      
+      // Set empty edges array initially
+      this.edges.set([]);
+      
+      // Select the root agent by default
+      this.nodeSelectedEvent.emit(defaultAgent);
+      
+      // Verify after a delay
+      setTimeout(() => {
+        console.log('Final nodes:', this.nodes());
+        console.log('Final edges:', this.edges());
+        console.log('Node count:', this.nodes().length);
+        console.log('Edge count:', this.edges().length);
+      }, 500);
     }
+  }
+
+  onNodeClick(nodeData: any) {
+    const nodeId = nodeData.id;
+    const node = this.nodes().find((n: DynamicNode) => n.id === nodeId);
+    
+    if (node) {
+      // Update selected node
+      this.selectedNodeId.set(nodeId);
+      
+      // Get the stored agent data for this node
+      const agentData = this.nodeAgentData.get(nodeId);
+      
+      if (agentData) {
+        // Use the stored agent data
+        this.nodeSelectedEvent.emit(agentData);
+      } else {
+        // Fallback to creating default agent data
+        const defaultAgentData: AgentNode = {
+          isRoot: nodeId === '1', // First agent is root
+          agentName: `agent_${nodeId}`, // Use node ID as fallback name
+          agentType: 'LlmAgent',
+          model: 'gemini-2.5-flash',
+          instructions: 'You are a helpful assistant.'
+        };
+        
+        // Store the default data
+        this.nodeAgentData.set(nodeId, defaultAgentData);
+        this.nodeSelectedEvent.emit(defaultAgentData);
+      }
+    }
+  }
+
+  onCanvasClick(event: any) {
+    // Deselect when clicking on empty space
+    if (!event.target || !event.target.closest('.vflow-node')) {
+      this.selectedNodeId.set(null);
+    }
+  }
+
+  addSubAgent(parentNodeId: string, event: Event) {
+    console.log('addSubAgent called with parentNodeId:', parentNodeId);
+    event.stopPropagation(); // Prevent node selection when clicking the button
+    // Create a new sub-agent with default values
+    const subAgent: AgentNode = {
+      isRoot: false,
+      agentName: `agent_${this.nodeId}`,
+      agentType: 'LlmAgent',
+      model: 'gemini-2.5-flash',
+      instructions: 'You are a helpful assistant.'
+    };
+    // Get the parent node's position
+    const parentNode = this.nodes().find((n: DynamicNode) => n.id === parentNodeId);
+    if (!parentNode) return;
+    const parentPoint = (parentNode as any).point();
+    // Position the new node directly below the parent
+    const newX = parentPoint.x;
+    const newY = parentPoint.y + 120; // 120px below parent
+    // Create the new node
+    const newNode: DynamicNode = {
+      id: this.nodeId.toString(),
+      point: signal({ x: newX, y: newY }),
+      type: 'html-template',
+      draggable: signal(true)
+    };
+    
+    // Store the agent data for the new node
+    this.nodeAgentData.set(this.nodeId.toString(), subAgent);
+    
+    // Add the new node
+    this.nodes.set([...this.nodes(), newNode]);
+    
+    // Create an edge connecting parent to child
+    const newEdge: Edge = {
+      id: `${parentNodeId}->${this.nodeId}`,
+      source: parentNodeId,
+      target: this.nodeId.toString()
+    };
+    this.edges.set([...this.edges(), newEdge]);
+    
+    // Force re-rendering by updating the key
+    this.nodesKey.set(this.nodesKey() + 1);
+    
+    // Increment the node ID for next use
+    this.nodeId++;
+    
+    console.log('Added subagent:', subAgent.agentName);
+    console.log('New node:', newNode);
+    console.log('New edge:', newEdge);
+    console.log('Total nodes:', this.nodes().length);
+    console.log('Total edges:', this.edges().length);
+  }
+
+  updateNodeData(nodeId: string, updatedAgentData: AgentNode) {
+    const currentNodes = this.nodes();
+    const nodeIndex = currentNodes.findIndex((n: DynamicNode) => n.id === nodeId);
+    
+    if (nodeIndex !== -1) {
+      // Create a completely new node object with updated text
+      const existingNode = currentNodes[nodeIndex];
+      const updatedNode: DynamicNode = {
+        id: existingNode.id,
+        point: existingNode.point,
+        type: existingNode.type,
+        text: signal(updatedAgentData.agentName),
+        draggable: existingNode.draggable
+      };
+      
+      // Create a new array with the updated node
+      const updatedNodes = [...currentNodes];
+      updatedNodes[nodeIndex] = updatedNode;
+      
+      // Update the nodes signal
+      this.nodes.set(updatedNodes);
+      
+      // Update the stored agent data
+      this.nodeAgentData.set(nodeId, updatedAgentData);
+      
+      // Increment the key to force re-rendering
+      this.nodesKey.set(this.nodesKey() + 1);
+      
+      // Force change detection
+      this.cdr.detectChanges();
+      
+      console.log('Updated node data:', nodeId, updatedAgentData.agentName);
+      console.log('Current nodes after update:', this.nodes());
+    }
+  }
+
+  exitBuilderMode() {
+    this.exitBuilderModeEvent.emit();
+  }
+
+  getNodeButtonPosition(node: any): { x: number, y: number } {
+    // Get the node's position from the signal
+    const nodePoint = (node as any).point();
+    
+    // Position the button under the bottom of the node, center aligned
+    // Assuming nodes are roughly 120px wide and 60px tall
+    return {
+      x: nodePoint.x + 60, // Center of the node (120px / 2)
+      y: nodePoint.y + 70  // Below the node (60px + 10px gap)
+    };
+  }
+
+  isNodeSelected(nodeId: string): boolean {
+    return this.selectedNodeId() === nodeId;
+  }
+
+  getNodeDisplayName(nodeId: string): string {
+    const agentData = this.nodeAgentData.get(nodeId);
+    return agentData ? agentData.agentName : `agent_${nodeId}`;
   }
 
 

@@ -22,5 +22,4 @@ export interface AgentRunRequest {
   newMessage: any;
   functionCallEventId?: string;
   streaming?: boolean;
-  stateDelta?: any;
 }

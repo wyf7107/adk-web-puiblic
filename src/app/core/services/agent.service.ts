@@ -115,6 +115,14 @@ export class AgentService {
     return new Observable<[]>();
   }
 
+  listTools(): Observable<string[]> {
+    if (this.apiServerDomain != undefined) {
+      const url = this.apiServerDomain + `/tools`;
+      return this.http.get<string[]>(url);
+    }
+    return new Observable<[]>();
+  }
+
   agentBuild(req: AgentBuildRequest): Observable<boolean> {
     if (this.apiServerDomain != undefined) {
       const url =

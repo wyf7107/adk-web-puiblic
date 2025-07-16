@@ -18,7 +18,7 @@
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
 import { DiagramNode, DiagramConnection } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
-import Konva from 'konva';
+// import Konva from 'konva';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
@@ -40,8 +40,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
 
-  private stage!: Konva.Stage;
-  private layer!: Konva.Layer;
+  // private stage!: Konva.Stage;
+  // private layer!: Konva.Layer;
 
   private ctx!: CanvasRenderingContext2D;
   //public nodes = signal<DiagramNode[]>([]);

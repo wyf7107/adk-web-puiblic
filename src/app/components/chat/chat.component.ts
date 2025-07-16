@@ -138,6 +138,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   useSse = false;
   currentSessionState = {};
   root_agent = ROOT_AGENT;
+  builtInTools: string[] = [];
 
   private readonly messagesSubject = new BehaviorSubject<any[]>([]);
   private readonly streamingTextMessageSubject =
@@ -1354,6 +1355,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleMode() {
     this.isBuilderMode.set(!this.isBuilderMode());
+
+    if (this.isBuilderMode()) {
+      this.agentService.listTools().subscribe(tools => {
+        this.builtInTools = tools;
+      });
+    }
   }
 
   selectEvent(key: string) {

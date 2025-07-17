@@ -15,64 +15,46 @@
 -->
 
 <div class="builder-tabs-container">
-  <mat-tab-group>
-            <mat-tab class="tabs-header">
-              <ng-template mat-tab-label>
-                <span class="tab-label">Manual</span>
-              </ng-template>
-              <div class="builder-tab-content">
-                <div class="components-section">
-                  <h4>Components</h4>
-                  <div class="draggable-items">
-                    <div 
-                      class="draggable-item agent-item"
-                      draggable="true"
-                      (dragstart)="onDragStart($event, 'agent')"
-                    >
-                      <mat-icon class="item-icon">smart_toy</mat-icon>
-                      <span class="item-label">Agent</span>
-                    </div>
-                    
-                    <div 
-                      class="draggable-item tool-item"
-                      draggable="true"
-                      (dragstart)="onDragStart($event, 'tool')"
-                    >
-                      <mat-icon class="item-icon">build</mat-icon>
-                      <span class="item-label">Tool</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="instructions">
-                  <mat-icon class="info-icon">info</mat-icon>
-                  <p>Drag components to the canvas to build your ADK workflow</p>
-                </div>
-              </div>
-            </mat-tab>
-    <mat-tab class="tabs-header">
-      <ng-template mat-tab-label>
-        <span class="tab-label">Plan</span>
-      </ng-template>
-      <div class="builder-tab-content">
-        <p>TODO: Plan builder tools</p>
+  <div class="builder-tab-content">
+    <div class="components-section">
+      <h4>Agent Configuration</h4>
+    </div>
+
+    <!-- Agent Configuration Form -->
+    <div class="config-form">
+      <div class="form-row">
+        <mat-form-field class="agent-name-field">
+          <mat-label>Agent Name</mat-label>
+          <input matInput [(ngModel)]="agentConfig.agentName" />
+        </mat-form-field>
+
+        <mat-form-field class="agent-type-field">
+          <mat-label>Agent Type</mat-label>
+          <mat-select [(ngModel)]="selectedAgentType">
+            @for (type of agentTypes; track type) {
+            <mat-option [value]="type">{{type}}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </div>
-    </mat-tab>
-    <mat-tab class="tabs-header">
-      <ng-template mat-tab-label>
-        <span class="tab-label">Architect</span>
-      </ng-template>
-      <div class="builder-tab-content">
-        <p>TODO: Architect builder tools</p>
+
+      <div class="form-row">
+        <mat-checkbox [(ngModel)]="agentConfig.isRoot" [disabled]="!isRootAgentEditable">Is root agent?</mat-checkbox>
       </div>
-    </mat-tab>
-    <mat-tab class="tabs-header">
-      <ng-template mat-tab-label>
-        <span class="tab-label">Code</span>
-      </ng-template>
-      <div class="builder-tab-content">
-        <p>TODO: Code builder tools</p>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
+
+      <mat-form-field>
+        <mat-label>Model</mat-label>
+        <mat-select [(ngModel)]="selectedModel">
+          @for (model of models; track model) {
+          <mat-option [value]="model">{{model}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Instructions</mat-label>
+        <textarea matInput rows="5" [(ngModel)]="agentConfig.instructions"></textarea>
+      </mat-form-field>
+    </div>
+  </div>
 </div>

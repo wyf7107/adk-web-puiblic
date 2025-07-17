@@ -115,8 +115,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       id: this.edgeId.toString(),
       source: parentNodeId,
       target: subAgentNode.id,
-      sourceHandle: 'bottom',
-      targetHandle: 'top'
     };
 
     // Add the edge

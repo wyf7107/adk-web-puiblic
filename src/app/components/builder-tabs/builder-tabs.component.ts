@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input, signal, computed, Signal } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 
 @Component({
@@ -25,15 +25,25 @@ import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
   standalone: false
 })
 export class BuilderTabsComponent implements OnInit {
+  @Input() nodeData: any = null;
 
   // Agent configuration properties
-  agentConfig: AgentNode = {
-    isRoot: false,
-    agentName: '',
-    agentType: '',
-    model: '',
-    instructions: ''
-  };
+  // agentConfig: AgentNode = {
+  //   isRoot: this.nodeData?.isRoot || false,
+  //   agentName: this.nodeData?.agentName || '',
+  //   agentType: this.nodeData?.agentType || '',
+  //   model: this.nodeData?.model || '',
+  //   instructions: this.nodeData?.instructions || '',
+  // };
+  agentConfig: Signal<AgentNode> = computed(() => {
+    return {
+      isRoot: this.nodeData().isRoot || false,
+      agentName: this.nodeData().agentName || '',
+      agentType: this.nodeData().agentType || '',
+      model: this.nodeData().model || '',
+      instructions: this.nodeData().instructions || '',
+    }
+  })
 
   // TODO: Tool configuration properties - Will implement later
   /*
@@ -68,11 +78,10 @@ export class BuilderTabsComponent implements OnInit {
   */
 
 
-
   // Method to save agent configuration
   saveAgentConfig() {
-    this.agentConfig.agentType = this.selectedAgentType;
-    this.agentConfig.model = this.selectedModel;
+    this.agentConfig().agentType = this.selectedAgentType;
+    this.agentConfig().model = this.selectedModel;
     console.log('Agent config saved:', this.agentConfig);
   }
 

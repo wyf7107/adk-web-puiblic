@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Output, EventEmitter} from '@angular/core';
 import { DiagramNode, DiagramConnection } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import {Vflow, DynamicNode, Edge} from 'ngx-vflow'
+import {Vflow, DynamicNode, Edge, NodeChange, HtmlTemplateDynamicNode} from 'ngx-vflow'
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
@@ -38,6 +38,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
+  @Output() readonly nodeSelected = new EventEmitter<any>();
 
   private ctx!: CanvasRenderingContext2D;
   //public nodes = signal<DiagramNode[]>([]);
@@ -68,8 +69,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         type: 'html-template',
         data: signal({
           agentName: 'root_agent',
-          agentType: 'llm',
-          model: 'gemini-2.0-flash',
+          agentType: 'LlmAgent',
+          model: 'gemini-2.5-flash',
           instructions: 'You are the root agent that coordinates other agents.',
           isRoot: true
         })
@@ -99,8 +100,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       type: 'html-template',
       data: signal({
         agentName: `sub_agent_${this.nodeId}`,
-        agentType: 'llm',
-        model: 'gemini-2.0-flash',
+        agentType: 'LlmAgent',
+        model: 'gemini-2.5-flash',
         instructions: 'You are a sub-agent that performs specialized tasks.',
         isRoot: false
       })
@@ -125,16 +126,16 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     console.log('Added sub-agent:', subAgentNode.id, 'connected to:', parentNodeId);
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
+  selectNode(changes: NodeChange[]) {
+    const change = changes[0];
+    console.log(change)
+    if (change.type === 'select') {
+      if (change.selected) {
+        const node = this.nodes().find(node => node.id === change.id) as HtmlTemplateDynamicNode;
+        this.nodeSelected.emit(node.data)
+      } else {
+        this.nodeSelected.emit(null);
+      }
+    }
+  }
 }

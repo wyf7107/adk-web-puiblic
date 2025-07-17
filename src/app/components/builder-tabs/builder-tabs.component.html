@@ -17,44 +17,51 @@
 <div class="builder-tabs-container">
   <div class="builder-tab-content">
     <div class="components-section">
-      <h4>Agent Configuration</h4>
+      @if (nodeData) {
+        <h4>Agent Configuration</h4>
+      } @else {
+        <h4>Select an agent to edit</h4>
+      }
+      
     </div>
 
     <!-- Agent Configuration Form -->
-    <div class="config-form">
-      <div class="form-row">
-        <mat-form-field class="agent-name-field">
-          <mat-label>Agent Name</mat-label>
-          <input matInput [(ngModel)]="agentConfig.agentName" />
-        </mat-form-field>
+     @if (nodeData) {
+        <div class="config-form">
+          <div class="form-row">
+            <mat-form-field class="agent-name-field">
+              <mat-label>Agent Name</mat-label>
+              <input matInput [(ngModel)]="agentConfig().agentName" />
+            </mat-form-field>
 
-        <mat-form-field class="agent-type-field">
-          <mat-label>Agent Type</mat-label>
-          <mat-select [(ngModel)]="selectedAgentType">
-            @for (type of agentTypes; track type) {
-            <mat-option [value]="type">{{type}}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </div>
+            <mat-form-field class="agent-type-field">
+              <mat-label>Agent Type</mat-label>
+              <mat-select [(ngModel)]="agentConfig().agentType">
+                @for (type of agentTypes; track type) {
+                <mat-option [value]="type">{{type}}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+          
+          <div class="form-row">
+            <mat-checkbox [(ngModel)]="agentConfig().isRoot" [disabled]="!isRootAgentEditable">Is root agent?</mat-checkbox>
+          </div>
 
-      <div class="form-row">
-        <mat-checkbox [(ngModel)]="agentConfig.isRoot" [disabled]="!isRootAgentEditable">Is root agent?</mat-checkbox>
-      </div>
+          <mat-form-field>
+            <mat-label>Model</mat-label>
+            <mat-select [(ngModel)]="agentConfig().model">
+              @for (model of models; track model) {                
+              <mat-option [value]="model">{{model}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-      <mat-form-field>
-        <mat-label>Model</mat-label>
-        <mat-select [(ngModel)]="selectedModel">
-          @for (model of models; track model) {
-          <mat-option [value]="model">{{model}}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field>
-        <mat-label>Instructions</mat-label>
-        <textarea matInput rows="5" [(ngModel)]="agentConfig.instructions"></textarea>
-      </mat-form-field>
-    </div>
+          <mat-form-field>
+            <mat-label>Instructions</mat-label>
+            <textarea matInput rows="5" [(ngModel)]="agentConfig().instructions"></textarea>
+          </mat-form-field>
+        </div>
+     }
   </div>
 </div>

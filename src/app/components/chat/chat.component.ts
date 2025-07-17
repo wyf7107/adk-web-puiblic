@@ -138,6 +138,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   useSse = false;
   currentSessionState = {};
   root_agent = ROOT_AGENT;
+  selectedNodeData = null;
 
   private readonly messagesSubject = new BehaviorSubject<any[]>([]);
   private readonly streamingTextMessageSubject =
@@ -1628,4 +1629,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.appendChild(
         this.document.head, style);  // Append to the head of the document
   }
+
+  protected handleNodeSelected(nodeData: any) {
+    this.selectedNodeData = nodeData;
+  } 
 }

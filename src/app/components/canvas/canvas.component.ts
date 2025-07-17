@@ -83,56 +83,46 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     console.log('Adding resource to node:', nodeId);
   }
 
-  addSubAgent(parentNodeId: string) {
+  addNode(parentNodeId: string, nodeType: string) {
     // Find the parent node
     const parentNode = this.nodes().find(node => node.id === parentNodeId);
     if (!parentNode) return;
 
-    // Create a new sub-agent node
+    // Create a new node
+    const data = nodeType === 'subAgent' ? {
+        agentName: `sub_agent_${this.nodeId}`,
+        agentType: 'llm',
+        model: 'gemini-2.0-flash',
+        instructions: 'You are a sub-agent that performs specialized tasks.',
+        isRoot: false
+      } : {
+        toolName: `tool_${this.nodeId}`,
+        toolType: 'builtinTool',
+      };
+
     this.nodeId++;
-    const subAgentNode: DynamicNode = {
+    const newNode: DynamicNode = {
       id: this.nodeId.toString(),
       point: signal({ 
         x: parentNode.point().x, 
         y: parentNode.point().y + 150 // Position below the parent
       }),
       type: 'html-template',
-      data: signal({
-        agentName: `sub_agent_${this.nodeId}`,
-        agentType: 'llm',
-        model: 'gemini-2.0-flash',
-        instructions: 'You are a sub-agent that performs specialized tasks.',
-        isRoot: false
-      })
+      data: signal(data)
     };
 
     // Add the new node
-    this.nodes.set([...this.nodes(), subAgentNode]);
+    this.nodes.set([...this.nodes(), newNode]);
 
     // Create an edge connecting the parent to the sub-agent
     this.edgeId++;
     const edge: Edge = {
       id: this.edgeId.toString(),
       source: parentNodeId,
-      target: subAgentNode.id,
+      target: newNode.id,
     };
 
     // Add the edge
     this.edges.set([...this.edges(), edge]);
-
-    console.log('Added sub-agent:', subAgentNode.id, 'connected to:', parentNodeId);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

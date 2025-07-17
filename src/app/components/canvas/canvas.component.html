@@ -24,31 +24,26 @@
         <div class="custom-node" selectable [class.custom-node_selected]="ctx.selected()">
           <div class="node-title-wrapper">
             <div class="node-title">
-              <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
+              @if (ctx.node.data()?.agentName) {
+                <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
+              } @else {
+                <span class="material-symbols-outlined" style="margin-right: 5px;">build</span>
+              }
               {{ctx.node.data()?.agentName
-              || 'root_agent'}}
+              || ctx.node.data()?.toolName}}
             </div>
           </div>
-          <div class="action-button-bar">
-            <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id)"
-              aria-label="Add sub-agent">
-              <mat-icon>smart_toy</mat-icon>
-            </button>
-            <button matIconButton class="action-btn add-tool-btn" [matMenuTriggerFor]="toolsMenu" aria-label="Add tool">
-              <mat-icon>build</mat-icon>
-            </button>
-            <mat-menu #toolsMenu="matMenu">
-              <button mat-menu-item>
-                <span>Inline Tool</span>
+          @if (ctx.node.data()?.agentName) {
+            <div class="action-button-bar">
+              <button matIconButton class="action-btn add-subagent-btn" (click)="addNode(ctx.node.id, 'subAgent')"
+                aria-label="Add sub-agent">
+                <mat-icon>smart_toy</mat-icon>
               </button>
-              <button mat-menu-item>
-                <span>Function Tool</span>
+              <button matIconButton class="action-btn add-tool-btn" (click)="addNode(ctx.node.id, 'tool')" aria-label="Add tool">
+                <mat-icon>build</mat-icon>
               </button>
-              <button mat-menu-item>
-                <span>MCP Toolset</span>
-              </button>
-            </mat-menu>
-          </div>
+            </div>
+          }
           <handle type="target" position="top" />
           <handle type="source" position="bottom" />
         </div>

@@ -18,8 +18,6 @@
 import { Component, inject } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
-import {filter} from 'rxjs';
-
 
 @Component({
   selector: 'app-builder-tabs',

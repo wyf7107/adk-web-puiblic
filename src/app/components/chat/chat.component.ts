@@ -138,7 +138,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   useSse = false;
   currentSessionState = {};
   root_agent = ROOT_AGENT;
-
+  updatedSessionState = signal(null);
   private readonly messagesSubject = new BehaviorSubject<any[]>([]);
   private readonly streamingTextMessageSubject =
     new BehaviorSubject<any | null>(null);
@@ -428,6 +428,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         'parts': await this.getUserMessageParts(),
       },
       streaming: this.useSse,
+      stateDelta: this.updatedSessionState(),
     };
     this.selectedFiles = [];
     let index = this.eventMessageIndexArray.length - 1;
@@ -474,6 +475,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     // Clear input
     this.userInput = '';
+    this.updatedSessionState.set(null);
     this.changeDetectorRef.detectChanges();
   }
 
@@ -1552,6 +1554,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.downloadService.downloadObjectAsJson(
           res, `session-${this.sessionId}.json`);
       });
+  }
+
+  protected updateState() {
+    const dialogRef = this.dialog.open(EditJsonDialogComponent, {
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data:
+          {dialogHeader: 'Update state', jsonContent: this.currentSessionState},
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.updatedSessionState.set(result);
+      }
+    });
+  }
+
+  protected removeStateUpdate() {
+    this.updatedSessionState.set(null);
   }
 
   closeTraceEventDetailPanel() {

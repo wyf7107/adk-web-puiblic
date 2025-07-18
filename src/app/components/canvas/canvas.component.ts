@@ -26,6 +26,7 @@ import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
 import {MatChipsModule} from '@angular/material/chips';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 
 
 @Component({
@@ -52,7 +53,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   public edges = signal<Edge[]>([]);
 
-  constructor(private dialog: MatDialog, private agentService: AgentService, private router: Router) {}
+  constructor(
+    private dialog: MatDialog,
+    private agentService: AgentService,
+    private router: Router,
+    private agentBuilderService: AgentBuilderService
+  ) {}
 
   ngOnInit() {
     this.createRootAgent();
@@ -64,20 +70,32 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   createRootAgent() {
     if (this.nodes().length == 0) {
       this.nodeId = 1;
+
+      const agentNodeData = {
+          agentName: 'root_agent',
+          agentType: 'LlmAgent',
+          model: 'gemini-2.5-flash',
+          instructions: 'You are the root agent that coordinates other agents.',
+          isRoot: true
+        };
+
       const rootNode: DynamicNode = {
-        id: this.nodeId.toString(),
+        id: 'root_agent',
         point: signal({ x: 100, y: 100 }),
         type: 'html-template',
-        data: signal({
-          agentName: 'root_agent',
-          agentType: 'llm',
-          model: 'gemini-2.0-flash',
-          instructions: 'You are the root agent that coordinates other agents.',
-          isRoot: true,
-          tools: []
-        })
+        data: signal(agentNodeData)
       };
       this.nodes.set([rootNode]);
+
+      this.agentBuilderService.addNode(agentNodeData);
+    }
+  }
+
+  onCustomTemplateNodeClick(clickedVflowNode: DynamicNode) {
+    const agentNodeData = this.agentBuilderService.getNode(clickedVflowNode.id);
+
+    if (!!agentNodeData) {
+      this.agentBuilderService.setSelectedNode(agentNodeData);
     }
   }
 
@@ -98,25 +116,29 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // Create a new sub-agent node
     this.nodeId++;
+
+    const agentNodeData = {
+        agentName: `sub_agent_${this.nodeId}`,
+        agentType: 'LlmAgent',
+        model: 'gemini-2.5-flash',
+        instructions: 'You are a sub-agent that performs specialized tasks.',
+        isRoot: false
+      };
+
     const subAgentNode: DynamicNode = {
-      id: this.nodeId.toString(),
+      id: `sub_agent_${this.nodeId}`,
       point: signal({ 
         x: parentNode.point().x, 
         y: parentNode.point().y + nodeHeight + 50 // Position below the parent
       }),
       type: 'html-template',
-      data: signal({
-        agentName: `sub_agent_${this.nodeId}`,
-        agentType: 'llm',
-        model: 'gemini-2.0-flash',
-        instructions: 'You are a sub-agent that performs specialized tasks.',
-        isRoot: false,
-        tools: []
-      })
+      data: signal(agentNodeData)
     };
 
     // Add the new node
     this.nodes.set([...this.nodes(), subAgentNode]);
+
+    this.agentBuilderService.addNode(agentNodeData);
 
     // Create an edge connecting the parent to the sub-agent
     this.edgeId++;

@@ -69,9 +69,7 @@ import {TraceEventComponent} from './trace-tab/trace-event/trace-event.component
 import {TraceTabComponent} from './trace-tab/trace-tab.component';
 import {TraceTreeComponent} from './trace-tab/trace-tree/trace-tree.component';
 import {ViewImageDialogComponent} from './view-image-dialog/view-image-dialog.component';
-import { AgentNodeCreateDialogComponent } from './canvas/agent-node-create-dialog/agent-node-create-dialog.component';
 import { CodeEditorComponent } from './code-editor/code-editor.component';
-import { ToolNodeCreateDialogComponent } from './canvas/tool-node-create-dialog/tool-node-create-dialog.component';
 
 
 const COMPONENTS = [
@@ -97,9 +95,7 @@ const COMPONENTS = [
   TraceTreeComponent,
   TraceEventComponent,
   JsonEditorComponent,
-  AgentNodeCreateDialogComponent,
   CodeEditorComponent,
-  ToolNodeCreateDialogComponent,
 ];
 
 @NgModule({

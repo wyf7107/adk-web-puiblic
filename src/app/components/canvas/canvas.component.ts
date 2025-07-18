@@ -21,10 +21,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import {Vflow, DynamicNode, Edge} from 'ngx-vflow'
+import {Vflow, DynamicNode, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
+import {MatChipsModule} from '@angular/material/chips';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 
 
@@ -33,7 +34,7 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule]
 })
 export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
@@ -46,6 +47,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   nodeId = 1;
   edgeId = 1;
+  toolId = 1;
 
   public nodes = signal<DynamicNode[]>([]);
 
@@ -102,7 +104,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     console.log('Adding resource to node:', nodeId);
   }
 
-  addSubAgent(parentNodeId: string) {
+  addSubAgent(parentNodeId: string, event: MouseEvent) {
+    const nodeElement = (event.target as HTMLElement).closest('.custom-node') as HTMLElement;
+    if (!nodeElement) return;
+
+    const nodeHeight = nodeElement.offsetHeight;
+
     // Find the parent node
     const parentNode = this.nodes().find(node => node.id === parentNodeId);
     if (!parentNode) return;
@@ -122,7 +129,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       id: `sub_agent_${this.nodeId}`,
       point: signal({ 
         x: parentNode.point().x, 
-        y: parentNode.point().y + 150 // Position below the parent
+        y: parentNode.point().y + nodeHeight + 50 // Position below the parent
       }),
       type: 'html-template',
       data: signal(agentNodeData)
@@ -147,16 +154,20 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     console.log('Added sub-agent:', subAgentNode.id, 'connected to:', parentNodeId);
   }
 
+  addTool(parentNodeId: string) {
+    // Find the parent node
+    const parentNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
+    if (!parentNode) return;
+    if (!parentNode.data) return;
 
+    const tool = {
+      toolType: 'builtInTool',
+      toolName: `tool_${this.toolId}`
+    }
+    this.toolId++;
 
-
-
-
-
-
-
-
-
-
-
+    const data = parentNode.data();
+    data.tools.push(tool);
+    parentNode.data.set(data);
+  }
 }

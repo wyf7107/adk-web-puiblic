@@ -383,6 +383,9 @@
   padding-bottom: 12px;
   background: rgba(0, 0, 0, 0.1);
   border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .node-title {
@@ -392,6 +395,13 @@
   align-items: center;
   color: #e8eaed;
   font-weight: 500;
+}
+
+.tools-container {
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 
@@ -429,14 +439,7 @@
 .action-button-bar {
   display: flex;
   gap: 8px;
-  position: absolute;
-  top: 50%;
-  right: 10px;
-  transform: translateY(-50%);
-  z-index: 10;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
+  margin-right: 4px;
 
   .action-btn {
     background: none;

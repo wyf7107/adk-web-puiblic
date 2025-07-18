@@ -17,6 +17,9 @@
 
 import { Component, OnInit } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
+
+import {filter} from 'rxjs';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -68,6 +71,16 @@ export class BuilderTabsComponent implements OnInit {
   */
 
 
+  constructor(private agentBuilderService: AgentBuilderService) {}
+
+  ngOnInit() {
+    this.agentBuilderService.getSelectedNode().pipe(filter((node: AgentNode|undefined) => !!node)).subscribe((node: AgentNode) => {
+      this.agentConfig = node;
+      this.selectedAgentType = node.agentType;
+      this.selectedModel = node.model;
+    });
+  }
+
 
   // Method to save agent configuration
   saveAgentConfig() {
@@ -84,8 +97,4 @@ export class BuilderTabsComponent implements OnInit {
     console.log('Tool config saved:', this.toolConfig);
     }
   */
-
-  ngOnInit() {
-    // Initialize component
-  }
 }

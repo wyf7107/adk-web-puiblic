@@ -30,7 +30,7 @@ import {filter} from 'rxjs';
 export class BuilderTabsComponent {
 
   // Agent configuration properties
-  agentConfig: AgentNode = {
+  agentConfig: AgentNode | undefined = {
     isRoot: false,
     agentName: '',
     agentType: '',
@@ -63,7 +63,6 @@ export class BuilderTabsComponent {
 
   private agentBuilderService = inject(AgentBuilderService);
   
-  protected selectedAgent: any = null;
   protected selectedTool: any = null;
   protected toolCode: string = '';
   protected toolTypes = [
@@ -72,33 +71,20 @@ export class BuilderTabsComponent {
   protected header = 'Select an agent or tool to edit'
 
   constructor() {
-    this.agentBuilderService.getSelectedNode().pipe(filter((node: AgentNode|undefined) => !!node)).subscribe((node: AgentNode) => {
+    this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
-      this.selectedAgentType = node.agentType;
-      this.selectedModel = node.model;
+      if (node) {
+        this.selectedAgentType = node?.agentType;
+        this.selectedModel = node?.model;
+        this.header = 'Agent configuration';
+      }
     });
 
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
+      this.selectedTool = tool;
       if (tool) {
-        this.selectedTool = tool;
         this.header = 'Tool configuration'
       }
     });
   }
-
-  // Method to save agent configuration
-  saveAgentConfig() {
-    this.agentConfig.agentType = this.selectedAgentType;
-    this.agentConfig.model = this.selectedModel;
-    console.log('Agent config saved:', this.agentConfig);
-  }
-
-  // TODO: Method to save tool configuration - Will implement later
-  /*
-  saveToolConfig() {
-    this.toolConfig.toolType = this.selectedToolType;
-    this.toolConfig.toolCode = this.toolCode;
-    console.log('Tool config saved:', this.toolConfig);
-    }
-  */
 }

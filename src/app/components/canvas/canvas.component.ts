@@ -22,7 +22,6 @@ import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import {Vflow, DynamicNode, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
@@ -59,7 +58,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     private dialog: MatDialog,
     private agentService: AgentService,
     private router: Router,
-    private agentBuilderService: AgentBuilderService
   ) {}
 
   ngOnInit() {
@@ -78,7 +76,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           agentType: 'LlmAgent',
           model: 'gemini-2.5-flash',
           instructions: 'You are the root agent that coordinates other agents.',
-          isRoot: true
+          isRoot: true,
+          tools: []
         };
 
       const rootNode: DynamicNode = {
@@ -98,6 +97,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedNode(agentNodeData);
+      this.agentBuilderService.setSelectedTool(null);
     }
   }
 
@@ -124,7 +124,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         agentType: 'LlmAgent',
         model: 'gemini-2.5-flash',
         instructions: 'You are a sub-agent that performs specialized tasks.',
-        isRoot: false
+        isRoot: false,
+        tools: []
       };
 
     const subAgentNode: DynamicNode = {
@@ -176,5 +177,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   selectTool(tool: any) {
     console.log('Selected tool:', tool);
     this.agentBuilderService.setSelectedTool(tool);
+    this.agentBuilderService.setSelectedNode(undefined);
   }
 }

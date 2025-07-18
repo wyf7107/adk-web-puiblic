@@ -34,7 +34,7 @@ export class AgentBuilderService {
     return this.selectedNodeSubject.asObservable();
   }
 
-  setSelectedNode(node: AgentNode) {
+  setSelectedNode(node: AgentNode | undefined) {
     this.selectedNodeSubject.next(node);
   }
 

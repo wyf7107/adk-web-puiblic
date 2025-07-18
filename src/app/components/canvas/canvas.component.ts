@@ -141,7 +141,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!parentNode.data) return;
 
     const tool = {
-      toolType: 'builtInTool',
+      toolType: 'Built-in tool',
       toolName: `tool_${this.toolId}`
     }
     this.toolId++;

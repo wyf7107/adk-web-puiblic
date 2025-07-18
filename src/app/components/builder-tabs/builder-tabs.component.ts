@@ -59,26 +59,22 @@ export class BuilderTabsComponent implements OnInit {
     'SequentialAgent'
   ];
 
-  // TODO: Tool configuration options - Will implement later
-  /*
-  selectedToolType: string = '';
-  toolCode: string = '';
-  toolTypes = [
-    'inlineTool'
-  ];
-  */
   private agentBuilderService = inject(AgentBuilderService);
   
   protected selectedAgent: any = null;
   protected selectedTool: any = null;
-  protected selectedToolType: string = '';
   protected toolCode: string = '';
   protected toolTypes = [
     'Built-in tool'
   ];
+  protected header = 'Select an agent or tool to edit'
+
   constructor() {
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
-      this.selectedTool = tool;
+      if (tool) {
+        this.selectedTool = tool;
+        this.header = 'Tool configuration'
+      }
     });
   }
 

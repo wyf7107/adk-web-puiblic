@@ -18,10 +18,20 @@
   <div class="canvas-workspace">
 
     @if (nodes().length > 0) {
-    <vflow view="auto" [nodes]="nodes()" [edges]="edges()"
-      [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }" [snapGrid]="[12, 12]">
-      <ng-template let-ctx nodeHtml>
-        <div class="custom-node" selectable [class.custom-node_selected]="ctx.selected()">
+    <vflow 
+      view="auto"
+      [nodes]="nodes()"
+      [edges]="edges()"
+      [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }"
+      [snapGrid]="[12, 12]"
+    >
+      <ng-template #nodeTemplate let-ctx nodeHtml>
+        <div 
+          class="custom-node"
+          selectable
+          [class.custom-node_selected]="ctx.selected()"
+          (click)="onCustomTemplateNodeClick(ctx.node)"
+        >
           <div class="node-title-wrapper">
             <div class="node-title">
               <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>

@@ -15,9 +15,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import {filter} from 'rxjs';
+
 
 @Component({
   selector: 'app-builder-tabs',
@@ -25,7 +27,7 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
   styleUrl: './builder-tabs.component.scss',
   standalone: false
 })
-export class BuilderTabsComponent implements OnInit {
+export class BuilderTabsComponent {
 
   // Agent configuration properties
   agentConfig: AgentNode = {
@@ -70,16 +72,18 @@ export class BuilderTabsComponent implements OnInit {
   protected header = 'Select an agent or tool to edit'
 
   constructor() {
+    this.agentBuilderService.getSelectedNode().pipe(filter((node: AgentNode|undefined) => !!node)).subscribe((node: AgentNode) => {
+      this.agentConfig = node;
+      this.selectedAgentType = node.agentType;
+      this.selectedModel = node.model;
+    });
+
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       if (tool) {
         this.selectedTool = tool;
         this.header = 'Tool configuration'
       }
     });
-  }
-
-  ngOnInit() {
-    // Initialize component
   }
 
   // Method to save agent configuration

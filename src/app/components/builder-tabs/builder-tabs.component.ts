@@ -77,16 +77,22 @@ export class BuilderTabsComponent {
     'transfer_to_agent',
   ];
   protected builtInToolArgs = new Map<string, string[]>([
-    ['APIHubToolset', ['api_specs']],
-    ['google_search', ['query']],
-    ['url_context', ['url', 'is_html']],
-    ['VertexAiSearchTool', ['query', 'datastore_id', 'max_results']],
-    ['exit_loop', ['result']],
-    ['get_user_choice', ['choices']],
-    ['load_artifacts', ['artifact_names']],
-    ['load_memory', ['keys']],
-    ['preload_memory', ['data_to_load']],
-    ['transfer_to_agent', ['agent', 'inputs']],
+    ['APIHubToolset', ['apihub_resource_name', 'access_token', 'service_account_json', 'name', 'description', 'lazy_load_spec', 'auth_scheme', 'auth_credential', 'apihub_client', 'tool_filter']],
+    ['AuthToolArguments', ['function_call_id', 'auth_config']],
+    ['BaseTool', ['name', 'description', 'is_long_running']],
+    ['google_search', []],
+    ['url_context', []],
+    ['VertexAiSearchTool', ['data_store_id', 'data_store_specs', 'search_engine_id', 'filter', 'max_results']],
+    ['ExampleTool', ['examples']],
+    ['exit_loop', []],
+    ['FunctionTool', ['func']],
+    ['get_user_choice', []],
+    ['load_artifacts', []],
+    ['load_memory', []],
+    ['LongRunningFunctionTool', ['func']],
+    ['preload_memory', []],
+    ['ToolContext', ['invocation_context', 'function_call_id', 'event_actions']],
+    ['transfer_to_agent', ['agent_name', 'tool_context']],
   ]);
   protected header = 'Select an agent or tool to edit'
 

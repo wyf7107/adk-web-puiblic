@@ -28,15 +28,15 @@
               {{ctx.node.data()?.agentName
               || 'root_agent'}}
             </div>
-          </div>
-          <div class="action-button-bar">
-            <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id)"
-              aria-label="Add sub-agent">
-              <mat-icon>smart_toy</mat-icon>
-            </button>
-            <button matIconButton class="action-btn add-tool-btn" (click)="addTool(ctx.node.id)" aria-label="Add tool">
-              <mat-icon>build</mat-icon>
-            </button>
+            <div class="action-button-bar">
+              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id)"
+                aria-label="Add sub-agent">
+                <mat-icon>smart_toy</mat-icon>
+              </button>
+              <button matIconButton class="action-btn add-tool-btn" (click)="addTool(ctx.node.id)" aria-label="Add tool">
+                <mat-icon>build</mat-icon>
+              </button>
+            </div>
           </div>
           <div class="tools-container">
             <mat-chip-set>

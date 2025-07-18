@@ -22,6 +22,7 @@ import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import {Vflow, DynamicNode, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
@@ -39,6 +40,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
+  private agentBuilderService = inject(AgentBuilderService);
 
   private ctx!: CanvasRenderingContext2D;
   //public nodes = signal<DiagramNode[]>([]);
@@ -147,5 +149,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const data = parentNode.data();
     data.tools.push(tool);
     parentNode.data.set(data);
+  }
+
+  selectTool(tool: any) {
+    console.log('Selected tool:', tool);
+    this.agentBuilderService.setSelectedTool(tool);
   }
 }

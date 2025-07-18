@@ -42,7 +42,7 @@
             <div class="tools-container">
               <mat-chip-set>
                 @for (tool of ctx.node.data()?.tools; track tool) {
-                  <mat-chip>{{tool.toolName}}</mat-chip>
+                  <mat-chip (click)="selectTool(tool)">{{tool.toolName}}</mat-chip>
                 }
               </mat-chip-set>
             </div>

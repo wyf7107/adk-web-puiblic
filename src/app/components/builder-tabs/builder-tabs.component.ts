@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -66,8 +67,24 @@ export class BuilderTabsComponent implements OnInit {
     'inlineTool'
   ];
   */
+  private agentBuilderService = inject(AgentBuilderService);
+  
+  protected selectedAgent: any = null;
+  protected selectedTool: any = null;
+  protected selectedToolType: string = '';
+  protected toolCode: string = '';
+  protected toolTypes = [
+    'Built-in tool'
+  ];
+  constructor() {
+    this.agentBuilderService.getSelectedTool().subscribe(tool => {
+      this.selectedTool = tool;
+    });
+  }
 
-
+  ngOnInit() {
+    // Initialize component
+  }
 
   // Method to save agent configuration
   saveAgentConfig() {
@@ -84,8 +101,4 @@ export class BuilderTabsComponent implements OnInit {
     console.log('Tool config saved:', this.toolConfig);
     }
   */
-
-  ngOnInit() {
-    // Initialize component
-  }
 }

@@ -36,15 +36,6 @@ export class BuilderTabsComponent {
     instructions: ''
   };
 
-  // TODO: Tool configuration properties - Will implement later
-  /*
-  toolConfig: ToolNode = {
-    toolName: '',
-    toolType: '',
-    toolCode: ''
-  };
-  */
-
   // Agent configuration options
   isRootAgentEditable: boolean = true;
   selectedAgentType: string = '';
@@ -61,11 +52,48 @@ export class BuilderTabsComponent {
 
   private agentBuilderService = inject(AgentBuilderService);
   
-  protected selectedTool: any = null;
+  protected selectedTool: ToolNode | undefined = undefined;
   protected toolCode: string = '';
   protected toolTypes = [
+    'Custom tool',
     'Built-in tool'
   ];
+  protected builtInTools = [
+    'APIHubToolset',
+    'AuthToolArguments',
+    'BaseTool',
+    'google_search',
+    'url_context',
+    'VertexAiSearchTool',
+    'ExampleTool',
+    'exit_loop',
+    'FunctionTool',
+    'get_user_choice',
+    'load_artifacts',
+    'load_memory',
+    'LongRunningFunctionTool',
+    'preload_memory',
+    'ToolContext',
+    'transfer_to_agent',
+  ];
+  protected builtInToolArgs = new Map<string, string[]>([
+    ['APIHubToolset', ['apihub_resource_name', 'access_token', 'service_account_json', 'name', 'description', 'lazy_load_spec', 'auth_scheme', 'auth_credential', 'apihub_client', 'tool_filter']],
+    ['AuthToolArguments', ['function_call_id', 'auth_config']],
+    ['BaseTool', ['name', 'description', 'is_long_running']],
+    ['google_search', []],
+    ['url_context', []],
+    ['VertexAiSearchTool', ['data_store_id', 'data_store_specs', 'search_engine_id', 'filter', 'max_results']],
+    ['ExampleTool', ['examples']],
+    ['exit_loop', []],
+    ['FunctionTool', ['func']],
+    ['get_user_choice', []],
+    ['load_artifacts', []],
+    ['load_memory', []],
+    ['LongRunningFunctionTool', ['func']],
+    ['preload_memory', []],
+    ['ToolContext', ['invocation_context', 'function_call_id', 'event_actions']],
+    ['transfer_to_agent', ['agent_name', 'tool_context']],
+  ]);
   protected header = 'Select an agent or tool to edit'
 
   constructor() {
@@ -84,5 +112,23 @@ export class BuilderTabsComponent {
         this.header = 'Tool configuration'
       }
     });
+  }
+
+  onToolTypeSelectionChange() {
+    if (this.selectedTool?.toolType === 'Built-in tool') {
+      this.selectedTool.toolName = 'google_search';
+    }
+  }
+
+  onBuiltInToolSelectionChange() {
+    if (this.selectedTool) {
+      this.selectedTool.toolArgs = [];
+      const argNames = this.builtInToolArgs.get(this.selectedTool.toolName);
+      if (argNames) {
+        for (const argName of argNames) {
+          this.selectedTool.toolArgs.push({name: argName, value: ''});
+        }
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { AgentNode } from '../models/AgentBuilder';
+import { AgentNode, ToolNode } from '../models/AgentBuilder';
 
 @Injectable({
   providedIn: 'root'
@@ -38,11 +38,11 @@ export class AgentBuilderService {
     this.selectedNodeSubject.next(node);
   }
 
-  getSelectedTool(): Observable<any|undefined> {
+  getSelectedTool(): Observable<ToolNode|undefined> {
     return this.selectedToolSubject.asObservable();
   }
 
-  setSelectedTool(tool: any) {
+  setSelectedTool(tool: ToolNode | undefined) {
     this.selectedToolSubject.next(tool);
   }
 }

@@ -97,7 +97,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedNode(agentNodeData);
-      this.agentBuilderService.setSelectedTool(null);
+      this.agentBuilderService.setSelectedTool(undefined);
     }
   }
 
@@ -164,8 +164,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!parentNode.data) return;
 
     const tool = {
-      toolType: 'Built-in tool',
-      toolName: `tool_${this.toolId}`
+      toolType: 'Custom tool',
+      toolName: `tool_${this.toolId}`,
+      toolArgs: []
     }
     this.toolId++;
 

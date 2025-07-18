@@ -34,20 +34,16 @@
               aria-label="Add sub-agent">
               <mat-icon>smart_toy</mat-icon>
             </button>
-            <button matIconButton class="action-btn add-tool-btn" [matMenuTriggerFor]="toolsMenu" aria-label="Add tool">
+            <button matIconButton class="action-btn add-tool-btn" (click)="addTool(ctx.node.id)" aria-label="Add tool">
               <mat-icon>build</mat-icon>
             </button>
-            <mat-menu #toolsMenu="matMenu">
-              <button mat-menu-item>
-                <span>Inline Tool</span>
-              </button>
-              <button mat-menu-item>
-                <span>Function Tool</span>
-              </button>
-              <button mat-menu-item>
-                <span>MCP Toolset</span>
-              </button>
-            </mat-menu>
+          </div>
+          <div class="tools-container">
+            <mat-chip-set>
+              @for (tool of ctx.node.data()?.tools; track tool) {
+                <mat-chip>{{tool.toolName}}</mat-chip>
+              }
+            </mat-chip-set>
           </div>
           <handle type="target" position="top" />
           <handle type="source" position="bottom" />

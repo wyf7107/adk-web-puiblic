@@ -21,10 +21,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import {Vflow, DynamicNode, Edge} from 'ngx-vflow'
+import {Vflow, DynamicNode, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
+import {MatChipsModule} from '@angular/material/chips';
 
 
 @Component({
@@ -32,7 +33,7 @@ import {MatButtonModule} from '@angular/material/button';
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule]
 })
 export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
@@ -45,6 +46,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   nodeId = 1;
   edgeId = 1;
+  toolId = 1;
 
   public nodes = signal<DynamicNode[]>([]);
 
@@ -71,7 +73,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           agentType: 'llm',
           model: 'gemini-2.0-flash',
           instructions: 'You are the root agent that coordinates other agents.',
-          isRoot: true
+          isRoot: true,
+          tools: []
         })
       };
       this.nodes.set([rootNode]);
@@ -102,7 +105,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         agentType: 'llm',
         model: 'gemini-2.0-flash',
         instructions: 'You are a sub-agent that performs specialized tasks.',
-        isRoot: false
+        isRoot: false,
+        tools: []
       })
     };
 
@@ -123,16 +127,20 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     console.log('Added sub-agent:', subAgentNode.id, 'connected to:', parentNodeId);
   }
 
+  addTool(parentNodeId: string) {
+    // Find the parent node
+    const parentNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
+    if (!parentNode) return;
+    if (!parentNode.data) return;
 
+    const tool = {
+      toolType: 'builtInTool',
+      toolName: `tool_${this.toolId}`
+    }
+    this.toolId++;
 
-
-
-
-
-
-
-
-
-
-
+    const data = parentNode.data();
+    data.tools.push(tool);
+    parentNode.data.set(data);
+  }
 }

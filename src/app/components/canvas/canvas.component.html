@@ -38,13 +38,15 @@
               </button>
             </div>
           </div>
-          <div class="tools-container">
-            <mat-chip-set>
-              @for (tool of ctx.node.data()?.tools; track tool) {
-                <mat-chip>{{tool.toolName}}</mat-chip>
-              }
-            </mat-chip-set>
-          </div>
+          @if (ctx.node.data()?.tools?.length) {
+            <div class="tools-container">
+              <mat-chip-set>
+                @for (tool of ctx.node.data()?.tools; track tool) {
+                  <mat-chip>{{tool.toolName}}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
           <handle type="target" position="top" />
           <handle type="source" position="bottom" />
         </div>

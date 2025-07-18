@@ -40,6 +40,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
+  private agentBuilderService = inject(AgentBuilderService);
 
   private ctx!: CanvasRenderingContext2D;
   //public nodes = signal<DiagramNode[]>([]);
@@ -57,7 +58,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     private dialog: MatDialog,
     private agentService: AgentService,
     private router: Router,
-    private agentBuilderService: AgentBuilderService
   ) {}
 
   ngOnInit() {
@@ -76,7 +76,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           agentType: 'LlmAgent',
           model: 'gemini-2.5-flash',
           instructions: 'You are the root agent that coordinates other agents.',
-          isRoot: true
+          isRoot: true,
+          tools: []
         };
 
       const rootNode: DynamicNode = {
@@ -96,6 +97,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedNode(agentNodeData);
+      this.agentBuilderService.setSelectedTool(null);
     }
   }
 
@@ -122,7 +124,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         agentType: 'LlmAgent',
         model: 'gemini-2.5-flash',
         instructions: 'You are a sub-agent that performs specialized tasks.',
-        isRoot: false
+        isRoot: false,
+        tools: []
       };
 
     const subAgentNode: DynamicNode = {
@@ -161,7 +164,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!parentNode.data) return;
 
     const tool = {
-      toolType: 'builtInTool',
+      toolType: 'Built-in tool',
       toolName: `tool_${this.toolId}`
     }
     this.toolId++;
@@ -169,5 +172,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const data = parentNode.data();
     data.tools.push(tool);
     parentNode.data.set(data);
+  }
+
+  selectTool(tool: any) {
+    console.log('Selected tool:', tool);
+    this.agentBuilderService.setSelectedTool(tool);
+    this.agentBuilderService.setSelectedNode(undefined);
   }
 }

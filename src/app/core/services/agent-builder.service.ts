@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of as ObservableOf, BehaviorSubject} from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { AgentNode } from '../models/AgentBuilder';
 
 @Injectable({
@@ -8,6 +8,7 @@ import { AgentNode } from '../models/AgentBuilder';
 export class AgentBuilderService {
   private nodes: AgentNode[] = [];
 
+  private selectedToolSubject = new BehaviorSubject<any | undefined>(undefined);
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
 
   constructor() { }
@@ -33,7 +34,15 @@ export class AgentBuilderService {
     return this.selectedNodeSubject.asObservable();
   }
 
-  setSelectedNode(node: AgentNode) {
+  setSelectedNode(node: AgentNode | undefined) {
     this.selectedNodeSubject.next(node);
+  }
+
+  getSelectedTool(): Observable<any|undefined> {
+    return this.selectedToolSubject.asObservable();
+  }
+
+  setSelectedTool(tool: any) {
+    this.selectedToolSubject.next(tool);
   }
 }

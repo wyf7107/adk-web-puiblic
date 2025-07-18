@@ -15,11 +15,9 @@
  * limitations under the License.
  */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
-
-import {filter} from 'rxjs';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -27,10 +25,10 @@ import {filter} from 'rxjs';
   styleUrl: './builder-tabs.component.scss',
   standalone: false
 })
-export class BuilderTabsComponent implements OnInit {
+export class BuilderTabsComponent {
 
   // Agent configuration properties
-  agentConfig: AgentNode = {
+  agentConfig: AgentNode | undefined = {
     isRoot: false,
     agentName: '',
     agentType: '',
@@ -61,40 +59,30 @@ export class BuilderTabsComponent implements OnInit {
     'SequentialAgent'
   ];
 
-  // TODO: Tool configuration options - Will implement later
-  /*
-  selectedToolType: string = '';
-  toolCode: string = '';
-  toolTypes = [
-    'inlineTool'
+  private agentBuilderService = inject(AgentBuilderService);
+  
+  protected selectedTool: any = null;
+  protected toolCode: string = '';
+  protected toolTypes = [
+    'Built-in tool'
   ];
-  */
+  protected header = 'Select an agent or tool to edit'
 
-
-  constructor(private agentBuilderService: AgentBuilderService) {}
-
-  ngOnInit() {
-    this.agentBuilderService.getSelectedNode().pipe(filter((node: AgentNode|undefined) => !!node)).subscribe((node: AgentNode) => {
+  constructor() {
+    this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
-      this.selectedAgentType = node.agentType;
-      this.selectedModel = node.model;
+      if (node) {
+        this.selectedAgentType = node?.agentType;
+        this.selectedModel = node?.model;
+        this.header = 'Agent configuration';
+      }
+    });
+
+    this.agentBuilderService.getSelectedTool().subscribe(tool => {
+      this.selectedTool = tool;
+      if (tool) {
+        this.header = 'Tool configuration'
+      }
     });
   }
-
-
-  // Method to save agent configuration
-  saveAgentConfig() {
-    this.agentConfig.agentType = this.selectedAgentType;
-    this.agentConfig.model = this.selectedModel;
-    console.log('Agent config saved:', this.agentConfig);
-  }
-
-  // TODO: Method to save tool configuration - Will implement later
-  /*
-  saveToolConfig() {
-    this.toolConfig.toolType = this.selectedToolType;
-    this.toolConfig.toolCode = this.toolCode;
-    console.log('Tool config saved:', this.toolConfig);
-    }
-  */
 }

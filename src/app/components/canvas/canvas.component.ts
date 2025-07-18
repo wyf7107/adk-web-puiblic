@@ -86,7 +86,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     console.log('Adding resource to node:', nodeId);
   }
 
-  addSubAgent(parentNodeId: string) {
+  addSubAgent(parentNodeId: string, event: MouseEvent) {
+    const nodeElement = (event.target as HTMLElement).closest('.custom-node') as HTMLElement;
+    if (!nodeElement) return;
+
+    const nodeHeight = nodeElement.offsetHeight;
+
     // Find the parent node
     const parentNode = this.nodes().find(node => node.id === parentNodeId);
     if (!parentNode) return;
@@ -97,7 +102,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       id: this.nodeId.toString(),
       point: signal({ 
         x: parentNode.point().x, 
-        y: parentNode.point().y + 150 // Position below the parent
+        y: parentNode.point().y + nodeHeight + 50 // Position below the parent
       }),
       type: 'html-template',
       data: signal({

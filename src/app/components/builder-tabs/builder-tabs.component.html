@@ -60,18 +60,37 @@
     } @else if (selectedTool) {
       <!-- Tool Configuration Form -->
       <div class="config-form">
-        <mat-form-field class="tool-name-field">
-          <mat-label>Tool Name</mat-label>
-          <input matInput [(ngModel)]="selectedTool.toolName" />
-        </mat-form-field>
         <mat-form-field class="tool-type-field">
           <mat-label>Tool Type</mat-label>
-          <mat-select [(ngModel)]="selectedTool.toolType">
+          <mat-select [(ngModel)]="selectedTool.toolType" (selectionChange)="onToolTypeSelectionChange()">
               @for (type of toolTypes; track type) {
                   <mat-option [value]="type">{{type}}</mat-option>
               }
           </mat-select>
         </mat-form-field>
+        @if (selectedTool.toolType === 'Custom tool') {
+          <mat-form-field class="tool-name-field">
+            <mat-label>Tool Name</mat-label>
+            <input matInput [(ngModel)]="selectedTool.toolName" />
+          </mat-form-field>
+        } @else if (selectedTool.toolType === 'Built-in tool') {
+          <mat-form-field class="built-in-tool-field">
+            <mat-label>Built-in Tool</mat-label>
+            <mat-select [(ngModel)]="selectedTool.toolName" (selectionChange)="onBuiltInToolSelectionChange()">
+              @for (tool of builtInTools; track tool) {
+                <mat-option [value]="tool">{{ tool }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          @if (selectedTool.toolName && builtInToolArgs.has(selectedTool.toolName)) {
+            @for (arg of selectedTool.toolArgs; track arg) {
+              <mat-form-field class="tool-arg-field">
+                <mat-label>{{ arg.name }}</mat-label>
+                <input matInput [(ngModel)]="arg.value" />
+              </mat-form-field>
+            }
+          }
+        }
       </div>
     }
   </div>

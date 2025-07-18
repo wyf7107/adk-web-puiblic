@@ -29,6 +29,12 @@ export interface ToolNode {
     toolName: string;
     toolType: string;
     toolCode?: string;
+    toolArgs?: ToolArg[];
+}
+
+export interface ToolArg {
+  name: string;
+  value: any;
 }
 
 export interface DiagramNode {

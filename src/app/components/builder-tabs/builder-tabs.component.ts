@@ -36,15 +36,6 @@ export class BuilderTabsComponent {
     instructions: ''
   };
 
-  // TODO: Tool configuration properties - Will implement later
-  /*
-  toolConfig: ToolNode = {
-    toolName: '',
-    toolType: '',
-    toolCode: ''
-  };
-  */
-
   // Agent configuration options
   isRootAgentEditable: boolean = true;
   selectedAgentType: string = '';
@@ -61,11 +52,42 @@ export class BuilderTabsComponent {
 
   private agentBuilderService = inject(AgentBuilderService);
   
-  protected selectedTool: any = null;
+  protected selectedTool: ToolNode | undefined = undefined;
   protected toolCode: string = '';
   protected toolTypes = [
+    'Custom tool',
     'Built-in tool'
   ];
+  protected builtInTools = [
+    'APIHubToolset',
+    'AuthToolArguments',
+    'BaseTool',
+    'google_search',
+    'url_context',
+    'VertexAiSearchTool',
+    'ExampleTool',
+    'exit_loop',
+    'FunctionTool',
+    'get_user_choice',
+    'load_artifacts',
+    'load_memory',
+    'LongRunningFunctionTool',
+    'preload_memory',
+    'ToolContext',
+    'transfer_to_agent',
+  ];
+  protected builtInToolArgs = new Map<string, string[]>([
+    ['APIHubToolset', ['api_specs']],
+    ['google_search', ['query']],
+    ['url_context', ['url', 'is_html']],
+    ['VertexAiSearchTool', ['query', 'datastore_id', 'max_results']],
+    ['exit_loop', ['result']],
+    ['get_user_choice', ['choices']],
+    ['load_artifacts', ['artifact_names']],
+    ['load_memory', ['keys']],
+    ['preload_memory', ['data_to_load']],
+    ['transfer_to_agent', ['agent', 'inputs']],
+  ]);
   protected header = 'Select an agent or tool to edit'
 
   constructor() {
@@ -84,5 +106,23 @@ export class BuilderTabsComponent {
         this.header = 'Tool configuration'
       }
     });
+  }
+
+  onToolTypeSelectionChange() {
+    if (this.selectedTool?.toolType === 'Built-in tool') {
+      this.selectedTool.toolName = 'google_search';
+    }
+  }
+
+  onBuiltInToolSelectionChange() {
+    if (this.selectedTool) {
+      this.selectedTool.toolArgs = [];
+      const argNames = this.builtInToolArgs.get(this.selectedTool.toolName);
+      if (argNames) {
+        for (const argName of argNames) {
+          this.selectedTool.toolArgs.push({name: argName, value: ''});
+        }
+      }
+    }
   }
 }

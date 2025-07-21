@@ -197,7 +197,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const yamlConfig = {
       name: rootAgent.agentName,
       model: rootAgent.model,
-      agentClass: rootAgent.agentType,
+      agent_class: rootAgent.agentType,
       description: '',
       instruction: rootAgent.instructions,
     }

@@ -53,6 +53,7 @@ import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
+import { CanvasComponent } from '../canvas/canvas.component';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -106,6 +107,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('autoScroll') private scrollContainer!: ElementRef;
   @ViewChild('messageTextarea') private textarea: ElementRef | undefined;
   @ViewChild('bottomPanel') bottomPanelRef!: ElementRef;
+  @ViewChild(CanvasComponent) canvasComponent!: CanvasComponent;
   private _snackBar = inject(MatSnackBar);
   shouldShowEvalTab = signal(true);
   enableSseIndicator = signal(false);
@@ -1356,6 +1358,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleMode() {
     this.isBuilderMode.set(!this.isBuilderMode());
+  }
+
+  saveAgentBuilder() {
+    this.canvasComponent.saveAgent();
   }
 
   selectEvent(key: string) {

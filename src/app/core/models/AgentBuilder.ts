@@ -57,7 +57,3 @@ export interface DiagramConnection {
   toX: number;
   toY: number;
 }
-
-export interface AgentBuildRequest {
-  root: AgentNode;
-}

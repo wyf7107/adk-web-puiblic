@@ -30,6 +30,10 @@ export class AgentBuilderService {
     this.nodes.push(newNode);
   }
 
+  getNodes(): AgentNode[] {
+    return this.nodes;
+  }
+
   getSelectedNode(): Observable<AgentNode|undefined> {
     return this.selectedNodeSubject.asObservable();
   }

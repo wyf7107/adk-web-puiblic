@@ -16,7 +16,7 @@
  */
 
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
-import { DiagramNode, DiagramConnection } from '../../core/models/AgentBuilder';
+import { DiagramNode, DiagramConnection, AgentNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -27,6 +27,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
 import {MatChipsModule} from '@angular/material/chips';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import * as YAML from 'yaml';
 
 
 @Component({
@@ -72,7 +73,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.nodeId = 1;
 
       const agentNodeData = {
-          agentName: 'root_agent',
+          agentName: 'RootAgent',
           agentType: 'LlmAgent',
           model: 'gemini-2.5-flash',
           instructions: 'You are the root agent that coordinates other agents.',
@@ -81,7 +82,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         };
 
       const rootNode: DynamicNode = {
-        id: 'root_agent',
+        id: 'RootAgent',
         point: signal({ x: 100, y: 100 }),
         type: 'html-template',
         data: signal(agentNodeData)
@@ -182,6 +183,34 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   saveAgent() {
-    console.log('save agent');
+    // Save root agent only for now
+    const rootAgent: AgentNode|undefined = this.agentBuilderService.getNodes().find((node: AgentNode) => !!node.isRoot);
+
+    if (!rootAgent) {
+      return ;
+    }
+
+    const agentName = rootAgent.agentName;
+
+    const fileName = `${agentName}/root_agent.yaml`;
+
+    const yamlString = YAML.stringify(rootAgent);
+    const blob = new Blob([yamlString], { type: 'application/x-yaml' });
+    const file = new File([blob], fileName, { type: 'application/x-yaml' });
+
+    const formData = new FormData();
+    formData.append('files', file);
+
+    this.agentService.agentBuild(formData).subscribe((success) => {
+      if (success) {
+        this.router.navigate(['/'], {
+          queryParams: { app: rootAgent.agentName }
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        this._snackBar.open("Something went wrong, please try again", "OK");
+      }
+    })
   }
 }

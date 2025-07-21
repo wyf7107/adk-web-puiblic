@@ -485,6 +485,12 @@
   }
 }
 
+mat-chip {
+  &.selected {
+    outline: 1px solid #1976d2;
+  }
+}
+
 .custom-node {
 
   &:hover .action-button-bar,

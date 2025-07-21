@@ -55,6 +55,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   public edges = signal<Edge[]>([]);
 
+  public selectedTool: any;
+
   constructor(
     private dialog: MatDialog,
     private agentService: AgentService,
@@ -63,6 +65,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   ngOnInit() {
     this.createRootAgent();
+    this.agentBuilderService.getSelectedTool().subscribe(tool => {
+      this.selectedTool = tool;
+    });
   }
 
   ngAfterViewInit() {

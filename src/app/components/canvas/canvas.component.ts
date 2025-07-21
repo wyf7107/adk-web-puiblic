@@ -194,7 +194,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const fileName = `${agentName}/root_agent.yaml`;
 
-    const yamlString = YAML.stringify(rootAgent);
+    const yamlConfig = {
+      name: rootAgent.agentName,
+      model: rootAgent.model,
+      agentClass: rootAgent.agentType,
+      description: '',
+      instruction: rootAgent.instructions,
+    }
+
+    const yamlString = YAML.stringify(yamlConfig);
     const blob = new Blob([yamlString], { type: 'application/x-yaml' });
     const file = new File([blob], fileName, { type: 'application/x-yaml' });
 

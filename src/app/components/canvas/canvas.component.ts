@@ -16,7 +16,7 @@
  */
 
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
-import { DiagramNode, DiagramConnection, AgentNode } from '../../core/models/AgentBuilder';
+import { DiagramNode, DiagramConnection, AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -194,12 +194,16 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const fileName = `${agentName}/root_agent.yaml`;
 
-    const yamlConfig = {
+    const yamlConfig: any = {
       name: rootAgent.agentName,
       model: rootAgent.model,
       agentClass: rootAgent.agentType,
       description: '',
       instruction: rootAgent.instructions,
+    }
+
+    if (rootAgent.tools?.length) {
+      yamlConfig.tools = this.buildToolsConfig(rootAgent.tools);
     }
 
     const yamlString = YAML.stringify(yamlConfig);
@@ -220,5 +224,19 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this._snackBar.open("Something went wrong, please try again", "OK");
       }
     })
+  }
+
+  private buildToolsConfig(tools: ToolNode[]): any[] {
+    return tools.map(tool => {
+      const config: any = {
+        name: tool.toolName,
+      };
+
+      if (tool.toolArgs && tool.toolArgs.length > 0) {
+        config.args = tool.toolArgs;
+      }
+
+      return config;
+    });
   }
 }

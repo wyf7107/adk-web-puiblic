@@ -819,11 +819,12 @@ button {
   z-index: 1000;
 }
 
-.exit-button {
+.builder-mode-action-button {
   background-color: rgba(0, 0, 0, 0.7);
   color: #c4c7c5;
   border-radius: 50%;
   transition: all 0.2s ease;
+  margin-right: 0px !important;
 
   &:hover {
     background-color: rgba(234, 67, 53, 0.8);

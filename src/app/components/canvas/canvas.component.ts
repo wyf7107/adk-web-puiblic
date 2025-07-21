@@ -180,4 +180,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.setSelectedTool(tool);
     this.agentBuilderService.setSelectedNode(undefined);
   }
+
+  saveAgent() {
+    console.log('save agent');
+  }
 }

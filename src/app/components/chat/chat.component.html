@@ -163,7 +163,10 @@
   @if (isBuilderMode()) {
   <div class="builder-mode-container">
     <div class="builder-exit-button">
-      <button mat-icon-button (click)="toggleMode()" class="exit-button" matTooltip="Exit Builder Mode">
+      <button mat-icon-button (click)="saveAgentBuilder()" class="builder-mode-action-button" matTooltip="Accept">
+        <mat-icon>check</mat-icon>
+      </button>
+      <button mat-icon-button (click)="toggleMode()" class="builder-mode-action-button" matTooltip="Exit Builder Mode">
         <mat-icon>close</mat-icon>
       </button>
     </div>

@@ -399,12 +399,16 @@
 
 .tools-container {
   padding: 12px;
-  display: flex;
-  flex-wrap: wrap;
   gap: 8px;
 }
 
-
+.tools-header {
+  font-family: "Google Sans";
+  color: rgb(163, 163, 163);
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
 
 .instruction-title {
   font-family: "Google Sans";

@@ -26,6 +26,7 @@ import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
 import {MatChipsModule} from '@angular/material/chips';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 
 
@@ -34,7 +35,7 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule]
 })
 export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);

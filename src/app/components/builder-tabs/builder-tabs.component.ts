@@ -30,16 +30,17 @@ export class BuilderTabsComponent {
   // Agent configuration properties
   agentConfig: AgentNode | undefined = {
     isRoot: false,
-    agentName: '',
-    agentType: '',
+    name: '',
+    agentClass: '',
     model: '',
-    instructions: ''
+    instruction: ''
   };
 
   // Agent configuration options
   isRootAgentEditable: boolean = true;
   selectedAgentType: string = '';
   selectedModel: string = '';
+  creatingNewAgent: boolean = true;
   models = [
     "gemini-2.5-flash"
   ];
@@ -100,7 +101,7 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       if (node) {
-        this.selectedAgentType = node?.agentType;
+        this.selectedAgentType = node?.agentClass;
         this.selectedModel = node?.model;
         this.header = 'Agent configuration';
       }
@@ -112,6 +113,14 @@ export class BuilderTabsComponent {
         this.header = 'Tool configuration'
       }
     });
+
+    this.agentBuilderService.getIsCreatingNewAgent().subscribe(newAgent => {
+      if (newAgent) {
+        this.creatingNewAgent = true;
+      } else {
+        this.creatingNewAgent = false;
+      }
+    })
   }
 
   onToolTypeSelectionChange() {

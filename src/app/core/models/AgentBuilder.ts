@@ -17,10 +17,10 @@
 
 export interface AgentNode {
     isRoot: boolean;
-    agentName: string;
-    agentType: string;
+    name: string;
+    agentClass: string;
     model: string;
-    instructions: string;
+    instruction: string;
     subAgents?: AgentNode[];
     tools?: ToolNode[];
 }

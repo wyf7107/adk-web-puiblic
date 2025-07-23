@@ -122,4 +122,15 @@ export class AgentService {
     }
     return new Observable<false>();
   }
+
+  getAgentBuilder(agentName: string) {
+    if (this.apiServerDomain != undefined) {
+      const url = 
+        this.apiServerDomain + `/builder/app/${agentName}?ts=${Date.now()}`
+      return this.http.get(url, {
+        responseType: 'text'
+      });
+    }
+    return new Observable<"">();
+  }
 }

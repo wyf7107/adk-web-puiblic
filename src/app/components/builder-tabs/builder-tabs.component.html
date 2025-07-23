@@ -26,7 +26,7 @@
         <div class="form-row">
           <mat-form-field class="agent-name-field">
             <mat-label>Agent Name</mat-label>
-            <input matInput [(ngModel)]="agentConfig.agentName" />
+            <input matInput [(ngModel)]="agentConfig.name" [disabled]="!creatingNewAgent"/>
           </mat-form-field>
 
           <mat-form-field class="agent-type-field">
@@ -54,7 +54,7 @@
 
         <mat-form-field>
           <mat-label>Instructions</mat-label>
-          <textarea matInput rows="5" [(ngModel)]="agentConfig.instructions"></textarea>
+          <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
         </mat-form-field>
       </div>
     } @else if (selectedTool) {

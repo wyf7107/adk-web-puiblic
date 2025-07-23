@@ -193,6 +193,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getNodes().find((node: AgentNode) => !!node.isRoot);
 
     if (!rootAgent) {
+      this._snackBar.open("Something went wrong, please try again", "OK");
+      
       return ;
     }
 

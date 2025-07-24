@@ -175,7 +175,7 @@
         <mat-icon>close</mat-icon>
       </button>
     </div>
-    <app-canvas></app-canvas>
+    <app-canvas [showSidePanel]="showSidePanel" (toggleSidePanelRequest)="toggleSidePanel()"></app-canvas>
   </div>
   } @else {
   <!-- Test Mode Layout (existing chat interface) -->

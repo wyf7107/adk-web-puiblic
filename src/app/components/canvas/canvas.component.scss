@@ -510,6 +510,17 @@ mat-chip {
   }
 }
 
+.open-panel-btn {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  color: #c4c7c5;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 20px;
+  z-index: 9999;
+}
+
 .custom-node {
 
   &:hover .action-button-bar,

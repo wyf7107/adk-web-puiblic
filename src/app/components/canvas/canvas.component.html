@@ -16,7 +16,14 @@
 
 <div class="canvas-container">
   <div class="canvas-workspace">
-
+    @if (!showSidePanel) {
+      <span
+        class="material-symbols-outlined open-panel-btn"
+        matTooltip="Open panel"
+        (click)="toggleSidePanelRequest.emit()"
+        >left_panel_open</span
+      >
+    }
     @if (nodes().length > 0) {
     <vflow 
       view="auto"

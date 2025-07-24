@@ -170,7 +170,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     this.agentBuilderService.addNode(agentNodeData);
 
-    const parentAgentNode: AgentNode|undefined = this.agentBuilderService.getNode(parentNode.data().name);
+    const parentAgentNode: AgentNode|undefined = parentNode.data ? this.agentBuilderService.getNode(parentNode.data().name) : undefined;
     if (!!parentAgentNode) {
       parentAgentNode.subAgents.push(agentNodeData);
     }

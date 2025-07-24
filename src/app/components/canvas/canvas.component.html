@@ -18,17 +18,7 @@
   <div class="canvas-workspace">
     @if (!showSidePanel) {
       <span
-        class="material-symbols-outlined"
-        style="
-          position: absolute;
-          width: 24px;
-          height: 24px;
-          color: #c4c7c5;
-          cursor: pointer;
-          margin-left: 20px;
-          margin-top: 20px;
-          z-index: 9999;
-        "
+        class="material-symbols-outlined open-panel-btn"
         matTooltip="Open panel"
         (click)="toggleSidePanelRequest.emit()"
         >left_panel_open</span

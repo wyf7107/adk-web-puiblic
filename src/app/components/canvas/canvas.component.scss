@@ -398,8 +398,7 @@
 }
 
 .tools-container {
-  padding: 12px;
-  gap: 8px;
+  padding: 12px 6px 12px 12px;
 }
 
 .tools-header {
@@ -410,6 +409,7 @@
   font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: space-between;;
 }
 
 .instruction-title {
@@ -486,7 +486,6 @@
   border: none;
   cursor: pointer;
   border-radius: 4px;
-  margin-left: 4px;
   width: 28px;
   height: 28px;
   padding: 0;

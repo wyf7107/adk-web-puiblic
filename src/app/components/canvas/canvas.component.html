@@ -35,8 +35,7 @@
           <div class="node-title-wrapper">
             <div class="node-title">
               <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
-              {{ctx.node.data()?.name
-              || 'root_agent'}}
+              {{ctx.node.data()?.name || 'root_agent'}}
             </div>
             <div class="action-button-bar">
               <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id, $event); $event.stopPropagation()" matTooltip="Add sub-agent"

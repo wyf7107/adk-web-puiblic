@@ -43,25 +43,25 @@
                 aria-label="Add sub-agent">
                 <mat-icon>smart_toy</mat-icon>
               </button>
-              <button matIconButton class="action-btn add-tool-btn" (click)="addTool(ctx.node.id); $event.stopPropagation()" matTooltip="Add tool" aria-label="Add tool">
-                <mat-icon>build</mat-icon>
-              </button>
             </div>
           </div>
-          @if (ctx.node.data()?.tools?.length) {
-            <div class="tools-container">
-              <div class="tools-header">
-                  Tools
-              </div>
+          <div class="tools-container">
+            <div class="tools-header">
+              Tools
+              <button matIconButton class="action-btn add-tool-btn" (click)="addTool(ctx.node.id); $event.stopPropagation()" matTooltip="Add tool" aria-label="Add tool">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            @if (ctx.node.data()?.tools?.length) {
               <mat-chip-set>
                 @for (tool of ctx.node.data()?.tools; track tool) {
-                  <mat-chip 
+                  <mat-chip
                     (click)="selectTool(tool); $event.stopPropagation()"
                     [class.selected]="tool === selectedTool">{{tool.toolName}}</mat-chip>
                 }
               </mat-chip-set>
-            </div>
-          }
+            }
+          </div>
           <handle type="target" position="top" />
           <handle type="source" position="bottom" />
         </div>

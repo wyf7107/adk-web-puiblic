@@ -398,8 +398,7 @@
 }
 
 .tools-container {
-  padding: 12px;
-  gap: 8px;
+  padding: 12px 6px 12px 12px;
 }
 
 .tools-header {
@@ -408,6 +407,9 @@
   margin-bottom: 10px;
   font-size: 14px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;;
 }
 
 .instruction-title {
@@ -477,11 +479,28 @@
       color: #e8eaed;
     }
   }
+}
 
-  .add-tool-btn {
-    &:hover {
-      color: #e8eaed;
-    }
+.add-tool-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  mat-icon {
+    margin: 0;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    color: #e8eaed;
+    background-color: rgba(138, 180, 248, 0.1);
+    transform: scale(1.1);
   }
 }
 

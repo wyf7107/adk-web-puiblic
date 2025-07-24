@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input} from '@angular/core';
 import { DiagramNode, DiagramConnection, AgentNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {Vflow, DynamicNode, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
@@ -29,6 +29,7 @@ import {MatChipsModule} from '@angular/material/chips';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
+import { parse } from 'yaml';
 
 
 @Component({
@@ -58,17 +59,28 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   public selectedTool: any;
 
+  existingAgent: string | undefined = undefined;
+
   constructor(
     private dialog: MatDialog,
     private agentService: AgentService,
-    private router: Router,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    this.createRootAgent();
-    this.agentBuilderService.getSelectedTool().subscribe(tool => {
-      this.selectedTool = tool;
-    });
+    this.agentBuilderService.getIsCreatingNewAgent().subscribe(res => {
+      if (!res) {
+        this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
+          this.existingAgent = agent;
+          this.loadAgent();
+        })
+      } else {
+        this.createRootAgent();
+        this.agentBuilderService.getSelectedTool().subscribe(tool => {
+          this.selectedTool = tool;
+        });
+      }
+    })
   }
 
   ngAfterViewInit() {
@@ -79,10 +91,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.nodeId = 1;
 
       const agentNodeData = {
-          agentName: 'RootAgent',
-          agentType: 'LlmAgent',
+          name: 'RootAgent',
+          agentClass: 'LlmAgent',
           model: 'gemini-2.5-flash',
-          instructions: 'You are the root agent that coordinates other agents.',
+          instruction: 'You are the root agent that coordinates other agents.',
           isRoot: true,
           tools: []
         };
@@ -127,10 +139,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.nodeId++;
 
     const agentNodeData = {
-        agentName: `sub_agent_${this.nodeId}`,
-        agentType: 'LlmAgent',
+        name: `sub_agent_${this.nodeId}`,
+        agentClass: 'LlmAgent',
         model: 'gemini-2.5-flash',
-        instructions: 'You are a sub-agent that performs specialized tasks.',
+        instruction: 'You are a sub-agent that performs specialized tasks.',
         isRoot: false,
         tools: []
       };
@@ -191,23 +203,22 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   saveAgent() {
     // Save root agent only for now
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getNodes().find((node: AgentNode) => !!node.isRoot);
-
     if (!rootAgent) {
       this._snackBar.open("Something went wrong, please try again", "OK");
       
       return ;
     }
 
-    const agentName = rootAgent.agentName;
+    const agentName = rootAgent.name;
 
     const fileName = `${agentName}/root_agent.yaml`;
 
     const yamlConfig = {
-      name: rootAgent.agentName,
+      name: rootAgent.name,
       model: rootAgent.model,
-      agentClass: rootAgent.agentType,
+      agentClass: rootAgent.agentClass,
       description: '',
-      instruction: rootAgent.instructions,
+      instruction: rootAgent.instruction,
     }
 
     const yamlString = YAML.stringify(yamlConfig);
@@ -220,7 +231,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
-          queryParams: { app: rootAgent.agentName }
+          queryParams: { app: rootAgent.name }
         }).then(() => {
           window.location.reload();
         });
@@ -228,5 +239,22 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this._snackBar.open("Something went wrong, please try again", "OK");
       }
     })
+  }
+
+  loadAgent() {
+    if (!this.existingAgent) { return; }
+
+    this.nodeId = 1;
+    const rootAgent = parse(this.existingAgent) as AgentNode;
+    rootAgent.isRoot = true;
+    if (!rootAgent.tools) { rootAgent.tools = [] } 
+    const rootNode: DynamicNode = {
+      id: rootAgent.name,
+      point: signal({ x: 100, y: 100 }),
+      type: 'html-template',
+      data: signal(rootAgent)
+    };
+    this.nodes.set([rootNode]);
+    this.agentBuilderService.addNode(rootAgent);
   }
 }

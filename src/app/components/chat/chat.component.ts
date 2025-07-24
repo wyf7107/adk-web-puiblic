@@ -54,6 +54,7 @@ import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -228,7 +229,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
 
+  // Builder
+  builderNewAgent = true;
+  disableBuilderSwitch = false;
+
   constructor(
+      private agentBuilderService: AgentBuilderService,
       private sanitizer: DomSanitizer,
       private sessionService: SessionService,
       private artifactService: ArtifactService,
@@ -400,7 +406,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (event instanceof KeyboardEvent) {
       // support for japanese IME
-      if (event.isComposing) {
+      if (event.isComposing || event.keyCode === 229) {
         return;
       }
     }
@@ -1356,8 +1362,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.useSse = !this.useSse;
   }
 
-  toggleMode() {
+  toggleMode(newAgent: boolean) {
+    this.builderNewAgent = newAgent;
     this.isBuilderMode.set(!this.isBuilderMode());
+    this.agentBuilderService.clear();
+    this.agentBuilderService.setIsCreatingNewAgent(newAgent);
   }
 
   saveAgentBuilder() {
@@ -1436,6 +1445,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         const app = params['app'];
         if (app && apps.includes(app)) {
           this.selectedAppControl.setValue(app);
+          this.agentService.getAgentBuilder(app).subscribe(res => {
+            if (!res || res == "") {
+              this.disableBuilderSwitch = true;
+              this.agentBuilderService.setLoadedAgentData(undefined);
+            } else {
+              this.disableBuilderSwitch = false;
+              this.agentBuilderService.setLoadedAgentData(res);
+            }
+          })
         } else if (app) {
           this.openSnackBar(`Agent '${app}' not found`, 'OK');
         }

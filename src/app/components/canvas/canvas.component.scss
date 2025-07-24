@@ -484,6 +484,8 @@
 .add-tool-btn {
   background: none;
   border: none;
+  cursor: pointer;
+  border-radius: 4px;
   margin-left: 4px;
   width: 28px;
   height: 28px;
@@ -494,6 +496,12 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
+  }
+
+  &:hover {
+    color: #e8eaed;
+    background-color: rgba(138, 180, 248, 0.1);
+    transform: scale(1.1);
   }
 }
 

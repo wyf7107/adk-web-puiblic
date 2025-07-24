@@ -31,7 +31,7 @@
 
           <mat-form-field class="agent-type-field">
             <mat-label>Agent Type</mat-label>
-            <mat-select [(ngModel)]="selectedAgentType">
+            <mat-select [(ngModel)]="agentConfig.agentClass">
               @for (type of agentTypes; track type) {
               <mat-option [value]="type">{{type}}</mat-option>
               }
@@ -45,7 +45,7 @@
 
         <mat-form-field>
           <mat-label>Model</mat-label>
-          <mat-select [(ngModel)]="selectedModel">
+          <mat-select [(ngModel)]="agentConfig.model">
             @for (model of models; track model) {
             <mat-option [value]="model">{{model}}</mat-option>
             }

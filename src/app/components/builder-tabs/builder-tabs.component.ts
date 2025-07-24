@@ -39,12 +39,13 @@ export class BuilderTabsComponent {
 
   // Agent configuration options
   isRootAgentEditable: boolean = true;
-  selectedAgentType: string = '';
-  selectedModel: string = '';
+
   creatingNewAgent: boolean = true;
+
   models = [
     "gemini-2.5-flash"
   ];
+  
   agentTypes = [
     'LlmAgent',
     'LoopAgent',
@@ -102,8 +103,6 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       if (node) {
-        this.selectedAgentType = node?.agentClass;
-        this.selectedModel = node?.model;
         this.header = 'Agent configuration';
       }
     });

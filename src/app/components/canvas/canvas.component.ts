@@ -115,8 +115,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     }
   }
 
-  onCustomTemplateNodeClick(clickedVflowNode: DynamicNode) {
-    const agentNodeData = this.agentBuilderService.getNode(clickedVflowNode.id);
+  onCustomTemplateNodeClick(clickedVflowNode: HtmlTemplateDynamicNode) {
+    if (!clickedVflowNode.data) {
+      return ;
+    }
+    const agentNodeData = this.agentBuilderService.getNode(clickedVflowNode.data().name);
 
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedNode(agentNodeData);
@@ -136,7 +139,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const nodeHeight = nodeElement.offsetHeight;
 
     // Find the parent node
-    const parentNode = this.nodes().find(node => node.id === parentNodeId);
+    const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
     if (!parentNode) return;
 
     // Create a new sub-agent node
@@ -167,7 +170,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     this.agentBuilderService.addNode(agentNodeData);
 
-    const parentAgentNode: AgentNode|undefined = this.agentBuilderService.getNode(parentNode.id);
+    const parentAgentNode: AgentNode|undefined = this.agentBuilderService.getNode(parentNode.data().name);
     if (!!parentAgentNode) {
       parentAgentNode.subAgents.push(agentNodeData);
     }

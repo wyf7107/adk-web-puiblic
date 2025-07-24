@@ -164,6 +164,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     this.agentBuilderService.addNode(agentNodeData);
 
+    const parentAgentNode: AgentNode|undefined = this.agentBuilderService.getNode(parentNode.id);
+    if (!!parentAgentNode) {
+      parentAgentNode.subAgents.push(agentNodeData);
+    }
+
     // Create an edge connecting the parent to the sub-agent
     this.edgeId++;
     const edge: Edge = {
@@ -205,30 +210,16 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   saveAgent() {
     // Save root agent only for now
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getNodes().find((node: AgentNode) => !!node.isRoot);
+
     if (!rootAgent) {
-      this._snackBar.open("Something went wrong, please try again", "OK");
-      
+      this._snackBar.open("Please create an agent first.", "OK");
+
       return ;
     }
 
-    const agentName = rootAgent.name;
-
-    const fileName = `${agentName}/root_agent.yaml`;
-
-    const yamlConfig = {
-      name: rootAgent.name,
-      model: rootAgent.model,
-      agentClass: rootAgent.agentClass,
-      description: '',
-      instruction: rootAgent.instruction,
-    }
-
-    const yamlString = YAML.stringify(yamlConfig);
-    const blob = new Blob([yamlString], { type: 'application/x-yaml' });
-    const file = new File([blob], fileName, { type: 'application/x-yaml' });
-
     const formData = new FormData();
-    formData.append('files', file);
+
+    this.generateYamlFile(rootAgent, formData, rootAgent.name);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
@@ -241,6 +232,31 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this._snackBar.open("Something went wrong, please try again", "OK");
       }
     })
+  }
+
+  private generateYamlFile(agentNode: AgentNode, formData: FormData, rootAgentName: string) {
+    const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
+
+    const folderName = `${rootAgentName}/${fileName}`;
+
+    const yamlConfig = {
+      name: agentNode.name,
+      model: agentNode.model,
+      agent_class: agentNode.agentClass,
+      description: '',
+      instruction: agentNode.instruction,
+      sub_agents: agentNode.subAgents.map((subAgentNode) => `./${subAgentNode.name}.yaml`),
+    }
+
+    const yamlString = YAML.stringify(yamlConfig);
+    const blob = new Blob([yamlString], { type: 'application/x-yaml' });
+    const file = new File([blob], folderName, { type: 'application/x-yaml' });
+    
+    formData.append('files', file);
+
+    for (const subNode of agentNode.subAgents ?? []) {
+      this.generateYamlFile(subNode, formData, rootAgentName);
+    }
   }
 
   loadAgent() {

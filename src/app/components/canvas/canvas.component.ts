@@ -21,7 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, Router } from '@angular/router';
-import {Vflow, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
+import {Vflow, DynamicNode, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
@@ -56,7 +56,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   edgeId = 1;
   toolId = 1;
 
-  public nodes = signal<HtmlTemplateDynamicNode[]>([]);
+  public nodes = signal<DynamicNode[]>([]);
 
   public edges = signal<Edge[]>([]);
 
@@ -103,7 +103,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           tools: []
         };
 
-      const rootNode: HtmlTemplateDynamicNode = {
+      const rootNode: DynamicNode = {
         id: 'RootAgent',
         point: signal({ x: 100, y: 100 }),
         type: 'html-template',
@@ -140,7 +140,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // Find the parent node
     const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
-    if (!parentNode || !parentNode.data) return;
+    if (!parentNode) return;
 
     // Create a new sub-agent node
     this.nodeId++;
@@ -155,7 +155,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         tools: []
       };
 
-    const subAgentNode: HtmlTemplateDynamicNode = {
+    const subAgentNode: DynamicNode = {
       id: `sub_agent_${this.nodeId}`,
       point: signal({ 
         x: parentNode.point().x, 
@@ -272,7 +272,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const rootAgent = parse(this.existingAgent) as AgentNode;
     rootAgent.isRoot = true;
     if (!rootAgent.tools) { rootAgent.tools = [] } 
-    const rootNode: HtmlTemplateDynamicNode = {
+    const rootNode: DynamicNode = {
       id: rootAgent.name,
       point: signal({ x: 100, y: 100 }),
       type: 'html-template',

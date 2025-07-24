@@ -408,6 +408,8 @@
   margin-bottom: 10px;
   font-size: 14px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
 }
 
 .instruction-title {
@@ -477,11 +479,21 @@
       color: #e8eaed;
     }
   }
+}
 
-  .add-tool-btn {
-    &:hover {
-      color: #e8eaed;
-    }
+.add-tool-btn {
+  background: none;
+  border: none;
+  margin-left: 4px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  mat-icon {
+    margin: 0;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
 }
 

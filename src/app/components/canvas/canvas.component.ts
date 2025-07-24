@@ -277,7 +277,27 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       };
 
       if (tool.toolArgs && tool.toolArgs.length > 0) {
-        config.args = tool.toolArgs;
+        config.args = tool.toolArgs.map(arg => {
+          const value = arg.value;
+
+          if (typeof value !== 'string') {
+            return arg;
+          }
+
+          if (value.toLowerCase() === 'true') {
+            return { ...arg, value: true };
+          }
+
+          if (value.toLowerCase() === 'false') {
+            return { ...arg, value: false };
+          }
+
+          if (value.trim() !== '' && Number(value)) {
+            return { ...arg, value: Number(value) };
+          }
+
+          return arg;
+        });
       }
 
       return config;

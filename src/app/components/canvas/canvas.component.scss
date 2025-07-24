@@ -398,13 +398,19 @@
 }
 
 .tools-container {
-  padding: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  padding: 12px 6px 12px 12px;
 }
 
-
+.tools-header {
+  font-family: "Google Sans";
+  color: rgb(163, 163, 163);
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;;
+}
 
 .instruction-title {
   font-family: "Google Sans";
@@ -473,12 +479,46 @@
       color: #e8eaed;
     }
   }
+}
 
-  .add-tool-btn {
-    &:hover {
-      color: #e8eaed;
-    }
+.add-tool-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  mat-icon {
+    margin: 0;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
+
+  &:hover {
+    color: #e8eaed;
+    background-color: rgba(138, 180, 248, 0.1);
+    transform: scale(1.1);
+  }
+}
+
+mat-chip {
+  &.selected {
+    outline: 1px solid #1976d2;
+  }
+}
+
+.open-panel-btn {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  color: #c4c7c5;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 20px;
+  z-index: 9999;
 }
 
 .custom-node {

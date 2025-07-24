@@ -37,10 +37,15 @@
           </div>
           <div class="mode-toggle-container">
             <div class="mode-toggle">
-              <button mat-icon-button (click)="toggleMode()" class="build-mode-button"
-                [matTooltip]="isBuilderMode() ? 'Switch to Test Mode' : 'Switch to Builder Mode'"
+              <button mat-icon-button (click)="toggleMode(true)" class="build-mode-button"
+                [matTooltip]="isBuilderMode() ? 'Switch to Test Mode' : 'Create new agent in builder mode'"
                 [class.active]="isBuilderMode()" *ngIf="!isBuilderMode()">
                 <mat-icon>add</mat-icon>
+              </button>
+              <button mat-icon-button (click)="toggleMode(false)" class="build-mode-button"
+                [matTooltip]="isBuilderMode() ? 'Switch to Test Mode' : 'Switch to Builder Mode'"
+                [class.active]="isBuilderMode()" *ngIf="!isBuilderMode() && !disableBuilderSwitch">
+                <mat-icon>build</mat-icon>
               </button>
             </div>
           </div>
@@ -166,11 +171,11 @@
       <button mat-icon-button (click)="saveAgentBuilder()" class="builder-mode-action-button" matTooltip="Accept">
         <mat-icon>check</mat-icon>
       </button>
-      <button mat-icon-button (click)="toggleMode()" class="builder-mode-action-button" matTooltip="Exit Builder Mode">
+      <button mat-icon-button (click)="toggleMode(true)" class="builder-mode-action-button" matTooltip="Exit Builder Mode">
         <mat-icon>close</mat-icon>
       </button>
     </div>
-    <app-canvas></app-canvas>
+    <app-canvas [showSidePanel]="showSidePanel" (toggleSidePanelRequest)="toggleSidePanel()"></app-canvas>
   </div>
   } @else {
   <!-- Test Mode Layout (existing chat interface) -->

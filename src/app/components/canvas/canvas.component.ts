@@ -15,19 +15,21 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter} from '@angular/core';
 import { DiagramNode, DiagramConnection, AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {Vflow, DynamicNode, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
 import { MatIcon } from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
 import {MatChipsModule} from '@angular/material/chips';
+import {MatTooltipModule} from '@angular/material/tooltip';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
+import { parse } from 'yaml';
 
 
 @Component({
@@ -35,13 +37,16 @@ import * as YAML from 'yaml';
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule]
 })
 export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
   private agentBuilderService = inject(AgentBuilderService);
+
+  @Input() showSidePanel: boolean = true;
+  @Output() toggleSidePanelRequest = new EventEmitter<void>();
 
   private ctx!: CanvasRenderingContext2D;
   //public nodes = signal<DiagramNode[]>([]);
@@ -55,14 +60,30 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   public edges = signal<Edge[]>([]);
 
+  public selectedTool: any;
+
+  existingAgent: string | undefined = undefined;
+
   constructor(
     private dialog: MatDialog,
     private agentService: AgentService,
-    private router: Router,
+    private router: Router
   ) {}
 
   ngOnInit() {
-    this.createRootAgent();
+    this.agentBuilderService.getIsCreatingNewAgent().subscribe(res => {
+      if (!res) {
+        this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
+          this.existingAgent = agent;
+          this.loadAgent();
+        })
+      } else {
+        this.createRootAgent();
+        this.agentBuilderService.getSelectedTool().subscribe(tool => {
+          this.selectedTool = tool;
+        });
+      }
+    })
   }
 
   ngAfterViewInit() {
@@ -72,12 +93,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (this.nodes().length == 0) {
       this.nodeId = 1;
 
-      const agentNodeData = {
-          agentName: 'RootAgent',
-          agentType: 'LlmAgent',
+      const agentNodeData: AgentNode = {
+          name: 'RootAgent',
+          agentClass: 'LlmAgent',
           model: 'gemini-2.5-flash',
-          instructions: 'You are the root agent that coordinates other agents.',
+          instruction: 'You are the root agent that coordinates other agents.',
           isRoot: true,
+          subAgents: [],
           tools: []
         };
 
@@ -93,8 +115,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     }
   }
 
-  onCustomTemplateNodeClick(clickedVflowNode: DynamicNode) {
-    const agentNodeData = this.agentBuilderService.getNode(clickedVflowNode.id);
+  onCustomTemplateNodeClick(clickedVflowNode: HtmlTemplateDynamicNode) {
+    if (!clickedVflowNode.data) {
+      return ;
+    }
+    const agentNodeData = this.agentBuilderService.getNode(clickedVflowNode.data().name);
 
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedNode(agentNodeData);
@@ -114,18 +139,19 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const nodeHeight = nodeElement.offsetHeight;
 
     // Find the parent node
-    const parentNode = this.nodes().find(node => node.id === parentNodeId);
+    const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
     if (!parentNode) return;
 
     // Create a new sub-agent node
     this.nodeId++;
 
-    const agentNodeData = {
-        agentName: `sub_agent_${this.nodeId}`,
-        agentType: 'LlmAgent',
+    const agentNodeData: AgentNode = {
+        name: `sub_agent_${this.nodeId}`,
+        agentClass: 'LlmAgent',
         model: 'gemini-2.5-flash',
-        instructions: 'You are a sub-agent that performs specialized tasks.',
+        instruction: 'You are a sub-agent that performs specialized tasks.',
         isRoot: false,
+        subAgents: [],
         tools: []
       };
 
@@ -143,6 +169,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.nodes.set([...this.nodes(), subAgentNode]);
 
     this.agentBuilderService.addNode(agentNodeData);
+
+    const parentAgentNode: AgentNode|undefined = this.agentBuilderService.getNode(parentNode.data().name);
+    if (!!parentAgentNode) {
+      parentAgentNode.subAgents.push(agentNodeData);
+    }
 
     // Create an edge connecting the parent to the sub-agent
     this.edgeId++;
@@ -187,36 +218,19 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getNodes().find((node: AgentNode) => !!node.isRoot);
 
     if (!rootAgent) {
+      this._snackBar.open("Please create an agent first.", "OK");
+
       return ;
     }
 
-    const agentName = rootAgent.agentName;
-
-    const fileName = `${agentName}/root_agent.yaml`;
-
-    const yamlConfig: any = {
-      name: rootAgent.agentName,
-      model: rootAgent.model,
-      agentClass: rootAgent.agentType,
-      description: '',
-      instruction: rootAgent.instructions,
-    }
-
-    if (rootAgent.tools?.length) {
-      yamlConfig.tools = this.buildToolsConfig(rootAgent.tools);
-    }
-
-    const yamlString = YAML.stringify(yamlConfig);
-    const blob = new Blob([yamlString], { type: 'application/x-yaml' });
-    const file = new File([blob], fileName, { type: 'application/x-yaml' });
-
     const formData = new FormData();
-    formData.append('files', file);
+
+    this.generateYamlFile(rootAgent, formData, rootAgent.name);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
-          queryParams: { app: rootAgent.agentName }
+          queryParams: { app: rootAgent.name }
         }).then(() => {
           window.location.reload();
         });
@@ -238,5 +252,51 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
       return config;
     });
+  }
+
+  private generateYamlFile(agentNode: AgentNode, formData: FormData, rootAgentName: string) {
+    const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
+
+    const folderName = `${rootAgentName}/${fileName}`;
+
+    const yamlConfig: any = {
+      name: agentNode.name,
+      model: agentNode.model,
+      agent_class: agentNode.agentClass,
+      description: '',
+      instruction: agentNode.instruction,
+      sub_agents: agentNode.subAgents.map((subAgentNode) => `./${subAgentNode.name}.yaml`),
+    }
+
+    if (agentNode.tools?.length) {
+      yamlConfig.tools = this.buildToolsConfig(agentNode.tools);
+    }
+
+    const yamlString = YAML.stringify(yamlConfig);
+    const blob = new Blob([yamlString], { type: 'application/x-yaml' });
+    const file = new File([blob], folderName, { type: 'application/x-yaml' });
+    
+    formData.append('files', file);
+
+    for (const subNode of agentNode.subAgents ?? []) {
+      this.generateYamlFile(subNode, formData, rootAgentName);
+    }
+  }
+
+  loadAgent() {
+    if (!this.existingAgent) { return; }
+
+    this.nodeId = 1;
+    const rootAgent = parse(this.existingAgent) as AgentNode;
+    rootAgent.isRoot = true;
+    if (!rootAgent.tools) { rootAgent.tools = [] } 
+    const rootNode: DynamicNode = {
+      id: rootAgent.name,
+      point: signal({ x: 100, y: 100 }),
+      type: 'html-template',
+      data: signal(rootAgent)
+    };
+    this.nodes.set([rootNode]);
+    this.agentBuilderService.addNode(rootAgent);
   }
 }

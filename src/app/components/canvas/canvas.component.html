@@ -16,7 +16,14 @@
 
 <div class="canvas-container">
   <div class="canvas-workspace">
-
+    @if (!showSidePanel) {
+      <span
+        class="material-symbols-outlined open-panel-btn"
+        matTooltip="Open panel"
+        (click)="toggleSidePanelRequest.emit()"
+        >left_panel_open</span
+      >
+    }
     @if (nodes().length > 0) {
     <vflow 
       view="auto"
@@ -35,28 +42,32 @@
           <div class="node-title-wrapper">
             <div class="node-title">
               <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
-              {{ctx.node.data()?.agentName
-              || 'root_agent'}}
+              {{ctx.node.data()?.name || 'root_agent'}}
             </div>
             <div class="action-button-bar">
-              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id, $event); $event.stopPropagation()"
+              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id, $event); $event.stopPropagation()" matTooltip="Add sub-agent"
                 aria-label="Add sub-agent">
                 <mat-icon>smart_toy</mat-icon>
               </button>
-              <button matIconButton class="action-btn add-tool-btn" (click)="addTool(ctx.node.id); $event.stopPropagation()" aria-label="Add tool">
-                <mat-icon>build</mat-icon>
-              </button>
             </div>
           </div>
-          @if (ctx.node.data()?.tools?.length) {
-            <div class="tools-container">
+          <div class="tools-container">
+            <div class="tools-header">
+              Tools
+              <button matIconButton class="action-btn add-tool-btn" (click)="addTool(ctx.node.id); $event.stopPropagation()" matTooltip="Add tool" aria-label="Add tool">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            @if (ctx.node.data()?.tools?.length) {
               <mat-chip-set>
                 @for (tool of ctx.node.data()?.tools; track tool) {
-                  <mat-chip (click)="selectTool(tool); $event.stopPropagation()">{{tool.toolName}}</mat-chip>
+                  <mat-chip
+                    (click)="selectTool(tool); $event.stopPropagation()"
+                    [class.selected]="tool === selectedTool">{{tool.toolName}}</mat-chip>
                 }
               </mat-chip-set>
-            </div>
-          }
+            }
+          </div>
           <handle type="target" position="top" />
           <handle type="source" position="bottom" />
         </div>

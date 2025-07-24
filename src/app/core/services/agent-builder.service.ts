@@ -10,6 +10,8 @@ export class AgentBuilderService {
 
   private selectedToolSubject = new BehaviorSubject<any | undefined>(undefined);
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
+  private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
+  private isCreatingNewAgentSubject = new BehaviorSubject<boolean>(true);
 
   constructor() { }
 
@@ -17,8 +19,7 @@ export class AgentBuilderService {
    * Returns the node data.
    */
   getNode(agentName: string): AgentNode|undefined {
-    const node = this.nodes.find(node => node.agentName === agentName);
-
+    const node = this.nodes.find(node => node.name === agentName);
     return node;
   }
 
@@ -32,6 +33,12 @@ export class AgentBuilderService {
 
   getNodes(): AgentNode[] {
     return this.nodes;
+  }
+
+  clear() {
+    this.nodes = [];
+    this.setSelectedNode(undefined);
+    this.setSelectedTool(undefined);
   }
 
   getSelectedNode(): Observable<AgentNode|undefined> {
@@ -48,5 +55,21 @@ export class AgentBuilderService {
 
   setSelectedTool(tool: ToolNode | undefined) {
     this.selectedToolSubject.next(tool);
+  }
+
+  setLoadedAgentData(agent: string | undefined) {
+    this.loadedAgentDataSubject.next(agent);
+  }
+
+  getLoadedAgentData(): Observable<string|undefined> {
+    return this.loadedAgentDataSubject.asObservable();
+  }
+
+  setIsCreatingNewAgent(newAgent: boolean) {
+    this.isCreatingNewAgentSubject.next(newAgent);
+  }
+
+  getIsCreatingNewAgent() {
+    return this.isCreatingNewAgentSubject.asObservable();
   }
 }

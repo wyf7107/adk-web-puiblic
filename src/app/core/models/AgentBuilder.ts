@@ -37,6 +37,16 @@ export interface ToolArg {
   value: any;
 }
 
+export interface YamlConfig {
+  name: string;
+  model: string;
+  agent_class: string;
+  description: string;
+  instruction: string;
+  sub_agents: string[];
+  tools: any[];
+}
+
 export interface DiagramNode {
   id: string;
   type: 'agent' | 'tool';

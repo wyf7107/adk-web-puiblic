@@ -240,20 +240,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     })
   }
 
-  private buildToolsConfig(tools: ToolNode[]): any[] {
-    return tools.map(tool => {
-      const config: any = {
-        name: tool.toolName,
-      };
-
-      if (tool.toolArgs && tool.toolArgs.length > 0) {
-        config.args = tool.toolArgs;
-      }
-
-      return config;
-    });
-  }
-
   private generateYamlFile(agentNode: AgentNode, formData: FormData, rootAgentName: string) {
     const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
 
@@ -266,10 +252,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       description: '',
       instruction: agentNode.instruction,
       sub_agents: agentNode.subAgents.map((subAgentNode) => `./${subAgentNode.name}.yaml`),
-    }
-
-    if (agentNode.tools?.length) {
-      yamlConfig.tools = this.buildToolsConfig(agentNode.tools);
+      tools: this.buildToolsConfig(agentNode.tools)
     }
 
     const yamlString = YAML.stringify(yamlConfig);
@@ -281,6 +264,24 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     for (const subNode of agentNode.subAgents ?? []) {
       this.generateYamlFile(subNode, formData, rootAgentName);
     }
+  }
+
+  private buildToolsConfig(tools: ToolNode[] | undefined): any[] {
+    if (!tools || tools.length === 0) {
+      return [];
+    }
+
+    return tools.map(tool => {
+      const config: any = {
+        name: tool.toolName,
+      };
+
+      if (tool.toolArgs && tool.toolArgs.length > 0) {
+        config.args = tool.toolArgs;
+      }
+
+      return config;
+    });
   }
 
   loadAgent() {

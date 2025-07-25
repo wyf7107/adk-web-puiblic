@@ -890,14 +890,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const key = this.messages[i].eventId;
     const selectedEvent = this.eventData.get(key);
 
-    return selectedEvent?.author ?? ROOT_AGENT;
+    return selectedEvent?.author ?? '';
   }
 
   customIconColorClass(i: number) {
     const agentName = this.getAgentNameFromEvent(i);
-    return agentName !== ROOT_AGENT ?
-        `custom-icon-color-${stc(agentName).replace('#', '')}` :
-        '';
+    if (!!agentName) {
+      this.createAgentIconColorClass(agentName);
+
+      return  `custom-icon-color-${stc(agentName).replace('#', '')}`;
+    }
+    
+    return 'hidden';
   }
 
   createAgentIconColorClass(agentName: string) {

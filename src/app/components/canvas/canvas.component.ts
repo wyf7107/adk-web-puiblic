@@ -251,11 +251,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       agent_class: agentNode.agentClass,
       description: '',
       instruction: agentNode.instruction,
-      sub_agents: agentNode.subAgents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}),
+      sub_agents: agentNode.subAgents.map((subAgentNode) => `./${subAgentNode.name}.yaml`),
     }
-
-    console.log('121111');
-    console.log(yamlConfig);
 
     const yamlString = YAML.stringify(yamlConfig);
     const blob = new Blob([yamlString], { type: 'application/x-yaml' });

@@ -142,7 +142,7 @@ export class BuilderTabsComponent {
   saveToolArgs() {
     if (this.jsonEditorComponent) {
       try {
-        const updatedArgs = JSON.parse(this.jsonEditorComponent.jsonString);
+        const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
         if (this.selectedTool) {
           this.selectedTool.toolArgs = updatedArgs;
           this.toolArgsString = JSON.stringify(this.selectedTool.toolArgs, null, 2);

@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild, signal } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import {JsonEditorComponent} from '../json-editor/json-editor.component'
 
 @Component({
   selector: 'app-builder-tabs',
@@ -26,6 +27,9 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
   standalone: false
 })
 export class BuilderTabsComponent {
+  @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
+  protected toolArgsString = signal('');
+  editingToolArgs = signal(false);
 
   // Agent configuration properties
   agentConfig: AgentNode | undefined = {
@@ -119,6 +123,30 @@ export class BuilderTabsComponent {
     })
   }
 
+  editToolArgs() {
+    this.editingToolArgs.set(true);
+  }
+
+  cancelEditToolArgs() {
+    this.editingToolArgs.set(false);
+    this.toolArgsString.set(JSON.stringify(this.selectedTool?.toolArgs, null, 2));
+  }
+
+  saveToolArgs() {
+    if (this.jsonEditorComponent) {
+      try {
+        const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
+        if (this.selectedTool) {
+          this.selectedTool.toolArgs = updatedArgs;
+          this.toolArgsString.set(JSON.stringify(this.selectedTool.toolArgs, null, 2));
+        }
+        this.editingToolArgs.set(false);
+      } catch (e) {
+        console.error('Error parsing tool arguments JSON', e);
+      }
+    }
+  }
+
   onToolTypeSelectionChange() {
     if (this.selectedTool?.toolType === 'Built-in tool') {
       this.selectedTool.toolName = 'google_search';
@@ -133,7 +161,9 @@ export class BuilderTabsComponent {
         for (const argName of argNames) {
           this.selectedTool.toolArgs.push({name: argName, value: ''});
         }
+        this.editingToolArgs.set(true);
       }
+      this.toolArgsString.set(JSON.stringify(this.selectedTool.toolArgs, null, 2));
     }
   }
 }

@@ -214,7 +214,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   saveAgent() {
-    // Save root agent only for now
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getNodes().find((node: AgentNode) => !!node.isRoot);
 
     if (!rootAgent) {
@@ -251,7 +250,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       agent_class: agentNode.agentClass,
       description: '',
       instruction: agentNode.instruction,
-      sub_agents: agentNode.subAgents.map((subAgentNode) => `./${subAgentNode.name}.yaml`),
+      sub_agents: agentNode.subAgents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}),
     }
 
     const yamlString = YAML.stringify(yamlConfig);

@@ -29,7 +29,7 @@ import {JsonEditorComponent} from '../json-editor/json-editor.component'
 export class BuilderTabsComponent {
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
   protected toolArgsString = signal('');
-  editingToolArgs = signal(true);
+  editingToolArgs = signal(false);
 
   // Agent configuration properties
   agentConfig: AgentNode | undefined = {
@@ -161,9 +161,9 @@ export class BuilderTabsComponent {
         for (const argName of argNames) {
           this.selectedTool.toolArgs.push({name: argName, value: ''});
         }
+        this.editingToolArgs.set(true);
       }
       this.toolArgsString.set(JSON.stringify(this.selectedTool.toolArgs, null, 2));
-      this.editingToolArgs.set(false);
     }
   }
 }

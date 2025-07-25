@@ -16,7 +16,7 @@
  */
 
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter} from '@angular/core';
-import { DiagramNode, DiagramConnection, AgentNode } from '../../core/models/AgentBuilder';
+import { DiagramConnection, AgentNode, ToolNode, YamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -170,7 +170,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     this.agentBuilderService.addNode(agentNodeData);
 
-    const parentAgentNode: AgentNode|undefined = this.agentBuilderService.getNode(parentNode.data().name);
+    const parentAgentNode: AgentNode|undefined = parentNode.data ? this.agentBuilderService.getNode(parentNode.data().name) : undefined;
     if (!!parentAgentNode) {
       parentAgentNode.subAgents.push(agentNodeData);
     }
@@ -244,13 +244,14 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const folderName = `${rootAgentName}/${fileName}`;
 
-    const yamlConfig = {
+    const yamlConfig: YamlConfig = {
       name: agentNode.name,
       model: agentNode.model,
       agent_class: agentNode.agentClass,
       description: '',
       instruction: agentNode.instruction,
       sub_agents: agentNode.subAgents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}),
+      tools: this.buildToolsConfig(agentNode.tools)
     }
 
     const yamlString = YAML.stringify(yamlConfig);
@@ -262,6 +263,44 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     for (const subNode of agentNode.subAgents ?? []) {
       this.generateYamlFile(subNode, formData, rootAgentName);
     }
+  }
+
+  private buildToolsConfig(tools: ToolNode[] | undefined): any[] {
+    if (!tools || tools.length === 0) {
+      return [];
+    }
+
+    return tools.map(tool => {
+      const config: any = {
+        name: tool.toolName,
+      };
+
+      if (tool.toolArgs && tool.toolArgs.length > 0) {
+        config.args = tool.toolArgs.map(arg => {
+          const value = arg.value;
+
+          if (typeof value !== 'string') {
+            return arg;
+          }
+
+          if (value.toLowerCase() === 'true') {
+            return { ...arg, value: true };
+          }
+
+          if (value.toLowerCase() === 'false') {
+            return { ...arg, value: false };
+          }
+
+          if (value.trim() !== '' && Number(value)) {
+            return { ...arg, value: Number(value) };
+          }
+
+          return arg;
+        });
+      }
+
+      return config;
+    });
   }
 
   loadAgent() {

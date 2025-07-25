@@ -29,6 +29,7 @@ import {JsonEditorComponent} from '../json-editor/json-editor.component'
 export class BuilderTabsComponent {
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
   protected toolArgsString: string = '';
+  editingToolArgs = false;
 
   // Agent configuration properties
   agentConfig: AgentNode | undefined = {
@@ -122,6 +123,37 @@ export class BuilderTabsComponent {
     })
   }
 
+  get toolArgsDisplay(): string {
+    if (this.selectedTool?.toolArgs) {
+      return JSON.stringify(this.selectedTool.toolArgs);
+    }
+    return '[]';
+  }
+
+  editToolArgs() {
+    this.editingToolArgs = true;
+  }
+
+  cancelEditToolArgs() {
+    this.editingToolArgs = false;
+    this.toolArgsString = JSON.stringify(this.selectedTool?.toolArgs, null, 2);
+  }
+
+  saveToolArgs() {
+    if (this.jsonEditorComponent) {
+      try {
+        const updatedArgs = JSON.parse(this.jsonEditorComponent.jsonString);
+        if (this.selectedTool) {
+          this.selectedTool.toolArgs = updatedArgs;
+          this.toolArgsString = JSON.stringify(this.selectedTool.toolArgs, null, 2);
+        }
+        this.editingToolArgs = false;
+      } catch (e) {
+        console.error('Error parsing tool arguments JSON', e);
+      }
+    }
+  }
+
   onToolTypeSelectionChange() {
     if (this.selectedTool?.toolType === 'Built-in tool') {
       this.selectedTool.toolName = 'google_search';
@@ -138,6 +170,7 @@ export class BuilderTabsComponent {
         }
       }
       this.toolArgsString = JSON.stringify(this.selectedTool.toolArgs, null, 2);
+      this.editingToolArgs = false;
     }
   }
 }

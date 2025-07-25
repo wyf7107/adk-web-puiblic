@@ -84,9 +84,22 @@
           </mat-form-field>
           @if (builtInToolArgs.has(selectedTool.toolName) && selectedTool.toolArgs?.length) {
             <h2 class="tool-args-header">Built-In Tool Arguments</h2>
-            <app-json-editor
-              [jsonString]="toolArgsString"
-            ></app-json-editor>
+            @if (editingToolArgs) {
+              <app-json-editor
+                [jsonString]="toolArgsString"
+              ></app-json-editor>
+              <div class="edit-buttons">
+                <button mat-button (click)="saveToolArgs()">Save</button>
+                <button mat-button (click)="cancelEditToolArgs()">Cancel</button>
+              </div>
+            } @else {
+              <div class="tool-args-display-container">
+                <span class="tool-args-json">Arguments: {{ toolArgsDisplay }}</span>
+                <button mat-icon-button (click)="editToolArgs()">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            }
           }
         }
       </div>

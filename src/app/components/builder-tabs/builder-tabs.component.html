@@ -84,12 +84,9 @@
           </mat-form-field>
           @if (builtInToolArgs.has(selectedTool.toolName) && selectedTool.toolArgs?.length) {
             <h2 class="tool-args-header">Built-In Tool Arguments</h2>
-            @for (arg of selectedTool.toolArgs; track arg) {
-              <mat-form-field class="tool-arg-field">
-                <mat-label>{{ arg.name }}</mat-label>
-                <input matInput [(ngModel)]="arg.value" />
-              </mat-form-field>
-            }
+            <app-json-editor
+              [jsonString]="toolArgsString"
+            ></app-json-editor>
           }
         }
       </div>

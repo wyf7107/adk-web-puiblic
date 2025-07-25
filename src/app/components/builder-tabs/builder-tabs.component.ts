@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import {JsonEditorComponent} from '../json-editor/json-editor.component'
 
 @Component({
   selector: 'app-builder-tabs',
@@ -26,6 +27,8 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
   standalone: false
 })
 export class BuilderTabsComponent {
+  @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
+  protected toolArgsString: string = '';
 
   // Agent configuration properties
   agentConfig: AgentNode | undefined = {
@@ -134,6 +137,7 @@ export class BuilderTabsComponent {
           this.selectedTool.toolArgs.push({name: argName, value: ''});
         }
       }
+      this.toolArgsString = JSON.stringify(this.selectedTool.toolArgs, null, 2);
     }
   }
 }

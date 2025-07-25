@@ -43,7 +43,7 @@ export interface YamlConfig {
   agent_class: string;
   description: string;
   instruction: string;
-  sub_agents: string[];
+  sub_agents: any[];
   tools: any[];
 }
 

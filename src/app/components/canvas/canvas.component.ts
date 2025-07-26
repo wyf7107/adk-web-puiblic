@@ -243,6 +243,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
 
     const folderName = `${rootAgentName}/${fileName}`;
+    const subAgents = agentNode.subAgents?
+      agentNode.subAgents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}) : []
 
     const yamlConfig: YamlConfig = {
       name: agentNode.name,
@@ -250,7 +252,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       agent_class: agentNode.agentClass,
       description: '',
       instruction: agentNode.instruction,
-      sub_agents: agentNode.subAgents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}),
+      sub_agents: subAgents,
       tools: this.buildToolsConfig(agentNode.tools)
     }
 

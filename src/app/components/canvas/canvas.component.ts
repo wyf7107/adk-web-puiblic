@@ -129,7 +129,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   onAddResource(nodeId: string) {
     // This method can be used for general resource addition logic
-    console.log('Adding resource to node:', nodeId);
   }
 
   addSubAgent(parentNodeId: string, event: MouseEvent) {
@@ -185,8 +184,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // Add the edge
     this.edges.set([...this.edges(), edge]);
-
-    console.log('Added sub-agent:', subAgentNode.id, 'connected to:', parentNodeId);
   }
 
   addTool(parentNodeId: string) {
@@ -197,8 +194,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const tool = {
       toolType: 'Custom tool',
-      toolName: `tool_${this.toolId}`,
-      toolArgs: []
+      name: `tool_${this.toolId}`,
+      args: []
     }
     this.toolId++;
 
@@ -208,7 +205,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   selectTool(tool: any) {
-    console.log('Selected tool:', tool);
     this.agentBuilderService.setSelectedTool(tool);
     this.agentBuilderService.setSelectedNode(undefined);
   }
@@ -274,11 +270,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     return tools.map(tool => {
       const config: any = {
-        name: tool.toolName,
+        name: tool.name,
       };
 
-      if (tool.toolArgs && tool.toolArgs.length > 0) {
-        config.args = tool.toolArgs.map(arg => {
+      if (tool.args && tool.args.length > 0) {
+        config.args = tool.args.map(arg => {
           const value = arg.value;
 
           if (typeof value !== 'string') {
@@ -312,6 +308,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const rootAgent = parse(this.existingAgent) as AgentNode;
     rootAgent.isRoot = true;
     if (!rootAgent.tools) { rootAgent.tools = [] } 
+    else {
+      rootAgent.tools.map(tool => {
+        if (tool.name.includes('.')) {
+          tool.toolType = "Custom tool"
+        } else {
+          tool.toolType = "Built-in tool"
+        }
+      })
+    }
     const rootNode: HtmlTemplateDynamicNode = {
       id: rootAgent.name,
       point: signal({ x: 100, y: 100 }),

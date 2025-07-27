@@ -125,11 +125,14 @@ export class BuilderTabsComponent {
 
   editToolArgs() {
     this.editingToolArgs.set(true);
+    if (this.selectedTool && this.selectedTool.args) {
+      this.toolArgsString.set(JSON.stringify(this.selectedTool.args, null, 2));
+    }
   }
 
   cancelEditToolArgs() {
     this.editingToolArgs.set(false);
-    this.toolArgsString.set(JSON.stringify(this.selectedTool?.toolArgs, null, 2));
+    this.toolArgsString.set(JSON.stringify(this.selectedTool?.args, null, 2));
   }
 
   saveToolArgs() {
@@ -137,8 +140,8 @@ export class BuilderTabsComponent {
       try {
         const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
         if (this.selectedTool) {
-          this.selectedTool.toolArgs = updatedArgs;
-          this.toolArgsString.set(JSON.stringify(this.selectedTool.toolArgs, null, 2));
+          this.selectedTool.args = updatedArgs;
+          this.toolArgsString.set(JSON.stringify(this.selectedTool.args, null, 2));
         }
         this.editingToolArgs.set(false);
       } catch (e) {
@@ -149,21 +152,21 @@ export class BuilderTabsComponent {
 
   onToolTypeSelectionChange() {
     if (this.selectedTool?.toolType === 'Built-in tool') {
-      this.selectedTool.toolName = 'google_search';
+      this.selectedTool.name = 'google_search';
     }
   }
 
   onBuiltInToolSelectionChange() {
     if (this.selectedTool) {
-      this.selectedTool.toolArgs = [];
-      const argNames = this.builtInToolArgs.get(this.selectedTool.toolName);
+      this.selectedTool.args = [];
+      const argNames = this.builtInToolArgs.get(this.selectedTool.name);
       if (argNames) {
         for (const argName of argNames) {
-          this.selectedTool.toolArgs.push({name: argName, value: ''});
+          this.selectedTool.args.push({name: argName, value: ''});
         }
         this.editingToolArgs.set(true);
       }
-      this.toolArgsString.set(JSON.stringify(this.selectedTool.toolArgs, null, 2));
+      this.toolArgsString.set(JSON.stringify(this.selectedTool.args, null, 2));
     }
   }
 }

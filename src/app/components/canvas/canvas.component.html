@@ -63,7 +63,7 @@
                 @for (tool of ctx.node.data()?.tools; track tool) {
                   <mat-chip
                     (click)="selectTool(tool); $event.stopPropagation()"
-                    [class.selected]="tool === selectedTool">{{tool.toolName}}</mat-chip>
+                    [class.selected]="tool === selectedTool">{{tool.name}}</mat-chip>
                 }
               </mat-chip-set>
             }

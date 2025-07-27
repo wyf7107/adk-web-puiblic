@@ -99,7 +99,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           model: 'gemini-2.5-flash',
           instruction: 'You are the root agent that coordinates other agents.',
           isRoot: true,
-          subAgents: [],
+          sub_agents: [],
           tools: []
         };
 
@@ -150,7 +150,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         model: 'gemini-2.5-flash',
         instruction: 'You are a sub-agent that performs specialized tasks.',
         isRoot: false,
-        subAgents: [],
+        sub_agents: [],
         tools: []
       };
 
@@ -171,7 +171,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const parentAgentNode: AgentNode|undefined = parentNode.data ? this.agentBuilderService.getNode(parentNode.data().name) : undefined;
     if (!!parentAgentNode) {
-      parentAgentNode.subAgents.push(agentNodeData);
+      parentAgentNode.sub_agents.push(agentNodeData);
     }
 
     // Create an edge connecting the parent to the sub-agent
@@ -239,8 +239,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
 
     const folderName = `${rootAgentName}/${fileName}`;
-    const subAgents = agentNode.subAgents?
-      agentNode.subAgents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}) : []
+    const subAgents = agentNode.sub_agents?
+      agentNode.sub_agents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}) : []
 
     const yamlConfig: YamlConfig = {
       name: agentNode.name,
@@ -258,7 +258,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     
     formData.append('files', file);
 
-    for (const subNode of agentNode.subAgents ?? []) {
+    for (const subNode of agentNode.sub_agents ?? []) {
       this.generateYamlFile(subNode, formData, rootAgentName);
     }
   }

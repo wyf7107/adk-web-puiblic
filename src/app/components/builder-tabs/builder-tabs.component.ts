@@ -38,7 +38,7 @@ export class BuilderTabsComponent {
     agentClass: '',
     model: '',
     instruction: '',
-    subAgents: []
+    sub_agents: []
   };
 
   // Agent configuration options

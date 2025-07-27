@@ -71,18 +71,18 @@
         @if (selectedTool.toolType === 'Custom tool') {
           <mat-form-field class="tool-name-field">
             <mat-label>Tool Name</mat-label>
-            <input matInput [(ngModel)]="selectedTool.toolName" />
+            <input matInput [(ngModel)]="selectedTool.name" />
           </mat-form-field>
         } @else if (selectedTool.toolType === 'Built-in tool') {
           <mat-form-field class="built-in-tool-field">
             <mat-label>Built-in Tool</mat-label>
-            <mat-select [(ngModel)]="selectedTool.toolName" (selectionChange)="onBuiltInToolSelectionChange()">
+            <mat-select [(ngModel)]="selectedTool.name" (selectionChange)="onBuiltInToolSelectionChange()">
               @for (tool of builtInTools; track tool) {
                 <mat-option [value]="tool">{{ tool }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-          @if (builtInToolArgs.has(selectedTool.toolName) && selectedTool.toolArgs?.length) {
+          @if (builtInToolArgs.has(selectedTool.name) && selectedTool.args?.length) {
             <h2 class="tool-args-header">Built-In Tool Arguments</h2>
             @if (editingToolArgs()) {
               <app-json-editor

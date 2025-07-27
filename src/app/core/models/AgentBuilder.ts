@@ -26,10 +26,10 @@ export interface AgentNode {
 }
 
 export interface ToolNode {
-    toolName: string;
+    name: string;
     toolType: string;
     toolCode?: string;
-    toolArgs?: ToolArg[];
+    args?: ToolArg[];
 }
 
 export interface ToolArg {

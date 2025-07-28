@@ -205,6 +205,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     parentNode.data.set(data);
   }
 
+  deleteTool(agentName: string, tool: any) {
+    this.agentBuilderService.deleteTool(agentName, tool);
+  }
+
   selectTool(tool: any) {
     this.agentBuilderService.setSelectedTool(tool);
     this.agentBuilderService.setSelectedNode(undefined);

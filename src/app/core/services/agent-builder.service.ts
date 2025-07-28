@@ -65,6 +65,19 @@ export class AgentBuilderService {
     this.selectedToolSubject.next(tool);
   }
 
+  deleteTool(agentName: string, toolToDelete: ToolNode) {
+    const agentNode = this.getNode(agentName);
+    if (agentNode && agentNode.tools) {
+      const toolIndex = agentNode.tools.findIndex(tool => tool.name === toolToDelete.name);
+      if (toolIndex > -1) {
+        agentNode.tools.splice(toolIndex, 1);
+        if (this.selectedToolSubject.value?.name === toolToDelete.name) {
+          this.setSelectedTool(undefined);
+        }
+      }
+    }
+  }
+
   setLoadedAgentData(agent: string | undefined) {
     this.loadedAgentDataSubject.next(agent);
   }

@@ -240,7 +240,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const folderName = `${rootAgentName}/${fileName}`;
     const subAgents = agentNode.sub_agents?
-      agentNode.sub_agents.map((subAgentNode) => {return {config: `./${subAgentNode.name}.yaml`};}) : []
+      agentNode.sub_agents.map((subAgentNode) => {return {config_path: `./${subAgentNode.name}.yaml`};}) : []
 
     const yamlConfig: YamlConfig = {
       name: agentNode.name,

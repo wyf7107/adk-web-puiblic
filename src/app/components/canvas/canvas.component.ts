@@ -210,7 +210,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   saveAgent() {
-    const rootAgent: AgentNode|undefined = this.agentBuilderService.getNodes().find((node: AgentNode) => !!node.isRoot);
+    const rootAgent: AgentNode|undefined = this.agentBuilderService.getRootNode();
 
     if (!rootAgent) {
       this._snackBar.open("Please create an agent first.", "OK");

@@ -24,6 +24,14 @@ export class AgentBuilderService {
   }
 
   /**
+   * Returns the root node data.
+   */
+  getRootNode(): AgentNode|undefined {
+    const node = this.nodes.find(node => !!node.isRoot);
+    return node;
+  }
+
+  /**
    * Adds a new AgentNode to the list.
    * @param newNode The agentNode to add.
    */

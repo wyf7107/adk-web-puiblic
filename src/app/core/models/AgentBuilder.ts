@@ -21,15 +21,15 @@ export interface AgentNode {
     agentClass: string;
     model: string;
     instruction: string;
-    subAgents: AgentNode[];
+    sub_agents: AgentNode[];
     tools?: ToolNode[];
 }
 
 export interface ToolNode {
-    toolName: string;
+    name: string;
     toolType: string;
     toolCode?: string;
-    toolArgs?: ToolArg[];
+    args?: ToolArg[];
 }
 
 export interface ToolArg {
@@ -43,7 +43,7 @@ export interface YamlConfig {
   agent_class: string;
   description: string;
   instruction: string;
-  sub_agents: any[];
+  sub_agents: any;
   tools: any[];
 }
 

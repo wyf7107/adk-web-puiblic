@@ -71,24 +71,29 @@
         @if (selectedTool.toolType === 'Custom tool') {
           <mat-form-field class="tool-name-field">
             <mat-label>Tool Name</mat-label>
-            <input matInput [(ngModel)]="selectedTool.toolName" />
+            <input matInput [(ngModel)]="selectedTool.name" />
           </mat-form-field>
         } @else if (selectedTool.toolType === 'Built-in tool') {
           <mat-form-field class="built-in-tool-field">
             <mat-label>Built-in Tool</mat-label>
-            <mat-select [(ngModel)]="selectedTool.toolName" (selectionChange)="onBuiltInToolSelectionChange()">
+            <mat-select [(ngModel)]="selectedTool.name" (selectionChange)="onBuiltInToolSelectionChange()">
               @for (tool of builtInTools; track tool) {
                 <mat-option [value]="tool">{{ tool }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
-          @if (builtInToolArgs.has(selectedTool.toolName) && selectedTool.toolArgs?.length) {
+          @if (builtInToolArgs.has(selectedTool.name) && selectedTool.args?.length) {
             <h2 class="tool-args-header">Built-In Tool Arguments</h2>
-            @for (arg of selectedTool.toolArgs; track arg) {
-              <mat-form-field class="tool-arg-field">
-                <mat-label>{{ arg.name }}</mat-label>
-                <input matInput [(ngModel)]="arg.value" />
-              </mat-form-field>
+            @if (editingToolArgs()) {
+              <app-json-editor
+                [jsonString]="toolArgsString()"
+              ></app-json-editor>
+              <div class="edit-buttons">
+                <button mat-button (click)="saveToolArgs()">Save</button>
+                <button mat-button (click)="cancelEditToolArgs()">Cancel</button>
+              </div>
+            } @else {
+              <button mat-button (click)="editToolArgs()">Edit tool args</button>
             }
           }
         }

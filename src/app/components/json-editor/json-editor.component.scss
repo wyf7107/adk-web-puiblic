@@ -17,11 +17,7 @@
 @import '../../../../node_modules/vanilla-jsoneditor/themes/jse-theme-dark.css';
 
 .json-editor-container {
-  height: 300px;
-  max-height: 300px;
-  // border: 1px solid #4f4f4f;
-  // border-radius: 10px;
-  // overflow: hidden;
+  height: 100%;
 }
 
 ::ng-deep .jse-message.jse-error {

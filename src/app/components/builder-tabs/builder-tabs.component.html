@@ -85,9 +85,11 @@
           @if (builtInToolArgs.has(selectedTool.name) && selectedTool.args?.length) {
             <h2 class="tool-args-header">Built-In Tool Arguments</h2>
             @if (editingToolArgs()) {
-              <app-json-editor
-                [jsonString]="toolArgsString()"
-              ></app-json-editor>
+              <div class="json-editor-wrapper">
+                <app-json-editor
+                  [jsonString]="toolArgsString()"
+                ></app-json-editor>
+              </div>
               <div class="edit-buttons">
                 <button mat-button (click)="saveToolArgs()">Save</button>
                 <button mat-button (click)="cancelEditToolArgs()">Cancel</button>

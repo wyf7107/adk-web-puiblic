@@ -43,8 +43,12 @@ export interface YamlConfig {
   agent_class: string;
   description: string;
   instruction: string;
-  sub_agents: any;
+  sub_agents: SubAgentYamlConfig[];
   tools: any[];
+}
+
+export interface SubAgentYamlConfig {
+  config_path: string;
 }
 
 export interface DiagramNode {

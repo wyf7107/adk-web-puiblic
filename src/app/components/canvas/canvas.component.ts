@@ -16,7 +16,7 @@
  */
 
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter} from '@angular/core';
-import { DiagramConnection, AgentNode, ToolNode, YamlConfig } from '../../core/models/AgentBuilder';
+import { DiagramConnection, AgentNode, ToolNode, YamlConfig, SubAgentYamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -239,7 +239,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
 
     const folderName = `${rootAgentName}/${fileName}`;
-    const subAgents = agentNode.sub_agents?
+    const subAgents: SubAgentYamlConfig[] = agentNode.sub_agents?
       agentNode.sub_agents.map((subAgentNode) => {return {config_path: `./${subAgentNode.name}.yaml`};}) : []
 
     const yamlConfig: YamlConfig = {

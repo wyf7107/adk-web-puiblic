@@ -66,7 +66,6 @@ export class BuilderTabsComponent {
     'Built-in tool'
   ];
   protected builtInTools = [
-    'AgentTool',
     'EnterpriseWebSearchTool',
     'exit_loop',
     'FilesRetrieval',
@@ -82,7 +81,6 @@ export class BuilderTabsComponent {
     'VertexAiSearchTool',
   ];
   protected builtInToolArgs = new Map<string, string[]>([
-    ['AgentTool', ['agent', 'skip_summarization']],
     ['EnterpriseWebSearchTool', []],
     ['exit_loop', []],
     ['FilesRetrieval', ['name', 'description', 'input_dir']],

@@ -19,6 +19,9 @@
 .json-editor-container {
   height: 300px;
   max-height: 300px;
+  // border: 1px solid #4f4f4f;
+  // border-radius: 10px;
+  // overflow: hidden;
 }
 
 ::ng-deep .jse-message.jse-error {
@@ -27,4 +30,13 @@
 
 ::ng-deep .cm-gutters.cm-gutters-before {
   display: none;
+}
+
+::ng-deep .jse-text-mode {
+  border-radius: 10px;
+}
+
+::ng-deep .jse-contents {
+  border-radius: 10px;
+  border-bottom: 1px solid #4f4f4f;
 }

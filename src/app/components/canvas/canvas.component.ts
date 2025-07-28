@@ -30,6 +30,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
 import { parse } from 'yaml';
+import { firstValueFrom } from 'rxjs';
 
 
 @Component({
@@ -301,15 +302,21 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     });
   }
 
-  loadAgent() {
+  async loadAgent() {
     if (!this.existingAgent) { return; }
-
     this.nodeId = 1;
+    this.edgeId = 1;
     const rootAgent = parse(this.existingAgent) as AgentNode;
     rootAgent.isRoot = true;
-    if (!rootAgent.tools) { rootAgent.tools = [] } 
+    this.loadAgentTools(rootAgent);
+    await this.loadSubAgents(rootAgent);
+    this.agentBuilderService.addNode(rootAgent);
+  }
+
+  loadAgentTools(agent: AgentNode) {
+    if (!agent.tools) { agent.tools = [] } 
     else {
-      rootAgent.tools.map(tool => {
+      agent.tools.map(tool => {
         if (tool.name.includes('.')) {
           tool.toolType = "Custom tool"
         } else {
@@ -317,13 +324,74 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         }
       })
     }
-    const rootNode: HtmlTemplateDynamicNode = {
-      id: rootAgent.name,
-      point: signal({ x: 100, y: 100 }),
-      type: 'html-template',
-      data: signal(rootAgent)
+  }
+
+  async loadSubAgents(rootAgent: AgentNode) {
+    type BFSItem = {
+      node: AgentNode;
+      depth: number;
+      index: number;
+      parentId?: number;  // used to draw edges
     };
-    this.nodes.set([rootNode]);
-    this.agentBuilderService.addNode(rootAgent);
+    const appName = rootAgent.name;
+    const queue: BFSItem[] = [{ node: rootAgent, depth: 1, index: 1 }];
+
+    while (queue.length > 0) {
+      let { node, depth, index, parentId } = queue.shift()!;
+
+      if (node && node.config) {
+        this.nodeId ++;
+        const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config));
+        const subAgent = parse(subAgentData) as AgentNode;
+
+        const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentId?.toString()) as HtmlTemplateDynamicNode;
+        if (!parentNode || !parentNode.data) return;
+        const subAgentNode: HtmlTemplateDynamicNode = {
+          id: `${this.nodeId}`,
+          point: signal({ 
+            x: (index-1) * 350 + 50, 
+            y: depth * 150 + 50 // Position below the parent
+          }),
+          type: 'html-template',
+          data: signal(subAgent)
+        };
+        this.nodes.set([...this.nodes(), subAgentNode])
+
+        if (parentId) {
+          const edge: Edge = {
+            id: this.edgeId.toString(),
+            source: parentId.toString(),
+            target: subAgentNode.id,
+          };
+          this.edgeId++;
+          // Add the edge
+          this.edges.set([...this.edges(), edge]);
+        }
+        if (subAgent.sub_agents && subAgent.sub_agents.length > 0) {
+          index = 1
+          for (const sub of subAgent.sub_agents) {
+            queue.push({ node: sub, parentId: this.nodeId, depth: depth + 1, index: index })
+            index ++;
+          }
+        }
+      } else {
+         const rootNode: HtmlTemplateDynamicNode = {
+          id: this.nodeId.toString(),
+          point: signal({ x: 100, y: 150 }),
+          type: 'html-template',
+          data: signal(rootAgent)
+        };
+
+        this.nodes.set([rootNode])
+
+        if (node.sub_agents && node.sub_agents.length > 0) {
+          index = 1
+          for (const sub of node.sub_agents) {
+            queue.push({ node: sub, parentId: this.nodeId, depth: depth + 1, index: index})
+            index ++;
+          }
+        }
+      }
+    }
   }
 }

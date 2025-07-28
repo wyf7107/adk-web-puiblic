@@ -133,4 +133,15 @@ export class AgentService {
     }
     return new Observable<"">();
   }
+
+  getSubAgentBuilder(appName: string, relativePath: string) {
+    if (this.apiServerDomain != undefined) {
+      const url = 
+        this.apiServerDomain + `/builder/app/${appName}?ts=${Date.now()}&file_path=${relativePath}`
+      return this.http.get(url, {
+        responseType: 'text'
+      });
+    }
+    return new Observable<"">();
+  }
 }

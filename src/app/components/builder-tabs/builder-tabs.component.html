@@ -16,90 +16,105 @@
 
 <div class="builder-tabs-container">
   <div class="builder-tab-content">
-    <div class="components-section">
-      <h4>{{header}}</h4>
-    </div>
 
-    @if (agentConfig) {
-      <!-- Agent Configuration Form -->
-      <div class="config-form">
-        <div class="form-row">
-          <mat-form-field class="agent-name-field">
-            <mat-label>Agent Name</mat-label>
-            <input matInput [(ngModel)]="agentConfig.name" [disabled]="!creatingNewAgent"/>
-          </mat-form-field>
+    <mat-tab-group>
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Config</span>
+        </ng-template>
+        <div class="tab-content-container">
+          <div class="components-section">
+            <h4>{{header}}</h4>
+          </div>
 
-          <mat-form-field class="agent-type-field">
-            <mat-label>Agent Type</mat-label>
-            <mat-select [(ngModel)]="agentConfig.agentClass">
-              @for (type of agentTypes; track type) {
-              <mat-option [value]="type">{{type}}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
+          @if (agentConfig) {
+            <!-- Agent Configuration Form -->
+            <div class="config-form">
+              <div class="form-row">
+                <mat-form-field class="agent-name-field">
+                  <mat-label>Agent Name</mat-label>
+                  <input matInput [(ngModel)]="agentConfig.name" [disabled]="!creatingNewAgent"/>
+                </mat-form-field>
 
-        <div class="form-row">
-          <mat-checkbox [(ngModel)]="agentConfig.isRoot" [disabled]="!isRootAgentEditable">Is root agent?</mat-checkbox>
-        </div>
-
-        <mat-form-field>
-          <mat-label>Model</mat-label>
-          <mat-select [(ngModel)]="agentConfig.model">
-            @for (model of models; track model) {
-            <mat-option [value]="model">{{model}}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field>
-          <mat-label>Instructions</mat-label>
-          <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
-        </mat-form-field>
-      </div>
-    } @else if (selectedTool) {
-      <!-- Tool Configuration Form -->
-      <div class="config-form">
-        <mat-form-field class="tool-type-field">
-          <mat-label>Tool Type</mat-label>
-          <mat-select [(ngModel)]="selectedTool.toolType" (selectionChange)="onToolTypeSelectionChange()">
-              @for (type of toolTypes; track type) {
-                  <mat-option [value]="type">{{type}}</mat-option>
-              }
-          </mat-select>
-        </mat-form-field>
-        @if (selectedTool.toolType === 'Custom tool') {
-          <mat-form-field class="tool-name-field">
-            <mat-label>Tool Name</mat-label>
-            <input matInput [(ngModel)]="selectedTool.name" />
-          </mat-form-field>
-        } @else if (selectedTool.toolType === 'Built-in tool') {
-          <mat-form-field class="built-in-tool-field">
-            <mat-label>Built-in Tool</mat-label>
-            <mat-select [(ngModel)]="selectedTool.name" (selectionChange)="onBuiltInToolSelectionChange()">
-              @for (tool of builtInTools; track tool) {
-                <mat-option [value]="tool">{{ tool }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-          @if (builtInToolArgs.has(selectedTool.name) && selectedTool.args?.length) {
-            <h2 class="tool-args-header">Built-In Tool Arguments</h2>
-            @if (editingToolArgs()) {
-              <div class="json-editor-wrapper">
-                <app-json-editor
-                  [jsonString]="toolArgsString()"
-                ></app-json-editor>
+                <mat-form-field class="agent-type-field">
+                  <mat-label>Agent Type</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.agentClass">
+                    @for (type of agentTypes; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
               </div>
-              <div class="edit-buttons">
-                <button mat-button (click)="saveToolArgs()">Save</button>
-                <button mat-button (click)="cancelEditToolArgs()">Cancel</button>
+
+              <div class="form-row">
+                <mat-checkbox [(ngModel)]="agentConfig.isRoot" [disabled]="!isRootAgentEditable">Is root agent?</mat-checkbox>
               </div>
-            } @else {
-              <button mat-button (click)="editToolArgs()">Edit tool args</button>
-            }
+
+              <mat-form-field>
+                <mat-label>Model</mat-label>
+                <mat-select [(ngModel)]="agentConfig.model">
+                  @for (model of models; track model) {
+                  <mat-option [value]="model">{{model}}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field>
+                <mat-label>Instructions</mat-label>
+                <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
+              </mat-form-field>
+            </div>
+          } @else if (selectedTool) {
+            <!-- Tool Configuration Form -->
+            <div class="config-form">
+              <mat-form-field class="tool-type-field">
+                <mat-label>Tool Type</mat-label>
+                <mat-select [(ngModel)]="selectedTool.toolType" (selectionChange)="onToolTypeSelectionChange()">
+                    @for (type of toolTypes; track type) {
+                        <mat-option [value]="type">{{type}}</mat-option>
+                    }
+                </mat-select>
+              </mat-form-field>
+              @if (selectedTool.toolType === 'Custom tool') {
+                <mat-form-field class="tool-name-field">
+                  <mat-label>Tool Name</mat-label>
+                  <input matInput [(ngModel)]="selectedTool.name" />
+                </mat-form-field>
+              } @else if (selectedTool.toolType === 'Built-in tool') {
+                <mat-form-field class="built-in-tool-field">
+                  <mat-label>Built-in Tool</mat-label>
+                  <mat-select [(ngModel)]="selectedTool.name" (selectionChange)="onBuiltInToolSelectionChange()">
+                    @for (tool of builtInTools; track tool) {
+                      <mat-option [value]="tool">{{ tool }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                @if (builtInToolArgs.has(selectedTool.name) && selectedTool.args?.length) {
+                  <h2 class="tool-args-header">Built-In Tool Arguments</h2>
+                  @if (editingToolArgs()) {
+                    <div class="json-editor-wrapper">
+                      <app-json-editor
+                        [jsonString]="toolArgsString()"
+                      ></app-json-editor>
+                    </div>
+                    <div class="edit-buttons">
+                      <button mat-button (click)="saveToolArgs()">Save</button>
+                      <button mat-button (click)="cancelEditToolArgs()">Cancel</button>
+                    </div>
+                  } @else {
+                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
+                  }
+                }
+              }
+            </div>
           }
-        }
-      </div>
-    }
+        </div>
+      </mat-tab>
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Sub agents list</span>
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
   </div>
 </div>

@@ -41,6 +41,7 @@ export class JsonEditorComponent implements AfterViewInit {
         content,
         mode: Mode.text,
         mainMenuBar: false,
+        statusBar: false,
       },
     });
   }

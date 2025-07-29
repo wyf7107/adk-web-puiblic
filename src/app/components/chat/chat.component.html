@@ -60,28 +60,29 @@
           }
         </mat-select>
       </div>
-      <div class="mode-toggle-container">
-        <button
-          mat-button
-          (click)="toggleMode(true)"
-          class="build-mode-button"
-          [matTooltip]="Create new agent in builder mode"
-          [class.active]="isBuilderMode()"
-          *ngIf="!isBuilderMode()"
-        >
-          + Agent
-        </button>
-        <button
-          mat-button
-          (click)="toggleMode(false)"
-          class="build-mode-button"
-          [matTooltip]="Switch to Builder Mode"
-          [class.active]="isBuilderMode()"
-          *ngIf="!isBuilderMode() && !disableBuilderSwitch"
-        >
-          Edit
-        </button>
-      </div>
+      @if (!isBuilderMode()) {
+        <div class="mode-toggle-container">
+          <button
+            mat-button
+            (click)="toggleMode(true)"
+            class="build-mode-button"
+            matTooltip="Create new agent in builder mode"
+            [class.active]="isBuilderMode()"
+          >
+            + Agent
+          </button>
+          <button
+            mat-button
+            (click)="toggleMode(false)"
+            class="build-mode-button"
+            matTooltip="Switch to Builder Mode"
+            [class.active]="isBuilderMode()"
+            [disabled]="disableBuilderSwitch"
+          >
+            Edit
+          </button>
+        </div>
+      }
     </div>
     @if (isBuilderMode()) {
     <!-- Builder Mode Left Panel Content -->

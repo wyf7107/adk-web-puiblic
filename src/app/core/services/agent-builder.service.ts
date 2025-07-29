@@ -37,6 +37,8 @@ export class AgentBuilderService {
    */
   addNode(newNode: AgentNode): void {
     this.nodes.push(newNode);
+
+    this.setSelectedNode(this.selectedNodeSubject.value);
   }
 
   getNodes(): AgentNode[] {

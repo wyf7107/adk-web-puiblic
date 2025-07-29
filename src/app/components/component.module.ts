@@ -55,6 +55,7 @@ import {CanvasComponent} from './canvas/canvas.component';
 import {ChatComponent} from './chat/chat.component';
 import {EditJsonDialogComponent} from './edit-json-dialog/edit-json-dialog.component';
 import {AddEvalSessionDialogComponent} from './eval-tab/add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
+import {AddItemDialogComponent} from './add-item-dialog/add-item-dialog.component';
 import {EvalTabComponent} from './eval-tab/eval-tab.component';
 import {NewEvalSetDialogComponentComponent} from './eval-tab/new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
 import {RunEvalConfigDialogComponent} from './eval-tab/run-eval-config-dialog/run-eval-config-dialog.component';
@@ -80,6 +81,7 @@ const COMPONENTS = [
   EvalTabComponent,
   NewEvalSetDialogComponentComponent,
   AddEvalSessionDialogComponent,
+  AddItemDialogComponent,
   ArtifactTabComponent,
   DeleteSessionDialogComponent,
   StateTabComponent,

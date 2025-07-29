@@ -529,3 +529,11 @@ mat-chip {
     pointer-events: auto;
   }
 }
+
+// This is a workaround to fix a handle positioning bug in ngx-vflow.
+// The bug is that the bottom handle position does not change when the
+// node height decreases, cause the handle to appear detached from the node:
+// https://screenshot.googleplex.com/5MfKMEFJf725Xau
+:host ::ng-deep div[nodehandlescontroller][noderesizecontroller].wrapper {
+  height: 0px !important;
+}

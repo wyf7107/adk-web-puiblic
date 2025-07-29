@@ -117,7 +117,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   isEvalCaseEditing = signal(false);
   hasEvalCaseChanged = signal(false);
   isEvalEditMode = signal(false);
-  isBuilderMode = signal(false); // Default to builder mode off
+  isBuilderMode = signal(false, { debugName: 'isBuilderMode'}); // Default to builder mode off
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages: any[] = [];
@@ -186,6 +186,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly agentService = inject(AgentService);
   protected isLoadingApps: WritableSignal<boolean> = signal(false);
   protected loadingError: WritableSignal<string> = signal('');
+  protected apps: string[] = [];
   protected readonly apps$: Observable<string[] | undefined> = of([]).pipe(
     tap(() => {
       this.isLoadingApps.set(true);
@@ -278,6 +279,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.agentService.getApp().subscribe((app) => {
       this.appName = app;
+    });
+
+    this.apps$.subscribe((apps) => {
+      this.apps = apps ?? [];
     });
 
     combineLatest([
@@ -1375,17 +1380,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openAddItemDialog(): void {
-    this.apps$.pipe(take(1)).subscribe(apps => {
-      const dialogRef = this.dialog.open(AddItemDialogComponent, {
-        width: '600px',
-        data: { appName: this.appName, existingAppNames: apps || [] },
-      });
+    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+      width: '600px',
+      data: { appName: this.appName, existingAppNames: this.apps },
+    });
 
-      dialogRef.afterClosed().subscribe(result => {
-        if (result) {
-          this.toggleMode(false);
-        }
-      });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.toggleMode(false);
+      }
     });
   }
 

@@ -17,6 +17,7 @@
 
 import {Component, inject, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {Router} from '@angular/router';
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentService } from '../../core/services/agent.service';
@@ -35,6 +36,7 @@ export class AddItemDialogComponent {
   protected newAppName = '';
   private agentService = inject(AgentService);
   private _snackBar = inject(MatSnackBar);
+  private router = inject(Router);
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -66,6 +68,11 @@ export class AddItemDialogComponent {
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
+        this.router.navigate(['/'], {
+            queryParams: { app: rootAgent.name }
+          }).then(() => {
+            window.location.reload();
+          });
         this.dialogRef.close(true);
       } else {
         this._snackBar.open('Something went wrong, please try again', 'OK');

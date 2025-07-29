@@ -1372,23 +1372,36 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.useSse = !this.useSse;
   }
 
-  toggleMode(newAgent: boolean) {
-    this.builderNewAgent = newAgent;
-    this.isBuilderMode.set(!this.isBuilderMode());
+  // toggleMode(newAgent: boolean) {
+  //   this.builderNewAgent = newAgent;
+  //   this.isBuilderMode.set(!this.isBuilderMode());
+  //   this.agentBuilderService.clear();
+  //   this.agentBuilderService.setIsCreatingNewAgent(newAgent);
+  // }
+
+  protected enterBuilderMode() {
+    this.isBuilderMode.set(true);
     this.agentBuilderService.clear();
-    this.agentBuilderService.setIsCreatingNewAgent(newAgent);
+    this.agentBuilderService.setIsCreatingNewAgent(false);
+  }
+
+  protected exitBuilderMode() {
+    const url = this.router
+                .createUrlTree([], {
+                  queryParams: {'mode': null},
+                  queryParamsHandling: 'merge',
+                })
+                .toString();
+    this.location.replaceState(url);
+    this.isBuilderMode.set(false);
+    this.agentBuilderService.clear();
+    this.agentBuilderService.setIsCreatingNewAgent(true);
   }
 
   openAddItemDialog(): void {
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       width: '600px',
       data: { appName: this.appName, existingAppNames: this.apps },
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.toggleMode(false);
-      }
     });
   }
 
@@ -1480,6 +1493,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         } else if (app) {
           this.openSnackBar(`Agent '${app}' not found`, 'OK');
         }
+      }
+      if (params['mode'] === 'builder') {
+        this.enterBuilderMode();
       }
     });
   }

@@ -72,7 +72,7 @@
           </button>
           <button
             mat-flat-button
-            (click)="toggleMode(false)"
+            (click)="enterBuilderMode()"
             class="build-mode-button"
             matTooltip="Switch to Builder Mode"
             [disabled]="disableBuilderSwitch"
@@ -185,7 +185,7 @@
       <button mat-icon-button (click)="saveAgentBuilder()" class="builder-mode-action-button" matTooltip="Accept">
         <mat-icon>check</mat-icon>
       </button>
-      <button mat-icon-button (click)="toggleMode(true)" class="builder-mode-action-button" matTooltip="Exit Builder Mode">
+      <button mat-icon-button (click)="exitBuilderMode()" class="builder-mode-action-button" matTooltip="Exit Builder Mode">
         <mat-icon>close</mat-icon>
       </button>
     </div>

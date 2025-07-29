@@ -69,7 +69,7 @@ export class AddItemDialogComponent {
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
-            queryParams: { app: rootAgent.name }
+            queryParams: { app: rootAgent.name, mode: 'builder' }
           }).then(() => {
             window.location.reload();
           });

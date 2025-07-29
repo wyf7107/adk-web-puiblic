@@ -56,7 +56,7 @@ export class AddItemDialogComponent {
       instruction: 'You are the root agent that coordinates other agents.',
       isRoot: true,
       model: 'gemini-2.5-flash',
-      name: 'RootAgent',
+      name: this.newAppName,
       sub_agents: [],
       tools: [],
     };

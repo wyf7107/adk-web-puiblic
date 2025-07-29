@@ -522,11 +522,16 @@ button {
   font-size: 14px;
 }
 
+.app-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  margin-left: 10px;
+}
+
 .app-select-container {
   width: 35%;
-  margin-top: 12px;
   background-color: #212123;
-  margin-left: 10px;
   height: 30px;
   display: flex;
   justify-content: space-between;

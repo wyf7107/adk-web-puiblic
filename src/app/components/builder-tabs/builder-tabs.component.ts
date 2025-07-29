@@ -109,6 +109,9 @@ export class BuilderTabsComponent {
       this.selectedTool = tool;
       if (tool) {
         this.header = 'Tool configuration'
+      } else {
+        this.header = 'Select an agent or tool to edit'
+      
       }
     });
 

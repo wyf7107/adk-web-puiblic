@@ -124,7 +124,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedNode(agentNodeData);
-      this.agentBuilderService.setSelectedTool(undefined);
     }
   }
 

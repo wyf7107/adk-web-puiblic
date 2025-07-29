@@ -19,17 +19,17 @@ import { AgentNode, ToolNode, YamlConfig  } from "../app/core/models/AgentBuilde
 import * as YAML from 'yaml';
 
 export class YamlUtils {
-  static generateYamlFile(agentNode: AgentNode, formData: FormData, rootAgentName: string) {
+  static generateYamlFile(agentNode: AgentNode, formData: FormData, appName: string) {
     const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
 
-    const folderName = `${rootAgentName}/${fileName}`;
+    const folderName = `${appName}/${fileName}`;
     const subAgents = agentNode.sub_agents?
       agentNode.sub_agents.map((subAgentNode) => {return {config_path: `./${subAgentNode.name}.yaml`};}) : []
 
     const yamlConfig: YamlConfig = {
       name: agentNode.name,
       model: agentNode.model,
-      agent_class: agentNode.agentClass,
+      agent_class: agentNode.agent_class,
       description: '',
       instruction: agentNode.instruction,
       sub_agents: subAgents,
@@ -43,7 +43,7 @@ export class YamlUtils {
     formData.append('files', file);
 
     for (const subNode of agentNode.sub_agents ?? []) {
-      this.generateYamlFile(subNode, formData, rootAgentName);
+      this.generateYamlFile(subNode, formData, appName);
     }
   }
 

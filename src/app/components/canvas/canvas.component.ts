@@ -97,7 +97,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
       const agentNodeData: AgentNode = {
           name: 'RootAgent',
-          agentClass: 'LlmAgent',
+          agent_class: 'LlmAgent',
           model: 'gemini-2.5-flash',
           instruction: 'You are the root agent that coordinates other agents.',
           isRoot: true,
@@ -148,7 +148,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const agentNodeData: AgentNode = {
         name: `sub_agent_${this.nodeId}`,
-        agentClass: 'LlmAgent',
+        agent_class: 'LlmAgent',
         model: 'gemini-2.5-flash',
         instruction: 'You are a sub-agent that performs specialized tasks.',
         isRoot: false,
@@ -211,7 +211,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.setSelectedNode(undefined);
   }
 
-  saveAgent() {
+  saveAgent(appName: string) {
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getRootNode();
 
     if (!rootAgent) {
@@ -222,12 +222,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const formData = new FormData();
 
-    YamlUtils.generateYamlFile(rootAgent, formData, rootAgent.name);
+    YamlUtils.generateYamlFile(rootAgent, formData, appName);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
-          queryParams: { app: rootAgent.name }
+          queryParams: { app: appName }
         }).then(() => {
           window.location.reload();
         });

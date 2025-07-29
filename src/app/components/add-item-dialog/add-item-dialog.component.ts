@@ -52,7 +52,7 @@ export class AddItemDialogComponent {
       return;
     }
     const rootAgent: AgentNode = {
-      agentClass: 'LlmAgent',
+      agent_class: 'LlmAgent',
       instruction: 'You are the root agent that coordinates other agents.',
       isRoot: true,
       model: 'gemini-2.5-flash',
@@ -63,12 +63,12 @@ export class AddItemDialogComponent {
 
     const formData = new FormData();
 
-    YamlUtils.generateYamlFile(rootAgent, formData, rootAgent.name);
+    YamlUtils.generateYamlFile(rootAgent, formData, this.newAppName);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
-            queryParams: { app: rootAgent.name, mode: 'builder' }
+            queryParams: { app: this.newAppName, mode: 'builder' }
           }).then(() => {
             window.location.reload();
           });

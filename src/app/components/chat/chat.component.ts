@@ -1402,7 +1402,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveAgentBuilder() {
-    this.canvasComponent.saveAgent();
+    this.canvasComponent.saveAgent(this.appName);
   }
 
   selectEvent(key: string) {

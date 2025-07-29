@@ -107,3 +107,23 @@
 .tab-content-container {
   margin-top: 30px;
 }
+
+.agent-list-row {
+  display: flex;
+  margin-top: 10px;
+}
+
+.sub-agent-list-row {
+  display: flex;
+  margin-top: 10px;
+  margin-left:16px;
+}
+
+.tree-view mat-tree{
+  background-color: inherit !important;
+}
+
+.tree-view expand-button{
+  background-color: transparent;
+  border: 0;
+}

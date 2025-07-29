@@ -40,7 +40,7 @@ export class AddItemDialogComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
-    public data: {appName: string; existingAppNames: string[]},
+    public data: {existingAppNames: string[]},
     public dialogRef: MatDialogRef<AddItemDialogComponent>,
   ) {}
 

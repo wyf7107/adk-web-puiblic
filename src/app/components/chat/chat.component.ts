@@ -117,7 +117,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   isEvalCaseEditing = signal(false);
   hasEvalCaseChanged = signal(false);
   isEvalEditMode = signal(false);
-  isBuilderMode = signal(false, { debugName: 'isBuilderMode'}); // Default to builder mode off
+  isBuilderMode = signal(false); // Default to builder mode off
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages: any[] = [];
@@ -1372,13 +1372,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.useSse = !this.useSse;
   }
 
-  // toggleMode(newAgent: boolean) {
-  //   this.builderNewAgent = newAgent;
-  //   this.isBuilderMode.set(!this.isBuilderMode());
-  //   this.agentBuilderService.clear();
-  //   this.agentBuilderService.setIsCreatingNewAgent(newAgent);
-  // }
-
   protected enterBuilderMode() {
     const url = this.router.createUrlTree([], {
       queryParams: {'mode': 'builder'},
@@ -1404,7 +1397,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   openAddItemDialog(): void {
     const dialogRef = this.dialog.open(AddItemDialogComponent, {
       width: '600px',
-      data: { appName: this.appName, existingAppNames: this.apps },
+      data: { existingAppNames: this.apps },
     });
   }
 

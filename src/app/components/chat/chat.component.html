@@ -35,39 +35,53 @@
             <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
             Agent Development Kit
           </div>
-          <div class="mode-toggle-container">
-            <div class="mode-toggle">
-              <button mat-icon-button (click)="toggleMode(true)" class="build-mode-button"
-                [matTooltip]="isBuilderMode() ? 'Switch to Test Mode' : 'Create new agent in builder mode'"
-                [class.active]="isBuilderMode()" *ngIf="!isBuilderMode()">
-                <mat-icon>add</mat-icon>
-              </button>
-              <button mat-icon-button (click)="toggleMode(false)" class="build-mode-button"
-                [matTooltip]="isBuilderMode() ? 'Switch to Test Mode' : 'Switch to Builder Mode'"
-                [class.active]="isBuilderMode()" *ngIf="!isBuilderMode() && !disableBuilderSwitch">
-                <mat-icon>build</mat-icon>
-              </button>
-            </div>
-          </div>
           <span class="material-symbols-outlined" style="color: #c4c7c5; cursor: pointer; margin-right: 15px"
             matTooltip="Collapse panel" (click)="toggleSidePanel()">left_panel_close</span>
         </div>
       </div>
     </div>
-    <div class="app-select-container" *ngIf="!isBuilderMode()">
-      <mat-select class="app-select" (selectionChange)="onAppSelection($event)"
-        [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'" [formControl]="selectedAppControl">
-        @if (apps$ | async; as availableApps) {
-        @for (appName of availableApps; track appName) {
-        <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
-        }
-        }
-        @if (selectedAppControl.value && isLoadingApps()) {
-        <mat-option class="app-name-option" [value]="selectedAppControl.value">{{ selectedAppControl.value
-          }}</mat-option>
-        }
-      </mat-select>
-    </div>
+    @if (!isBuilderMode()) {
+      <div class="app-actions">
+        <div class="app-select-container">
+          <mat-select
+            class="app-select"
+            (selectionChange)="onAppSelection($event)"
+            [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
+            [formControl]="selectedAppControl"
+          >
+            @if (apps$ | async; as availableApps) { @for (appName of
+            availableApps; track appName) {
+            <mat-option class="app-name-option" [value]="appName">{{
+              appName
+            }}</mat-option>
+            } } @if (selectedAppControl.value && isLoadingApps()) {
+            <mat-option class="app-name-option" [value]="selectedAppControl.value"
+              >{{ selectedAppControl.value }}</mat-option
+            >
+            }
+          </mat-select>
+        </div>
+        <div class="mode-toggle-container">
+          <button
+            mat-flat-button
+            (click)="toggleMode(true)"
+            class="build-mode-button"
+            matTooltip="Create new agent in builder mode"
+          >
+            + Agent
+          </button>
+          <button
+            mat-flat-button
+            (click)="toggleMode(false)"
+            class="build-mode-button"
+            matTooltip="Switch to Builder Mode"
+            [disabled]="disableBuilderSwitch"
+          >
+            Edit
+          </button>
+        </div>
+      </div>
+    } 
     @if (isBuilderMode()) {
     <!-- Builder Mode Left Panel Content -->
     <app-builder-tabs></app-builder-tabs>

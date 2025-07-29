@@ -31,6 +31,7 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
 import { parse } from 'yaml';
 import { firstValueFrom } from 'rxjs';
+import { YamlUtils } from '../../../utils/yaml-utils';
 
 
 @Component({
@@ -221,7 +222,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const formData = new FormData();
 
-    this.generateYamlFile(rootAgent, formData, rootAgent.name);
+    YamlUtils.generateYamlFile(rootAgent, formData, rootAgent.name);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
@@ -234,72 +235,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this._snackBar.open("Something went wrong, please try again", "OK");
       }
     })
-  }
-
-  private generateYamlFile(agentNode: AgentNode, formData: FormData, rootAgentName: string) {
-    const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
-
-    const folderName = `${rootAgentName}/${fileName}`;
-    const subAgents = agentNode.sub_agents?
-      agentNode.sub_agents.map((subAgentNode) => {return {config_path: `./${subAgentNode.name}.yaml`};}) : []
-
-    const yamlConfig: YamlConfig = {
-      name: agentNode.name,
-      model: agentNode.model,
-      agent_class: agentNode.agentClass,
-      description: '',
-      instruction: agentNode.instruction,
-      sub_agents: subAgents,
-      tools: this.buildToolsConfig(agentNode.tools)
-    }
-
-    const yamlString = YAML.stringify(yamlConfig);
-    const blob = new Blob([yamlString], { type: 'application/x-yaml' });
-    const file = new File([blob], folderName, { type: 'application/x-yaml' });
-    
-    formData.append('files', file);
-
-    for (const subNode of agentNode.sub_agents ?? []) {
-      this.generateYamlFile(subNode, formData, rootAgentName);
-    }
-  }
-
-  private buildToolsConfig(tools: ToolNode[] | undefined): any[] {
-    if (!tools || tools.length === 0) {
-      return [];
-    }
-
-    return tools.map(tool => {
-      const config: any = {
-        name: tool.name,
-      };
-
-      if (tool.args && tool.args.length > 0) {
-        config.args = tool.args.map(arg => {
-          const value = arg.value;
-
-          if (typeof value !== 'string') {
-            return arg;
-          }
-
-          if (value.toLowerCase() === 'true') {
-            return { ...arg, value: true };
-          }
-
-          if (value.toLowerCase() === 'false') {
-            return { ...arg, value: false };
-          }
-
-          if (value.trim() !== '' && Number(value)) {
-            return { ...arg, value: Number(value) };
-          }
-
-          return arg;
-        });
-      }
-
-      return config;
-    });
   }
 
   async loadAgent() {

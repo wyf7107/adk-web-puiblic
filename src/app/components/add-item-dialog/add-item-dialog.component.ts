@@ -17,7 +17,8 @@
 
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {v4 as uuidv4} from 'uuid';
+import { AgentNode } from '../../core/models/AgentBuilder';
+
 
 @Component({
   selector: 'app-add-item-dialog',
@@ -36,20 +37,30 @@ export class AddItemDialogComponent {
   ) {}
 
   createNewApp() {
-    // if (!this.newCaseId || this.newCaseId == '') {
-    //   alert('Cannot create eval set with empty id!');
-    // } else {
-    //   this.evalService
-    //       .addCurrentSession(
-    //           this.data.appName,
-    //           this.data.evalSetId,
-    //           this.newCaseId,
-    //           this.data.sessionId,
-    //           this.data.userId,
-    //           )
-    //       .subscribe((res) => {
-    //         this.dialogRef.close(true);
-    //       });
-    // }
+    const rootAgent: AgentNode = {
+      agentClass: 'LlmAgent',
+      instruction: 'You are the root agent that coordinates other agents.',
+      isRoot: true,
+      model: 'gemini-2.5-flash',
+      name: 'RootAgent',
+      sub_agents: [],
+      tools: [],
+    }
+
+    const formData = new FormData();
+
+    this.generateYamlFile(rootAgent, formData, rootAgent.name);
+
+    this.agentService.agentBuild(formData).subscribe((success) => {
+      if (success) {
+        this.router.navigate(['/'], {
+          queryParams: { app: rootAgent.name }
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        this._snackBar.open("Something went wrong, please try again", "OK");
+      }
+    })
   }
 }

@@ -1380,18 +1380,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // }
 
   protected enterBuilderMode() {
+    const url = this.router.createUrlTree([], {
+      queryParams: {'mode': 'builder'},
+      queryParamsHandling: 'merge',
+    }).toString();
+    this.location.replaceState(url);
     this.isBuilderMode.set(true);
     this.agentBuilderService.clear();
     this.agentBuilderService.setIsCreatingNewAgent(false);
   }
 
   protected exitBuilderMode() {
-    const url = this.router
-                .createUrlTree([], {
-                  queryParams: {'mode': null},
-                  queryParamsHandling: 'merge',
-                })
-                .toString();
+    const url = this.router.createUrlTree([], {
+      queryParams: {'mode': null},
+      queryParamsHandling: 'merge',
+    }).toString();
     this.location.replaceState(url);
     this.isBuilderMode.set(false);
     this.agentBuilderService.clear();

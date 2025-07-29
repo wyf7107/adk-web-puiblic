@@ -37,11 +37,19 @@ export class AddItemDialogComponent {
   private _snackBar = inject(MatSnackBar);
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: {appName: string},
+    @Inject(MAT_DIALOG_DATA)
+    public data: {appName: string; existingAppNames: string[]},
     public dialogRef: MatDialogRef<AddItemDialogComponent>,
   ) {}
 
   createNewApp() {
+    if (this.data.existingAppNames.includes(this.newAppName)) {
+      this._snackBar.open(
+        'App name already exists. Please choose a different name.',
+        'OK',
+      );
+      return;
+    }
     const rootAgent: AgentNode = {
       agentClass: 'LlmAgent',
       instruction: 'You are the root agent that coordinates other agents.',
@@ -50,7 +58,7 @@ export class AddItemDialogComponent {
       name: this.newAppName,
       sub_agents: [],
       tools: [],
-    }
+    };
 
     const formData = new FormData();
 
@@ -60,8 +68,8 @@ export class AddItemDialogComponent {
       if (success) {
         this.dialogRef.close(true);
       } else {
-        this._snackBar.open("Something went wrong, please try again", "OK");
+        this._snackBar.open('Something went wrong, please try again', 'OK');
       }
-    })
+    });
   }
 }

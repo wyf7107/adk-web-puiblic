@@ -19,20 +19,6 @@ import { AgentNode, ToolNode, YamlConfig  } from "../app/core/models/AgentBuilde
 import * as YAML from 'yaml';
 
 export class YamlUtils {
-  /**
-   * Get the base URL without any path
-   * @returns {string} Base URL (protocol + hostname + port)
-   */
-  static getBaseUrlWithoutPath(): string {
-    // Use the URL constructor for robust URL parsing
-    const currentUrl = window.location.href;
-    const urlObject = new URL(currentUrl);
-
-    // Construct base URL using origin property
-    // Origin includes protocol, hostname, and port
-    return urlObject.origin + '/dev-ui/';
-  }
-
   static generateYamlFile(agentNode: AgentNode, formData: FormData, rootAgentName: string) {
     const fileName = `${agentNode.name}.yaml`;
 

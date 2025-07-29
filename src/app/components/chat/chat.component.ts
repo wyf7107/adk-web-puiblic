@@ -1375,15 +1375,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openAddItemDialog(): void {
-    const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      width: '600px',
-      data: { appName: this.appName },
-    });
+    this.apps$.pipe(take(1)).subscribe(apps => {
+      const dialogRef = this.dialog.open(AddItemDialogComponent, {
+        width: '600px',
+        data: { appName: this.appName, existingAppNames: apps || [] },
+      });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.toggleMode(false);
-      }
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.toggleMode(false);
+        }
+      });
     });
   }
 

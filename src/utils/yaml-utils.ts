@@ -29,7 +29,7 @@ export class YamlUtils {
     const yamlConfig: YamlConfig = {
       name: agentNode.name,
       model: agentNode.model,
-      agent_class: agentNode.agentClass,
+      agent_class: agentNode.agent_class,
       description: '',
       instruction: agentNode.instruction,
       sub_agents: subAgents,

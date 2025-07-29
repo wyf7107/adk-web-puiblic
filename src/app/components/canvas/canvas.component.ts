@@ -97,7 +97,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
       const agentNodeData: AgentNode = {
           name: 'RootAgent',
-          agentClass: 'LlmAgent',
+          agent_class: 'LlmAgent',
           model: 'gemini-2.5-flash',
           instruction: 'You are the root agent that coordinates other agents.',
           isRoot: true,
@@ -148,7 +148,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const agentNodeData: AgentNode = {
         name: `sub_agent_${this.nodeId}`,
-        agentClass: 'LlmAgent',
+        agent_class: 'LlmAgent',
         model: 'gemini-2.5-flash',
         instruction: 'You are a sub-agent that performs specialized tasks.',
         isRoot: false,

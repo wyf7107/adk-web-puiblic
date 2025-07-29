@@ -40,34 +40,33 @@
         </div>
       </div>
     </div>
-    <div class="app-actions" *ngIf="!isBuilderMode()">
-      <div class="app-select-container">
-        <mat-select
-          class="app-select"
-          (selectionChange)="onAppSelection($event)"
-          [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
-          [formControl]="selectedAppControl"
-        >
-          @if (apps$ | async; as availableApps) { @for (appName of
-          availableApps; track appName) {
-          <mat-option class="app-name-option" [value]="appName">{{
-            appName
-          }}</mat-option>
-          } } @if (selectedAppControl.value && isLoadingApps()) {
-          <mat-option class="app-name-option" [value]="selectedAppControl.value"
-            >{{ selectedAppControl.value }}</mat-option
+    @if (!isBuilderMode()) {
+      <div class="app-actions">
+        <div class="app-select-container">
+          <mat-select
+            class="app-select"
+            (selectionChange)="onAppSelection($event)"
+            [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
+            [formControl]="selectedAppControl"
           >
-          }
-        </mat-select>
-      </div>
-      @if (!isBuilderMode()) {
+            @if (apps$ | async; as availableApps) { @for (appName of
+            availableApps; track appName) {
+            <mat-option class="app-name-option" [value]="appName">{{
+              appName
+            }}</mat-option>
+            } } @if (selectedAppControl.value && isLoadingApps()) {
+            <mat-option class="app-name-option" [value]="selectedAppControl.value"
+              >{{ selectedAppControl.value }}</mat-option
+            >
+            }
+          </mat-select>
+        </div>
         <div class="mode-toggle-container">
           <button
             mat-button
             (click)="toggleMode(true)"
             class="build-mode-button"
             matTooltip="Create new agent in builder mode"
-            [class.active]="isBuilderMode()"
           >
             + Agent
           </button>
@@ -76,14 +75,13 @@
             (click)="toggleMode(false)"
             class="build-mode-button"
             matTooltip="Switch to Builder Mode"
-            [class.active]="isBuilderMode()"
             [disabled]="disableBuilderSwitch"
           >
             Edit
           </button>
         </div>
-      }
-    </div>
+      </div>
+    } 
     @if (isBuilderMode()) {
     <!-- Builder Mode Left Panel Content -->
     <app-builder-tabs></app-builder-tabs>

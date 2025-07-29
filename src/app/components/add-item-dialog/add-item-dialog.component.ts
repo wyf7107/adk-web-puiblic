@@ -52,7 +52,7 @@ export class AddItemDialogComponent {
       return;
     }
     const rootAgent: AgentNode = {
-      agent_class: 'LlmAgent',
+      agentClass: 'LlmAgent',
       instruction: 'You are the root agent that coordinates other agents.',
       isRoot: true,
       model: 'gemini-2.5-flash',

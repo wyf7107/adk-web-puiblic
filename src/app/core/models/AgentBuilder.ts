@@ -18,7 +18,7 @@
 export interface AgentNode {
     isRoot: boolean;
     name: string;
-    agent_class: string;
+    agentClass: string;
     model: string;
     instruction: string;
     sub_agents: AgentNode[];

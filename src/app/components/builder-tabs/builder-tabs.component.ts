@@ -35,7 +35,7 @@ export class BuilderTabsComponent {
   agentConfig: AgentNode | undefined = {
     isRoot: false,
     name: '',
-    agent_class: '',
+    agentClass: '',
     model: '',
     instruction: '',
     sub_agents: []

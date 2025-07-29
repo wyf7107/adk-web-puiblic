@@ -30,7 +30,7 @@ import {EvalService} from '../../core/services/eval.service';
 import {FeatureFlagService} from '../../core/services/feature-flag.service';
 import {SessionService} from '../../core/services/session.service';
 
-import {AddItemDialogComponent} from '../add-item-dialog/add-item-dialog.component';
+import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
 import {RunEvalConfigDialogComponent} from './run-eval-config-dialog/run-eval-config-dialog.component';
 
@@ -189,7 +189,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   openNewEvalCaseDialog() {
-    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+    const dialogRef = this.dialog.open(AddEvalSessionDialogComponent, {
       width: '600px',
       data: {
         appName: this.appName,

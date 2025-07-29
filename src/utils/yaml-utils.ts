@@ -34,7 +34,7 @@ export class YamlUtils {
   }
 
   static generateYamlFile(agentNode: AgentNode, formData: FormData, rootAgentName: string) {
-    const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
+    const fileName = `${agentNode.name}.yaml`;
 
     const folderName = `${rootAgentName}/${fileName}`;
     const subAgents = agentNode.sub_agents?

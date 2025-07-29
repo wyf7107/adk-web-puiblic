@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
+import {Component, inject, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import { AgentNode } from '../../core/models/AgentBuilder';
+import { YamlUtils } from '../../../utils/yaml-utils';
+import { AgentService } from '../../core/services/agent.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -30,6 +33,8 @@ export class AddItemDialogComponent {
   // TODO: Replace the eval dialogs to use this common dialog component
   // newCaseId: string = 'case' + uuidv4().slice(0, 6);
   protected newAppName = '';
+  private agentService = inject(AgentService);
+  private _snackBar = inject(MatSnackBar);
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {appName: string},
@@ -42,22 +47,18 @@ export class AddItemDialogComponent {
       instruction: 'You are the root agent that coordinates other agents.',
       isRoot: true,
       model: 'gemini-2.5-flash',
-      name: 'RootAgent',
+      name: this.newAppName,
       sub_agents: [],
       tools: [],
     }
 
     const formData = new FormData();
 
-    this.generateYamlFile(rootAgent, formData, rootAgent.name);
+    YamlUtils.generateYamlFile(rootAgent, formData, rootAgent.name);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
-        this.router.navigate(['/'], {
-          queryParams: { app: rootAgent.name }
-        }).then(() => {
-          window.location.reload();
-        });
+        this.dialogRef.close(true);
       } else {
         this._snackBar.open("Something went wrong, please try again", "OK");
       }

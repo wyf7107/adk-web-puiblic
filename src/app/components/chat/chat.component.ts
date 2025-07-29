@@ -55,6 +55,7 @@ import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -1371,6 +1372,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isBuilderMode.set(!this.isBuilderMode());
     this.agentBuilderService.clear();
     this.agentBuilderService.setIsCreatingNewAgent(newAgent);
+  }
+
+  openAddItemDialog(): void {
+    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+      width: '600px',
+      data: { appName: this.appName },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.toggleMode(false);
+      }
+    });
   }
 
   saveAgentBuilder() {

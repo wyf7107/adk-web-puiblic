@@ -32,7 +32,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class AddItemDialogComponent {
   // TODO: Replace the eval dialogs to use this common dialog component
-  // newCaseId: string = 'case' + uuidv4().slice(0, 6);
   protected newAppName = '';
   private agentService = inject(AgentService);
   private _snackBar = inject(MatSnackBar);

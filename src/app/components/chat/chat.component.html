@@ -62,30 +62,24 @@
       </div>
       <div class="mode-toggle-container">
         <button
-          mat-icon-button
+          mat-button
           (click)="toggleMode(true)"
           class="build-mode-button"
-          [matTooltip]="
-            isBuilderMode()
-              ? 'Switch to Test Mode'
-              : 'Create new agent in builder mode'
-          "
+          [matTooltip]="Create new agent in builder mode"
           [class.active]="isBuilderMode()"
           *ngIf="!isBuilderMode()"
         >
-          <mat-icon>add</mat-icon>
+          + Agent
         </button>
         <button
-          mat-icon-button
+          mat-button
           (click)="toggleMode(false)"
           class="build-mode-button"
-          [matTooltip]="
-            isBuilderMode() ? 'Switch to Test Mode' : 'Switch to Builder Mode'
-          "
+          [matTooltip]="Switch to Builder Mode"
           [class.active]="isBuilderMode()"
           *ngIf="!isBuilderMode() && !disableBuilderSwitch"
         >
-          <mat-icon>build</mat-icon>
+          Edit
         </button>
       </div>
     </div>

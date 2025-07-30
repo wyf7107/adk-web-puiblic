@@ -136,9 +136,7 @@ export class BuilderTabsComponent {
         this.header = 'Tool configuration';
       } else {
         this.header = 'Select an agent or tool to edit';
-     
       }
-
       this.cdr.detectChanges();
     });
 

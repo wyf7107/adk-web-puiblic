@@ -172,10 +172,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       args: []
     }
     this.toolId++;
-
-    const data = parentNode.data();
-    data.tools.push(tool);
-    parentNode.data.set(data);
+    this.agentBuilderService.addTool(parentNode.data().name, tool);
   }
 
   deleteTool(agentName: string, tool: any) {

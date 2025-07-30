@@ -149,7 +149,14 @@ export class BuilderTabsComponent {
       } else {
         this.creatingNewAgent = false;
       }
-    })
+    });
+
+    this.agentBuilderService.getAgentTools().subscribe(tools => {
+      if (this.agentConfig) {
+        this.agentConfig.tools = tools;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   editToolArgs() {

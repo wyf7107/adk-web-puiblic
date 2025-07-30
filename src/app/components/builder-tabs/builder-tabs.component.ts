@@ -42,7 +42,8 @@ export class BuilderTabsComponent {
     agent_class: '',
     model: '',
     instruction: '',
-    sub_agents: []
+    sub_agents: [],
+    tools: []
   };
 
   treeDataSource = new BehaviorSubject<AgentNode[]>([]);
@@ -146,7 +147,14 @@ export class BuilderTabsComponent {
       } else {
         this.creatingNewAgent = false;
       }
-    })
+    });
+
+    this.agentBuilderService.getAgentTools().subscribe(tools => {
+      if (this.agentConfig) {
+        this.agentConfig.tools = tools;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   editToolArgs() {

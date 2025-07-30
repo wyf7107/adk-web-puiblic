@@ -123,8 +123,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const agentNodeData = this.agentBuilderService.getNode(clickedVflowNode.data().name);
 
     if (!!agentNodeData) {
-      this.agentBuilderService.setSelectedNode(agentNodeData);
       this.agentBuilderService.setSelectedTool(undefined);
+      this.agentBuilderService.setSelectedNode(agentNodeData);
     }
   }
 
@@ -206,8 +206,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   selectTool(tool: any) {
-    this.agentBuilderService.setSelectedTool(tool);
     this.agentBuilderService.setSelectedNode(undefined);
+    this.agentBuilderService.setSelectedTool(tool);
   }
 
   saveAgent() {

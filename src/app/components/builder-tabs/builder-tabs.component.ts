@@ -137,7 +137,6 @@ export class BuilderTabsComponent {
       } else {
         this.header = 'Select an agent or tool to edit';
       }
-
       this.cdr.detectChanges();
     });
 

@@ -144,12 +144,14 @@
           <span class="tab-label">Tools</span>
         </ng-template>
         <div class="tab-content-container">
-          @if (agentConfig && agentConfig.tools) {
+          @if (agentConfig && agentConfig.tools && agentConfig.tools.length > 0) {
             <ul>
               @for (tool of agentConfig.tools; track tool) {
                 <li>{{tool.name}}</li>
               }
             </ul>
+          } @else {
+            <span class="no-tools-message">This agent has no tools</span>
           }
         </div>
       </mat-tab>

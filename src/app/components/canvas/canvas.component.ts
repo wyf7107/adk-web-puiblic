@@ -128,10 +128,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         tools: []
       };
 
+    const subAgentIndex = parentNode.data().sub_agents.length;
+
     const subAgentNode: HtmlTemplateDynamicNode = {
       id: `sub_agent_${this.nodeId}`,
       point: signal({ 
-        x: parentNode.point().x, 
+        x: parentNode.point().x + subAgentIndex * 400 + 50, 
         y: parentNode.point().y + nodeHeight + 50 // Position below the parent
       }),
       type: 'html-template',

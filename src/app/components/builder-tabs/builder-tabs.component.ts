@@ -133,9 +133,9 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
       if (tool) {
-        this.header = 'Tool configuration'
+        this.header = 'Tool configuration';
       } else {
-        this.header = 'Select an agent or tool to edit'
+        this.header = 'Select an agent or tool to edit';
       }
 
       this.cdr.detectChanges();

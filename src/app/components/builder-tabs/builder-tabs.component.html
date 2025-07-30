@@ -112,7 +112,7 @@
       </mat-tab>
       <mat-tab class="tabs-header">
         <ng-template mat-tab-label>
-          <span class="tab-label">Sub agents list</span>
+          <span class="tab-label">Sub agents</span>
         </ng-template>
         <div *ngIf="treeDataSource | async as dataSource"class="tree-view">
           <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" [trackBy]="trackByFn">

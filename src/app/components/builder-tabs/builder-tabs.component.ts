@@ -19,7 +19,7 @@ import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDe
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { MatTree } from '@angular/material/tree'; // Import MatTree component type
 
 @Component({
@@ -108,27 +108,30 @@ export class BuilderTabsComponent {
   protected header = 'Select an agent or tool to edit'
 
   constructor(private cdr: ChangeDetectorRef) {
-    this.agentBuilderService.getSelectedNode().subscribe(node => {
-      this.agentConfig = node;
-      if (node) {
-        this.header = 'Agent configuration';
-        const oldTreeData = this.treeDataSource.value;
-        this.treeDataSource.next([]);
-        this.treeDataSource.next([node]);
-        this.cdr.detectChanges();
-        setTimeout(() => {
-          // Code to execute after 100 milliseconds
-          // Open the root node by default
-          if (oldTreeData.length == 0) {
-            this.matTree.expand(node);
-          }
+    // Load the selected node value again once node graph is updated
+    combineLatest([this.agentBuilderService.getSelectedNode(), this.agentBuilderService.getRefreshSubject()])
+      .pipe(map(([node, ]) => node))
+      .subscribe(node => {
+        this.agentConfig = node;
+        if (node) {
+          this.header = 'Agent configuration';
+          const oldTreeData = this.treeDataSource.value;
+          this.treeDataSource.next([]);
+          this.treeDataSource.next([node]);
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            // Code to execute after 100 milliseconds
+            // Open the root node by default
+            if (oldTreeData.length == 0) {
+              this.matTree.expand(node);
+            }
 
-          // Refresh the tree node once data gets updated
-          this.matTree.toggle(node);
-          this.matTree.toggle(node);
-        }, 100);
-       }
-    });
+            // Refresh the tree node once data gets updated
+            this.matTree.toggle(node);
+            this.matTree.toggle(node);
+          }, 100);
+        }
+      });
 
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;

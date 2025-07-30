@@ -127,3 +127,18 @@
   background-color: transparent;
   border: 0;
 }
+
+.node-item {
+  display: flex;
+  align-items: center
+}
+
+.node-icon {
+  margin-right: 14px;
+}
+
+.node-name {
+  margin-top: 2px;
+  display: flex;
+  align-items: center
+}

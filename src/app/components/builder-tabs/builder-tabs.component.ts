@@ -42,7 +42,8 @@ export class BuilderTabsComponent {
     agent_class: '',
     model: '',
     instruction: '',
-    sub_agents: []
+    sub_agents: [],
+    tools: []
   };
 
   treeDataSource = new BehaviorSubject<AgentNode[]>([]);

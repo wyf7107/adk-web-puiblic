@@ -139,6 +139,20 @@
           </mat-tree>
         </div>
       </mat-tab>
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Tools</span>
+        </ng-template>
+        <div class="tab-content-container">
+          @if (agentConfig && agentConfig.tools) {
+            <ul>
+              @for (tool of agentConfig.tools; track tool) {
+                <li>{{tool.name}}</li>
+              }
+            </ul>
+          }
+        </div>
+      </mat-tab>
     </mat-tab-group>
   </div>
 </div>

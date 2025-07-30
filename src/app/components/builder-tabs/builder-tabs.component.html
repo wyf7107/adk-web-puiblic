@@ -116,18 +116,25 @@
         </ng-template>
         <div *ngIf="treeDataSource | async as dataSource"class="tree-view">
           <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" [trackBy]="trackByFn">
-            <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
-              {{ node.name }}
-            </mat-tree-node>
-            <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding matTreeNodeToggle
-                          [cdkTreeNodeTypeaheadLabel]="node.name">
-              <button matIconButton matTreeNodeToggle style="background-color: transparent; border: 0;"
-                      [attr.aria-label]="'Toggle ' + node.name">
-                <mat-icon>
-                  {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                </mat-icon>
-              </button>
-              {{node.name}}
+            <mat-tree-node 
+              *matTreeNodeDef="let node;when: hasChild" 
+              matTreeNodePadding matTreeNodeToggle
+              [cdkTreeNodeTypeaheadLabel]="node.name">
+              <div class="node-item">
+                <mat-icon class="node-icon" fontSet="material-symbols-outlined">robot_2</mat-icon>
+                <div class="node-name">
+                  <button 
+                    *ngIf="node.sub_agents.length > 0"
+                    matIconButton matTreeNodeToggle 
+                    style="background-color: transparent; border: 0; margin-left: -7px"
+                    [attr.aria-label]="'Toggle ' + node.name">
+                    <mat-icon>
+                      {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                    </mat-icon>
+                  </button>
+                  {{node.name}}
+                </div>
+              </div>
             </mat-tree-node>
           </mat-tree>
         </div>

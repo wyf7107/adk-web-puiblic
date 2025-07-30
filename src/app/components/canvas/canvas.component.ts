@@ -78,43 +78,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
           this.existingAgent = agent;
           this.loadAgent();
+          this.agentBuilderService.getSelectedTool().subscribe(tool => {
+            this.selectedTool = tool;
+          });
         })
-      } else {
-        this.createRootAgent();
-        this.agentBuilderService.getSelectedTool().subscribe(tool => {
-          this.selectedTool = tool;
-        });
       }
     })
   }
 
   ngAfterViewInit() {
-  }
-
-  createRootAgent() {
-    if (this.nodes().length == 0) {
-      this.nodeId = 1;
-
-      const agentNodeData: AgentNode = {
-          name: 'RootAgent',
-          agent_class: 'LlmAgent',
-          model: 'gemini-2.5-flash',
-          instruction: 'You are the root agent that coordinates other agents.',
-          isRoot: true,
-          sub_agents: [],
-          tools: []
-        };
-
-      const rootNode: HtmlTemplateDynamicNode = {
-        id: 'RootAgent',
-        point: signal({ x: 100, y: 100 }),
-        type: 'html-template',
-        data: signal(agentNodeData)
-      };
-      this.nodes.set([rootNode]);
-
-      this.agentBuilderService.addNode(agentNodeData);
-    }
   }
 
   onCustomTemplateNodeClick(clickedVflowNode: HtmlTemplateDynamicNode) {
@@ -198,7 +170,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const tool = {
       toolType: 'Custom tool',
-      name: `tool_${this.toolId}`,
+      name: `.tool_${this.toolId}`,
       args: []
     }
     this.toolId++;

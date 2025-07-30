@@ -12,7 +12,6 @@ export class AgentBuilderService {
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
   private isCreatingNewAgentSubject = new BehaviorSubject<boolean>(true);
-  private refreshSubject = new BehaviorSubject<void>(undefined);
 
   constructor() { }
 
@@ -39,7 +38,7 @@ export class AgentBuilderService {
   addNode(newNode: AgentNode): void {
     this.nodes.push(newNode);
 
-    this.triggerRefresh();
+    this.setSelectedNode(this.selectedNodeSubject.value);
   }
 
   getNodes(): AgentNode[] {
@@ -82,13 +81,5 @@ export class AgentBuilderService {
 
   getIsCreatingNewAgent() {
     return this.isCreatingNewAgentSubject.asObservable();
-  }
-
-  getRefreshSubject(): Observable<void>{
-    return this.refreshSubject.asObservable();
-  }
-
-  triggerRefresh() {
-    this.refreshSubject.next(undefined);
   }
 }

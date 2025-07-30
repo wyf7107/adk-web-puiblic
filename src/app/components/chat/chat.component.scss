@@ -75,38 +75,13 @@
 .mode-toggle-container {
   display: flex;
   align-items: center;
-  margin-left: auto;
   margin-right: 20px;
 }
 
-.mode-toggle {
-  display: flex;
-  align-items: center;
-}
-
 .build-mode-button {
-  color: #9aa0a6;
-  background-color: transparent;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  margin: 0;
-
-  &:hover {
-    background-color: rgba(138, 180, 249, 0.1);
-    color: #8ab4f9;
-  }
-
-  &.active {
-    background-color: #8ab4f9;
-    color: #1b73e8;
-
-    &:hover {
-      background-color: #7ba3e8;
-    }
-  }
-
-  mat-icon {
-    font-size: 24px;
+  margin: 0 4px;
+  &.mat-mdc-unelevated-button {
+    height: 30px;
   }
 }
 
@@ -522,11 +497,16 @@ button {
   font-size: 14px;
 }
 
+.app-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+  margin-left: 10px;
+}
+
 .app-select-container {
   width: 35%;
-  margin-top: 12px;
   background-color: #212123;
-  margin-left: 10px;
   height: 30px;
   display: flex;
   justify-content: space-between;

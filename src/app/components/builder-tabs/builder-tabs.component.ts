@@ -39,7 +39,7 @@ export class BuilderTabsComponent {
   agentConfig: AgentNode | undefined = {
     isRoot: false,
     name: '',
-    agentClass: '',
+    agent_class: '',
     model: '',
     instruction: '',
     sub_agents: []
@@ -133,7 +133,9 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
       if (tool) {
-        this.header = 'Tool configuration';
+        this.header = 'Tool configuration'
+      } else {
+        this.header = 'Select an agent or tool to edit'
       }
 
       this.cdr.detectChanges();

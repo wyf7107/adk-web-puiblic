@@ -55,6 +55,7 @@ import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -185,6 +186,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly agentService = inject(AgentService);
   protected isLoadingApps: WritableSignal<boolean> = signal(false);
   protected loadingError: WritableSignal<string> = signal('');
+  protected apps: string[] = [];
   protected readonly apps$: Observable<string[] | undefined> = of([]).pipe(
     tap(() => {
       this.isLoadingApps.set(true);
@@ -277,6 +279,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.agentService.getApp().subscribe((app) => {
       this.appName = app;
+    });
+
+    this.apps$.subscribe((apps) => {
+      this.apps = apps ?? [];
     });
 
     combineLatest([
@@ -1366,15 +1372,37 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.useSse = !this.useSse;
   }
 
-  toggleMode(newAgent: boolean) {
-    this.builderNewAgent = newAgent;
-    this.isBuilderMode.set(!this.isBuilderMode());
+  protected enterBuilderMode() {
+    const url = this.router.createUrlTree([], {
+      queryParams: {'mode': 'builder'},
+      queryParamsHandling: 'merge',
+    }).toString();
+    this.location.replaceState(url);
+    this.isBuilderMode.set(true);
     this.agentBuilderService.clear();
-    this.agentBuilderService.setIsCreatingNewAgent(newAgent);
+    this.agentBuilderService.setIsCreatingNewAgent(false);
+  }
+
+  protected exitBuilderMode() {
+    const url = this.router.createUrlTree([], {
+      queryParams: {'mode': null},
+      queryParamsHandling: 'merge',
+    }).toString();
+    this.location.replaceState(url);
+    this.isBuilderMode.set(false);
+    this.agentBuilderService.clear();
+    this.agentBuilderService.setIsCreatingNewAgent(true);
+  }
+
+  openAddItemDialog(): void {
+    const dialogRef = this.dialog.open(AddItemDialogComponent, {
+      width: '600px',
+      data: { existingAppNames: this.apps },
+    });
   }
 
   saveAgentBuilder() {
-    this.canvasComponent.saveAgent();
+    this.canvasComponent.saveAgent(this.appName);
   }
 
   selectEvent(key: string) {
@@ -1461,6 +1489,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         } else if (app) {
           this.openSnackBar(`Agent '${app}' not found`, 'OK');
         }
+      }
+      if (params['mode'] === 'builder') {
+        this.enterBuilderMode();
       }
     });
   }

@@ -12,7 +12,7 @@ export class AgentBuilderService {
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
   private isCreatingNewAgentSubject = new BehaviorSubject<boolean>(true);
-  private agentToolsSubject = new BehaviorSubject<ToolNode[] | undefined>(undefined);
+  private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
 
   constructor() { }
 
@@ -72,7 +72,7 @@ export class AgentBuilderService {
     const agentNode = this.getNode(agentName);
     if (agentNode && agentNode.tools) {
       agentNode.tools.push(tool);
-      this.agentToolsSubject.next(agentNode.tools);
+      this.agentToolsSubject.next({ agentName, tools: agentNode.tools });
     }
   }
 
@@ -82,7 +82,7 @@ export class AgentBuilderService {
       const toolIndex = agentNode.tools.findIndex(tool => tool.name === toolToDelete.name);
       if (toolIndex > -1) {
         agentNode.tools.splice(toolIndex, 1);
-        this.agentToolsSubject.next(agentNode.tools);
+        this.agentToolsSubject.next({ agentName, tools: agentNode.tools });
         if (this.selectedToolSubject.value?.name === toolToDelete.name) {
           this.setSelectedTool(undefined);
         }
@@ -106,11 +106,13 @@ export class AgentBuilderService {
     return this.isCreatingNewAgentSubject.asObservable();
   }
 
-  getAgentTools(): Observable<ToolNode[] | undefined> {
+  getAgentTools(): Observable<{ agentName: string, tools: ToolNode[] } | undefined> {
     return this.agentToolsSubject.asObservable();
   }
 
-  setAgentTools(tools: ToolNode[] | undefined) {
-    this.agentToolsSubject.next(tools);
+  setAgentTools(agentName: string, tools: ToolNode[] | undefined) {
+    if (tools) {
+      this.agentToolsSubject.next({ agentName, tools });
+    }
   }
 }

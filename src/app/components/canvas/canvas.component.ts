@@ -81,6 +81,16 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           this.agentBuilderService.getSelectedTool().subscribe(tool => {
             this.selectedTool = tool;
           });
+          this.agentBuilderService.getAgentTools().subscribe(update => {
+            if (update) {
+              const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
+              if (node && node.data) {
+                const data = node.data();
+                data.tools = update.tools;
+                node.data.set(data);
+              }
+            }
+          });
         })
       }
     })
@@ -98,6 +108,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
+      this.agentBuilderService.setAgentTools(agentNodeData.name, agentNodeData.tools);
     }
   }
 

@@ -149,9 +149,9 @@ export class BuilderTabsComponent {
       }
     });
 
-    this.agentBuilderService.getAgentTools().subscribe(tools => {
-      if (this.agentConfig) {
-        this.agentConfig.tools = tools;
+    this.agentBuilderService.getAgentTools().subscribe(update => {
+      if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
+        this.agentConfig.tools = update.tools;
         this.cdr.detectChanges();
       }
     });

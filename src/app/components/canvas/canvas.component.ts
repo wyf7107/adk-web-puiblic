@@ -168,7 +168,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const tool = {
       toolType: 'Custom tool',
-      name: `tool_${this.toolId}`,
+      name: `.tool_${this.toolId}`,
       args: []
     }
     this.toolId++;

@@ -64,49 +64,6 @@
                 <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
               </mat-form-field>
             </div>
-          } @else if (selectedTool) {
-            <!-- Tool Configuration Form -->
-            <div class="config-form">
-              <mat-form-field class="tool-type-field">
-                <mat-label>Tool Type</mat-label>
-                <mat-select [(ngModel)]="selectedTool.toolType" (selectionChange)="onToolTypeSelectionChange(selectedTool)">
-                    @for (type of toolTypes; track type) {
-                        <mat-option [value]="type">{{type}}</mat-option>
-                    }
-                </mat-select>
-              </mat-form-field>
-              @if (selectedTool.toolType === 'Custom tool') {
-                <mat-form-field class="tool-name-field">
-                  <mat-label>Tool Name</mat-label>
-                  <input matInput [(ngModel)]="selectedTool.name" />
-                </mat-form-field>
-              } @else if (selectedTool.toolType === 'Built-in tool') {
-                <mat-form-field class="built-in-tool-field">
-                  <mat-label>Built-in Tool</mat-label>
-                  <mat-select [(ngModel)]="selectedTool.name" (selectionChange)="onBuiltInToolSelectionChange(selectedTool)">
-                    @for (tool of builtInTools; track tool) {
-                      <mat-option [value]="tool">{{ tool }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
-                @if (builtInToolArgs.has(selectedTool.name) && selectedTool.args?.length) {
-                  <h2 class="tool-args-header">Built-In Tool Arguments</h2>
-                  @if (editingToolArgs()) {
-                    <div class="json-editor-wrapper">
-                      <app-json-editor
-                        [jsonString]="toolArgsString()"
-                      ></app-json-editor>
-                    </div>
-                    <div class="edit-buttons">
-                      <button mat-button (click)="saveToolArgs(selectedTool)">Save</button>
-                      <button mat-button (click)="cancelEditToolArgs(selectedTool)">Cancel</button>
-                    </div>
-                  } @else {
-                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
-                  }
-                }
-              }
-            </div>
           }
         </div>
       </mat-tab>

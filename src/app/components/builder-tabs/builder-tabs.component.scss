@@ -24,6 +24,7 @@
 .builder-tab-content {
   padding: 20px;
   color: #9aa0a6;
+  overflow-y: auto;
 
   p {
     margin: 8px 0;
@@ -100,12 +101,13 @@
 }
 
 .json-editor-wrapper {
-  height: 450px;
-  max-height: 450px;
+  height: 410px;
+  max-height: 410px;
 }
 
 .tab-content-container {
-  margin-top: 30px;
+  margin-top: 20px;
+  overflow-y: hidden;
 }
 
 .agent-list-row {
@@ -148,4 +150,18 @@
   font-size: 16px;
   margin-top: 16px;
   text-align: center;
+}
+
+.tool-name {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.back-button {
+  margin-bottom: 16px;
 }

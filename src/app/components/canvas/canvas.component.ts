@@ -99,16 +99,30 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   ngAfterViewInit() {
   }
 
-  onCustomTemplateNodeClick(clickedVflowNode: HtmlTemplateDynamicNode) {
+  onCustomTemplateNodeClick(
+    clickedVflowNode: HtmlTemplateDynamicNode,
+    event: MouseEvent,
+  ) {
     if (!clickedVflowNode.data) {
-      return ;
+      return;
     }
-    const agentNodeData = this.agentBuilderService.getNode(clickedVflowNode.data().name);
+
+    // If the click is on a tool, the selectTool method will handle it
+    if ((event.target as HTMLElement).closest('mat-chip')) {
+      return;
+    }
+
+    const agentNodeData = this.agentBuilderService.getNode(
+      clickedVflowNode.data().name,
+    );
 
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
-      this.agentBuilderService.setAgentTools(agentNodeData.name, agentNodeData.tools);
+      this.agentBuilderService.setAgentTools(
+        agentNodeData.name,
+        agentNodeData.tools,
+      );
     }
   }
 
@@ -249,8 +263,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.deleteNode(agentNode);
   }
 
-  selectTool(tool: any) {
-    this.agentBuilderService.setSelectedNode(undefined);
+  selectTool(tool: any, node: HtmlTemplateDynamicNode) {
+    if (node.data) {
+      const agentNodeData = this.agentBuilderService.getNode(node.data().name);
+      if (agentNodeData) {
+        this.agentBuilderService.setSelectedNode(agentNodeData);
+      }
+    }
     this.agentBuilderService.setSelectedTool(tool);
   }
 

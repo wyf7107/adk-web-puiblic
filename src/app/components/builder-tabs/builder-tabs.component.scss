@@ -154,16 +154,30 @@
   text-align: center;
 }
 
+.tools-list {
+  list-style: none;
+  padding: 0;
+}
+
 .tool-name {
   cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
+  padding: 11px;
+  border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 4px;
+  background-color: #303030;
+  color: #e8eaed;
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0.25px;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: #141414;
   }
 }
 

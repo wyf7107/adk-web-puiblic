@@ -148,7 +148,7 @@
             </div>
           } @else {
             @if (agentConfig && agentConfig.tools && agentConfig.tools.length > 0) {
-              <ul>
+              <ul class="tools-list">
                 @for (tool of agentConfig.tools; track tool) {
                   <li (click)="selectTool(tool)" class="tool-name">{{tool.name}}
                     <button mat-icon-button (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()">

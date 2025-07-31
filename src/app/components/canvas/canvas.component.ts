@@ -359,10 +359,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     while (queue.length > 0) {
       let { node, depth, index, parentId } = queue.shift()!;
-
-      if (node && node.config) {
+      if (node && node.config_path) {
         this.nodeId ++;
-        const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config));
+        const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config_path));
         const subAgent = parse(subAgentData) as AgentNode;
 
         const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentId?.toString()) as HtmlTemplateDynamicNode;

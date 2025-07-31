@@ -157,6 +157,18 @@ export class BuilderTabsComponent {
     this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
     this.editingToolArgs.set(!!this.editingTool.args?.length);
   }
+
+  addTool() {
+    if (this.agentConfig) {
+      const toolId = Math.floor(Math.random() * 1000);
+      const tool = {
+        toolType: 'Custom tool',
+        name: `.tool_${toolId}`,
+        args: []
+      }
+      this.agentBuilderService.addTool(this.agentConfig.name, tool);
+    }
+  }
   
   backToToolList() {
     this.editingTool = null;

@@ -58,7 +58,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   nodeId = 1;
   edgeId = 1;
-  toolId = 1;
 
   public nodes = signal<HtmlTemplateDynamicNode[]>([]);
 
@@ -191,12 +190,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!parentNode) return;
     if (!parentNode.data) return;
 
+    const toolId = Math.floor(Math.random() * 1000);
     const tool = {
       toolType: 'Custom tool',
-      name: `.tool_${this.toolId}`,
+      name: `.tool_${toolId}`,
       args: []
     }
-    this.toolId++;
     this.agentBuilderService.addTool(parentNode.data().name, tool);
   }
 

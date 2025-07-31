@@ -109,4 +109,29 @@ export class AgentBuilderService {
       this.agentToolsSubject.next(undefined);
     }
   }
+
+  getParentNode(current: AgentNode|undefined, target: AgentNode, parent: AgentNode|undefined): AgentNode|undefined {
+    if (!current) {
+        return undefined;
+    }
+    
+    if (current.name === target.name) {
+        return parent;
+    }
+
+    for (const subNode of current.sub_agents) {
+        const foundParent = this.getParentNode(subNode, target, current);
+        if (foundParent) {
+            return foundParent;
+        }
+    }
+
+    return undefined;
+  }
+
+  deleteNode(agentNode: AgentNode) {
+    this.nodes = this.nodes.filter(node => node.name !== agentNode.name);
+
+    this.setSelectedNode(this.selectedNodeSubject.value);
+  }
 }

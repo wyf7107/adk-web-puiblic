@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
 import { DiagramConnection, AgentNode, ToolNode, YamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
@@ -32,6 +32,7 @@ import * as YAML from 'yaml';
 import { parse } from 'yaml';
 import { firstValueFrom } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 
 @Component({
@@ -46,6 +47,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
   private agentBuilderService = inject(AgentBuilderService);
+  private cdr = inject(ChangeDetectorRef);
 
   @Input() showSidePanel: boolean = true;
   @Output() toggleSidePanelRequest = new EventEmitter<void>();
@@ -199,7 +201,20 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   deleteTool(agentName: string, tool: any) {
-    this.agentBuilderService.deleteTool(agentName, tool);
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: 'Delete Tool',
+        message: `Are you sure you want to delete ${tool.name}?`,
+        confirmButtonText: 'Delete'
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        this.agentBuilderService.deleteTool(agentName, tool);
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   selectTool(tool: any, node: HtmlTemplateDynamicNode) {

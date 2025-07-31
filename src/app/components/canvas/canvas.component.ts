@@ -32,7 +32,7 @@ import * as YAML from 'yaml';
 import { parse } from 'yaml';
 import { firstValueFrom } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
-import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 
 @Component({

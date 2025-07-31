@@ -13,9 +13,10 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<h2 mat-dialog-title>Delete Tool</h2>
+
+<h2 mat-dialog-title>{{ data.title }}</h2>
 <mat-dialog-content>
-  <p>Are you sure you want to delete {{ data.toolName }}?</p>
+  <p>{{ data.message }}</p>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>

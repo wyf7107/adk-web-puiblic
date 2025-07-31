@@ -26,10 +26,15 @@ import {
 } from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
 
+export interface ConfirmationDialogData {
+  title: string;
+  message: string;
+}
+
 @Component({
-  selector: 'app-delete-tool-dialog',
-  templateUrl: './delete-tool-dialog.component.html',
-  styleUrls: ['./delete-tool-dialog.component.scss'],
+  selector: 'app-confirmation-dialog',
+  templateUrl: './confirmation-dialog.component.html',
+  styleUrls: ['./confirmation-dialog.component.scss'],
   standalone: true,
   imports: [
     MatButtonModule,
@@ -39,10 +44,10 @@ import {MatButtonModule} from '@angular/material/button';
     MatDialogClose,
   ],
 })
-export class DeleteToolDialogComponent {
+export class ConfirmationDialogComponent {
   constructor(
-    public dialogRef: MatDialogRef<DeleteToolDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {toolName: string},
+    public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogData,
   ) {}
 
   onCancel(): void {

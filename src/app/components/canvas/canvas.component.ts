@@ -32,7 +32,7 @@ import * as YAML from 'yaml';
 import { parse } from 'yaml';
 import { firstValueFrom } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
-import { DeleteToolDialogComponent } from './delete-tool-dialog/delete-tool-dialog.component';
+import { ConfirmationDialogComponent } from './confirmation-dialog/confirmation-dialog.component';
 
 
 @Component({
@@ -204,8 +204,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   deleteTool(agentName: string, tool: any) {
-    const dialogRef = this.dialog.open(DeleteToolDialogComponent, {
-      data: { toolName: tool.name },
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: 'Delete Tool',
+        message: `Are you sure you want to delete ${tool.name}?` 
+      },
     });
 
     dialogRef.afterClosed().subscribe(result => {

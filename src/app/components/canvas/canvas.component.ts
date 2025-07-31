@@ -30,7 +30,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
 import { parse } from 'yaml';
-import { firstValueFrom, take, filter } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 
 
@@ -191,63 +191,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   deleteTool(agentName: string, tool: any) {
     this.agentBuilderService.deleteTool(agentName, tool);
   }
-  
-  deleteSubAgent(agentName: string) {
-    const currentNode: AgentNode|undefined = this.agentBuilderService.getNode(agentName);
-
-    if (!currentNode) {
-      return ;
-    }
-
-    const parentNode = this.agentBuilderService.getParentNode(this.agentBuilderService.getRootNode(), currentNode, undefined);
-
-    if (!parentNode) {
-      return ;
-    }
-
-    const parentTemplateNode = this.nodes().find(node => !!node.data && node.data().name === parentNode.name);
-
-    this.deleteSubAgentHelper(currentNode, parentNode);
-
-    // select the parent node if the current selected node is deleted
-    this.agentBuilderService.getSelectedNode()
-      .pipe(take(1), filter(node => !!node))
-      .subscribe(node => {
-        if (!this.agentBuilderService.getNodes().includes(node)) {
-          this.onCustomTemplateNodeClick(parentTemplateNode!);
-        }
-      })
-  }
-
-  deleteSubAgentHelper(agentNode: AgentNode|undefined, parentNode: AgentNode) {
-    if (!agentNode) {
-      return ;
-    }
-
-    // recursive until it's leaf node
-    for (const subAgent of agentNode.sub_agents) {
-      this.deleteSubAgentHelper(subAgent, agentNode);
-    }
-
-    // it's leaf node
-
-    const subAgentNodeId = this.nodes().find(node => node.data && node.data().name === agentNode.name)?.id;
-
-    //delte node and edge data in the canvas
-    const newNodes = this.nodes().filter((node: HtmlTemplateDynamicNode) => {
-      return node.data ? node.data().name !== agentNode.name : false;
-    });
-
-    this.nodes.set(newNodes);
-
-    const newEdges = this.edges().filter(edge => edge.target !== subAgentNodeId);
-    this.edges.set(newEdges);
-
-    parentNode.sub_agents = parentNode.sub_agents.filter(subagent => subagent.name !== agentNode.name);
-
-    // delete node data in builder service
-    this.agentBuilderService.deleteNode(agentNode);
-  }
 
   selectTool(tool: any) {
     this.agentBuilderService.setSelectedNode(undefined);
@@ -278,16 +221,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this._snackBar.open("Something went wrong, please try again", "OK");
       }
     })
-  }
-
-  isRootAgent(agentName: string): boolean {
-    const rootAgent = this.agentBuilderService.getRootNode();
-
-    if (!rootAgent) {
-      return false;
-    }
-
-    return rootAgent.name === agentName;
   }
 
   async loadAgent() {

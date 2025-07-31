@@ -35,6 +35,7 @@ export class BuilderTabsComponent {
   protected toolArgsString = signal('');
   editingToolArgs = signal(false);
   public editingTool: ToolNode | null = null;
+  public selectedTabIndex = 0;
 
   // Agent configuration properties
   agentConfig: AgentNode | undefined = {
@@ -113,6 +114,7 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       if (node) {
+        this.selectedTabIndex = 0;
         this.header = 'Agent configuration';
         const oldTreeData = this.treeDataSource.value;
         this.treeDataSource.next([]);
@@ -134,6 +136,10 @@ export class BuilderTabsComponent {
 
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
+      if (tool) {
+        this.selectTool(tool);
+        this.selectedTabIndex = 2;
+      }
       this.cdr.detectChanges();
     });
 

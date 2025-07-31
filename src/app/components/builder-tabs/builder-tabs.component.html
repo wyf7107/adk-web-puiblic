@@ -124,7 +124,7 @@
                 <mat-icon class="node-icon" fontSet="material-symbols-outlined">robot_2</mat-icon>
                 <div class="node-name">
                   <button 
-                    *ngIf="node.sub_agents.length > 0"
+                    *ngIf="node.sub_agents?.length > 0"
                     matIconButton matTreeNodeToggle 
                     style="background-color: transparent; border: 0; margin-left: -7px"
                     [attr.aria-label]="'Toggle ' + node.name">
@@ -144,12 +144,14 @@
           <span class="tab-label">Tools</span>
         </ng-template>
         <div class="tab-content-container">
-          @if (agentConfig && agentConfig.tools) {
+          @if (agentConfig && agentConfig.tools && agentConfig.tools.length > 0) {
             <ul>
               @for (tool of agentConfig.tools; track tool) {
                 <li>{{tool.name}}</li>
               }
             </ul>
+          } @else {
+            <span class="no-tools-message">This agent has no tools</span>
           }
         </div>
       </mat-tab>

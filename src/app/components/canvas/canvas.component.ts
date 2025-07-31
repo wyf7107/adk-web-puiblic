@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
 import { DiagramConnection, AgentNode, ToolNode, YamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
@@ -47,6 +47,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
   private agentBuilderService = inject(AgentBuilderService);
+  private cdr = inject(ChangeDetectorRef);
 
   @Input() showSidePanel: boolean = true;
   @Output() toggleSidePanelRequest = new EventEmitter<void>();
@@ -215,6 +216,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
         this.agentBuilderService.deleteTool(agentName, tool);
+        this.cdr.detectChanges();
       }
     });
   }

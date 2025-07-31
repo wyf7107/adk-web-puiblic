@@ -50,6 +50,7 @@ export class AgentBuilderService {
     this.nodes = [];
     this.setSelectedNode(undefined);
     this.setSelectedTool(undefined);
+    this.setAgentTools();
   }
 
   getSelectedNode(): Observable<AgentNode|undefined> {
@@ -110,9 +111,11 @@ export class AgentBuilderService {
     return this.agentToolsSubject.asObservable();
   }
 
-  setAgentTools(agentName: string, tools: ToolNode[] | undefined) {
-    if (tools) {
+  setAgentTools(agentName?: string, tools?: ToolNode[]) {
+    if (agentName && tools) {
       this.agentToolsSubject.next({ agentName, tools });
+    } else {
+      this.agentToolsSubject.next(undefined);
     }
   }
 }

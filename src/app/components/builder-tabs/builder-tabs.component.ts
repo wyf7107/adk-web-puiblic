@@ -22,6 +22,9 @@ import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject } from 'rxjs';
 import { MatTree } from '@angular/material/tree'; // Import MatTree component type
 
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+
 @Component({
   selector: 'app-builder-tabs',
   templateUrl: './builder-tabs.component.html',
@@ -108,7 +111,7 @@ export class BuilderTabsComponent {
   ]);
   protected header = 'Select an agent or tool to edit'
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private dialog: MatDialog) {
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       if (node) {
@@ -168,6 +171,23 @@ export class BuilderTabsComponent {
       }
       this.agentBuilderService.addTool(this.agentConfig.name, tool);
     }
+  }
+
+  deleteTool(agentName: string, tool: any) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: 'Delete Tool',
+        message: `Are you sure you want to delete ${tool.name}?`,
+        confirmButtonText: 'Delete'
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        this.agentBuilderService.deleteTool(agentName, tool);
+        this.cdr.detectChanges();
+      }
+    });
   }
   
   backToToolList() {

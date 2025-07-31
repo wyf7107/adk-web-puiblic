@@ -34,6 +34,7 @@ export class BuilderTabsComponent {
   @ViewChild(MatTree) matTree!: MatTree<AgentNode>;
   protected toolArgsString = signal('');
   editingToolArgs = signal(false);
+  public editingTool: ToolNode | null = null;
 
   // Agent configuration properties
   agentConfig: AgentNode | undefined = {
@@ -157,26 +158,31 @@ export class BuilderTabsComponent {
     });
   }
 
+  selectTool(tool: ToolNode) {
+    this.editingTool = tool;
+    this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
+    this.editingToolArgs.set(!!this.editingTool.args?.length);
+  }
+  
+  backToToolList() {
+    this.editingTool = null;
+  }
+
   editToolArgs() {
     this.editingToolArgs.set(true);
-    if (this.selectedTool && this.selectedTool.args) {
-      this.toolArgsString.set(JSON.stringify(this.selectedTool.args, null, 2));
-    }
   }
 
-  cancelEditToolArgs() {
+  cancelEditToolArgs(tool: ToolNode | undefined | null) {
     this.editingToolArgs.set(false);
-    this.toolArgsString.set(JSON.stringify(this.selectedTool?.args, null, 2));
+    this.toolArgsString.set(JSON.stringify(tool?.args, null, 2));
   }
 
-  saveToolArgs() {
-    if (this.jsonEditorComponent) {
+  saveToolArgs(tool: ToolNode | undefined | null) {
+    if (this.jsonEditorComponent && tool) {
       try {
         const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
-        if (this.selectedTool) {
-          this.selectedTool.args = updatedArgs;
-          this.toolArgsString.set(JSON.stringify(this.selectedTool.args, null, 2));
-        }
+        tool.args = updatedArgs;
+        this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
         this.editingToolArgs.set(false);
       } catch (e) {
         console.error('Error parsing tool arguments JSON', e);
@@ -184,23 +190,31 @@ export class BuilderTabsComponent {
     }
   }
 
-  onToolTypeSelectionChange() {
-    if (this.selectedTool?.toolType === 'Built-in tool') {
-      this.selectedTool.name = 'google_search';
+  onToolTypeSelectionChange(tool: ToolNode | undefined | null) {
+    if (tool?.toolType === 'Built-in tool') {
+      tool.name = 'google_search';
+      this.onBuiltInToolSelectionChange(tool);
+    } else if (tool) {
+      tool.name = '';
+      tool.args = [];
+      this.toolArgsString.set('[]');
+      this.editingToolArgs.set(false);
     }
   }
 
-  onBuiltInToolSelectionChange() {
-    if (this.selectedTool) {
-      this.selectedTool.args = [];
-      const argNames = this.builtInToolArgs.get(this.selectedTool.name);
+  onBuiltInToolSelectionChange(tool: ToolNode | undefined | null) {
+    if (tool) {
+      tool.args = [];
+      const argNames = this.builtInToolArgs.get(tool.name);
       if (argNames) {
         for (const argName of argNames) {
-          this.selectedTool.args.push({name: argName, value: ''});
+          tool.args.push({name: argName, value: ''});
         }
-        this.editingToolArgs.set(true);
+        if (tool.args.length > 0) {
+          this.editingToolArgs.set(true);
+        }
       }
-      this.toolArgsString.set(JSON.stringify(this.selectedTool.args, null, 2));
+      this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
     }
   }
 

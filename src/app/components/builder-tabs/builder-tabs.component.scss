@@ -149,3 +149,17 @@
   margin-top: 16px;
   text-align: center;
 }
+
+.tool-name {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.back-button {
+  margin-bottom: 16px;
+}

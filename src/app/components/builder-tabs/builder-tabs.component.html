@@ -69,7 +69,7 @@
             <div class="config-form">
               <mat-form-field class="tool-type-field">
                 <mat-label>Tool Type</mat-label>
-                <mat-select [(ngModel)]="selectedTool.toolType" (selectionChange)="onToolTypeSelectionChange()">
+                <mat-select [(ngModel)]="selectedTool.toolType" (selectionChange)="onToolTypeSelectionChange(selectedTool)">
                     @for (type of toolTypes; track type) {
                         <mat-option [value]="type">{{type}}</mat-option>
                     }
@@ -83,7 +83,7 @@
               } @else if (selectedTool.toolType === 'Built-in tool') {
                 <mat-form-field class="built-in-tool-field">
                   <mat-label>Built-in Tool</mat-label>
-                  <mat-select [(ngModel)]="selectedTool.name" (selectionChange)="onBuiltInToolSelectionChange()">
+                  <mat-select [(ngModel)]="selectedTool.name" (selectionChange)="onBuiltInToolSelectionChange(selectedTool)">
                     @for (tool of builtInTools; track tool) {
                       <mat-option [value]="tool">{{ tool }}</mat-option>
                     }
@@ -98,8 +98,8 @@
                       ></app-json-editor>
                     </div>
                     <div class="edit-buttons">
-                      <button mat-button (click)="saveToolArgs()">Save</button>
-                      <button mat-button (click)="cancelEditToolArgs()">Cancel</button>
+                      <button mat-button (click)="saveToolArgs(selectedTool)">Save</button>
+                      <button mat-button (click)="cancelEditToolArgs(selectedTool)">Cancel</button>
                     </div>
                   } @else {
                     <button mat-button (click)="editToolArgs()">Edit tool args</button>
@@ -144,14 +144,61 @@
           <span class="tab-label">Tools</span>
         </ng-template>
         <div class="tab-content-container">
-          @if (agentConfig && agentConfig.tools && agentConfig.tools.length > 0) {
-            <ul>
-              @for (tool of agentConfig.tools; track tool) {
-                <li>{{tool.name}}</li>
+          @if (editingTool) {
+            <button mat-icon-button (click)="backToToolList()" class="back-button">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div class="config-form">
+              <mat-form-field class="tool-type-field">
+                <mat-label>Tool Type</mat-label>
+                <mat-select [(ngModel)]="editingTool.toolType" (selectionChange)="onToolTypeSelectionChange(editingTool)">
+                    @for (type of toolTypes; track type) {
+                        <mat-option [value]="type">{{type}}</mat-option>
+                    }
+                </mat-select>
+              </mat-form-field>
+              @if (editingTool.toolType === 'Custom tool') {
+                <mat-form-field class="tool-name-field">
+                  <mat-label>Tool Name</mat-label>
+                  <input matInput [(ngModel)]="editingTool.name" />
+                </mat-form-field>
+              } @else if (editingTool.toolType === 'Built-in tool') {
+                <mat-form-field class="built-in-tool-field">
+                  <mat-label>Built-in Tool</mat-label>
+                  <mat-select [(ngModel)]="editingTool.name" (selectionChange)="onBuiltInToolSelectionChange(editingTool)">
+                    @for (tool of builtInTools; track tool) {
+                      <mat-option [value]="tool">{{ tool }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                @if (builtInToolArgs.has(editingTool.name) && editingTool.args?.length) {
+                  <h2 class="tool-args-header">Built-In Tool Arguments</h2>
+                  @if (editingToolArgs()) {
+                    <div class="json-editor-wrapper">
+                      <app-json-editor
+                        [jsonString]="toolArgsString()"
+                      ></app-json-editor>
+                    </div>
+                    <div class="edit-buttons">
+                      <button mat-button (click)="saveToolArgs(editingTool)">Save</button>
+                      <button mat-button (click)="cancelEditToolArgs(editingTool)">Cancel</button>
+                    </div>
+                  } @else {
+                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
+                  }
+                }
               }
-            </ul>
+            </div>
           } @else {
-            <span class="no-tools-message">This agent has no tools</span>
+            @if (agentConfig && agentConfig.tools && agentConfig.tools.length > 0) {
+              <ul>
+                @for (tool of agentConfig.tools; track tool) {
+                  <li (click)="selectTool(tool)" class="tool-name">{{tool.name}}</li>
+                }
+              </ul>
+            } @else {
+              <span class="no-tools-message">This agent has no tools</span>
+            }
           }
         </div>
       </mat-tab>

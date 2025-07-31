@@ -244,6 +244,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     }
 
     // it's leaf node
+    for (const tool of agentNode.tools ?? []) {
+      this.deleteTool(agentNode.name, tool);
+    }
 
     const subAgentNodeId = this.nodes().find(node => node.data && node.data().name === agentNode.name)?.id;
 

@@ -207,12 +207,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: { 
         title: 'Delete Tool',
-        message: `Are you sure you want to delete ${tool.name}?` 
+        message: `Are you sure you want to delete ${tool.name}?`,
+        confirmButtonText: 'Delete'
       },
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result === 'delete') {
+      if (result === 'confirm') {
         this.agentBuilderService.deleteTool(agentName, tool);
       }
     });

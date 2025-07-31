@@ -151,7 +151,7 @@
               <ul>
                 @for (tool of agentConfig.tools; track tool) {
                   <li (click)="selectTool(tool)" class="tool-name">{{tool.name}}
-                    <button mat-icon-button (click)="deleteTool(agentConfig.name, tool)">
+                    <button mat-icon-button (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </li>

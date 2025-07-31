@@ -57,8 +57,6 @@ export class BuilderTabsComponent {
   // Agent configuration options
   isRootAgentEditable: boolean = true;
 
-  creatingNewAgent: boolean = true;
-
   models = [
     "gemini-2.5-flash"
   ];
@@ -144,14 +142,6 @@ export class BuilderTabsComponent {
         this.editingTool = null;
       }
       this.cdr.detectChanges();
-    });
-
-    this.agentBuilderService.getIsCreatingNewAgent().subscribe(newAgent => {
-      if (newAgent) {
-        this.creatingNewAgent = true;
-      } else {
-        this.creatingNewAgent = false;
-      }
     });
 
     this.agentBuilderService.getAgentTools().subscribe(update => {

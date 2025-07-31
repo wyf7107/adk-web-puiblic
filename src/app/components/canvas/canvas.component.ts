@@ -73,26 +73,22 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   ) {}
 
   ngOnInit() {
-    this.agentBuilderService.getIsCreatingNewAgent().subscribe(res => {
-      if (!res) {
-        this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
-          this.existingAgent = agent;
-          this.loadAgent();
-          this.agentBuilderService.getSelectedTool().subscribe(tool => {
-            this.selectedTool = tool;
-          });
-          this.agentBuilderService.getAgentTools().subscribe(update => {
-            if (update) {
-              const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
-              if (node && node.data) {
-                const data = node.data();
-                data.tools = update.tools;
-                node.data.set(data);
-              }
-            }
-          });
-        })
-      }
+    this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
+      this.existingAgent = agent;
+      this.loadAgent();
+      this.agentBuilderService.getSelectedTool().subscribe(tool => {
+        this.selectedTool = tool;
+      });
+      this.agentBuilderService.getAgentTools().subscribe(update => {
+        if (update) {
+          const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
+          if (node && node.data) {
+            const data = node.data();
+            data.tools = update.tools;
+            node.data.set(data);
+          }
+        }
+      });
     })
   }
 

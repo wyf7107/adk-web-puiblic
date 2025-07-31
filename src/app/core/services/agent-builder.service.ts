@@ -11,7 +11,6 @@ export class AgentBuilderService {
   private selectedToolSubject = new BehaviorSubject<any | undefined>(undefined);
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
-  private isCreatingNewAgentSubject = new BehaviorSubject<boolean>(true);
   private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
 
   constructor() { }
@@ -97,14 +96,6 @@ export class AgentBuilderService {
 
   getLoadedAgentData(): Observable<string|undefined> {
     return this.loadedAgentDataSubject.asObservable();
-  }
-
-  setIsCreatingNewAgent(newAgent: boolean) {
-    this.isCreatingNewAgentSubject.next(newAgent);
-  }
-
-  getIsCreatingNewAgent() {
-    return this.isCreatingNewAgentSubject.asObservable();
   }
 
   getAgentTools(): Observable<{ agentName: string, tools: ToolNode[] } | undefined> {

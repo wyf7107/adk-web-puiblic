@@ -228,7 +228,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       .pipe(take(1), filter(node => !!node))
       .subscribe(node => {
         if (!this.agentBuilderService.getNodes().includes(node)) {
-          this.onCustomTemplateNodeClick(parentTemplateNode!);
+          this.agentBuilderService.setSelectedNode(parentNode);
         }
       })
   }

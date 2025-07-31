@@ -52,7 +52,7 @@
               @if (!isRootAgent(ctx.node.data()?.name)) {
                 <button matIconButton class="action-btn add-subagent-btn" (click)="deleteSubAgent(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Add sub-agent"
                   aria-label="Delete sub-agent">
-                  <mat-icon>cancel</mat-icon>
+                  <mat-icon>delete</mat-icon>
                 </button>
               }
             </div>

@@ -140,6 +140,8 @@ export class BuilderTabsComponent {
       if (tool) {
         this.selectTool(tool);
         this.selectedTabIndex = 2;
+      } else {
+        this.editingTool = null;
       }
       this.cdr.detectChanges();
     });

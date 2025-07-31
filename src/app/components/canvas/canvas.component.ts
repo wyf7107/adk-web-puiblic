@@ -78,43 +78,25 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
           this.existingAgent = agent;
           this.loadAgent();
+          this.agentBuilderService.getSelectedTool().subscribe(tool => {
+            this.selectedTool = tool;
+          });
+          this.agentBuilderService.getAgentTools().subscribe(update => {
+            if (update) {
+              const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
+              if (node && node.data) {
+                const data = node.data();
+                data.tools = update.tools;
+                node.data.set(data);
+              }
+            }
+          });
         })
-      } else {
-        this.createRootAgent();
-        this.agentBuilderService.getSelectedTool().subscribe(tool => {
-          this.selectedTool = tool;
-        });
       }
     })
   }
 
   ngAfterViewInit() {
-  }
-
-  createRootAgent() {
-    if (this.nodes().length == 0) {
-      this.nodeId = 1;
-
-      const agentNodeData: AgentNode = {
-          name: 'RootAgent',
-          agent_class: 'LlmAgent',
-          model: 'gemini-2.5-flash',
-          instruction: 'You are the root agent that coordinates other agents.',
-          isRoot: true,
-          sub_agents: [],
-          tools: []
-        };
-
-      const rootNode: HtmlTemplateDynamicNode = {
-        id: 'RootAgent',
-        point: signal({ x: 100, y: 100 }),
-        type: 'html-template',
-        data: signal(agentNodeData)
-      };
-      this.nodes.set([rootNode]);
-
-      this.agentBuilderService.addNode(agentNodeData);
-    }
   }
 
   onCustomTemplateNodeClick(clickedVflowNode: HtmlTemplateDynamicNode) {
@@ -126,6 +108,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
+      this.agentBuilderService.setAgentTools(agentNodeData.name, agentNodeData.tools);
     }
   }
 
@@ -198,14 +181,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     const tool = {
       toolType: 'Custom tool',
-      name: `tool_${this.toolId}`,
+      name: `.tool_${this.toolId}`,
       args: []
     }
     this.toolId++;
-
-    const data = parentNode.data();
-    data.tools.push(tool);
-    parentNode.data.set(data);
+    this.agentBuilderService.addTool(parentNode.data().name, tool);
   }
 
   deleteTool(agentName: string, tool: any) {

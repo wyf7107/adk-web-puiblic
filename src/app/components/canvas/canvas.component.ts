@@ -32,6 +32,7 @@ import * as YAML from 'yaml';
 import { parse } from 'yaml';
 import { firstValueFrom } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
+import { DeleteToolDialogComponent } from './delete-tool-dialog/delete-tool-dialog.component';
 
 
 @Component({
@@ -203,7 +204,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   deleteTool(agentName: string, tool: any) {
-    this.agentBuilderService.deleteTool(agentName, tool);
+    const dialogRef = this.dialog.open(DeleteToolDialogComponent, {
+      data: { toolName: tool.name },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'delete') {
+        this.agentBuilderService.deleteTool(agentName, tool);
+      }
+    });
   }
 
   selectTool(tool: any, node: HtmlTemplateDynamicNode) {

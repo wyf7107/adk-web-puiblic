@@ -114,6 +114,7 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       if (node) {
+        this.editingTool = null;
         this.selectedTabIndex = 0;
         this.header = 'Agent configuration';
         const oldTreeData = this.treeDataSource.value;

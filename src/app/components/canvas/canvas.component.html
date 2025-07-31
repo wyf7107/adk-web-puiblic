@@ -37,7 +37,7 @@
           class="custom-node"
           selectable
           [class.custom-node_selected]="ctx.selected()"
-          (click)="onCustomTemplateNodeClick(ctx.node)"
+          (click)="onCustomTemplateNodeClick(ctx.node, $event)"
         >
           <div class="node-title-wrapper">
             <div class="node-title">
@@ -62,7 +62,7 @@
               <mat-chip-set>
                 @for (tool of ctx.node.data()?.tools; track tool) {
                   <mat-chip
-                    (click)="selectTool(tool); $event.stopPropagation()"
+                    (click)="selectTool(tool, ctx.node)"
                     [class.selected]="tool === selectedTool">
                     {{tool.name}}
                     <button matChipRemove (click)="deleteTool(ctx.node.data()?.name, tool); $event.stopPropagation()">

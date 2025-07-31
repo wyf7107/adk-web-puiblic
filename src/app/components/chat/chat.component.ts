@@ -1379,8 +1379,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }).toString();
     this.location.replaceState(url);
     this.isBuilderMode.set(true);
-    this.agentBuilderService.clear();
-    this.agentBuilderService.setIsCreatingNewAgent(false);
   }
 
   protected exitBuilderMode() {
@@ -1391,7 +1389,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.location.replaceState(url);
     this.isBuilderMode.set(false);
     this.agentBuilderService.clear();
-    this.agentBuilderService.setIsCreatingNewAgent(true);
   }
 
   openAddItemDialog(): void {
@@ -1509,7 +1506,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.router.navigate([], {
           queryParams: { 'app': app },
-          queryParamsHandling: 'merge',
         });
       });
   }

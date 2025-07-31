@@ -1506,7 +1506,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.router.navigate([], {
           queryParams: { 'app': app },
-          queryParamsHandling: 'merge',
         });
       });
   }

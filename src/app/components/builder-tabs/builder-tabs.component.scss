@@ -176,8 +176,16 @@
   line-height: 20px;
   letter-spacing: 0.25px;
 
+  button {
+    visibility: hidden;
+  }
+
   &:hover {
     background-color: #141414;
+
+    button {
+      visibility: visible;
+    }
   }
 }
 

@@ -76,6 +76,7 @@
             <mat-tree-node 
               *matTreeNodeDef="let node;when: hasChild" 
               matTreeNodePadding matTreeNodeToggle
+              [style.padding-left.px]="node.name === agentConfig?.name ? 0 : 40 * node.level"
               [cdkTreeNodeTypeaheadLabel]="node.name">
               <div class="node-item">
                 <mat-icon class="node-icon" fontSet="material-symbols-outlined">robot_2</mat-icon>

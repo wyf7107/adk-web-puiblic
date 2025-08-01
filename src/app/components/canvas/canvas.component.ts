@@ -64,6 +64,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   public edges = signal<Edge[]>([]);
 
+  public selectedAgents: HtmlTemplateDynamicNode[] = [];
+
   public selectedTool: any;
 
   existingAgent: string | undefined = undefined;
@@ -78,6 +80,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
       this.existingAgent = agent;
       this.loadAgent();
+      this.agentBuilderService.getSelectedNode().subscribe(selectedAgentNode => {
+        this.selectedAgents = this.nodes().filter(node => node.data && node.data().name === selectedAgentNode?.name);
+      });
       this.agentBuilderService.getSelectedTool().subscribe(tool => {
         this.selectedTool = tool;
       });
@@ -348,6 +353,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.loadAgentTools(rootAgent);
     await this.loadSubAgents(rootAgent);
     this.agentBuilderService.addNode(rootAgent);
+    this.agentBuilderService.setSelectedNode(rootAgent);
   }
 
   loadAgentTools(agent: AgentNode) {
@@ -361,6 +367,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         }
       })
     }
+  }
+
+  isNodeSelected(node: HtmlTemplateDynamicNode): boolean {
+    return this.selectedAgents.includes(node);
   }
 
   async loadSubAgents(rootAgent: AgentNode) {

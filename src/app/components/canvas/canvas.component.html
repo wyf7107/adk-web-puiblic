@@ -36,7 +36,7 @@
         <div 
           class="custom-node"
           selectable
-          [class.custom-node_selected]="ctx.selected()"
+          [class.custom-node_selected]="ctx.selected() || isNodeSelected(ctx.node)"
           (click)="onCustomTemplateNodeClick(ctx.node, $event)"
         >
           <div class="node-title-wrapper">

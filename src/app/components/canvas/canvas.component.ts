@@ -30,9 +30,10 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
 import { parse } from 'yaml';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { AsyncPipe } from '@angular/common';
 
 
 @Component({
@@ -40,7 +41,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule, AsyncPipe]
 })
 export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
@@ -66,12 +67,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   public selectedTool: any;
 
   existingAgent: string | undefined = undefined;
+  public tools$: Observable<{ agentName: string; tools: ToolNode[]; } | undefined>;
 
   constructor(
     private dialog: MatDialog,
     private agentService: AgentService,
     private router: Router
-  ) {}
+  ) {
+    this.tools$ = this.agentBuilderService.getAgentTools();
+  }
 
   ngOnInit() {
     this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
@@ -79,16 +83,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.loadAgent();
       this.agentBuilderService.getSelectedTool().subscribe(tool => {
         this.selectedTool = tool;
-      });
-      this.agentBuilderService.getAgentTools().subscribe(update => {
-        if (update) {
-          const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
-          if (node && node.data) {
-            const data = node.data();
-            data.tools = update.tools;
-            node.data.set(data);
-          }
-        }
       });
     })
   }

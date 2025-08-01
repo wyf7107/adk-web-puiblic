@@ -19,7 +19,7 @@ import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDe
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { MatTree } from '@angular/material/tree'; // Import MatTree component type
 
 import { MatDialog } from '@angular/material/dialog';
@@ -110,8 +110,10 @@ export class BuilderTabsComponent {
     ['VertexAiSearchTool', ['data_store_id', 'data_store_specs', 'search_engine_id', 'filter', 'max_results']],
   ]);
   protected header = 'Select an agent or tool to edit'
+  public tools$: Observable<{ agentName: string; tools: ToolNode[]; } | undefined>;
 
   constructor(private cdr: ChangeDetectorRef, private dialog: MatDialog) {
+    this.tools$ = this.agentBuilderService.getAgentTools();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       if (node) {
@@ -146,13 +148,6 @@ export class BuilderTabsComponent {
       }
       this.cdr.detectChanges();
     });
-
-    this.agentBuilderService.getAgentTools().subscribe(update => {
-      if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
-        this.agentConfig.tools = update.tools;
-        this.cdr.detectChanges();
-      }
-    });
   }
 
   selectTool(tool: ToolNode) {
@@ -186,10 +181,6 @@ export class BuilderTabsComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
         this.agentBuilderService.deleteTool(agentName, tool);
-        if (this.agentConfig && this.agentConfig.tools) {
-          this.agentConfig.tools = [...this.agentConfig.tools];
-          this.cdr.detectChanges();
-        }
       }
     });
   }

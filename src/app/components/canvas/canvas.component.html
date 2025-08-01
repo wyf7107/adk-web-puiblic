@@ -58,19 +58,21 @@
                 <mat-icon>add</mat-icon>
               </button>
             </div>
-            @if (ctx.node.data()?.tools?.length) {
-              <mat-chip-set>
-                @for (tool of ctx.node.data()?.tools; track tool) {
-                  <mat-chip
-                    (click)="selectTool(tool, ctx.node)"
-                    [class.selected]="tool === selectedTool">
-                    {{tool.name}}
-                    <button matChipRemove (click)="deleteTool(ctx.node.data()?.name, tool); $event.stopPropagation()">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </mat-chip>
-                }
-              </mat-chip-set>
+            @if (tools$ | async; as tools) {
+              @if (tools && tools.agentName === ctx.node.data()?.name && tools.tools.length > 0) {
+                <mat-chip-set>
+                  @for (tool of tools.tools; track tool) {
+                    <mat-chip
+                      (click)="selectTool(tool, ctx.node)"
+                      [class.selected]="tool === selectedTool">
+                      {{tool.name}}
+                      <button matChipRemove (click)="deleteTool(ctx.node.data()?.name, tool); $event.stopPropagation()">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              }
             }
           </div>
           <handle type="target" position="top" />

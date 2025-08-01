@@ -71,7 +71,7 @@ export class AgentBuilderService {
   addTool(agentName: string, tool: ToolNode) {
     const agentNode = this.getNode(agentName);
     if (agentNode && agentNode.tools) {
-      agentNode.tools.push(tool);
+      agentNode.tools.unshift(tool);
       this.agentToolsSubject.next({ agentName, tools: agentNode.tools });
     }
   }

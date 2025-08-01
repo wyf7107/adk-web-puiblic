@@ -147,7 +147,14 @@
               }
             </div>
           } @else {
-            <button mat-stroked-button (click)="addTool()" class="add-tool-button">Add tool</button>
+            <button class="add-tool-button" (click)="addTool()">
+              <div class="add-tool-button-detail">
+                <mat-icon>add</mat-icon>
+                <div class="add-tool-button-text">
+                  Add tool
+                </div>
+              </div>
+            </button>
             @if (agentConfig && agentConfig.tools && agentConfig.tools.length > 0) {
               <ul class="tools-list">
                 @for (tool of agentConfig.tools; track tool) {

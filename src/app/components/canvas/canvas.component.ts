@@ -67,16 +67,17 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   public selectedTool: any;
 
   existingAgent: string | undefined = undefined;
-  public tools$: Observable<{ agentName: string; tools: ToolNode[]; } | undefined>;
+  public toolsMap$: Observable<Map<string, ToolNode[]>>;
 
   constructor(
     private dialog: MatDialog,
     private agentService: AgentService,
     private router: Router
   ) {
-    this.tools$ = this.agentBuilderService.getAgentTools();
+    this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
+      this.cdr.detectChanges();
     });
   }
 
@@ -110,10 +111,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
-      this.agentBuilderService.setAgentTools(
-        agentNodeData.name,
-        agentNodeData.tools,
-      );
     }
   }
 

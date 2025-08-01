@@ -11,7 +11,7 @@ export class AgentBuilderService {
   private selectedToolSubject = new BehaviorSubject<any | undefined>(undefined);
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
-  private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
+  private agentToolsMapSubject = new BehaviorSubject<Map<string, ToolNode[]>>(new Map());
 
   constructor() { }
 
@@ -37,7 +37,10 @@ export class AgentBuilderService {
    */
   addNode(newNode: AgentNode): void {
     this.nodes.push(newNode);
-
+    const currentMap = this.agentToolsMapSubject.value;
+    const newMap = new Map(currentMap);
+    newMap.set(newNode.name, newNode.tools || []);
+    this.agentToolsMapSubject.next(newMap);
     this.setSelectedNode(this.selectedNodeSubject.value);
   }
 
@@ -49,7 +52,7 @@ export class AgentBuilderService {
     this.nodes = [];
     this.setSelectedNode(undefined);
     this.setSelectedTool(undefined);
-    this.setAgentTools();
+    this.agentToolsMapSubject.next(new Map());
   }
 
   getSelectedNode(): Observable<AgentNode|undefined> {
@@ -70,19 +73,29 @@ export class AgentBuilderService {
 
   addTool(agentName: string, tool: ToolNode) {
     const agentNode = this.getNode(agentName);
-    if (agentNode && agentNode.tools) {
-      agentNode.tools.unshift(tool);
-      this.agentToolsSubject.next({ agentName, tools: agentNode.tools });
+    if (agentNode) {
+      const oldTools = agentNode.tools || [];
+      agentNode.tools = [tool, ...oldTools];
+
+      const currentMap = this.agentToolsMapSubject.value;
+      const newMap = new Map(currentMap);
+      newMap.set(agentName, agentNode.tools);
+      this.agentToolsMapSubject.next(newMap);
     }
   }
 
   deleteTool(agentName: string, toolToDelete: ToolNode) {
     const agentNode = this.getNode(agentName);
     if (agentNode && agentNode.tools) {
-      const toolIndex = agentNode.tools.findIndex(tool => tool.name === toolToDelete.name);
-      if (toolIndex > -1) {
-        agentNode.tools.splice(toolIndex, 1);
-        this.agentToolsSubject.next({ agentName, tools: agentNode.tools });
+      const originalLength = agentNode.tools.length;
+      agentNode.tools = agentNode.tools.filter(t => t.name !== toolToDelete.name);
+
+      if (agentNode.tools.length < originalLength) {
+        const currentMap = this.agentToolsMapSubject.value;
+        const newMap = new Map(currentMap);
+        newMap.set(agentName, agentNode.tools);
+        this.agentToolsMapSubject.next(newMap);
+
         if (this.selectedToolSubject.value?.name === toolToDelete.name) {
           this.setSelectedTool(undefined);
         }
@@ -98,15 +111,7 @@ export class AgentBuilderService {
     return this.loadedAgentDataSubject.asObservable();
   }
 
-  getAgentTools(): Observable<{ agentName: string, tools: ToolNode[] } | undefined> {
-    return this.agentToolsSubject.asObservable();
-  }
-
-  setAgentTools(agentName?: string, tools?: ToolNode[]) {
-    if (agentName && tools) {
-      this.agentToolsSubject.next({ agentName, tools });
-    } else {
-      this.agentToolsSubject.next(undefined);
-    }
+  getAgentToolsMap(): Observable<Map<string, ToolNode[]>> {
+    return this.agentToolsMapSubject.asObservable();
   }
 }

@@ -155,12 +155,12 @@
                 </div>
               </div>
             </button>
-            @if (tools$ | async; as tools) {
-              @if (tools && tools.agentName === agentConfig?.name && tools.tools.length > 0) {
+            @if (toolsMap$ | async; as toolsMap) {
+              @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
                 <ul class="tools-list">
-                  @for (tool of tools.tools; track tool) {
+                  @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
                     <li (click)="selectTool(tool)" class="tool-name">{{tool.name}}
-                      <button mat-icon-button (click)="deleteTool(agentConfig!.name, tool); $event.stopPropagation()">
+                      <button mat-icon-button (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()">
                         <mat-icon>delete</mat-icon>
                       </button>
                     </li>

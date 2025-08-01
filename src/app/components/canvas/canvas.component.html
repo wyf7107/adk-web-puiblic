@@ -58,10 +58,10 @@
                 <mat-icon>add</mat-icon>
               </button>
             </div>
-            @if (tools$ | async; as tools) {
-              @if (tools && tools.agentName === ctx.node.data()?.name && tools.tools.length > 0) {
+            @if (toolsMap$ | async; as toolsMap) {
+              @if (toolsMap.get(ctx.node.data()?.name)?.length) {
                 <mat-chip-set>
-                  @for (tool of tools.tools; track tool) {
+                  @for (tool of toolsMap.get(ctx.node.data()?.name); track tool) {
                     <mat-chip
                       (click)="selectTool(tool, ctx.node)"
                       [class.selected]="tool === selectedTool">

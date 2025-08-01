@@ -110,10 +110,10 @@ export class BuilderTabsComponent {
     ['VertexAiSearchTool', ['data_store_id', 'data_store_specs', 'search_engine_id', 'filter', 'max_results']],
   ]);
   protected header = 'Select an agent or tool to edit'
-  public tools$: Observable<{ agentName: string; tools: ToolNode[]; } | undefined>;
+  public toolsMap$: Observable<Map<string, ToolNode[]>>;
 
   constructor(private cdr: ChangeDetectorRef, private dialog: MatDialog) {
-    this.tools$ = this.agentBuilderService.getAgentTools();
+    this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       if (node) {

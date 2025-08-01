@@ -177,7 +177,6 @@ export class BuilderTabsComponent {
       },
     });
 
-    // TODO fix this change detection, it looks silly
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
         this.agentBuilderService.deleteTool(agentName, tool);

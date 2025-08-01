@@ -110,10 +110,12 @@ export class BuilderTabsComponent {
 
   constructor(private cdr: ChangeDetectorRef) {
     this.agentBuilderService.getSelectedNode().subscribe(node => {
+      if (this.agentConfig?.name !== node?.name) {
+        this.selectedTabIndex = 0;
+      }
       this.agentConfig = node;
       if (node) {
         this.editingTool = null;
-        this.selectedTabIndex = 0;
         this.header = 'Agent configuration';
         const oldTreeData = this.treeDataSource.value;
         this.treeDataSource.next([]);

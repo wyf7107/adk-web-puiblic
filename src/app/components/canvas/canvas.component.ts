@@ -216,6 +216,22 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       }
     });
   }
+
+  openDeleteSubAgentDialog(agentName: string) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: 'Delete sub agent',
+        message: `Are you sure you want to delete ${agentName}? This will also delete all the underlying sub agents and tools.`,
+        confirmButtonText: 'Delete'
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        this.deleteSubAgent(agentName);
+      }
+    });
+  }
   
   deleteSubAgent(agentName: string) {
     const currentNode: AgentNode|undefined = this.agentBuilderService.getNode(agentName);

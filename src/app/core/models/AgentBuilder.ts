@@ -23,7 +23,7 @@ export interface AgentNode {
     instruction: string;
     sub_agents: AgentNode[];
     tools?: ToolNode[];
-    config?: string;
+    config_path?: string;
 }
 
 export interface ToolNode {

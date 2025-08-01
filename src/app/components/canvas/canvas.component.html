@@ -67,7 +67,7 @@
                       [class.selected]="tool === selectedTool">
                       {{tool.name}}
                       <button matChipRemove (click)="deleteTool(ctx.node.data()?.name, tool); $event.stopPropagation()">
-                        <mat-icon>delete</mat-icon>
+                        <mat-icon>cancel</mat-icon>
                       </button>
                     </mat-chip>
                   }

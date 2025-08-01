@@ -75,15 +75,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     private router: Router
   ) {
     this.tools$ = this.agentBuilderService.getAgentTools();
+    this.agentBuilderService.getSelectedTool().subscribe(tool => {
+      this.selectedTool = tool;
+    });
   }
 
   ngOnInit() {
     this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
       this.existingAgent = agent;
       this.loadAgent();
-      this.agentBuilderService.getSelectedTool().subscribe(tool => {
-        this.selectedTool = tool;
-      });
     })
   }
 

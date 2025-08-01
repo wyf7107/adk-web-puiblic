@@ -141,7 +141,9 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
       if (tool) {
-        this.selectTool(tool);
+        this.editingTool = tool;
+        this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
+        this.editingToolArgs.set(!!this.editingTool.args?.length);
         this.selectedTabIndex = 2;
       } else {
         this.editingTool = null;
@@ -151,9 +153,7 @@ export class BuilderTabsComponent {
   }
 
   selectTool(tool: ToolNode) {
-    this.editingTool = tool;
-    this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
-    this.editingToolArgs.set(!!this.editingTool.args?.length);
+    this.agentBuilderService.setSelectedTool(tool);
   }
 
   addTool() {

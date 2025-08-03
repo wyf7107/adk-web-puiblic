@@ -16,7 +16,7 @@
  */
 
 import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
-import { DiagramConnection, AgentNode, ToolNode, YamlConfig } from '../../core/models/AgentBuilder';
+import { DiagramConnection, AgentNode, ToolNode, CallbackNode, YamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -59,6 +59,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   nodeId = 1;
   edgeId = 1;
   toolId = 1;
+  callbackId = 1;
 
   public nodes = signal<HtmlTemplateDynamicNode[]>([]);
 
@@ -67,6 +68,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   public selectedAgents: HtmlTemplateDynamicNode[] = [];
 
   public selectedTool: any;
+  public selectedCallback: any;
 
   existingAgent: string | undefined = undefined;
 
@@ -86,12 +88,25 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.agentBuilderService.getSelectedTool().subscribe(tool => {
         this.selectedTool = tool;
       });
+      this.agentBuilderService.getSelectedCallback().subscribe(callback => {
+        this.selectedCallback = callback;
+      });
       this.agentBuilderService.getAgentTools().subscribe(update => {
         if (update) {
           const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
           if (node && node.data) {
             const data = node.data();
             data.tools = update.tools;
+            node.data.set(data);
+          }
+        }
+      });
+      this.agentBuilderService.getAgentCallbacks().subscribe(update => {
+        if (update) {
+          const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
+          if (node && node.data) {
+            const data = node.data();
+            data.callbacks = update.callbacks;
             node.data.set(data);
           }
         }
@@ -205,6 +220,29 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.addTool(parentNode.data().name, tool);
   }
 
+  addCallback(parentNodeId: string) {
+    // Find the parent node
+    const parentNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
+    if (!parentNode) return;
+    if (!parentNode.data) return;
+
+    const callback = {
+      name: `callback_${this.callbackId}`,
+      type: 'before_agent' as const,
+      code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
+      description: 'Auto-generated callback'
+    }
+    this.callbackId++;
+    
+    const result = this.agentBuilderService.addCallback(parentNode.data().name, callback);
+    if (!result.success) {
+      this._snackBar.open(result.error || 'Failed to add callback', 'Close', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+    }
+  }
+
   deleteTool(agentName: string, tool: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: { 
@@ -217,6 +255,29 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
         this.agentBuilderService.deleteTool(agentName, tool);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  deleteCallback(agentName: string, callback: any) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: 'Delete Callback',
+        message: `Are you sure you want to delete ${callback.name}?`,
+        confirmButtonText: 'Delete'
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        const deleteResult = this.agentBuilderService.deleteCallback(agentName, callback);
+        if (!deleteResult.success) {
+          this._snackBar.open(deleteResult.error || 'Failed to delete callback', 'Close', {
+            duration: 3000,
+            panelClass: ['error-snackbar']
+          });
+        }
         this.cdr.detectChanges();
       }
     });
@@ -306,6 +367,16 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       }
     }
     this.agentBuilderService.setSelectedTool(tool);
+  }
+
+  selectCallback(callback: any, node: HtmlTemplateDynamicNode) {
+    if (node.data) {
+      const agentNodeData = this.agentBuilderService.getNode(node.data().name);
+      if (agentNodeData) {
+        this.agentBuilderService.setSelectedNode(agentNodeData);
+      }
+    }
+    this.agentBuilderService.setSelectedCallback(callback);
   }
 
   saveAgent(appName: string) {

@@ -16,7 +16,7 @@
  */
 
 import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
+import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject } from 'rxjs';
@@ -30,6 +30,8 @@ import { MatTree } from '@angular/material/tree'; // Import MatTree component ty
   standalone: false
 })
 export class BuilderTabsComponent {
+  // Tab indices
+  private readonly CALLBACKS_TAB_INDEX = 3;
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
   @ViewChild(MatTree) matTree!: MatTree<AgentNode>;
   protected toolArgsString = signal('');
@@ -45,7 +47,8 @@ export class BuilderTabsComponent {
     model: '',
     instruction: '',
     sub_agents: [],
-    tools: []
+    tools: [],
+    callbacks: []
   };
 
   treeDataSource = new BehaviorSubject<AgentNode[]>([]);
@@ -75,6 +78,18 @@ export class BuilderTabsComponent {
   protected toolTypes = [
     'Custom tool',
     'Built-in tool'
+  ];
+
+  // Callback-related properties
+  public editingCallback: CallbackNode | null = null;
+  public selectedCallback: CallbackNode | undefined = undefined;
+  public callbackTypes = [
+    'before_agent',
+    'after_agent',
+    'before_model',
+    'after_model',
+    'before_tool',
+    'after_tool'
   ];
   protected builtInTools = [
     'EnterpriseWebSearchTool',
@@ -116,6 +131,7 @@ export class BuilderTabsComponent {
       this.agentConfig = node;
       if (node) {
         this.editingTool = null;
+        this.editingCallback = null;
         this.header = 'Agent configuration';
         const oldTreeData = this.treeDataSource.value;
         this.treeDataSource.next([]);
@@ -149,6 +165,24 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getAgentTools().subscribe(update => {
       if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
         this.agentConfig.tools = update.tools;
+        this.cdr.detectChanges();
+      }
+    });
+
+    this.agentBuilderService.getSelectedCallback().subscribe(callback => {
+      this.selectedCallback = callback;
+      if (callback) {
+        this.selectCallback(callback);
+        this.selectedTabIndex = this.CALLBACKS_TAB_INDEX;
+      } else {
+        this.editingCallback = null;
+      }
+      this.cdr.detectChanges();
+    });
+
+    this.agentBuilderService.getAgentCallbacks().subscribe(update => {
+      if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
+        this.agentConfig.callbacks = update.callbacks;
         this.cdr.detectChanges();
       }
     });
@@ -211,6 +245,21 @@ export class BuilderTabsComponent {
         }
       }
       this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
+    }
+  }
+
+  selectCallback(callback: CallbackNode) {
+    this.editingCallback = callback;
+  }
+  
+  backToCallbackList() {
+    this.editingCallback = null;
+  }
+
+  onCallbackTypeChange(callback: CallbackNode | undefined | null) {
+    if (callback) {
+      // Type is already set by the select binding
+      // Additional logic can be added here if needed
     }
   }
 

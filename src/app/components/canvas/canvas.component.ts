@@ -480,6 +480,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         toolNode.name = agentName; // Use the actual agent name
         toolNode.toolAgentName = agentName;
       }
+
+      if (tool.args) {
+        toolNode.args = tool.args;
+      }
       
       return toolNode;
     });

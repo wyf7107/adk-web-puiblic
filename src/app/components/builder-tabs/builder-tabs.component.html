@@ -126,7 +126,15 @@
                   </mat-select>
                 </mat-form-field>
                 @if (builtInToolArgs.has(editingTool.name) && editingTool.args?.length) {
-                  <h2 class="tool-args-header">Built-In Tool Arguments</h2>
+                  <h2 class="tool-args-header">
+                    Built-In Tool Arguments
+                    <mat-icon
+                      class="help-icon"
+                      matTooltip="For information about supported built-in tools and their arguments, visit https://google.github.io/adk-docs/tools/built-in-tools/"
+                      fontSet="material-symbols-outlined">
+                      help_outline
+                    </mat-icon>
+                  </h2>
                   @if (editingToolArgs()) {
                     <div class="json-editor-wrapper">
                       <app-json-editor

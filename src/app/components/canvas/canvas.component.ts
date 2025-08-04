@@ -139,6 +139,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         }
       }
     });
+    
+    this.agentBuilderService.getDeleteSubAgentSubject().subscribe((agentName) => {
+      if (!agentName) {
+        return ;
+      }   
+      this.openDeleteSubAgentDialog(agentName);
+    });
   }
 
   ngAfterViewInit() {
@@ -444,6 +451,15 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     }
     this.agentBuilderService.setSelectedCallback(callback);
   }
+  openToolsTab(node: HtmlTemplateDynamicNode) {
+    if (node.data) {
+      const agentNodeData = this.agentBuilderService.getNode(node.data().name);
+      if (agentNodeData) {
+        this.agentBuilderService.setSelectedNode(agentNodeData);
+      }
+    }
+    this.agentBuilderService.requestSideTabChange('tools');
+  }
 
   saveAgent(appName: string) {
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getRootNode();
@@ -560,6 +576,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         const agentName = configPath.replace('./', '').replace('.yaml', '');
         toolNode.name = agentName; // Use the actual agent name
         toolNode.toolAgentName = agentName;
+      }
+
+      if (tool.args) {
+        toolNode.args = tool.args;
       }
       
       return toolNode;

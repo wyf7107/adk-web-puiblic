@@ -196,6 +196,11 @@ export class BuilderTabsComponent {
         this.cdr.detectChanges();
       }
     });
+    this.agentBuilderService.getSideTabChangeRequest().subscribe(tabName => {
+      if (tabName === 'tools') {
+        this.selectedTabIndex = 2;
+      }
+    });
   }
 
   selectTool(tool: ToolNode) {
@@ -250,6 +255,10 @@ export class BuilderTabsComponent {
         }
       }
     });
+  }
+
+  deleteSubAgent(agentName: string) {
+    this.agentBuilderService.setDeleteSubAgentSubject(agentName);
   }
 
   deleteTool(agentName: string, tool: any) {
@@ -328,17 +337,23 @@ export class BuilderTabsComponent {
 
   onBuiltInToolSelectionChange(tool: ToolNode | undefined | null) {
     if (tool) {
-      tool.args = [];
-      const argNames = this.builtInToolArgs.get(tool.name);
-      if (argNames) {
-        for (const argName of argNames) {
-          tool.args.push({name: argName, value: ''});
+      // Force re-initialization of the JSON editor by toggling the signal
+      this.editingToolArgs.set(false);
+
+      setTimeout(() => {
+        tool.args = [];
+        const argNames = this.builtInToolArgs.get(tool.name);
+        if (argNames) {
+          for (const argName of argNames) {
+            tool.args.push({ name: argName, value: '' });
+          }
         }
+        this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
         if (tool.args.length > 0) {
           this.editingToolArgs.set(true);
         }
-      }
-      this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
+        this.cdr.markForCheck();
+      });
     }
   }
 

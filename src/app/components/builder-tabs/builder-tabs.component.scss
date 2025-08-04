@@ -189,6 +189,15 @@
   }
 }
 
+.tool-list-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px; /* Add some space between text and delete button */
+}
+
 .back-button {
   margin-bottom: 16px;
 }

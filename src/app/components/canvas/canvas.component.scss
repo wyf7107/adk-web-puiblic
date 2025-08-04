@@ -411,6 +411,7 @@
   border-radius: 8px;
   align-items: center;
   position: relative;
+  max-height: 245px;
 
   &:hover {
     border-color: #666;
@@ -604,6 +605,15 @@ mat-chip {
   &.selected {
     outline: 1px solid #1976d2;
   }
+}
+
+.tool-name-label {
+  display: inline-block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .open-panel-btn {

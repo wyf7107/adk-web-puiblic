@@ -145,6 +145,14 @@
                     <button mat-button (click)="editToolArgs()">Edit tool args</button>
                   }
                 }
+              } @else if (editingTool.toolType === 'Agent Tool') {
+                <div class="agent-tool-section">
+                  <h3>Agent as Tool Configuration</h3>
+                  <p>Create an agent that can be used as a tool by other agents.</p>
+                  <button mat-raised-button color="primary" class="create-agent-tool-btn" (click)="createAgentTool()">
+                    Create an agent as tool
+                  </button>
+                </div>
               }
             </div>
           } @else {

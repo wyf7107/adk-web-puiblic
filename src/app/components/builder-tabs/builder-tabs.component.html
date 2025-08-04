@@ -153,7 +153,8 @@
               @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
                 <ul class="tools-list">
                   @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
-                    <li (click)="selectTool(tool)" class="tool-name">{{tool.name}}
+                    <li (click)="selectTool(tool)" class="tool-name">
+                      <span class="tool-list-item-name">{{tool.name}}</span>
                       <button mat-icon-button (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()">
                         <mat-icon>delete</mat-icon>
                       </button>

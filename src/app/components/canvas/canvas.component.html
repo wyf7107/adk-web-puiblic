@@ -83,7 +83,7 @@
                         <mat-chip
                           (click)="selectTool(tool, ctx.node)"
                           [class.selected]="tool === selectedTool">
-                          {{tool.name}}
+                          <span class="tool-name-label">{{tool.name}}</span>
                           <button matChipRemove (click)="deleteTool(ctx.node.data().name, tool); $event.stopPropagation()">
                             <mat-icon>cancel</mat-icon>
                           </button>

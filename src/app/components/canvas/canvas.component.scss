@@ -554,14 +554,18 @@
 }
 
 mat-chip {
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
   &.selected {
     outline: 1px solid #1976d2;
   }
+}
+
+.tool-name-label {
+  display: inline-block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .open-panel-btn {

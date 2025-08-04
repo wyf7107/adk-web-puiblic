@@ -86,7 +86,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
-      this.cdr.detectChanges();
     });
   }
 
@@ -253,7 +252,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           // Regular tool deletion
           this.agentBuilderService.deleteTool(agentName, tool);
         }
-        this.cdr.detectChanges();
       }
     });
   }

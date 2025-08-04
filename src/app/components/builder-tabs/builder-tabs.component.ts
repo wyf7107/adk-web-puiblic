@@ -21,6 +21,9 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatTree } from '@angular/material/tree'; // Import MatTree component type
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
+
 
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
@@ -35,6 +38,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
 export class BuilderTabsComponent {
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
   @ViewChild(MatTree) matTree!: MatTree<AgentNode>;
+
   protected toolArgsString = signal('');
   editingToolArgs = signal(false);
   public editingTool: ToolNode | null = null;
@@ -72,12 +76,14 @@ export class BuilderTabsComponent {
   ];
 
   private agentBuilderService = inject(AgentBuilderService);
+  private dialog = inject(MatDialog);
   
   protected selectedTool: ToolNode | undefined = undefined;
-  protected toolCode: string = '';
+  protected toolAgentName: string = '';
   protected toolTypes = [
     'Custom tool',
-    'Built-in tool'
+    'Built-in tool',
+    'Agent Tool'
   ];
   protected builtInTools = [
     'EnterpriseWebSearchTool',
@@ -115,10 +121,12 @@ export class BuilderTabsComponent {
   constructor(private cdr: ChangeDetectorRef, private dialog: MatDialog) {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
+      if (this.agentConfig?.name !== node?.name) {
+        this.selectedTabIndex = 0;
+      }
       this.agentConfig = node;
       if (node) {
         this.editingTool = null;
-        this.selectedTabIndex = 0;
         this.header = 'Agent configuration';
         const oldTreeData = this.treeDataSource.value;
         this.treeDataSource.next([]);
@@ -154,6 +162,20 @@ export class BuilderTabsComponent {
 
   selectTool(tool: ToolNode) {
     this.agentBuilderService.setSelectedTool(tool);
+
+    // this part is incoming change
+    // Check if this is an agent tool
+    // if (tool.toolType === 'Agent Tool') {
+    //   // Switch to the corresponding agent tool tab
+    //   const agentToolName = tool.name;
+    //   this.agentBuilderService.requestTabSwitch(agentToolName);
+    //   return;
+    // }
+    
+    // // Default behavior for regular tools
+    // this.editingTool = tool;
+    // this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
+    // this.editingToolArgs.set(!!this.editingTool.args?.length);
   }
 
   addTool() {
@@ -240,5 +262,33 @@ export class BuilderTabsComponent {
 
   trackByFn(index: number, node: AgentNode): string {
     return node.name;
+  }
+
+  createAgentTool() {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Create Agent Tool',
+        message: 'Please enter a name for the agent tool:',
+        confirmButtonText: 'Create',
+        showInput: true,
+        inputLabel: 'Agent Tool Name',
+        inputPlaceholder: 'Enter agent tool name'
+      } as ConfirmationDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && typeof result === 'string') {
+        // Determine the correct agent name for tab storage
+        let currentAgentName = this.agentConfig?.name || 'root_agent';
+        
+        // If we're in the root agent tab, use 'root_agent' as the key
+        if (this.agentConfig?.isRoot) {
+          currentAgentName = 'root_agent';
+        }
+        
+        this.agentBuilderService.requestNewTab(result, currentAgentName);
+      }
+    });
   }
 }

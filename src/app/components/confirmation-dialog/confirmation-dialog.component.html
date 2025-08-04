@@ -17,8 +17,26 @@
 <h2 mat-dialog-title>{{ data.title }}</h2>
 <mat-dialog-content>
   <p>{{ data.message }}</p>
+  @if (data.showInput) {
+    <mat-form-field style="width: 100%; margin-top: 16px;">
+      <mat-label>{{ data.inputLabel || 'Input' }}</mat-label>
+      <input 
+        matInput 
+        [(ngModel)]="inputValue" 
+        [placeholder]="data.inputPlaceholder || 'Enter value'"
+        (keydown)="onKeyDown($event)"
+        cdkFocusInitial>
+    </mat-form-field>
+  }
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
-  <button mat-button color="warn" [mat-dialog-close]="'confirm'" cdkFocusInitial>{{ data.confirmButtonText || 'Confirm' }}</button>
+  <button 
+    mat-button 
+    color="primary" 
+    (click)="onConfirm()" 
+    [disabled]="data.showInput && !inputValue.trim()"
+    cdkFocusInitial>
+    {{ data.confirmButtonText || 'Confirm' }}
+  </button>
 </mat-dialog-actions>

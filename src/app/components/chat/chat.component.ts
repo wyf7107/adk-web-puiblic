@@ -1379,6 +1379,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }).toString();
     this.location.replaceState(url);
     this.isBuilderMode.set(true);
+    
+    // Load existing agent configuration if app is selected
+    if (this.appName) {
+      this.loadExistingAgentConfiguration();
+    }
+  }
+
+  private loadExistingAgentConfiguration() {
+    this.agentService.getAgentBuilder(this.appName).subscribe({
+      next: (yamlContent: string) => {
+        if (yamlContent) {
+          this.canvasComponent.loadFromYaml(yamlContent, this.appName);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading agent configuration:', error);
+        this._snackBar.open('Error loading agent configuration', 'OK');
+      }
+    });
   }
 
   protected exitBuilderMode() {
@@ -1506,7 +1525,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.router.navigate([], {
           queryParams: { 'app': app },
-          queryParamsHandling: 'merge',
         });
       });
   }

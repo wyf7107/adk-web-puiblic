@@ -12,6 +12,8 @@ export class AgentBuilderService {
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
   private agentToolsMapSubject = new BehaviorSubject<Map<string, ToolNode[]>>(new Map());
+  private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
+  private newTabSubject = new BehaviorSubject<{tabName: string, currentAgentName?: string}|undefined>(undefined);
 
   constructor() { }
 
@@ -113,5 +115,54 @@ export class AgentBuilderService {
 
   getAgentToolsMap(): Observable<Map<string, ToolNode[]>> {
     return this.agentToolsMapSubject.asObservable();
+  }
+
+  requestNewTab(tabName: string, currentAgentName?: string) {
+    this.newTabSubject.next({tabName, currentAgentName});
+  }
+
+  requestTabSwitch(tabName: string) {
+    this.newTabSubject.next({tabName});
+  }
+
+  getNewTabRequest(): Observable<{tabName: string, currentAgentName?: string}|undefined> {
+    return this.newTabSubject.asObservable();
+  }
+
+  getAgentTools(): Observable<{ agentName: string, tools: ToolNode[] } | undefined> {
+    return this.agentToolsSubject.asObservable();
+  }
+
+  setAgentTools(agentName?: string, tools?: ToolNode[]) {
+    if (agentName && tools) {
+      this.agentToolsSubject.next({ agentName, tools });
+    } else {
+      this.agentToolsSubject.next(undefined);
+    }
+  }
+
+  getParentNode(current: AgentNode|undefined, target: AgentNode, parent: AgentNode|undefined): AgentNode|undefined {
+    if (!current) {
+        return undefined;
+    }
+    
+    if (current.name === target.name) {
+        return parent;
+    }
+
+    for (const subNode of current.sub_agents) {
+        const foundParent = this.getParentNode(subNode, target, current);
+        if (foundParent) {
+            return foundParent;
+        }
+    }
+
+    return undefined;
+  }
+
+  deleteNode(agentNode: AgentNode) {
+    this.nodes = this.nodes.filter(node => node.name !== agentNode.name);
+
+    this.setSelectedNode(this.selectedNodeSubject.value);
   }
 }

@@ -55,7 +55,7 @@
               {{ctx.node.data()?.name || 'root_agent'}}
             </div>
             <div class="action-button-bar">
-              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id, $event); $event.stopPropagation()" matTooltip="Add sub-agent"
+              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Add sub-agent"
                 aria-label="Add sub-agent">
                 <mat-icon>smart_toy</mat-icon>
               </button>

@@ -67,6 +67,14 @@
         <ng-template mat-tab-label>
           <span class="tab-label">Sub agents</span>
         </ng-template>
+        <button class="add-tool-button" (click)="addSubAgent(agentConfig?.name)">
+          <div class="add-tool-button-detail">
+            <mat-icon>add</mat-icon>
+            <div class="add-tool-button-text">
+              Add sub agent
+            </div>
+          </div>
+        </button>
         @if (agentConfig && agentConfig.sub_agents.length > 0) {
           <ul class="tools-list">
             @for (subAgent of agentConfig.sub_agents; track subAgent) {

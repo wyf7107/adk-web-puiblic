@@ -182,6 +182,10 @@ export class BuilderTabsComponent {
     }
   }
 
+  addSubAgent(parentAgentName: string|undefined) {
+    this.agentBuilderService.setAddSubAgentSubject(parentAgentName ?? '');
+  }
+
   deleteSubAgent(agentName: string) {
     this.agentBuilderService.setDeleteSubAgentSubject(agentName);
   }

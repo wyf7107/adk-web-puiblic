@@ -15,6 +15,7 @@ export class AgentBuilderService {
   private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
   private newTabSubject = new BehaviorSubject<{tabName: string, currentAgentName?: string}|undefined>(undefined);
   private deleteSubAgentSubject = new BehaviorSubject<string>('');
+  private addSubAgentSubject = new BehaviorSubject<string>('');
   private tabChangeSubject = new BehaviorSubject<string|undefined>(undefined);
 
   constructor() { }
@@ -149,6 +150,14 @@ export class AgentBuilderService {
 
   setDeleteSubAgentSubject(agentName: string) {
     this.deleteSubAgentSubject.next(agentName);
+  }
+
+  getAddSubAgentSubject(): Observable<string> {
+    return this.addSubAgentSubject.asObservable();
+  }
+
+  setAddSubAgentSubject(agentName: string) {
+    this.addSubAgentSubject.next(agentName);
   }
 
   setAgentTools(agentName?: string, tools?: ToolNode[]) {

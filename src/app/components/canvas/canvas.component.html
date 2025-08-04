@@ -16,6 +16,16 @@
 
 <div class="canvas-container">
   <div class="canvas-workspace">
+    <!-- Tab Navigation - Overlay -->
+    <div class="canvas-tabs-overlay">
+      <mat-button-toggle-group [value]="selectedTab()" (change)="selectTab($event.value)">
+        @for (tab of availableTabs(); track tab) {
+          <mat-button-toggle [value]="tab">
+            {{tab === 'root_agent' ? 'Root Agent' : tab}}
+          </mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+    </div>
     @if (!showSidePanel) {
       <span
         class="material-symbols-outlined open-panel-btn"

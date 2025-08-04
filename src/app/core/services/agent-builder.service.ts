@@ -12,6 +12,7 @@ export class AgentBuilderService {
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
   private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
+  private newTabSubject = new BehaviorSubject<{tabName: string, currentAgentName?: string}|undefined>(undefined);
 
   constructor() { }
 
@@ -96,6 +97,18 @@ export class AgentBuilderService {
 
   getLoadedAgentData(): Observable<string|undefined> {
     return this.loadedAgentDataSubject.asObservable();
+  }
+
+  requestNewTab(tabName: string, currentAgentName?: string) {
+    this.newTabSubject.next({tabName, currentAgentName});
+  }
+
+  requestTabSwitch(tabName: string) {
+    this.newTabSubject.next({tabName});
+  }
+
+  getNewTabRequest(): Observable<{tabName: string, currentAgentName?: string}|undefined> {
+    return this.newTabSubject.asObservable();
   }
 
   getAgentTools(): Observable<{ agentName: string, tools: ToolNode[] } | undefined> {

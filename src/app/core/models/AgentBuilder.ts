@@ -29,7 +29,7 @@ export interface AgentNode {
 export interface ToolNode {
     name: string;
     toolType: string;
-    toolCode?: string;
+    toolAgentName?: string;
     args?: ToolArg[];
 }
 

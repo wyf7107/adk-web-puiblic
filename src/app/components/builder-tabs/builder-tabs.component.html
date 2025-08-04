@@ -168,6 +168,55 @@
           }
         </div>
       </mat-tab>
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Callbacks</span>
+        </ng-template>
+        <div class="tab-content-container">
+          @if (editingCallback) {
+            <button mat-icon-button (click)="backToCallbackList()" class="back-button">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div class="config-form">
+              <mat-form-field class="callback-type-field">
+                <mat-label>Callback Type</mat-label>
+                <mat-select [(ngModel)]="editingCallback.type" (selectionChange)="onCallbackTypeChange(editingCallback)">
+                  @for (type of callbackTypes; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field class="callback-name-field">
+                <mat-label>Callback Name</mat-label>
+                <input matInput [(ngModel)]="editingCallback.name" />
+              </mat-form-field>
+            </div>
+          } @else {
+            <button class="add-tool-button" (click)="addCallback()">
+              <div class="add-tool-button-detail">
+                <mat-icon>add</mat-icon>
+                <div class="add-tool-button-text">
+                  Add callback
+                </div>
+              </div>
+            </button>
+            @if (agentConfig && agentConfig.callbacks && agentConfig.callbacks.length > 0) {
+              <ul class="tools-list">
+                @for (callback of agentConfig.callbacks; track callback) {
+                  <li (click)="selectCallback(callback)" class="tool-name">{{callback.name}} ({{callback.type}})
+                    <button mat-icon-button (click)="deleteCallback(agentConfig.name, callback); $event.stopPropagation()">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <div class="no-tools-message">This agent has no callbacks</div>
+            }
+          }
+        </div>
+      </mat-tab>
     </mat-tab-group>
   </div>
 </div>

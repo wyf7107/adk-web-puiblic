@@ -24,10 +24,6 @@ import { MatTree } from '@angular/material/tree'; // Import MatTree component ty
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 
-
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-
 @Component({
   selector: 'app-builder-tabs',
   templateUrl: './builder-tabs.component.html',
@@ -118,7 +114,7 @@ export class BuilderTabsComponent {
   protected header = 'Select an agent or tool to edit'
   public toolsMap$: Observable<Map<string, ToolNode[]>>;
 
-  constructor(private cdr: ChangeDetectorRef, private dialog: MatDialog) {
+  constructor(private cdr: ChangeDetectorRef) {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       if (this.agentConfig?.name !== node?.name) {
@@ -148,7 +144,11 @@ export class BuilderTabsComponent {
 
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
-      if (tool) {
+      if (tool && tool.toolType === 'Agent Tool') {
+        // Switch to the corresponding agent tool tab
+        const agentToolName = tool.name;
+        this.agentBuilderService.requestTabSwitch(agentToolName);
+      } else if (tool) {
         this.editingTool = tool;
         this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
         this.editingToolArgs.set(!!this.editingTool.args?.length);
@@ -162,20 +162,6 @@ export class BuilderTabsComponent {
 
   selectTool(tool: ToolNode) {
     this.agentBuilderService.setSelectedTool(tool);
-
-    // this part is incoming change
-    // Check if this is an agent tool
-    // if (tool.toolType === 'Agent Tool') {
-    //   // Switch to the corresponding agent tool tab
-    //   const agentToolName = tool.name;
-    //   this.agentBuilderService.requestTabSwitch(agentToolName);
-    //   return;
-    // }
-    
-    // // Default behavior for regular tools
-    // this.editingTool = tool;
-    // this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
-    // this.editingToolArgs.set(!!this.editingTool.args?.length);
   }
 
   addTool() {

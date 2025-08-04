@@ -127,7 +127,7 @@ export class BuilderTabsComponent {
         const oldTreeData = this.treeDataSource.value;
         this.treeDataSource.next([]);
         this.treeDataSource.next([node]);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
         setTimeout(() => {
           // Code to execute after 100 milliseconds
           // Open the root node by default
@@ -156,7 +156,7 @@ export class BuilderTabsComponent {
       } else {
         this.editingTool = null;
       }
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 

@@ -14,6 +14,7 @@ export class AgentBuilderService {
   private agentToolsMapSubject = new BehaviorSubject<Map<string, ToolNode[]>>(new Map());
   private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
   private newTabSubject = new BehaviorSubject<{tabName: string, currentAgentName?: string}|undefined>(undefined);
+  private tabChangeSubject = new BehaviorSubject<string|undefined>(undefined);
 
   constructor() { }
 
@@ -127,6 +128,14 @@ export class AgentBuilderService {
 
   getNewTabRequest(): Observable<{tabName: string, currentAgentName?: string}|undefined> {
     return this.newTabSubject.asObservable();
+  }
+
+  requestSideTabChange(tabName: string) {
+    this.tabChangeSubject.next(tabName);
+  }
+
+  getSideTabChangeRequest(): Observable<string|undefined> {
+    return this.tabChangeSubject.asObservable();
   }
 
   getAgentTools(): Observable<{ agentName: string, tools: ToolNode[] } | undefined> {

@@ -75,19 +75,26 @@
               </button>
             </div>
             @if (toolsMap$ | async; as toolsMap) {
-              @if (toolsMap.get(ctx.node.data()?.name)?.length) {
-                <mat-chip-set>
-                  @for (tool of toolsMap.get(ctx.node.data()?.name); track tool) {
-                    <mat-chip
-                      (click)="selectTool(tool, ctx.node)"
-                      [class.selected]="tool === selectedTool">
-                      {{tool.name}}
-                      <button matChipRemove (click)="deleteTool(ctx.node.data()?.name, tool); $event.stopPropagation()">
-                        <mat-icon>cancel</mat-icon>
-                      </button>
-                    </mat-chip>
+              @if (ctx.node.data) {
+                @if (toolsMap.get(ctx.node.data().name); as tools) {
+                  @if (tools.length > 0) {
+                    <mat-chip-set>
+                      @for (tool of tools.slice(0, 2); track tool) {
+                        <mat-chip
+                          (click)="selectTool(tool, ctx.node)"
+                          [class.selected]="tool === selectedTool">
+                          {{tool.name}}
+                          <button matChipRemove (click)="deleteTool(ctx.node.data().name, tool); $event.stopPropagation()">
+                            <mat-icon>cancel</mat-icon>
+                          </button>
+                        </mat-chip>
+                      }
+                      @if (tools.length > 2) {
+                        <mat-chip (click)="openToolsTab(ctx.node)">...</mat-chip>
+                      }
+                    </mat-chip-set>
                   }
-                </mat-chip-set>
+                }
               }
             }
           </div>

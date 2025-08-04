@@ -158,6 +158,12 @@ export class BuilderTabsComponent {
       }
       this.cdr.markForCheck();
     });
+
+    this.agentBuilderService.getTabChangeRequest().subscribe(tabName => {
+      if (tabName === 'tools') {
+        this.selectedTabIndex = 2;
+      }
+    });
   }
 
   selectTool(tool: ToolNode) {

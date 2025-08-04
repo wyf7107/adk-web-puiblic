@@ -365,6 +365,16 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.setSelectedTool(tool);
   }
 
+  openToolsTab(node: HtmlTemplateDynamicNode) {
+    if (node.data) {
+      const agentNodeData = this.agentBuilderService.getNode(node.data().name);
+      if (agentNodeData) {
+        this.agentBuilderService.setSelectedNode(agentNodeData);
+      }
+    }
+    this.agentBuilderService.requestTabChange('tools');
+  }
+
   saveAgent(appName: string) {
     const rootAgent: AgentNode|undefined = this.agentBuilderService.getRootNode();
 

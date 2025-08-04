@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { AgentNode, ToolNode } from '../models/AgentBuilder';
+import { AgentNode, ToolNode, CallbackNode } from '../models/AgentBuilder';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +10,12 @@ export class AgentBuilderService {
 
   private selectedToolSubject = new BehaviorSubject<any | undefined>(undefined);
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
+  private selectedCallbackSubject = new BehaviorSubject<CallbackNode|undefined>(undefined);
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
   private agentToolsMapSubject = new BehaviorSubject<Map<string, ToolNode[]>>(new Map());
   private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
   private newTabSubject = new BehaviorSubject<{tabName: string, currentAgentName?: string}|undefined>(undefined);
+  private agentCallbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
 
   constructor() { }
 
@@ -55,6 +57,9 @@ export class AgentBuilderService {
     this.setSelectedNode(undefined);
     this.setSelectedTool(undefined);
     this.agentToolsMapSubject.next(new Map());
+    this.setSelectedCallback(undefined);
+    this.setAgentTools();
+    this.setAgentCallbacks();
   }
 
   getSelectedNode(): Observable<AgentNode|undefined> {
@@ -71,6 +76,14 @@ export class AgentBuilderService {
 
   setSelectedTool(tool: ToolNode | undefined) {
     this.selectedToolSubject.next(tool);
+  }
+
+  getSelectedCallback(): Observable<CallbackNode|undefined> {
+    return this.selectedCallbackSubject.asObservable();
+  }
+
+  setSelectedCallback(callback: CallbackNode | undefined) {
+    this.selectedCallbackSubject.next(callback);
   }
 
   addTool(agentName: string, tool: ToolNode) {
@@ -102,6 +115,72 @@ export class AgentBuilderService {
           this.setSelectedTool(undefined);
         }
       }
+    }
+  }
+
+  addCallback(agentName: string, callback: CallbackNode): { success: boolean, error?: string } {
+    try {
+      const agentNode = this.getNode(agentName);
+      if (!agentNode) {
+        return { success: false, error: 'Agent not found' };
+      }
+      
+      if (!agentNode.callbacks) {
+        agentNode.callbacks = [];
+      }
+      
+      // Check for duplicate callback names
+      const duplicateCallback = agentNode.callbacks.find(cb => cb.name === callback.name);
+      if (duplicateCallback) {
+        return { success: false, error: `Callback with name '${callback.name}' already exists` };
+      }
+      
+      // Validate callback name (must be valid Python identifier)
+      const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+      if (!pythonIdentifierRegex.test(callback.name)) {
+        return { success: false, error: 'Callback name must be a valid Python identifier' };
+      }
+      
+      // Basic Python code validation
+      if (!callback.code || callback.code.trim().length === 0) {
+        return { success: false, error: 'Callback code cannot be empty' };
+      }
+      
+      agentNode.callbacks.push(callback);
+      this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Failed to add callback: ' + (error as Error).message };
+    }
+  }
+
+  deleteCallback(agentName: string, callbackToDelete: CallbackNode): { success: boolean, error?: string } {
+    try {
+      const agentNode = this.getNode(agentName);
+      if (!agentNode) {
+        return { success: false, error: 'Agent not found' };
+      }
+      
+      if (!agentNode.callbacks) {
+        return { success: false, error: 'No callbacks found for this agent' };
+      }
+      
+      const callbackIndex = agentNode.callbacks.findIndex(callback => callback.name === callbackToDelete.name);
+      if (callbackIndex === -1) {
+        return { success: false, error: 'Callback not found' };
+      }
+      
+      agentNode.callbacks.splice(callbackIndex, 1);
+      this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
+      
+      // Clear selection if the deleted callback was selected
+      if (this.selectedCallbackSubject.value?.name === callbackToDelete.name) {
+        this.setSelectedCallback(undefined);
+      }
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Failed to delete callback: ' + (error as Error).message };
     }
   }
 
@@ -138,6 +217,18 @@ export class AgentBuilderService {
       this.agentToolsSubject.next({ agentName, tools });
     } else {
       this.agentToolsSubject.next(undefined);
+    }
+  }
+
+  getAgentCallbacks(): Observable<{ agentName: string, callbacks: CallbackNode[] } | undefined> {
+    return this.agentCallbacksSubject.asObservable();
+  }
+
+  setAgentCallbacks(agentName?: string, callbacks?: CallbackNode[]) {
+    if (agentName && callbacks) {
+      this.agentCallbacksSubject.next({ agentName, callbacks });
+    } else {
+      this.agentCallbacksSubject.next(undefined);
     }
   }
 

@@ -91,6 +91,29 @@
               }
             }
           </div>
+          <div class="callbacks-container">
+            <div class="callbacks-header">
+              Callbacks
+              <button matIconButton class="action-btn add-callback-btn" (click)="addCallback(ctx.node.id); $event.stopPropagation()" matTooltip="Add callback" aria-label="Add callback">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            @if (ctx.node.data()?.callbacks?.length) {
+              <mat-chip-set>
+                @for (callback of ctx.node.data()?.callbacks; track callback) {
+                  <mat-chip
+                    (click)="selectCallback(callback, ctx.node)"
+                    [class.selected]="callback === selectedCallback">
+                    {{callback.name}}
+                    <span class="callback-type">{{callback.type}}</span>
+                    <button matChipRemove (click)="deleteCallback(ctx.node.data()?.name, callback); $event.stopPropagation()">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            }
+          </div>
           <handle type="target" position="top" />
           <handle type="source" position="bottom" />
         </div>

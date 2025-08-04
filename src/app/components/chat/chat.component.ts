@@ -386,7 +386,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((res) => {
         this.currentSessionState = res.state;
         this.sessionId = res.id;
-        this.sessionTab.refreshSession();
+        if (this.sessionTab) {
+          this.sessionTab.refreshSession();
+        }
 
         this.isSessionUrlEnabledObs.subscribe((enabled) => {
           if (enabled) {

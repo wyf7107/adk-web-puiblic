@@ -165,3 +165,35 @@
 .back-button {
   margin-bottom: 16px;
 }
+
+.agent-tool-section {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.02);
+
+  h3 {
+    color: #e8eaed;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    color: #9aa0a6;
+    font-size: 14px;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+  }
+
+  .create-agent-tool-btn {
+    background-color: #8ab4f8;
+    color: #202124;
+    font-weight: 500;
+    
+    &:hover {
+      background-color: #aecbfa;
+    }
+  }
+}

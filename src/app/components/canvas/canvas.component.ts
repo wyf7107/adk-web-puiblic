@@ -372,7 +372,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this.agentBuilderService.setSelectedNode(agentNodeData);
       }
     }
-    this.agentBuilderService.requestTabChange('tools');
+    this.agentBuilderService.requestSideTabChange('tools');
   }
 
   saveAgent(appName: string) {

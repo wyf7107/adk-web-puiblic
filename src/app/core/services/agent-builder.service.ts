@@ -130,11 +130,11 @@ export class AgentBuilderService {
     return this.newTabSubject.asObservable();
   }
 
-  requestTabChange(tabName: string) {
+  requestSideTabChange(tabName: string) {
     this.tabChangeSubject.next(tabName);
   }
 
-  getTabChangeRequest(): Observable<string|undefined> {
+  getSideTabChangeRequest(): Observable<string|undefined> {
     return this.tabChangeSubject.asObservable();
   }
 

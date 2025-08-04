@@ -159,7 +159,7 @@ export class BuilderTabsComponent {
       this.cdr.markForCheck();
     });
 
-    this.agentBuilderService.getTabChangeRequest().subscribe(tabName => {
+    this.agentBuilderService.getSideTabChangeRequest().subscribe(tabName => {
       if (tabName === 'tools') {
         this.selectedTabIndex = 2;
       }

@@ -19,11 +19,10 @@ import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDe
 import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { MatTree } from '@angular/material/tree'; // Import MatTree component type
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
-
 
 @Component({
   selector: 'app-builder-tabs',
@@ -113,8 +112,10 @@ export class BuilderTabsComponent {
     ['VertexAiSearchTool', ['data_store_id', 'data_store_specs', 'search_engine_id', 'filter', 'max_results']],
   ]);
   protected header = 'Select an agent or tool to edit'
+  public toolsMap$: Observable<Map<string, ToolNode[]>>;
 
   constructor(private cdr: ChangeDetectorRef) {
+    this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       if (this.agentConfig?.name !== node?.name) {
         this.selectedTabIndex = 0;
@@ -143,36 +144,52 @@ export class BuilderTabsComponent {
 
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
-      if (tool) {
-        this.selectTool(tool);
+      if (tool && tool.toolType === 'Agent Tool') {
+        // Switch to the corresponding agent tool tab
+        const agentToolName = tool.name;
+        this.agentBuilderService.requestTabSwitch(agentToolName);
+      } else if (tool) {
+        this.editingTool = tool;
+        this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
+        this.editingToolArgs.set(!!this.editingTool.args?.length);
         this.selectedTabIndex = 2;
       } else {
         this.editingTool = null;
       }
       this.cdr.detectChanges();
     });
-
-    this.agentBuilderService.getAgentTools().subscribe(update => {
-      if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
-        this.agentConfig.tools = update.tools;
-        this.cdr.detectChanges();
-      }
-    });
   }
 
   selectTool(tool: ToolNode) {
-    // Check if this is an agent tool
-    if (tool.toolType === 'Agent Tool') {
-      // Switch to the corresponding agent tool tab
-      const agentToolName = tool.name;
-      this.agentBuilderService.requestTabSwitch(agentToolName);
-      return;
+    this.agentBuilderService.setSelectedTool(tool);
+  }
+
+  addTool() {
+    if (this.agentConfig) {
+      const toolId = Math.floor(Math.random() * 1000);
+      const tool = {
+        toolType: 'Custom tool',
+        name: `.tool_${toolId}`,
+        args: []
+      }
+      this.agentBuilderService.addTool(this.agentConfig.name, tool);
     }
-    
-    // Default behavior for regular tools
-    this.editingTool = tool;
-    this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
-    this.editingToolArgs.set(!!this.editingTool.args?.length);
+  }
+
+  deleteTool(agentName: string, tool: any) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: 'Delete Tool',
+        message: `Are you sure you want to delete ${tool.name}?`,
+        confirmButtonText: 'Delete'
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        this.agentBuilderService.deleteTool(agentName, tool);
+      }
+    });
   }
   
   backToToolList() {

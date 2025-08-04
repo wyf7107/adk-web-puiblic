@@ -152,14 +152,28 @@
               }
             </div>
           } @else {
-            @if (agentConfig && agentConfig.tools && agentConfig.tools.length > 0) {
-              <ul>
-                @for (tool of agentConfig.tools; track tool) {
-                  <li (click)="selectTool(tool)" class="tool-name">{{tool.name}}</li>
-                }
-              </ul>
-            } @else {
-              <span class="no-tools-message">This agent has no tools</span>
+            <button class="add-tool-button" (click)="addTool()">
+              <div class="add-tool-button-detail">
+                <mat-icon>add</mat-icon>
+                <div class="add-tool-button-text">
+                  Add tool
+                </div>
+              </div>
+            </button>
+            @if (toolsMap$ | async; as toolsMap) {
+              @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
+                <ul class="tools-list">
+                  @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
+                    <li (click)="selectTool(tool)" class="tool-name">{{tool.name}}
+                      <button mat-icon-button (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <div class="no-tools-message">This agent has no tools</div>
+              }
             }
           }
         </div>

@@ -31,9 +31,10 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
 import { parse } from 'yaml';
-import { firstValueFrom, take, filter } from 'rxjs';
+import { firstValueFrom, take, filter, Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { AsyncPipe } from '@angular/common';
 
 
 @Component({
@@ -41,7 +42,7 @@ import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatButtonToggleModule, MatChipsModule, MatTooltipModule]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatButtonToggleModule, MatChipsModule, MatTooltipModule, AsyncPipe]
 })
 export class CanvasComponent implements AfterViewInit, OnInit {
   private _snackBar = inject(MatSnackBar);
@@ -59,7 +60,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   nodeId = 1;
   edgeId = 1;
-  toolId = 1;
 
   public nodes = signal<HtmlTemplateDynamicNode[]>([]);
 
@@ -70,6 +70,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   public selectedTool: any;
 
   existingAgent: string | undefined = undefined;
+  public toolsMap$: Observable<Map<string, ToolNode[]>>;
 
   // Tab management
   public selectedTab = signal('root_agent');
@@ -81,7 +82,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     private dialog: MatDialog,
     private agentService: AgentService,
     private router: Router
-  ) {}
+  ) {
+    this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
+    this.agentBuilderService.getSelectedTool().subscribe(tool => {
+      this.selectedTool = tool;
+      this.cdr.detectChanges();
+    });
+  }
 
   ngOnInit() {
     this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
@@ -91,19 +98,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.loadAgentForTab('root_agent');
       this.agentBuilderService.getSelectedNode().subscribe(selectedAgentNode => {
         this.selectedAgents = this.nodes().filter(node => node.data && node.data().name === selectedAgentNode?.name);
-      });
-      this.agentBuilderService.getSelectedTool().subscribe(tool => {
-        this.selectedTool = tool;
-      });
-      this.agentBuilderService.getAgentTools().subscribe(update => {
-        if (update) {
-          const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
-          if (node && node.data) {
-            const data = node.data();
-            data.tools = update.tools;
-            node.data.set(data);
-          }
-        }
       });
     });
 
@@ -147,10 +141,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
-      this.agentBuilderService.setAgentTools(
-        agentNodeData.name,
-        agentNodeData.tools || [],
-      );
+      // this.agentBuilderService.setAgentTools(
+      //   agentNodeData.name,
+      //   agentNodeData.tools || [],
+      // );
     }
   }
 
@@ -226,12 +220,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!parentNode) return;
     if (!parentNode.data) return;
 
+    const toolId = Math.floor(Math.random() * 1000);
     const tool = {
       toolType: 'Custom tool',
-      name: `.tool_${this.toolId}`,
+      name: `.tool_${toolId}`,
       args: []
     }
-    this.toolId++;
     this.agentBuilderService.addTool(parentNode.data().name, tool);
   }
 

@@ -115,6 +115,14 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         }
       }
     });
+
+    this.agentBuilderService.getDeleteSubAgentSubject().subscribe((agentName) => {
+      if (!agentName) {
+        return ;
+      }
+      
+      this.openDeleteSubAgentDialog(agentName);
+    });
   }
 
   ngAfterViewInit() {

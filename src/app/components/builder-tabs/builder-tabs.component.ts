@@ -182,6 +182,10 @@ export class BuilderTabsComponent {
     }
   }
 
+  deleteSubAgent(agentName: string) {
+    this.agentBuilderService.setDeleteSubAgentSubject(agentName);
+  }
+
   deleteTool(agentName: string, tool: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: { 

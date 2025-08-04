@@ -188,7 +188,11 @@ export class BuilderTabsComponent {
 
     this.agentBuilderService.getAgentCallbacks().subscribe(update => {
       if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
-        this.agentConfig.callbacks = update.callbacks;
+        // Create a new object reference to ensure change detection works with OnPush strategy
+        this.agentConfig = {
+          ...this.agentConfig,
+          callbacks: update.callbacks
+        };
         this.cdr.detectChanges();
       }
     });
@@ -210,20 +214,78 @@ export class BuilderTabsComponent {
     }
   }
 
-  deleteTool(agentName: string, tool: any) {
+  addCallback() {
+    if (this.agentConfig) {
+      const callbackId = Math.floor(Math.random() * 1000);
+      const callback: CallbackNode = {
+        name: `callback_${callbackId}`,
+        type: 'before_agent',
+        code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
+        description: 'Auto-generated callback'
+      };
+      const result = this.agentBuilderService.addCallback(this.agentConfig.name, callback);
+      if (!result.success) {
+        console.error('Failed to add callback:', result.error);
+      }
+    }
+  }
+
+  deleteCallback(agentName: string, callback: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: { 
-        title: 'Delete Tool',
-        message: `Are you sure you want to delete ${tool.name}?`,
+        title: 'Delete Callback',
+        message: `Are you sure you want to delete ${callback.name}?`,
         confirmButtonText: 'Delete'
       },
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
-        this.agentBuilderService.deleteTool(agentName, tool);
+        const deleteResult = this.agentBuilderService.deleteCallback(agentName, callback);
+        if (!deleteResult.success) {
+          console.error('Failed to delete callback:', deleteResult.error);
+        } else {
+          // Force change detection to update the UI immediately
+          this.cdr.detectChanges();
+        }
       }
     });
+  }
+
+  deleteTool(agentName: string, tool: any) {
+    const isAgentTool = tool.toolType === 'Agent Tool';
+    const toolDisplayName = isAgentTool ? (tool.toolAgentName || tool.name) : tool.name;
+    
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: isAgentTool ? 'Delete Agent Tool' : 'Delete Tool',
+        message: isAgentTool 
+          ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding tab.`
+          : `Are you sure you want to delete ${toolDisplayName}?`,
+        confirmButtonText: 'Delete'
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        // Check if this is an agent tool that needs tab deletion
+        if (tool.toolType === 'Agent Tool') {
+          const agentToolName = tool.toolAgentName || tool.name;
+          this.deleteAgentToolAndTab(agentName, tool, agentToolName);
+        } else {
+          // Regular tool deletion
+          this.agentBuilderService.deleteTool(agentName, tool);
+        }
+      }
+    });
+  }
+
+  deleteAgentToolAndTab(agentName: string, tool: any, agentToolName: string) {
+    // First, delete the tool from the agent
+    this.agentBuilderService.deleteTool(agentName, tool);
+
+    // Request the canvas to delete the tab
+    this.agentBuilderService.requestTabDeletion(agentToolName);
   }
   
   backToToolList() {

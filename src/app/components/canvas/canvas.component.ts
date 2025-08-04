@@ -118,6 +118,14 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         }
       }
     });
+
+    // Listen for tab deletion requests
+    this.agentBuilderService.getTabDeletionRequest().subscribe(tabName => {
+      if (tabName) {
+        this.deleteTab(tabName);
+      }
+    });
+
     this.agentBuilderService.getSelectedCallback().subscribe(callback => {
       this.selectedCallback = callback;
     });
@@ -512,7 +520,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         instruction: yamlData.instruction || '',
         isRoot: true,
         sub_agents: [],
-        tools: this.parseToolsFromYaml(yamlData.tools || [])
+        tools: this.parseToolsFromYaml(yamlData.tools || []),
+        callbacks: this.parseCallbacksFromYaml(yamlData)
       };
       
       // Store root agent
@@ -557,6 +566,30 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     });
   }
 
+  private parseCallbacksFromYaml(yamlData: any): CallbackNode[] {
+    const callbacks: CallbackNode[] = [];
+    
+    // Look for callback groups at the root level
+    Object.keys(yamlData).forEach(key => {
+      if (key.endsWith('_callbacks') && Array.isArray(yamlData[key])) {
+        const callbackType = key.replace('_callbacks', '');
+        
+        yamlData[key].forEach((callbackData: any) => {
+          if (callbackData.name) {
+            callbacks.push({
+              name: callbackData.name,
+              type: callbackType as any,
+              code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
+              description: 'Auto-generated callback'
+            });
+          }
+        });
+      }
+    });
+    
+    return callbacks;
+  }
+
   private determineToolType(tool: any): string {
     if (tool.name === 'AgentTool' && tool.args && tool.args.agent) {
       return 'Agent Tool';
@@ -598,7 +631,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
               instruction: yamlData.instruction || `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
               isRoot: false,
               sub_agents: [],
-              tools: this.parseToolsFromYaml(yamlData.tools || [])
+              tools: this.parseToolsFromYaml(yamlData.tools || []),
+              callbacks: this.parseCallbacksFromYaml(yamlData)
             };
             
             // Store the agent tool agent
@@ -852,6 +886,35 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // If the deleted tab was selected, switch to root_agent
     if (this.selectedTab() === agentToolName) {
+      this.selectTab('root_agent');
+    }
+  }
+
+  deleteTab(tabName: string) {
+    // Remove the agent tool from tabAgents
+    const currentTabAgents = this.tabAgents();
+    currentTabAgents.delete(tabName);
+    this.tabAgents.set(currentTabAgents);
+
+    // Remove the tab from availableTabs
+    const currentAvailableTabs = this.availableTabs();
+    const updatedTabs = currentAvailableTabs.filter(tab => tab !== tabName);
+    this.availableTabs.set(updatedTabs);
+
+    // Remove any references to this agent tool from other agents
+    for (const [tabName, agent] of currentTabAgents) {
+      if (agent.tools) {
+        agent.tools = agent.tools.filter(t => 
+          !(t.toolType === 'Agent Tool' && (t.toolAgentName === tabName || t.name === tabName))
+        );
+        // Update the agent in tabAgents
+        currentTabAgents.set(tabName, agent);
+      }
+    }
+    this.tabAgents.set(currentTabAgents);
+
+    // If the deleted tab was selected, switch to root_agent
+    if (this.selectedTab() === tabName) {
       this.selectTab('root_agent');
     }
   }

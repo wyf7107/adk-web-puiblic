@@ -48,7 +48,7 @@ describe('YamlUtils - Callback Support', () => {
   });
 
   describe('buildCallbacksConfig', () => {
-    it('should build callbacks configuration correctly', () => {
+    it('should build callbacks configuration grouped by type', () => {
       const callbacks: CallbackNode[] = [
         {
           name: 'before_callback',
@@ -60,53 +60,35 @@ describe('YamlUtils - Callback Support', () => {
           name: 'after_callback',
           type: 'after_tool',
           code: 'def after_callback(ctx): pass'
-        }
-      ];
-
-      const config = YamlUtils.buildCallbacksConfig(callbacks);
-
-      expect(config.length).toBe(2);
-      expect(config[0]).toEqual({
-        name: 'before_callback',
-        type: 'before_agent',
-        code: 'def before_callback(ctx): pass',
-        description: 'Before agent callback'
-      });
-      expect(config[1]).toEqual({
-        name: 'after_callback',
-        type: 'after_tool',
-        code: 'def after_callback(ctx): pass'
-      });
-    });
-
-    it('should return empty array for undefined callbacks', () => {
-      const config = YamlUtils.buildCallbacksConfig(undefined);
-      expect(config).toEqual([]);
-    });
-
-    it('should return empty array for empty callbacks array', () => {
-      const config = YamlUtils.buildCallbacksConfig([]);
-      expect(config).toEqual([]);
-    });
-
-    it('should handle callbacks without description', () => {
-      const callbacks: CallbackNode[] = [
+        },
         {
-          name: 'simple_callback',
-          type: 'before_model',
-          code: 'def simple_callback(ctx): pass'
+          name: 'another_before_callback',
+          type: 'before_agent',
+          code: 'def another_before_callback(ctx): pass'
         }
       ];
 
       const config = YamlUtils.buildCallbacksConfig(callbacks);
 
-      expect(config.length).toBe(1);
-      expect(config[0]).toEqual({
-        name: 'simple_callback',
-        type: 'before_model',
-        code: 'def simple_callback(ctx): pass'
+      expect(config).toEqual({
+        before_agent_callbacks: [
+          { name: 'before_callback' },
+          { name: 'another_before_callback' }
+        ],
+        after_tool_callbacks: [
+          { name: 'after_callback' }
+        ]
       });
-      expect(config[0].description).toBeUndefined();
+    });
+
+    it('should return empty object for undefined callbacks', () => {
+      const config = YamlUtils.buildCallbacksConfig(undefined);
+      expect(config).toEqual({});
+    });
+
+    it('should return empty object for empty callbacks array', () => {
+      const config = YamlUtils.buildCallbacksConfig([]);
+      expect(config).toEqual({});
     });
   });
 
@@ -115,12 +97,10 @@ describe('YamlUtils - Callback Support', () => {
       // Test the YAML generation logic by creating a mock YAML config
       const callbacksConfig = YamlUtils.buildCallbacksConfig(mockAgentNode.callbacks);
       
-      expect(callbacksConfig.length).toBe(1);
-      expect(callbacksConfig[0]).toEqual({
-        name: 'callback_1',
-        type: 'before_agent',
-        code: 'def callback_function(callback_context):\n    return None',
-        description: 'Test callback'
+      expect(callbacksConfig).toEqual({
+        before_agent_callbacks: [
+          { name: 'callback_1' }
+        ]
       });
 
       // Verify that generateYamlFile creates a FormData entry
@@ -136,14 +116,14 @@ describe('YamlUtils - Callback Support', () => {
       mockAgentNode.callbacks = undefined;
       const callbacksConfig = YamlUtils.buildCallbacksConfig(mockAgentNode.callbacks);
       
-      expect(callbacksConfig).toEqual([]);
+      expect(callbacksConfig).toEqual({});
     });
 
     it('should handle empty callbacks array', () => {
       mockAgentNode.callbacks = [];
       const callbacksConfig = YamlUtils.buildCallbacksConfig(mockAgentNode.callbacks);
       
-      expect(callbacksConfig).toEqual([]);
+      expect(callbacksConfig).toEqual({});
     });
   });
 });

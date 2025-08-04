@@ -36,10 +36,10 @@ export class YamlUtils {
       tools: this.buildToolsConfig(agentNode.tools)
     }
 
-    // Add callbacks if they exist
+    // Add callbacks directly to root level if they exist
     const callbacksConfig = this.buildCallbacksConfig(agentNode.callbacks);
-    if (callbacksConfig.length > 0) {
-      yamlConfig.callbacks = callbacksConfig;
+    if (Object.keys(callbacksConfig).length > 0) {
+      Object.assign(yamlConfig, callbacksConfig);
     }
 
     const yamlString = YAML.stringify(yamlConfig);
@@ -146,16 +146,24 @@ export class YamlUtils {
      }).filter(config => config !== null); // Filter out null results
   }
 
-  static buildCallbacksConfig(callbacks: CallbackNode[] | undefined): any[] {
+  static buildCallbacksConfig(callbacks: CallbackNode[] | undefined): any {
     if (!callbacks || callbacks.length === 0) {
-      return [];
+      return {};
     }
 
-    return callbacks.map(callback => ({
-      name: callback.name,
-      type: callback.type,
-      code: callback.code,
-      ...(callback.description && { description: callback.description })
-    }));
+    // Group callbacks by type
+    const groupedCallbacks: { [key: string]: any[] } = {};
+    
+    callbacks.forEach(callback => {
+      const callbackTypeKey = `${callback.type}_callbacks`;
+      if (!groupedCallbacks[callbackTypeKey]) {
+        groupedCallbacks[callbackTypeKey] = [];
+      }
+      groupedCallbacks[callbackTypeKey].push({
+        name: callback.name
+      });
+    });
+
+    return groupedCallbacks;
   }
 }

@@ -44,7 +44,12 @@ export class AgentBuilderService {
    * @param newNode The agentNode to add.
    */
   addNode(newNode: AgentNode): void {
-    this.nodes.push(newNode);
+    const existingNodeIndex = this.nodes.findIndex(n => n.name === newNode.name);
+    if (existingNodeIndex !== -1) {
+      this.nodes[existingNodeIndex] = newNode;
+    } else {
+      this.nodes.push(newNode);
+    }
     const currentMap = this.agentToolsMapSubject.value;
     const newMap = new Map(currentMap);
     newMap.set(newNode.name, newNode.tools || []);

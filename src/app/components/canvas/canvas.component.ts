@@ -175,6 +175,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     );
 
     if (!!agentNodeData) {
+      // logging the data here does not reflect the sub_agents added in loadSubAgents
+      console.log(agentNodeData);
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
       // this.agentBuilderService.setAgentTools(
@@ -946,9 +948,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       depth: number;
       index: number;
       parentId?: string;
+      parentAgent?: AgentNode;
     };
     const appName = rootAgent.name;
-    const queue: BFSItem[] = [{ node: rootAgent, depth: 1, index: 1, parentId: undefined }];
+    const queue: BFSItem[] = [{ node: rootAgent, depth: 1, index: 1, parentId: undefined, parentAgent: undefined }];
 
     const nodes: HtmlTemplateDynamicNode[] = [];
     const edges: Edge[] = [];
@@ -956,7 +959,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     let edgeIdCounter = 0;
 
     while (queue.length > 0) {
-      const { node, depth, index, parentId } = queue.shift()!;
+      const { node, depth, index, parentId, parentAgent } = queue.shift()!;
 
       let agentData = node;
       if (node.config_path) {
@@ -966,6 +969,14 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         } catch (e) {
           console.error(`Failed to load agent from ${node.config_path}`, e);
           continue;
+        }
+      }
+
+      if (parentAgent && parentAgent.sub_agents) {
+        const subAgentIndex = parentAgent.sub_agents.indexOf(node);
+        if (subAgentIndex !== -1) {
+          parentAgent.sub_agents[subAgentIndex] = agentData;
+          this.agentBuilderService.addNode(parentAgent);
         }
       }
 
@@ -1008,6 +1019,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
             parentId: currentNodeId,
             depth: depth + 1,
             index: subIndex,
+            parentAgent: agentData,
           });
           subIndex++;
         }

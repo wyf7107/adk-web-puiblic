@@ -36,6 +36,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSidenavModule} from '@angular/material/sidenav';
+import {MatTreeModule} from '@angular/material/tree';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatSliderModule} from '@angular/material/slider';
 import {MatTableModule} from '@angular/material/table';
@@ -120,6 +121,7 @@ const COMPONENTS = [
     MatListModule,
     NgxJsonViewerModule,
     MatSidenavModule,
+    MatTreeModule,
     MatTabsModule,
     MatRadioModule,
     MatSelectModule,

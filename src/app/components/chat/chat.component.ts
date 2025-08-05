@@ -386,9 +386,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((res) => {
         this.currentSessionState = res.state;
         this.sessionId = res.id;
-        if (this.sessionTab) {
-          this.sessionTab.refreshSession();
-        }
+        this.sessionTab.refreshSession();
 
         this.isSessionUrlEnabledObs.subscribe((enabled) => {
           if (enabled) {
@@ -1381,25 +1379,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }).toString();
     this.location.replaceState(url);
     this.isBuilderMode.set(true);
-    
-    // Load existing agent configuration if app is selected
-    if (this.appName) {
-      this.loadExistingAgentConfiguration();
-    }
-  }
-
-  private loadExistingAgentConfiguration() {
-    this.agentService.getAgentBuilder(this.appName).subscribe({
-      next: (yamlContent: string) => {
-        if (yamlContent) {
-          this.canvasComponent.loadFromYaml(yamlContent, this.appName);
-        }
-      },
-      error: (error) => {
-        console.error('Error loading agent configuration:', error);
-        this._snackBar.open('Error loading agent configuration', 'OK');
-      }
-    });
   }
 
   protected exitBuilderMode() {

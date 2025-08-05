@@ -381,7 +381,7 @@
 
     &_selected {
         border-color: #8ab4f8;
-        background-color: #394457;
+        background-color: #222730;
 
         mat-chip {
             --mdc-chip-outline-color: rgba(255, 255, 255, 0.1);
@@ -533,9 +533,9 @@ mat-chip {
 
     &.selected {
         --mdc-chip-outline-width: 0;
-        /* --mdc-chip-outline-color: 0; */
-
-        background-color: #515f77;
+        background-color: #8ab4f8;
+        --mdc-chip-label-text-color: #202124;
+        --mdc-chip-with-trailing-icon-trailing-icon-color: #202124;
     }
 }
 

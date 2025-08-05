@@ -374,6 +374,7 @@
     border-radius: 8px;
     align-items: center;
     position: relative;
+    max-height: 245px;
 
     &:hover {
         border-color: #666;
@@ -381,11 +382,7 @@
 
     &_selected {
         border-color: #8ab4f8;
-        background-color: #222730;
-
-        mat-chip {
-            --mdc-chip-outline-color: rgba(255, 255, 255, 0.1);
-        }
+        background-color: #394457;
     }
 
     &_selected:hover {
@@ -418,7 +415,7 @@
 }
 
 .custom-node_selected .node-title-wrapper {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: #8ab4f8;
 
     .node-title {
         color: #8ab4f8;
@@ -530,12 +527,14 @@
 
 mat-chip {
     --mdc-chip-outline-color: #444;
+    --mdc-chip-label-text-color: #e8eaed;
+    --mdc-chip-with-trailing-icon-trailing-icon-color: #e8eaed;
 
     &.selected {
-        --mdc-chip-outline-width: 0;
-        background-color: #8ab4f8;
-        --mdc-chip-label-text-color: #202124;
-        --mdc-chip-with-trailing-icon-trailing-icon-color: #202124;
+        --mdc-chip-outline-color: #8ab4f8;
+        background-color: #394457;
+        --mdc-chip-label-text-color: #e8eaed;
+        --mdc-chip-with-trailing-icon-trailing-icon-color: #e8eaed;
     }
 }
 

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AgentNode, ToolNode, YamlConfig  } from "../app/core/models/AgentBuilder";
+import { AgentNode, ToolNode, CallbackNode, YamlConfig  } from "../app/core/models/AgentBuilder";
 import * as YAML from 'yaml';
 
 export class YamlUtils {
@@ -34,6 +34,12 @@ export class YamlUtils {
       instruction: agentNode.instruction,
       sub_agents: subAgents,
       tools: this.buildToolsConfig(agentNode.tools)
+    }
+
+    // Add callbacks directly to root level if they exist
+    const callbacksConfig = this.buildCallbacksConfig(agentNode.callbacks);
+    if (Object.keys(callbacksConfig).length > 0) {
+      Object.assign(yamlConfig, callbacksConfig);
     }
 
     const yamlString = YAML.stringify(yamlConfig);
@@ -138,5 +144,26 @@ export class YamlUtils {
 
        return config;
      }).filter(config => config !== null); // Filter out null results
+  }
+
+  static buildCallbacksConfig(callbacks: CallbackNode[] | undefined): any {
+    if (!callbacks || callbacks.length === 0) {
+      return {};
+    }
+
+    // Group callbacks by type
+    const groupedCallbacks: { [key: string]: any[] } = {};
+    
+    callbacks.forEach(callback => {
+      const callbackTypeKey = `${callback.type}_callbacks`;
+      if (!groupedCallbacks[callbackTypeKey]) {
+        groupedCallbacks[callbackTypeKey] = [];
+      }
+      groupedCallbacks[callbackTypeKey].push({
+        name: callback.name
+      });
+    });
+
+    return groupedCallbacks;
   }
 }

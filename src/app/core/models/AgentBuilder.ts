@@ -23,6 +23,7 @@ export interface AgentNode {
     instruction: string;
     sub_agents: AgentNode[];
     tools?: ToolNode[];
+    callbacks?: CallbackNode[];
     config_path?: string;
 }
 
@@ -38,6 +39,13 @@ export interface ToolArg {
   value: any;
 }
 
+export interface CallbackNode {
+    name: string;
+    type: 'before_agent' | 'after_agent' | 'before_model' | 'after_model' | 'before_tool' | 'after_tool';
+    code: string;
+    description?: string;
+}
+
 export interface YamlConfig {
   name: string;
   model: string;
@@ -46,6 +54,7 @@ export interface YamlConfig {
   instruction: string;
   sub_agents: any;
   tools: any[];
+  callbacks?: any[];
 }
 
 export interface DiagramNode {

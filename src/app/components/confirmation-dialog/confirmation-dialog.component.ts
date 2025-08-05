@@ -22,14 +22,20 @@ import {
   MatDialogTitle,
   MatDialogContent,
   MatDialogActions,
-  MatDialogClose,
 } from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
 
 export interface ConfirmationDialogData {
   title: string;
   message: string;
   confirmButtonText?: string;
+  showInput?: boolean;
+  inputLabel?: string;
+  inputPlaceholder?: string;
+  inputValue?: string;
 }
 
 @Component({
@@ -42,16 +48,36 @@ export interface ConfirmationDialogData {
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatDialogClose,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
   ],
 })
 export class ConfirmationDialogComponent {
+  inputValue = '';
+
   constructor(
     public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogData,
-  ) {}
+  ) {
+    this.inputValue = data.inputValue || '';
+  }
 
   onCancel(): void {
     this.dialogRef.close();
+  }
+
+  onConfirm(): void {
+    if (this.data.showInput) {
+      this.dialogRef.close(this.inputValue.trim());
+    } else {
+      this.dialogRef.close('confirm');
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && this.data.showInput) {
+      this.onConfirm();
+    }
   }
 }

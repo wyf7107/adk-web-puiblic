@@ -16,6 +16,16 @@
 
 <div class="canvas-container">
   <div class="canvas-workspace">
+    <!-- Tab Navigation - Overlay -->
+    <div class="canvas-tabs-overlay">
+      <mat-button-toggle-group [value]="selectedTab()" (change)="selectTab($event.value)">
+        @for (tab of availableTabs(); track tab) {
+          <mat-button-toggle [value]="tab">
+            {{tab === 'root_agent' ? 'Root Agent' : tab}}
+          </mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+    </div>
     @if (!showSidePanel) {
       <span
         class="material-symbols-outlined open-panel-btn"
@@ -36,7 +46,7 @@
         <div 
           class="custom-node"
           selectable
-          [class.custom-node_selected]="ctx.selected()"
+          [class.custom-node_selected]="isNodeSelected(ctx.node)"
           (click)="onCustomTemplateNodeClick(ctx.node, $event)"
         >
           <div class="node-title-wrapper">
@@ -45,7 +55,7 @@
               {{ctx.node.data()?.name || 'root_agent'}}
             </div>
             <div class="action-button-bar">
-              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.id, $event); $event.stopPropagation()" matTooltip="Add sub-agent"
+              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Add sub-agent"
                 aria-label="Add sub-agent">
                 <mat-icon>smart_toy</mat-icon>
               </button>
@@ -64,19 +74,28 @@
                 <mat-icon>add</mat-icon>
               </button>
             </div>
-            @if (ctx.node.data()?.tools?.length) {
-              <mat-chip-set>
-                @for (tool of ctx.node.data()?.tools; track tool) {
-                  <mat-chip
-                    (click)="selectTool(tool, ctx.node)"
-                    [class.selected]="tool === selectedTool">
-                    {{tool.name}}
-                    <button matChipRemove (click)="deleteTool(ctx.node.data()?.name, tool); $event.stopPropagation()">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </mat-chip>
+            @if (toolsMap$ | async; as toolsMap) {
+              @if (ctx.node.data) {
+                @if (toolsMap.get(ctx.node.data().name); as tools) {
+                  @if (tools.length > 0) {
+                    <mat-chip-set>
+                      @for (tool of tools.slice(0, 2); track tool) {
+                        <mat-chip
+                          (click)="selectTool(tool, ctx.node)"
+                          [class.selected]="tool === selectedTool">
+                          <span class="tool-name-label">{{tool.name}}</span>
+                          <button matChipRemove (click)="deleteTool(ctx.node.data().name, tool); $event.stopPropagation()">
+                            <mat-icon>cancel</mat-icon>
+                          </button>
+                        </mat-chip>
+                      }
+                      @if (tools.length > 2) {
+                        <mat-chip (click)="openToolsTab(ctx.node)">...</mat-chip>
+                      }
+                    </mat-chip-set>
+                  }
                 }
-              </mat-chip-set>
+              }
             }
           </div>
           <handle type="target" position="top" />

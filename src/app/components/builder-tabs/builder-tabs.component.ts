@@ -132,9 +132,6 @@ export class BuilderTabsComponent {
   constructor(private cdr: ChangeDetectorRef) {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
-      if (this.agentConfig?.name !== node?.name) {
-        this.selectedTabIndex = 0;
-      }
       this.agentConfig = node;
       if (node) {
         this.editingTool = null;

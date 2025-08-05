@@ -200,6 +200,10 @@ export class BuilderTabsComponent {
     });
   }
 
+  selectAgent(agent: AgentNode) {
+    this.agentBuilderService.setSelectedNode(agent);
+  }
+
   selectTool(tool: ToolNode) {
     this.agentBuilderService.setSelectedTool(tool);
   }
@@ -258,7 +262,7 @@ export class BuilderTabsComponent {
     if (!parentAgentName) {
       return ;
     }
-    
+
     this.agentBuilderService.setAddSubAgentSubject(parentAgentName);
   }
 

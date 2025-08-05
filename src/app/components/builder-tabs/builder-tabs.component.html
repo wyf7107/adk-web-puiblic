@@ -78,7 +78,7 @@
         @if (agentConfig && agentConfig.sub_agents.length > 0) {
           <ul class="tools-list">
             @for (subAgent of agentConfig.sub_agents; track subAgent) {
-              <li class="tool-name">
+              <li (click)="selectAgent(subAgent)" class="tool-name">
                 {{subAgent.name}}
                 <button mat-icon-button (click)="deleteSubAgent(subAgent.name); $event.stopPropagation()">
                   <mat-icon>delete</mat-icon>

@@ -98,9 +98,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.loadAgent();
       // Load the initial agent for the root tab
       this.loadAgentForTab('root_agent');
-      this.agentBuilderService.getSelectedNode().subscribe(selectedAgentNode => {
-        this.selectedAgents = this.nodes().filter(node => node.data && node.data().name === selectedAgentNode?.name);
-      });
     });
 
     // Listen for new tab requests
@@ -144,12 +141,16 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       if (!agentName) {
         return ;
       }
-      
+
       this.openDeleteSubAgentDialog(agentName);
     });
 
     this.agentBuilderService.getAddSubAgentSubject().subscribe((parentAgentName) => {
       this.addSubAgent(parentAgentName);
+    });
+
+    this.agentBuilderService.getSelectedNode().subscribe(selectedAgentNode => {
+      this.selectedAgents = this.nodes().filter(node => node.data && node.data().name === selectedAgentNode?.name);
     });
   }
 

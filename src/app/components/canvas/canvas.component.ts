@@ -953,14 +953,14 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     while (queue.length > 0) {
       let { node, depth, index, parentId } = queue.shift()!;
       if (node && node.config_path) {
-        this.nodeId ++;
         const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config_path));
         const subAgent = parse(subAgentData) as AgentNode;
 
         const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentId?.toString()) as HtmlTemplateDynamicNode;
         if (!parentNode || !parentNode.data) return;
+        this.nodeId ++;
         const subAgentNode: HtmlTemplateDynamicNode = {
-          id: `${this.nodeId}`,
+          id: this.nodeId.toString(),
           point: signal({ 
             x: (index-1) * 350 + 50, 
             y: depth * 150 + 50 // Position below the parent
@@ -969,7 +969,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           data: signal(subAgent)
         };
         this.nodes.set([...this.nodes(), subAgentNode])
-
         if (parentId) {
           const edge: Edge = {
             id: this.edgeId.toString(),

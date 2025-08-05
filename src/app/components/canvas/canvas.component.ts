@@ -175,8 +175,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     );
 
     if (!!agentNodeData) {
-      // logging the data here does not reflect the sub_agents added in loadSubAgents
-      console.log(agentNodeData);
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
       // this.agentBuilderService.setAgentTools(

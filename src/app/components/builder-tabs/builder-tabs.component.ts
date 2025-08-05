@@ -216,7 +216,6 @@ export class BuilderTabsComponent {
     }
   }
 
-<<<<<<<<< Temporary merge branch 1
   addCallback() {
     if (this.agentConfig) {
       const callbackId = Math.floor(Math.random() * 1000);
@@ -253,6 +252,14 @@ export class BuilderTabsComponent {
         }
       }
     });
+  }
+
+  addSubAgent(parentAgentName: string|undefined) {
+    if (!parentAgentName) {
+      return ;
+    }
+    
+    this.agentBuilderService.setAddSubAgentSubject(parentAgentName);
   }
 
   deleteSubAgent(agentName: string) {

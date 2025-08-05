@@ -158,7 +158,7 @@ export class BuilderTabsComponent {
       } else {
         this.editingCallback = null;
       }
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
 
     this.agentBuilderService.getAgentCallbacks().subscribe(update => {
@@ -168,7 +168,7 @@ export class BuilderTabsComponent {
           ...this.agentConfig,
           callbacks: update.callbacks
         };
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
     this.agentBuilderService.getSideTabChangeRequest().subscribe(tabName => {
@@ -230,7 +230,7 @@ export class BuilderTabsComponent {
           console.error('Failed to delete callback:', deleteResult.error);
         } else {
           // Force change detection to update the UI immediately
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       }
     });

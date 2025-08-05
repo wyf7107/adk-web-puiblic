@@ -945,66 +945,78 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       node: AgentNode;
       depth: number;
       index: number;
-      parentId?: number;  // used to draw edges
+      parentId?: string;
     };
     const appName = rootAgent.name;
-    const queue: BFSItem[] = [{ node: rootAgent, depth: 1, index: 1 }];
+    const queue: BFSItem[] = [{ node: rootAgent, depth: 1, index: 1, parentId: undefined }];
+
+    const nodes: HtmlTemplateDynamicNode[] = [];
+    const edges: Edge[] = [];
+    let nodeIdCounter = 0;
+    let edgeIdCounter = 0;
 
     while (queue.length > 0) {
-      let { node, depth, index, parentId } = queue.shift()!;
-      if (node && node.config_path) {
-        this.nodeId ++;
-        const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config_path));
-        const subAgent = parse(subAgentData) as AgentNode;
+      const { node, depth, index, parentId } = queue.shift()!;
 
-        const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentId?.toString()) as HtmlTemplateDynamicNode;
-        if (!parentNode || !parentNode.data) return;
-        const subAgentNode: HtmlTemplateDynamicNode = {
-          id: `${this.nodeId}`,
-          point: signal({ 
-            x: (index-1) * 350 + 50, 
-            y: depth * 150 + 50 // Position below the parent
-          }),
-          type: 'html-template',
-          data: signal(subAgent)
-        };
-        this.nodes.set([...this.nodes(), subAgentNode])
-
-        if (parentId) {
-          const edge: Edge = {
-            id: this.edgeId.toString(),
-            source: parentId.toString(),
-            target: subAgentNode.id,
-          };
-          this.edgeId++;
-          // Add the edge
-          this.edges.set([...this.edges(), edge]);
+      let agentData = node;
+      if (node.config_path) {
+        try {
+          const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config_path));
+          agentData = parse(subAgentData) as AgentNode;
+        } catch (e) {
+          console.error(`Failed to load agent from ${node.config_path}`, e);
+          continue;
         }
-        if (subAgent.sub_agents && subAgent.sub_agents.length > 0) {
-          index = 1
-          for (const sub of subAgent.sub_agents) {
-            queue.push({ node: sub, parentId: this.nodeId, depth: depth + 1, index: index })
-            index ++;
-          }
-        }
-      } else {
-         const rootNode: HtmlTemplateDynamicNode = {
-          id: this.nodeId.toString(),
-          point: signal({ x: 100, y: 150 }),
-          type: 'html-template',
-          data: signal(rootAgent)
+      }
+
+      this.agentBuilderService.addNode(agentData);
+
+      nodeIdCounter++;
+      const currentNodeId = nodeIdCounter.toString();
+
+      const vflowNode: HtmlTemplateDynamicNode = {
+        id: currentNodeId,
+        point: signal({
+          x: (index - 1) * 350 + 50,
+          y: depth * 150 + 50,
+        }),
+        type: 'html-template',
+        data: signal(agentData),
+      };
+
+      if (!parentId) {
+        vflowNode.point.set({ x: 100, y: 150 });
+      }
+
+      nodes.push(vflowNode);
+
+      if (parentId) {
+        edgeIdCounter++;
+        const edge: Edge = {
+          id: edgeIdCounter.toString(),
+          source: parentId,
+          target: currentNodeId,
         };
+        edges.push(edge);
+      }
 
-        this.nodes.set([rootNode])
-
-        if (node.sub_agents && node.sub_agents.length > 0) {
-          index = 1
-          for (const sub of node.sub_agents) {
-            queue.push({ node: sub, parentId: this.nodeId, depth: depth + 1, index: index})
-            index ++;
-          }
+      if (agentData.sub_agents && agentData.sub_agents.length > 0) {
+        let subIndex = 1;
+        for (const sub of agentData.sub_agents) {
+          queue.push({
+            node: sub,
+            parentId: currentNodeId,
+            depth: depth + 1,
+            index: subIndex,
+          });
+          subIndex++;
         }
       }
     }
+
+    this.nodes.set(nodes);
+    this.edges.set(edges);
+    this.nodeId = nodeIdCounter;
+    this.edgeId = edgeIdCounter;
   }
 }

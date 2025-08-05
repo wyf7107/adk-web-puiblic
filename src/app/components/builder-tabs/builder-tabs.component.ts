@@ -158,7 +158,7 @@ export class BuilderTabsComponent {
       } else {
         this.editingCallback = null;
       }
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
 
     this.agentBuilderService.getAgentCallbacks().subscribe(update => {

@@ -16,7 +16,7 @@
  */
 
 import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { AgentNode, ToolNode } from '../../core/models/AgentBuilder';
+import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -32,6 +32,8 @@ import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirma
   standalone: false
 })
 export class BuilderTabsComponent {
+  // Tab indices
+  private readonly CALLBACKS_TAB_INDEX = 3;
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
   @ViewChild(MatTree) matTree!: MatTree<AgentNode>;
 
@@ -48,7 +50,8 @@ export class BuilderTabsComponent {
     model: '',
     instruction: '',
     sub_agents: [],
-    tools: []
+    tools: [],
+    callbacks: []
   };
 
   treeDataSource = new BehaviorSubject<AgentNode[]>([]);
@@ -80,6 +83,18 @@ export class BuilderTabsComponent {
     'Custom tool',
     'Built-in tool',
     'Agent Tool'
+  ];
+
+  // Callback-related properties
+  public editingCallback: CallbackNode | null = null;
+  public selectedCallback: CallbackNode | undefined = undefined;
+  public callbackTypes = [
+    'before_agent',
+    'after_agent',
+    'before_model',
+    'after_model',
+    'before_tool',
+    'after_tool'
   ];
   protected builtInTools = [
     'EnterpriseWebSearchTool',
@@ -123,6 +138,7 @@ export class BuilderTabsComponent {
       this.agentConfig = node;
       if (node) {
         this.editingTool = null;
+        this.editingCallback = null;
         this.header = 'Agent configuration';
         const oldTreeData = this.treeDataSource.value;
         this.treeDataSource.next([]);
@@ -159,6 +175,27 @@ export class BuilderTabsComponent {
       this.cdr.markForCheck();
     });
 
+    this.agentBuilderService.getSelectedCallback().subscribe(callback => {
+      this.selectedCallback = callback;
+      if (callback) {
+        this.selectCallback(callback);
+        this.selectedTabIndex = this.CALLBACKS_TAB_INDEX;
+      } else {
+        this.editingCallback = null;
+      }
+      this.cdr.detectChanges();
+    });
+
+    this.agentBuilderService.getAgentCallbacks().subscribe(update => {
+      if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
+        // Create a new object reference to ensure change detection works with OnPush strategy
+        this.agentConfig = {
+          ...this.agentConfig,
+          callbacks: update.callbacks
+        };
+        this.cdr.detectChanges();
+      }
+    });
     this.agentBuilderService.getSideTabChangeRequest().subscribe(tabName => {
       if (tabName === 'tools') {
         this.selectedTabIndex = 2;
@@ -188,22 +225,83 @@ export class BuilderTabsComponent {
 
   deleteSubAgent(agentName: string) {
     this.agentBuilderService.setDeleteSubAgentSubject(agentName);
+
+  addCallback() {
+    if (this.agentConfig) {
+      const callbackId = Math.floor(Math.random() * 1000);
+      const callback: CallbackNode = {
+        name: `callback_${callbackId}`,
+        type: 'before_agent',
+        code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
+        description: 'Auto-generated callback'
+      };
+      const result = this.agentBuilderService.addCallback(this.agentConfig.name, callback);
+      if (!result.success) {
+        console.error('Failed to add callback:', result.error);
+      }
+    }
   }
 
-  deleteTool(agentName: string, tool: any) {
+  deleteCallback(agentName: string, callback: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: { 
-        title: 'Delete Tool',
-        message: `Are you sure you want to delete ${tool.name}?`,
+        title: 'Delete Callback',
+        message: `Are you sure you want to delete ${callback.name}?`,
         confirmButtonText: 'Delete'
       },
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
-        this.agentBuilderService.deleteTool(agentName, tool);
+        const deleteResult = this.agentBuilderService.deleteCallback(agentName, callback);
+        if (!deleteResult.success) {
+          console.error('Failed to delete callback:', deleteResult.error);
+        } else {
+          // Force change detection to update the UI immediately
+          this.cdr.detectChanges();
+        }
       }
     });
+  }
+
+  deleteSubAgent(agentName: string) {
+    this.agentBuilderService.setDeleteSubAgentSubject(agentName);
+  }
+
+  deleteTool(agentName: string, tool: any) {
+    const isAgentTool = tool.toolType === 'Agent Tool';
+    const toolDisplayName = isAgentTool ? (tool.toolAgentName || tool.name) : tool.name;
+    
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: { 
+        title: isAgentTool ? 'Delete Agent Tool' : 'Delete Tool',
+        message: isAgentTool 
+          ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding tab.`
+          : `Are you sure you want to delete ${toolDisplayName}?`,
+        confirmButtonText: 'Delete'
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        // Check if this is an agent tool that needs tab deletion
+        if (tool.toolType === 'Agent Tool') {
+          const agentToolName = tool.toolAgentName || tool.name;
+          this.deleteAgentToolAndTab(agentName, tool, agentToolName);
+        } else {
+          // Regular tool deletion
+          this.agentBuilderService.deleteTool(agentName, tool);
+        }
+      }
+    });
+  }
+
+  deleteAgentToolAndTab(agentName: string, tool: any, agentToolName: string) {
+    // First, delete the tool from the agent
+    this.agentBuilderService.deleteTool(agentName, tool);
+
+    // Request the canvas to delete the tab
+    this.agentBuilderService.requestTabDeletion(agentToolName);
   }
   
   backToToolList() {
@@ -263,6 +361,21 @@ export class BuilderTabsComponent {
         }
         this.cdr.markForCheck();
       });
+    }
+  }
+
+  selectCallback(callback: CallbackNode) {
+    this.editingCallback = callback;
+  }
+  
+  backToCallbackList() {
+    this.editingCallback = null;
+  }
+
+  onCallbackTypeChange(callback: CallbackNode | undefined | null) {
+    if (callback) {
+      // Type is already set by the select binding
+      // Additional logic can be added here if needed
     }
   }
 

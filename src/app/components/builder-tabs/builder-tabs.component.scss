@@ -267,3 +267,32 @@
     }
   }
 }
+
+.no-callbacks-message {
+  color: #9aa0a6;
+  font-size: 16px;
+  margin-top: 16px;
+  text-align: center;
+}
+
+.callback-name {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.callback-section {
+  margin-top: 16px;
+
+  .callback-section-label {
+    margin: 0 0 8px 0;
+    color: #9aa0a6;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+  }
+}

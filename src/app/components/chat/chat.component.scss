@@ -454,15 +454,14 @@ button {
 }
 
 .resize-handler {
-  background: #5f6368;
-  width: 4px;
-  border-radius: 4px;
   position: absolute;
-  display: block;
-  height: 20%;
   top: 40%;
-  right: 0;
-  z-index: 9999;
+  height: 20%;
+  width: 4px;
+  margin-left: 4px; 
+  background: #5f6368;
+  border-radius: 4px;
+  z-index: 9999; 
   cursor: ew-resize;
 }
 

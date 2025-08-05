@@ -254,6 +254,14 @@ export class BuilderTabsComponent {
     });
   }
 
+  addSubAgent(parentAgentName: string|undefined) {
+    if (!parentAgentName) {
+      return ;
+    }
+    
+    this.agentBuilderService.setAddSubAgentSubject(parentAgentName);
+  }
+
   deleteSubAgent(agentName: string) {
     this.agentBuilderService.setDeleteSubAgentSubject(agentName);
   }

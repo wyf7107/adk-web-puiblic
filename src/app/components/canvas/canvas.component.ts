@@ -143,8 +143,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.getDeleteSubAgentSubject().subscribe((agentName) => {
       if (!agentName) {
         return ;
-      }   
+      }
+      
       this.openDeleteSubAgentDialog(agentName);
+    });
+
+    this.agentBuilderService.getAddSubAgentSubject().subscribe((parentAgentName) => {
+      this.addSubAgent(parentAgentName);
     });
   }
 
@@ -182,14 +187,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     // This method can be used for general resource addition logic
   }
 
-  addSubAgent(parentNodeId: string, event: MouseEvent) {
-    const nodeElement = (event.target as HTMLElement).closest('.custom-node') as HTMLElement;
-    if (!nodeElement) return;
-
-    const nodeHeight = nodeElement.offsetHeight;
-
+  addSubAgent(parentAgentName: string) {
     // Find the parent node
-    const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
+    const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.data && node.data().name === parentAgentName) as HtmlTemplateDynamicNode;
     if (!parentNode || !parentNode.data) return;
 
     // Create a new sub-agent node
@@ -211,7 +211,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       id: `sub_agent_${this.nodeId}`,
       point: signal({ 
         x: parentNode.point().x + subAgentIndex * 400 + 50, 
-        y: parentNode.point().y + nodeHeight + 50 // Position below the parent
+        y: parentNode.point().y + 150 + 50 // Position below the parent
       }),
       type: 'html-template',
       data: signal(agentNodeData)
@@ -231,7 +231,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.edgeId++;
     const edge: Edge = {
       id: this.edgeId.toString(),
-      source: parentNodeId,
+      source: parentNode.id,
       target: subAgentNode.id,
     };
 

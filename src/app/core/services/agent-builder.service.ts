@@ -18,6 +18,7 @@ export class AgentBuilderService {
   private agentCallbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
   private tabDeletionSubject = new BehaviorSubject<string|undefined>(undefined);
   private deleteSubAgentSubject = new BehaviorSubject<string>('');
+  private addSubAgentSubject = new BehaviorSubject<string>('');
   private tabChangeSubject = new BehaviorSubject<string|undefined>(undefined);
 
   constructor() { }
@@ -237,6 +238,14 @@ export class AgentBuilderService {
 
   setDeleteSubAgentSubject(agentName: string) {
     this.deleteSubAgentSubject.next(agentName);
+  }
+
+  getAddSubAgentSubject(): Observable<string> {
+    return this.addSubAgentSubject.asObservable();
+  }
+
+  setAddSubAgentSubject(agentName: string) {
+    this.addSubAgentSubject.next(agentName);
   }
 
   setAgentTools(agentName?: string, tools?: ToolNode[]) {

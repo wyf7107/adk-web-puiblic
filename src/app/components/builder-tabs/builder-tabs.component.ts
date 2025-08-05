@@ -20,7 +20,6 @@ import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilde
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { MatTree } from '@angular/material/tree'; // Import MatTree component type
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 
@@ -35,7 +34,6 @@ export class BuilderTabsComponent {
   // Tab indices
   private readonly CALLBACKS_TAB_INDEX = 3;
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
-  @ViewChild(MatTree) matTree!: MatTree<AgentNode>;
 
   protected toolArgsString = signal('');
   editingToolArgs = signal(false);
@@ -53,12 +51,6 @@ export class BuilderTabsComponent {
     tools: [],
     callbacks: []
   };
-
-  treeDataSource = new BehaviorSubject<AgentNode[]>([]);
-
-  childrenAccessor = (node: AgentNode) => node.sub_agents ?? [];
-
-  hasChild = (_: number, node: AgentNode) => (!!node.sub_agents && node.sub_agents.length > 0) || !!node.isRoot;
 
   // Agent configuration options
   isRootAgentEditable: boolean = true;
@@ -137,21 +129,7 @@ export class BuilderTabsComponent {
         this.editingTool = null;
         this.editingCallback = null;
         this.header = 'Agent configuration';
-        const oldTreeData = this.treeDataSource.value;
-        this.treeDataSource.next([]);
-        this.treeDataSource.next([node]);
         this.cdr.markForCheck();
-        setTimeout(() => {
-          // Code to execute after 100 milliseconds
-          // Open the root node by default
-          if (oldTreeData.length == 0) {
-            this.matTree.expand(node);
-          }
-
-          // Refresh the tree node once data gets updated
-          this.matTree.toggle(node);
-          this.matTree.toggle(node);
-        }, 100);
        }
     });
 
@@ -379,10 +357,6 @@ export class BuilderTabsComponent {
       // Type is already set by the select binding
       // Additional logic can be added here if needed
     }
-  }
-
-  trackByFn(index: number, node: AgentNode): string {
-    return node.name;
   }
 
   createAgentTool() {

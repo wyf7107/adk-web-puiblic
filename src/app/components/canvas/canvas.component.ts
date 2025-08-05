@@ -144,7 +144,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       if (!agentName) {
         return ;
       }
-
+      
       this.openDeleteSubAgentDialog(agentName);
     });
 

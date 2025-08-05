@@ -219,13 +219,7 @@ export class BuilderTabsComponent {
     }
   }
 
-  addSubAgent(parentAgentName: string|undefined) {
-    this.agentBuilderService.setAddSubAgentSubject(parentAgentName ?? '');
-  }
-
-  deleteSubAgent(agentName: string) {
-    this.agentBuilderService.setDeleteSubAgentSubject(agentName);
-
+<<<<<<<<< Temporary merge branch 1
   addCallback() {
     if (this.agentConfig) {
       const callbackId = Math.floor(Math.random() * 1000);

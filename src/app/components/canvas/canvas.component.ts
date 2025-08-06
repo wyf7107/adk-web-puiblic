@@ -63,6 +63,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   callbackId = 1;
   toolId = 1;
 
+  public appName = '';
+
   public nodes = signal<HtmlTemplateDynamicNode[]>([]);
 
   public edges = signal<Edge[]>([]);
@@ -90,6 +92,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
     });
+    this.agentService.getApp().subscribe((app) => {
+      this.appName = app;
+      console.log(this.appName)
+    });
   }
 
   ngOnInit() {
@@ -101,7 +107,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         const availableTabs = this.availableTabs();
         if (availableTabs.includes(tabName)) {
           // Tab exists, just switch to it
-          this.selectTab(tabName);
+          this.selectTab(this.appName, tabName);
         } else {
           // Tab doesn't exist, create new tab
           this.addNewTab(tabName, currentAgentName);
@@ -411,7 +417,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       const availableTabs = this.availableTabs();
       
       if (availableTabs.includes(agentToolName)) {
-        this.selectTab(agentToolName);
+        this.selectTab(this.appName, agentToolName);
         return;
       } else {
         console.log('Tab not found:', agentToolName);
@@ -524,7 +530,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.processAgentToolsFromYaml(rootAgent.tools || [], appName);
       
       // Load the root agent tab
-      this.loadAgentForTab('root_agent');
+      this.loadAgentForTab(this.appName, 'root_agent');
       
     } catch (error) {
       console.error('Error parsing YAML:', error);
@@ -621,7 +627,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
               model: yamlData.model || 'gemini-2.5-flash',
               instruction: yamlData.instruction || `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
               isRoot: false,
-              sub_agents: [],
+              sub_agents: yamlData.sub_agents || [],
               tools: this.parseToolsFromYaml(yamlData.tools || []),
               callbacks: this.parseCallbacksFromYaml(yamlData)
             };
@@ -700,17 +706,17 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     return this.selectedAgents.includes(node);
   }
 
-  selectTab(tabName: string) {
+  selectTab(appName: string, tabName: string) {
     this.isTabSwitching = true;
     this.selectedTab.set(tabName);
-    this.loadAgentForTab(tabName);
+    this.loadAgentForTab(appName, tabName);
     // Reset the flag after a short delay to allow the UI to update
     setTimeout(() => {
       this.isTabSwitching = false;
     }, 100);
   }
 
-  loadAgentForTab(tabName: string) {
+  loadAgentForTab(appName: string, tabName: string) {
     const tabAgents = this.tabAgents();
     const agent = tabAgents.get(tabName);
     if (agent) {
@@ -737,8 +743,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       
       // Load sub-agents if any
       if (agent.sub_agents && agent.sub_agents.length > 0) {
-        console.log(agent.sub_agents)
-        this.loadSubAgents(agent);
+        this.loadSubAgents(appName, agent);
       } else {
         // Create a single node for the agent
         const agentNode: HtmlTemplateDynamicNode = {
@@ -779,7 +784,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.addAgentToolToAgent(tabName, targetAgentName);
 
       // Auto-select the new tab
-      this.selectTab(tabName);
+      this.selectTab(this.appName, tabName);
     }
   }
 
@@ -874,7 +879,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // If the deleted tab was selected, switch to root_agent
     if (this.selectedTab() === agentToolName) {
-      this.selectTab('root_agent');
+      this.selectTab(this.appName, 'root_agent');
     }
   }
 
@@ -903,11 +908,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // If the deleted tab was selected, switch to root_agent
     if (this.selectedTab() === tabName) {
-      this.selectTab('root_agent');
+      this.selectTab(this.appName, 'root_agent');
     }
   }
 
-  async loadSubAgents(rootAgent: AgentNode) {
+  async loadSubAgents(appName: string, rootAgent: AgentNode) {
     type BFSItem = {
       node: AgentNode;
       depth: number;
@@ -915,7 +920,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       parentId?: string;
       parentAgent?: AgentNode;
     };
-    const appName = rootAgent.name;
     const queue: BFSItem[] = [{ node: rootAgent, depth: 1, index: 1, parentId: undefined, parentAgent: undefined }];
 
     const nodes: HtmlTemplateDynamicNode[] = [];
@@ -931,7 +935,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         try {
           const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config_path));
           agentData = parse(subAgentData) as AgentNode;
-          agentData.tools = this.parseToolsFromYaml(agentData.tools || []);
+          if (agentData.tools) {
+            agentData.tools = this.parseToolsFromYaml(agentData.tools || [])
+          }
           this.processAgentToolsFromYaml(agentData.tools || [], appName);
         } catch (e) {
           console.error(`Failed to load agent from ${node.config_path}`, e);

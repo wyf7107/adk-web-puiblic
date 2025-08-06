@@ -192,11 +192,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.data && node.data().name === parentAgentName) as HtmlTemplateDynamicNode;
     if (!parentNode || !parentNode.data) return;
 
-    // Create a new sub-agent node
-    this.nodeId++;
+    const newAgentName = this.agentBuilderService.getNextSubAgentName();
 
     const agentNodeData: AgentNode = {
-        name: `sub_agent_${this.nodeId}`,
+        name: newAgentName,
         agent_class: 'LlmAgent',
         model: 'gemini-2.5-flash',
         instruction: 'You are a sub-agent that performs specialized tasks.',
@@ -208,7 +207,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const subAgentIndex = parentNode.data().sub_agents.length;
 
     const subAgentNode: HtmlTemplateDynamicNode = {
-      id: `sub_agent_${this.nodeId}`,
+      id: newAgentName,
       point: signal({ 
         x: parentNode.point().x + subAgentIndex * 400 + 50, 
         y: parentNode.point().y + 150 + 50 // Position below the parent

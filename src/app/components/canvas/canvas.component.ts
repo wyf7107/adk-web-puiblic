@@ -706,17 +706,17 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     return this.selectedAgents.includes(node);
   }
 
-  selectTab(appName: string, tabName: string) {
+  async selectTab(appName: string, tabName: string) {
     this.isTabSwitching = true;
     this.selectedTab.set(tabName);
-    this.loadAgentForTab(appName, tabName);
+    await this.loadAgentForTab(appName, tabName);
     // Reset the flag after a short delay to allow the UI to update
     setTimeout(() => {
       this.isTabSwitching = false;
     }, 100);
   }
 
-  loadAgentForTab(appName: string, tabName: string) {
+  async loadAgentForTab(appName: string, tabName: string) {
     const tabAgents = this.tabAgents();
     const agent = tabAgents.get(tabName);
     if (agent) {
@@ -731,7 +731,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       // Load the agent for this tab
       this.loadAgentTools(agent);
       this.agentBuilderService.addNode(agent);
-      this.agentBuilderService.setSelectedNode(agent);
       
       // Update agent tools in the service only if there are actual tools
       if (agent.tools && agent.tools.length > 0) {
@@ -743,7 +742,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       
       // Load sub-agents if any
       if (agent.sub_agents && agent.sub_agents.length > 0) {
-        this.loadSubAgents(appName, agent);
+        await this.loadSubAgents(appName, agent);
       } else {
         // Create a single node for the agent
         const agentNode: HtmlTemplateDynamicNode = {
@@ -754,6 +753,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         };
         this.nodes.set([agentNode]);
       }
+      this.agentBuilderService.setSelectedNode(agent);
     }
   }
 

@@ -355,7 +355,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       return ;
     }
 
-    const parentNode = this.agentBuilderService.getParentNode(this.agentBuilderService.getRootNode(), currentNode, undefined);
+    const parentNode = this.agentBuilderService.getParentNode(
+      this.agentBuilderService.getRootNode(), 
+      currentNode, 
+      undefined, 
+      this.tabAgents()
+    );
 
     if (!parentNode) {
       return ;

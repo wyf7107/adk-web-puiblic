@@ -59,8 +59,8 @@
                 aria-label="Add sub-agent">
                 <mat-icon>smart_toy</mat-icon>
               </button>
-              @if (!isRootAgent(ctx.node.data()?.name)) {
-                <button matIconButton class="action-btn add-subagent-btn" (click)="openDeleteSubAgentDialog(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Add sub-agent"
+              @if (!isRootAgentForCurrentTab(ctx.node.data()?.name)) {
+                <button matIconButton class="action-btn add-subagent-btn" (click)="openDeleteSubAgentDialog(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Delete sub-agent"
                   aria-label="Delete sub-agent">
                   <mat-icon>delete</mat-icon>
                 </button>

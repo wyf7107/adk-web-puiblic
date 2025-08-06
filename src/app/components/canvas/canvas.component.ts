@@ -495,6 +495,18 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     return rootAgent.name === agentName;
   }
 
+  isRootAgentForCurrentTab(agentName: string): boolean {
+    const currentTab = this.selectedTab();
+    
+    // If we're in the root_agent tab, use the global root agent logic
+    if (currentTab === 'root_agent') {
+      return this.isRootAgent(agentName);
+    }
+    
+    // For other tabs, the agent with the same name as the tab is the root agent for that tab
+    return agentName === currentTab;
+  }
+
   loadFromYaml(yamlContent: string, appName: string) {
     try {
       // Parse the YAML content

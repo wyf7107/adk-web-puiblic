@@ -19,7 +19,18 @@ import { AgentNode, ToolNode, CallbackNode, YamlConfig  } from "../app/core/mode
 import * as YAML from 'yaml';
 
 export class YamlUtils {
-  static generateYamlFile(agentNode: AgentNode, formData: FormData, appName: string) {
+  static generateYamlFile(
+    agentNode: AgentNode,
+    formData: FormData,
+    appName: string,
+    allTabAgents: Map<string, AgentNode>,
+    processedAgents: Set<string> = new Set(),
+  ) {
+    if (processedAgents.has(agentNode.name)) {
+      return;
+    }
+    processedAgents.add(agentNode.name);
+
     const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
 
     const folderName = `${appName}/${fileName}`;
@@ -50,42 +61,26 @@ export class YamlUtils {
 
     // Generate YAML files for sub-agents
     for (const subNode of agentNode.sub_agents ?? []) {
-      this.generateYamlFile(subNode, formData, appName);
+      this.generateYamlFile(subNode, formData, appName, allTabAgents, processedAgents);
     }
 
-         // Generate YAML files for agent tools
-     if (agentNode.tools) {
-       for (const tool of agentNode.tools) {
-         if (tool.toolType === 'Agent Tool') {
-                       // Get the actual agent name from the tool (before it was changed to "AgentTool")
-            let actualAgentName = tool.toolAgentName || tool.name;
-           
-           // Skip if the agent name is empty, undefined, or "undefined"
-           if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
-             continue;
-           }
-           
-           // Create a default agent configuration for the agent tool
-           const agentToolConfig: YamlConfig = {
-             name: actualAgentName,
-             model: 'gemini-2.5-flash',
-             agent_class: 'LlmAgent',
-             description: '',
-             instruction: `You are the ${actualAgentName} agent that can be used as a tool by other agents.`,
-             sub_agents: [],
-             tools: []
-           };
-
-           const agentToolFileName = `${actualAgentName}.yaml`;
-           const agentToolFolderName = `${appName}/${agentToolFileName}`;
-           const agentToolYamlString = YAML.stringify(agentToolConfig);
-           const agentToolBlob = new Blob([agentToolYamlString], { type: 'application/x-yaml' });
-           const agentToolFile = new File([agentToolBlob], agentToolFolderName, { type: 'application/x-yaml' });
-           
-           formData.append('files', agentToolFile);
-         }
-       }
-     }
+    // Generate YAML files for agent tools
+    if (agentNode.tools) {
+      for (const tool of agentNode.tools) {
+        if (tool.toolType === 'Agent Tool') {
+          const actualAgentName = tool.toolAgentName || tool.name;
+          
+          if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
+            continue;
+          }
+          
+          const agentToolNode = allTabAgents.get(actualAgentName);
+          if (agentToolNode) {
+            this.generateYamlFile(agentToolNode, formData, appName, allTabAgents, processedAgents);
+          }
+        }
+      }
+    }
   }
 
   static buildToolsConfig(tools: ToolNode[] | undefined): any[] {

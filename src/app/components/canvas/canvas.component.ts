@@ -468,9 +468,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     // Generate YAML for all agents in tabAgents
     const tabAgents = this.tabAgents();
     
-    for (const [tabName, agent] of tabAgents) {
-      YamlUtils.generateYamlFile(agent, formData, appName);
-    }
+    YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {

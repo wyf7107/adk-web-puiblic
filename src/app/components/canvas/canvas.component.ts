@@ -642,7 +642,19 @@ export class CanvasComponent implements AfterViewInit, OnInit {
             
             // Process nested agent tools recursively
             this.processAgentToolsFromYaml(agentToolAgent.tools || [], appName);
-            
+
+            if (agentToolAgent.sub_agents && agentToolAgent.sub_agents.length > 0) {
+              for (const subAgent of agentToolAgent.sub_agents) {
+                if (subAgent.config_path) {
+                  this.agentService.getSubAgentBuilder(appName, subAgent.config_path).subscribe(a => {
+                    if (a) {
+                      const yamlData = YAML.parse(a) as AgentNode;
+                      this.processAgentToolsFromYaml(this.parseToolsFromYaml(yamlData.tools || []), appName)
+                    }
+                  })
+                }
+              }
+            }
           } catch (error) {
             console.error(`Error parsing YAML for agent tool ${agentToolName}:`, error);
             // Fallback to default configuration
@@ -938,6 +950,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           if (agentData.tools) {
             agentData.tools = this.parseToolsFromYaml(agentData.tools || [])
           }
+
           this.processAgentToolsFromYaml(agentData.tools || [], appName);
         } catch (e) {
           console.error(`Failed to load agent from ${node.config_path}`, e);

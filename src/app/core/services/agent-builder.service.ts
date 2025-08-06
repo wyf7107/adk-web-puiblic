@@ -256,6 +256,10 @@ export class AgentBuilderService {
   setAgentTools(agentName?: string, tools?: ToolNode[]) {
     if (agentName && tools) {
       this.agentToolsSubject.next({ agentName, tools });
+      const currentMap = this.agentToolsMapSubject.value;
+      const newMap = new Map(currentMap);
+      newMap.set(agentName, tools);
+      this.agentToolsMapSubject.next(newMap);
     } else {
       this.agentToolsSubject.next(undefined);
     }

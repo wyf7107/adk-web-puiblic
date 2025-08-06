@@ -93,13 +93,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   ngOnInit() {
-    this.agentBuilderService.getLoadedAgentData().subscribe(agent => {
-      this.existingAgent = agent;
-      this.loadAgent();
-      // Load the initial agent for the root tab
-      this.loadAgentForTab('root_agent');
-    });
-
     // Listen for new tab requests
     this.agentBuilderService.getNewTabRequest().subscribe(request => {
       if (request) {
@@ -411,19 +404,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   }
 
   selectTool(tool: any, node: HtmlTemplateDynamicNode) {
-    console.log('selectTool called with tool:', tool);
-    console.log('tool.toolType:', tool.toolType);
-    
     // Check if this is an agent tool chip
     if (tool.toolType === 'Agent Tool') {
-      console.log('Agent tool detected, switching to tab:', tool.name);
       // Switch to the corresponding agent tool tab
       const agentToolName = tool.name;
       const availableTabs = this.availableTabs();
-      console.log('Available tabs:', availableTabs);
       
       if (availableTabs.includes(agentToolName)) {
-        console.log('Tab found, switching to:', agentToolName);
         this.selectTab(agentToolName);
         return;
       } else {
@@ -502,23 +489,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     return rootAgent.name === agentName;
   }
 
-  async loadAgent() {
-    if (!this.existingAgent) { return; }
-    this.nodeId = 1;
-    this.edgeId = 1;
-    const rootAgent = parse(this.existingAgent) as AgentNode;
-    rootAgent.isRoot = true;
-    this.loadAgentTools(rootAgent);
-    await this.loadSubAgents(rootAgent);
-    this.agentBuilderService.addNode(rootAgent);
-    this.agentBuilderService.setSelectedNode(rootAgent);
-    
-    // Store the root agent in tabAgents
-    const currentTabAgents = this.tabAgents();
-    currentTabAgents.set('root_agent', rootAgent);
-    this.tabAgents.set(currentTabAgents);
-  }
-
   loadFromYaml(yamlContent: string, appName: string) {
     try {
       // Parse the YAML content
@@ -536,7 +506,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         model: yamlData.model || 'gemini-2.5-flash',
         instruction: yamlData.instruction || '',
         isRoot: true,
-        sub_agents: [],
+        sub_agents: yamlData.sub_agents || [],
         tools: this.parseToolsFromYaml(yamlData.tools || []),
         callbacks: this.parseCallbacksFromYaml(yamlData)
       };
@@ -711,7 +681,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     } else {
       // Filter out any tools with empty names
       agent.tools = agent.tools.filter(tool => tool.name && tool.name.trim() !== '');
-      
       agent.tools.map(tool => {
         // Preserve Agent Tool type if already set
         if (tool.toolType === 'Agent Tool') {
@@ -744,7 +713,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   loadAgentForTab(tabName: string) {
     const tabAgents = this.tabAgents();
     const agent = tabAgents.get(tabName);
-    
     if (agent) {
       // Clear existing nodes and edges
       this.nodes.set([]);
@@ -769,6 +737,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       
       // Load sub-agents if any
       if (agent.sub_agents && agent.sub_agents.length > 0) {
+        console.log(agent.sub_agents)
         this.loadSubAgents(agent);
       } else {
         // Create a single node for the agent
@@ -816,32 +785,30 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
   addAgentToolToAgent(agentToolName: string, targetAgentName: string) {
     // Get the target agent
-    const targetAgent = this.tabAgents().get(targetAgentName);
+    const targetAgent = this.agentBuilderService.getNode(targetAgentName);
     
     if (targetAgent) {
       // Check if the tool already exists
       if (targetAgent.tools && targetAgent.tools.some(tool => tool.name === agentToolName)) {
         return; // Tool already exists, don't add duplicate
       }
-
       // Create a tool node for the agent tool
       const agentTool: ToolNode = {
         name: agentToolName,
         toolType: 'Agent Tool',
         toolAgentName: agentToolName // Use the agent name as the tool agent name
       };
-
       // Add the tool to the target agent
       if (!targetAgent.tools) {
         targetAgent.tools = [];
       }
       targetAgent.tools.push(agentTool);
+      targetAgent.tools = targetAgent.tools.filter(tool => tool.name && tool.name.trim() !== '');
 
       // Update the target agent in tabAgents
       const currentTabAgents = this.tabAgents();
       currentTabAgents.set(targetAgentName, targetAgent);
       this.tabAgents.set(currentTabAgents);
-
       // Update the agent builder service with the complete tools array
       this.agentBuilderService.setAgentTools(targetAgentName, targetAgent.tools);
     }
@@ -964,6 +931,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         try {
           const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config_path));
           agentData = parse(subAgentData) as AgentNode;
+          agentData.tools = this.parseToolsFromYaml(agentData.tools || []);
+          this.processAgentToolsFromYaml(agentData.tools || [], appName);
         } catch (e) {
           console.error(`Failed to load agent from ${node.config_path}`, e);
           continue;

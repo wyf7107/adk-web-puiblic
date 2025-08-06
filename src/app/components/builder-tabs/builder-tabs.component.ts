@@ -377,11 +377,6 @@ export class BuilderTabsComponent {
         // Determine the correct agent name for tab storage
         let currentAgentName = this.agentConfig?.name || 'root_agent';
         
-        // If we're in the root agent tab, use 'root_agent' as the key
-        if (this.agentConfig?.isRoot) {
-          currentAgentName = 'root_agent';
-        }
-        
         this.agentBuilderService.requestNewTab(result, currentAgentName);
       }
     });

@@ -75,7 +75,7 @@
             (click)="enterBuilderMode()"
             class="build-mode-button"
             matTooltip="Switch to Builder Mode"
-            [disabled]="disableBuilderSwitch"
+            [disabled]="!selectedAppControl.value || disableBuilderSwitch"
           >
             Edit
           </button>

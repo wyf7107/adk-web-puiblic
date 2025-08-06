@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +16,6 @@
  */
 
 import {Component} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
-import {SessionService} from './core/services/session.service';
 
 @Component({
   selector: 'app-root',
@@ -24,11 +23,4 @@ import {SessionService} from './core/services/session.service';
   styleUrl: './app.component.scss',
   standalone: false,
 })
-export class AppComponent {
-  title = 'agent_framework_web';
-  userId: string = '';
-  appName: string = '';
-  sessionId: string = '';
-
-  constructor() {}
-}
+export class AppComponent {}

@@ -19,7 +19,18 @@ import { AgentNode, ToolNode, YamlConfig  } from "../app/core/models/AgentBuilde
 import * as YAML from 'yaml';
 
 export class YamlUtils {
-  static generateYamlFile(agentNode: AgentNode, formData: FormData, appName: string) {
+  static generateYamlFile(
+    agentNode: AgentNode,
+    formData: FormData,
+    appName: string,
+    allTabAgents: Map<string, AgentNode>,
+    processedAgents: Set<string> = new Set(),
+  ) {
+    if (processedAgents.has(agentNode.name)) {
+      return;
+    }
+    processedAgents.add(agentNode.name);
+
     const fileName = agentNode.isRoot ? 'root_agent.yaml' : `${agentNode.name}.yaml`;
 
     const folderName = `${appName}/${fileName}`;
@@ -43,8 +54,29 @@ export class YamlUtils {
     formData.append('files', file);
 
     for (const subNode of agentNode.sub_agents ?? []) {
-      this.generateYamlFile(subNode, formData, appName);
+      this.generateYamlFile(subNode, formData, appName, allTabAgents, processedAgents);
     }
+<<<<<<< HEAD
+=======
+
+    // Generate YAML files for agent tools
+    if (agentNode.tools) {
+      for (const tool of agentNode.tools) {
+        if (tool.toolType === 'Agent Tool') {
+          const actualAgentName = tool.toolAgentName || tool.name;
+          
+          if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
+            continue;
+          }
+          
+          const agentToolNode = allTabAgents.get(actualAgentName);
+          if (agentToolNode) {
+            this.generateYamlFile(agentToolNode, formData, appName, allTabAgents, processedAgents);
+          }
+        }
+      }
+    }
+>>>>>>> a738bd519c9f54c1542258d46e68aad746afb290
   }
 
   static buildToolsConfig(tools: ToolNode[] | undefined): any[] {

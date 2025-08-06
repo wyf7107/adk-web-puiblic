@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +16,33 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import {AppModule} from '../../../../app.module';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog.component';
 
 describe('AddEvalSessionDialogComponent', () => {
   let component: AddEvalSessionDialogComponent;
   let fixture: ComponentFixture<AddEvalSessionDialogComponent>;
+  const mockDialogRef = {
+    close: jasmine.createSpy('close'),
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AddEvalSessionDialogComponent],
+      declarations: [AddEvalSessionDialogComponent],
+      imports: [AppModule, MatDialogModule],
+      providers: [
+        {provide: MatDialogRef, useValue: mockDialogRef},
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {},
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AddEvalSessionDialogComponent);

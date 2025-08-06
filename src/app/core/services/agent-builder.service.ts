@@ -7,6 +7,7 @@ import { AgentNode, ToolNode, CallbackNode } from '../models/AgentBuilder';
 })
 export class AgentBuilderService {
   private nodes: AgentNode[] = [];
+  private subAgentIdCounter = 1;
 
   private selectedToolSubject = new BehaviorSubject<any | undefined>(undefined);
   private selectedNodeSubject = new BehaviorSubject<AgentNode|undefined>(undefined);
@@ -50,6 +51,18 @@ export class AgentBuilderService {
     } else {
       this.nodes.push(newNode);
     }
+
+    // If a new node's name matches the sub-agent pattern, update the counter
+    // to avoid name collisions.
+    const subAgentNamePattern = /^sub_agent_(\d+)$/;
+    const match = newNode.name.match(subAgentNamePattern);
+    if (match) {
+      const numericPart = parseInt(match[1], 10);
+      if (numericPart >= this.subAgentIdCounter) {
+        this.subAgentIdCounter = numericPart + 1;
+      }
+    }
+
     const currentMap = this.agentToolsMapSubject.value;
     const newMap = new Map(currentMap);
     newMap.set(newNode.name, newNode.tools || []);
@@ -63,6 +76,7 @@ export class AgentBuilderService {
 
   clear() {
     this.nodes = [];
+    this.subAgentIdCounter = 1;
     this.setSelectedNode(undefined);
     this.setSelectedTool(undefined);
     this.agentToolsMapSubject.next(new Map());
@@ -93,6 +107,10 @@ export class AgentBuilderService {
 
   setSelectedCallback(callback: CallbackNode | undefined) {
     this.selectedCallbackSubject.next(callback);
+  }
+
+  getNextSubAgentName(): string {
+    return `sub_agent_${this.subAgentIdCounter++}`;
   }
 
   addTool(agentName: string, tool: ToolNode) {
@@ -277,20 +295,36 @@ export class AgentBuilderService {
     }
   }
 
-  getParentNode(current: AgentNode|undefined, target: AgentNode, parent: AgentNode|undefined): AgentNode|undefined {
+  getParentNode(current: AgentNode | undefined, target: AgentNode, parent: AgentNode | undefined, allTabAgents: Map<string, AgentNode>): AgentNode | undefined {
     if (!current) {
-        return undefined;
-    }
-    
-    if (current.name === target.name) {
-        return parent;
+      return undefined;
     }
 
+    if (current.name === target.name) {
+      return parent;
+    }
+
+    // Search within sub-agents
     for (const subNode of current.sub_agents) {
-        const foundParent = this.getParentNode(subNode, target, current);
-        if (foundParent) {
-            return foundParent;
+      const foundParent = this.getParentNode(subNode, target, current, allTabAgents);
+      if (foundParent) {
+        return foundParent;
+      }
+    }
+
+    // Search within agent tools
+    if (current.tools) {
+      for (const tool of current.tools) {
+        if (tool.toolType === 'Agent Tool') {
+          const agentToolNode = allTabAgents.get(tool.toolAgentName || tool.name);
+          if (agentToolNode) {
+            const foundParent = this.getParentNode(agentToolNode, target, current, allTabAgents);
+            if (foundParent) {
+              return foundParent;
+            }
+          }
         }
+      }
     }
 
     return undefined;

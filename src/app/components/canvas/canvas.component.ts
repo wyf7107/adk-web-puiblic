@@ -192,11 +192,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.data && node.data().name === parentAgentName) as HtmlTemplateDynamicNode;
     if (!parentNode || !parentNode.data) return;
 
-    // Create a new sub-agent node
-    this.nodeId++;
+    const newAgentName = this.agentBuilderService.getNextSubAgentName();
 
     const agentNodeData: AgentNode = {
-        name: `sub_agent_${this.nodeId}`,
+        name: newAgentName,
         agent_class: 'LlmAgent',
         model: 'gemini-2.5-flash',
         instruction: 'You are a sub-agent that performs specialized tasks.',
@@ -208,7 +207,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const subAgentIndex = parentNode.data().sub_agents.length;
 
     const subAgentNode: HtmlTemplateDynamicNode = {
-      id: `sub_agent_${this.nodeId}`,
+      id: newAgentName,
       point: signal({ 
         x: parentNode.point().x + subAgentIndex * 400 + 50, 
         y: parentNode.point().y + 150 + 50 // Position below the parent
@@ -298,16 +297,20 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
-        // Check if this is an agent tool that needs tab deletion
-        if (tool.toolType === 'Agent Tool') {
-          const agentToolName = tool.toolAgentName || tool.name;
-          this.deleteAgentToolAndTab(agentName, tool, agentToolName);
-        } else {
-          // Regular tool deletion
-          this.agentBuilderService.deleteTool(agentName, tool);
-        }
+        this.deleteToolWithoutDialog(agentName, tool);
       }
     });
+  }
+
+  private deleteToolWithoutDialog(agentName: string, tool: any) {
+    // Check if this is an agent tool that needs tab deletion
+    if (tool.toolType === 'Agent Tool') {
+      const agentToolName = tool.toolAgentName || tool.name;
+      this.deleteAgentToolAndTab(agentName, tool, agentToolName);
+    } else {
+      // Regular tool deletion
+      this.agentBuilderService.deleteTool(agentName, tool);
+    }
   }
 
   deleteCallback(agentName: string, callback: any) {
@@ -356,7 +359,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       return ;
     }
 
-    const parentNode = this.agentBuilderService.getParentNode(this.agentBuilderService.getRootNode(), currentNode, undefined);
+    const parentNode = this.agentBuilderService.getParentNode(
+      this.agentBuilderService.getRootNode(), 
+      currentNode, 
+      undefined, 
+      this.tabAgents()
+    );
 
     if (!parentNode) {
       return ;
@@ -388,7 +396,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // it's leaf node
     for (const tool of agentNode.tools ?? []) {
-      this.deleteTool(agentNode.name, tool);
+      this.deleteToolWithoutDialog(agentNode.name, tool);
     }
 
     const subAgentNodeId = this.nodes().find(node => node.data && node.data().name === agentNode.name)?.id;
@@ -468,9 +476,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     // Generate YAML for all agents in tabAgents
     const tabAgents = this.tabAgents();
     
-    for (const [tabName, agent] of tabAgents) {
-      YamlUtils.generateYamlFile(agent, formData, appName);
-    }
+    YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {

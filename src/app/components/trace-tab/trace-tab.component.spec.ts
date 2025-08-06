@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {AppModule} from '../../app.module';
 
 import {TraceTabComponent} from './trace-tab.component';
 
@@ -23,7 +24,9 @@ describe('TraceTabComponent', () => {
   let fixture: ComponentFixture<TraceTabComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({imports: [TraceTabComponent]})
+    await TestBed.configureTestingModule({
+      declarations: [TraceTabComponent], imports: [AppModule]
+    })
         .compileComponents();
 
     fixture = TestBed.createComponent(TraceTabComponent);

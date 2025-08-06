@@ -25,7 +25,7 @@ import {createJSONEditor, Mode} from 'vanilla-jsoneditor';
   standalone: false,
 })
 export class JsonEditorComponent implements AfterViewInit {
-  @Input() jsonString: any;
+  @Input({ required: true }) jsonString: any;
 
   private editor: any = null;
 

@@ -297,16 +297,20 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
-        // Check if this is an agent tool that needs tab deletion
-        if (tool.toolType === 'Agent Tool') {
-          const agentToolName = tool.toolAgentName || tool.name;
-          this.deleteAgentToolAndTab(agentName, tool, agentToolName);
-        } else {
-          // Regular tool deletion
-          this.agentBuilderService.deleteTool(agentName, tool);
-        }
+        this.deleteToolWithoutDialog(agentName, tool);
       }
     });
+  }
+
+  private deleteToolWithoutDialog(agentName: string, tool: any) {
+    // Check if this is an agent tool that needs tab deletion
+    if (tool.toolType === 'Agent Tool') {
+      const agentToolName = tool.toolAgentName || tool.name;
+      this.deleteAgentToolAndTab(agentName, tool, agentToolName);
+    } else {
+      // Regular tool deletion
+      this.agentBuilderService.deleteTool(agentName, tool);
+    }
   }
 
   deleteCallback(agentName: string, callback: any) {
@@ -392,7 +396,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // it's leaf node
     for (const tool of agentNode.tools ?? []) {
-      this.deleteTool(agentNode.name, tool);
+      this.deleteToolWithoutDialog(agentNode.name, tool);
     }
 
     const subAgentNodeId = this.nodes().find(node => node.data && node.data().name === agentNode.name)?.id;

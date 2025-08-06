@@ -951,12 +951,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
             agentData.tools = this.parseToolsFromYaml(agentData.tools || [])
           }
 
-          const agentAsToolList = agentData.tools?.filter(t => t.toolType == "Agent Tool")
-          if (agentAsToolList && agentAsToolList.length > 0 ) {
-            console.log(agentAsToolList)
-          }
-
-
           this.processAgentToolsFromYaml(agentData.tools || [], appName);
         } catch (e) {
           console.error(`Failed to load agent from ${node.config_path}`, e);

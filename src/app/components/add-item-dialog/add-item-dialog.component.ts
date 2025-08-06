@@ -63,8 +63,7 @@ export class AddItemDialogComponent {
 
     const formData = new FormData();
 
-    const allTabAgents = new Map<string, AgentNode>();
-    YamlUtils.generateYamlFile(rootAgent, formData, this.newAppName, allTabAgents);
+    YamlUtils.generateYamlFile(rootAgent, formData, this.newAppName);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {

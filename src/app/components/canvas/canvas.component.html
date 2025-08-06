@@ -16,19 +16,6 @@
 
 <div class="canvas-container">
   <div class="canvas-workspace">
-<<<<<<< HEAD
-=======
-    <!-- Tab Navigation - Overlay -->
-    <div class="canvas-tabs-overlay">
-      <mat-button-toggle-group [value]="selectedTab()" (change)="selectTab(appName, $event.value)">
-        @for (tab of availableTabs(); track tab) {
-          <mat-button-toggle [value]="tab">
-            {{tab === 'root_agent' ? 'Root Agent' : tab}}
-          </mat-button-toggle>
-        }
-      </mat-button-toggle-group>
-    </div>
->>>>>>> a738bd519c9f54c1542258d46e68aad746afb290
     @if (!showSidePanel) {
       <span
         class="material-symbols-outlined open-panel-btn"
@@ -62,8 +49,8 @@
                 aria-label="Add sub-agent">
                 <mat-icon>smart_toy</mat-icon>
               </button>
-              @if (!isRootAgentForCurrentTab(ctx.node.data()?.name)) {
-                <button matIconButton class="action-btn add-subagent-btn" (click)="openDeleteSubAgentDialog(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Delete sub-agent"
+              @if (!isRootAgent(ctx.node.data()?.name)) {
+                <button matIconButton class="action-btn add-subagent-btn" (click)="openDeleteSubAgentDialog(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Add sub-agent"
                   aria-label="Delete sub-agent">
                   <mat-icon>delete</mat-icon>
                 </button>

@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,14 +19,16 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatButtonModule} from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
   MatDialogModule,
   MatDialogRef,
+  MatDialogTitle,
 } from '@angular/material/dialog';
-import {AppModule} from '../../../app.module';
 import {
   DeleteSessionDialogComponent,
   DeleteSessionDialogData,
-} from './delete-session-dialog.component';
+} from './dialog.component';
 
 describe('DeleteSessionDialogComponent', () => {
   let component: DeleteSessionDialogComponent;
@@ -44,8 +45,13 @@ describe('DeleteSessionDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DeleteSessionDialogComponent],
-      imports: [MatDialogModule, MatButtonModule, AppModule],
+      declarations: [
+        DeleteSessionDialogComponent,
+        MatDialogActions,
+        MatDialogContent,
+        MatDialogTitle,
+      ],
+      imports: [MatDialogModule, MatButtonModule],
       providers: [
         {provide: MatDialogRef, useValue: mockDialogRef},
         {provide: MAT_DIALOG_DATA, useValue: mockDialogData},

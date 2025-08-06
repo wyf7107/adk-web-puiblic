@@ -18,7 +18,6 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
-import {AppModule} from '../../app.module';
 
 import {ViewImageDialogComponent, ViewImageDialogData} from './view-image-dialog.component';
 
@@ -34,7 +33,7 @@ describe('ViewImageDialogComponent', () => {
 
     await TestBed
         .configureTestingModule({
-          imports: [MatDialogModule, AppModule],  // Import MatDialogModule for testing
+          imports: [MatDialogModule],  // Import MatDialogModule for testing
           declarations: [ViewImageDialogComponent],
           providers: [
             {provide: MatDialogRef, useValue: mockDialogRef},
@@ -68,6 +67,21 @@ describe('ViewImageDialogComponent', () => {
     expect(imgElement.nativeElement.src)
         .toContain('data:image/png;base64,' + base64Image);
     expect(component.isSvgContent).toBeFalse();
+  });
+
+  it('should display SVG data correctly', () => {
+    const svgData =
+        '<svg width="100" height="100"><circle cx="50" cy="50" r="40" fill="blue" /></svg>';
+    mockDialogData.imageData = svgData;
+    component.ngOnInit();  // Manually call ngOnInit
+    fixture.detectChanges();
+
+    const svgContainer =
+        fixture.debugElement.query(By.css('.image-wrapper .svg-container'));
+    expect(svgContainer).not.toBeNull();
+    expect(svgContainer.nativeElement.innerHTML)
+        .toContain('<circle cx="50" cy="50" r="40" fill="blue"');
+    expect(component.isSvgContent).toBeTrue();
   });
 
   it('should call dialogRef.close() when close button is clicked', () => {

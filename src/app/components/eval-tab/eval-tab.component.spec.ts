@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,23 +15,16 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {AppModule} from '../../app.module';
 
 import {EvalTabComponent} from './eval-tab.component';
 
 describe('EvalTabComponent', () => {
   let component: EvalTabComponent;
   let fixture: ComponentFixture<EvalTabComponent>;
-  const mockDialogRef = {
-    close: jasmine.createSpy('close'),
-  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [EvalTabComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [{provide: MatDialogRef, useValue: mockDialogRef}],
+      imports: [EvalTabComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EvalTabComponent);

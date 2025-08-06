@@ -15,37 +15,19 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {
-  MAT_DIALOG_DATA,
-  MatDialogModule,
-  MatDialogRef,
-} from '@angular/material/dialog';
-import {AppModule} from '../../../app.module';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {TraceChartComponent} from './trace-chart.component';
+import { TraceChartComponent } from './trace-chart.component';
 
 describe('TraceChartComponent', () => {
   let component: TraceChartComponent;
   let fixture: ComponentFixture<TraceChartComponent>;
-  const mockDialogRef = {
-    close: jasmine.createSpy('close'),
-  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TraceChartComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: {
-            spans: [],
-          },
-        },
-      ],
-    }).compileComponents();
+      imports: [TraceChartComponent]
+    })
+    .compileComponents();
 
     fixture = TestBed.createComponent(TraceChartComponent);
     component = fixture.componentInstance;

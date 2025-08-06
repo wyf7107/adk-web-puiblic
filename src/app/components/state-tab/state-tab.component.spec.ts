@@ -1,5 +1,4 @@
 /**
- * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,6 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {AppModule} from '../../app.module';
 
 import {StateTabComponent} from './state-tab.component';
 
@@ -26,8 +24,7 @@ describe('StateTabComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [StateTabComponent],
-      imports: [AppModule],
+      imports: [StateTabComponent],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StateTabComponent);

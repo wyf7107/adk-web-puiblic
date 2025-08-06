@@ -14,25 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {AppModule} from '../../../app.module';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {TraceEventComponent} from './trace-event.component';
+import { TraceEventComponent } from './trace-event.component';
 
 describe('TraceEventComponent', () => {
   let component: TraceEventComponent;
   let fixture: ComponentFixture<TraceEventComponent>;
-  const mockDialogRef = {
-    close: jasmine.createSpy('close'),
-  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TraceEventComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [{provide: MatDialogRef, useValue: mockDialogRef}],
-    }).compileComponents();
+      imports: [TraceEventComponent]
+    })
+    .compileComponents();
 
     fixture = TestBed.createComponent(TraceEventComponent);
     component = fixture.componentInstance;

@@ -143,147 +143,21 @@ export class BuilderTabsComponent {
       } else {
         this.editingTool = null;
       }
-<<<<<<< HEAD
       this.cdr.detectChanges();
-=======
-      this.cdr.markForCheck();
-    });
-
-    this.agentBuilderService.getSelectedCallback().subscribe(callback => {
-      this.selectedCallback = callback;
-      if (callback) {
-        this.selectCallback(callback);
-        this.selectedTabIndex = this.CALLBACKS_TAB_INDEX;
-      } else {
-        this.editingCallback = null;
-      }
-      this.cdr.markForCheck();
->>>>>>> a738bd519c9f54c1542258d46e68aad746afb290
     });
 
     this.agentBuilderService.getAgentTools().subscribe(update => {
       if (this.agentConfig && update && this.agentConfig.name === update.agentName) {
-<<<<<<< HEAD
         this.agentConfig.tools = update.tools;
         this.cdr.detectChanges();
-=======
-        // Create a new object reference to ensure change detection works with OnPush strategy
-        this.agentConfig = {
-          ...this.agentConfig,
-          callbacks: update.callbacks
-        };
-        this.cdr.markForCheck();
->>>>>>> a738bd519c9f54c1542258d46e68aad746afb290
       }
     });
   }
 
   selectTool(tool: ToolNode) {
-<<<<<<< HEAD
     this.editingTool = tool;
     this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
     this.editingToolArgs.set(!!this.editingTool.args?.length);
-=======
-    this.agentBuilderService.setSelectedTool(tool);
-  }
-
-  addTool() {
-    if (this.agentConfig) {
-      const toolId = Math.floor(Math.random() * 1000);
-      const tool = {
-        toolType: 'Custom tool',
-        name: `.tool_${toolId}`,
-        args: []
-      }
-      this.agentBuilderService.addTool(this.agentConfig.name, tool);
-    }
-  }
-
-  addCallback() {
-    if (this.agentConfig) {
-      const callbackId = Math.floor(Math.random() * 1000);
-      const callback: CallbackNode = {
-        name: `callback_${callbackId}`,
-        type: 'before_agent',
-        code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
-        description: 'Auto-generated callback'
-      };
-      const result = this.agentBuilderService.addCallback(this.agentConfig.name, callback);
-      if (!result.success) {
-        console.error('Failed to add callback:', result.error);
-      }
-    }
-  }
-
-  deleteCallback(agentName: string, callback: any) {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { 
-        title: 'Delete Callback',
-        message: `Are you sure you want to delete ${callback.name}?`,
-        confirmButtonText: 'Delete'
-      },
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        const deleteResult = this.agentBuilderService.deleteCallback(agentName, callback);
-        if (!deleteResult.success) {
-          console.error('Failed to delete callback:', deleteResult.error);
-        } else {
-          // Force change detection to update the UI immediately
-          this.cdr.markForCheck();
-        }
-      }
-    });
-  }
-
-  addSubAgent(parentAgentName: string|undefined) {
-    if (!parentAgentName) {
-      return ;
-    }
-
-    this.agentBuilderService.setAddSubAgentSubject(parentAgentName);
-  }
-
-  deleteSubAgent(agentName: string) {
-    this.agentBuilderService.setDeleteSubAgentSubject(agentName);
-  }
-
-  deleteTool(agentName: string, tool: any) {
-    const isAgentTool = tool.toolType === 'Agent Tool';
-    const toolDisplayName = isAgentTool ? (tool.toolAgentName || tool.name) : tool.name;
-    
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { 
-        title: isAgentTool ? 'Delete Agent Tool' : 'Delete Tool',
-        message: isAgentTool 
-          ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding tab.`
-          : `Are you sure you want to delete ${toolDisplayName}?`,
-        confirmButtonText: 'Delete'
-      },
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        // Check if this is an agent tool that needs tab deletion
-        if (tool.toolType === 'Agent Tool') {
-          const agentToolName = tool.toolAgentName || tool.name;
-          this.deleteAgentToolAndTab(agentName, tool, agentToolName);
-        } else {
-          // Regular tool deletion
-          this.agentBuilderService.deleteTool(agentName, tool);
-        }
-      }
-    });
-  }
-
-  deleteAgentToolAndTab(agentName: string, tool: any, agentToolName: string) {
-    // First, delete the tool from the agent
-    this.agentBuilderService.deleteTool(agentName, tool);
-
-    // Request the canvas to delete the tab
-    this.agentBuilderService.requestTabDeletion(agentToolName);
->>>>>>> a738bd519c9f54c1542258d46e68aad746afb290
   }
   
   backToToolList() {
@@ -335,48 +209,6 @@ export class BuilderTabsComponent {
         if (tool.args.length > 0) {
           this.editingToolArgs.set(true);
         }
-<<<<<<< HEAD
-=======
-        this.cdr.markForCheck();
-      });
-    }
-  }
-
-  selectCallback(callback: CallbackNode) {
-    this.editingCallback = callback;
-  }
-  
-  backToCallbackList() {
-    this.editingCallback = null;
-  }
-
-  onCallbackTypeChange(callback: CallbackNode | undefined | null) {
-    if (callback) {
-      // Type is already set by the select binding
-      // Additional logic can be added here if needed
-    }
-  }
-
-  createAgentTool() {
-    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Create Agent Tool',
-        message: 'Please enter a name for the agent tool:',
-        confirmButtonText: 'Create',
-        showInput: true,
-        inputLabel: 'Agent Tool Name',
-        inputPlaceholder: 'Enter agent tool name'
-      } as ConfirmationDialogData
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && typeof result === 'string') {
-        // Determine the correct agent name for tab storage
-        let currentAgentName = this.agentConfig?.name || 'root_agent';
-        
-        this.agentBuilderService.requestNewTab(result, currentAgentName);
->>>>>>> a738bd519c9f54c1542258d46e68aad746afb290
       }
       this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
     }

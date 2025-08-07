@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+@use '@angular/material' as mat;
 // Builder tabs container
 .builder-tabs-container {
   width: 100%;
@@ -31,6 +32,17 @@
     font-size: 14px;
     line-height: 1.5;
   }
+
+  @include mat.form-field-overrides((
+    filled-container-color: #364150,
+    filled-focus-active-indicator-color: #364150,
+    filled-active-indicator-color:#364150,
+    filled-hover-active-indicator-color: #364150
+  ));
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  border: none !important;
 }
 
 // Components section header
@@ -296,3 +308,4 @@
     text-transform: none;
   }
 }
+

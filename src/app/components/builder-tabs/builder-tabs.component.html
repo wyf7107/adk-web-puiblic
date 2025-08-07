@@ -46,14 +46,16 @@
                 </mat-form-field>
               </div>
 
-              <mat-form-field>
-                <mat-label>Model</mat-label>
-                <mat-select [(ngModel)]="agentConfig.model">
-                  @for (model of models; track model) {
-                  <mat-option [value]="model">{{model}}</mat-option>
-                  }
-                </mat-select>
-              </mat-form-field>
+              @if (agentConfig.agent_class === 'LlmAgent') {
+                <mat-form-field>
+                  <mat-label>Model</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.model">
+                    @for (model of models; track model) {
+                    <mat-option [value]="model">{{model}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
 
               <mat-form-field>
                 <mat-label>Instructions</mat-label>

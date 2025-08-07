@@ -113,6 +113,7 @@
                   <mat-label>Tool Name</mat-label>
                   <input matInput [(ngModel)]="editingTool.name" />
                 </mat-form-field>
+                <mat-checkbox>Skip summarization</mat-checkbox>
               } @else if (editingTool.toolType === 'Built-in tool') {
                 <mat-form-field class="built-in-tool-field">
                   <mat-label>Built-in Tool</mat-label>
@@ -122,6 +123,7 @@
                     }
                   </mat-select>
                 </mat-form-field>
+                <mat-checkbox>Skip summarization</mat-checkbox>
                 @if (builtInToolArgs.has(editingTool.name) && editingTool.args && getObjectKeys(editingTool.args).length > 0) {
                   <h2 class="tool-args-header">Built-In Tool Arguments</h2>
                   @if (editingToolArgs()) {

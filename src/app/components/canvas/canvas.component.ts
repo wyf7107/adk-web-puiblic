@@ -253,7 +253,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const tool = {
       toolType: 'Custom tool',
       name: `.tool_${toolId}`,
-      args: []
+      args: {skip_summarization: false}
     }
     this.agentBuilderService.addTool(parentNode.data().name, tool);
   }

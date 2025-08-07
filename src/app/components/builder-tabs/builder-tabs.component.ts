@@ -121,6 +121,15 @@ export class BuilderTabsComponent {
   protected header = 'Select an agent or tool to edit'
   public toolsMap$: Observable<Map<string, ToolNode[]>>;
 
+  private getJsonStringForEditor(args: any): string {
+    if (!args) {
+      return '{}';
+    }
+    const editorArgs = { ...args };
+    delete editorArgs.skip_summarization;
+    return JSON.stringify(editorArgs, null, 2);
+  }
+
   constructor(private cdr: ChangeDetectorRef) {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
@@ -141,8 +150,8 @@ export class BuilderTabsComponent {
         this.agentBuilderService.requestTabSwitch(agentToolName);
       } else if (tool) {
         this.editingTool = tool;
-        this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
-        this.editingToolArgs.set(!!this.editingTool.args?.length);
+        this.toolArgsString.set(this.getJsonStringForEditor(this.editingTool.args));
+        this.editingToolArgs.set(!!this.editingTool.args && Object.keys(this.editingTool.args).length > 0);
         this.selectedTabIndex = 2;
       } else {
         this.editingTool = null;
@@ -178,6 +187,13 @@ export class BuilderTabsComponent {
     });
   }
 
+  getObjectKeys(obj: any): string[] {
+    if (!obj) {
+      return [];
+    }
+    return Object.keys(obj).filter(key => key !== 'skip_summarization');
+  }
+
   selectAgent(agent: AgentNode) {
     this.agentBuilderService.setSelectedNode(agent);
   }
@@ -192,7 +208,7 @@ export class BuilderTabsComponent {
       const tool = {
         toolType: 'Custom tool',
         name: `.tool_${toolId}`,
-        args: []
+        args: {skip_summarization: false}
       }
       this.agentBuilderService.addTool(this.agentConfig.name, tool);
     }
@@ -294,14 +310,16 @@ export class BuilderTabsComponent {
 
   cancelEditToolArgs(tool: ToolNode | undefined | null) {
     this.editingToolArgs.set(false);
-    this.toolArgsString.set(JSON.stringify(tool?.args, null, 2));
+    this.toolArgsString.set(this.getJsonStringForEditor(tool?.args));
   }
 
   saveToolArgs(tool: ToolNode | undefined | null) {
     if (this.jsonEditorComponent && tool) {
       try {
         const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
+        const skipSummarization = tool.args ? tool.args['skip_summarization'] : false;
         tool.args = updatedArgs;
+        tool.args!['skip_summarization'] = skipSummarization;
         this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
         this.editingToolArgs.set(false);
       } catch (e) {
@@ -316,8 +334,8 @@ export class BuilderTabsComponent {
       this.onBuiltInToolSelectionChange(tool);
     } else if (tool) {
       tool.name = '';
-      tool.args = [];
-      this.toolArgsString.set('[]');
+      tool.args = {skip_summarization: false};
+      this.toolArgsString.set('{}');
       this.editingToolArgs.set(false);
     }
   }
@@ -328,15 +346,15 @@ export class BuilderTabsComponent {
       this.editingToolArgs.set(false);
 
       setTimeout(() => {
-        tool.args = [];
+        tool.args = {skip_summarization: false};
         const argNames = this.builtInToolArgs.get(tool.name);
         if (argNames) {
           for (const argName of argNames) {
-            tool.args.push({ name: argName, value: '' });
+            if(tool.args) tool.args[argName] = '';
           }
         }
-        this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
-        if (tool.args.length > 0) {
+        this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
+        if (tool.args && this.getObjectKeys(tool.args).length > 0) {
           this.editingToolArgs.set(true);
         }
         this.cdr.markForCheck();

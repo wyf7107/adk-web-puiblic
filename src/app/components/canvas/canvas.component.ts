@@ -253,7 +253,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     const tool = {
       toolType: 'Custom tool',
       name: `.tool_${toolId}`,
-      args: []
+      args: {skip_summarization: false}
     }
     this.agentBuilderService.addTool(parentNode.data().name, tool);
   }
@@ -562,7 +562,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         toolType: this.determineToolType(tool),
         toolAgentName: tool.name
       };
-      
+
       // Handle agent tools - extract the actual agent name from config_path
       if (tool.name === 'AgentTool' && tool.args && tool.args.agent && tool.args.agent.config_path) {
         toolNode.toolType = 'Agent Tool';
@@ -571,12 +571,11 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         const agentName = configPath.replace('./', '').replace('.yaml', '');
         toolNode.name = agentName; // Use the actual agent name
         toolNode.toolAgentName = agentName;
-      }
-
-      if (tool.args) {
+        toolNode.args = tool.args;
+      } else if (tool.args) {
         toolNode.args = tool.args;
       }
-      
+
       return toolNode;
     });
   }
@@ -625,12 +624,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this.availableTabs.set([...currentTabs, agentTool.name]);
         
         // Try to load the agent tool's YAML file to get its actual configuration
-        this.loadAgentToolConfiguration(agentTool.name, appName);
+        this.loadAgentToolConfiguration(agentTool, appName);
       }
     }
   }
 
-  private loadAgentToolConfiguration(agentToolName: string, appName: string) {
+  private loadAgentToolConfiguration(agentTool: ToolNode, appName: string) {
+    const agentToolName = agentTool.name;
     // Try to fetch the agent tool's YAML file
     this.agentService.getSubAgentBuilder(appName, `${agentToolName}.yaml`).subscribe({
       next: (yamlContent: string) => {
@@ -647,7 +647,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
               isRoot: false,
               sub_agents: yamlData.sub_agents || [],
               tools: this.parseToolsFromYaml(yamlData.tools || []),
-              callbacks: this.parseCallbacksFromYaml(yamlData)
+              callbacks: this.parseCallbacksFromYaml(yamlData),
+              isAgentTool: true,
+              skip_summarization: !!agentTool.args?.['skip_summarization'],
             };
             
             // Store the agent tool agent
@@ -676,22 +678,23 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           } catch (error) {
             console.error(`Error parsing YAML for agent tool ${agentToolName}:`, error);
             // Fallback to default configuration
-            this.createDefaultAgentToolConfiguration(agentToolName);
+            this.createDefaultAgentToolConfiguration(agentTool);
           }
         } else {
           // No YAML file found, create default configuration
-          this.createDefaultAgentToolConfiguration(agentToolName);
+          this.createDefaultAgentToolConfiguration(agentTool);
         }
       },
       error: (error) => {
         console.error(`Error loading agent tool configuration for ${agentToolName}:`, error);
         // Fallback to default configuration
-        this.createDefaultAgentToolConfiguration(agentToolName);
+        this.createDefaultAgentToolConfiguration(agentTool);
       }
     });
   }
 
-  private createDefaultAgentToolConfiguration(agentToolName: string) {
+  private createDefaultAgentToolConfiguration(agentTool: ToolNode) {
+    const agentToolName = agentTool.name;
     const agentToolAgent: AgentNode = {
       name: agentToolName,
       agent_class: 'LlmAgent',
@@ -699,7 +702,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       instruction: `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
       isRoot: false,
       sub_agents: [],
-      tools: []
+      tools: [],
+      isAgentTool: true,
+      skip_summarization: !!agentTool.args?.['skip_summarization'],
     };
     
     // Store the agent tool agent
@@ -801,7 +806,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         model: 'gemini-2.5-flash',
         instruction: `You are the ${tabName} agent that can be used as a tool by other agents.`,
         sub_agents: [],
-        tools: []
+        tools: [],
+        isAgentTool: true,
+        skip_summarization: false,
       };
 
       // Store the agent for this tab

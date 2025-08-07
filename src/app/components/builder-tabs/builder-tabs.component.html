@@ -61,6 +61,10 @@
                 <mat-label>Instructions</mat-label>
                 <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
               </mat-form-field>
+
+              @if (agentConfig.isAgentTool) {
+                <mat-checkbox [(ngModel)]="agentConfig.skip_summarization">Skip summarization</mat-checkbox>
+              }
             </div>
           }
         </div>
@@ -115,6 +119,7 @@
                   <mat-label>Tool Name</mat-label>
                   <input matInput [(ngModel)]="editingTool.name" />
                 </mat-form-field>
+                <mat-checkbox [(ngModel)]="editingTool.args!['skip_summarization']">Skip summarization</mat-checkbox>
               } @else if (editingTool.toolType === 'Built-in tool') {
                 <mat-form-field class="built-in-tool-field">
                   <mat-label>Built-in Tool</mat-label>
@@ -124,7 +129,8 @@
                     }
                   </mat-select>
                 </mat-form-field>
-                @if (builtInToolArgs.has(editingTool.name) && editingTool.args?.length) {
+                <mat-checkbox [(ngModel)]="editingTool.args!['skip_summarization']">Skip summarization</mat-checkbox>
+                @if (builtInToolArgs.has(editingTool.name) && editingTool.args && getObjectKeys(editingTool.args).length > 0) {
                   <h2 class="tool-args-header">Built-In Tool Arguments</h2>
                   @if (editingToolArgs()) {
                     <div class="json-editor-wrapper">

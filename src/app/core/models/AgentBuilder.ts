@@ -25,18 +25,15 @@ export interface AgentNode {
     tools?: ToolNode[];
     callbacks?: CallbackNode[];
     config_path?: string;
+    isAgentTool?: boolean;
+    skip_summarization?: boolean;
 }
 
 export interface ToolNode {
     name: string;
     toolType: string;
     toolAgentName?: string;
-    args?: ToolArg[];
-}
-
-export interface ToolArg {
-  name: string;
-  value: any;
+    args?: {[key: string]: any};
 }
 
 export interface CallbackNode {

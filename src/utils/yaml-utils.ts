@@ -44,7 +44,7 @@ export class YamlUtils {
       description: '',
       instruction: agentNode.instruction,
       sub_agents: subAgents,
-      tools: this.buildToolsConfig(agentNode.tools)
+      tools: this.buildToolsConfig(agentNode.tools, allTabAgents)
     }
 
     // Add callbacks directly to root level if they exist
@@ -83,62 +83,45 @@ export class YamlUtils {
     }
   }
 
-  static buildToolsConfig(tools: ToolNode[] | undefined): any[] {
+  static buildToolsConfig(tools: ToolNode[] | undefined, allTabAgents: Map<string, AgentNode>): any[] {
     if (!tools || tools.length === 0) {
       return [];
     }
 
-         return tools.map(tool => {
-       const config: any = {
-         name: tool.name,
-       };
+    return tools.map(tool => {
+      const config: any = {
+        name: tool.name,
+      };
 
-       // Handle agent tools with special format
-       if (tool.toolType === 'Agent Tool') {
-         config.name = 'AgentTool'; // Always use "AgentTool" as the tool name
-                 // Use toolAgentName for the actual agent name, fallback to name if toolAgentName is not set
+      // Handle agent tools with special format
+      if (tool.toolType === 'Agent Tool') {
+        config.name = 'AgentTool'; // Always use "AgentTool" as the tool name
+        // Use toolAgentName for the actual agent name, fallback to name if toolAgentName is not set
         let actualAgentName = tool.toolAgentName || tool.name;
-         
-         // Skip if the agent name is empty, undefined, or "undefined"
-         if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
-           return null; // Skip this tool
-         }
-         
-         config.args = {
-           agent: {
-             config_path: `./${actualAgentName}.yaml`
-           }
-         };
-         return config;
-       }
 
-       // Handle regular tools
-       if (tool.args && tool.args.length > 0) {
-         config.args = tool.args.map(arg => {
-           const value = arg.value;
+        // Skip if the agent name is empty, undefined, or "undefined"
+        if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
+          return null; // Skip this tool
+        }
 
-           if (typeof value !== 'string') {
-             return arg;
-           }
+        const agentToolNode = allTabAgents.get(actualAgentName);
 
-           if (value.toLowerCase() === 'true') {
-             return { ...arg, value: true };
-           }
+        config.args = {
+          agent: {
+            config_path: `./${actualAgentName}.yaml`
+          },
+          skip_summarization: agentToolNode?.skip_summarization || false,
+        };
+        return config;
+      }
 
-           if (value.toLowerCase() === 'false') {
-             return { ...arg, value: false };
-           }
+      // Handle regular tools
+      if (tool.args) {
+        config.args = tool.args;
+      }
 
-           if (value.trim() !== '' && Number(value)) {
-             return { ...arg, value: Number(value) };
-           }
-
-           return arg;
-         });
-       }
-
-       return config;
-     }).filter(config => config !== null); // Filter out null results
+      return config;
+    }).filter(config => config !== null); // Filter out null results
   }
 
   static buildCallbacksConfig(callbacks: CallbackNode[] | undefined): any {

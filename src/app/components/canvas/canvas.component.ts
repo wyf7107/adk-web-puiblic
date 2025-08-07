@@ -646,7 +646,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
               isRoot: false,
               sub_agents: yamlData.sub_agents || [],
               tools: this.parseToolsFromYaml(yamlData.tools || []),
-              callbacks: this.parseCallbacksFromYaml(yamlData)
+              callbacks: this.parseCallbacksFromYaml(yamlData),
+              isAgentTool: true,
+              skip_summarization: yamlData.skip_summarization || false,
             };
             
             // Store the agent tool agent
@@ -698,7 +700,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       instruction: `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
       isRoot: false,
       sub_agents: [],
-      tools: []
+      tools: [],
+      isAgentTool: true,
+      skip_summarization: false,
     };
     
     // Store the agent tool agent
@@ -800,7 +804,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         model: 'gemini-2.5-flash',
         instruction: `You are the ${tabName} agent that can be used as a tool by other agents.`,
         sub_agents: [],
-        tools: []
+        tools: [],
+        isAgentTool: true,
+        skip_summarization: false,
       };
 
       // Store the agent for this tab

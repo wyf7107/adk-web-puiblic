@@ -5,9 +5,8 @@ description: ""
 instruction: You are the root agent that coordinates other agents.
 sub_agents: []
 tools:
-  - name: FunctionTool
+  - name: AgentTool
     args:
-      - name: func
-        value: "some_func"
-      - name: skip_summarization
-        value: False
+      agent:
+        config_path: ./agent_tool.yaml
+      skip_summarization: false

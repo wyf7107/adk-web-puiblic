@@ -25,6 +25,8 @@ export interface AgentNode {
     tools?: ToolNode[];
     callbacks?: CallbackNode[];
     config_path?: string;
+    isAgentTool?: boolean;
+    skip_summarization?: boolean;
 }
 
 export interface ToolNode {

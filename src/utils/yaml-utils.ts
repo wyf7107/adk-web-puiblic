@@ -44,7 +44,7 @@ export class YamlUtils {
       description: '',
       instruction: agentNode.instruction,
       sub_agents: subAgents,
-      tools: this.buildToolsConfig(agentNode.tools)
+      tools: this.buildToolsConfig(agentNode.tools, allTabAgents)
     }
 
     // Add callbacks directly to root level if they exist
@@ -83,7 +83,7 @@ export class YamlUtils {
     }
   }
 
-  static buildToolsConfig(tools: ToolNode[] | undefined): any[] {
+  static buildToolsConfig(tools: ToolNode[] | undefined, allTabAgents: Map<string, AgentNode>): any[] {
     if (!tools || tools.length === 0) {
       return [];
     }
@@ -104,10 +104,13 @@ export class YamlUtils {
           return null; // Skip this tool
         }
 
+        const agentToolNode = allTabAgents.get(actualAgentName);
+
         config.args = {
           agent: {
             config_path: `./${actualAgentName}.yaml`
-          }
+          },
+          skip_summarization: agentToolNode?.skip_summarization || false,
         };
         return config;
       }

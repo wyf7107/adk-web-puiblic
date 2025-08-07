@@ -59,6 +59,10 @@
                 <mat-label>Instructions</mat-label>
                 <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
               </mat-form-field>
+
+              @if (agentConfig.isAgentTool) {
+                <mat-checkbox [(ngModel)]="agentConfig.skip_summarization">Skip summarization</mat-checkbox>
+              }
             </div>
           }
         </div>

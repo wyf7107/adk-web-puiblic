@@ -141,7 +141,11 @@ export class BuilderTabsComponent {
         this.agentBuilderService.requestTabSwitch(agentToolName);
       } else if (tool) {
         this.editingTool = tool;
-        this.toolArgsString.set(JSON.stringify(this.editingTool.args, null, 2));
+        const argsMap = (this.editingTool.args || []).reduce((acc, arg) => {
+          acc[arg.name] = arg.value;
+          return acc;
+        }, {} as {[key: string]: any});
+        this.toolArgsString.set(JSON.stringify(argsMap, null, 2));
         this.editingToolArgs.set(!!this.editingTool.args?.length);
         this.selectedTabIndex = 2;
       } else {
@@ -294,15 +298,19 @@ export class BuilderTabsComponent {
 
   cancelEditToolArgs(tool: ToolNode | undefined | null) {
     this.editingToolArgs.set(false);
-    this.toolArgsString.set(JSON.stringify(tool?.args, null, 2));
+    const argsMap = (tool?.args || []).reduce((acc, arg) => {
+      acc[arg.name] = arg.value;
+      return acc;
+    }, {} as {[key: string]: any});
+    this.toolArgsString.set(JSON.stringify(argsMap, null, 2));
   }
 
   saveToolArgs(tool: ToolNode | undefined | null) {
     if (this.jsonEditorComponent && tool) {
       try {
-        const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
-        tool.args = updatedArgs;
-        this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
+        const updatedArgsMap = JSON.parse(this.jsonEditorComponent.getJsonString());
+        tool.args = Object.entries(updatedArgsMap).map(([name, value]) => ({ name, value: value as any }));
+        this.toolArgsString.set(JSON.stringify(updatedArgsMap, null, 2));
         this.editingToolArgs.set(false);
       } catch (e) {
         console.error('Error parsing tool arguments JSON', e);
@@ -317,7 +325,7 @@ export class BuilderTabsComponent {
     } else if (tool) {
       tool.name = '';
       tool.args = [];
-      this.toolArgsString.set('[]');
+      this.toolArgsString.set('{}');
       this.editingToolArgs.set(false);
     }
   }
@@ -335,7 +343,11 @@ export class BuilderTabsComponent {
             tool.args.push({ name: argName, value: '' });
           }
         }
-        this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
+        const argsMap = (tool.args || []).reduce((acc, arg) => {
+          acc[arg.name] = arg.value;
+          return acc;
+        }, {} as {[key: string]: any});
+        this.toolArgsString.set(JSON.stringify(argsMap, null, 2));
         if (tool.args.length > 0) {
           this.editingToolArgs.set(true);
         }

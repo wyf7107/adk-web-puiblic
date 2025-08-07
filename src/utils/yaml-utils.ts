@@ -88,57 +88,52 @@ export class YamlUtils {
       return [];
     }
 
-         return tools.map(tool => {
-       const config: any = {
-         name: tool.name,
-       };
+    return tools.map(tool => {
+      const config: any = {
+        name: tool.name,
+      };
 
-       // Handle agent tools with special format
-       if (tool.toolType === 'Agent Tool') {
-         config.name = 'AgentTool'; // Always use "AgentTool" as the tool name
-                 // Use toolAgentName for the actual agent name, fallback to name if toolAgentName is not set
+      // Handle agent tools with special format
+      if (tool.toolType === 'Agent Tool') {
+        config.name = 'AgentTool'; // Always use "AgentTool" as the tool name
+        // Use toolAgentName for the actual agent name, fallback to name if toolAgentName is not set
         let actualAgentName = tool.toolAgentName || tool.name;
-         
-         // Skip if the agent name is empty, undefined, or "undefined"
-         if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
-           return null; // Skip this tool
-         }
-         
-         config.args = {
-           agent: {
-             config_path: `./${actualAgentName}.yaml`
-           }
-         };
-         return config;
-       }
 
-       // Handle regular tools
-       if (tool.args && tool.args.length > 0) {
-         config.args = tool.args.map(arg => {
-           const value = arg.value;
+        // Skip if the agent name is empty, undefined, or "undefined"
+        if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
+          return null; // Skip this tool
+        }
 
-           if (typeof value !== 'string') {
-             return arg;
-           }
+        config.args = {
+          agent: {
+            config_path: `./${actualAgentName}.yaml`
+          }
+        };
+        return config;
+      }
 
-           if (value.toLowerCase() === 'true') {
-             return { ...arg, value: true };
-           }
+      // Handle regular tools
+      if (tool.args && Array.isArray(tool.args) && tool.args.length > 0) {
+        config.args = tool.args.reduce((acc, arg) => {
+          let value: any = arg.value;
 
-           if (value.toLowerCase() === 'false') {
-             return { ...arg, value: false };
-           }
+          if (typeof value === 'string') {
+            const lowerValue = value.toLowerCase();
+            if (lowerValue === 'true') {
+              value = true;
+            } else if (lowerValue === 'false') {
+              value = false;
+            } else if (value.trim() !== '' && !isNaN(Number(value))) {
+              value = Number(value);
+            }
+          }
+          acc[arg.name] = value;
+          return acc;
+        }, {} as { [key: string]: any });
+      }
 
-           if (value.trim() !== '' && Number(value)) {
-             return { ...arg, value: Number(value) };
-           }
-
-           return arg;
-         });
-       }
-
-       return config;
-     }).filter(config => config !== null); // Filter out null results
+      return config;
+    }).filter(config => config !== null); // Filter out null results
   }
 
   static buildCallbacksConfig(callbacks: CallbackNode[] | undefined): any {

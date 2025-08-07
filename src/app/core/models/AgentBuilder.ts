@@ -31,12 +31,7 @@ export interface ToolNode {
     name: string;
     toolType: string;
     toolAgentName?: string;
-    args?: ToolArg[];
-}
-
-export interface ToolArg {
-  name: string;
-  value: any;
+    args?: {[key: string]: any};
 }
 
 export interface CallbackNode {

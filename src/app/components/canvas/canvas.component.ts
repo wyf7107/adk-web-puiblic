@@ -573,8 +573,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         toolNode.toolAgentName = agentName;
         toolNode.args = tool.args;
       } else if (tool.args) {
-        // For regular tools, convert args object to array of {name, value}
-        toolNode.args = Object.entries(tool.args).map(([name, value]) => ({ name, value }));
+        toolNode.args = tool.args;
       }
 
       return toolNode;

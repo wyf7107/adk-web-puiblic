@@ -113,23 +113,8 @@ export class YamlUtils {
       }
 
       // Handle regular tools
-      if (tool.args && Array.isArray(tool.args) && tool.args.length > 0) {
-        config.args = tool.args.reduce((acc, arg) => {
-          let value: any = arg.value;
-
-          if (typeof value === 'string') {
-            const lowerValue = value.toLowerCase();
-            if (lowerValue === 'true') {
-              value = true;
-            } else if (lowerValue === 'false') {
-              value = false;
-            } else if (value.trim() !== '' && !isNaN(Number(value))) {
-              value = Number(value);
-            }
-          }
-          acc[arg.name] = value;
-          return acc;
-        }, {} as { [key: string]: any });
+      if (tool.args) {
+        config.args = tool.args;
       }
 
       return config;

@@ -141,12 +141,8 @@ export class BuilderTabsComponent {
         this.agentBuilderService.requestTabSwitch(agentToolName);
       } else if (tool) {
         this.editingTool = tool;
-        const argsMap = (this.editingTool.args || []).reduce((acc, arg) => {
-          acc[arg.name] = arg.value;
-          return acc;
-        }, {} as {[key: string]: any});
-        this.toolArgsString.set(JSON.stringify(argsMap, null, 2));
-        this.editingToolArgs.set(!!this.editingTool.args?.length);
+        this.toolArgsString.set(JSON.stringify(this.editingTool.args || {}, null, 2));
+        this.editingToolArgs.set(!!this.editingTool.args && Object.keys(this.editingTool.args).length > 0);
         this.selectedTabIndex = 2;
       } else {
         this.editingTool = null;
@@ -182,6 +178,10 @@ export class BuilderTabsComponent {
     });
   }
 
+  getObjectKeys(obj: any): string[] {
+    return Object.keys(obj);
+  }
+
   selectAgent(agent: AgentNode) {
     this.agentBuilderService.setSelectedNode(agent);
   }
@@ -196,7 +196,7 @@ export class BuilderTabsComponent {
       const tool = {
         toolType: 'Custom tool',
         name: `.tool_${toolId}`,
-        args: []
+        args: {}
       }
       this.agentBuilderService.addTool(this.agentConfig.name, tool);
     }
@@ -298,19 +298,15 @@ export class BuilderTabsComponent {
 
   cancelEditToolArgs(tool: ToolNode | undefined | null) {
     this.editingToolArgs.set(false);
-    const argsMap = (tool?.args || []).reduce((acc, arg) => {
-      acc[arg.name] = arg.value;
-      return acc;
-    }, {} as {[key: string]: any});
-    this.toolArgsString.set(JSON.stringify(argsMap, null, 2));
+    this.toolArgsString.set(JSON.stringify(tool?.args || {}, null, 2));
   }
 
   saveToolArgs(tool: ToolNode | undefined | null) {
     if (this.jsonEditorComponent && tool) {
       try {
-        const updatedArgsMap = JSON.parse(this.jsonEditorComponent.getJsonString());
-        tool.args = Object.entries(updatedArgsMap).map(([name, value]) => ({ name, value: value as any }));
-        this.toolArgsString.set(JSON.stringify(updatedArgsMap, null, 2));
+        const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
+        tool.args = updatedArgs;
+        this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
         this.editingToolArgs.set(false);
       } catch (e) {
         console.error('Error parsing tool arguments JSON', e);
@@ -324,7 +320,7 @@ export class BuilderTabsComponent {
       this.onBuiltInToolSelectionChange(tool);
     } else if (tool) {
       tool.name = '';
-      tool.args = [];
+      tool.args = {};
       this.toolArgsString.set('{}');
       this.editingToolArgs.set(false);
     }
@@ -336,19 +332,15 @@ export class BuilderTabsComponent {
       this.editingToolArgs.set(false);
 
       setTimeout(() => {
-        tool.args = [];
+        tool.args = {};
         const argNames = this.builtInToolArgs.get(tool.name);
         if (argNames) {
           for (const argName of argNames) {
-            tool.args.push({ name: argName, value: '' });
+            if(tool.args) tool.args[argName] = '';
           }
         }
-        const argsMap = (tool.args || []).reduce((acc, arg) => {
-          acc[arg.name] = arg.value;
-          return acc;
-        }, {} as {[key: string]: any});
-        this.toolArgsString.set(JSON.stringify(argsMap, null, 2));
-        if (tool.args.length > 0) {
+        this.toolArgsString.set(JSON.stringify(tool.args, null, 2));
+        if (tool.args && Object.keys(tool.args).length > 0) {
           this.editingToolArgs.set(true);
         }
         this.cdr.markForCheck();

@@ -624,12 +624,13 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         this.availableTabs.set([...currentTabs, agentTool.name]);
         
         // Try to load the agent tool's YAML file to get its actual configuration
-        this.loadAgentToolConfiguration(agentTool.name, appName);
+        this.loadAgentToolConfiguration(agentTool, appName);
       }
     }
   }
 
-  private loadAgentToolConfiguration(agentToolName: string, appName: string) {
+  private loadAgentToolConfiguration(agentTool: ToolNode, appName: string) {
+    const agentToolName = agentTool.name;
     // Try to fetch the agent tool's YAML file
     this.agentService.getSubAgentBuilder(appName, `${agentToolName}.yaml`).subscribe({
       next: (yamlContent: string) => {
@@ -648,7 +649,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
               tools: this.parseToolsFromYaml(yamlData.tools || []),
               callbacks: this.parseCallbacksFromYaml(yamlData),
               isAgentTool: true,
-              skip_summarization: yamlData.skip_summarization || false,
+              skip_summarization: !!agentTool.args?.['skip_summarization'],
             };
             
             // Store the agent tool agent
@@ -677,22 +678,23 @@ export class CanvasComponent implements AfterViewInit, OnInit {
           } catch (error) {
             console.error(`Error parsing YAML for agent tool ${agentToolName}:`, error);
             // Fallback to default configuration
-            this.createDefaultAgentToolConfiguration(agentToolName);
+            this.createDefaultAgentToolConfiguration(agentTool);
           }
         } else {
           // No YAML file found, create default configuration
-          this.createDefaultAgentToolConfiguration(agentToolName);
+          this.createDefaultAgentToolConfiguration(agentTool);
         }
       },
       error: (error) => {
         console.error(`Error loading agent tool configuration for ${agentToolName}:`, error);
         // Fallback to default configuration
-        this.createDefaultAgentToolConfiguration(agentToolName);
+        this.createDefaultAgentToolConfiguration(agentTool);
       }
     });
   }
 
-  private createDefaultAgentToolConfiguration(agentToolName: string) {
+  private createDefaultAgentToolConfiguration(agentTool: ToolNode) {
+    const agentToolName = agentTool.name;
     const agentToolAgent: AgentNode = {
       name: agentToolName,
       agent_class: 'LlmAgent',
@@ -702,7 +704,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       sub_agents: [],
       tools: [],
       isAgentTool: true,
-      skip_summarization: false,
+      skip_summarization: !!agentTool.args?.['skip_summarization'],
     };
     
     // Store the agent tool agent

@@ -1,7 +1,0 @@
-name: agent_tool
-model: gemini-2.5-flash
-agent_class: LlmAgent
-description: ""
-instruction: You are the agent_tool agent that can be used as a tool by other agents.
-sub_agents: []
-tools: []

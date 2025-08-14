@@ -26,6 +26,9 @@
         [placeholder]="data.inputPlaceholder || 'Enter value'"
         (keydown)="onKeyDown($event)"
         cdkFocusInitial>
+      <mat-hint *ngIf="!isInputValid()" style="font-size: 11px; color: #666;">
+        Start with a letter or underscore, and contain only letters, digits, and underscores.
+      </mat-hint>
     </mat-form-field>
   }
 </mat-dialog-content>
@@ -35,7 +38,7 @@
     mat-button 
     color="primary" 
     (click)="onConfirm()" 
-    [disabled]="data.showInput && !inputValue.trim()"
+    [disabled]="!isInputValid()"
     cdkFocusInitial>
     {{ data.confirmButtonText || 'Confirm' }}
   </button>

@@ -16,6 +16,7 @@
  */
 
 import {Component, Inject} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {
   MAT_DIALOG_DATA,
   MatDialogRef,
@@ -44,6 +45,7 @@ export interface ConfirmationDialogData {
   styleUrls: ['./confirmation-dialog.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     MatButtonModule,
     MatDialogTitle,
     MatDialogContent,
@@ -63,13 +65,40 @@ export class ConfirmationDialogComponent {
     this.inputValue = data.inputValue || '';
   }
 
+  isInputValid(): boolean {
+    const trimmedValue = this.inputValue.trim();
+    
+    // If empty after trimming, it's not valid
+    if (!trimmedValue) {
+      return false;
+    }
+    
+    // Check if starts with letter or underscore
+    if (!/^[a-zA-Z_]/.test(trimmedValue)) {
+      return false;
+    }
+    
+    // Check if contains only letters, digits, and underscores
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmedValue)) {
+      return false;
+    }
+    
+    return true;
+  }
+
   onCancel(): void {
     this.dialogRef.close();
   }
 
   onConfirm(): void {
     if (this.data.showInput) {
-      this.dialogRef.close(this.inputValue.trim());
+      const trimmedValue = this.inputValue.trim();
+      
+      if (!this.isInputValid()) {
+        return;
+      }
+      
+      this.dialogRef.close(trimmedValue);
     } else {
       this.dialogRef.close('confirm');
     }

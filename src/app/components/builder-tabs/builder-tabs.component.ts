@@ -379,7 +379,8 @@ export class BuilderTabsComponent {
 
   createAgentTool() {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      width: '400px',
+      width: '750px',
+      height: '310px',
       data: {
         title: 'Create Agent Tool',
         message: 'Please enter a name for the agent tool:',

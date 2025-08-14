@@ -37,6 +37,27 @@ export class AddItemDialogComponent {
   private _snackBar = inject(MatSnackBar);
   private router = inject(Router);
 
+  isNameValid(): boolean {
+    const trimmedValue = this.newAppName.trim();
+    
+    // If empty after trimming, it's not valid
+    if (!trimmedValue) {
+      return false;
+    }
+    
+    // Check if starts with letter or underscore
+    if (!/^[a-zA-Z_]/.test(trimmedValue)) {
+      return false;
+    }
+    
+    // Check if contains only letters, digits, and underscores
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmedValue)) {
+      return false;
+    }
+    
+    return true;
+  }
+
   constructor(
     @Inject(MAT_DIALOG_DATA)
     public data: {existingAppNames: string[]},
@@ -44,7 +65,18 @@ export class AddItemDialogComponent {
   ) {}
 
   createNewApp() {
-    if (this.data.existingAppNames.includes(this.newAppName)) {
+    const trimmedName = this.newAppName.trim();
+    
+    // Check validation first
+    if (!this.isNameValid()) {
+      this._snackBar.open(
+        'App name must start with a letter or underscore and can only contain letters, digits, and underscores.',
+        'OK',
+      );
+      return;
+    }
+
+    if (this.data.existingAppNames.includes(trimmedName)) {
       this._snackBar.open(
         'App name already exists. Please choose a different name.',
         'OK',
@@ -56,7 +88,7 @@ export class AddItemDialogComponent {
       instruction: 'You are the root agent that coordinates other agents.',
       isRoot: true,
       model: 'gemini-2.5-flash',
-      name: this.newAppName,
+      name: trimmedName,
       sub_agents: [],
       tools: [],
     };
@@ -64,12 +96,12 @@ export class AddItemDialogComponent {
     const formData = new FormData();
 
     const allTabAgents = new Map<string, AgentNode>();
-    YamlUtils.generateYamlFile(rootAgent, formData, this.newAppName, allTabAgents);
+    YamlUtils.generateYamlFile(rootAgent, formData, trimmedName, allTabAgents);
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
-            queryParams: { app: this.newAppName, mode: 'builder' }
+            queryParams: { app: trimmedName, mode: 'builder' }
           }).then(() => {
             window.location.reload();
           });

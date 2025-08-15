@@ -33,12 +33,13 @@ Adk web is the built-in dev UI that comes along with adk for easier development 
 
 - **Install [google-adk (Python)](https://github.com/google/adk-python)** 
 
-- **Install [google-adk (Java)](https://github.com/google/adk-java/)** 
+- **Install [google-adk (Java)](https://github.com/google/adk-java/)**
 
+- **Clone [adk-web (this repo)](https://github.com/google/adk-web/)**
 
 ## 🚀 Running adk web
 
-To be able to run `adk web`, follow the steps:
+To be able to run `adk web`, follow the steps from the root of your local adk-web folder:
 
 ### Install dependencies
 

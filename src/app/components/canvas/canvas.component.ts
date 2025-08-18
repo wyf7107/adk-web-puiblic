@@ -34,6 +34,7 @@ import { parse } from 'yaml';
 import { firstValueFrom, take, filter, Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
+import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 import { AsyncPipe } from '@angular/common';
 
 
@@ -249,13 +250,32 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!parentNode) return;
     if (!parentNode.data) return;
 
-    const toolId = Math.floor(Math.random() * 1000);
-    const tool = {
-      toolType: 'Custom tool',
-      name: `.tool_${toolId}`,
-      args: {skip_summarization: false}
-    }
-    this.agentBuilderService.addTool(parentNode.data().name, tool);
+    // Get parent data
+    const parentData = parentNode.data();
+    if (!parentData) return;
+    
+    const dialogRef = this.dialog.open(AddToolDialogComponent, {
+      width: '500px'
+    });
+
+         dialogRef.afterClosed().subscribe(result => {
+       if (result) {
+         if (result.toolType === 'Agent Tool') {
+           // For Agent Tool, show the create agent dialog instead
+           this.createAgentTool(parentData.name);
+         } else {
+           const tool: any = {
+             toolType: result.toolType,
+             name: result.name
+           };
+           
+           this.agentBuilderService.addTool(parentData.name, tool);
+           
+           // Automatically select the newly created tool
+           this.agentBuilderService.setSelectedTool(tool);
+         }
+       }
+     });
   }
 
   addCallback(parentNodeId: string) {
@@ -279,6 +299,27 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         panelClass: ['error-snackbar']
       });
     }
+  }
+
+  createAgentTool(parentAgentName: string) {
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '750px',
+      height: '310px',
+      data: {
+        title: 'Create Agent Tool',
+        message: 'Please enter a name for the agent tool:',
+        confirmButtonText: 'Create',
+        showInput: true,
+        inputLabel: 'Agent Tool Name',
+        inputPlaceholder: 'Enter agent tool name'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && typeof result === 'string') {
+        this.agentBuilderService.requestNewTab(result, parentAgentName);
+      }
+    });
   }
 
   deleteTool(agentName: string, tool: any) {

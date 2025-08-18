@@ -1,0 +1,54 @@
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<h2 mat-dialog-title>Add New Tool</h2>
+<mat-dialog-content>
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Tool Type</mat-label>
+    <mat-select [(ngModel)]="toolType">
+      <mat-option *ngFor="let type of toolTypes" [value]="type">
+        {{ type }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+           <mat-form-field *ngIf="toolType === 'Custom tool'" appearance="outline" style="width: 100%;">
+           <mat-label>Tool Name</mat-label>
+           <input
+             [(ngModel)]="toolName"
+             matInput
+             placeholder="Enter tool name">
+         </mat-form-field>
+
+         <mat-form-field *ngIf="toolType === 'Built-in tool'" appearance="outline" style="width: 100%;">
+           <mat-label>Built-in Tool</mat-label>
+           <mat-select [(ngModel)]="selectedBuiltInTool">
+             <mat-option *ngFor="let tool of builtInTools" [value]="tool">
+               {{ tool }}
+             </mat-option>
+           </mat-select>
+         </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button 
+    mat-button 
+    (click)="addTool()"
+    [disabled]="createDisabled()">
+    Add Tool
+  </button>
+</mat-dialog-actions>

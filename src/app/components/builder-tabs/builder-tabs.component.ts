@@ -22,6 +22,7 @@ import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
+import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -73,6 +74,7 @@ export class BuilderTabsComponent {
   protected toolAgentName: string = '';
   protected toolTypes = [
     'Custom tool',
+    'Function tool',
     'Built-in tool',
     'Agent Tool'
   ];
@@ -92,7 +94,6 @@ export class BuilderTabsComponent {
     'EnterpriseWebSearchTool',
     'exit_loop',
     'FilesRetrieval',
-    'FunctionTool',
     'get_user_choice',
     'google_search',
     'load_artifacts',
@@ -107,7 +108,7 @@ export class BuilderTabsComponent {
     ['EnterpriseWebSearchTool', []],
     ['exit_loop', []],
     ['FilesRetrieval', ['name', 'description', 'input_dir']],
-    ['FunctionTool', ['func']],
+    ['Function tool', ['func']],
     ['get_user_choice', []],
     ['google_search', []],
     ['load_artifacts', []],
@@ -150,8 +151,29 @@ export class BuilderTabsComponent {
         this.agentBuilderService.requestTabSwitch(agentToolName);
       } else if (tool) {
         this.editingTool = tool;
-        this.toolArgsString.set(this.getJsonStringForEditor(this.editingTool.args));
-        this.editingToolArgs.set(!!this.editingTool.args && Object.keys(this.editingTool.args).length > 0);
+        this.editingToolArgs.set(false);
+
+        setTimeout(() => {
+          const toolName = tool.toolType == "Function tool" ? 'Function tool' : tool.name
+          if (tool.toolType == "Function tool" && !tool.name) {
+            tool.name = 'Function tool';
+          }
+          const argNames = this.builtInToolArgs.get(toolName);
+          if (argNames) {
+            if (!tool.args) {
+              tool.args = {};
+            }
+            for (const argName of argNames) {
+              if(tool.args) tool.args[argName] = '';
+            }
+          }
+          this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
+          if (tool.args && this.getObjectKeys(tool.args).length > 0) {
+            this.editingToolArgs.set(true);
+          }
+          this.cdr.markForCheck();
+        });
+        
         this.selectedTabIndex = 2;
       } else {
         this.editingTool = null;
@@ -204,13 +226,28 @@ export class BuilderTabsComponent {
 
   addTool() {
     if (this.agentConfig) {
-      const toolId = Math.floor(Math.random() * 1000);
-      const tool = {
-        toolType: 'Custom tool',
-        name: `.tool_${toolId}`,
-        args: {skip_summarization: false}
-      }
-      this.agentBuilderService.addTool(this.agentConfig.name, tool);
+      const dialogRef = this.dialog.open(AddToolDialogComponent, {
+        width: '500px'
+      });
+
+        dialogRef.afterClosed().subscribe(result => {
+          if (result) {
+            if (result.toolType === 'Agent Tool') {
+              // For Agent Tool, show the create agent dialog instead
+              this.createAgentTool();
+            } else {
+              const tool: any = {
+                toolType: result.toolType,
+                name: result.name
+              };
+              
+              this.agentBuilderService.addTool(this.agentConfig!.name, tool);
+              
+              // Automatically select the newly created tool
+              this.agentBuilderService.setSelectedTool(tool);
+            }
+          }
+        });
     }
   }
 
@@ -302,6 +339,7 @@ export class BuilderTabsComponent {
   
   backToToolList() {
     this.editingTool = null;
+    this.agentBuilderService.setSelectedTool(undefined);
   }
 
   editToolArgs() {

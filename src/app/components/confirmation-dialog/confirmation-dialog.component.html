@@ -38,7 +38,7 @@
     mat-button 
     color="primary" 
     (click)="onConfirm()" 
-    [disabled]="!isInputValid()"
+    [disabled]="data.showInput && !isInputValid()"
     cdkFocusInitial>
     {{ data.confirmButtonText || 'Confirm' }}
   </button>

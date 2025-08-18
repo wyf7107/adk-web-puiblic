@@ -108,7 +108,7 @@
             <div class="config-form">
               <mat-form-field class="tool-type-field">
                 <mat-label>Tool Type</mat-label>
-                <mat-select [(ngModel)]="editingTool.toolType" (selectionChange)="onToolTypeSelectionChange(editingTool)">
+                <mat-select [(ngModel)]="editingTool.toolType" (selectionChange)="onToolTypeSelectionChange(editingTool)" disabled>
                     @for (type of toolTypes; track type) {
                         <mat-option [value]="type">{{type}}</mat-option>
                     }
@@ -117,19 +117,17 @@
               @if (editingTool.toolType === 'Custom tool') {
                 <mat-form-field class="tool-name-field">
                   <mat-label>Tool Name</mat-label>
-                  <input matInput [(ngModel)]="editingTool.name" />
+                  <input matInput [(ngModel)]="editingTool.name" disabled/>
                 </mat-form-field>
-                <mat-checkbox [(ngModel)]="editingTool.args!['skip_summarization']">Skip summarization</mat-checkbox>
               } @else if (editingTool.toolType === 'Built-in tool') {
                 <mat-form-field class="built-in-tool-field">
                   <mat-label>Built-in Tool</mat-label>
-                  <mat-select [(ngModel)]="editingTool.name" (selectionChange)="onBuiltInToolSelectionChange(editingTool)">
+                  <mat-select [(ngModel)]="editingTool.name" (selectionChange)="onBuiltInToolSelectionChange(editingTool)" disabled>
                     @for (tool of builtInTools; track tool) {
                       <mat-option [value]="tool">{{ tool }}</mat-option>
                     }
                   </mat-select>
                 </mat-form-field>
-                <mat-checkbox [(ngModel)]="editingTool.args!['skip_summarization']">Skip summarization</mat-checkbox>
                 @if (builtInToolArgs.has(editingTool.name) && editingTool.args && getObjectKeys(editingTool.args).length > 0) {
                   <h2 class="tool-args-header">Built-In Tool Arguments</h2>
                   @if (editingToolArgs()) {
@@ -154,6 +152,23 @@
                     Create an agent as tool
                   </button>
                 </div>
+              } @else if (editingTool.toolType === 'Function tool') {
+                @if (builtInToolArgs.has(editingTool.name) && editingTool.args && getObjectKeys(editingTool.args).length > 0) {
+                  <h2 class="tool-args-header">Built-In Tool Arguments</h2>
+                  @if (editingToolArgs()) {
+                    <div class="json-editor-wrapper">
+                      <app-json-editor
+                        [jsonString]="toolArgsString()"
+                      ></app-json-editor>
+                    </div>
+                    <div class="edit-buttons">
+                      <button mat-button (click)="saveToolArgs(editingTool)">Save</button>
+                      <button mat-button (click)="cancelEditToolArgs(editingTool)">Cancel</button>
+                    </div>
+                  } @else {
+                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
+                  }
+                }
               }
             </div>
           } @else {
@@ -170,6 +185,9 @@
                 <ul class="tools-list">
                   @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
                     <li (click)="selectTool(tool)" class="tool-name">
+                      @if (tool.toolType === 'Agent Tool') {
+                        <mat-icon class="tool-icon">smart_toy</mat-icon>
+                      }
                       <span class="tool-list-item-name">{{tool.name}}</span>
                       <button mat-icon-button (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()">
                         <mat-icon>delete</mat-icon>

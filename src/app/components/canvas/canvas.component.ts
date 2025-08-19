@@ -563,8 +563,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.availableTabs.set(['root_agent']);
       this.tabAgents.set(new Map());
       this.agentBuilderService.clear();
-
-      console.log(this.parseToolsFromYaml(yamlData.tools || []));
       // Create root agent from YAML
       const rootAgent: AgentNode = {
         name: yamlData.name || 'root_agent',
@@ -576,8 +574,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         tools: this.parseToolsFromYaml(yamlData.tools || []),
         callbacks: this.parseCallbacksFromYaml(yamlData)
       };
-
-      console.log(rootAgent.tools)
       
       // Store root agent
       const currentTabAgents = this.tabAgents();
@@ -636,8 +632,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
             callbacks.push({
               name: callbackData.name,
               type: callbackType as any,
-              code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
-              description: 'Auto-generated callback'
             });
           }
         });

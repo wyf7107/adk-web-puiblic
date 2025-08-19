@@ -23,6 +23,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
+import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -226,6 +227,27 @@ export class BuilderTabsComponent {
     return Object.keys(obj).filter(key => key !== 'skip_summarization');
   }
 
+  getCallbacksByType(): Map<string, CallbackNode[]> {
+    const callbackGroups = new Map<string, CallbackNode[]>();
+    
+    // Initialize groups for all callback types with empty arrays
+    this.callbackTypes.forEach(type => {
+      callbackGroups.set(type, []);
+    });
+
+    // Group callbacks by type if they exist
+    if (this.agentConfig?.callbacks) {
+      this.agentConfig.callbacks.forEach(callback => {
+        const group = callbackGroups.get(callback.type);
+        if (group) {
+          group.push(callback);
+        }
+      });
+    }
+
+    return callbackGroups;
+  }
+
   selectAgent(agent: AgentNode) {
     this.agentBuilderService.setSelectedNode(agent);
   }
@@ -261,19 +283,26 @@ export class BuilderTabsComponent {
     }
   }
 
-  addCallback() {
+  addCallback(callbackType: string) {
     if (this.agentConfig) {
-      const callbackId = Math.floor(Math.random() * 1000);
-      const callback: CallbackNode = {
-        name: `callback_${callbackId}`,
-        type: 'before_agent',
-        code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
-        description: 'Auto-generated callback'
-      };
-      const result = this.agentBuilderService.addCallback(this.agentConfig.name, callback);
-      if (!result.success) {
-        console.error('Failed to add callback:', result.error);
-      }
+      const dialogRef = this.dialog.open(AddCallbackDialogComponent, {
+        width: '500px',
+        data: { callbackType: callbackType }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          const callback: CallbackNode = {
+            name: result.name,
+            type: result.type,
+          };
+          
+          const addResult = this.agentBuilderService.addCallback(this.agentConfig!.name, callback);
+          if (!addResult.success) {
+            console.error('Failed to add callback:', addResult.error);
+          }
+        }
+      });
     }
   }
 

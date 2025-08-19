@@ -163,15 +163,10 @@ export class AgentBuilderService {
       }
       
       // Validate callback name (must be valid Python identifier)
-      const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-      if (!pythonIdentifierRegex.test(callback.name)) {
-        return { success: false, error: 'Callback name must be a valid Python identifier' };
-      }
-      
-      // Basic Python code validation
-      if (!callback.code || callback.code.trim().length === 0) {
-        return { success: false, error: 'Callback code cannot be empty' };
-      }
+      // const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+      // if (!pythonIdentifierRegex.test(callback.name)) {
+      //   return { success: false, error: 'Callback name must be a valid Python identifier' };
+      // }
       
       agentNode.callbacks.push(callback);
       this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });

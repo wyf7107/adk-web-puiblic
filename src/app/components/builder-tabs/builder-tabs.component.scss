@@ -288,13 +288,12 @@
 }
 
 .callback-name {
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 4px;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
 }
 
 .callback-section {
@@ -307,5 +306,91 @@
     font-weight: 500;
     text-transform: none;
   }
+}
+
+// Callback groups styling (similar to trace tab)
+.callback-groups-wrapper {
+  margin-top: 16px;
+}
+
+.callback-group {
+  margin-top: 5px;
+  @include mat.expansion-overrides(
+    (
+      container-background-color: #333537,
+      header-focus-state-layer-color: red,
+      header-description-color: #8e918f,
+      header-text-size: 15,
+    )
+  );
+}
+
+.callback-list {
+  padding: 8px 0;
+}
+
+.no-callbacks-in-type {
+  color: #9aa0a6;
+  font-size: 14px;
+  font-style: italic;
+  padding: 12px;
+  text-align: center;
+}
+
+.callback-item {
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  background-color: #303030;
+  color: #e8eaed;
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+
+  button {
+    visibility: hidden;
+  }
+
+  &:hover {
+    background-color: #444746;
+
+    button {
+      visibility: visible;
+    }
+  }
+}
+
+.add-callback-icon {
+  color: #8ab4f8;
+  
+  &:hover {
+    background-color: rgba(138, 180, 248, 0.1);
+  }
+}
+
+// Override expansion panel styles for callbacks
+::ng-deep .callback-group .mat-expansion-panel-header.mat-expanded:focus {
+  background-color: #444746 !important;
+}
+
+::ng-deep .callback-group .mat-expansion-panel-header.mat-expanded {
+  background-color: #444746 !important;
+}
+
+::ng-deep .callback-group .mat-expansion-panel-header.mat-expanded:hover {
+  background-color: #444746 !important;
+}
+
+::ng-deep .callback-group .mat-expansion-panel-header-title {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 

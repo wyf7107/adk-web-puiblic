@@ -218,7 +218,7 @@
             <div class="config-form">
               <mat-form-field class="callback-type-field">
                 <mat-label>Callback Type</mat-label>
-                <mat-select [(ngModel)]="editingCallback.type" (selectionChange)="onCallbackTypeChange(editingCallback)">
+                <mat-select [(ngModel)]="editingCallback.type" (selectionChange)="onCallbackTypeChange(editingCallback)" disabled>
                   @for (type of callbackTypes; track type) {
                     <mat-option [value]="type">{{type}}</mat-option>
                   }
@@ -227,31 +227,43 @@
               
               <mat-form-field class="callback-name-field">
                 <mat-label>Callback Name</mat-label>
-                <input matInput [(ngModel)]="editingCallback.name" />
+                <input matInput [(ngModel)]="editingCallback.name" disabled />
               </mat-form-field>
             </div>
           } @else {
-            <button class="add-tool-button" (click)="addCallback()">
-              <div class="add-tool-button-detail">
-                <mat-icon>add</mat-icon>
-                <div class="add-tool-button-text">
-                  Add callback
+            <div class="callback-groups-wrapper">
+              @for (callbackGroup of getCallbacksByType() | keyvalue; track callbackGroup.key) {
+                <div class="callback-group">
+                  <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>{{callbackGroup.key}} ({{callbackGroup.value.length}})</mat-panel-title>
+                      <mat-action-row>
+                        <button mat-icon-button 
+                                (click)="addCallback(callbackGroup.key); $event.stopPropagation()" 
+                                matTooltip="Add {{callbackGroup.key}} callback"
+                                class="add-callback-icon">
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </mat-action-row>
+                    </mat-expansion-panel-header>
+                    @if (callbackGroup.value.length > 0) {
+                      <div class="callback-list">
+                        @for (callback of callbackGroup.value; track callback) {
+                          <div (click)="selectCallback(callback)" class="callback-item">
+                            <span class="callback-name">{{callback.name}}</span>
+                            <button mat-icon-button (click)="deleteCallback(agentConfig?.name || '', callback); $event.stopPropagation()">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="no-callbacks-in-type">No callbacks in this type</div>
+                    }
+                  </mat-expansion-panel>
                 </div>
-              </div>
-            </button>
-            @if (agentConfig && agentConfig.callbacks && agentConfig.callbacks.length > 0) {
-              <ul class="tools-list">
-                @for (callback of agentConfig.callbacks; track callback) {
-                  <li (click)="selectCallback(callback)" class="tool-name">{{callback.name}} ({{callback.type}})
-                    <button mat-icon-button (click)="deleteCallback(agentConfig.name, callback); $event.stopPropagation()">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </li>
-                }
-              </ul>
-            } @else {
-              <div class="no-tools-message">This agent has no callbacks</div>
-            }
+              }
+            </div>
           }
         </div>
       </mat-tab>

@@ -79,7 +79,7 @@ export class AddToolDialogComponent {
       toolType: this.toolType
     };
 
-    if (this.toolType === 'Custom tool') {
+    if (this.toolType === 'Custom tool' || this.toolType === 'Function tool') {
       result.name = this.toolName.trim();
     } else if (this.toolType === 'Built-in tool') {
       result.name = this.selectedBuiltInTool;

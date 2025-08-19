@@ -33,6 +33,14 @@
              placeholder="Enter tool name">
          </mat-form-field>
 
+         <mat-form-field *ngIf="toolType === 'Function tool'" appearance="outline" style="width: 100%;">
+           <mat-label>Function Name</mat-label>
+           <input
+             [(ngModel)]="toolName"
+             matInput
+             placeholder="Enter function name">
+         </mat-form-field>
+
          <mat-form-field *ngIf="toolType === 'Built-in tool'" appearance="outline" style="width: 100%;">
            <mat-label>Built-in Tool</mat-label>
            <mat-select [(ngModel)]="selectedBuiltInTool">

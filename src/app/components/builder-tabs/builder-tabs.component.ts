@@ -108,7 +108,6 @@ export class BuilderTabsComponent {
     ['EnterpriseWebSearchTool', []],
     ['exit_loop', []],
     ['FilesRetrieval', ['name', 'description', 'input_dir']],
-    ['Function tool', ['func']],
     ['get_user_choice', []],
     ['google_search', []],
     ['load_artifacts', []],
@@ -158,18 +157,29 @@ export class BuilderTabsComponent {
           if (tool.toolType == "Function tool" && !tool.name) {
             tool.name = 'Function tool';
           }
-          const argNames = this.builtInToolArgs.get(toolName);
-          if (argNames) {
+          
+          // Initialize args for Custom tools
+          if (tool.toolType === 'Custom tool') {
             if (!tool.args) {
               tool.args = {};
             }
-            for (const argName of argNames) {
-              if(tool.args) tool.args[argName] = '';
-            }
-          }
-          this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
-          if (tool.args && this.getObjectKeys(tool.args).length > 0) {
+            this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
             this.editingToolArgs.set(true);
+          } else {
+            // Handle Built-in and Function tools
+            const argNames = this.builtInToolArgs.get(toolName);
+            if (argNames) {
+              if (!tool.args) {
+                tool.args = {};
+              }
+              for (const argName of argNames) {
+                if(tool.args) tool.args[argName] = '';
+              }
+            }
+            this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
+            if (tool.args && this.getObjectKeys(tool.args).length > 0) {
+              this.editingToolArgs.set(true);
+            }
           }
           this.cdr.markForCheck();
         });
@@ -370,6 +380,10 @@ export class BuilderTabsComponent {
     if (tool?.toolType === 'Built-in tool') {
       tool.name = 'google_search';
       this.onBuiltInToolSelectionChange(tool);
+    } else if (tool?.toolType === 'Custom tool') {
+      tool.args = {};
+      this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
+      this.editingToolArgs.set(true);
     } else if (tool) {
       tool.name = '';
       tool.args = {skip_summarization: false};

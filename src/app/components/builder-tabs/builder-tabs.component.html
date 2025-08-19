@@ -119,6 +119,22 @@
                   <mat-label>Tool Name</mat-label>
                   <input matInput [(ngModel)]="editingTool.name" disabled/>
                 </mat-form-field>
+                @if (editingTool.args) {
+                  <h2 class="tool-args-header">Custom Tool Arguments</h2>
+                  @if (editingToolArgs()) {
+                    <div class="json-editor-wrapper">
+                      <app-json-editor
+                        [jsonString]="toolArgsString()"
+                      ></app-json-editor>
+                    </div>
+                    <div class="edit-buttons">
+                      <button mat-button (click)="saveToolArgs(editingTool)">Save</button>
+                      <button mat-button (click)="cancelEditToolArgs(editingTool)">Cancel</button>
+                    </div>
+                  } @else {
+                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
+                  }
+                }
               } @else if (editingTool.toolType === 'Built-in tool') {
                 <mat-form-field class="built-in-tool-field">
                   <mat-label>Built-in Tool</mat-label>
@@ -153,22 +169,10 @@
                   </button>
                 </div>
               } @else if (editingTool.toolType === 'Function tool') {
-                @if (builtInToolArgs.has(editingTool.name) && editingTool.args && getObjectKeys(editingTool.args).length > 0) {
-                  <h2 class="tool-args-header">Built-In Tool Arguments</h2>
-                  @if (editingToolArgs()) {
-                    <div class="json-editor-wrapper">
-                      <app-json-editor
-                        [jsonString]="toolArgsString()"
-                      ></app-json-editor>
-                    </div>
-                    <div class="edit-buttons">
-                      <button mat-button (click)="saveToolArgs(editingTool)">Save</button>
-                      <button mat-button (click)="cancelEditToolArgs(editingTool)">Cancel</button>
-                    </div>
-                  } @else {
-                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
-                  }
-                }
+                <mat-form-field class="tool-name-field">
+                  <mat-label>Function Name</mat-label>
+                  <input matInput [(ngModel)]="editingTool.name" disabled/>
+                </mat-form-field>
               }
             </div>
           } @else {

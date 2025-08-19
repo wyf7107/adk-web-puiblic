@@ -563,7 +563,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       this.availableTabs.set(['root_agent']);
       this.tabAgents.set(new Map());
       this.agentBuilderService.clear();
-      
+
+      console.log(this.parseToolsFromYaml(yamlData.tools || []));
       // Create root agent from YAML
       const rootAgent: AgentNode = {
         name: yamlData.name || 'root_agent',
@@ -575,6 +576,8 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         tools: this.parseToolsFromYaml(yamlData.tools || []),
         callbacks: this.parseCallbacksFromYaml(yamlData)
       };
+
+      console.log(rootAgent.tools)
       
       // Store root agent
       const currentTabAgents = this.tabAgents();
@@ -616,7 +619,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
       } else if (tool.args) {
         toolNode.args = tool.args;
       }
-
       return toolNode;
     });
   }
@@ -648,8 +650,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   private determineToolType(tool: any): string {
     if (tool.name === 'AgentTool' && tool.args && tool.args.agent) {
       return 'Agent Tool';
-    } else if (tool.name && tool.name.includes('.')) {
+    } else if (tool.name && tool.name.includes('.') && tool.args) {
       return 'Custom tool';
+    } else if (tool.name && tool.name.includes('.') && !tool.args) {
+      return "Function tool";
     } else {
       return 'Built-in tool';
     }
@@ -768,9 +772,10 @@ export class CanvasComponent implements AfterViewInit, OnInit {
         if (tool.toolType === 'Agent Tool') {
           return; // Don't override Agent Tool type
         }
-        
-        if (tool.name.includes('.')) {
-          tool.toolType = "Custom tool"
+        if (tool.name.includes('.') && tool.args) {
+          tool.toolType = 'Custom tool';
+        } else if (tool.name.includes('.') && !tool.args) {
+          tool.toolType =  "Function tool";
         } else {
           tool.toolType = "Built-in tool"
         }

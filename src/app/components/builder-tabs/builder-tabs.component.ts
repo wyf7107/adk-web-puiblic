@@ -54,6 +54,10 @@ export class BuilderTabsComponent {
     callbacks: []
   };
 
+  // Breadcrumb tracking
+  recentAgents: AgentNode[] = [];
+  currentSelectedAgent: AgentNode | undefined = undefined;
+
   // Agent configuration options
   isRootAgentEditable: boolean = true;
 
@@ -135,12 +139,14 @@ export class BuilderTabsComponent {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
+      this.currentSelectedAgent = node;
       if (node) {
         this.editingTool = null;
         this.editingCallback = null;
         this.header = 'Agent configuration';
-        this.cdr.markForCheck();
-       }
+        this.updateBreadcrumb(node);
+      }
+      this.cdr.markForCheck();
     });
 
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
@@ -246,6 +252,26 @@ export class BuilderTabsComponent {
     }
 
     return callbackGroups;
+  }
+
+  private updateBreadcrumb(agent: AgentNode) {
+    // If agent is already in the breadcrumb, don't change the order
+    const existingAgent = this.recentAgents.find(a => a.name === agent.name);
+    if (existingAgent) {
+      return; // Just select it, don't modify the array
+    }
+    
+    // Add the agent to the end
+    this.recentAgents.push(agent);
+    
+    // Keep only the 3 most recent (remove from beginning if needed)
+    if (this.recentAgents.length > 3) {
+      this.recentAgents.shift(); // Remove the first (oldest) element
+    }
+  }
+
+  selectAgentFromBreadcrumb(agent: AgentNode) {
+    this.agentBuilderService.setSelectedNode(agent);
   }
 
   selectAgent(agent: AgentNode) {

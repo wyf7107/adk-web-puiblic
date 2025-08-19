@@ -16,6 +16,21 @@
 
 <div class="builder-tabs-container">
   <div class="builder-tab-content">
+    @if (recentAgents.length > 0) {
+      <div class="agent-breadcrumb-container">
+        @for (agent of recentAgents; track agent.name; let i = $index) {
+          <mat-chip 
+            class="breadcrumb-chip"
+            [class.current-agent]="currentSelectedAgent?.name === agent.name"
+            (click)="selectAgentFromBreadcrumb(agent)">
+            {{agent.name}}
+          </mat-chip>
+          @if (i < recentAgents.length - 1) {
+            <mat-icon class="breadcrumb-arrow">chevron_right</mat-icon>
+          }
+        }
+      </div>
+    }
 
     <mat-tab-group [(selectedIndex)]="selectedTabIndex">
       <mat-tab class="tabs-header">

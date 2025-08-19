@@ -22,6 +22,45 @@
   padding: 0;
 }
 
+// Agent breadcrumb
+.agent-breadcrumb-container {
+  padding: 2px 20px 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-chip {
+  background-color: rgba(138, 180, 248, 0.1);
+  color: #8ab4f8;
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 13px;
+  font-weight: 400;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(138, 180, 248, 0.2);
+    transform: scale(1.05);
+  }
+  
+  &.current-agent {
+    background-color: rgba(138, 180, 248, 0.2);
+    color: #8ab4f8;
+    font-weight: 500;
+    transform: scale(1.1);
+  }
+}
+
+.breadcrumb-arrow {
+  color: #666;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
 .builder-tab-content {
   padding: 20px;
   color: #9aa0a6;

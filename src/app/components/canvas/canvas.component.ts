@@ -237,6 +237,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
 
     // Add the edge
     this.edges.set([...this.edges(), edge]);
+
+    // Auto-select the newly created sub-agent
+    this.agentBuilderService.setSelectedNode(agentNodeData);
   }
 
   addTool(parentNodeId: string) {

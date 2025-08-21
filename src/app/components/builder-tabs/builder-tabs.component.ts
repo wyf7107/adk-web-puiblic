@@ -55,7 +55,7 @@ export class BuilderTabsComponent {
   };
 
   // Breadcrumb tracking
-  recentAgents: AgentNode[] = [];
+  hierarchyPath: AgentNode[] = [];
   currentSelectedAgent: AgentNode | undefined = undefined;
 
   // Agent configuration options
@@ -255,19 +255,76 @@ export class BuilderTabsComponent {
   }
 
   private updateBreadcrumb(agent: AgentNode) {
-    // If agent is already in the breadcrumb, don't change the order
-    const existingAgent = this.recentAgents.find(a => a.name === agent.name);
-    if (existingAgent) {
-      return; // Just select it, don't modify the array
+    this.hierarchyPath = this.buildHierarchyPath(agent);
+  }
+
+  private buildHierarchyPath(targetAgent: AgentNode): AgentNode[] {
+    const path: AgentNode[] = [];
+    
+    // Find the appropriate root agent for the current context
+    const rootAgent = this.findContextualRoot(targetAgent);
+    if (!rootAgent) {
+      return [targetAgent];
+    }
+
+    if (targetAgent.name === rootAgent.name) {
+      return [rootAgent];
+    }
+
+    const foundPath = this.findPathToAgent(rootAgent, targetAgent, [rootAgent]);
+    return foundPath || [targetAgent];
+  }
+
+  private findContextualRoot(targetAgent: AgentNode): AgentNode | undefined {
+    if (targetAgent.isAgentTool) {
+      return targetAgent;
     }
     
-    // Add the agent to the end
-    this.recentAgents.push(agent);
-    
-    // Keep only the 3 most recent (remove from beginning if needed)
-    if (this.recentAgents.length > 3) {
-      this.recentAgents.shift(); // Remove the first (oldest) element
+    // Check if any agent tool contains this target in its hierarchy
+    const allNodes = this.agentBuilderService.getNodes();
+    for (const node of allNodes) {
+      if (node.isAgentTool && this.findPathToAgent(node, targetAgent, [node])) {
+        return node;
+      }
     }
+
+    const mainRoot = this.agentBuilderService.getRootNode();
+    if (mainRoot && this.findPathToAgent(mainRoot, targetAgent, [mainRoot])) {
+      return mainRoot;
+    }
+    
+    // If target itself is the main root
+    if (targetAgent.isRoot) {
+      return targetAgent;
+    }
+    
+    // Check if any other root agent contains this target
+    for (const node of allNodes) {
+      if (node.isRoot && this.findPathToAgent(node, targetAgent, [node])) {
+        return node;
+      }
+    }
+    
+    // If still not found, return the main root as fallback
+    return mainRoot;
+  }
+
+  private findPathToAgent(current: AgentNode, target: AgentNode, currentPath: AgentNode[]): AgentNode[] | null {
+    // If we found the target, return the current path
+    if (current.name === target.name) {
+      return currentPath;
+    }
+    
+    // Search in sub-agents only
+    for (const subAgent of current.sub_agents) {
+      const newPath = [...currentPath, subAgent];
+      const result = this.findPathToAgent(subAgent, target, newPath);
+      if (result) {
+        return result;
+      }
+    }
+    
+    return null;
   }
 
   selectAgentFromBreadcrumb(agent: AgentNode) {

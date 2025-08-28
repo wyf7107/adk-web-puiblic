@@ -18,7 +18,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {v4 as uuidv4} from 'uuid';
-import {EvalService} from '../../../../core/services/eval.service';
+import {EvalService, EVAL_SERVICE} from '../../../../core/services/eval.service';
 
 @Component({
   selector: 'app-add-eval-session-dialog',
@@ -30,7 +30,7 @@ export class AddEvalSessionDialogComponent {
   newCaseId: string = 'case' + uuidv4().slice(0, 6);
 
   constructor(
-    private evalService: EvalService,
+    @Inject(EVAL_SERVICE) private evalService: EvalService,
     @Inject(MAT_DIALOG_DATA)
     public data: {
       appName: string;

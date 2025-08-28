@@ -16,7 +16,7 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, QueryList, signal, SimpleChanges, ViewChildren} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, QueryList, signal, SimpleChanges, ViewChildren, Inject} from '@angular/core';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog} from '@angular/material/dialog';
 import {MatTableDataSource} from '@angular/material/table';
@@ -26,9 +26,9 @@ import {catchError} from 'rxjs/operators';
 import {DEFAULT_EVAL_METRICS, EvalMetric} from '../../core/models/EvalMetric';
 import {Session} from '../../core/models/Session';
 import {Invocation} from '../../core/models/types';
-import {EvalService} from '../../core/services/eval.service';
-import {FeatureFlagService} from '../../core/services/feature-flag.service';
-import {SessionService} from '../../core/services/session.service';
+import {EvalService, EVAL_SERVICE} from '../../core/services/eval.service';
+import {FeatureFlagService, FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
+import {SessionService, SESSION_SERVICE} from '../../core/services/session.service';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
@@ -123,8 +123,8 @@ export class EvalTabComponent implements OnInit, OnChanges {
   protected appEvaluationResults: AppEvaluationResult = {};
 
   constructor(
-      private evalService: EvalService,
-      private sessionService: SessionService,
+      @Inject(EVAL_SERVICE) private evalService: EvalService,
+      @Inject(SESSION_SERVICE) private sessionService: SessionService,
   ) {
     this.evalCasesSubject.subscribe((evalCases: string[]) => {
       if (!this.selectedEvalCase() && this.deletedEvalCaseIndex >= 0 &&

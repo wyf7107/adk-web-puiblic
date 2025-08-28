@@ -18,7 +18,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-import {AgentService} from '../../core/services/agent.service';
+import {AgentService, AGENT_SERVICE} from '../../core/services/agent.service';
 
 @Component({
   selector: 'app-pending-event-dialog',
@@ -38,7 +38,7 @@ export class PendingEventDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<PendingEventDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private agentService: AgentService,
+    @Inject(AGENT_SERVICE) private agentService: AgentService,
   ) {
     this.selectedEvent = data.event;
     this.appName = data.appName;

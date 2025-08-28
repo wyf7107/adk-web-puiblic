@@ -84,7 +84,7 @@
     } 
     @if (isBuilderMode()) {
     <!-- Builder Mode Left Panel Content -->
-    <app-builder-tabs></app-builder-tabs>
+    <app-builder-tabs (exitBuilderMode)="exitBuilderMode()"></app-builder-tabs>
     } @else if (appName != "" && showSidePanel) {
     <!-- Normal Mode Tabs -->
     <div class="tabs-container">

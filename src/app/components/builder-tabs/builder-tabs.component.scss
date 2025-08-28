@@ -19,7 +19,9 @@
 .builder-tabs-container {
   width: 100%;
   margin-top: 20px;
-  padding: 0;
+  height: calc(95vh - 20px);
+  display: flex;
+  flex-direction: column;
 }
 
 // Agent breadcrumb
@@ -32,25 +34,26 @@
 }
 
 .breadcrumb-chip {
-  background-color: rgba(138, 180, 248, 0.1);
-  color: #8ab4f8;
+  background-color: transparent;
+  color: #9aa0a6;
   font-family: 'Google Sans Mono', monospace;
   font-size: 13px;
   font-weight: 400;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  user-select: none;
+
   &:hover {
-    background-color: rgba(138, 180, 248, 0.2);
-    transform: scale(1.05);
+    color: #aecbfa;
   }
-  
+
   &.current-agent {
-    background-color: rgba(138, 180, 248, 0.2);
     color: #8ab4f8;
     font-weight: 500;
-    transform: scale(1.1);
   }
 }
 
@@ -62,9 +65,11 @@
 }
 
 .builder-tab-content {
-  padding: 20px;
   color: #9aa0a6;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
 
   p {
     margin: 8px 0;
@@ -158,7 +163,7 @@
 
 .tab-content-container {
   margin-top: 20px;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .agent-list-row {
@@ -431,5 +436,79 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+}
+
+// Make tab group take available space
+mat-tab-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 16px 20px 0 20px;
+  min-height: 0;
+}
+
+::ng-deep .mat-mdc-tab-body-wrapper {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+::ng-deep .mat-mdc-tab-body-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+// Make tab group take available space
+mat-tab-group {
+  flex: 1;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+::ng-deep .mat-mdc-tab-body-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+::ng-deep .mat-mdc-tab-body-content {
+  height: 100%;
+  overflow-y: auto;
+}
+
+// Action buttons
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  max-height: 120px;
+
+  .save-button {
+    background-color: #8ab4f8;
+    color: #202124;
+    font-weight: 500;
+    
+    &:hover {
+      background-color: #aecbfa;
+    }
+  }
+
+  .cancel-button {
+    color: #9aa0a6;
+    border: 1px solid rgba(154, 160, 166, 0.3);
+    
+    &:hover {
+      background-color: rgba(154, 160, 166, 0.1);
+      color: #e8eaed;
+    }
+  }
 }
 

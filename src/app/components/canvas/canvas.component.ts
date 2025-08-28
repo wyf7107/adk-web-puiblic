@@ -177,6 +177,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     if (!!agentNodeData) {
       this.agentBuilderService.setSelectedTool(undefined);
       this.agentBuilderService.setSelectedNode(agentNodeData);
+      this.agentBuilderService.requestSideTabChange('config');
       // this.agentBuilderService.setAgentTools(
       //   agentNodeData.name,
       //   agentNodeData.tools || [],
@@ -238,8 +239,9 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     // Add the edge
     this.edges.set([...this.edges(), edge]);
 
-    // Auto-select the newly created sub-agent
+    // Auto-select the newly created sub-agent and switch to Config tab
     this.agentBuilderService.setSelectedNode(agentNodeData);
+    this.agentBuilderService.requestSideTabChange('config');
   }
 
   addTool(parentNodeId: string) {

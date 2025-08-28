@@ -15,15 +15,19 @@
  * limitations under the License.
  */
 
-import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AgentService } from '../../core/services/agent.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
+import { YamlUtils } from '../../../utils/yaml-utils';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -36,6 +40,7 @@ export class BuilderTabsComponent {
   // Tab indices
   private readonly CALLBACKS_TAB_INDEX = 3;
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
+  @Output() exitBuilderMode = new EventEmitter<void>();
 
   protected toolArgsString = signal('');
   editingToolArgs = signal(false);
@@ -74,6 +79,9 @@ export class BuilderTabsComponent {
 
   private agentBuilderService = inject(AgentBuilderService);
   private dialog = inject(MatDialog);
+  private agentService = inject(AgentService);
+  private snackBar = inject(MatSnackBar);
+  private router = inject(Router);
   
   protected selectedTool: ToolNode | undefined = undefined;
   protected toolAgentName: string = '';
@@ -89,11 +97,11 @@ export class BuilderTabsComponent {
   public selectedCallback: CallbackNode | undefined = undefined;
   public callbackTypes = [
     'before_agent',
-    'after_agent',
     'before_model',
-    'after_model',
     'before_tool',
-    'after_tool'
+    'after_tool',
+    'after_model',
+    'after_agent',
   ];
   protected builtInTools = [
     'EnterpriseWebSearchTool',
@@ -222,6 +230,8 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSideTabChangeRequest().subscribe(tabName => {
       if (tabName === 'tools') {
         this.selectedTabIndex = 2;
+      } else if (tabName === 'config') {
+        this.selectedTabIndex = 0;
       }
     });
   }
@@ -329,10 +339,12 @@ export class BuilderTabsComponent {
 
   selectAgentFromBreadcrumb(agent: AgentNode) {
     this.agentBuilderService.setSelectedNode(agent);
+    this.selectedTabIndex = 0; // Switch to Config tab
   }
 
   selectAgent(agent: AgentNode) {
     this.agentBuilderService.setSelectedNode(agent);
+    this.selectedTabIndex = 0; // Switch to Config tab
   }
 
   selectTool(tool: ToolNode) {
@@ -561,6 +573,54 @@ export class BuilderTabsComponent {
         let currentAgentName = this.agentConfig?.name || 'root_agent';
         
         this.agentBuilderService.requestNewTab(result, currentAgentName);
+      }
+    });
+  }
+
+  saveChanges() {
+    const rootAgent = this.agentBuilderService.getRootNode();
+    
+    if (!rootAgent) {
+      this.snackBar.open("Please create an agent first.", "OK");
+      return;
+    }
+
+    // Get app name from agent service
+    this.agentService.getApp().subscribe(appName => {
+      if (appName) {
+        this.saveAgent(appName);
+      }
+    });
+  }
+
+  cancelChanges() {
+    this.exitBuilderMode.emit();
+  }
+
+  private saveAgent(appName: string) {
+    const rootAgent = this.agentBuilderService.getRootNode();
+
+    if (!rootAgent) {
+      this.snackBar.open("Please create an agent first.", "OK");
+      return;
+    }
+
+    const formData = new FormData();
+    
+    // For now, we'll use an empty tabAgents map since we don't have access to canvas component's tabAgents
+    const tabAgents = new Map<string, AgentNode>();
+    
+    YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
+
+    this.agentService.agentBuild(formData).subscribe((success) => {
+      if (success) {
+        this.router.navigate(['/'], {
+          queryParams: { app: appName }
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        this.snackBar.open("Something went wrong, please try again", "OK");
       }
     });
   }

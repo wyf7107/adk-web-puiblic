@@ -19,12 +19,12 @@
     @if (hierarchyPath.length > 0) {
       <div class="agent-breadcrumb-container">
         @for (agent of hierarchyPath; track agent.name; let i = $index) {
-          <mat-chip 
+          <div 
             class="breadcrumb-chip"
             [class.current-agent]="currentSelectedAgent?.name === agent.name"
             (click)="selectAgentFromBreadcrumb(agent)">
             {{agent.name}}
-          </mat-chip>
+          </div>
           @if (i < hierarchyPath.length - 1) {
             <mat-icon class="breadcrumb-arrow">chevron_right</mat-icon>
           }
@@ -247,41 +247,53 @@
             </div>
           } @else {
             <div class="callback-groups-wrapper">
-              @for (callbackGroup of getCallbacksByType() | keyvalue; track callbackGroup.key) {
-                <div class="callback-group">
-                  <mat-expansion-panel>
-                    <mat-expansion-panel-header>
-                      <mat-panel-title>{{callbackGroup.key}} ({{callbackGroup.value.length}})</mat-panel-title>
-                      <mat-action-row>
-                        <button mat-icon-button 
-                                (click)="addCallback(callbackGroup.key); $event.stopPropagation()" 
-                                matTooltip="Add {{callbackGroup.key}} callback"
-                                class="add-callback-icon">
-                          <mat-icon>add</mat-icon>
-                        </button>
-                      </mat-action-row>
-                    </mat-expansion-panel-header>
-                    @if (callbackGroup.value.length > 0) {
-                      <div class="callback-list">
-                        @for (callback of callbackGroup.value; track callback) {
-                          <div (click)="selectCallback(callback)" class="callback-item">
-                            <span class="callback-name">{{callback.name}}</span>
-                            <button mat-icon-button (click)="deleteCallback(agentConfig?.name || '', callback); $event.stopPropagation()">
-                              <mat-icon>delete</mat-icon>
-                            </button>
-                          </div>
-                        }
-                      </div>
-                    } @else {
-                      <div class="no-callbacks-in-type">No callbacks in this type</div>
-                    }
-                  </mat-expansion-panel>
-                </div>
+              @for (callbackType of callbackTypes; track callbackType) {
+                @if (getCallbacksByType().get(callbackType); as callbacks) {
+                  <div class="callback-group">
+                    <mat-expansion-panel [expanded]="true">
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>{{callbackType}} ({{callbacks.length}})</mat-panel-title>
+                        <mat-action-row>
+                          <button mat-icon-button 
+                                  (click)="addCallback(callbackType); $event.stopPropagation()" 
+                                  matTooltip="Add {{callbackType}} callback"
+                                  class="add-callback-icon">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </mat-action-row>
+                      </mat-expansion-panel-header>
+                      @if (callbacks.length > 0) {
+                        <div class="callback-list">
+                          @for (callback of callbacks; track callback) {
+                            <div (click)="selectCallback(callback)" class="callback-item">
+                              <span class="callback-name">{{callback.name}}</span>
+                              <button mat-icon-button (click)="deleteCallback(agentConfig?.name || '', callback); $event.stopPropagation()">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      } @else {
+                        <div class="no-callbacks-in-type">No callbacks in this type</div>
+                      }
+                    </mat-expansion-panel>
+                  </div>
+                }
               }
             </div>
           }
         </div>
       </mat-tab>
     </mat-tab-group>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" class="save-button" (click)="saveChanges()">
+        Save
+      </button>
+      <button mat-button class="cancel-button" (click)="cancelChanges()">
+        Cancel
+      </button>
+    </div>
   </div>
 </div>

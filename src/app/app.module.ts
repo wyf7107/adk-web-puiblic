@@ -27,16 +27,17 @@ import {MatInputModule} from '@angular/material/input';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AppComponent} from './app.component';
 import {ComponentModule} from './components/component.module';
-import {AgentService} from './core/services/agent.service';
-import {ArtifactService} from './core/services/artifact.service';
-import {AudioService} from './core/services/audio.service';
-import {DownloadService} from './core/services/download.service';
-import {EvalService} from './core/services/eval.service';
-import {EventService} from './core/services/event.service';
-import {SessionService} from './core/services/session.service';
-import {VideoService} from './core/services/video.service';
-import {WebSocketService} from './core/services/websocket.service';
-import { TraceService } from './core/services/trace.service';
+import {AgentService, AGENT_SERVICE} from './core/services/agent.service';
+import {ArtifactService, ARTIFACT_SERVICE} from './core/services/artifact.service';
+import {AudioService, AUDIO_SERVICE} from './core/services/audio.service';
+import {DownloadService, DOWNLOAD_SERVICE} from './core/services/download.service';
+import {EvalService, EVAL_SERVICE} from './core/services/eval.service';
+import {EventService, EVENT_SERVICE} from './core/services/event.service';
+import {FeatureFlagService, FEATURE_FLAG_SERVICE} from './core/services/feature-flag.service';
+import {SessionService, SESSION_SERVICE} from './core/services/session.service';
+import {VideoService, VIDEO_SERVICE} from './core/services/video.service';
+import {WebSocketService, WEBSOCKET_SERVICE} from './core/services/websocket.service';
+import { TraceService, TRACE_SERVICE } from './core/services/trace.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -52,16 +53,17 @@ import { TraceService } from './core/services/trace.service';
     BrowserAnimationsModule,
   ],
   providers: [
-    SessionService,
-    AgentService,
-    WebSocketService,
-    AudioService,
-    VideoService,
-    EventService,
-    EvalService,
-    ArtifactService,
-    DownloadService,
-    TraceService
+    {provide: SESSION_SERVICE, useClass: SessionService},
+    {provide: AGENT_SERVICE, useClass: AgentService},
+    {provide: WEBSOCKET_SERVICE, useClass: WebSocketService},
+    {provide: AUDIO_SERVICE, useClass: AudioService},
+    {provide: VIDEO_SERVICE, useClass: VideoService},
+    {provide: EVENT_SERVICE, useClass: EventService},
+    {provide: EVAL_SERVICE, useClass: EvalService},
+    {provide: ARTIFACT_SERVICE, useClass: ArtifactService},
+    {provide: DOWNLOAD_SERVICE, useClass: DownloadService},
+    {provide: TRACE_SERVICE, useClass: TraceService},
+    {provide: FEATURE_FLAG_SERVICE, useClass: FeatureFlagService},
   ],
   bootstrap: [AppComponent],
 })

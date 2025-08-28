@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import {Injectable, InjectionToken} from '@angular/core';
+
+export const DOWNLOAD_SERVICE = new InjectionToken<DownloadService>('DownloadService');
 
 @Injectable({
   providedIn: 'root',

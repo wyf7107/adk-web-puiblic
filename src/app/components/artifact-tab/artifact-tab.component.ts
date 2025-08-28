@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges, Inject} from '@angular/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
-import {DownloadService} from '../../core/services/download.service';
+import {DownloadService, DOWNLOAD_SERVICE} from '../../core/services/download.service';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 
@@ -142,7 +142,7 @@ export class ArtifactTabComponent implements OnChanges {
   protected openBase64InNewTab = openBase64InNewTab;
 
   constructor(
-      private downloadService: DownloadService,
+      @Inject(DOWNLOAD_SERVICE) private downloadService: DownloadService,
       private dialog: MatDialog,
   ) {}
 

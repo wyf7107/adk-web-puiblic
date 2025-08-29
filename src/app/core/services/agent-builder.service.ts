@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AgentNode, ToolNode, CallbackNode } from '../models/AgentBuilder';
 
 @Injectable({
@@ -15,12 +16,13 @@ export class AgentBuilderService {
   private loadedAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
   private agentToolsMapSubject = new BehaviorSubject<Map<string, ToolNode[]>>(new Map());
   private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
-  private newTabSubject = new BehaviorSubject<{tabName: string, currentAgentName?: string}|undefined>(undefined);
+  private newAgentToolBoardSubject = new BehaviorSubject<{toolName: string, currentAgentName?: string}|undefined>(undefined);
   private agentCallbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
-  private tabDeletionSubject = new BehaviorSubject<string|undefined>(undefined);
+  private agentToolDeletionSubject = new BehaviorSubject<string|undefined>(undefined);
   private deleteSubAgentSubject = new BehaviorSubject<string>('');
   private addSubAgentSubject = new BehaviorSubject<string>('');
   private tabChangeSubject = new BehaviorSubject<string|undefined>(undefined);
+  private agentToolBoardsSubject = new BehaviorSubject<Map<string, AgentNode>>(new Map());
 
   constructor() { }
 
@@ -218,25 +220,6 @@ export class AgentBuilderService {
     return this.agentToolsMapSubject.asObservable();
   }
 
-  requestNewTab(tabName: string, currentAgentName?: string) {
-    this.newTabSubject.next({tabName, currentAgentName});
-  }
-
-  requestTabSwitch(tabName: string) {
-    this.newTabSubject.next({tabName});
-  }
-
-  getNewTabRequest(): Observable<{tabName: string, currentAgentName?: string}|undefined> {
-    return this.newTabSubject.asObservable();
-  }
-
-  requestTabDeletion(tabName: string) {
-    this.tabDeletionSubject.next(tabName);
-  }
-
-  getTabDeletionRequest(): Observable<string|undefined> {
-    return this.tabDeletionSubject.asObservable();
-  }
 
   requestSideTabChange(tabName: string) {
     this.tabChangeSubject.next(tabName);
@@ -244,6 +227,38 @@ export class AgentBuilderService {
 
   getSideTabChangeRequest(): Observable<string|undefined> {
     return this.tabChangeSubject.asObservable();
+  }
+
+  requestNewTab(toolName: string, currentAgentName?: string) {
+    this.newAgentToolBoardSubject.next({toolName, currentAgentName});
+  }
+
+  getNewTabRequest(): Observable<{tabName: string, currentAgentName?: string}|undefined> {
+    const newTabRequest = this.newAgentToolBoardSubject.asObservable();
+    // Map the property names to match expected interface
+    return newTabRequest.pipe(
+      map(request => request ? { tabName: request.toolName, currentAgentName: request.currentAgentName } : undefined)
+    ) as Observable<{tabName: string, currentAgentName?: string}|undefined>;
+  }
+
+  requestTabDeletion(toolName: string) {
+    this.agentToolDeletionSubject.next(toolName);
+  }
+
+  getTabDeletionRequest(): Observable<string|undefined> {
+    return this.agentToolDeletionSubject.asObservable();
+  }
+
+  setAgentToolBoards(agentToolBoards: Map<string, AgentNode>) {
+    this.agentToolBoardsSubject.next(agentToolBoards);
+  }
+
+  getAgentToolBoards(): Observable<Map<string, AgentNode>> {
+    return this.agentToolBoardsSubject.asObservable();
+  }
+
+  getCurrentAgentToolBoards(): Map<string, AgentNode> {
+    return this.agentToolBoardsSubject.value;
   }
 
   getAgentTools(): Observable<{ agentName: string, tools: ToolNode[] } | undefined> {

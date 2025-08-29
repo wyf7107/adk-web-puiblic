@@ -160,9 +160,7 @@ export class BuilderTabsComponent {
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
       if (tool && tool.toolType === 'Agent Tool') {
-        // Switch to the corresponding agent tool tab
-        const agentToolName = tool.name;
-        this.agentBuilderService.requestTabSwitch(agentToolName);
+        return;
       } else if (tool) {
         this.editingTool = tool;
         this.editingToolArgs.set(false);
@@ -348,6 +346,12 @@ export class BuilderTabsComponent {
   }
 
   selectTool(tool: ToolNode) {
+    if (tool.toolType === 'Agent Tool') {
+      const agentToolName = tool.name;
+      this.agentBuilderService.requestNewTab(agentToolName);
+      return;
+    }
+    
     this.agentBuilderService.setSelectedTool(tool);
   }
 
@@ -443,7 +447,7 @@ export class BuilderTabsComponent {
       data: { 
         title: isAgentTool ? 'Delete Agent Tool' : 'Delete Tool',
         message: isAgentTool 
-          ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding tab.`
+          ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding board.`
           : `Are you sure you want to delete ${toolDisplayName}?`,
         confirmButtonText: 'Delete'
       },
@@ -451,25 +455,22 @@ export class BuilderTabsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result === 'confirm') {
-        // Check if this is an agent tool that needs tab deletion
         if (tool.toolType === 'Agent Tool') {
           const agentToolName = tool.toolAgentName || tool.name;
-          this.deleteAgentToolAndTab(agentName, tool, agentToolName);
+          this.deleteAgentToolAndBoard(agentName, tool, agentToolName);
         } else {
-          // Regular tool deletion
           this.agentBuilderService.deleteTool(agentName, tool);
         }
       }
     });
   }
 
-  deleteAgentToolAndTab(agentName: string, tool: any, agentToolName: string) {
-    // First, delete the tool from the agent
+  deleteAgentToolAndBoard(agentName: string, tool: any, agentToolName: string) {
     this.agentBuilderService.deleteTool(agentName, tool);
 
-    // Request the canvas to delete the tab
     this.agentBuilderService.requestTabDeletion(agentToolName);
   }
+
   
   backToToolList() {
     this.editingTool = null;
@@ -569,7 +570,6 @@ export class BuilderTabsComponent {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && typeof result === 'string') {
-        // Determine the correct agent name for tab storage
         let currentAgentName = this.agentConfig?.name || 'root_agent';
         
         this.agentBuilderService.requestNewTab(result, currentAgentName);
@@ -607,8 +607,7 @@ export class BuilderTabsComponent {
 
     const formData = new FormData();
     
-    // For now, we'll use an empty tabAgents map since we don't have access to canvas component's tabAgents
-    const tabAgents = new Map<string, AgentNode>();
+    const tabAgents = this.agentBuilderService.getCurrentAgentToolBoards();
     
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 

@@ -18,7 +18,7 @@
 import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
-import { AgentService } from '../../core/services/agent.service';
+import { AGENT_SERVICE } from '../../core/services/agent.service';
 import {JsonEditorComponent} from '../json-editor/json-editor.component';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -69,7 +69,7 @@ export class BuilderTabsComponent {
   models = [
     "gemini-2.5-flash"
   ];
-  
+
   agentTypes = [
     'LlmAgent',
     'LoopAgent',
@@ -79,10 +79,10 @@ export class BuilderTabsComponent {
 
   private agentBuilderService = inject(AgentBuilderService);
   private dialog = inject(MatDialog);
-  private agentService = inject(AgentService);
+  private agentService = inject(AGENT_SERVICE);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
-  
+
   protected selectedTool: ToolNode | undefined = undefined;
   protected toolAgentName: string = '';
   protected toolTypes = [
@@ -170,7 +170,7 @@ export class BuilderTabsComponent {
           if (tool.toolType == "Function tool" && !tool.name) {
             tool.name = 'Function tool';
           }
-          
+
           // Initialize args for Custom tools
           if (tool.toolType === 'Custom tool') {
             if (!tool.args) {
@@ -196,7 +196,7 @@ export class BuilderTabsComponent {
           }
           this.cdr.markForCheck();
         });
-        
+
         this.selectedTabIndex = 2;
       } else {
         this.editingTool = null;
@@ -243,7 +243,7 @@ export class BuilderTabsComponent {
 
   getCallbacksByType(): Map<string, CallbackNode[]> {
     const callbackGroups = new Map<string, CallbackNode[]>();
-    
+
     // Initialize groups for all callback types with empty arrays
     this.callbackTypes.forEach(type => {
       callbackGroups.set(type, []);
@@ -268,7 +268,7 @@ export class BuilderTabsComponent {
 
   private buildHierarchyPath(targetAgent: AgentNode): AgentNode[] {
     const path: AgentNode[] = [];
-    
+
     // Find the appropriate root agent for the current context
     const rootAgent = this.findContextualRoot(targetAgent);
     if (!rootAgent) {
@@ -287,7 +287,7 @@ export class BuilderTabsComponent {
     if (targetAgent.isAgentTool) {
       return targetAgent;
     }
-    
+
     // Check if any agent tool contains this target in its hierarchy
     const allNodes = this.agentBuilderService.getNodes();
     for (const node of allNodes) {
@@ -300,19 +300,19 @@ export class BuilderTabsComponent {
     if (mainRoot && this.findPathToAgent(mainRoot, targetAgent, [mainRoot])) {
       return mainRoot;
     }
-    
+
     // If target itself is the main root
     if (targetAgent.isRoot) {
       return targetAgent;
     }
-    
+
     // Check if any other root agent contains this target
     for (const node of allNodes) {
       if (node.isRoot && this.findPathToAgent(node, targetAgent, [node])) {
         return node;
       }
     }
-    
+
     // If still not found, return the main root as fallback
     return mainRoot;
   }
@@ -322,7 +322,7 @@ export class BuilderTabsComponent {
     if (current.name === target.name) {
       return currentPath;
     }
-    
+
     // Search in sub-agents only
     for (const subAgent of current.sub_agents) {
       const newPath = [...currentPath, subAgent];
@@ -331,7 +331,7 @@ export class BuilderTabsComponent {
         return result;
       }
     }
-    
+
     return null;
   }
 
@@ -351,7 +351,7 @@ export class BuilderTabsComponent {
       this.agentBuilderService.requestNewTab(agentToolName);
       return;
     }
-    
+
     this.agentBuilderService.setSelectedTool(tool);
   }
 
@@ -371,9 +371,9 @@ export class BuilderTabsComponent {
                 toolType: result.toolType,
                 name: result.name
               };
-              
+
               this.agentBuilderService.addTool(this.agentConfig!.name, tool);
-              
+
               // Automatically select the newly created tool
               this.agentBuilderService.setSelectedTool(tool);
             }
@@ -395,7 +395,7 @@ export class BuilderTabsComponent {
             name: result.name,
             type: result.type,
           };
-          
+
           const addResult = this.agentBuilderService.addCallback(this.agentConfig!.name, callback);
           if (!addResult.success) {
             console.error('Failed to add callback:', addResult.error);
@@ -407,7 +407,7 @@ export class BuilderTabsComponent {
 
   deleteCallback(agentName: string, callback: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { 
+      data: {
         title: 'Delete Callback',
         message: `Are you sure you want to delete ${callback.name}?`,
         confirmButtonText: 'Delete'
@@ -442,11 +442,11 @@ export class BuilderTabsComponent {
   deleteTool(agentName: string, tool: any) {
     const isAgentTool = tool.toolType === 'Agent Tool';
     const toolDisplayName = isAgentTool ? (tool.toolAgentName || tool.name) : tool.name;
-    
+
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { 
+      data: {
         title: isAgentTool ? 'Delete Agent Tool' : 'Delete Tool',
-        message: isAgentTool 
+        message: isAgentTool
           ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding board.`
           : `Are you sure you want to delete ${toolDisplayName}?`,
         confirmButtonText: 'Delete'
@@ -471,7 +471,7 @@ export class BuilderTabsComponent {
     this.agentBuilderService.requestTabDeletion(agentToolName);
   }
 
-  
+
   backToToolList() {
     this.editingTool = null;
     this.agentBuilderService.setSelectedTool(undefined);
@@ -542,7 +542,7 @@ export class BuilderTabsComponent {
   selectCallback(callback: CallbackNode) {
     this.editingCallback = callback;
   }
-  
+
   backToCallbackList() {
     this.editingCallback = null;
   }
@@ -571,7 +571,7 @@ export class BuilderTabsComponent {
     dialogRef.afterClosed().subscribe(result => {
       if (result && typeof result === 'string') {
         let currentAgentName = this.agentConfig?.name || 'root_agent';
-        
+
         this.agentBuilderService.requestNewTab(result, currentAgentName);
       }
     });
@@ -579,7 +579,7 @@ export class BuilderTabsComponent {
 
   saveChanges() {
     const rootAgent = this.agentBuilderService.getRootNode();
-    
+
     if (!rootAgent) {
       this.snackBar.open("Please create an agent first.", "OK");
       return;
@@ -606,9 +606,9 @@ export class BuilderTabsComponent {
     }
 
     const formData = new FormData();
-    
+
     const tabAgents = this.agentBuilderService.getCurrentAgentToolBoards();
-    
+
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
     this.agentService.agentBuild(formData).subscribe((success) => {

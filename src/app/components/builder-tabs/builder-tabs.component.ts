@@ -283,6 +283,15 @@ export class BuilderTabsComponent {
     return foundPath || [targetAgent];
   }
 
+  protected isInAgentToolContext(): boolean {
+    if (!this.hierarchyPath || this.hierarchyPath.length === 0) {
+      return false;
+    }
+
+    const rootAgent = this.hierarchyPath[0];
+    return rootAgent?.isAgentTool === true;
+  }
+
   private findContextualRoot(targetAgent: AgentNode): AgentNode | undefined {
     if (targetAgent.isAgentTool) {
       return targetAgent;

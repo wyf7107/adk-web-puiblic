@@ -32,17 +32,17 @@ import stc from 'string-to-color';
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {Session} from '../../core/models/Session';
-import {AgentService} from '../../core/services/agent.service';
-import {ArtifactService} from '../../core/services/artifact.service';
-import {AudioService} from '../../core/services/audio.service';
-import {DownloadService} from '../../core/services/download.service';
-import {EvalService} from '../../core/services/eval.service';
-import {EventService} from '../../core/services/event.service';
-import {FeatureFlagService} from '../../core/services/feature-flag.service';
-import {SessionService} from '../../core/services/session.service';
-import {TraceService} from '../../core/services/trace.service';
-import {VideoService} from '../../core/services/video.service';
-import {WebSocketService} from '../../core/services/websocket.service';
+import {AgentService, AGENT_SERVICE} from '../../core/services/agent.service';
+import {ArtifactService, ARTIFACT_SERVICE} from '../../core/services/artifact.service';
+import {AudioService, AUDIO_SERVICE} from '../../core/services/audio.service';
+import {DownloadService, DOWNLOAD_SERVICE} from '../../core/services/download.service';
+import {EvalService, EVAL_SERVICE} from '../../core/services/eval.service';
+import {EventService, EVENT_SERVICE} from '../../core/services/event.service';
+import {FeatureFlagService, FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
+import {SessionService, SESSION_SERVICE} from '../../core/services/session.service';
+import {TraceService, TRACE_SERVICE} from '../../core/services/trace.service';
+import {VideoService, VIDEO_SERVICE} from '../../core/services/video.service';
+import {WebSocketService, WEBSOCKET_SERVICE} from '../../core/services/websocket.service';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
@@ -183,7 +183,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
 
   // Load apps
-  private readonly agentService = inject(AgentService);
   protected isLoadingApps: WritableSignal<boolean> = signal(false);
   protected loadingError: WritableSignal<string> = signal('');
   protected apps: string[] = [];
@@ -214,18 +213,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     shareReplay(),
   );
 
-  private readonly featureFlagService = inject(FeatureFlagService);
-
   // Import session
-  importSessionEnabledObs: Observable<boolean> =
-      this.featureFlagService.isImportSessionEnabled();
+  importSessionEnabledObs: Observable<boolean>;
 
   // Edit eval tool use
-  isEditFunctionArgsEnabledObs =
-      this.featureFlagService.isEditFunctionArgsEnabled();
+  isEditFunctionArgsEnabledObs: Observable<boolean>;
 
   // Session url
-  isSessionUrlEnabledObs = this.featureFlagService.isSessionUrlEnabled();
+  isSessionUrlEnabledObs: Observable<boolean>;
 
   // Trace detail
   bottomPanelVisible = false;
@@ -238,21 +233,29 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
       private agentBuilderService: AgentBuilderService,
       private sanitizer: DomSanitizer,
-      private sessionService: SessionService,
-      private artifactService: ArtifactService,
-      private audioService: AudioService,
-      private webSocketService: WebSocketService,
-      private videoService: VideoService,
+      @Inject(SESSION_SERVICE) private sessionService: SessionService,
+      @Inject(ARTIFACT_SERVICE) private artifactService: ArtifactService,
+      @Inject(AUDIO_SERVICE) private audioService: AudioService,
+      @Inject(WEBSOCKET_SERVICE) private webSocketService: WebSocketService,
+      @Inject(VIDEO_SERVICE) private videoService: VideoService,
       private dialog: MatDialog,
-      private eventService: EventService,
+      @Inject(EVENT_SERVICE) private eventService: EventService,
       private route: ActivatedRoute,
-      private downloadService: DownloadService,
-      private evalService: EvalService,
-      private traceService: TraceService,
+      @Inject(DOWNLOAD_SERVICE) private downloadService: DownloadService,
+      @Inject(EVAL_SERVICE) private evalService: EvalService,
+      @Inject(TRACE_SERVICE) private traceService: TraceService,
       private location: Location,
       private renderer: Renderer2,
       @Inject(DOCUMENT) private document: Document,
-  ) {}
+      @Inject(AGENT_SERVICE) private agentService: AgentService,
+      @Inject(FEATURE_FLAG_SERVICE) private featureFlagService: FeatureFlagService,
+  ) {
+    this.importSessionEnabledObs =
+        this.featureFlagService.isImportSessionEnabled();
+    this.isEditFunctionArgsEnabledObs =
+        this.featureFlagService.isEditFunctionArgsEnabled();
+    this.isSessionUrlEnabledObs = this.featureFlagService.isSessionUrlEnabled();
+  }
 
   ngOnInit(): void {
     this.syncSelectedAppFromUrl();

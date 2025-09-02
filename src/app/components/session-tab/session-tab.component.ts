@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, Inject} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {Subject, switchMap} from 'rxjs';
 import {Session} from '../../core/models/Session';
-import {SessionService} from '../../core/services/session.service';
+import {SessionService, SESSION_SERVICE} from '../../core/services/session.service';
 
 @Component({
   selector: 'app-session-tab',
@@ -40,7 +40,7 @@ export class SessionTabComponent implements OnInit {
   private refreshSessionsSubject = new Subject<void>();
 
   constructor(
-    private sessionService: SessionService,
+    @Inject(SESSION_SERVICE) private sessionService: SessionService,
     private dialog: MatDialog,
   ) {
     this.refreshSessionsSubject

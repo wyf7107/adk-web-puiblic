@@ -21,7 +21,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {AppModule} from '../../app.module';
+
 
 import {EditJsonDialogComponent} from './edit-json-dialog.component';
 
@@ -34,15 +34,14 @@ describe('EditJsonDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [EditJsonDialogComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
-        {provide: MAT_DIALOG_DATA, useValue: {
-          jsonContent: '{"key": "value"}',
-        }},
-      ],
-    }).compileComponents();
+    imports: [MatDialogModule, EditJsonDialogComponent],
+    providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: {
+                jsonContent: '{"key": "value"}',
+            } },
+    ],
+}).compileComponents();
 
     fixture = TestBed.createComponent(EditJsonDialogComponent);
     component = fixture.componentInstance;

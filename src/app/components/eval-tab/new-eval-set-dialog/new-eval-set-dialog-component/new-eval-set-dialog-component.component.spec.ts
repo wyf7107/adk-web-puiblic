@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {AppModule} from '../../../../app.module';
-
-import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog-component.component';
+import { NewEvalSetDialogComponentComponent } from './new-eval-set-dialog-component.component';
+import { EVAL_SERVICE, EvalService } from '../../../../core/services/eval.service';
+import { of } from 'rxjs';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('NewEvalSetDialogComponentComponent', () => {
   let component: NewEvalSetDialogComponentComponent;
@@ -33,12 +34,19 @@ describe('NewEvalSetDialogComponentComponent', () => {
   };
 
   beforeEach(async () => {
+    const evalService = jasmine.createSpyObj<EvalService>(['createNewEvalSet']);
+    evalService.createNewEvalSet.and.returnValue(of({}));
+
     await TestBed.configureTestingModule({
-      declarations: [NewEvalSetDialogComponentComponent],
-      imports: [AppModule, MatDialogModule],
+      imports: [
+        MatDialogModule,
+        NewEvalSetDialogComponentComponent,
+        NoopAnimationsModule,
+      ],
       providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
-        {provide: MAT_DIALOG_DATA, useValue: {}},
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        { provide: EVAL_SERVICE, useValue: evalService },
       ],
     }).compileComponents();
 

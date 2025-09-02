@@ -21,7 +21,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {AppModule} from '../../../app.module';
+
 
 import {TraceChartComponent} from './trace-chart.component';
 
@@ -34,18 +34,17 @@ describe('TraceChartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [TraceChartComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
+    imports: [MatDialogModule, TraceChartComponent],
+    providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
         {
-          provide: MAT_DIALOG_DATA,
-          useValue: {
-            spans: [],
-          },
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+                spans: [],
+            },
         },
-      ],
-    }).compileComponents();
+    ],
+}).compileComponents();
 
     fixture = TestBed.createComponent(TraceChartComponent);
     component = fixture.componentInstance;

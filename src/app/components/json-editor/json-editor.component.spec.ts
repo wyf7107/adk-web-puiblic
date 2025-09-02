@@ -16,7 +16,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {AppModule} from '../../app.module';
+
 
 import {JsonEditorComponent} from './json-editor.component';
 
@@ -27,9 +27,8 @@ describe('JsonEditorComponent', () => {
   beforeEach(async () => {
     await TestBed
         .configureTestingModule({
-          declarations: [JsonEditorComponent],
-          imports: [AppModule],
-        })
+    imports: [JsonEditorComponent],
+})
         .compileComponents();
 
     fixture = TestBed.createComponent(JsonEditorComponent);

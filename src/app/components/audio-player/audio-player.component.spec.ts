@@ -17,7 +17,7 @@
 
 import {ElementRef, SimpleChange} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {AppModule} from '../../app.module';
+
 
 import {AudioPlayerComponent} from './audio-player.component';
 
@@ -44,9 +44,8 @@ describe('AudioPlayerComponent', () => {
     mockAudioElement = new MockHTMLAudioElement();
 
     await TestBed.configureTestingModule({
-      declarations: [AudioPlayerComponent],
-      imports: [AppModule],
-    }).compileComponents();
+    imports: [AudioPlayerComponent],
+}).compileComponents();
   });
 
   beforeEach(() => {

@@ -18,13 +18,14 @@ import {Component, Input, OnChanges, SimpleChanges, Inject} from '@angular/core'
 
 import {Span} from '../../../core/models/Trace';
 import {TraceService, TRACE_SERVICE} from '../../../core/services/trace.service';
+import { NgStyle } from '@angular/common';
 
 
 @Component({
-  selector: 'app-trace-tree',
-  templateUrl: './trace-tree.component.html',
-  styleUrl: './trace-tree.component.scss',
-  standalone: false
+    selector: 'app-trace-tree',
+    templateUrl: './trace-tree.component.html',
+    styleUrl: './trace-tree.component.scss',
+    imports: [NgStyle]
 })
 export class TraceTreeComponent {
   @Input() spans: any[] = [];

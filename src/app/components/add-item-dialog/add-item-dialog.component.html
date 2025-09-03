@@ -20,20 +20,22 @@
 </mat-dialog-content>
 <mat-form-field style="padding-left:20px; padding-right: 24px;">
     <mat-label>App Name</mat-label>
-    <input 
-      [(ngModel)]="newAppName" 
-      matInput 
+    <input
+      [(ngModel)]="newAppName"
+      matInput
       (keydown.enter)="createNewApp()"
       placeholder="Enter app name">
-    <mat-hint *ngIf="!isNameValid()" style="font-size: 12px; color: #666;">
-    Start with a letter or underscore, and contain only letters, digits, and underscores.
-    </mat-hint>
+      @if (!isNameValid()) {
+        <mat-hint style="font-size: 12px; color: #666;">
+        Start with a letter or underscore, and contain only letters, digits, and underscores.
+        </mat-hint>
+      }
   </mat-form-field>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Cancel</button>
-  <button 
-    mat-button 
-    cdkFocusInitial 
+  <button
+    mat-button
+    cdkFocusInitial
     (click)="createNewApp()"
     [disabled]="!isNameValid()">
     Create

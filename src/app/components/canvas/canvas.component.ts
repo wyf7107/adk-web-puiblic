@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, inject, signal, Input, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, OnChanges, SimpleChanges, inject, signal, Input, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
 import { DiagramConnection, AgentNode, ToolNode, CallbackNode, YamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
@@ -44,7 +44,7 @@ import { AsyncPipe } from '@angular/common';
   standalone: true,
   imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule, AsyncPipe]
 })
-export class CanvasComponent implements AfterViewInit, OnInit {
+export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
@@ -52,6 +52,7 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   @Input() showSidePanel: boolean = true;
+  @Input() appNameInput: string = '';
   @Output() toggleSidePanelRequest = new EventEmitter<void>();
 
   private ctx!: CanvasRenderingContext2D;
@@ -92,13 +93,19 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.getSelectedTool().subscribe(tool => {
       this.selectedTool = tool;
     });
-    this.agentService.getApp().subscribe((app) => {
-      this.appName = app;
-      console.log(this.appName)
-    });
   }
 
   ngOnInit() {
+    this.agentService.getApp().subscribe((app) => {
+      if (app) {
+        this.appName = app;
+      }
+    });
+    
+    // Use input parameter if provided
+    if (this.appNameInput) {
+      this.appName = this.appNameInput;
+    }
     this.agentBuilderService.getNewTabRequest().subscribe(request => {
       if (request) {
         const {tabName, currentAgentName} = request;
@@ -141,6 +148,12 @@ export class CanvasComponent implements AfterViewInit, OnInit {
     this.agentBuilderService.getSelectedNode().subscribe(selectedAgentNode => {
       this.selectedAgents = this.nodes().filter(node => node.data && node.data().name === selectedAgentNode?.name);
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['appNameInput'] && changes['appNameInput'].currentValue) {
+      this.appName = changes['appNameInput'].currentValue;
+    }
   }
 
   ngAfterViewInit() {
@@ -745,48 +758,6 @@ export class CanvasComponent implements AfterViewInit, OnInit {
   isNodeSelected(node: HtmlTemplateDynamicNode): boolean {
     return this.selectedAgents.includes(node);
   }
-
-  async loadAgent(appName: string, agent: AgentNode) {
-    // Clear existing nodes and edges
-    this.nodes.set([]);
-    this.edges.set([]);
-    
-    // Reset IDs
-    this.nodeId = 1;
-    this.edgeId = 1;
-    
-    // Load the agent
-    this.loadAgentTools(agent);
-    this.agentBuilderService.addNode(agent);
-    
-    // Update agent tools in the service only if there are actual tools
-    if (agent.tools && agent.tools.length > 0) {
-      this.agentBuilderService.setAgentTools(agent.name, agent.tools);
-    } else {
-      // Clear any existing tools for this agent
-      this.agentBuilderService.setAgentTools(agent.name, []);
-    }
-    
-    // Load sub-agents if any
-    if (agent.sub_agents && agent.sub_agents.length > 0) {
-      await this.loadSubAgents(appName, agent);
-    } else {
-      // Create a single node for the agent
-      const agentNode: HtmlTemplateDynamicNode = {
-        id: this.nodeId.toString(),
-        point: signal({ x: 100, y: 150 }),
-        type: 'html-template',
-        data: signal(agent)
-      };
-      this.nodes.set([agentNode]);
-    }
-    this.agentBuilderService.setSelectedNode(agent);
-  }
-
-
-
-
-
 
   async loadSubAgents(appName: string, rootAgent: AgentNode) {
     type BFSItem = {

@@ -84,7 +84,7 @@
     } 
     @if (isBuilderMode()) {
     <!-- Builder Mode Left Panel Content -->
-    <app-builder-tabs (exitBuilderMode)="exitBuilderMode()"></app-builder-tabs>
+    <app-builder-tabs [appNameInput]="appName" (exitBuilderMode)="exitBuilderMode()"></app-builder-tabs>
     } @else if (appName != "" && showSidePanel) {
     <!-- Normal Mode Tabs -->
     <div class="tabs-container">
@@ -189,7 +189,7 @@
         <mat-icon>close</mat-icon>
       </button>
     </div>
-    <app-canvas [showSidePanel]="showSidePanel" (toggleSidePanelRequest)="toggleSidePanel()"></app-canvas>
+    <app-canvas [showSidePanel]="showSidePanel" [appNameInput]="appName" (toggleSidePanelRequest)="toggleSidePanel()"></app-canvas>
   </div>
   } @else {
   <!-- Test Mode Layout (existing chat interface) -->

@@ -16,7 +16,7 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
+import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef, Output, EventEmitter, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -67,6 +67,7 @@ export class BuilderTabsComponent {
   // Tab indices
   private readonly CALLBACKS_TAB_INDEX = 3;
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
+  @Input() appNameInput: string = '';
   @Output() exitBuilderMode = new EventEmitter<void>();
 
   protected toolArgsString = signal('');
@@ -308,6 +309,15 @@ export class BuilderTabsComponent {
 
     const foundPath = this.findPathToAgent(rootAgent, targetAgent, [rootAgent]);
     return foundPath || [targetAgent];
+  }
+
+  protected isInAgentToolContext(): boolean {
+    if (!this.hierarchyPath || this.hierarchyPath.length === 0) {
+      return false;
+    }
+
+    const rootAgent = this.hierarchyPath[0];
+    return rootAgent?.isAgentTool === true;
   }
 
   private findContextualRoot(targetAgent: AgentNode): AgentNode | undefined {
@@ -612,12 +622,18 @@ export class BuilderTabsComponent {
       return;
     }
 
-    // Get app name from agent service
-    this.agentService.getApp().subscribe(appName => {
-      if (appName) {
-        this.saveAgent(appName);
-      }
-    });
+    // Use input parameter if available, otherwise get from agent service
+    if (this.appNameInput) {
+      this.saveAgent(this.appNameInput);
+    } else {
+      this.agentService.getApp().subscribe(appName => {
+        if (appName) {
+          this.saveAgent(appName);
+        } else {
+          this.snackBar.open("No agent selected. Please select an agent first.", "OK");
+        }
+      });
+    }
   }
 
   cancelChanges() {

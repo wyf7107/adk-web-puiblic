@@ -23,7 +23,11 @@
             class="breadcrumb-chip"
             [class.current-agent]="currentSelectedAgent?.name === agent.name"
             (click)="selectAgentFromBreadcrumb(agent)">
-            {{agent.name}}
+            @if (i === 0 && isInAgentToolContext()) {
+              AgentTool: {{agent.name}}
+            } @else {
+              {{agent.name}}
+            }
           </div>
           @if (i < hierarchyPath.length - 1) {
             <mat-icon class="breadcrumb-arrow">chevron_right</mat-icon>

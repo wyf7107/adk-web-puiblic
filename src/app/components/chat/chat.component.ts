@@ -77,6 +77,7 @@ import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { ResizableBottomDirective } from '../../directives/resizable-bottom.directive';
 import { TraceEventComponent } from '../trace-tab/trace-event/trace-event.component';
+import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -167,6 +168,7 @@ const BIDI_STREAMING_RESTART_WARNING =
         ResizableBottomDirective,
         TraceEventComponent,
         AsyncPipe,
+        BuilderTabsComponent
     ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {

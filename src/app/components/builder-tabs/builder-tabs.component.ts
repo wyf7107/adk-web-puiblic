@@ -15,26 +15,56 @@
  * limitations under the License.
  */
 
+import { CommonModule } from '@angular/common';
 import { Component, inject, ViewChild, signal, ChangeDetectionStrategy, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AGENT_SERVICE } from '../../core/services/agent.service';
-import {JsonEditorComponent} from '../json-editor/json-editor.component';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
-import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
-import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
-import { YamlUtils } from '../../../utils/yaml-utils';
+import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
+import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
+import { JsonEditorComponent } from '../json-editor/json-editor.component';
 
 @Component({
   selector: 'app-builder-tabs',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    JsonEditorComponent,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSnackBarModule,
+    MatTabsModule,
+    MatTooltipModule,
+    ConfirmationDialogComponent,
+    AddToolDialogComponent,
+    AddCallbackDialogComponent,
+  ],
   templateUrl: './builder-tabs.component.html',
   styleUrl: './builder-tabs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false
 })
 export class BuilderTabsComponent {
   // Tab indices

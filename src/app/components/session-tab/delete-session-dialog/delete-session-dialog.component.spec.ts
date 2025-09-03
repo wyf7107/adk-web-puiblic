@@ -23,7 +23,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {AppModule} from '../../../app.module';
+
 import {
   DeleteSessionDialogComponent,
   DeleteSessionDialogData,
@@ -44,13 +44,12 @@ describe('DeleteSessionDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DeleteSessionDialogComponent],
-      imports: [MatDialogModule, MatButtonModule, AppModule],
-      providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
-        {provide: MAT_DIALOG_DATA, useValue: mockDialogData},
-      ],
-    }).compileComponents();
+    imports: [MatDialogModule, MatButtonModule, DeleteSessionDialogComponent],
+    providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
+    ],
+}).compileComponents();
   });
 
   beforeEach(() => {

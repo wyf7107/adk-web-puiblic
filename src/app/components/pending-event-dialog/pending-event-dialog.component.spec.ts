@@ -15,15 +15,16 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {AppModule} from '../../app.module';
-
-import {PendingEventDialogComponent} from './pending-event-dialog.component';
+import { PendingEventDialogComponent } from './pending-event-dialog.component';
+import { AGENT_SERVICE, AgentService } from '../../core/services/agent.service';
+import { of } from 'rxjs';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('PendingEventDialogComponent', () => {
   let component: PendingEventDialogComponent;
@@ -33,11 +34,17 @@ describe('PendingEventDialogComponent', () => {
   };
 
   beforeEach(async () => {
+    const agentService = jasmine.createSpyObj<AgentService>(['runSse']);
+    agentService.runSse.and.returnValue(of(''));
+
     await TestBed.configureTestingModule({
-      declarations: [PendingEventDialogComponent],
-      imports: [AppModule, MatDialogModule],
+      imports: [
+        MatDialogModule,
+        PendingEventDialogComponent,
+        NoopAnimationsModule,
+      ],
       providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
+        { provide: MatDialogRef, useValue: mockDialogRef },
         {
           provide: MAT_DIALOG_DATA,
           useValue: {
@@ -47,6 +54,7 @@ describe('PendingEventDialogComponent', () => {
             sessionId: 'testsession',
           },
         },
+        { provide: AGENT_SERVICE, useValue: agentService },
       ],
     }).compileComponents();
 

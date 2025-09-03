@@ -25,7 +25,7 @@ import {
 import {MatRadioModule} from '@angular/material/radio';
 import {MatSliderModule} from '@angular/material/slider';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {AppModule} from '../../../app.module';
+
 
 import {RunEvalConfigDialogComponent} from './run-eval-config-dialog.component';
 
@@ -39,35 +39,34 @@ describe('RunEvalConfigDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [RunEvalConfigDialogComponent],
-      imports: [
+    imports: [
         ReactiveFormsModule,
         MatDialogModule,
         MatRadioModule,
         MatSliderModule,
         NoopAnimationsModule,
-        AppModule,
-      ],
-      providers: [
-        {provide: MatDialogRef, useValue: mockDialogRef},
+        RunEvalConfigDialogComponent,
+    ],
+    providers: [
+        { provide: MatDialogRef, useValue: mockDialogRef },
         {
-          provide: MAT_DIALOG_DATA,
-          useValue: {
-            evalMetrics: [
-              {
-                metricName: 'tool_trajectory_avg_score',
-                threshold: 1,
-              },
-              {
-                metricName: 'response_match_score',
-                threshold: 0.7,
-              },
-            ],
-          },
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+                evalMetrics: [
+                    {
+                        metricName: 'tool_trajectory_avg_score',
+                        threshold: 1,
+                    },
+                    {
+                        metricName: 'response_match_score',
+                        threshold: 0.7,
+                    },
+                ],
+            },
         },
         // Provide empty data for initial setup
-      ],
-    }).compileComponents();
+    ],
+}).compileComponents();
   });
 
   beforeEach(() => {

@@ -16,7 +16,7 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {AppModule} from '../../app.module';
+
 
 import {StateTabComponent} from './state-tab.component';
 
@@ -26,9 +26,8 @@ describe('StateTabComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [StateTabComponent],
-      imports: [AppModule],
-    }).compileComponents();
+    imports: [StateTabComponent],
+}).compileComponents();
 
     fixture = TestBed.createComponent(StateTabComponent);
     component = fixture.componentInstance;

@@ -17,7 +17,7 @@
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {AppModule} from '../../app.module';
+
 
 import {EventTabComponent} from './event-tab.component';
 
@@ -30,10 +30,9 @@ describe('EventTabComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [EventTabComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [{provide: MatDialogRef, useValue: mockDialogRef}],
-    }).compileComponents();
+    imports: [MatDialogModule, EventTabComponent],
+    providers: [{ provide: MatDialogRef, useValue: mockDialogRef }],
+}).compileComponents();
 
     fixture = TestBed.createComponent(EventTabComponent);
     component = fixture.componentInstance;

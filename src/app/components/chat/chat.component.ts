@@ -15,19 +15,20 @@
  * limitations under the License.
  */
 
-import {DOCUMENT, Location} from '@angular/common';
+import { DOCUMENT, Location, NgClass, NgStyle, AsyncPipe } from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, inject, OnDestroy, OnInit, Renderer2, signal, ViewChild, WritableSignal} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, ViewChild, WritableSignal} from '@angular/core';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
-import {MatPaginatorIntl} from '@angular/material/paginator';
-import {MatDrawer} from '@angular/material/sidenav';
+import { MatPaginatorIntl, MatPaginator } from '@angular/material/paginator';
+import { MatDrawer, MatDrawerContainer } from '@angular/material/sidenav';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {instance} from '@viz-js/viz';
 import {BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap} from 'rxjs';
 import stc from 'string-to-color';
+import {provideMarkdown} from 'ngx-markdown';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
@@ -44,7 +45,7 @@ import {TraceService, TRACE_SERVICE} from '../../core/services/trace.service';
 import {VideoService, VIDEO_SERVICE} from '../../core/services/video.service';
 import {WebSocketService, WEBSOCKET_SERVICE} from '../../core/services/websocket.service';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
-import {getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
+import { getMediaTypeFromMimetype, MediaType, openBase64InNewTab, ArtifactTabComponent } from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 import {EvalCase, EvalTabComponent} from '../eval-tab/eval-tab.component';
@@ -56,6 +57,27 @@ import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.c
 import { CanvasComponent } from '../canvas/canvas.component';
 import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/core';
+import { MatTabGroup, MatTab, MatTabLabel } from '@angular/material/tabs';
+import { TraceTabComponent } from '../trace-tab/trace-tab.component';
+import { StateTabComponent } from '../state-tab/state-tab.component';
+import { MatMiniFabButton, MatButton, MatFabButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatDivider } from '@angular/material/divider';
+import { MatCard } from '@angular/material/card';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MarkdownComponent } from 'ngx-markdown';
+import { MatFormField, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { ResizableBottomDirective } from '../../directives/resizable-bottom.directive';
+import { TraceEventComponent } from '../trace-tab/trace-event/trace-event.component';
+import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -71,6 +93,7 @@ function fixBase64String(base64: string): string {
   return base64;
 }
 
+@Injectable()
 class CustomPaginatorIntl extends MatPaginatorIntl {
   override nextPageLabel = 'Next Event';
   override previousPageLabel = 'Previous Event';
@@ -93,12 +116,60 @@ const BIDI_STREAMING_RESTART_WARNING =
   'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.';
 
 @Component({
-  selector: 'app-chat',
-  templateUrl: './chat.component.html',
-  styleUrl: './chat.component.scss',
-  standalone: false,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [{ provide: MatPaginatorIntl, useClass: CustomPaginatorIntl }],
+    selector: 'app-chat',
+    templateUrl: './chat.component.html',
+    styleUrl: './chat.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl },
+        provideMarkdown(),
+    ],
+    imports: [
+        MatDrawerContainer,
+        MatTooltip,
+        MatDrawer,
+        ResizableDrawerDirective,
+        MatSelect,
+        FormsModule,
+        ReactiveFormsModule,
+        MatOption,
+        MatTabGroup,
+        MatTab,
+        MatTabLabel,
+        TraceTabComponent,
+        EventTabComponent,
+        StateTabComponent,
+        ArtifactTabComponent,
+        SessionTabComponent,
+        EvalTabComponent,
+        CanvasComponent,
+        MatPaginator,
+        MatMiniFabButton,
+        MatIcon,
+        NgxJsonViewerModule,
+        NgClass,
+        MatButton,
+        MatSlideToggle,
+        MatDivider,
+        MatCard,
+        MatFabButton,
+        NgStyle,
+        MatProgressBar,
+        MarkdownComponent,
+        AudioPlayerComponent,
+        MatFormField,
+        MatIconButton,
+        MatInput,
+        CdkTextareaAutosize,
+        MatMenuTrigger,
+        MatMenu,
+        MatMenuItem,
+        MatSuffix,
+        ResizableBottomDirective,
+        TraceEventComponent,
+        AsyncPipe,
+        BuilderTabsComponent
+    ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('videoContainer', { read: ElementRef }) videoContainer!: ElementRef;
@@ -911,7 +982,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       return  `custom-icon-color-${stc(agentName).replace('#', '')}`;
     }
-    
+
     return 'hidden';
   }
 
@@ -1384,7 +1455,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }).toString();
     this.location.replaceState(url);
     this.isBuilderMode.set(true);
-    
+
     // Load existing agent configuration if app is selected
     if (this.appName) {
       this.loadExistingAgentConfiguration();

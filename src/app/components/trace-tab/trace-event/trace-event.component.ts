@@ -22,12 +22,16 @@ import { TraceService, TRACE_SERVICE } from '../../../core/services/trace.servic
 import { Span } from '../../../core/models/Trace';
 import { EventService, EVENT_SERVICE } from '../../../core/services/event.service';
 import { instance } from '@viz-js/viz';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-trace-event',
-  templateUrl: './trace-event.component.html',
-  styleUrl: './trace-event.component.scss',
-  standalone: false
+    selector: 'app-trace-event',
+    templateUrl: './trace-event.component.html',
+    styleUrl: './trace-event.component.scss',
+    imports: [MatTabGroup, MatTab, NgxJsonViewerModule, MatIconButton, MatIcon]
 })
 export class TraceEventComponent implements OnInit {
   @Input() userId: string = "";

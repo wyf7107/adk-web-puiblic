@@ -15,29 +15,32 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {AppModule} from '../../app.module';
-import {ArtifactTabComponent} from './artifact-tab.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ArtifactTabComponent } from './artifact-tab.component';
+import { DOWNLOAD_SERVICE, DownloadService } from '../../core/services/download.service';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
 describe('ArtifactTabComponent', () => {
   let component: ArtifactTabComponent;
-
   let fixture: ComponentFixture<ArtifactTabComponent>;
-  const mockDialogRef = {
-    close: jasmine.createSpy('close'),
-  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ArtifactTabComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [{provide: MatDialogRef, useValue: mockDialogRef}],
+      imports: [MatDialogModule, ArtifactTabComponent, NoopAnimationsModule],
+      providers: [
+        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
+        {
+          provide: DOWNLOAD_SERVICE,
+          useValue: jasmine.createSpyObj<DownloadService>([
+            'downloadBase64Data',
+          ]),
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ArtifactTabComponent);
-
     component = fixture.componentInstance;
-
     fixture.detectChanges();
   });
 

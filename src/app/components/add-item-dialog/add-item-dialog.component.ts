@@ -16,45 +16,68 @@
  */
 
 import {Component, inject, Inject} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle
+} from '@angular/material/dialog';
 import {Router} from '@angular/router';
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { YamlUtils } from '../../../utils/yaml-utils';
-import { AgentService } from '../../core/services/agent.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
-
+import {AGENT_SERVICE} from '../../core/services/agent.service';
+import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {FormsModule} from '@angular/forms';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'app-add-item-dialog',
   templateUrl: './add-item-dialog.component.html',
   styleUrl: './add-item-dialog.component.scss',
-  standalone: false,
+  standalone: true,
+  imports: [
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
+    MatDialogActions,
+    MatButtonModule,
+    MatDialogClose,
+    MatIconModule,
+    MatSnackBarModule,
+  ],
 })
 export class AddItemDialogComponent {
   // TODO: Replace the eval dialogs to use this common dialog component
   protected newAppName = '';
-  private agentService = inject(AgentService);
+  private agentService = inject(AGENT_SERVICE);
   private _snackBar = inject(MatSnackBar);
   private router = inject(Router);
 
   isNameValid(): boolean {
     const trimmedValue = this.newAppName.trim();
-    
+
     // If empty after trimming, it's not valid
     if (!trimmedValue) {
       return false;
     }
-    
+
     // Check if starts with letter or underscore
     if (!/^[a-zA-Z_]/.test(trimmedValue)) {
       return false;
     }
-    
+
     // Check if contains only letters, digits, and underscores
     if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(trimmedValue)) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -66,7 +89,7 @@ export class AddItemDialogComponent {
 
   createNewApp() {
     const trimmedName = this.newAppName.trim();
-    
+
     // Check validation first
     if (!this.isNameValid()) {
       this._snackBar.open(

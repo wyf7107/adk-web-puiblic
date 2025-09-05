@@ -20,12 +20,13 @@ import {MatDialog} from '@angular/material/dialog';
 import {Subject, switchMap} from 'rxjs';
 import {Session} from '../../core/models/Session';
 import {SessionService, SESSION_SERVICE} from '../../core/services/session.service';
+import { NgClass } from '@angular/common';
 
 @Component({
-  selector: 'app-session-tab',
-  templateUrl: './session-tab.component.html',
-  styleUrl: './session-tab.component.scss',
-  standalone: false,
+    selector: 'app-session-tab',
+    templateUrl: './session-tab.component.html',
+    styleUrl: './session-tab.component.scss',
+    imports: [NgClass],
 })
 export class SessionTabComponent implements OnInit {
   @Input() userId: string = '';

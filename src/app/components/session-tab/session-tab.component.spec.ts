@@ -15,24 +15,31 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {AppModule} from '../../app.module';
-
-import {SessionTabComponent} from './session-tab.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { SessionTabComponent } from './session-tab.component';
+import { SESSION_SERVICE, SessionService } from '../../core/services/session.service';
+import { of } from 'rxjs';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('SessionTabComponent', () => {
   let component: SessionTabComponent;
   let fixture: ComponentFixture<SessionTabComponent>;
-  const mockDialogRef = {
-    close: jasmine.createSpy('close'),
-  };
 
   beforeEach(async () => {
+    const sessionService = jasmine.createSpyObj<SessionService>([
+      'listSessions',
+      'getSession',
+    ]);
+    sessionService.listSessions.and.returnValue(of([]));
+    sessionService.getSession.and.returnValue(of({} as any));
+
     await TestBed.configureTestingModule({
-      declarations: [SessionTabComponent],
-      imports: [AppModule, MatDialogModule],
-      providers: [{provide: MatDialogRef, useValue: mockDialogRef}],
+      imports: [MatDialogModule, SessionTabComponent, NoopAnimationsModule],
+      providers: [
+        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
+        { provide: SESSION_SERVICE, useValue: sessionService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(SessionTabComponent);

@@ -19,7 +19,7 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnInit, Output, QueryList, signal, SimpleChanges, ViewChildren, Inject} from '@angular/core';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog} from '@angular/material/dialog';
-import {MatTableDataSource} from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 import {BehaviorSubject, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
@@ -33,6 +33,10 @@ import {SessionService, SESSION_SERVICE} from '../../core/services/session.servi
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
 import {RunEvalConfigDialogComponent} from './run-eval-config-dialog/run-eval-config-dialog.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { NgClass } from '@angular/common';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export interface EvalCase {
   evalId: string;
@@ -78,11 +82,27 @@ interface AppEvaluationResult {
 
 
 @Component({
-  selector: 'app-eval-tab',
-  templateUrl: './eval-tab.component.html',
-  styleUrl: './eval-tab.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: false,
+    selector: 'app-eval-tab',
+    templateUrl: './eval-tab.component.html',
+    styleUrl: './eval-tab.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [
+        MatIcon,
+        MatTooltip,
+        MatTable,
+        MatColumnDef,
+        MatHeaderCellDef,
+        MatHeaderCell,
+        MatCheckbox,
+        MatCellDef,
+        MatCell,
+        NgClass,
+        MatHeaderRowDef,
+        MatHeaderRow,
+        MatRowDef,
+        MatRow,
+        MatProgressSpinner,
+    ],
 })
 export class EvalTabComponent implements OnInit, OnChanges {
   @ViewChildren(MatCheckbox) checkboxes!: QueryList<MatCheckbox>;

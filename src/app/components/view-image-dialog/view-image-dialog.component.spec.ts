@@ -18,7 +18,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
-import {AppModule} from '../../app.module';
+
 
 import {ViewImageDialogComponent, ViewImageDialogData} from './view-image-dialog.component';
 
@@ -32,16 +32,13 @@ describe('ViewImageDialogComponent', () => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     mockDialogData = {imageData: null};
 
-    await TestBed
-        .configureTestingModule({
-          imports: [MatDialogModule, AppModule],  // Import MatDialogModule for testing
-          declarations: [ViewImageDialogComponent],
-          providers: [
-            {provide: MatDialogRef, useValue: mockDialogRef},
-            {provide: MAT_DIALOG_DATA, useValue: mockDialogData}
-          ]
-        })
-        .compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [MatDialogModule, ViewImageDialogComponent],
+      providers: [
+        {provide: MatDialogRef, useValue: mockDialogRef},
+        {provide: MAT_DIALOG_DATA, useValue: mockDialogData},
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {

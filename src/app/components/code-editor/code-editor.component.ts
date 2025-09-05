@@ -92,7 +92,6 @@ const pythonLinter = linter((view) => {
   selector: 'app-code-editor',
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss'],
-  standalone: false,
 })
 export class CodeEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('editor') editorEl!: ElementRef<HTMLDivElement>;

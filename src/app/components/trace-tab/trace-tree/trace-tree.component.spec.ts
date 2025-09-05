@@ -14,20 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {AppModule} from '../../../app.module';
 
-import {TraceTreeComponent} from './trace-tree.component';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TraceTreeComponent } from './trace-tree.component';
+import { TRACE_SERVICE, TraceService } from '../../../core/services/trace.service';
+import { of } from 'rxjs';
 
 describe('TraceTreeComponent', () => {
   let component: TraceTreeComponent;
   let fixture: ComponentFixture<TraceTreeComponent>;
 
   beforeEach(async () => {
+    const traceService = {
+      ...jasmine.createSpyObj<TraceService>([
+        'selectedRow',
+        'setHoveredMessages',
+      ]),
+      selectedTraceRow$: of(undefined),
+      eventData$: of(new Map<string, any>()),
+    };
+
     await TestBed.configureTestingModule({
-      declarations: [TraceTreeComponent], imports: [AppModule]
-    })
-        .compileComponents();
+      imports: [TraceTreeComponent],
+      providers: [{ provide: TRACE_SERVICE, useValue: traceService }],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TraceTreeComponent);
     component = fixture.componentInstance;

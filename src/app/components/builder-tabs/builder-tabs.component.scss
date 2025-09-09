@@ -478,7 +478,11 @@ mat-tab-group {
 
 ::ng-deep .mat-mdc-tab-body-content {
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
+}
+
+::ng-deep .mat-drawer-inner-container {
+  overflow: hidden;
 }
 
 // Action buttons

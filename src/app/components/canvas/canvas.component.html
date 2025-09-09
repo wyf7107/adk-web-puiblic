@@ -134,4 +134,12 @@
 
 
   </div>
+  
+  <!-- Builder Assistant Panel -->
+  <app-builder-assistant 
+    [isVisible]="showBuilderAssistant"
+    (closePanel)="onBuilderAssistantClose()"
+    (reloadCanvas)="reloadCanvasFromYaml()"
+    [appName]="appName">
+  </app-builder-assistant>
 </div>

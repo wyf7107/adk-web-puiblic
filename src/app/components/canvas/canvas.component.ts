@@ -35,6 +35,7 @@ import { YamlUtils } from '../../../utils/yaml-utils';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 import { AsyncPipe } from '@angular/common';
+import { BuilderAssistantComponent } from '../builder-assistant/builder-assistant.component';
 
 
 @Component({
@@ -42,7 +43,7 @@ import { AsyncPipe } from '@angular/common';
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule, AsyncPipe]
+  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule, AsyncPipe, BuilderAssistantComponent]
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private _snackBar = inject(MatSnackBar);
@@ -52,8 +53,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private cdr = inject(ChangeDetectorRef);
 
   @Input() showSidePanel: boolean = true;
+  @Input() showBuilderAssistant: boolean = false;
   @Input() appNameInput: string = '';
   @Output() toggleSidePanelRequest = new EventEmitter<void>();
+  @Output() builderAssistantCloseRequest = new EventEmitter<void>();
 
   private ctx!: CanvasRenderingContext2D;
   //public nodes = signal<DiagramNode[]>([]);
@@ -1044,4 +1047,24 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     }
     return 'Back to Main Canvas';
   }
+
+  onBuilderAssistantClose(): void {
+    this.builderAssistantCloseRequest.emit();
+  }
+
+  reloadCanvasFromYaml(): void {
+    if (this.appNameInput) {
+      this.agentService.getAgentBuilderTmp(this.appNameInput).subscribe({
+        next: (yamlContent: string) => {
+          if (yamlContent) {
+            this.loadFromYaml(yamlContent, this.appNameInput);
+          }
+        },
+        error: (error) => {
+          console.error('Error reloading canvas:', error);
+        }
+      });
+    }
+  }
+
 }

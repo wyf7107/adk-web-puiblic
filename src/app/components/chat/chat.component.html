@@ -188,8 +188,11 @@
       <button mat-icon-button (click)="exitBuilderMode()" class="builder-mode-action-button" matTooltip="Exit Builder Mode">
         <mat-icon>close</mat-icon>
       </button>
+      <button mat-icon-button (click)="toggleBuilderAssistant()" class="builder-mode-action-button" matTooltip="Builder Assistant" [class.active]="showBuilderAssistant">
+        <mat-icon>assistant</mat-icon>
+      </button>
     </div>
-    <app-canvas [showSidePanel]="showSidePanel" [appNameInput]="appName" (toggleSidePanelRequest)="toggleSidePanel()"></app-canvas>
+    <app-canvas [showSidePanel]="showSidePanel" [showBuilderAssistant]="showBuilderAssistant" [appNameInput]="appName" (toggleSidePanelRequest)="toggleSidePanel()" (builderAssistantCloseRequest)="toggleBuilderAssistant()"></app-canvas>
   </div>
   } @else {
   <!-- Test Mode Layout (existing chat interface) -->

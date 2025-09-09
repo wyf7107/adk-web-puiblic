@@ -811,6 +811,11 @@ button {
     color: white;
   }
 
+  &.active {
+    background-color: rgba(138, 180, 248, 0.8);
+    color: white;
+  }
+
   mat-icon {
     font-size: 20px;
   }

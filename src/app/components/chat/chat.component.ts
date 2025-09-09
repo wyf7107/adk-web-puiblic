@@ -210,6 +210,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   functionCallEventId = '';
   redirectUri = URLUtil.getBaseUrlWithoutPath();
   showSidePanel = true;
+  showBuilderAssistant = true;
   useSse = false;
   currentSessionState = {};
   root_agent = ROOT_AGENT;
@@ -1484,6 +1485,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.location.replaceState(url);
     this.isBuilderMode.set(false);
     this.agentBuilderService.clear();
+  }
+
+  protected toggleBuilderAssistant() {
+    this.showBuilderAssistant = !this.showBuilderAssistant;
   }
 
   openAddItemDialog(): void {

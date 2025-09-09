@@ -125,10 +125,30 @@ export class AgentService {
     return new Observable<false>();
   }
 
+  agentBuildTmp(req: any): Observable<boolean> {
+    if (this.apiServerDomain != undefined) {
+      const url =
+        this.apiServerDomain + `/builder/save?tmp=true`;
+      return this.http.post<any>(url, req);
+    }
+    return new Observable<false>();
+  }
+
   getAgentBuilder(agentName: string) {
     if (this.apiServerDomain != undefined) {
       const url = 
         this.apiServerDomain + `/builder/app/${agentName}?ts=${Date.now()}`
+      return this.http.get(url, {
+        responseType: 'text'
+      });
+    }
+    return new Observable<"">();
+  }
+
+  getAgentBuilderTmp(agentName: string) {
+    if (this.apiServerDomain != undefined) {
+      const url = 
+        this.apiServerDomain + `/builder/app/${agentName}?ts=${Date.now()}&tmp=true`
       return this.http.get(url, {
         responseType: 'text'
       });

@@ -100,7 +100,7 @@
             </div>
           </div>
         </button>
-        @if (agentConfig && agentConfig.sub_agents.length > 0) {
+        @if (agentConfig && agentConfig.sub_agents && agentConfig.sub_agents.length > 0) {
           <ul class="tools-list">
             @for (subAgent of agentConfig.sub_agents; track subAgent) {
               <li (click)="selectAgent(subAgent)" class="tool-name">

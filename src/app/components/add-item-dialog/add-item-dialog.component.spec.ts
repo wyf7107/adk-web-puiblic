@@ -15,8 +15,11 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {AGENT_SERVICE} from '../../core/services/agent.service';
 
 import {AddItemDialogComponent} from './add-item-dialog.component';
+import {provideNoopAnimations} from '@angular/platform-browser/animations';
 
 describe('AddItemDialogComponent', () => {
   let component: AddItemDialogComponent;
@@ -25,6 +28,12 @@ describe('AddItemDialogComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AddItemDialogComponent],
+      providers: [
+        {provide: MatDialogRef, useValue: {}},
+        {provide: MAT_DIALOG_DATA, useValue: {}},
+        {provide: AGENT_SERVICE, useValue: {}},
+        provideNoopAnimations()
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AddItemDialogComponent);

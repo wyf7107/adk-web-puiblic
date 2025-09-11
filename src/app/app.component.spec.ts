@@ -48,6 +48,7 @@ import {
   FeatureFlagService,
 } from './core/services/feature-flag.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {AGENT_BUILDER_SERVICE, AgentBuilderService} from './core/services/agent-builder.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -176,6 +177,10 @@ describe('AppComponent', () => {
         {
           provide: FEATURE_FLAG_SERVICE,
           useValue: featureFlagService,
+        },
+        {
+          provide: AGENT_BUILDER_SERVICE,
+          useClass: AgentBuilderService,
         },
       ],
     }).compileComponents();

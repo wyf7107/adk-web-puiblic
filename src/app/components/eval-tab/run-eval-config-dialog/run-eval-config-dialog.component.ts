@@ -19,7 +19,7 @@ import {Component, Inject} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 
-import {EvalMetric} from '../../../core/models/EvalMetric';
+import {EvalMetric} from '../../../core/models/Eval';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatButton } from '@angular/material/button';

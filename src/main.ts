@@ -37,6 +37,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppComponent } from './app/app.component';
 import { importProvidersFrom } from '@angular/core';
+import {AGENT_BUILDER_SERVICE, AgentBuilderService} from './app/core/services/agent-builder.service';
 
 fetch('./assets/config/runtime-config.json')
   .then((response) => response.json())
@@ -57,6 +58,7 @@ fetch('./assets/config/runtime-config.json')
         { provide: DOWNLOAD_SERVICE, useClass: DownloadService },
         { provide: TRACE_SERVICE, useClass: TraceService },
         { provide: FEATURE_FLAG_SERVICE, useClass: FeatureFlagService },
+        { provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService },
         provideAnimations(),
     ]
 })

@@ -20,7 +20,7 @@ import {Injectable, InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 
 import {URLUtil} from '../../../utils/url-util';
-import {EvalCase} from '../../components/eval-tab/eval-tab.component';
+import {EvalCase} from '../models/Eval';
 
 export const EVAL_SERVICE = new InjectionToken<EvalService>('EvalService');
 

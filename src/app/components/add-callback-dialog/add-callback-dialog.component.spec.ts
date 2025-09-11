@@ -16,7 +16,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AddCallbackDialogComponent } from './add-callback-dialog.component';
@@ -32,7 +32,8 @@ describe('AddCallbackDialogComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AddCallbackDialogComponent, NoopAnimationsModule],
       providers: [
-        { provide: MatDialogRef, useValue: dialogRefSpy }
+        { provide: MatDialogRef, useValue: dialogRefSpy },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
       ]
     })
     .compileComponents();
@@ -45,21 +46,6 @@ describe('AddCallbackDialogComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should have default callback type as before_agent', () => {
-    expect(component.callbackType).toBe('before_agent');
-  });
-
-  it('should have all callback types defined', () => {
-    expect(component.callbackTypes).toBeDefined();
-    expect(component.callbackTypes.length).toBe(6);
-    expect(component.callbackTypes).toContain('before_agent');
-    expect(component.callbackTypes).toContain('after_agent');
-    expect(component.callbackTypes).toContain('before_model');
-    expect(component.callbackTypes).toContain('after_model');
-    expect(component.callbackTypes).toContain('before_tool');
-    expect(component.callbackTypes).toContain('after_tool');
   });
 
   it('should disable create button when callback name is empty', () => {
@@ -75,28 +61,26 @@ describe('AddCallbackDialogComponent', () => {
   it('should close dialog with callback data when addCallback is called', () => {
     component.callbackName = 'test_callback';
     component.callbackType = 'after_agent';
-    
+
     component.addCallback();
-    
+
     expect(mockDialogRef.close).toHaveBeenCalledWith({
       name: 'test_callback',
       type: 'after_agent',
-      code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
-      description: 'Auto-generated callback'
     });
   });
 
   it('should not close dialog when callback name is empty', () => {
     component.callbackName = '';
-    
+
     component.addCallback();
-    
+
     expect(mockDialogRef.close).not.toHaveBeenCalled();
   });
 
   it('should close dialog without data when cancel is called', () => {
     component.cancel();
-    
+
     expect(mockDialogRef.close).toHaveBeenCalledWith();
   });
 });

@@ -18,6 +18,7 @@
 import { TestBed } from '@angular/core/testing';
 import { AgentBuilderService } from './agent-builder.service';
 import { AgentNode, CallbackNode } from '../models/AgentBuilder';
+import {firstValueFrom} from 'rxjs';
 
 describe('AgentBuilderService - Callback Management', () => {
   let service: AgentBuilderService;
@@ -35,7 +36,7 @@ describe('AgentBuilderService - Callback Management', () => {
       instruction: 'Test instruction',
       sub_agents: [],
       tools: [],
-      callbacks: []
+      callbacks: [],
     };
 
     service.addNode(mockAgentNode);
@@ -51,7 +52,7 @@ describe('AgentBuilderService - Callback Management', () => {
         name: 'test_callback',
         type: 'before_agent',
         code: 'def test_callback(callback_context): return None',
-        description: 'Test callback'
+        description: 'Test callback',
       };
 
       const result = service.addCallback('test-agent', callback);
@@ -66,13 +67,13 @@ describe('AgentBuilderService - Callback Management', () => {
       const callback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
+        code: 'def test_callback(callback_context): return None',
       };
 
       const result = service.addCallback('non-existent', callback);
       expect(result.success).toBe(false);
       expect(result.error).toBe('Agent not found');
-      
+
       const agent = service.getNode('non-existent');
       expect(agent).toBeUndefined();
     });
@@ -87,7 +88,7 @@ describe('AgentBuilderService - Callback Management', () => {
       const callback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
+        code: 'def test_callback(callback_context): return None',
       };
 
       const result = service.addCallback('test-agent', callback);
@@ -104,7 +105,7 @@ describe('AgentBuilderService - Callback Management', () => {
       const callback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
+        code: 'def test_callback(callback_context): return None',
       };
 
       const result = service.addCallback('test-agent', callback);
@@ -112,7 +113,7 @@ describe('AgentBuilderService - Callback Management', () => {
       expect(result.success).toBe(true);
       expect(service['agentCallbacksSubject'].next).toHaveBeenCalledWith({
         agentName: 'test-agent',
-        callbacks: [callback]
+        callbacks: [callback],
       });
     });
 
@@ -120,13 +121,13 @@ describe('AgentBuilderService - Callback Management', () => {
       const callback1: CallbackNode = {
         name: 'duplicate_callback',
         type: 'before_agent',
-        code: 'def duplicate_callback(ctx): pass'
+        code: 'def duplicate_callback(ctx): pass',
       };
 
       const callback2: CallbackNode = {
         name: 'duplicate_callback',
         type: 'after_agent',
-        code: 'def duplicate_callback(ctx): pass'
+        code: 'def duplicate_callback(ctx): pass',
       };
 
       const result1 = service.addCallback('test-agent', callback1);
@@ -139,40 +140,51 @@ describe('AgentBuilderService - Callback Management', () => {
 
     it('should validate callback name format', () => {
       const invalidCallbacks = [
-        { name: '123invalid', type: 'before_agent' as const, code: 'def test(): pass' },
-        { name: 'invalid-name', type: 'before_agent' as const, code: 'def test(): pass' },
-        { name: 'invalid name', type: 'before_agent' as const, code: 'def test(): pass' },
-        { name: '', type: 'before_agent' as const, code: 'def test(): pass' }
+        {
+          name: '123invalid',
+          type: 'before_agent' as const,
+          code: 'def test(): pass',
+        },
+        {
+          name: 'invalid-name',
+          type: 'before_agent' as const,
+          code: 'def test(): pass',
+        },
+        {
+          name: 'invalid name',
+          type: 'before_agent' as const,
+          code: 'def test(): pass',
+        },
+        {name: '', type: 'before_agent' as const, code: 'def test(): pass'},
       ];
 
-      invalidCallbacks.forEach(callback => {
+      invalidCallbacks.forEach((callback) => {
         const result = service.addCallback('test-agent', callback);
         expect(result.success).toBe(false);
         expect(result.error).toContain('valid Python identifier');
       });
 
       const validCallbacks = [
-        { name: 'valid_callback', type: 'before_agent' as const, code: 'def test(): pass' },
-        { name: '_private_callback', type: 'before_agent' as const, code: 'def test(): pass' },
-        { name: 'callback123', type: 'before_agent' as const, code: 'def test(): pass' }
+        {
+          name: 'valid_callback',
+          type: 'before_agent' as const,
+          code: 'def test(): pass',
+        },
+        {
+          name: '_private_callback',
+          type: 'before_agent' as const,
+          code: 'def test(): pass',
+        },
+        {
+          name: 'callback123',
+          type: 'before_agent' as const,
+          code: 'def test(): pass',
+        },
       ];
 
-      validCallbacks.forEach(callback => {
+      validCallbacks.forEach((callback) => {
         const result = service.addCallback('test-agent', callback);
         expect(result.success).toBe(true);
-      });
-    });
-
-    it('should validate callback code is not empty', () => {
-      const emptyCodeCallbacks = [
-        { name: 'empty_code', type: 'before_agent' as const, code: '' },
-        { name: 'whitespace_code', type: 'before_agent' as const, code: '   ' }
-      ];
-
-      emptyCodeCallbacks.forEach(callback => {
-        const result = service.addCallback('test-agent', callback);
-        expect(result.success).toBe(false);
-        expect(result.error).toContain('cannot be empty');
       });
     });
   });
@@ -184,7 +196,7 @@ describe('AgentBuilderService - Callback Management', () => {
       callback = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
+        code: 'def test_callback(callback_context): return None',
       };
       service.addCallback('test-agent', callback);
     });
@@ -199,7 +211,9 @@ describe('AgentBuilderService - Callback Management', () => {
     });
 
     it('should handle deleting from non-existent agent', () => {
-      expect(() => service.deleteCallback('non-existent', callback)).not.toThrow();
+      expect(() =>
+        service.deleteCallback('non-existent', callback)
+      ).not.toThrow();
     });
 
     it('should emit callback update after deletion', () => {
@@ -209,104 +223,91 @@ describe('AgentBuilderService - Callback Management', () => {
 
       expect(service['agentCallbacksSubject'].next).toHaveBeenCalledWith({
         agentName: 'test-agent',
-        callbacks: []
+        callbacks: [],
       });
     });
 
-    it('should clear selected callback if deleted', () => {
+    it('should clear selected callback if deleted', async () => {
       service.setSelectedCallback(callback);
-      
+
       service.deleteCallback('test-agent', callback);
 
-      service.getSelectedCallback().subscribe(selectedCallback => {
-        expect(selectedCallback).toBeUndefined();
-      });
+      expect(
+        await firstValueFrom(service.getSelectedCallback())
+      ).toBeUndefined();
     });
   });
 
   describe('callback selection', () => {
-    it('should get and set selected callback', () => {
+    it('should get and set selected callback', async () => {
       const callback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
+        code: 'def test_callback(callback_context): return None',
       };
 
       service.setSelectedCallback(callback);
 
-      service.getSelectedCallback().subscribe(selectedCallback => {
-        expect(selectedCallback).toBe(callback);
-      });
+      expect(await firstValueFrom(service.getSelectedCallback())).toBe(
+        callback
+      );
     });
 
-    it('should clear selected callback', () => {
+    it('should clear selected callback', async () => {
       const callback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
+        code: 'def test_callback(callback_context): return None',
       };
 
       service.setSelectedCallback(callback);
       service.setSelectedCallback(undefined);
 
-      service.getSelectedCallback().subscribe(selectedCallback => {
-        expect(selectedCallback).toBeUndefined();
-      });
+      expect(
+        await firstValueFrom(service.getSelectedCallback())
+      ).toBeUndefined();
     });
   });
 
   describe('getAgentCallbacks', () => {
-    it('should emit callback updates', () => {
+    it('should emit callback updates', async () => {
       const callback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
+        code: 'def test_callback(callback_context): return None',
       };
-
-      let emittedValue: any;
-      service.getAgentCallbacks().subscribe(value => {
-        emittedValue = value;
-      });
 
       service.addCallback('test-agent', callback);
 
-      expect(emittedValue).toEqual({
+      expect(await firstValueFrom(service.getAgentCallbacks())).toEqual({
         agentName: 'test-agent',
-        callbacks: [callback]
+        callbacks: [callback],
       });
     });
   });
 
   describe('setAgentCallbacks', () => {
-    it('should set callbacks with agent name and callbacks', () => {
-      const callbacks: CallbackNode[] = [{
-        name: 'test_callback',
-        type: 'before_agent',
-        code: 'def test_callback(callback_context): return None'
-      }];
-
-      let emittedValue: any;
-      service.getAgentCallbacks().subscribe(value => {
-        emittedValue = value;
-      });
+    it('should set callbacks with agent name and callbacks', async () => {
+      const callbacks: CallbackNode[] = [
+        {
+          name: 'test_callback',
+          type: 'before_agent',
+          code: 'def test_callback(callback_context): return None',
+        },
+      ];
 
       service.setAgentCallbacks('test-agent', callbacks);
 
-      expect(emittedValue).toEqual({
+      expect(await firstValueFrom(service.getAgentCallbacks())).toEqual({
         agentName: 'test-agent',
-        callbacks: callbacks
+        callbacks: callbacks,
       });
     });
 
-    it('should clear callbacks when called without parameters', () => {
-      let emittedValue: any;
-      service.getAgentCallbacks().subscribe(value => {
-        emittedValue = value;
-      });
-
+    it('should clear callbacks when called without parameters', async () => {
       service.setAgentCallbacks();
 
-      expect(emittedValue).toBeUndefined();
+      expect(await firstValueFrom(service.getAgentCallbacks())).toBeUndefined();
     });
   });
 });

@@ -104,7 +104,7 @@ describe('YamlUtils - Callback Support', () => {
       });
 
       // Verify that generateYamlFile creates a FormData entry
-      YamlUtils.generateYamlFile(mockAgentNode, mockFormData, 'test-app');
+      YamlUtils.generateYamlFile(mockAgentNode, mockFormData, 'test-app', new Map());
       
       expect(mockFormData.getAll('files').length).toBe(1);
       const file = mockFormData.get('files') as File;

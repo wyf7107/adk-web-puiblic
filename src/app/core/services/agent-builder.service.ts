@@ -153,23 +153,23 @@ export class AgentBuilderService {
       if (!agentNode) {
         return { success: false, error: 'Agent not found' };
       }
-      
+
       if (!agentNode.callbacks) {
         agentNode.callbacks = [];
       }
-      
+
       // Check for duplicate callback names
       const duplicateCallback = agentNode.callbacks.find(cb => cb.name === callback.name);
       if (duplicateCallback) {
         return { success: false, error: `Callback with name '${callback.name}' already exists` };
       }
-      
+
       // Validate callback name (must be valid Python identifier)
-      // const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-      // if (!pythonIdentifierRegex.test(callback.name)) {
-      //   return { success: false, error: 'Callback name must be a valid Python identifier' };
-      // }
-      
+      const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+      if (!pythonIdentifierRegex.test(callback.name)) {
+        return { success: false, error: 'Callback name must be a valid Python identifier' };
+      }
+
       agentNode.callbacks.push(callback);
       this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
       return { success: true };
@@ -184,24 +184,24 @@ export class AgentBuilderService {
       if (!agentNode) {
         return { success: false, error: 'Agent not found' };
       }
-      
+
       if (!agentNode.callbacks) {
         return { success: false, error: 'No callbacks found for this agent' };
       }
-      
+
       const callbackIndex = agentNode.callbacks.findIndex(callback => callback.name === callbackToDelete.name);
       if (callbackIndex === -1) {
         return { success: false, error: 'Callback not found' };
       }
-      
+
       agentNode.callbacks.splice(callbackIndex, 1);
       this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
-      
+
       // Clear selection if the deleted callback was selected
       if (this.selectedCallbackSubject.value?.name === callbackToDelete.name) {
         this.setSelectedCallback(undefined);
       }
-      
+
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Failed to delete callback: ' + (error as Error).message };

@@ -16,7 +16,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { AgentBuilderService } from './agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from './agent-builder.service';
 import { AgentNode, CallbackNode } from '../models/AgentBuilder';
 import {firstValueFrom} from 'rxjs';
 
@@ -25,8 +25,10 @@ describe('AgentBuilderService - Callback Management', () => {
   let mockAgentNode: AgentNode;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(AgentBuilderService);
+    TestBed.configureTestingModule({providers: [
+      {provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService}
+    ]});
+    service = TestBed.inject(AGENT_BUILDER_SERVICE);
 
     mockAgentNode = {
       name: 'test-agent',

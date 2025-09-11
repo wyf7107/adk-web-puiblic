@@ -33,7 +33,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AGENT_SERVICE } from '../../core/services/agent.service';
 import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
@@ -105,7 +105,7 @@ export class BuilderTabsComponent {
     'SequentialAgent'
   ];
 
-  private agentBuilderService = inject(AgentBuilderService);
+  private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   private dialog = inject(MatDialog);
   private agentService = inject(AGENT_SERVICE);
   private snackBar = inject(MatSnackBar);

@@ -56,7 +56,7 @@ import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatSelect } from '@angular/material/select';
@@ -304,7 +304,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   disableBuilderSwitch = false;
 
   constructor(
-      private agentBuilderService: AgentBuilderService,
+      @Inject(AGENT_BUILDER_SERVICE) private agentBuilderService: AgentBuilderService,
       private sanitizer: DomSanitizer,
       @Inject(SESSION_SERVICE) private sessionService: SessionService,
       @Inject(ARTIFACT_SERVICE) private artifactService: ArtifactService,

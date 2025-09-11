@@ -17,7 +17,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BuilderTabsComponent } from './builder-tabs.component';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import {AGENT_SERVICE} from '../../core/services/agent.service';
 import {CallbackNode} from '../../core/models/AgentBuilder';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
@@ -35,7 +35,7 @@ describe('BuilderTabsComponent - Callback Support', () => {
     await TestBed.configureTestingModule({
       imports: [BuilderTabsComponent],
       providers: [
-        AgentBuilderService,
+        {provide: AGENT_BUILDER_SERVICE, useExisting: AgentBuilderService},
         {provide: AGENT_SERVICE, useValue: agentServiceSpy},
         provideNoopAnimations(),
       ],

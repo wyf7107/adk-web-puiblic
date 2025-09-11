@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AgentNode, ToolNode, CallbackNode } from '../models/AgentBuilder';
+
+export const AGENT_BUILDER_SERVICE = new InjectionToken<AgentBuilderService>('AgentBuilderService');
 
 @Injectable({
   providedIn: 'root'

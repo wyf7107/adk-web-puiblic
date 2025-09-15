@@ -25,13 +25,13 @@ Adk web is the built-in dev UI that comes along with adk for easier development 
 
 ## ✨ Prerequisite
 
-- **Install [Angular CLI](https://angular.dev/tools/cli)**
+- **Install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
 
 - **Install [NodeJs](https://nodejs.org/en)**
 
-- **Install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
+- **Install [Angular CLI](https://angular.dev/tools/cli)**
 
-- **Install [google-adk (Python)](https://github.com/google/adk-python)**
+- **Install [google-adk (Python)](https://github.com/google/adk-python)** 
 
 - **Install [google-adk (Java)](https://github.com/google/adk-java/)**
 

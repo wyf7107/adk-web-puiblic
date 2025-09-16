@@ -206,7 +206,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   useSse = false;
   currentSessionState = {};
   root_agent = ROOT_AGENT;
-  updatedSessionState = signal(null);
+  updatedSessionState: WritableSignal<any> = signal(null);
   private readonly messagesSubject = new BehaviorSubject<any[]>([]);
   private readonly streamingTextMessageSubject =
     new BehaviorSubject<any | null>(null);
@@ -248,7 +248,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Load apps
   protected isLoadingApps: WritableSignal<boolean> = signal(false);
-  protected loadingError: WritableSignal<string> = signal('');
+  loadingError: WritableSignal<string> = signal('');
   protected readonly apps$: Observable<string[] | undefined> = of([]).pipe(
     tap(() => {
       this.isLoadingApps.set(true);
@@ -443,7 +443,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((res) => {
         this.currentSessionState = res.state;
         this.sessionId = res.id;
-        this.sessionTab.refreshSession();
+        this.sessionTab?.refreshSession();
 
         this.isSessionUrlEnabledObs.subscribe((enabled) => {
           if (enabled) {
@@ -529,7 +529,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('SSE error:', err),
       complete: () => {
         this.streamingTextMessage = null;
-        this.sessionTab.reloadSession(this.sessionId);
+        this.sessionTab?.reloadSession(this.sessionId);
         this.eventService.getTrace(this.sessionId)
             .pipe(catchError((error) => {
               if (error.status === 404) {
@@ -1147,7 +1147,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected handleReturnToSession(event: boolean) {
-    this.sessionTab.getSession(this.sessionId);
+    this.sessionTab?.getSession(this.sessionId);
     this.evalTab.resetEvalCase();
     this.isChatMode.set(true);
   }
@@ -1455,7 +1455,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  protected deleteSession(session: string) {
+  deleteSession(session: string) {
     const dialogData: DeleteSessionDialogData = {
       title: 'Confirm delete',
       message:
@@ -1472,14 +1472,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.sessionService.deleteSession(this.userId, this.appName, session)
-          .subscribe((res) => {
-            const nextSession = this.sessionTab.refreshSession(session);
-            if (nextSession) {
-              this.sessionTab.getSession(nextSession.id);
-            } else {
-              window.location.reload();
-            }
-          });
+            .subscribe((res) => {
+              const nextSession = this.sessionTab?.refreshSession(session);
+              if (nextSession) {
+                this.sessionTab?.getSession(nextSession.id);
+              } else {
+                window.location.reload();
+              }
+            });
       } else {
       }
     });
@@ -1623,7 +1623,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  protected updateState() {
+  updateState() {
     const dialogRef = this.dialog.open(EditJsonDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',
@@ -1638,7 +1638,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  protected removeStateUpdate() {
+  removeStateUpdate() {
     this.updatedSessionState.set(null);
   }
 
@@ -1679,7 +1679,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                     sessionData.userId, sessionData.appName, sessionData.events)
                 .subscribe((res) => {
                   this.openSnackBar('Session imported', 'OK');
-                  this.sessionTab.refreshSession();
+                  this.sessionTab?.refreshSession();
                 });
           } catch (error) {
             this.openSnackBar('Error parsing session file', 'OK');

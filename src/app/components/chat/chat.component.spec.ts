@@ -17,33 +17,26 @@
 
 import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
-import {
-  ARTIFACT_SERVICE,
-  ArtifactService,
-} from '../../core/services/artifact.service';
+import {ARTIFACT_SERVICE, ArtifactService,} from '../../core/services/artifact.service';
 import {AUDIO_SERVICE, AudioService} from '../../core/services/audio.service';
-import {
-  DOWNLOAD_SERVICE,
-  DownloadService,
-} from '../../core/services/download.service';
+import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/download.service';
 import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
-import {
-  FEATURE_FLAG_SERVICE,
-  FeatureFlagService,
-} from '../../core/services/feature-flag.service';
+import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from '../../core/services/feature-flag.service';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/session.service';
 import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/websocket.service';
+import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 
 import {ChatComponent} from './chat.component';
 
@@ -346,14 +339,14 @@ describe('ChatComponent', () => {
 
     describe('when onNewSessionClick() is called', () => {
       beforeEach(() => {
-        component.messages = [{role: USER_ID, text: 'hello'}];
+        component.messages.set([{role: USER_ID, text: 'hello'}]);
         component.artifacts = [{}];
         component.eventData = new Map([['1', {}]]);
         component.traceData = [{}];
         component.onNewSessionClick();
       });
       it('should clear data and create new session', () => {
-        expect(component.messages.length).toBe(0);
+        expect(component.messages().length).toBe(0);
         expect(component.artifacts.length).toBe(0);
         expect(component.eventData.size).toBe(0);
         expect(component.traceData.length).toBe(0);
@@ -399,136 +392,6 @@ describe('ChatComponent', () => {
     });
   });
 
-  describe('Message Handling', () => {
-    it('should send message and process response', async () => {
-      spyOn(component.sessionTab, 'reloadSession').and.callFake(() => {});
-      const mockStreamingResponse = new Subject<any>();
-      mockAgentService.runSse.and.returnValue(
-          mockStreamingResponse.asObservable(),
-      );
-      component.userInput = 'Hello';
-      await component.sendMessage(new Event('submit'));
-
-      expect(component.messages[0].role).toBe(USER_ID);
-      expect(component.messages[0].text).toBe('Hello');
-
-      // Simulate streaming response
-      mockStreamingResponse.next(
-          `{"id": "${
-              EVENT_1_ID}", "content": {"parts": [{"text": "Response part 1"}]}}`,
-      );
-      fixture.detectChanges();
-
-      mockStreamingResponse.complete();
-      fixture.detectChanges();
-
-      expect(mockAgentService.runSse).toHaveBeenCalled();
-    });
-
-    describe('when sendMessage fails', () => {
-      beforeEach(async () => {
-        const mockStreamingResponse = new Subject<string>();
-        mockAgentService.runSse.and.returnValue(
-            mockStreamingResponse.asObservable(),
-        );
-        component.userInput = 'Hello';
-        await component.sendMessage(new Event('submit'));
-        mockStreamingResponse.next(SSE_ERROR_RESPONSE);
-        fixture.detectChanges();
-      });
-      it('should show error message', () => {
-        expect(mockSnackBar.open)
-            .toHaveBeenCalledWith(
-                SSE_ERROR_RESPONSE,
-                OK_BUTTON_TEXT,
-            );
-      });
-    });
-
-    describe('when user input is empty and no files are selected', () => {
-      beforeEach(async () => {
-        component.userInput = '';
-        component.selectedFiles = [];
-        await component.sendMessage(new Event('submit'));
-      });
-      it('should not send message', () => {
-        expect(mockAgentService.runSse).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when sending message with file attachment', () => {
-      const mockFile = new File([''], 'test.txt', {type: 'text/plain'});
-      beforeEach(async () => {
-        component.selectedFiles = [{file: mockFile, url: 'blob:url'}];
-        spyOn(component, 'readFileAsBytes')
-            .and.returnValue(
-                Promise.resolve(new ArrayBuffer(0)),
-            );
-        const mockStreamingResponse = new Subject<any>();
-        mockAgentService.runSse.and.returnValue(
-            mockStreamingResponse.asObservable(),
-        );
-        await component.sendMessage(new Event('submit'));
-      });
-      it('should send message with file attachment', () => {
-        expect(component.messages.length).toBe(1);
-        expect(component.messages[0].role).toBe(USER_ID);
-        expect(component.messages[0].attachments[0].file).toBe(mockFile);
-        expect(mockAgentService.runSse).toHaveBeenCalled();
-      });
-    });
-
-    describe('when streaming response contains function call', () => {
-      beforeEach(async () => {
-        const mockStreamingResponse = new Subject<any>();
-        mockAgentService.runSse.and.returnValue(
-            mockStreamingResponse.asObservable(),
-        );
-        component.userInput = CALL_FUNCTION_USER_INPUT;
-        await component.sendMessage(new Event('submit'));
-        mockStreamingResponse.next(
-            `{"id": "${
-                EVENT_1_ID}", "content": {"parts": [{"functionCall": {"name": "${
-                FUNC1_NAME}", "args": {}}}]}}`,
-        );
-        fixture.detectChanges();
-        mockStreamingResponse.complete();
-        fixture.detectChanges();
-      });
-      it('should process function call', () => {
-        expect(component.messages[1].functionCall).toEqual({
-          name: FUNC1_NAME,
-          args: {},
-        });
-      });
-    });
-
-    describe('when streaming response contains function response', () => {
-      beforeEach(async () => {
-        const mockStreamingResponse = new Subject<any>();
-        mockAgentService.runSse.and.returnValue(
-            mockStreamingResponse.asObservable(),
-        );
-        component.userInput = CALL_FUNCTION_USER_INPUT;
-        await component.sendMessage(new Event('submit'));
-        mockStreamingResponse.next(
-            `{"id": "${
-                EVENT_1_ID}", "content": {"parts": [{"functionResponse": {"name": "${
-                FUNC1_NAME}", "response": {}}}]}}`,
-        );
-        fixture.detectChanges();
-        mockStreamingResponse.complete();
-        fixture.detectChanges();
-      });
-      it('should process function response', () => {
-        expect(component.messages[1].functionResponse).toEqual({
-          name: FUNC1_NAME,
-          response: {},
-        });
-      });
-    });
-  });
-
   describe('UI and State', () => {
     describe('toggleSidePanel', () => {
       beforeEach(() => {
@@ -561,8 +424,8 @@ describe('ChatComponent', () => {
     describe('when clickEvent() is called', () => {
       beforeEach(() => {
         component.sessionId = SESSION_1_ID;
-        component.messages =
-            [{role: 'bot', text: 'response', eventId: EVENT_1_ID}];
+        component.messages.set(
+            [{role: 'bot', text: 'response', eventId: EVENT_1_ID}]);
         component.eventData = new Map([[EVENT_1_ID, {id: EVENT_1_ID}]]);
         spyOn(component.sideDrawer, 'open');
         component.clickEvent(0);
@@ -619,6 +482,139 @@ describe('ChatComponent', () => {
                 OK_BUTTON_TEXT,
             );
       });
+    });
+  });
+
+  describe('ChatPanel integration', () => {
+    it('should display chat-panel when appName is set', () => {
+      const chatPanel =
+          fixture.debugElement.query(By.directive(ChatPanelComponent));
+      expect(chatPanel).toBeTruthy();
+    });
+
+    it('should pass messages to chat-panel', async () => {
+      component.messages.set([{role: 'user', text: 'test message'}]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const chatPanelComponent =
+          fixture.debugElement.query(By.directive(ChatPanelComponent))
+              .componentInstance;
+      expect(chatPanelComponent.messages).toEqual(component.messages());
+      const messageCards =
+          fixture.debugElement.queryAll(By.css('app-chat-panel .message-card'));
+      expect(messageCards.length).toBe(1);
+      expect(messageCards[0].nativeElement.textContent)
+          .toContain('test message');
+    });
+
+    it('should call sendMessage when chat-panel emits sendMessage', () => {
+      spyOn(component, 'sendMessage').and.callThrough();
+      mockAgentService.runSse.and.returnValue(of());
+      const chatPanelDebugEl =
+          fixture.debugElement.query(By.directive(ChatPanelComponent));
+      const mockEvent = new KeyboardEvent('keydown', {key: 'Enter'});
+      chatPanelDebugEl.triggerEventHandler('sendMessage', mockEvent);
+      expect(component.sendMessage).toHaveBeenCalledWith(mockEvent);
+    });
+
+    it('should call clickEvent when chat-panel emits clickEvent', () => {
+      spyOn(component, 'clickEvent');
+      const chatPanelDebugEl =
+          fixture.debugElement.query(By.directive(ChatPanelComponent));
+      chatPanelDebugEl.triggerEventHandler('clickEvent', 0);
+      expect(component.clickEvent).toHaveBeenCalledWith(0);
+    });
+
+    it('should call updateState when chat-panel emits updateState', () => {
+      spyOn(component, 'updateState');
+      const chatPanelDebugEl =
+          fixture.debugElement.query(By.directive(ChatPanelComponent));
+      chatPanelDebugEl.triggerEventHandler('updateState', undefined);
+      expect(component.updateState).toHaveBeenCalled();
+    });
+
+    it('should call toggleAudioRecording when chat-panel emits toggleAudioRecording',
+       () => {
+         spyOn(component, 'toggleAudioRecording');
+         const chatPanelDebugEl =
+             fixture.debugElement.query(By.directive(ChatPanelComponent));
+         chatPanelDebugEl.triggerEventHandler(
+             'toggleAudioRecording', undefined);
+         expect(component.toggleAudioRecording).toHaveBeenCalled();
+       });
+  });
+
+  describe('Eval Case Editing', () => {
+    describe('when editEvalCaseMessage() is called', () => {
+      const message = {role: 'user', text: 'hello', isEditing: false};
+      let mockTextarea: any;
+
+      beforeEach(() => {
+        mockTextarea = {
+          value: message.text,
+          focus: jasmine.createSpy('focus'),
+          setSelectionRange: jasmine.createSpy('setSelectionRange'),
+        };
+        component.chatPanel.textarea = {
+          nativeElement: mockTextarea,
+        };
+      });
+
+      it('should set editing state', () => {
+        component['editEvalCaseMessage'](message);
+
+        expect(component.isEvalCaseEditing()).toBe(true);
+        expect(component.userEditEvalCaseMessage).toBe(message.text);
+        expect(message.isEditing).toBe(true);
+      });
+
+      it('should set cursor position', fakeAsync(() => {
+           component['editEvalCaseMessage'](message);
+
+           tick();
+           expect(mockTextarea.setSelectionRange)
+               .toHaveBeenCalledWith(message.text.length, message.text.length);
+         }));
+
+      it('should focus textarea ', fakeAsync(() => {
+           component['editEvalCaseMessage'](message);
+
+           tick();
+           expect(mockTextarea.focus).toHaveBeenCalled();
+         }));
+    });
+
+    describe('when editEvalCaseMessage() is called with newline at end', () => {
+      const message = {role: 'user', text: 'hello\n', isEditing: false};
+      let mockTextarea: any;
+
+      beforeEach(() => {
+        mockTextarea = {
+          value: message.text,
+          focus: jasmine.createSpy('focus'),
+          setSelectionRange: jasmine.createSpy('setSelectionRange'),
+        };
+        component.chatPanel.textarea = {
+          nativeElement: mockTextarea,
+        };
+      });
+
+      it('should set cursor position before newline', fakeAsync(() => {
+           component['editEvalCaseMessage'](message);
+
+           tick();
+           expect(mockTextarea.setSelectionRange)
+               .toHaveBeenCalledWith(
+                   message.text.length - 1, message.text.length - 1);
+         }));
+
+      it('should focus textarea', fakeAsync(() => {
+           component['editEvalCaseMessage'](message);
+
+           tick();
+           expect(mockTextarea.focus).toHaveBeenCalled();
+         }));
     });
   });
 });

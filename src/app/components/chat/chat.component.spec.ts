@@ -25,6 +25,7 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
+import {EvalCase} from '../../core/models/Eval';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService,} from '../../core/services/artifact.service';
 import {AUDIO_SERVICE, AudioService} from '../../core/services/audio.service';
@@ -37,6 +38,7 @@ import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/websocket.service';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
+import {SidePanelComponent} from '../side-panel/side-panel.component';
 
 import {ChatComponent} from './chat.component';
 
@@ -56,6 +58,10 @@ const CALL_FUNCTION_USER_INPUT = 'call a function';
 const FUNC1_NAME = 'func1';
 const STATE_KEY = 'key';
 const STATE_VALUE = 'value';
+const TEST_MESSAGE = 'test message';
+const TEST_FILE_NAME = 'test.txt';
+const BOT_RESPONSE = 'bot response';
+const NEW_RESPONSE = 'new response';
 
 describe('ChatComponent', () => {
   let component: ChatComponent;
@@ -345,11 +351,13 @@ describe('ChatComponent', () => {
         component.traceData = [{}];
         component.onNewSessionClick();
       });
-      it('should clear data and create new session', () => {
+      it('should clear data', () => {
         expect(component.messages().length).toBe(0);
         expect(component.artifacts.length).toBe(0);
         expect(component.eventData.size).toBe(0);
         expect(component.traceData.length).toBe(0);
+      });
+      it('should create new session', () => {
         expect(mockSessionService.createSession).toHaveBeenCalled();
       });
     });
@@ -360,10 +368,11 @@ describe('ChatComponent', () => {
           mockDialog.open.and.returnValue({
             afterClosed: () => of(true),
           } as any);
-          spyOn(component.sessionTab, 'refreshSession').and.returnValue({
-            id: SESSION_2_ID,
-          } as any);
-          spyOn(component.sessionTab, 'getSession');
+          const sessionTabSpy = jasmine.createSpyObj(
+              'sessionTab', ['refreshSession', 'getSession']);
+          sessionTabSpy.refreshSession.and.returnValue(
+              {id: SESSION_2_ID} as any);
+          spyOn(component, 'sessionTab').and.returnValue(sessionTabSpy);
           component.deleteSession(SESSION_1_ID);
         });
         it('should delete session', () => {
@@ -390,13 +399,64 @@ describe('ChatComponent', () => {
         });
       });
     });
+
+    describe(
+        'when updateWithSelectedSession() is called with a session', () => {
+          const mockSession = {
+            id: SESSION_1_ID,
+            state: {},
+            events: [
+              {
+                id: 'event-1',
+                author: 'user',
+                content: {parts: [{text: 'user message'}]},
+              },
+              {
+                id: 'event-2',
+                author: 'bot',
+                content: {parts: [{text: 'bot response'}]},
+              },
+            ],
+          };
+          beforeEach(() => {
+            mockEventService.getTrace.and.returnValue(of([]));
+            component['updateWithSelectedSession'](mockSession as any);
+            fixture.detectChanges();
+          });
+
+          it('should update session id and state', () => {
+            expect(component.sessionId).toBe(SESSION_1_ID);
+            expect(component.currentSessionState).toEqual({});
+          });
+
+          it('should reset trace service', () => {
+            expect(mockTraceService.resetTraceService).toHaveBeenCalled();
+          });
+
+          it('should populate messages from session events', () => {
+            expect(component.messages().length).toBe(2);
+            expect(component.messages()[0]).toEqual(jasmine.objectContaining({
+              role: 'user',
+              text: 'user message'
+            }));
+            expect(component.messages()[1]).toEqual(jasmine.objectContaining({
+              role: 'bot',
+              text: 'bot response'
+            }));
+          });
+
+          it('should call getTrace', () => {
+            expect(mockEventService.getTrace)
+                .toHaveBeenCalledWith(SESSION_1_ID);
+          });
+        });
   });
 
   describe('UI and State', () => {
     describe('toggleSidePanel', () => {
       beforeEach(() => {
-        spyOn(component.sideDrawer, 'open');
-        spyOn(component.sideDrawer, 'close');
+        spyOn(component.sideDrawer()!, 'open');
+        spyOn(component.sideDrawer()!, 'close');
       });
 
       describe('when panel is open', () => {
@@ -405,7 +465,7 @@ describe('ChatComponent', () => {
           component.toggleSidePanel();
         });
         it('closes panel', () => {
-          expect(component.sideDrawer.close).toHaveBeenCalled();
+          expect(component.sideDrawer()!.close).toHaveBeenCalled();
           expect(component.showSidePanel).toBe(false);
         });
       });
@@ -415,7 +475,7 @@ describe('ChatComponent', () => {
           component.toggleSidePanel();
         });
         it('opens panel', () => {
-          expect(component.sideDrawer.open).toHaveBeenCalled();
+          expect(component.sideDrawer()!.open).toHaveBeenCalled();
           expect(component.showSidePanel).toBe(true);
         });
       });
@@ -427,11 +487,11 @@ describe('ChatComponent', () => {
         component.messages.set(
             [{role: 'bot', text: 'response', eventId: EVENT_1_ID}]);
         component.eventData = new Map([[EVENT_1_ID, {id: EVENT_1_ID}]]);
-        spyOn(component.sideDrawer, 'open');
+        spyOn(component.sideDrawer()!, 'open');
         component.clickEvent(0);
       });
       it('should open side panel with event details', () => {
-        expect(component.sideDrawer.open).toHaveBeenCalled();
+        expect(component.sideDrawer()!.open).toHaveBeenCalled();
         expect(component.selectedEvent.id).toBe(EVENT_1_ID);
         expect(mockEventService.getEventTrace).toHaveBeenCalledWith(EVENT_1_ID);
         expect(mockEventService.getEvent)
@@ -452,8 +512,10 @@ describe('ChatComponent', () => {
         } as any);
         component.updateState();
       });
-      it('should open dialog and update session state', () => {
+      it('should open dialog', () => {
         expect(mockDialog.open).toHaveBeenCalled();
+      });
+      it('should update session state', () => {
         expect(component.updatedSessionState()).toEqual(newState);
       });
     });
@@ -486,66 +548,144 @@ describe('ChatComponent', () => {
   });
 
   describe('ChatPanel integration', () => {
-    it('should display chat-panel when appName is set', () => {
-      const chatPanel =
-          fixture.debugElement.query(By.directive(ChatPanelComponent));
-      expect(chatPanel).toBeTruthy();
+    describe('when appName is set', () => {
+      it('should display chat-panel', () => {
+        const chatPanel =
+            fixture.debugElement.query(By.directive(ChatPanelComponent));
+        expect(chatPanel).toBeTruthy();
+      });
     });
 
-    it('should pass messages to chat-panel', async () => {
-      component.messages.set([{role: 'user', text: 'test message'}]);
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-      const chatPanelComponent =
-          fixture.debugElement.query(By.directive(ChatPanelComponent))
-              .componentInstance;
-      expect(chatPanelComponent.messages).toEqual(component.messages());
-      const messageCards =
-          fixture.debugElement.queryAll(By.css('app-chat-panel .message-card'));
-      expect(messageCards.length).toBe(1);
-      expect(messageCards[0].nativeElement.textContent)
-          .toContain('test message');
+    describe('Message Passing', () => {
+      beforeEach(async () => {
+        component.messages.set([{role: 'user', text: TEST_MESSAGE}]);
+        fixture.detectChanges();
+        await fixture.whenStable();
+        fixture.detectChanges();
+      });
+      it('should pass messages to chat-panel', () => {
+        const chatPanelComponent =
+            fixture.debugElement.query(By.directive(ChatPanelComponent))
+                .componentInstance;
+        expect(chatPanelComponent.messages).toEqual(component.messages());
+        const messageCards = fixture.debugElement.queryAll(
+            By.css('app-chat-panel .message-card'));
+        expect(messageCards.length).toBe(1);
+        expect(messageCards[0].nativeElement.textContent)
+            .toContain(TEST_MESSAGE);
+      });
     });
 
-    it('should call sendMessage when chat-panel emits sendMessage', () => {
-      spyOn(component, 'sendMessage').and.callThrough();
-      mockAgentService.runSse.and.returnValue(of());
-      const chatPanelDebugEl =
-          fixture.debugElement.query(By.directive(ChatPanelComponent));
+    describe('when chat-panel emits sendMessage', () => {
       const mockEvent = new KeyboardEvent('keydown', {key: 'Enter'});
-      chatPanelDebugEl.triggerEventHandler('sendMessage', mockEvent);
-      expect(component.sendMessage).toHaveBeenCalledWith(mockEvent);
+      beforeEach(() => {
+        spyOn(component, 'sendMessage').and.callThrough();
+        mockAgentService.runSse.and.returnValue(of());
+        const chatPanelDebugEl =
+            fixture.debugElement.query(By.directive(ChatPanelComponent));
+        chatPanelDebugEl.triggerEventHandler('sendMessage', mockEvent);
+      });
+      it('should call sendMessage', () => {
+        expect(component.sendMessage).toHaveBeenCalledWith(mockEvent);
+      });
     });
 
-    it('should call clickEvent when chat-panel emits clickEvent', () => {
-      spyOn(component, 'clickEvent');
-      const chatPanelDebugEl =
-          fixture.debugElement.query(By.directive(ChatPanelComponent));
-      chatPanelDebugEl.triggerEventHandler('clickEvent', 0);
-      expect(component.clickEvent).toHaveBeenCalledWith(0);
+    describe('when chat-panel emits clickEvent', () => {
+      beforeEach(() => {
+        spyOn(component, 'clickEvent');
+        const chatPanelDebugEl =
+            fixture.debugElement.query(By.directive(ChatPanelComponent));
+        chatPanelDebugEl.triggerEventHandler('clickEvent', 0);
+      });
+      it('should call clickEvent', () => {
+        expect(component.clickEvent).toHaveBeenCalledWith(0);
+      });
     });
 
-    it('should call updateState when chat-panel emits updateState', () => {
-      spyOn(component, 'updateState');
-      const chatPanelDebugEl =
-          fixture.debugElement.query(By.directive(ChatPanelComponent));
-      chatPanelDebugEl.triggerEventHandler('updateState', undefined);
-      expect(component.updateState).toHaveBeenCalled();
+    describe('when chat-panel emits updateState', () => {
+      beforeEach(() => {
+        spyOn(component, 'updateState');
+        const chatPanelDebugEl =
+            fixture.debugElement.query(By.directive(ChatPanelComponent));
+        chatPanelDebugEl.triggerEventHandler('updateState', undefined);
+      });
+      it('should call updateState', () => {
+        expect(component.updateState).toHaveBeenCalled();
+      });
     });
 
-    it('should call toggleAudioRecording when chat-panel emits toggleAudioRecording',
-       () => {
-         spyOn(component, 'toggleAudioRecording');
-         const chatPanelDebugEl =
-             fixture.debugElement.query(By.directive(ChatPanelComponent));
-         chatPanelDebugEl.triggerEventHandler(
-             'toggleAudioRecording', undefined);
-         expect(component.toggleAudioRecording).toHaveBeenCalled();
-       });
+    describe('when chat-panel emits toggleAudioRecording', () => {
+      beforeEach(() => {
+        spyOn(component, 'toggleAudioRecording');
+        const chatPanelDebugEl =
+            fixture.debugElement.query(By.directive(ChatPanelComponent));
+        chatPanelDebugEl.triggerEventHandler('toggleAudioRecording', undefined);
+      });
+      it('should call toggleAudioRecording', () => {
+        expect(component.toggleAudioRecording).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('File Handling', () => {
+    describe('when onFileSelect() is called', () => {
+      beforeEach(() => {
+        const file = new File([''], TEST_FILE_NAME, {type: 'text/plain'});
+        const event = {target: {files: [file]}} as unknown as Event;
+        component.onFileSelect(event);
+      });
+      it('should add file to selectedFiles', () => {
+        expect(component.selectedFiles.length).toBe(1);
+        expect(component.selectedFiles[0].file.name).toBe(TEST_FILE_NAME);
+      });
+    });
+
+    describe('when removeFile() is called', () => {
+      beforeEach(() => {
+        component.selectedFiles =
+            [{file: new File([''], TEST_FILE_NAME), url: 'blob:url'}];
+        component.removeFile(0);
+      });
+      it('should remove file from selectedFiles', () => {
+        expect(component.selectedFiles.length).toBe(0);
+      });
+    });
   });
 
   describe('Eval Case Editing', () => {
+    const mockEvalCase: EvalCase = {
+      evalId: 'eval-1',
+      sessionInput: {},
+      creationTimestamp: 12345,
+      conversation: [{
+        invocationId: 'inv-1',
+        creationTimestamp: 12345,
+        userContent: {parts: [{text: 'user message'}]},
+        finalResponse: {parts: [{text: BOT_RESPONSE}]},
+      }],
+    };
+    const mockMessage = {
+      text: BOT_RESPONSE,
+      isEditing: false,
+      invocationIndex: 0,
+      finalResponsePartIndex: 0
+    };
+
+    beforeEach(() => {
+      component.evalCase = mockEvalCase;
+      component.messages.set([mockMessage]);
+      fixture.detectChanges();
+    });
+
+    describe('when editEvalCase() is called', () => {
+      beforeEach(() => {
+        (component as any).editEvalCase();
+      });
+      it('should set isEvalEditMode to true', () => {
+        expect(component.isEvalEditMode()).toBe(true);
+      });
+    });
+
     describe('when editEvalCaseMessage() is called', () => {
       const message = {role: 'user', text: 'hello', isEditing: false};
       let mockTextarea: any;
@@ -556,7 +696,7 @@ describe('ChatComponent', () => {
           focus: jasmine.createSpy('focus'),
           setSelectionRange: jasmine.createSpy('setSelectionRange'),
         };
-        component.chatPanel.textarea = {
+        component.chatPanel()!.textarea = {
           nativeElement: mockTextarea,
         };
       });
@@ -595,7 +735,7 @@ describe('ChatComponent', () => {
           focus: jasmine.createSpy('focus'),
           setSelectionRange: jasmine.createSpy('setSelectionRange'),
         };
-        component.chatPanel.textarea = {
+        component.chatPanel()!.textarea = {
           nativeElement: mockTextarea,
         };
       });
@@ -615,6 +755,75 @@ describe('ChatComponent', () => {
            tick();
            expect(mockTextarea.focus).toHaveBeenCalled();
          }));
+    });
+
+    describe('when cancelEditMessage() is called', () => {
+      beforeEach(() => {
+        mockMessage.isEditing = true;
+        component.isEvalCaseEditing.set(true);
+        (component as any).cancelEditMessage(mockMessage);
+      });
+      it('should exit editing mode', () => {
+        expect(mockMessage.isEditing).toBe(false);
+        expect(component.isEvalCaseEditing()).toBe(false);
+      });
+    });
+
+    describe('when saveEditMessage() is called', () => {
+      beforeEach(() => {
+        mockMessage.isEditing = true;
+        component.isEvalCaseEditing.set(true);
+        component.userEditEvalCaseMessage = NEW_RESPONSE;
+        (component as any).saveEditMessage(mockMessage);
+      });
+      it('should save message', () => {
+        expect(mockMessage.text).toBe(NEW_RESPONSE);
+        expect(component.hasEvalCaseChanged()).toBe(true);
+        expect(component.updatedEvalCase!.conversation[0]
+                   .finalResponse!.parts![0]!.text)
+            .toBe(NEW_RESPONSE);
+      });
+      it('should exit editing mode', () => {
+        expect(mockMessage.isEditing).toBe(false);
+        expect(component.isEvalCaseEditing()).toBe(false);
+      });
+    });
+
+    describe('when deleteEvalCaseMessage() is called', () => {
+      beforeEach(() => {
+        (component as any).deleteEvalCaseMessage(mockMessage, 0);
+      });
+      it('should delete message', () => {
+        expect(component.messages().length).toBe(0);
+        expect(component.hasEvalCaseChanged()).toBe(true);
+        expect(component.updatedEvalCase!.conversation[0]
+                   .finalResponse!.parts!.length)
+            .toBe(0);
+      });
+    });
+
+    describe('when saveEvalCase() is called', () => {
+      beforeEach(() => {
+        component.updatedEvalCase = mockEvalCase;
+        mockEvalService.updateEvalCase.and.returnValue(of({}));
+        (component as any).saveEvalCase();
+      });
+      it('should call updateEvalCase', () => {
+        expect(mockEvalService.updateEvalCase).toHaveBeenCalled();
+      });
+      it('should reset edit mode', () => {
+        expect(component.isEvalEditMode()).toBe(false);
+      });
+    });
+
+    describe('when cancelEditEvalCase() is called', () => {
+      beforeEach(() => {
+        component.isEvalEditMode.set(true);
+        (component as any).cancelEditEvalCase();
+      });
+      it('should reset edit mode', () => {
+        expect(component.isEvalEditMode()).toBe(false);
+      });
     });
   });
 });

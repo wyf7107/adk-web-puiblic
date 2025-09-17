@@ -18,7 +18,7 @@
 import {CdkTextareaAutosize} from '@angular/cdk/text-field';
 import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, ViewChild, WritableSignal} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, ElementRef, HostListener, Inject, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButton, MatFabButton, MatIconButton, MatMiniFabButton} from '@angular/material/button';
 import {MatCard} from '@angular/material/card';
@@ -71,6 +71,7 @@ import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
+import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {StateTabComponent} from '../state-tab/state-tab.component';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
 import {TraceTabComponent} from '../trace-tab/trace-tab.component';
@@ -165,15 +166,19 @@ const BIDI_STREAMING_RESTART_WARNING =
     TraceEventComponent,
     AsyncPipe,
     ChatPanelComponent,
+    SidePanelComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('sideDrawer') sideDrawer!: MatDrawer;
-  @ViewChild(EventTabComponent) eventTabComponent!: EventTabComponent;
-  @ViewChild(SessionTabComponent) sessionTab!: SessionTabComponent;
-  @ViewChild(EvalTabComponent) evalTab!: EvalTabComponent;
-  @ViewChild(ChatPanelComponent) chatPanel!: ChatPanelComponent;
-  @ViewChild('bottomPanel') bottomPanelRef!: ElementRef;
+  sideDrawer = viewChild<MatDrawer>('sideDrawer');
+  sidePanel = viewChild(SidePanelComponent);
+  chatPanel = viewChild(ChatPanelComponent);
+  bottomPanelRef = viewChild<ElementRef>('bottomPanel');
+
+  eventTabComponent = computed(() => this.sidePanel()?.eventTabComponent());
+  sessionTab = computed(() => this.sidePanel()?.sessionTabComponent());
+  evalTab = computed(() => this.sidePanel()?.evalTabComponent());
+
   private _snackBar = inject(MatSnackBar);
   shouldShowEvalTab = signal(true);
   enableSseIndicator = signal(false);
@@ -369,7 +374,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.showSidePanel = true;
-    this.sideDrawer.open();
+    this.sideDrawer()?.open();
   }
 
   selectApp(appName: string) {
@@ -419,7 +424,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       .subscribe((res) => {
         this.currentSessionState = res.state;
         this.sessionId = res.id;
-        this.sessionTab?.refreshSession();
+        this.sessionTab()?.refreshSession();
 
         this.isSessionUrlEnabledObs.subscribe((enabled) => {
           if (enabled) {
@@ -496,7 +501,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       error: (err) => console.error('SSE error:', err),
       complete: () => {
         this.streamingTextMessage = null;
-        this.sessionTab?.reloadSession(this.sessionId);
+        this.sessionTab()?.reloadSession(this.sessionId);
         this.eventService.getTrace(this.sessionId)
             .pipe(catchError((error) => {
               if (error.status === 404) {
@@ -937,7 +942,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   clickEvent(i: number) {
     const key = this.messages()[i].eventId;
 
-    this.sideDrawer.open();
+    this.sideDrawer()?.open();
     this.showSidePanel = true;
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
@@ -983,7 +988,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.stopVideoRecording();
       this.isVideoRecording = false;
     }
-    this.evalTab?.resetEvalResults();
+    this.evalTab()?.resetEvalResults();
     this.traceData = [];
     this.bottomPanelVisible = false;
   }
@@ -1030,13 +1035,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK')
       return;
     }
-
+    const videoContainer = this.chatPanel()?.videoContainer;
+    if (!videoContainer) {
+      return;
+    }
     this.isVideoRecording = true;
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     this.webSocketService.connect(
       `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${this.appName}&user_id=${this.userId}&session_id=${this.sessionId}`,
     );
-    this.videoService.startRecording(this.chatPanel.videoContainer);
+    this.videoService.startRecording(videoContainer);
     this.audioService.startRecording();
     this.messages.update(
         messages => [...messages, {role: 'user', text: 'Speaking...'}]);
@@ -1044,8 +1052,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   stopVideoRecording() {
+    const videoContainer = this.chatPanel()?.videoContainer;
+    if (!videoContainer) {
+      return;
+    }
     this.audioService.stopRecording();
-    this.videoService.stopRecording(this.chatPanel.videoContainer);
+    this.videoService.stopRecording(videoContainer);
     this.webSocketService.closeConnection();
     this.isVideoRecording = false;
   }
@@ -1088,9 +1100,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleSidePanel() {
     if (this.showSidePanel) {
-      this.sideDrawer.close();
+      this.sideDrawer()?.close();
     } else {
-      this.sideDrawer.open();
+      this.sideDrawer()?.open();
     }
     this.showSidePanel = !this.showSidePanel;
   }
@@ -1107,8 +1119,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected handleReturnToSession(event: boolean) {
-    this.sessionTab?.getSession(this.sessionId);
-    this.evalTab.resetEvalCase();
+    this.sessionTab()?.getSession(this.sessionId);
+    this.evalTab()?.resetEvalCase();
     this.isChatMode.set(true);
   }
 
@@ -1221,13 +1233,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userEditEvalCaseMessage = message.text;
     message.isEditing = true;
     setTimeout(() => {
-      this.chatPanel.textarea?.nativeElement.focus();
-      let textLength = this.chatPanel.textarea?.nativeElement.value.length;
+      const textarea = this.chatPanel()?.textarea?.nativeElement;
+      if (!textarea) {
+        return;
+      }
+      textarea.focus();
+      let textLength = textarea.value.length;
       if (message.text.charAt(textLength - 1) === '\n') {
         textLength--;
       }
-      this.chatPanel.textarea?.nativeElement.setSelectionRange(
-          textLength, textLength);
+      textarea.setSelectionRange(textLength, textLength);
     }, 0);
   }
 
@@ -1338,7 +1353,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.evalTab.deleteEvalCase(this.evalCase!.evalId);
+        this.evalTab()?.deleteEvalCase(this.evalCase!.evalId);
         this.openSnackBar('Eval case deleted', 'OK')
       }
     });
@@ -1358,8 +1373,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.bottomPanelVisible = false;
 
     // Close eval history if opened
-    if (!!this.evalTab.showEvalHistory) {
-      this.evalTab.toggleEvalHistoryButton();
+    if (!!this.evalTab()?.showEvalHistory) {
+      this.evalTab()?.toggleEvalHistoryButton();
     }
   }
 
@@ -1432,14 +1447,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (result) {
         this.sessionService.deleteSession(this.userId, this.appName, session)
             .subscribe((res) => {
-              const nextSession = this.sessionTab?.refreshSession(session);
+              const nextSession = this.sessionTab()?.refreshSession(session);
               if (nextSession) {
-                this.sessionTab?.getSession(nextSession.id);
+                this.sessionTab()?.getSession(nextSession.id);
               } else {
                 window.location.reload();
               }
             });
-      } else {
       }
     });
   }
@@ -1630,7 +1644,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                     sessionData.userId, sessionData.appName, sessionData.events)
                 .subscribe((res) => {
                   this.openSnackBar('Session imported', 'OK');
-                  this.sessionTab?.refreshSession();
+                  this.sessionTab()?.refreshSession();
                 });
           } catch (error) {
             this.openSnackBar('Error parsing session file', 'OK');

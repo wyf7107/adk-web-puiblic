@@ -42,7 +42,8 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {instance} from '@viz-js/viz';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
-import {BehaviorSubject, catchError, combineLatest, distinctUntilChanged, filter, map, Observable, of, shareReplay, switchMap, take, tap} from 'rxjs';
+import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
+import {catchError, distinctUntilChanged, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 import stc from 'string-to-color';
 
 import {URLUtil} from '../../../utils/url-util';

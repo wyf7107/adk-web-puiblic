@@ -15,20 +15,24 @@
  * limitations under the License.
  */
 
-export interface Invocation {
-  invocationId: string;
-  userContent: Content;
-  finalResponse?: Content;
-  intermediateData?: IntermediateData;
-  creationTimestamp: number;
+// TODO: Replace with genai TS types when they're available.
+export interface Blob {
+  data: string;
 }
-
-export interface Content {
-  parts?: any[];
-  role?: string|null;
+export interface Part {
+  text?: string;
+  inlineData?: Blob;
 }
-
-export interface IntermediateData {
-  toolUses: any[];
-  intermediateResponses: any[];
+export interface GenAiContent {
+  role: string;
+  parts: Part[];
 }
+export interface LlmRequest {
+  contents: GenAiContent[];
+}
+export interface LlmResponse {
+  content: GenAiContent;
+  error?: string;
+  errorMessage?: string;
+}
+export interface Event extends LlmResponse {}

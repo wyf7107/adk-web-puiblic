@@ -25,7 +25,7 @@ import {catchError} from 'rxjs/operators';
 
 import {DEFAULT_EVAL_METRICS, EvalMetric, EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
-import {Invocation} from '../../core/models/types';
+import {Invocation} from '../../core/models/Eval';
 import {EvalService, EVAL_SERVICE} from '../../core/services/eval.service';
 import {FeatureFlagService, FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
 import {SessionService, SESSION_SERVICE} from '../../core/services/session.service';

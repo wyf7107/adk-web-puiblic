@@ -48,6 +48,7 @@ import stc from 'string-to-color';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
+import {LlmResponse} from '../../core/models/types';
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
@@ -483,7 +484,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.openSnackBar(chunk, 'OK');
           return;
         }
-        const chunkJson = JSON.parse(chunk);
+        const chunkJson = JSON.parse(chunk) as LlmResponse;
         if (chunkJson.error) {
           this.openSnackBar(chunkJson.error, 'OK');
           return;

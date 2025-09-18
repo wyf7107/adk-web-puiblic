@@ -25,17 +25,14 @@ import {MatCard} from '@angular/material/card';
 import {MatOption} from '@angular/material/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatDivider} from '@angular/material/divider';
-import {MatFormField, MatSuffix} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
 import {MatInput} from '@angular/material/input';
-import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MatPaginator, MatPaginatorIntl} from '@angular/material/paginator';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {MatSelect} from '@angular/material/select';
 import {MatDrawer, MatDrawerContainer} from '@angular/material/sidenav';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatTab, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
 import {MatTooltip} from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
@@ -133,17 +130,6 @@ const BIDI_STREAMING_RESTART_WARNING =
     FormsModule,
     ReactiveFormsModule,
     MatOption,
-    MatTabGroup,
-    MatTab,
-    MatTabLabel,
-    TraceTabComponent,
-    EventTabComponent,
-    StateTabComponent,
-    ArtifactTabComponent,
-    SessionTabComponent,
-    EvalTabComponent,
-    MatPaginator,
-    MatMiniFabButton,
     MatIcon,
     NgxJsonViewerModule,
     NgClass,
@@ -152,18 +138,6 @@ const BIDI_STREAMING_RESTART_WARNING =
     MatDivider,
     MatCard,
     MatFabButton,
-    NgStyle,
-    MatProgressBar,
-    MarkdownComponent,
-    AudioPlayerComponent,
-    MatFormField,
-    MatIconButton,
-    MatInput,
-    CdkTextareaAutosize,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
-    MatSuffix,
     ResizableBottomDirective,
     TraceEventComponent,
     AsyncPipe,

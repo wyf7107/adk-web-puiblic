@@ -16,7 +16,7 @@
  */
 
 import {Component, EventEmitter, inject, Input, Output, viewChild} from '@angular/core';
-import {MatButton, MatMiniFabButton} from '@angular/material/button';
+import {MatMiniFabButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatTab, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
@@ -58,7 +58,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatMiniFabButton,
     MatIcon,
     NgxJsonViewerModule,
-    MatButton,
   ],
 })
 export class SidePanelComponent {

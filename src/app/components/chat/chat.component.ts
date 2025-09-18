@@ -146,15 +146,13 @@ const BIDI_STREAMING_RESTART_WARNING =
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
-  sideDrawer = viewChild<MatDrawer>('sideDrawer');
-  sidePanel = viewChild(SidePanelComponent);
-  chatPanel = viewChild(ChatPanelComponent);
-  bottomPanelRef = viewChild<ElementRef>('bottomPanel');
-
-  eventTabComponent = computed(() => this.sidePanel()?.eventTabComponent());
-  sessionTab = computed(() => this.sidePanel()?.sessionTabComponent());
-  evalTab = computed(() => this.sidePanel()?.evalTabComponent());
-
+  chatPanel = viewChild.required(ChatPanelComponent);
+  sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
+  eventTabComponent = viewChild.required(EventTabComponent);
+  sessionTab = viewChild(SessionTabComponent);
+  evalTab = viewChild(EvalTabComponent);
+  private scrollContainer = viewChild.required<ElementRef>('autoScroll');
+  bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
   private _snackBar = inject(MatSnackBar);
   shouldShowEvalTab = signal(true);
   enableSseIndicator = signal(false);
@@ -190,6 +188,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly streamingTextMessageSubject =
       new BehaviorSubject<any|null>(null);
   private readonly isModelThinkingSubject = new BehaviorSubject(false);
+  private readonly scrollInterruptedSubject = new BehaviorSubject(false);
 
   // TODO: Remove this once backend supports restarting bidi streaming.
   sessionHasUsedBidi = new Set<string>();

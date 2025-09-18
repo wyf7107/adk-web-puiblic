@@ -37,10 +37,25 @@ import {SESSION_SERVICE, SessionService,} from '../../core/services/session.serv
 import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/websocket.service';
+import {Component} from '@angular/core';
+
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 
 import {ChatComponent} from './chat.component';
+
+// Mock EvalTabComponent to satisfy the required viewChild in ChatComponent
+@Component({
+  selector: 'app-eval-tab',
+  template: '',
+  standalone: true,
+})
+class MockEvalTabComponent {
+  showEvalHistory = false;
+  toggleEvalHistoryButton() {
+    this.showEvalHistory = !this.showEvalHistory;
+  }
+}
 
 const SESSION_1_ID = 'session-1';
 const SESSION_2_ID = 'session-2';
@@ -186,7 +201,12 @@ describe('ChatComponent', () => {
 
     await TestBed
         .configureTestingModule({
-          imports: [ChatComponent, MatDialogModule, NoopAnimationsModule],
+          imports: [
+            ChatComponent,
+            MatDialogModule,
+            NoopAnimationsModule,
+            MockEvalTabComponent,
+          ],
           providers: [
             {provide: SESSION_SERVICE, useValue: mockSessionService},
             {provide: ARTIFACT_SERVICE, useValue: mockArtifactService},

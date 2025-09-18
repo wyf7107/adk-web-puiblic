@@ -1,30 +1,39 @@
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
-    frameworks: ['jasmine', 'karma-typescript'],
-    preprocessors: {
-      'src/**/*.ts': ['karma-typescript']
-    },
-    karmaTypescriptConfig: {
-      tsconfig: './tsconfig.karma.json',
-      reports: {
-        "html": "coverage",
-        "text-summary": "" // Log to console
-      }
-    },
-    reporters: ['progress', 'karma-typescript'],
-    files: [
-      './src/**/*.spec.ts'
+    basePath: '',
+    frameworks: ['jasmine', '@angular-devkit/build-angular'],
+    plugins: [
+      require('karma-jasmine'),
+      require('karma-chrome-launcher'),
+      require('karma-jasmine-html-reporter'),
+      require('karma-coverage'),
+      require('@angular-devkit/build-angular/plugins/karma')
     ],
-    browsers: ['ChromeHeadlessCI'],
+    client: {
+      jasmine: {},
+      clearContext: false
+    },
+    coverageReporter: {
+      dir: require('path').join(__dirname, './coverage/adk-web'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' }
+      ]
+    },
+    reporters: ['progress', 'kjhtml'],
+    port: 9876,
+    colors: true,
+    logLevel: config.LOG_INFO,
+    autoWatch: true,
+    browsers: ['Chrome'],
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
-        flags: [
-          '--no-sandbox',
-        ]
+        flags: ['--no-sandbox', '--disable-gpu']
       }
     },
-    singleRun: true
+    singleRun: false,
+    restartOnFileChange: true
   });
 };
-

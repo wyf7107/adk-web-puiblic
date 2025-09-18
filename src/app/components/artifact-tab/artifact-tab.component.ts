@@ -116,7 +116,6 @@ export function openBase64InNewTab(dataUrl: string, mimeType: string) {
     const blob = new Blob([byteArray], {type: mimeType});
 
     const blobUrl = URL.createObjectURL(blob);
-
     const newWindow = window.open(blobUrl, '_blank');
     if (newWindow) {
       newWindow.focus();

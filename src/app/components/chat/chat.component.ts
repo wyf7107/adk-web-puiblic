@@ -42,6 +42,7 @@ import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {catchError, distinctUntilChanged, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 import stc from 'string-to-color';
+import {windowOpen} from 'safevalues/dom';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
@@ -1048,7 +1049,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private openOAuthPopup(url: string): Promise<any> {
     return new Promise((resolve, reject) => {
       // Open OAuth popup
-      const popup = window.open(url, 'oauthPopup', 'width=600,height=700');
+      const popup = windowOpen(
+        window,
+        url,
+        'oauthPopup',
+        'width=600,height=700',
+      );
 
       if (!popup) {
         reject('Popup blocked!');
@@ -1326,7 +1332,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       data: dialogData,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.evalTab()?.deleteEvalCase(this.evalCase!.evalId);
         this.openSnackBar('Eval case deleted', 'OK')
@@ -1418,7 +1424,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       data: dialogData,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.sessionService.deleteSession(this.userId, this.appName, session)
             .subscribe((res) => {
@@ -1537,7 +1543,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openLink(url: string) {
-    window.open(url, '_blank');
+    windowOpen(
+      window,
+      url,
+      '_blank'
+    );
   }
 
   openViewImageDialog(imageData: string | null) {
@@ -1608,7 +1618,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       reader.onload = (e) => {
         if (e.target?.result) {
           try {
-            const sessionData = JSON.parse(e.target.result as string);
+            const sessionData = JSON.parse(e.target.result as string) as Session;
             if (!sessionData.userId || !sessionData.appName ||
                 !sessionData.events) {
               this.openSnackBar('Invalid session file format', 'OK');

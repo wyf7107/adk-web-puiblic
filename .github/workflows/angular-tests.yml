@@ -21,7 +21,7 @@ jobs:
         cache: 'npm' # Enable caching of npm dependencies
 
     - name: Install dependencies
-      run: npm ci # 'ci' is typically preferred over 'install' in CI for faster, more reliable builds
+      run: npm install
 
     - name: Run tests
       run: npm run test

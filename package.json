@@ -7,6 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test-headless": "karma start karma.conf.js",
     "clean-config": "node clean-backend.js",
     "inject-backend": "node set-backend.js",
     "serve": "npm run clean-config && npm run inject-backend && ng serve"

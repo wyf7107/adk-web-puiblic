@@ -7,7 +7,6 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test-headless": "karma start karma.conf.js",
     "clean-config": "node clean-backend.js",
     "inject-backend": "node set-backend.js",
     "serve": "npm run clean-config && npm run inject-backend && ng serve"
@@ -40,7 +39,6 @@
     "@angular/cli": "^19.1.7",
     "@angular/compiler-cli": "^19.1.0",
     "@types/jasmine": "~5.1.0",
-    "@types/node": "^24.5.2",
     "@types/uuid": "10.0.0",
     "jasmine-core": "~5.5.0",
     "karma": "~6.4.0",
@@ -48,8 +46,6 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "karma-typescript": "^5.5.4",
-    "karma-typescript-angular2-transform": "^5.5.4",
     "typescript": "~5.7.2"
   }
 }

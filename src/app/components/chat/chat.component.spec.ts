@@ -48,6 +48,7 @@ import {
 } from '../../core/services/feature-flag.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ChatComponent } from './chat.component';
+import {AGENT_BUILDER_SERVICE, AgentBuilderService} from '../../core/services/agent-builder.service';
 
 describe('ChatComponent', () => {
   let component: ChatComponent;
@@ -180,6 +181,10 @@ describe('ChatComponent', () => {
           provide: FEATURE_FLAG_SERVICE,
           useValue: featureFlagService,
         },
+        {
+          provide: AGENT_BUILDER_SERVICE,
+          useClass: AgentBuilderService
+        }
       ],
     }).compileComponents();
 

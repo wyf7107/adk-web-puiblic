@@ -39,6 +39,8 @@ export interface ToolNode {
 export interface CallbackNode {
     name: string;
     type: 'before_agent' | 'after_agent' | 'before_model' | 'after_model' | 'before_tool' | 'after_tool';
+    code?: string;
+    description?: string;
 }
 
 export interface YamlConfig {

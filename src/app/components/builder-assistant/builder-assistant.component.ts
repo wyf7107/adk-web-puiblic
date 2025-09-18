@@ -28,7 +28,7 @@ import { MarkdownModule } from 'ngx-markdown';
 import { SESSION_SERVICE, SessionService } from '../../core/services/session.service';
 import { AGENT_SERVICE, AgentService } from '../../core/services/agent.service';
 import { AgentRunRequest } from '../../core/models/AgentRunRequest';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { YamlUtils } from '../../../utils/yaml-utils';
 
 @Component({
@@ -47,7 +47,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
   assistantAppName = "__adk_agent_builder_assistant";
   userId = "user";
   currentSession = "";
-  
+
   userMessage: string = '';
   messages: any[] = [];
   private shouldAutoScroll = false;
@@ -56,7 +56,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
   constructor(@Inject(SESSION_SERVICE) private sessionService: SessionService,
               @Inject(AGENT_SERVICE) private agentService: AgentService,
-              private agentBuilderService: AgentBuilderService){
+              @Inject(AGENT_BUILDER_SERVICE) private agentBuilderService: AgentBuilderService){
   }
 
   ngOnInit() {
@@ -76,11 +76,11 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
           "root_directory" : `${this.appName}`
         }
       };
-      
+
       // Add loading message for bot response
       this.messages.push({ role: 'bot', text: '', isLoading: true });
       this.shouldAutoScroll = true;
-      
+
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
           const chunkJson = JSON.parse(chunk);
@@ -121,7 +121,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
   onClosePanel() {
     this.closePanel.emit();
   }
-  
+
   sendMessage() {
     if (this.userMessage?.trim() && this.currentSession) {
       // save to tmp
@@ -129,14 +129,14 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       // Add user message
       this.messages.push({ role: 'user', text: this.userMessage });
-      
+
       const userText = this.userMessage;
       this.userMessage = '';
-      
+
       // Add loading message for bot response
       this.messages.push({ role: 'bot', text: '', isLoading: true });
       this.shouldAutoScroll = true;
-      
+
       const req: AgentRunRequest = {
         appName: this.assistantAppName,
         userId: this.userId,
@@ -150,7 +150,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
           "root_directory" : `${this.appName}/tmp`
         }
       };
-      
+
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
           const chunkJson = JSON.parse(chunk);
@@ -188,7 +188,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
       });
     }
   }
-  
+
   ngAfterViewChecked() {
     if (this.shouldAutoScroll) {
       this.scrollToBottom();
@@ -231,9 +231,9 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
     }
 
     const formData = new FormData();
-    
+
     const tabAgents = this.agentBuilderService.getCurrentAgentToolBoards();
-    
+
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
     this.agentService.agentBuildTmp(formData).subscribe((success) => {

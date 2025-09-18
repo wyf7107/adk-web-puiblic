@@ -32,6 +32,7 @@ import {provideMarkdown} from 'ngx-markdown';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
+import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {AgentService, AGENT_SERVICE} from '../../core/services/agent.service';
 import {ArtifactService, ARTIFACT_SERVICE} from '../../core/services/artifact.service';
@@ -48,14 +49,14 @@ import {ResizableDrawerDirective} from '../../directives/resizable-drawer.direct
 import { getMediaTypeFromMimetype, MediaType, openBase64InNewTab, ArtifactTabComponent } from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
-import {EvalCase, EvalTabComponent} from '../eval-tab/eval-tab.component';
+import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatSelect } from '@angular/material/select';
@@ -303,7 +304,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   disableBuilderSwitch = false;
 
   constructor(
-      private agentBuilderService: AgentBuilderService,
+      @Inject(AGENT_BUILDER_SERVICE) private agentBuilderService: AgentBuilderService,
       private sanitizer: DomSanitizer,
       @Inject(SESSION_SERVICE) private sessionService: SessionService,
       @Inject(ARTIFACT_SERVICE) private artifactService: ArtifactService,

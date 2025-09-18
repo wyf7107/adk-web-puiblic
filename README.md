@@ -31,7 +31,7 @@ Adk web is the built-in dev UI that comes along with adk for easier development 
 
 - **Install [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)**
 
-- **Install [google-adk (Python)](https://github.com/google/adk-python)** 
+- **Install [google-adk (Python)](https://github.com/google/adk-python)**
 
 - **Install [google-adk (Java)](https://github.com/google/adk-java/)**
 
@@ -39,7 +39,8 @@ Adk web is the built-in dev UI that comes along with adk for easier development 
 
 ## 🚀 Running adk web
 
-To be able to run `adk web`, follow the steps from the root of your local adk-web folder:
+To be able to run `adk web`, follow the steps from the root of your local
+adk-web folder:
 
 ### Install dependencies
 
@@ -70,7 +71,7 @@ Go to `localhost:4200` and start developing!
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions, please see our 
+We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions, please see our
 - [General contribution guideline and flow](https://google.github.io/adk-docs/contributing-guide/#questions).
 - Then if you want to contribute code, please read [Code Contributing Guidelines](./CONTRIBUTING.md) to get started.
 

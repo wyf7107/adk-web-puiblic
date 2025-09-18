@@ -27,7 +27,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
 import {MatChipsModule} from '@angular/material/chips';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
 import { parse } from 'yaml';
 import { firstValueFrom, take, filter, Observable } from 'rxjs';
@@ -49,7 +49,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private _snackBar = inject(MatSnackBar);
   @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
-  private agentBuilderService = inject(AgentBuilderService);
+  private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   private cdr = inject(ChangeDetectorRef);
 
   @Input() showSidePanel: boolean = true;
@@ -104,7 +104,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         this.appName = app;
       }
     });
-    
+
     // Use input parameter if provided
     if (this.appNameInput) {
       this.appName = this.appNameInput;
@@ -135,7 +135,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         }
       }
     });
-    
+
     this.agentBuilderService.getDeleteSubAgentSubject().subscribe((agentName) => {
       if (!agentName) {
         return ;
@@ -215,8 +215,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     const subAgentNode: HtmlTemplateDynamicNode = {
       id: newAgentName,
-      point: signal({ 
-        x: parentNode.point().x + subAgentIndex * 400 + 50, 
+      point: signal({
+        x: parentNode.point().x + subAgentIndex * 400 + 50,
         y: parentNode.point().y + 150 + 50 // Position below the parent
       }),
       type: 'html-template',
@@ -258,7 +258,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     // Get parent data
     const parentData = parentNode.data();
     if (!parentData) return;
-    
+
     const dialogRef = this.dialog.open(AddToolDialogComponent, {
       width: '500px'
     });
@@ -273,9 +273,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
              toolType: result.toolType,
              name: result.name
            };
-           
+
            this.agentBuilderService.addTool(parentData.name, tool);
-           
+
            // Automatically select the newly created tool
            this.agentBuilderService.setSelectedTool(tool);
          }
@@ -296,7 +296,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       description: 'Auto-generated callback'
     }
     this.callbackId++;
-    
+
     const result = this.agentBuilderService.addCallback(parentNode.data().name, callback);
     if (!result.success) {
       this._snackBar.open(result.error || 'Failed to add callback', 'Close', {
@@ -330,11 +330,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   deleteTool(agentName: string, tool: any) {
     const isAgentTool = tool.toolType === 'Agent Tool';
     const toolDisplayName = isAgentTool ? (tool.toolAgentName || tool.name) : tool.name;
-    
+
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { 
+      data: {
         title: isAgentTool ? 'Delete Agent Tool' : 'Delete Tool',
-        message: isAgentTool 
+        message: isAgentTool
           ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding board.`
           : `Are you sure you want to delete ${toolDisplayName}?`,
         confirmButtonText: 'Delete'
@@ -356,7 +356,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.agentBuilderService.deleteTool(agentName, tool);
     }
   }
-  
+
   deleteAgentToolAndBoard(agentName: string, tool: any, agentToolName: string) {
     this.agentBuilderService.deleteTool(agentName, tool);
 
@@ -365,7 +365,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   deleteCallback(agentName: string, callback: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { 
+      data: {
         title: 'Delete Callback',
         message: `Are you sure you want to delete ${callback.name}?`,
         confirmButtonText: 'Delete'
@@ -388,7 +388,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   openDeleteSubAgentDialog(agentName: string) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      data: { 
+      data: {
         title: 'Delete sub agent',
         message: `Are you sure you want to delete ${agentName}? This will also delete all the underlying sub agents and tools.`,
         confirmButtonText: 'Delete'
@@ -401,7 +401,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     });
   }
-  
+
   deleteSubAgent(agentName: string) {
     const currentNode: AgentNode|undefined = this.agentBuilderService.getNode(agentName);
 
@@ -410,9 +410,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     }
 
     const parentNode = this.agentBuilderService.getParentNode(
-      this.agentBuilderService.getRootNode(), 
-      currentNode, 
-      undefined, 
+      this.agentBuilderService.getRootNode(),
+      currentNode,
+      undefined,
       this.agentToolBoards()
     );
 
@@ -473,7 +473,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.switchToAgentToolBoard(agentToolName);
       return;
     }
-    
+
     if (node.data) {
       const agentNodeData = this.agentBuilderService.getNode(node.data().name);
       if (agentNodeData) {
@@ -542,7 +542,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     if (this.isAgentToolMode && this.currentAgentTool()) {
       return agentName === this.currentAgentTool();
     }
-    
+
     return this.isRootAgent(agentName);
   }
 
@@ -550,14 +550,14 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     try {
       // Parse the YAML content
       const yamlData = YAML.parse(yamlContent);
-      
+
       this.agentBuilderService.clear();
       this.agentToolBoards.set(new Map());
       this.agentBuilderService.setAgentToolBoards(new Map());
       this.currentAgentTool.set(null);
       this.isAgentToolMode = false;
       this.navigationStack = [];
-      
+
       // Create root agent from YAML
       const rootAgent: AgentNode = {
         name: yamlData.name || 'root_agent',
@@ -569,15 +569,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         tools: this.parseToolsFromYaml(yamlData.tools || []),
         callbacks: this.parseCallbacksFromYaml(yamlData)
       };
-      
+
       // Add to agent builder service
       this.agentBuilderService.addNode(rootAgent);
       this.agentBuilderService.setSelectedNode(rootAgent);
-      
+
       this.processAgentToolsFromYaml(rootAgent.tools || [], appName);
-      
+
       this.loadAgentBoard(rootAgent);
-      
+
     } catch (error) {
       console.error('Error parsing YAML:', error);
     }
@@ -609,12 +609,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   private parseCallbacksFromYaml(yamlData: any): CallbackNode[] {
     const callbacks: CallbackNode[] = [];
-    
+
     // Look for callback groups at the root level
     Object.keys(yamlData).forEach(key => {
       if (key.endsWith('_callbacks') && Array.isArray(yamlData[key])) {
         const callbackType = key.replace('_callbacks', '');
-        
+
         yamlData[key].forEach((callbackData: any) => {
           if (callbackData.name) {
             callbacks.push({
@@ -625,7 +625,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         });
       }
     });
-    
+
     return callbacks;
   }
 
@@ -643,7 +643,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   private processAgentToolsFromYaml(tools: ToolNode[], appName: string) {
     const agentTools = tools.filter(tool => tool.toolType === 'Agent Tool');
-    
+
     for (const agentTool of agentTools) {
       // Create board for agent tool
       const agentToolBoards = this.agentToolBoards();
@@ -653,7 +653,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     }
   }
-  
+
   private loadAgentToolConfiguration(agentTool: ToolNode, appName: string) {
     const agentToolName = agentTool.name;
     // Try to fetch the agent tool's YAML file
@@ -662,7 +662,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         if (yamlContent) {
           try {
             const yamlData = YAML.parse(yamlContent);
-            
+
             const agentToolAgent: AgentNode = {
               name: yamlData.name || agentToolName,
               agent_class: yamlData.agent_class || 'LlmAgent',
@@ -675,14 +675,14 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
               isAgentTool: true,
               skip_summarization: !!agentTool.args?.['skip_summarization'],
             };
-            
+
             const currentAgentToolBoards = this.agentToolBoards();
             currentAgentToolBoards.set(agentToolName, agentToolAgent);
             this.agentToolBoards.set(currentAgentToolBoards);
             this.agentBuilderService.setAgentToolBoards(currentAgentToolBoards);
-            
+
             this.agentBuilderService.addNode(agentToolAgent);
-            
+
             this.processAgentToolsFromYaml(agentToolAgent.tools || [], appName);
 
             if (agentToolAgent.sub_agents && agentToolAgent.sub_agents.length > 0) {
@@ -711,7 +711,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     });
   }
-  
+
   private createDefaultAgentToolConfiguration(agentTool: ToolNode) {
     const agentToolName = agentTool.name;
     const agentToolAgent: AgentNode = {
@@ -725,20 +725,20 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       isAgentTool: true,
       skip_summarization: !!agentTool.args?.['skip_summarization'],
     };
-    
+
     const currentAgentToolBoards = this.agentToolBoards();
     currentAgentToolBoards.set(agentToolName, agentToolAgent);
     this.agentToolBoards.set(currentAgentToolBoards);
     this.agentBuilderService.setAgentToolBoards(currentAgentToolBoards);
-    
+
     this.agentBuilderService.addNode(agentToolAgent);
   }
 
 
 
   loadAgentTools(agent: AgentNode) {
-    if (!agent.tools) { 
-      agent.tools = [] 
+    if (!agent.tools) {
+      agent.tools = []
     } else {
       // Filter out any tools with empty names
       agent.tools = agent.tools.filter(tool => tool.name && tool.name.trim() !== '');
@@ -861,10 +861,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     if (currentContext !== agentToolName) {
       this.navigationStack.push(currentContext);
     }
-    
+
     const agentToolBoards = this.agentToolBoards();
     let agentToolAgent = agentToolBoards.get(agentToolName);
-    
+
     if (!agentToolAgent) {
       agentToolAgent = {
         isRoot: false,
@@ -877,51 +877,51 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         isAgentTool: true,
         skip_summarization: false,
       };
-      
+
       const newAgentToolBoards = new Map(agentToolBoards);
       newAgentToolBoards.set(agentToolName, agentToolAgent);
       this.agentToolBoards.set(newAgentToolBoards);
       this.agentBuilderService.setAgentToolBoards(newAgentToolBoards);
-      
+
       if (currentAgentName) {
         this.addAgentToolToAgent(agentToolName, currentAgentName);
       } else {
         this.addAgentToolToRoot(agentToolName);
       }
     }
-    
+
     this.currentAgentTool.set(agentToolName);
     this.isAgentToolMode = true;
     this.loadAgentBoard(agentToolAgent);
-    
+
     this.agentBuilderService.setSelectedNode(agentToolAgent);
     this.agentBuilderService.requestSideTabChange('config');
   }
-  
+
   backToMainCanvas() {
     if (this.navigationStack.length > 0) {
       const parentContext = this.navigationStack.pop();
-      
+
       if (parentContext === 'main') {
         this.currentAgentTool.set(null);
         this.isAgentToolMode = false;
-        
+
         const rootAgent = this.agentBuilderService.getRootNode();
         if (rootAgent) {
           this.loadAgentBoard(rootAgent);
-          
+
           this.agentBuilderService.setSelectedNode(rootAgent);
           this.agentBuilderService.requestSideTabChange('config');
         }
       } else {
         const agentToolBoards = this.agentToolBoards();
         const parentAgent = agentToolBoards.get(parentContext!);
-        
+
         if (parentAgent) {
           this.currentAgentTool.set(parentContext!);
           this.isAgentToolMode = true;
           this.loadAgentBoard(parentAgent);
-          
+
           this.agentBuilderService.setSelectedNode(parentAgent);
           this.agentBuilderService.requestSideTabChange('config');
         }
@@ -929,33 +929,33 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     } else {
       this.currentAgentTool.set(null);
       this.isAgentToolMode = false;
-      
+
       const rootAgent = this.agentBuilderService.getRootNode();
       if (rootAgent) {
         this.loadAgentBoard(rootAgent);
-        
+
         this.agentBuilderService.setSelectedNode(rootAgent);
         this.agentBuilderService.requestSideTabChange('config');
       }
     }
   }
-  
+
   async loadAgentBoard(agent: AgentNode) {
     this.nodes.set([]);
     this.edges.set([]);
-    
+
     this.nodeId = 1;
     this.edgeId = 1;
-    
+
     this.loadAgentTools(agent);
     this.agentBuilderService.addNode(agent);
-    
+
     if (agent.tools && agent.tools.length > 0) {
       this.agentBuilderService.setAgentTools(agent.name, agent.tools);
     } else {
       this.agentBuilderService.setAgentTools(agent.name, []);
     }
-    
+
     if (agent.sub_agents && agent.sub_agents.length > 0) {
       await this.loadSubAgents(this.appName, agent);
     } else {
@@ -969,72 +969,72 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     }
     this.agentBuilderService.setSelectedNode(agent);
   }
-  
+
   addAgentToolToAgent(agentToolName: string, targetAgentName: string) {
     const targetAgent = this.agentBuilderService.getNode(targetAgentName);
-    
+
     if (targetAgent) {
       if (targetAgent.tools && targetAgent.tools.some(tool => tool.name === agentToolName)) {
         return;
       }
-      
+
       const agentTool: ToolNode = {
         name: agentToolName,
         toolType: 'Agent Tool',
         toolAgentName: agentToolName
       };
-      
+
       if (!targetAgent.tools) {
         targetAgent.tools = [];
       }
       targetAgent.tools.push(agentTool);
       targetAgent.tools = targetAgent.tools.filter(tool => tool.name && tool.name.trim() !== '');
-      
+
       this.agentBuilderService.setAgentTools(targetAgentName, targetAgent.tools);
     }
   }
-  
+
   addAgentToolToRoot(agentToolName: string) {
     const rootAgent = this.agentBuilderService.getRootNode();
     if (rootAgent) {
       if (rootAgent.tools && rootAgent.tools.some(tool => tool.name === agentToolName)) {
         return;
       }
-      
+
       const agentTool: ToolNode = {
         name: agentToolName,
         toolType: 'Agent Tool',
         toolAgentName: agentToolName
       };
-      
+
       if (!rootAgent.tools) {
         rootAgent.tools = [];
       }
       rootAgent.tools.push(agentTool);
-      
+
       this.agentBuilderService.setAgentTools('root_agent', rootAgent.tools);
     }
   }
-  
+
   deleteAgentToolBoard(agentToolName: string) {
     const agentToolBoards = this.agentToolBoards();
     const newAgentToolBoards = new Map(agentToolBoards);
     newAgentToolBoards.delete(agentToolName);
     this.agentToolBoards.set(newAgentToolBoards);
     this.agentBuilderService.setAgentToolBoards(newAgentToolBoards);
-    
+
     const allNodes = this.agentBuilderService.getNodes();
     for (const agent of allNodes) {
       if (agent.tools) {
-        agent.tools = agent.tools.filter(t => 
+        agent.tools = agent.tools.filter(t =>
           !(t.toolType === 'Agent Tool' && (t.toolAgentName === agentToolName || t.name === agentToolName))
         );
         this.agentBuilderService.setAgentTools(agent.name, agent.tools);
       }
     }
-    
+
     this.navigationStack = this.navigationStack.filter(context => context !== agentToolName);
-    
+
     if (this.currentAgentTool() === agentToolName) {
       this.backToMainCanvas();
     }

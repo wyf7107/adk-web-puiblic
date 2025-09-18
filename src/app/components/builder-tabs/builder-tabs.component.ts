@@ -30,10 +30,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AGENT_SERVICE } from '../../core/services/agent.service';
 import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
@@ -105,11 +105,12 @@ export class BuilderTabsComponent {
     'SequentialAgent'
   ];
 
-  private agentBuilderService = inject(AgentBuilderService);
+  private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   private dialog = inject(MatDialog);
   private agentService = inject(AGENT_SERVICE);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   protected selectedTool: ToolNode | undefined = undefined;
   protected toolAgentName: string = '';
@@ -171,7 +172,7 @@ export class BuilderTabsComponent {
     return JSON.stringify(editorArgs, null, 2);
   }
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor() {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;

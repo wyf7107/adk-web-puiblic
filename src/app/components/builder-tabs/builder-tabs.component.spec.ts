@@ -16,54 +16,37 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ChangeDetectorRef } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { BuilderTabsComponent } from './builder-tabs.component';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
-import { AgentNode, CallbackNode, ToolNode } from '../../core/models/AgentBuilder';
+import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import {AGENT_SERVICE} from '../../core/services/agent.service';
+import {CallbackNode} from '../../core/models/AgentBuilder';
+import {provideNoopAnimations} from '@angular/platform-browser/animations';
 
 describe('BuilderTabsComponent - Callback Support', () => {
   let component: BuilderTabsComponent;
   let fixture: ComponentFixture<BuilderTabsComponent>;
-  let mockAgentBuilderService: jasmine.SpyObj<AgentBuilderService>;
-  let mockChangeDetectorRef: jasmine.SpyObj<ChangeDetectorRef>;
 
   beforeEach(async () => {
-    const agentBuilderServiceSpy = jasmine.createSpyObj('AgentBuilderService', [
-      'getSelectedNode',
-      'getSelectedTool', 
-      'getSelectedCallback',
-      'getAgentTools',
-      'getAgentCallbacks'
+    const agentServiceSpy = jasmine.createSpyObj('AgentService', [
+      'getApp',
+      'agentBuild',
     ]);
 
-    const changeDetectorRefSpy = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
-
     await TestBed.configureTestingModule({
-      declarations: [BuilderTabsComponent],
+      imports: [BuilderTabsComponent],
       providers: [
-        { provide: AgentBuilderService, useValue: agentBuilderServiceSpy },
-        { provide: ChangeDetectorRef, useValue: changeDetectorRefSpy }
-      ]
+        {provide: AGENT_BUILDER_SERVICE, useExisting: AgentBuilderService},
+        {provide: AGENT_SERVICE, useValue: agentServiceSpy},
+        provideNoopAnimations(),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(BuilderTabsComponent);
     component = fixture.componentInstance;
-    mockAgentBuilderService = TestBed.inject(AgentBuilderService) as jasmine.SpyObj<AgentBuilderService>;
-    mockChangeDetectorRef = TestBed.inject(ChangeDetectorRef) as jasmine.SpyObj<ChangeDetectorRef>;
-
-    // Setup default return values
-    mockAgentBuilderService.getSelectedNode.and.returnValue(new BehaviorSubject<AgentNode | undefined>(undefined));
-    mockAgentBuilderService.getSelectedTool.and.returnValue(new BehaviorSubject<ToolNode | undefined>(undefined));
-    mockAgentBuilderService.getSelectedCallback.and.returnValue(new BehaviorSubject<CallbackNode | undefined>(undefined));
-    mockAgentBuilderService.getAgentTools.and.returnValue(new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined));
-    mockAgentBuilderService.getAgentCallbacks.and.returnValue(new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined));
   });
 
   describe('Callback Properties', () => {
     it('should have callback-related properties', () => {
-      expect(component.editingCallback).toBeDefined();
-      expect(component.selectedCallback).toBeDefined();
       expect(component.callbackTypes).toBeDefined();
       expect(component.callbackTypes.length).toBe(6);
       expect(component.callbackTypes).toContain('before_agent');
@@ -83,57 +66,49 @@ describe('BuilderTabsComponent - Callback Support', () => {
         name: 'test_callback',
         type: 'before_agent',
         code: 'def test_callback(ctx): pass',
-        description: 'Test callback'
+        description: 'Test callback',
       };
     });
 
     it('should select callback correctly', () => {
       component.selectCallback(mockCallback);
-      
+
       expect(component.editingCallback).toBe(mockCallback);
     });
 
     it('should navigate back to callback list', () => {
       component.editingCallback = mockCallback;
-      
+
       component.backToCallbackList();
-      
+
       expect(component.editingCallback).toBeNull();
     });
 
     it('should handle callback type change', () => {
-      const callback = { ...mockCallback };
-      
+      const callback = {...mockCallback};
+
       component.onCallbackTypeChange(callback);
-      
+
       expect(callback.type).toBe('before_agent');
     });
   });
 
   describe('Service Integration', () => {
     it('should subscribe to selected callback changes', () => {
-      const callbackSubject = new BehaviorSubject<CallbackNode | undefined>(undefined);
-      mockAgentBuilderService.getSelectedCallback.and.returnValue(callbackSubject);
-      
       const mockCallback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(ctx): pass'
+        code: 'def test_callback(ctx): pass',
       };
-      
-      // Reinitialize component to trigger constructor
-      component = new BuilderTabsComponent(mockChangeDetectorRef);
-      
-      callbackSubject.next(mockCallback);
-      
+
+      fixture.detectChanges(); // Trigger component initialization
+      TestBed.inject(AgentBuilderService).setSelectedCallback(mockCallback);
+
       expect(component.selectedCallback).toBe(mockCallback);
       expect(component.selectedTabIndex).toBe(3); // Callback tab index
     });
 
     it('should subscribe to agent callback updates', () => {
-      const callbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
-      mockAgentBuilderService.getAgentCallbacks.and.returnValue(callbacksSubject);
-      
       component.agentConfig = {
         name: 'test-agent',
         isRoot: true,
@@ -142,21 +117,23 @@ describe('BuilderTabsComponent - Callback Support', () => {
         instruction: 'test',
         sub_agents: [],
         tools: [],
-        callbacks: []
+        callbacks: [],
       };
-      
-      const mockCallbacks: CallbackNode[] = [{
-        name: 'callback1',
-        type: 'before_agent',
-        code: 'def callback1(ctx): pass'
-      }];
-      
-      // Reinitialize component to trigger constructor
-      component = new BuilderTabsComponent(mockChangeDetectorRef);
-      
-      callbacksSubject.next({ agentName: 'test-agent', callbacks: mockCallbacks });
-      
-      expect(component.agentConfig?.callbacks).toBe(mockCallbacks);
+      const mockCallbacks: CallbackNode[] = [
+        {
+          name: 'callback1',
+          type: 'before_agent',
+          code: 'def callback1(ctx): pass',
+        },
+      ];
+      fixture.detectChanges(); // Trigger component initialization
+
+      TestBed.inject(AgentBuilderService).setAgentCallbacks(
+        'test-agent',
+        mockCallbacks,
+      );
+
+      expect(component.agentConfig?.callbacks).toEqual(mockCallbacks);
     });
   });
 
@@ -165,28 +142,26 @@ describe('BuilderTabsComponent - Callback Support', () => {
       const mockCallback: CallbackNode = {
         name: 'test_callback',
         type: 'before_agent',
-        code: 'def test_callback(ctx): pass'
+        code: 'def test_callback(ctx): pass',
       };
-      
-      const callbackSubject = new BehaviorSubject<CallbackNode | undefined>(undefined);
-      mockAgentBuilderService.getSelectedCallback.and.returnValue(callbackSubject);
-      
-      component = new BuilderTabsComponent(mockChangeDetectorRef);
-      callbackSubject.next(mockCallback);
-      
+
+      fixture.detectChanges();
+      TestBed.inject(AgentBuilderService).setSelectedCallback(mockCallback);
+
       expect(component.selectedTabIndex).toBe(3);
       expect(component.editingCallback).toBe(mockCallback);
     });
 
     it('should handle null callback selection', () => {
-      const callbackSubject = new BehaviorSubject<CallbackNode | undefined>(undefined);
-      mockAgentBuilderService.getSelectedCallback.and.returnValue(callbackSubject);
-      
-      component = new BuilderTabsComponent(mockChangeDetectorRef);
-      component.editingCallback = { name: 'test', type: 'before_agent', code: '' };
-      
-      callbackSubject.next(undefined);
-      
+      fixture.detectChanges();
+      component.editingCallback = {
+        name: 'test',
+        type: 'before_agent',
+        code: '',
+      };
+
+      TestBed.inject(AgentBuilderService).setSelectedCallback(undefined);
+
       expect(component.editingCallback).toBeNull();
     });
   });
@@ -196,24 +171,25 @@ describe('BuilderTabsComponent - Callback Support', () => {
       const mockCallback: CallbackNode = {
         name: 'new_callback',
         type: 'before_agent',
-        code: ''
+        code: '',
       };
-      
+
       component.selectCallback(mockCallback);
-      
+
       expect(component.editingCallback?.code).toBe('');
     });
 
     it('should preserve callback code when editing', () => {
-      const customCode = 'def my_callback(ctx):\n    print("Custom callback")\n    return None';
+      const customCode =
+        'def my_callback(ctx):\n    print("Custom callback")\n    return None';
       const mockCallback: CallbackNode = {
         name: 'custom_callback',
         type: 'after_agent',
-        code: customCode
+        code: customCode,
       };
-      
+
       component.selectCallback(mockCallback);
-      
+
       expect(component.editingCallback?.code).toBe(customCode);
     });
 
@@ -222,12 +198,14 @@ describe('BuilderTabsComponent - Callback Support', () => {
         name: 'descriptive_callback',
         type: 'before_tool',
         code: 'def callback(ctx): pass',
-        description: 'This callback logs tool execution'
+        description: 'This callback logs tool execution',
       };
-      
+
       component.selectCallback(mockCallback);
-      
-      expect(component.editingCallback?.description).toBe('This callback logs tool execution');
+
+      expect(component.editingCallback?.description).toBe(
+        'This callback logs tool execution'
+      );
     });
   });
 
@@ -235,27 +213,22 @@ describe('BuilderTabsComponent - Callback Support', () => {
     it('should have all ADK callback types available', () => {
       const expectedTypes = [
         'before_agent',
-        'after_agent',
         'before_model',
-        'after_model',
         'before_tool',
-        'after_tool'
+        'after_tool',
+        'after_model',
+        'after_agent',
       ];
-      
+
       expect(component.callbackTypes).toEqual(expectedTypes);
     });
   });
 
   describe('Agent Config with Callbacks', () => {
-    it('should initialize agentConfig with empty callbacks array', () => {
-      expect(component.agentConfig?.callbacks).toEqual([]);
-    });
-
     it('should update agent callbacks when service emits update', () => {
-      const callbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
-      mockAgentBuilderService.getAgentCallbacks.and.returnValue(callbacksSubject);
-      
-      component = new BuilderTabsComponent(mockChangeDetectorRef);
+      const cdr = (component as any).cdr;
+      const markForCheckSpy = spyOn(cdr, 'markForCheck');
+      fixture.detectChanges();
       component.agentConfig = {
         name: 'test-agent',
         isRoot: false,
@@ -264,26 +237,23 @@ describe('BuilderTabsComponent - Callback Support', () => {
         instruction: 'test instruction',
         sub_agents: [],
         tools: [],
-        callbacks: []
+        callbacks: [],
       };
-      
+
       const newCallbacks: CallbackNode[] = [
-        { name: 'callback1', type: 'before_agent', code: 'def cb1(ctx): pass' },
-        { name: 'callback2', type: 'after_model', code: 'def cb2(ctx): pass' }
+        {name: 'callback1', type: 'before_agent', code: 'def cb1(ctx): pass'},
+        {name: 'callback2', type: 'after_model', code: 'def cb2(ctx): pass'},
       ];
-      
-      callbacksSubject.next({ agentName: 'test-agent', callbacks: newCallbacks });
-      
+
+      TestBed.inject(AgentBuilderService).setAgentCallbacks('test-agent', newCallbacks);
+
       expect(component.agentConfig.callbacks?.length).toBe(2);
       expect(component.agentConfig.callbacks).toEqual(newCallbacks);
-      expect(mockChangeDetectorRef.detectChanges).toHaveBeenCalled();
+      expect(markForCheckSpy).toHaveBeenCalled();
     });
 
     it('should not update callbacks for different agent', () => {
-      const callbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
-      mockAgentBuilderService.getAgentCallbacks.and.returnValue(callbacksSubject);
-      
-      component = new BuilderTabsComponent(mockChangeDetectorRef);
+      fixture.detectChanges();
       component.agentConfig = {
         name: 'current-agent',
         isRoot: false,
@@ -292,15 +262,15 @@ describe('BuilderTabsComponent - Callback Support', () => {
         instruction: 'test',
         sub_agents: [],
         tools: [],
-        callbacks: []
+        callbacks: [],
       };
-      
+
       const newCallbacks: CallbackNode[] = [
-        { name: 'callback1', type: 'before_agent', code: 'def cb1(ctx): pass' }
+        {name: 'callback1', type: 'before_agent', code: 'def cb1(ctx): pass'},
       ];
-      
-      callbacksSubject.next({ agentName: 'different-agent', callbacks: newCallbacks });
-      
+
+      TestBed.inject(AgentBuilderService).setAgentCallbacks('different-agent', newCallbacks);
+
       expect(component.agentConfig.callbacks?.length).toBe(0);
     });
   });

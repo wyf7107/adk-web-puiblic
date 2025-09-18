@@ -23,7 +23,7 @@ import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeader
 import {BehaviorSubject, of} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 
-import {DEFAULT_EVAL_METRICS, EvalMetric} from '../../core/models/EvalMetric';
+import {DEFAULT_EVAL_METRICS, EvalMetric, EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {Invocation} from '../../core/models/types';
 import {EvalService, EVAL_SERVICE} from '../../core/services/eval.service';
@@ -38,12 +38,6 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { NgClass } from '@angular/common';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
-export interface EvalCase {
-  evalId: string;
-  conversation: Invocation[];
-  sessionInput: any;
-  creationTimestamp: number;
-}
 
 interface EvaluationResult {
   setId: string;

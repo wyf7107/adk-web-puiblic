@@ -16,6 +16,8 @@
  */
 
 import {Injectable, InjectionToken} from '@angular/core';
+import {objectUrlFromSafeSource} from 'safevalues/dom';
+import {setAnchorHref} from 'safevalues/dom';
 
 export const DOWNLOAD_SERVICE = new InjectionToken<DownloadService>('DownloadService');
 
@@ -41,12 +43,12 @@ export class DownloadService {
   downloadObjectAsJson(data: object, filename = 'session.json'): void {
     const jsonString = JSON.stringify(data, null, 2);
 
-    const blob = new Blob([jsonString], {type: 'application/json'});
+    const blob = new Blob([jsonString], {type: 'application/octet-stream'});
 
-    const url = URL.createObjectURL(blob);
+    const url = objectUrlFromSafeSource(blob);
 
     const a = document.createElement('a');
-    a.href = url;
+    setAnchorHref(a, url);
     a.download = filename;
 
     document.body.appendChild(a);
@@ -54,6 +56,6 @@ export class DownloadService {
     a.click();
 
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url.toString());
   }
 }

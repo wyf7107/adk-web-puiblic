@@ -20,15 +20,15 @@ limitations under the License.
       <mat-icon>assistant</mat-icon>
       <span>Builder Assistant</span>
     </div>
-    <button 
-      mat-icon-button 
-      class="close-btn" 
+    <button
+      mat-icon-button
+      class="close-btn"
       (click)="onClosePanel()"
       matTooltip="Close assistant panel">
       <mat-icon>close</mat-icon>
     </button>
   </div>
-  
+
   <div class="panel-content">
     <div class="chat-messages" #chatMessages>
       @if (messages.length === 0) {
@@ -71,7 +71,7 @@ limitations under the License.
         }
       }
     </div>
-    
+
     <div class="chat-input-container">
       <mat-form-field class="input-field" appearance="outline">
         <textarea
@@ -88,7 +88,7 @@ limitations under the License.
           mat-icon-button
           matSuffix
           (click)="sendMessage()"
-          [disabled]="!userMessage?.trim()"
+          [disabled]="!userMessage.trim()"
           class="send-button"
           matTooltip="Send message">
           <mat-icon>send</mat-icon>

@@ -18,10 +18,10 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 
 @Component({
   selector: 'app-add-callback-dialog',
@@ -31,11 +31,14 @@ import { MatInputModule } from '@angular/material/input';
   imports: [
     CommonModule,
     FormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule
-  ]
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormField,
+    MatInput,
+    MatDialogActions,
+    MatButton,
+    MatLabel,
+  ],
 })
 export class AddCallbackDialogComponent {
   callbackName = '';
@@ -53,12 +56,12 @@ export class AddCallbackDialogComponent {
     if (!this.callbackName.trim()) {
       return;
     }
-    
+
     const result = {
       name: this.callbackName.trim(),
       type: this.callbackType,
     };
-    
+
     this.dialogRef.close(result);
   }
 

@@ -17,14 +17,14 @@
 import { Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatCardModule } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatCard, MatCardContent } from '@angular/material/card';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { MarkdownModule } from 'ngx-markdown';
+import { MarkdownComponent } from 'ngx-markdown';
 import { SESSION_SERVICE, SessionService } from '../../core/services/session.service';
 import { AGENT_SERVICE, AgentService } from '../../core/services/agent.service';
 import { AgentRunRequest } from '../../core/models/AgentRunRequest';
@@ -36,7 +36,17 @@ import { YamlUtils } from '../../../utils/yaml-utils';
   templateUrl: './builder-assistant.component.html',
   styleUrl: './builder-assistant.component.scss',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatTooltipModule, MatFormFieldModule, MatInputModule, MatCardModule, TextFieldModule, MarkdownModule]
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIcon,
+    MatTooltip,
+    MatFormField,
+    MatInput,
+    MatCard,
+    TextFieldModule,
+    MarkdownComponent,
+  ],
 })
 export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
   @Input() isVisible: boolean = true;

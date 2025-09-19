@@ -18,11 +18,11 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatOption, MatSelect } from '@angular/material/select';
 
 @Component({
   selector: 'app-add-tool-dialog',
@@ -32,12 +32,16 @@ import { MatSelectModule } from '@angular/material/select';
   imports: [
     CommonModule,
     FormsModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule
-  ]
+    MatDialogTitle,
+    MatDialogContent,
+    MatFormField,
+    MatInput,
+    MatSelect,
+    MatOption,
+    MatDialogActions,
+    MatButton,
+    MatLabel,
+  ],
 })
 export class AddToolDialogComponent {
   toolName = '';
@@ -45,7 +49,7 @@ export class AddToolDialogComponent {
   selectedBuiltInTool = 'google_search';
 
   toolTypes = [
-    'Custom tool', 
+    'Custom tool',
     'Function tool',
     'Built-in tool',
     'Agent Tool'
@@ -74,7 +78,7 @@ export class AddToolDialogComponent {
     if (this.toolType === 'Custom tool' && !this.toolName.trim()) {
       return;
     }
-    
+
     const result: any = {
       toolType: this.toolType
     };
@@ -84,7 +88,7 @@ export class AddToolDialogComponent {
     } else if (this.toolType === 'Built-in tool') {
       result.name = this.selectedBuiltInTool;
     }
-    
+
     this.dialogRef.close(result);
   }
 

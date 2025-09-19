@@ -70,7 +70,7 @@ import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
-import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AGENT_BUILDER_SERVICE } from '../../core/services/agent-builder.service';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
@@ -275,27 +275,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   builderNewAgent = true;
   disableBuilderSwitch = false;
 
-  constructor(
-    @Inject(AGENT_BUILDER_SERVICE)
-    private agentBuilderService: AgentBuilderService,
-    private sanitizer: DomSanitizer,
-    @Inject(SESSION_SERVICE) private sessionService: SessionService,
-    @Inject(ARTIFACT_SERVICE) private artifactService: ArtifactService,
-    @Inject(AUDIO_SERVICE) private audioService: AudioService,
-    @Inject(WEBSOCKET_SERVICE) private webSocketService: WebSocketService,
-    @Inject(VIDEO_SERVICE) private videoService: VideoService,
-    private dialog: MatDialog,
-    @Inject(EVENT_SERVICE) private eventService: EventService,
-    private route: ActivatedRoute,
-    @Inject(DOWNLOAD_SERVICE) private downloadService: DownloadService,
-    @Inject(EVAL_SERVICE) private evalService: EvalService,
-    @Inject(TRACE_SERVICE) private traceService: TraceService,
-    private location: Location,
-    private renderer: Renderer2,
-    @Inject(DOCUMENT) private document: Document,
-    @Inject(AGENT_SERVICE) private agentService: AgentService,
-    @Inject(FEATURE_FLAG_SERVICE) private featureFlagService: FeatureFlagService
-  ) {
+  private readonly agentBuilderService = inject(AGENT_BUILDER_SERVICE);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly sessionService = inject(SESSION_SERVICE);
+  private readonly artifactService = inject(ARTIFACT_SERVICE);
+  private readonly audioService = inject(AUDIO_SERVICE);
+  private readonly webSocketService = inject(WEBSOCKET_SERVICE);
+  private readonly videoService = inject(VIDEO_SERVICE);
+  private readonly dialog = inject(MatDialog);
+  private readonly eventService = inject(EVENT_SERVICE);
+  private readonly route = inject(ActivatedRoute);
+  private readonly downloadService = inject(DOWNLOAD_SERVICE);
+  private readonly evalService = inject(EVAL_SERVICE);
+  private readonly traceService = inject(TRACE_SERVICE);
+  private readonly location = inject(Location);
+  private readonly renderer = inject(Renderer2);
+  private readonly document = inject(DOCUMENT);
+  private readonly agentService = inject(AGENT_SERVICE);
+  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+
+  constructor() {
     this.importSessionEnabledObs =
       this.featureFlagService.isImportSessionEnabled();
     this.isEditFunctionArgsEnabledObs =

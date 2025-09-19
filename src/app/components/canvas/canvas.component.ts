@@ -20,14 +20,12 @@ import { DiagramConnection, AgentNode, ToolNode, CallbackNode, YamlConfig } from
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, Router } from '@angular/router';
-import {Vflow, HtmlTemplateDynamicNode, Edge} from 'ngx-vflow'
+import { Router } from '@angular/router';
+import { Vflow, HtmlTemplateDynamicNode, Edge } from 'ngx-vflow';
 import { MatIcon } from '@angular/material/icon';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatButtonModule} from '@angular/material/button';
-import {MatChipsModule} from '@angular/material/chips';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import { MatChip, MatChipSet } from '@angular/material/chips';
+import { MatTooltip } from '@angular/material/tooltip';
+import { AGENT_BUILDER_SERVICE } from '../../core/services/agent-builder.service';
 import * as YAML from 'yaml';
 import { parse } from 'yaml';
 import { firstValueFrom, take, filter, Observable } from 'rxjs';
@@ -43,7 +41,15 @@ import { BuilderAssistantComponent } from '../builder-assistant/builder-assistan
   templateUrl: './canvas.component.html',
   styleUrl: './canvas.component.scss',
   standalone: true,
-  imports: [Vflow, MatIcon, MatMenuModule, MatButtonModule, MatChipsModule, MatTooltipModule, AsyncPipe, BuilderAssistantComponent]
+  imports: [
+    Vflow,
+    MatIcon,
+    MatChip,
+    MatChipSet,
+    MatTooltip,
+    AsyncPipe,
+    BuilderAssistantComponent,
+  ],
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private _snackBar = inject(MatSnackBar);

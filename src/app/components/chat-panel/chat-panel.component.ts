@@ -18,15 +18,16 @@
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {CommonModule, DOCUMENT, NgClass, NgStyle} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Inject, Input, OnChanges, Output, Renderer2, signal, SimpleChanges, ViewChild,} from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
-import {MatInputModule} from '@angular/material/input';
-import {MatMenuModule} from '@angular/material/menu';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {MatTooltipModule} from '@angular/material/tooltip';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatIcon } from '@angular/material/icon';
+import { MatInput } from '@angular/material/input';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatTooltip } from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
@@ -48,17 +49,19 @@ const ROOT_AGENT = 'root_agent';
   imports: [
     CommonModule,
     FormsModule,
-    MatIconModule,
-    MatCardModule,
-    MatProgressBarModule,
+    MatIcon,
+    MatCard,
+    MatProgressBar,
     MatButtonModule,
-    MatInputModule,
+    MatInput,
     TextFieldModule,
-    MatFormFieldModule,
-    MatMenuModule,
+    MatFormField,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
     NgxJsonViewerModule,
     AudioPlayerComponent,
-    MatTooltipModule,
+    MatTooltip,
     NgClass,
     NgStyle,
     MarkdownComponent,

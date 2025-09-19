@@ -164,11 +164,17 @@ describe('ChatComponent', () => {
       'getLoadingState',
       'setApp',
       'runSse',
-      'getAgentBuilder'
+      'getAgentBuilder',
     ]);
     mockAgentBuilderService = jasmine.createSpyObj('AgentBuilderService', [
       'buildAgent',
+      'setLoadedAgentData',
+      'clear'
     ]);
+    const loadAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
+    mockAgentBuilderService.setLoadedAgentData.and.callFake((val) => {
+      loadAgentDataSubject.next(val);
+    });
     mockFeatureFlagService = jasmine.createSpyObj('FeatureFlagService', {
       isImportSessionEnabled: of(true),
       isEditFunctionArgsEnabled: of(true),
@@ -200,6 +206,7 @@ describe('ChatComponent', () => {
     mockAgentService.getLoadingState.and.returnValue(
         new BehaviorSubject<boolean>(false),
     );
+    mockAgentService.getAgentBuilder.and.returnValue(of('fake-agent'));
     mockRouter.createUrlTree.and.returnValue({
       toString: () => '/?session=session-id',
     } as any);

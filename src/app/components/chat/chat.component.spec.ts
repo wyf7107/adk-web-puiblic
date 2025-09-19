@@ -33,7 +33,9 @@ import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/download.s
 import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
 import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from '../../core/services/feature-flag.service';
+import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/session.service';
+import {MockGraphService} from '../../core/services/testing/mock-graph.service';
 import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/websocket.service';
@@ -97,6 +99,7 @@ describe('ChatComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>;
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockLocation: jasmine.SpyObj<Location>;
+  let graphService: MockGraphService;
 
   beforeEach(async () => {
     mockSessionService = jasmine.createSpyObj('SessionService', {
@@ -199,6 +202,14 @@ describe('ChatComponent', () => {
       toString: () => '/?session=session-id',
     } as any);
 
+    graphService = new MockGraphService();
+    graphService.render.and.returnValue(Promise.resolve('svg'));
+    mockEventService.getEvent.and.returnValue(
+        of({
+          dotSrc: 'digraph {A -> B}',
+        }),
+    );
+
     await TestBed
         .configureTestingModule({
           imports: [
@@ -219,6 +230,7 @@ describe('ChatComponent', () => {
             {provide: TRACE_SERVICE, useValue: mockTraceService},
             {provide: AGENT_SERVICE, useValue: mockAgentService},
             {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
+            {provide: GRAPH_SERVICE, useValue: graphService},
             {provide: MatDialog, useValue: mockDialog},
             {provide: MatSnackBar, useValue: mockSnackBar},
             {provide: Router, useValue: mockRouter},

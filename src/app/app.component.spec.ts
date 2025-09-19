@@ -15,39 +15,27 @@
  * limitations under the License.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
-import { of, BehaviorSubject } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
-import {
-  SESSION_SERVICE,
-  SessionService,
-} from './core/services/session.service';
-import {
-  ARTIFACT_SERVICE,
-  ArtifactService,
-} from './core/services/artifact.service';
-import { AUDIO_SERVICE, AudioService } from './core/services/audio.service';
-import {
-  WEBSOCKET_SERVICE,
-  WebSocketService,
-} from './core/services/websocket.service';
-import { VIDEO_SERVICE, VideoService } from './core/services/video.service';
-import { EVENT_SERVICE, EventService } from './core/services/event.service';
-import {
-  DOWNLOAD_SERVICE,
-  DownloadService,
-} from './core/services/download.service';
-import { EVAL_SERVICE, EvalService } from './core/services/eval.service';
-import { TRACE_SERVICE, TraceService } from './core/services/trace.service';
-import { AGENT_SERVICE, AgentService } from './core/services/agent.service';
-import {
-  FEATURE_FLAG_SERVICE,
-  FeatureFlagService,
-} from './core/services/feature-flag.service';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import {TestBed} from '@angular/core/testing';
+import {MatDialog} from '@angular/material/dialog';
+import {DomSanitizer} from '@angular/platform-browser';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {ActivatedRoute} from '@angular/router';
+import {BehaviorSubject, of} from 'rxjs';
+
+import {AppComponent} from './app.component';
+import {AGENT_SERVICE, AgentService} from './core/services/agent.service';
+import {ARTIFACT_SERVICE, ArtifactService,} from './core/services/artifact.service';
+import {AUDIO_SERVICE, AudioService} from './core/services/audio.service';
+import {DOWNLOAD_SERVICE, DownloadService,} from './core/services/download.service';
+import {EVAL_SERVICE, EvalService} from './core/services/eval.service';
+import {EVENT_SERVICE, EventService} from './core/services/event.service';
+import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from './core/services/feature-flag.service';
+import {GRAPH_SERVICE, GraphService} from './core/services/graph.service';
+import {SESSION_SERVICE, SessionService,} from './core/services/session.service';
+import {MockGraphService} from './core/services/testing/mock-graph.service';
+import {TRACE_SERVICE, TraceService} from './core/services/trace.service';
+import {VIDEO_SERVICE, VideoService} from './core/services/video.service';
+import {WEBSOCKET_SERVICE, WebSocketService,} from './core/services/websocket.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -95,90 +83,98 @@ describe('AppComponent', () => {
       hoveredMessageIndicies$: of([]),
     };
 
-    await TestBed.configureTestingModule({
-      imports: [AppComponent, NoopAnimationsModule],
-      providers: [
-        { provide: MatDialog, useValue: {} },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: { queryParams: {} },
-            queryParams: of({}),
-            valueChanges: of({}),
-            fragment: of(''),
-          },
-        },
-        {
-          provide: DomSanitizer,
-          useValue: { bypassSecurityTrustHtml: () => '' },
-        },
-        {
-          provide: SESSION_SERVICE,
-          useValue: sessionService,
-        },
-        {
-          provide: ARTIFACT_SERVICE,
-          useValue: jasmine.createSpyObj<ArtifactService>([
-            'getArtifactVersion',
-          ]),
-        },
-        {
-          provide: AUDIO_SERVICE,
-          useValue: jasmine.createSpyObj<AudioService>([
-            'startRecording',
-            'stopRecording',
-          ]),
-        },
-        {
-          provide: WEBSOCKET_SERVICE,
-          useValue: {
-            ...jasmine.createSpyObj<WebSocketService>([
-              'onCloseReason',
-              'connect',
-              'closeConnection',
-            ]),
-            onCloseReason: () => of(''),
-          },
-        },
-        {
-          provide: VIDEO_SERVICE,
-          useValue: jasmine.createSpyObj<VideoService>([
-            'startRecording',
-            'stopRecording',
-          ]),
-        },
-        {
-          provide: EVENT_SERVICE,
-          useValue: jasmine.createSpyObj<EventService>([
-            'getTrace',
-            'getEventTrace',
-            'getEvent',
-          ]),
-        },
-        {
-          provide: DOWNLOAD_SERVICE,
-          useValue: jasmine.createSpyObj<DownloadService>([
-            'downloadObjectAsJson',
-          ]),
-        },
-        {
-          provide: EVAL_SERVICE,
-          useValue: jasmine.createSpyObj<EvalService>(['updateEvalCase']),
-        },
-        {
-          provide: TRACE_SERVICE,
-          useValue: traceService,
-        },
-        {
-          provide: AGENT_SERVICE,
-          useValue: agentService,
-        },
-        {
-          provide: FEATURE_FLAG_SERVICE,
-          useValue: featureFlagService,
-        },
-      ],
-    }).compileComponents();
+    const graphService = new MockGraphService();
+    graphService.render.and.returnValue(Promise.resolve('svg'));
+
+    await TestBed
+        .configureTestingModule({
+          imports: [AppComponent, NoopAnimationsModule],
+          providers: [
+            {provide: MatDialog, useValue: {}}, {
+              provide: ActivatedRoute,
+              useValue: {
+                snapshot: {queryParams: {}},
+                queryParams: of({}),
+                valueChanges: of({}),
+                fragment: of(''),
+              },
+            },
+            {
+              provide: DomSanitizer,
+              useValue: {bypassSecurityTrustHtml: () => ''},
+            },
+            {
+              provide: SESSION_SERVICE,
+              useValue: sessionService,
+            },
+            {
+              provide: ARTIFACT_SERVICE,
+              useValue: jasmine.createSpyObj<ArtifactService>([
+                'getArtifactVersion',
+              ]),
+            },
+            {
+              provide: AUDIO_SERVICE,
+              useValue: jasmine.createSpyObj<AudioService>([
+                'startRecording',
+                'stopRecording',
+              ]),
+            },
+            {
+              provide: WEBSOCKET_SERVICE,
+              useValue: {
+                ...jasmine.createSpyObj<WebSocketService>([
+                  'onCloseReason',
+                  'connect',
+                  'closeConnection',
+                ]),
+                onCloseReason: () => of(''),
+              },
+            },
+            {
+              provide: VIDEO_SERVICE,
+              useValue: jasmine.createSpyObj<VideoService>([
+                'startRecording',
+                'stopRecording',
+              ]),
+            },
+            {
+              provide: EVENT_SERVICE,
+              useValue: jasmine.createSpyObj<EventService>([
+                'getTrace',
+                'getEventTrace',
+                'getEvent',
+              ]),
+            },
+            {
+              provide: DOWNLOAD_SERVICE,
+              useValue: jasmine.createSpyObj<DownloadService>([
+                'downloadObjectAsJson',
+              ]),
+            },
+            {
+              provide: EVAL_SERVICE,
+              useValue: jasmine.createSpyObj<EvalService>(['updateEvalCase']),
+            },
+            {
+              provide: TRACE_SERVICE,
+              useValue: traceService,
+            },
+            {
+              provide: AGENT_SERVICE,
+              useValue: agentService,
+            },
+            {
+              provide: FEATURE_FLAG_SERVICE,
+              useValue: featureFlagService,
+            },
+            {
+              provide: GRAPH_SERVICE,
+              useValue: graphService,
+            }
+          ],
+        })
+        .compileComponents();
   });
 
   it('should create the app', () => {

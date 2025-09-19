@@ -36,7 +36,6 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTooltip} from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {instance} from '@viz-js/viz';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
@@ -56,6 +55,7 @@ import {DOWNLOAD_SERVICE, DownloadService} from '../../core/services/download.se
 import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
 import {FEATURE_FLAG_SERVICE, FeatureFlagService} from '../../core/services/feature-flag.service';
+import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
 import {SESSION_SERVICE, SessionService} from '../../core/services/session.service';
 import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
@@ -284,7 +284,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       private renderer: Renderer2,
       @Inject(DOCUMENT) private document: Document,
       @Inject(AGENT_SERVICE) private agentService: AgentService,
-      @Inject(FEATURE_FLAG_SERVICE) private featureFlagService: FeatureFlagService,
+      @Inject(FEATURE_FLAG_SERVICE) private featureFlagService:
+          FeatureFlagService,
+      @Inject(GRAPH_SERVICE) private graphService: GraphService,
   ) {
     this.importSessionEnabledObs =
         this.featureFlagService.isImportSessionEnabled();
@@ -941,11 +943,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
         const graphSrc = res.dotSrc;
-        const viz = await instance();
-        const svg = viz.renderString(graphSrc, {
-          format: 'svg',
-          engine: 'dot',
-        });
+        const svg = await this.graphService.render(graphSrc);
         this.rawSvgString = svg;
         this.renderedEventGraph = this.sanitizer.bypassSecurityTrustHtml(svg);
       });
@@ -1399,12 +1397,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.renderedEventGraph = undefined;
           return;
         }
-        const graphSrc = res.dotSrc;
-        const viz = await instance();
-        const svg = viz.renderString(graphSrc, {
-          format: 'svg',
-          engine: 'dot',
-        });
+        const svg = await this.graphService.render(res.dotSrc);
         this.rawSvgString = svg;
         this.renderedEventGraph = this.sanitizer.bypassSecurityTrustHtml(svg);
       });

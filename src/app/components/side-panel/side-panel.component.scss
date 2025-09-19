@@ -16,28 +16,6 @@
 
 @use '@angular/material' as mat;
 
-.drawer-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: #89b4f8,
-      filled-label-text-color: black,
-    )
-  );
-
-  .mat-icon {
-    width: 36px;
-    height: 36px;
-    color: #bdc1c6;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
 .tabs-container {
   width: 100%;
   margin-top: 20px;
@@ -111,19 +89,4 @@
 .event-graph-container ::ng-deep svg text {
   font-family: 'Google Sans Mono', monospace;
   font-size: 11px;
-}
-.drawer-logo {
-  margin-left: 9px;
-  display: flex;
-  align-items: center;
-
-  img {
-    margin-right: 9px;
-  }
-
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 24px;
-  letter-spacing: 0.1px;
 }

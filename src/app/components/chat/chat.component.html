@@ -28,7 +28,25 @@
       " matTooltip="Open panel" (click)="toggleSidePanel()">left_panel_open</span>
   }
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
+    <div style="margin-top: 20px; margin-left: 20px; display: flex">
+      <div style="width: 100%">
+        <div class="drawer-header">
+          <div class="drawer-logo">
+            <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
+            {{ i18n.agentDevelopmentKitLabel }}
+          </div>
+          <span
+            class="material-symbols-outlined"
+            style="color: #c4c7c5; cursor: pointer; margin-right: 15px"
+            matTooltip="{{ i18n.collapsePanelTooltip }}"
+            (click)="toggleSidePanel()"
+            >left_panel_close</span
+          >
+        </div>
+      </div>
+    </div>
     @if (!isBuilderMode()) {
+      <!-- Normal Mode Left Side Panel Content -->
       <div class="app-actions">
         <div class="app-select-container">
           <mat-select
@@ -69,46 +87,45 @@
           </button>
         </div>
       </div>
+      <app-side-panel
+        [showSidePanel]="showSidePanel"
+        [appName]="appName"
+        [userId]="userId"
+        [sessionId]="sessionId"
+        [traceData]="traceData"
+        [eventData]="eventData"
+        [currentSessionState]="currentSessionState"
+        [artifacts]="artifacts"
+        [shouldShowEvalTab]="shouldShowEvalTab()"
+        [selectedEvent]="selectedEvent"
+        [selectedEventIndex]="selectedEventIndex"
+        [renderedEventGraph]="renderedEventGraph"
+        [rawSvgString]="rawSvgString"
+        [llmRequest]="llmRequest"
+        [llmResponse]="llmResponse"
+        (closePanel)="toggleSidePanel()"
+        (tabChange)="handleTabChange($event)"
+        (eventSelected)="selectEvent($event)"
+        (sessionSelected)="updateWithSelectedSession($event)"
+        (sessionReloaded)="updateSessionState($event)"
+        (evalTabVisibilityChange)="handleShouldShowEvalTab($event)"
+        (evalCaseSelected)="updateWithSelectedEvalCase($event)"
+        (evalSetIdSelected)="updateSelectedEvalSetId($event)"
+        (returnToSession)="handleReturnToSession($event)"
+        (evalNotInstalled)="handleEvalNotInstalled($event)"
+        (page)="handlePageEvent($event)"
+        (closeSelectedEvent)="closeSelectedEvent()"
+        (openImageDialog)="openViewImageDialog($event)"
+      >
+      </app-side-panel>
     }
     @if (isBuilderMode()) {
     <!-- Builder Mode Left Panel Content -->
     <app-builder-tabs [appNameInput]="appName" (exitBuilderMode)="exitBuilderMode()"></app-builder-tabs>
-    } @else if (appName != "" && showSidePanel) {
-    <!-- Normal Mode Tabs -->
-    <app-side-panel
-      [showSidePanel]="showSidePanel"
-      [appName]="appName"
-      [userId]="userId"
-      [sessionId]="sessionId"
-      [traceData]="traceData"
-      [eventData]="eventData"
-      [currentSessionState]="currentSessionState"
-      [artifacts]="artifacts"
-      [shouldShowEvalTab]="shouldShowEvalTab()"
-      [selectedEvent]="selectedEvent"
-      [selectedEventIndex]="selectedEventIndex"
-      [renderedEventGraph]="renderedEventGraph"
-      [rawSvgString]="rawSvgString"
-      [llmRequest]="llmRequest"
-      [llmResponse]="llmResponse"
-      (closePanel)="toggleSidePanel()"
-      (tabChange)="handleTabChange($event)"
-      (eventSelected)="selectEvent($event)"
-      (sessionSelected)="updateWithSelectedSession($event)"
-      (sessionReloaded)="updateSessionState($event)"
-      (evalTabVisibilityChange)="handleShouldShowEvalTab($event)"
-      (evalCaseSelected)="updateWithSelectedEvalCase($event)"
-      (evalSetIdSelected)="updateSelectedEvalSetId($event)"
-      (returnToSession)="handleReturnToSession($event)"
-      (evalNotInstalled)="handleEvalNotInstalled($event)"
-      (page)="handlePageEvent($event)"
-      (closeSelectedEvent)="closeSelectedEvent()"
-      (openImageDialog)="openViewImageDialog($event)"
-    >
-    </app-side-panel>
     }
     <div class="resize-handler"></div>
   </mat-drawer>
+
   <!-- Builder Mode Layout - Canvas for Diagrams -->
   @if (isBuilderMode()) {
   <div class="builder-mode-container">
@@ -201,30 +218,30 @@
     }
     <mat-card class="chat-card">
       @if (!selectedAppControl.value) {
-      @if (isLoadingApps()) {
-      <div class="empty-state-container">
-        <span>Loading agents, please wait...</span>
-      </div>
-      } @else {
-      <div class="empty-state-container">
-        @if (((apps$ | async) || []).length > 0) {
-        <span>Welcome to ADK!<br />
-          Select an agent on the left to begin with.</span>
+        @if (isLoadingApps()) {
+        <div class="empty-state-container">
+          <span>Loading agents, please wait...</span>
+        </div>
         } @else {
-        <div>
-          Failed to load agents. To get started, run
-          <pre>adk web</pre>
-          in the folder that contains the agents.<br />
-          @if (loadingError()) {
-          Error message: <br />
-          <pre class="error">{{ loadingError() }}</pre>
+        <div class="empty-state-container">
+          @if (((apps$ | async) || []).length > 0) {
+          <span>Welcome to ADK!<br />
+            Select an agent on the left to begin with.</span>
           } @else {
-          <pre class="warning">Warning: No agents found in current folder.</pre>
+          <div>
+            Failed to load agents. To get started, run
+            <pre>adk web</pre>
+            in the folder that contains the agents.<br />
+            @if (loadingError()) {
+            Error message: <br />
+            <pre class="error">{{ loadingError() }}</pre>
+            } @else {
+            <pre class="warning">Warning: No agents found in current folder.</pre>
+            }
+          </div>
           }
         </div>
         }
-      </div>
-      }
       }
       @if (longRunningEvents.length > 0) {
       <button mat-fab color="primary" class="fab-button" (click)="openDialog()">
@@ -265,7 +282,8 @@
             (updateState)="updateState()"
             (toggleAudioRecording)="toggleAudioRecording()"
             (toggleVideoRecording)="toggleVideoRecording()"
-        ></app-chat-panel>
+      ></app-chat-panel>
+    }
     </mat-card>
 
     @if (bottomPanelVisible) {

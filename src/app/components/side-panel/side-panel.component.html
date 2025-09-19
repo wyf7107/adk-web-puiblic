@@ -1,20 +1,3 @@
-<div style="margin-top: 20px; margin-left: 20px; display: flex">
-  <div style="width: 100%">
-    <div class="drawer-header">
-      <div class="drawer-logo">
-        <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
-        {{ i18n.agentDevelopmentKitLabel }}
-      </div>
-      <span
-        class="material-symbols-outlined"
-        style="color: #c4c7c5; cursor: pointer; margin-right: 15px"
-        matTooltip="{{ i18n.collapsePanelTooltip }}"
-        (click)="closePanel.emit()"
-        >left_panel_close</span
-      >
-    </div>
-  </div>
-</div>
 @if (appName != "" && showSidePanel) {
   <div class="tabs-container">
     <mat-tab-group (selectedTabChange)="tabChange.emit($event)">

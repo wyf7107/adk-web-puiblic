@@ -20,7 +20,6 @@ import {MatMiniFabButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatTab, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
-import {MatTooltip} from '@angular/material/tooltip';
 import {SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
@@ -44,7 +43,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   styleUrls: ['./side-panel.component.scss'],
   standalone: true,
   imports: [
-    MatTooltip,
     MatTabGroup,
     MatTab,
     MatTabLabel,

@@ -15,20 +15,17 @@
  * limitations under the License.
  */
 
-import {CdkTextareaAutosize} from '@angular/cdk/text-field';
-import {AsyncPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
+import {AsyncPipe, DOCUMENT, Location, NgClass} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, ElementRef, HostListener, Inject, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButton, MatFabButton, MatIconButton, MatMiniFabButton} from '@angular/material/button';
+import {MatButton, MatFabButton} from '@angular/material/button';
 import {MatCard} from '@angular/material/card';
 import {MatOption} from '@angular/material/core';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatDialog} from '@angular/material/dialog';
 import {MatDivider} from '@angular/material/divider';
 import {MatIcon} from '@angular/material/icon';
-import {MatInput} from '@angular/material/input';
-import {MatPaginator, MatPaginatorIntl} from '@angular/material/paginator';
-import {MatProgressBar} from '@angular/material/progress-bar';
+import {MatPaginatorIntl} from '@angular/material/paginator';
 import {MatSelect} from '@angular/material/select';
 import {MatDrawer, MatDrawerContainer} from '@angular/material/sidenav';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
@@ -38,7 +35,7 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {instance} from '@viz-js/viz';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
+import {provideMarkdown} from 'ngx-markdown';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {catchError, distinctUntilChanged, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 import stc from 'string-to-color';
@@ -62,24 +59,21 @@ import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService} from '../../core/services/websocket.service';
 import {ResizableBottomDirective} from '../../directives/resizable-bottom.directive';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
-import {ArtifactTabComponent, getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
-import {AudioPlayerComponent} from '../audio-player/audio-player.component';
+import {getMediaTypeFromMimetype, MediaType, openBase64InNewTab} from '../artifact-tab/artifact-tab.component';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
-import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
-import {StateTabComponent} from '../state-tab/state-tab.component';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
-import {TraceTabComponent} from '../trace-tab/trace-tab.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
 import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
+import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -153,14 +147,14 @@ const BIDI_STREAMING_RESTART_WARNING =
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
+  readonly i18n = inject(SidePanelMessagesInjectionToken);
   chatPanel = viewChild.required(ChatPanelComponent);
+  canvasComponent = viewChild.required(CanvasComponent);
   sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
-  eventTabComponent = viewChild.required(EventTabComponent);
   sessionTab = viewChild(SessionTabComponent);
   evalTab = viewChild(EvalTabComponent);
   private scrollContainer = viewChild.required<ElementRef>('autoScroll');
   bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
-  canvasComponent = viewChild.required(CanvasComponent);
   private _snackBar = inject(MatSnackBar);
   shouldShowEvalTab = signal(true);
   enableSseIndicator = signal(false);
@@ -1482,7 +1476,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.agentService.getAgentBuilder(this.appName).subscribe({
       next: (yamlContent: string) => {
         if (yamlContent) {
-          this.canvasComponent.loadFromYaml(yamlContent, this.appName);
+          this.canvasComponent()?.loadFromYaml(yamlContent, this.appName);
         }
       },
       error: (error) => {
@@ -1516,7 +1510,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   saveAgentBuilder() {
-    this.canvasComponent.saveAgent(this.appName);
+    this.canvasComponent()?.saveAgent(this.appName);
   }
 
   selectEvent(key: string) {

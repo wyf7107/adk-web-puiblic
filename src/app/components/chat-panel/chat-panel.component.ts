@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
-
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {CommonModule, DOCUMENT, NgClass, NgStyle} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Inject, Input, OnChanges, Output, Renderer2, signal, SimpleChanges, ViewChild,} from '@angular/core';
@@ -33,9 +31,10 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import stc from 'string-to-color';
 
-import {EvalCase} from '../../core/models/Eval';
+import type {EvalCase} from '../../core/models/Eval';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
+import {MarkdownComponent} from '../markdown/markdown.component';
 
 import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 
@@ -47,27 +46,10 @@ const ROOT_AGENT = 'root_agent';
   styleUrl: './chat-panel.component.scss',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    MatIconModule,
-    MatCardModule,
-    MatProgressBarModule,
-    MatButtonModule,
-    MatInputModule,
-    TextFieldModule,
-    MatFormFieldModule,
-    MatMenuModule,
-    NgxJsonViewerModule,
-    AudioPlayerComponent,
-    MatTooltipModule,
-    NgClass,
-    NgStyle,
-    // BEGIN-EXTERNAL
-    MarkdownComponent,
-    // END-EXTERNAL
-  ],
-  providers: [
-    provideMarkdown(),
+    CommonModule, FormsModule, MatIconModule, MatCardModule,
+    MatProgressBarModule, MatButtonModule, MatInputModule, TextFieldModule,
+    MatFormFieldModule, MatMenuModule, NgxJsonViewerModule,
+    AudioPlayerComponent, MatTooltipModule, NgClass, NgStyle, MarkdownComponent
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {

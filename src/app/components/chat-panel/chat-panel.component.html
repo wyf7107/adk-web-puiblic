@@ -105,14 +105,9 @@
             </div>
           </div>
           } @else {
-          <markdown
-            [data]="message.text"
-            [ngStyle]="{
-                        'font-style': message.thought ? 'italic' : 'normal',
-                        color: message.thought ? '#9aa0a6' : 'white'
-                      }"
-          ></markdown>
-          } }
+          <app-markdown [text]="message.text!" [thought]="message.thought"></app-markdown>
+          }
+        }
         </div>
         @if (message.renderedContent) {
         <div>

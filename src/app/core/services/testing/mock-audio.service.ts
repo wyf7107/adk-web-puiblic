@@ -15,19 +15,12 @@
  * limitations under the License.
  */
 
-import {GraphService} from './graph.service';
+import {Injectable} from '@angular/core';
 
-const GRAPH_SRC = 'digraph {a}';
+import {AudioService} from '../audio.service';
 
-describe('GraphService', () => {
-  let service: GraphService;
-
-  beforeEach(() => {
-    service = new GraphService();
-  });
-
-  it('should render a graph', async () => {
-    const svg = await service.render(GRAPH_SRC);
-    expect(svg).toContain('<title>a</title>');
-  });
-});
+@Injectable()
+export class MockAudioService implements Partial<AudioService> {
+  startRecording = jasmine.createSpy('startRecording');
+  stopRecording = jasmine.createSpy('stopRecording');
+}

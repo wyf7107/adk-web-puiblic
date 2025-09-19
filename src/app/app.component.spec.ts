@@ -32,56 +32,38 @@ import {EVENT_SERVICE, EventService} from './core/services/event.service';
 import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from './core/services/feature-flag.service';
 import {GRAPH_SERVICE, GraphService} from './core/services/graph.service';
 import {SESSION_SERVICE, SessionService,} from './core/services/session.service';
+import {MockAgentService} from './core/services/testing/mock-agent.service';
+import {MockArtifactService} from './core/services/testing/mock-artifact.service';
+import {MockAudioService} from './core/services/testing/mock-audio.service';
+import {MockDownloadService} from './core/services/testing/mock-download.service';
+import {MockEvalService} from './core/services/testing/mock-eval.service';
+import {MockEventService} from './core/services/testing/mock-event.service';
+import {MockFeatureFlagService} from './core/services/testing/mock-feature-flag.service';
 import {MockGraphService} from './core/services/testing/mock-graph.service';
+import {MockSessionService} from './core/services/testing/mock-session.service';
+import {MockTraceService} from './core/services/testing/mock-trace.service';
+import {MockVideoService} from './core/services/testing/mock-video.service';
+import {MockWebSocketService} from './core/services/testing/mock-websocket.service';
 import {TRACE_SERVICE, TraceService} from './core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from './core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from './core/services/websocket.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
-    const sessionService = jasmine.createSpyObj<SessionService>([
-      'createSession',
-      'getSession',
-      'deleteSession',
-      'importSession',
-    ]);
-    sessionService.createSession.and.returnValue(of({} as any));
-    sessionService.getSession.and.returnValue(of({} as any));
+    const sessionService = new MockSessionService();
+    const agentService = new MockAgentService();
+    const featureFlagService = new MockFeatureFlagService();
+    const traceService = new MockTraceService();
+    const artifactService = new MockArtifactService();
+    const audioService = new MockAudioService();
+    const webSocketService = new MockWebSocketService();
+    const videoService = new MockVideoService();
+    const eventService = new MockEventService();
+    const downloadService = new MockDownloadService();
+    const evalService = new MockEvalService();
 
-    const agentService = jasmine.createSpyObj<AgentService>([
-      'listApps',
-      'getApp',
-      'setApp',
-      'getLoadingState',
-      'runSse',
-    ]);
-    agentService.listApps.and.returnValue(of([]));
-    agentService.getApp.and.returnValue(of(''));
-    agentService.getLoadingState.and.returnValue(
-      new BehaviorSubject<boolean>(false)
-    );
-    agentService.runSse.and.returnValue(of(''));
-
-    const featureFlagService = jasmine.createSpyObj<FeatureFlagService>([
-      'isImportSessionEnabled',
-      'isEditFunctionArgsEnabled',
-      'isSessionUrlEnabled',
-    ]);
-    featureFlagService.isImportSessionEnabled.and.returnValue(of(false));
-    featureFlagService.isEditFunctionArgsEnabled.and.returnValue(of(false));
-    featureFlagService.isSessionUrlEnabled.and.returnValue(of(false));
-
-    const traceService = {
-      ...jasmine.createSpyObj<TraceService>([
-        'setEventData',
-        'setMessages',
-        'resetTraceService',
-        'selectedRow',
-        'setHoveredMessages',
-      ]),
-      selectedTraceRow$: of(undefined),
-      hoveredMessageIndicies$: of([]),
-    };
+    traceService.selectedTraceRow$.next(undefined);
+    traceService.hoveredMessageIndicies$.next([]);
 
     const graphService = new MockGraphService();
     graphService.render.and.returnValue(Promise.resolve('svg'));
@@ -109,52 +91,31 @@ describe('AppComponent', () => {
             },
             {
               provide: ARTIFACT_SERVICE,
-              useValue: jasmine.createSpyObj<ArtifactService>([
-                'getArtifactVersion',
-              ]),
+              useValue: artifactService,
             },
             {
               provide: AUDIO_SERVICE,
-              useValue: jasmine.createSpyObj<AudioService>([
-                'startRecording',
-                'stopRecording',
-              ]),
+              useValue: audioService,
             },
             {
               provide: WEBSOCKET_SERVICE,
-              useValue: {
-                ...jasmine.createSpyObj<WebSocketService>([
-                  'onCloseReason',
-                  'connect',
-                  'closeConnection',
-                ]),
-                onCloseReason: () => of(''),
-              },
+              useValue: webSocketService,
             },
             {
               provide: VIDEO_SERVICE,
-              useValue: jasmine.createSpyObj<VideoService>([
-                'startRecording',
-                'stopRecording',
-              ]),
+              useValue: videoService,
             },
             {
               provide: EVENT_SERVICE,
-              useValue: jasmine.createSpyObj<EventService>([
-                'getTrace',
-                'getEventTrace',
-                'getEvent',
-              ]),
+              useValue: eventService,
             },
             {
               provide: DOWNLOAD_SERVICE,
-              useValue: jasmine.createSpyObj<DownloadService>([
-                'downloadObjectAsJson',
-              ]),
+              useValue: downloadService,
             },
             {
               provide: EVAL_SERVICE,
-              useValue: jasmine.createSpyObj<EvalService>(['updateEvalCase']),
+              useValue: evalService,
             },
             {
               provide: TRACE_SERVICE,

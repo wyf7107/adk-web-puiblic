@@ -24,7 +24,9 @@ import {of} from 'rxjs';
 import {Span} from '../../../core/models/Trace';
 import {EVENT_SERVICE, EventService} from '../../../core/services/event.service';
 import {GRAPH_SERVICE, GraphService} from '../../../core/services/graph.service';
+import {MockEventService} from '../../../core/services/testing/mock-event.service';
 import {MockGraphService} from '../../../core/services/testing/mock-graph.service';
+import {MockTraceService} from '../../../core/services/testing/mock-trace.service';
 import {TRACE_SERVICE, TraceService} from '../../../core/services/trace.service';
 import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialog.component';
 
@@ -42,8 +44,8 @@ const SANITIZED_SVG = 'sanitized svg';
 describe('TraceEventComponent', () => {
   let component: TraceEventComponent;
   let fixture: ComponentFixture<TraceEventComponent>;
-  let traceService: jasmine.SpyObj<TraceService>;
-  let eventService: jasmine.SpyObj<EventService>;
+  let traceService: MockTraceService;
+  let eventService: MockEventService;
   let matDialog: jasmine.SpyObj<MatDialog>;
   let domSanitizer: jasmine.SpyObj<DomSanitizer>;
   let graphService: MockGraphService;
@@ -60,28 +62,17 @@ describe('TraceEventComponent', () => {
   };
 
   beforeEach(async () => {
-    traceService = jasmine.createSpyObj<TraceService>(
-        'traceService',
-        ['setHoveredMessages', 'selectedRow'],
-        {
-          selectedTraceRow$: of(span),
-          eventData$: of(
-              new Map<string, any>([[EVENT_ID, EVENT_DATA]]),
-              ),
-        },
-    );
+    traceService = new MockTraceService();
+    eventService = new MockEventService();
 
-    eventService = jasmine.createSpyObj<EventService>([
-      'getEventTrace',
-      'getEvent',
-    ]);
-    eventService.getEventTrace.and.returnValue(
-        of({
-          'gcp.vertex.agent.llm_request': '{"data": "request"}',
-          'gcp.vertex.agent.llm_response': '{"data": "response"}',
-        }),
-    );
-    eventService.getEvent.and.returnValue(of({}));
+    traceService.selectedTraceRow$.next(span);
+    traceService.eventData$.next(
+        new Map<string, any>([[EVENT_ID, EVENT_DATA]]));
+    eventService.getEventTraceResponse.next({
+      'gcp.vertex.agent.llm_request': '{"data": "request"}',
+      'gcp.vertex.agent.llm_response': '{"data": "response"}',
+    });
+    eventService.getEventResponse.next({});
     matDialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
     domSanitizer = jasmine.createSpyObj<DomSanitizer>('DomSanitizer', [
       'bypassSecurityTrustHtml',
@@ -213,7 +204,7 @@ describe('TraceEventComponent', () => {
   describe('getEventGraph()', () => {
     describe('when event service returns no dotSrc', () => {
       beforeEach(() => {
-        eventService.getEvent.and.returnValue(of({}));
+        eventService.getEventResponse.next({});
       });
 
       it('should set renderedEventGraph to undefined', fakeAsync(() => {
@@ -225,7 +216,7 @@ describe('TraceEventComponent', () => {
 
     describe('when event service returns dotSrc', () => {
       beforeEach(() => {
-        eventService.getEvent.and.returnValue(of({dotSrc: DOT_SRC}));
+        eventService.getEventResponse.next({dotSrc: DOT_SRC});
         graphService.render.and.returnValue(Promise.resolve(RAW_SVG));
         domSanitizer.bypassSecurityTrustHtml.and.returnValue(SANITIZED_SVG);
       });

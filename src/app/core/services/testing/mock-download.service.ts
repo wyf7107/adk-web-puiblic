@@ -15,19 +15,12 @@
  * limitations under the License.
  */
 
-import {GraphService} from './graph.service';
+import {Injectable} from '@angular/core';
 
-const GRAPH_SRC = 'digraph {a}';
+import {DownloadService} from '../download.service';
 
-describe('GraphService', () => {
-  let service: GraphService;
-
-  beforeEach(() => {
-    service = new GraphService();
-  });
-
-  it('should render a graph', async () => {
-    const svg = await service.render(GRAPH_SRC);
-    expect(svg).toContain('<title>a</title>');
-  });
-});
+@Injectable()
+export class MockDownloadService implements Partial<DownloadService> {
+  downloadBase64Data = jasmine.createSpy('downloadBase64Data');
+  downloadObjectAsJson = jasmine.createSpy('downloadObjectAsJson');
+}

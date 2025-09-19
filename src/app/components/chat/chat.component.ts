@@ -926,8 +926,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
 
     this.eventService.getEventTrace(this.selectedEvent.id).subscribe((res) => {
-      this.llmRequest = JSON.parse(res[this.llmRequestKey]);
-      this.llmResponse = JSON.parse(res[this.llmResponseKey]);
+      if (res[this.llmRequestKey]) {
+        this.llmRequest = JSON.parse(res[this.llmRequestKey]);
+      }
+      if (res[this.llmResponseKey]) {
+        this.llmResponse = JSON.parse(res[this.llmResponseKey]);
+      }
     });
 
     this.eventService
@@ -1382,8 +1386,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
     this.eventService.getEventTrace(this.selectedEvent.id).subscribe((res) => {
-      this.llmRequest = JSON.parse(res[this.llmRequestKey]);
-      this.llmResponse = JSON.parse(res[this.llmResponseKey]);
+      if (res[this.llmRequestKey]) {
+        this.llmRequest = JSON.parse(res[this.llmRequestKey]);
+      }
+      if (res[this.llmResponseKey]) {
+        this.llmResponse = JSON.parse(res[this.llmResponseKey]);
+      }
     });
     this.eventService
       .getEvent(

@@ -153,7 +153,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
   sessionTab = viewChild(SessionTabComponent);
   evalTab = viewChild(EvalTabComponent);
-  private scrollContainer = viewChild.required<ElementRef>('autoScroll');
   bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
   private _snackBar = inject(MatSnackBar);
   shouldShowEvalTab = signal(true);

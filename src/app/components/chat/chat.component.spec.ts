@@ -41,7 +41,6 @@ import {AGENT_BUILDER_SERVICE, AgentBuilderService} from '../../core/services/ag
 import {Component} from '@angular/core';
 
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
-import {SidePanelComponent} from '../side-panel/side-panel.component';
 
 import {ChatComponent} from './chat.component';
 
@@ -58,6 +57,9 @@ class MockEvalTabComponent {
   }
 }
 
+const HEADER_TOGGLE_BUTTON_SELECTOR =
+    By.css('.drawer-header .material-symbols-outlined');
+
 const SESSION_1_ID = 'session-1';
 const SESSION_2_ID = 'session-2';
 const TEST_APP_1_NAME = 'test-app';
@@ -69,9 +71,6 @@ const EVENT_1_ID = 'event1';
 const OK_BUTTON_TEXT = 'OK';
 const APP_QUERY_PARAM = 'app';
 const SESSION_QUERY_PARAM = 'session';
-const SSE_ERROR_RESPONSE = '{"error": "SSE error"}';
-const CALL_FUNCTION_USER_INPUT = 'call a function';
-const FUNC1_NAME = 'func1';
 const STATE_KEY = 'key';
 const STATE_VALUE = 'value';
 const TEST_MESSAGE = 'test message';
@@ -98,6 +97,7 @@ describe('ChatComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>;
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockLocation: jasmine.SpyObj<Location>;
+  let mockAgentBuilderService: jasmine.SpyObj<AgentBuilderService>;
 
   beforeEach(async () => {
     mockSessionService = jasmine.createSpyObj('SessionService', {
@@ -164,6 +164,10 @@ describe('ChatComponent', () => {
       'getLoadingState',
       'setApp',
       'runSse',
+      'getAgentBuilder'
+    ]);
+    mockAgentBuilderService = jasmine.createSpyObj('AgentBuilderService', [
+      'buildAgent',
     ]);
     mockFeatureFlagService = jasmine.createSpyObj('FeatureFlagService', {
       isImportSessionEnabled: of(true),
@@ -220,12 +224,12 @@ describe('ChatComponent', () => {
             {provide: TRACE_SERVICE, useValue: mockTraceService},
             {provide: AGENT_SERVICE, useValue: mockAgentService},
             {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
-            {provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService},
+            {provide: AGENT_BUILDER_SERVICE, useValue: mockAgentBuilderService},
             {provide: MatDialog, useValue: mockDialog},
-            {provide: MatSnackBar, useValue: mockSnackBar},
             {provide: Router, useValue: mockRouter},
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: Location, useValue: mockLocation},
+            {provide: MatSnackBar, useValue: mockSnackBar},
           ],
         })
         .compileComponents();
@@ -233,6 +237,7 @@ describe('ChatComponent', () => {
     fixture = TestBed.createComponent(ChatComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   describe('Component Initialization', () => {
@@ -475,6 +480,41 @@ describe('ChatComponent', () => {
   });
 
   describe('UI and State', () => {
+    describe('Header', () => {
+      describe('toggle', () => {
+        beforeEach(() => {
+          spyOn(component.sideDrawer()!, 'open');
+          spyOn(component.sideDrawer()!, 'close');
+        });
+
+        it('should hide side drawer when it is open', () => {
+          component.showSidePanel = true;
+          fixture.detectChanges();
+
+          const closeButton = fixture.debugElement.query(
+              HEADER_TOGGLE_BUTTON_SELECTOR,
+          );
+          closeButton.nativeElement.click();
+
+          expect(component.sideDrawer()!.close).toHaveBeenCalled();
+          expect(component.showSidePanel).toBe(false);
+        });
+
+        it('should show side drawer when it is closed', () => {
+          component.showSidePanel = false;
+          fixture.detectChanges();
+
+          const closeButton = fixture.debugElement.query(
+              HEADER_TOGGLE_BUTTON_SELECTOR,
+          );
+          closeButton.nativeElement.click();
+
+          expect(component.sideDrawer()!.open).toHaveBeenCalled();
+          expect(component.showSidePanel).toBe(true);
+        });
+      });
+    });
+
     describe('toggleSidePanel', () => {
       beforeEach(() => {
         spyOn(component.sideDrawer()!, 'open');
@@ -491,6 +531,7 @@ describe('ChatComponent', () => {
           expect(component.showSidePanel).toBe(false);
         });
       });
+
       describe('when panel is closed', () => {
         beforeEach(() => {
           component.showSidePanel = false;
@@ -555,11 +596,10 @@ describe('ChatComponent', () => {
 
   describe('Bi-directional Streaming', () => {
     describe('when bidi streaming is restarted', () => {
-      beforeEach(() => {
+      it('should show snackbar', () => {
         component.sessionHasUsedBidi.add(component.sessionId);
         component.startAudioRecording();
-      });
-      it('should show snackbar', () => {
+
         expect(mockSnackBar.open)
             .toHaveBeenCalledWith(
                 'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.',

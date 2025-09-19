@@ -106,7 +106,6 @@
           </div>
           } @else {
           <markdown
-            class="message-text"
             [data]="message.text"
             [ngStyle]="{
                         'font-style': message.thought ? 'italic' : 'normal',
@@ -222,7 +221,9 @@
         @if (message.evalScore !== undefined && message.evalThreshold !== undefined) {
         <div class="score-threshold-container">
           <span class="header-actual">{{ i18n.matchScoreLabel }}: {{ message.evalScore }}</span>
-          <span class="header-expected">{{ i18n.thresholdLabel }}: {{ message.evalThreshold }}</span>
+          <span class="header-expected"
+            >{{ i18n.thresholdLabel }}: {{ message.evalThreshold }}</span
+          >
         </div>
         }
       </div>
@@ -258,7 +259,10 @@
       <span class="material-symbols-outlined"
         >{{ message.evalStatus === 1 ? "check" : message.evalStatus === 2 ? "close" : "" }}</span
       >
-      <span>{{ message.evalStatus === 1 ? i18n.evalPassLabel : message.evalStatus === 2 ? i18n.evalFailLabel : "" }}</span>
+      <span
+        >{{ message.evalStatus === 1 ? i18n.evalPassLabel : message.evalStatus === 2 ?
+        i18n.evalFailLabel : "" }}</span
+      >
     </div>
     @if (evalCase && message.role === "bot" && isEvalEditMode) { @if (message.text) {
     <div>

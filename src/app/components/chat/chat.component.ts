@@ -37,7 +37,6 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {catchError, distinctUntilChanged, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 import stc from 'string-to-color';
@@ -45,9 +44,9 @@ import {windowOpen} from 'safevalues/dom';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-import {LlmResponse} from '../../core/models/types';
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
+import {LlmResponse} from '../../core/models/types';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService} from '../../core/services/artifact.service';
 import {AUDIO_SERVICE, AudioService} from '../../core/services/audio.service';
@@ -120,7 +119,6 @@ const BIDI_STREAMING_RESTART_WARNING =
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {provide: MatPaginatorIntl, useClass: CustomPaginatorIntl},
-    provideMarkdown(),
   ],
   imports: [
     MatDrawerContainer,

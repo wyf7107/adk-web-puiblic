@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
+
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {CommonModule, DOCUMENT, NgClass, NgStyle} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Inject, Input, OnChanges, Output, Renderer2, signal, SimpleChanges, ViewChild,} from '@angular/core';
@@ -29,7 +31,6 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {MarkdownComponent, provideMarkdown} from 'ngx-markdown';
 import stc from 'string-to-color';
 
 import {EvalCase} from '../../core/models/Eval';
@@ -61,7 +62,9 @@ const ROOT_AGENT = 'root_agent';
     MatTooltipModule,
     NgClass,
     NgStyle,
+    // BEGIN-EXTERNAL
     MarkdownComponent,
+    // END-EXTERNAL
   ],
   providers: [
     provideMarkdown(),

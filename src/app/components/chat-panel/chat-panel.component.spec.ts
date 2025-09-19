@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
+import {MarkdownModule} from 'ngx-markdown';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {SimpleChange} from '@angular/core';
 import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {MarkdownModule} from 'ngx-markdown';
 import {of} from 'rxjs';
 
 import {ChatPanelComponent} from './chat-panel.component';
@@ -41,7 +41,9 @@ describe('ChatPanelComponent', () => {
             MatDialogModule,
             NoopAnimationsModule,
             HttpClientTestingModule,
-            MarkdownModule.forRoot(),
+            // BEGIN_EXTERNAL
+            // MarkdownModule.forRoot(),
+            // END_EXTERNAL
           ],
         })
         .compileComponents();

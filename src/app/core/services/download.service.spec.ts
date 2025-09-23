@@ -18,6 +18,8 @@
 import {TestBed} from '@angular/core/testing';
 
 import {DownloadService} from './download.service';
+import {SAFE_VALUES_SERVICE} from './interfaces/safevalues';
+import {MockSafeValuesService} from './testing/mock-safevalues.service';
 
 const FILE_NAME_PNG = 'test.png';
 const FILE_NAME_JSON = 'test.json';
@@ -31,12 +33,19 @@ describe('DownloadService', () => {
   let createElementSpy: jasmine.Spy;
   let appendChildSpy: jasmine.Spy;
   let removeChildSpy: jasmine.Spy;
+  let safeValuesService: MockSafeValuesService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [DownloadService],
+      providers: [
+        DownloadService,
+        {provide: SAFE_VALUES_SERVICE, useClass: MockSafeValuesService},
+      ],
     });
     service = TestBed.inject(DownloadService);
+    safeValuesService = TestBed.inject(
+      SAFE_VALUES_SERVICE,
+    ) as MockSafeValuesService;
 
     mockAnchor = jasmine.createSpyObj('HTMLAnchorElement', ['click']);
     createElementSpy = spyOn(document, 'createElement')
@@ -58,6 +67,14 @@ describe('DownloadService', () => {
     it('should create an anchor element', () => {
       service.downloadBase64Data(base64Data, mimeType, FILE_NAME_PNG);
       expect(createElementSpy).toHaveBeenCalledWith(ANCHOR);
+    });
+
+    it('should call safeValuesService.setAnchorHref', () => {
+      service.downloadBase64Data(base64Data, mimeType, FILE_NAME_PNG);
+      expect(safeValuesService.setAnchorHref).toHaveBeenCalledWith(
+        mockAnchor,
+        base64Data,
+      );
     });
 
     it('should set download attribute to filename', () => {
@@ -84,6 +101,7 @@ describe('DownloadService', () => {
   describe('downloadObjectAsJson', () => {
     const data = {key: 'value'};
     const jsonString = JSON.stringify(data, null, 2);
+    const blobUrl = 'blob:foo';
 
     let blobSpy: jasmine.Spy;
     let revokeObjectURLSpy: jasmine.Spy;
@@ -91,6 +109,7 @@ describe('DownloadService', () => {
     beforeEach(() => {
       blobSpy = spyOn(window, 'Blob').and.callThrough();
       revokeObjectURLSpy = spyOn(URL, 'revokeObjectURL');
+      safeValuesService.createObjectUrl.and.returnValue(blobUrl);
     });
 
     it('should stringify object to JSON', () => {
@@ -104,6 +123,22 @@ describe('DownloadService', () => {
       expect(blobSpy).toHaveBeenCalledWith([jsonString], {
         type: OCTET_STREAM,
       });
+    });
+
+    it('should call safeValuesService.createObjectUrl with blob', () => {
+      service.downloadObjectAsJson(data, FILE_NAME_JSON);
+      expect(safeValuesService.createObjectUrl).toHaveBeenCalled();
+      expect(
+        safeValuesService.createObjectUrl.calls.mostRecent().args[0].type,
+      ).toBe(OCTET_STREAM);
+    });
+
+    it('should call safeValuesService.setAnchorHref with object url', () => {
+      service.downloadObjectAsJson(data, FILE_NAME_JSON);
+      expect(safeValuesService.setAnchorHref).toHaveBeenCalledWith(
+        mockAnchor,
+        blobUrl,
+      );
     });
 
     it('should create an anchor element', () => {
@@ -129,6 +164,11 @@ describe('DownloadService', () => {
     it('should remove anchor from body', () => {
       service.downloadObjectAsJson(data, FILE_NAME_JSON);
       expect(removeChildSpy).toHaveBeenCalledWith(mockAnchor);
+    });
+
+    it('should revoke object URL', () => {
+      service.downloadObjectAsJson(data, FILE_NAME_JSON);
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith(blobUrl);
     });
   });
 });

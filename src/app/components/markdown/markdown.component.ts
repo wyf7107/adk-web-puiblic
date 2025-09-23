@@ -16,7 +16,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {Component, Input} from '@angular/core';
+import {Component, Input, CUSTOM_ELEMENTS_SCHEMA} from '@angular/core';
 
 import {MarkdownModule, provideMarkdown} from 'ngx-markdown';
 
@@ -26,7 +26,6 @@ import {MarkdownModule, provideMarkdown} from 'ngx-markdown';
 @Component({
   selector: 'app-markdown',
   templateUrl: './markdown.component.html',
-  styleUrls: ['./markdown.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -35,6 +34,7 @@ import {MarkdownModule, provideMarkdown} from 'ngx-markdown';
   providers: [
     provideMarkdown(),
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class MarkdownComponent {
   @Input() text = '';

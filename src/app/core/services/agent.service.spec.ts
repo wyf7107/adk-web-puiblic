@@ -20,6 +20,8 @@ import {TestBed} from '@angular/core/testing';
 import {firstValueFrom} from 'rxjs';
 
 import {URLUtil} from '../../../utils/url-util';
+import {createFakeLlmResponse} from '../models/testing/fake_genai_types';
+import {LlmResponse} from '../models/types';
 
 import {AgentService} from './agent.service';
 
@@ -139,23 +141,31 @@ describe('AgentService', () => {
           });
     });
 
-    it('should emit data chunks received from fetch', (done) => {
+    it('should emit LlmResponses received from fetch', (done) => {
+      const fakeResponse1 = createFakeLlmResponse();
+      const fakeResponse2 = createFakeLlmResponse({
+        content: {role: 'model', parts: [{text: 'fake response 2'}]},
+      });
       const mockBody = new ReadableStream({
         start(controller) {
           const encoder = new TextEncoder();
-          controller.enqueue(encoder.encode('data: {"a": 1}\n'));
-          controller.enqueue(encoder.encode('data: {"b": 2}\n'));
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(fakeResponse1)}\n`),
+          );
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(fakeResponse2)}\n`),
+          );
           controller.close();
         },
       });
       spyOn(window, 'fetch').and.resolveTo(new Response(mockBody));
-      const results: string[] = [];
+      const results: LlmResponse[] = [];
       service.runSse(RUN_SSE_PAYLOAD).subscribe({
         next: (data) => {
           results.push(data);
         },
         complete: () => {
-          expect(results).toEqual(['{"a": 1}', '{"b": 2}']);
+          expect(results).toEqual([fakeResponse1, fakeResponse2]);
           done();
         },
       });
@@ -187,22 +197,28 @@ describe('AgentService', () => {
     });
 
     it('should handle incomplete JSON chunks', (done) => {
+      const fakeResponse = createFakeLlmResponse();
+      const fakeResponseJson = JSON.stringify(fakeResponse);
+      const mid = Math.floor(fakeResponseJson.length / 2);
+      const chunk1 = fakeResponseJson.substring(0, mid);
+      const chunk2 = fakeResponseJson.substring(mid);
+
       const mockBody = new ReadableStream({
         start(controller) {
           const encoder = new TextEncoder();
-          controller.enqueue(encoder.encode('data: {"a":'));
-          controller.enqueue(encoder.encode(' 1}\n'));
+          controller.enqueue(encoder.encode(`data: ${chunk1}`));
+          controller.enqueue(encoder.encode(`${chunk2}\n`));
           controller.close();
         },
       });
       spyOn(window, 'fetch').and.resolveTo(new Response(mockBody));
-      const results: string[] = [];
+      const results: LlmResponse[] = [];
       service.runSse(RUN_SSE_PAYLOAD).subscribe({
         next: (data) => {
           results.push(data);
         },
         complete: () => {
-          expect(results).toEqual(['{"a": 1}']);
+          expect(results).toEqual([fakeResponse]);
           done();
         },
       });

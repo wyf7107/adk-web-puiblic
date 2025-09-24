@@ -455,12 +455,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let index = this.eventMessageIndexArray.length - 1;
     this.streamingTextMessage = null;
     this.agentService.runSse(req).subscribe({
-      next: async (chunk) => {
-        if (chunk.startsWith('{"error"')) {
-          this.openSnackBar(chunk, 'OK');
-          return;
-        }
-        const chunkJson = JSON.parse(chunk) as LlmResponse;
+      next: async (chunkJson: LlmResponse) => {
         if (chunkJson.error) {
           this.openSnackBar(chunkJson.error, 'OK');
           return;
@@ -476,7 +471,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.changeDetectorRef.detectChanges();
       },
-      error: (err) => console.error('SSE error:', err),
+      error: (err) => {
+        console.error('Send message error:', err);
+        this.openSnackBar(err, 'OK');
+      },
       complete: () => {
         this.streamingTextMessage = null;
         this.sessionTab()?.reloadSession(this.sessionId);
@@ -858,8 +856,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let response: any[] = [];
     this.agentService.runSse(authResponse).subscribe({
-      next: async (chunk) => {
-        const chunkJson = JSON.parse(chunk);
+      next: async (chunkJson) => {
         response.push(chunkJson);
       },
       error: (err) => console.error('SSE error:', err),

@@ -43,7 +43,7 @@ import {catchError, distinctUntilChanged, filter, map, shareReplay, switchMap, t
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {EvalCase} from '../../core/models/Eval';
-import {Session} from '../../core/models/Session';
+import {Session, SessionState} from '../../core/models/Session';
 import {LlmResponse} from '../../core/models/types';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService} from '../../core/services/artifact.service';
@@ -181,7 +181,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   redirectUri = URLUtil.getBaseUrlWithoutPath();
   showSidePanel = true;
   useSse = false;
-  currentSessionState = {};
+  currentSessionState: SessionState|undefined = {};
   root_agent = ROOT_AGENT;
   updatedSessionState: WritableSignal<any> = signal(null);
   private readonly streamingTextMessageSubject =

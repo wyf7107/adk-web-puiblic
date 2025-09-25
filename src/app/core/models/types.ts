@@ -21,18 +21,22 @@ export interface Blob {
   mimeType?: string;
   data: string;
 }
+
 export interface FunctionCall {
   name: string;
   args: {[key: string]: any};
 }
+
 export interface FunctionResponse {
   name: string;
   response: {[key: string]: any};
 }
+
 export interface FileData {
   mimeType: string;
   fileUri: string;
 }
+
 export interface Part {
   text?: string;
   inlineData?: Blob;
@@ -40,13 +44,16 @@ export interface Part {
   functionResponse?: FunctionResponse;
   fileData?: FileData;
 }
+
 export interface GenAiContent {
   role: string;
   parts: Part[];
 }
+
 export interface LlmRequest {
   contents: GenAiContent[];
 }
+
 export interface LlmResponse {
   id?: number;
   content: GenAiContent;
@@ -54,4 +61,18 @@ export interface LlmResponse {
   errorMessage?: string;
   longRunningToolIds?: string[];
 }
-export interface Event extends LlmResponse {}
+
+export interface EventActions {
+  message?: string;
+  functionCall?: FunctionCall;
+  functionResponse?: FunctionResponse;
+}
+
+export interface Event extends LlmResponse {
+  author?: string
+  invocationId?: string;
+  actions?: EventActions;
+  longRunningToolIds?: string[];
+  branch?: string;
+  timestamp?: number;
+}

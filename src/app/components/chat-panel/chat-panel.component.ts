@@ -65,7 +65,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() selectedFiles: {file: File; url: string}[] = [];
   @Input() updatedSessionState: any|null = null;
   @Input() eventData = new Map<string, any>();
-  @Input() MediaType = MediaType;
   @Input() isAudioRecording: boolean = false;
   @Input() isVideoRecording: boolean = false;
   @Input() hoveredEventMessageIndices: number[] = [];
@@ -102,6 +101,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   private previousMessageCount = 0;
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
+  readonly MediaType = MediaType;
 
   constructor(
       private sanitizer: DomSanitizer,

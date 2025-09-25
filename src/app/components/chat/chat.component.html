@@ -34,6 +34,7 @@
     >
   }
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
+  @if (isApplicationSelectorEnabledObs | async) {
     <div class="app-select-container">
       <mat-select
         class="app-select"
@@ -51,6 +52,7 @@
         }
       </mat-select>
     </div>
+  }
     <app-side-panel
       [showSidePanel]="showSidePanel"
       [appName]="appName"
@@ -192,7 +194,7 @@
           <div class="empty-state-container">
             <span>Loading agents, please wait...</span>
           </div>
-        } @else {
+        } @else if (isApplicationSelectorEnabledObs | async) {
           <div class="empty-state-container">
             @if (((apps$ | async) || []).length > 0) {
               <span

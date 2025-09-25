@@ -263,6 +263,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // Session url
   isSessionUrlEnabledObs: Observable<boolean>;
 
+  // Application selector
+  isApplicationSelectorEnabledObs: Observable<boolean>;
+
   // Trace detail
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
@@ -293,6 +296,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isEditFunctionArgsEnabledObs =
         this.featureFlagService.isEditFunctionArgsEnabled();
     this.isSessionUrlEnabledObs = this.featureFlagService.isSessionUrlEnabled();
+    this.isApplicationSelectorEnabledObs =
+        this.featureFlagService.isApplicationSelectorEnabled();
   }
 
   ngOnInit(): void {

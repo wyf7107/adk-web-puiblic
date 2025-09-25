@@ -56,4 +56,12 @@ export class FeatureFlagService {
         map((params) => params[A2A_CARD] === 'true'),
     );
   }
+
+  isApplicationSelectorEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isAlwaysOnSidePanelEnabled(): Observable<boolean> {
+    return of(false);
+  }
 }

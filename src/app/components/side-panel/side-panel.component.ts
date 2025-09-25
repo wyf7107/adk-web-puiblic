@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {CommonModule} from '@angular/common';
 import {Component, EventEmitter, inject, Input, Output, viewChild} from '@angular/core';
 import {MatMiniFabButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -26,6 +27,7 @@ import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
 import {ArtifactTabComponent} from '../artifact-tab/artifact-tab.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
@@ -44,6 +46,7 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   styleUrls: ['./side-panel.component.scss'],
   standalone: true,
   imports: [
+    CommonModule,
     MatTooltip,
     MatTabGroup,
     MatTab,
@@ -69,12 +72,12 @@ export class SidePanelComponent {
   @Input() currentSessionState: any;
   @Input() artifacts: any[] = [];
   @Input() shouldShowEvalTab = false;
-  @Input() selectedEvent: any | undefined;
-  @Input() selectedEventIndex: number | undefined;
-  @Input() renderedEventGraph: SafeHtml | undefined;
-  @Input() rawSvgString: string | null = null;
-  @Input() llmRequest: any | undefined;
-  @Input() llmResponse: any | undefined;
+  @Input() selectedEvent: any|undefined;
+  @Input() selectedEventIndex: number|undefined;
+  @Input() renderedEventGraph: SafeHtml|undefined;
+  @Input() rawSvgString: string|null = null;
+  @Input() llmRequest: any|undefined;
+  @Input() llmResponse: any|undefined;
   @Input() showSidePanel = false;
 
   @Output() readonly closePanel = new EventEmitter<void>();
@@ -96,4 +99,8 @@ export class SidePanelComponent {
   readonly evalTabComponent = viewChild(EvalTabComponent);
 
   readonly i18n = inject(SidePanelMessagesInjectionToken);
+  readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+
+  readonly isAlwaysOnSidePanelEnabledObs =
+      this.featureFlagService.isAlwaysOnSidePanelEnabled();
 }

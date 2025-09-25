@@ -37,7 +37,9 @@ export class TraceTreeComponent {
   flatTree: {span: Span; level: number}[] = [];
   traceLabelIconMap = new Map<string, string>([
     ['Invocation', 'start'],
+    // TODO: Remove agent_run mapping once all ADKs span names follow OTLP GenAI semconv.
     ['agent_run', 'directions_run'],
+    ['invoke_agent', 'directions_run'],
     ['tool', 'build'],
     ['call_llm', 'chat'],
   ]);

@@ -28,6 +28,8 @@ import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-
 import {StringToColorServiceImpl} from '../../core/services/string-to-color.service';
 import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
 import {ChatPanelComponent} from './chat-panel.component';
+import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
+import {MarkdownComponent} from '../markdown/markdown.component';
 
 const USER_ID = 'user';
 const FUNC1_NAME = 'func1';
@@ -53,6 +55,7 @@ describe('ChatPanelComponent', () => {
               provide: STRING_TO_COLOR_SERVICE,
               useClass: StringToColorServiceImpl,
             },
+            {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
           ],
         })
         .compileComponents();

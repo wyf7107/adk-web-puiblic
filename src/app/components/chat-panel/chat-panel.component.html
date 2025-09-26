@@ -105,7 +105,7 @@
             </div>
           </div>
           } @else {
-          <app-markdown [text]="message.text!" [thought]="message.thought"></app-markdown>
+            <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: message.text!, thought: message.thought}"></ng-container>
           }
         }
         </div>

@@ -43,6 +43,8 @@ import {StringToColorServiceImpl} from './app/core/services/string-to-color.serv
 import {TRACE_SERVICE, TraceService} from './app/core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from './app/core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService} from './app/core/services/websocket.service';
+import {MARKDOWN_COMPONENT} from './app/components/markdown/markdown.component.interface';
+import {MarkdownComponent} from './app/components/markdown/markdown.component';
 
 fetch('./assets/config/runtime-config.json')
   .then((response) => response.json())
@@ -67,6 +69,7 @@ fetch('./assets/config/runtime-config.json')
         {provide: GRAPH_SERVICE, useClass: GraphService},
         {provide: STRING_TO_COLOR_SERVICE, useClass: StringToColorServiceImpl},
         {provide: SAFE_VALUES_SERVICE, useClass: SafeValuesServiceImpl},
+        {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
         provideAnimations(),
       ]
     }).catch((err) => console.error(err));

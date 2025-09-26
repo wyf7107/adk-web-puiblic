@@ -15,26 +15,19 @@
  * limitations under the License.
  */
 
-import {CommonModule} from '@angular/common';
-import {Component, input} from '@angular/core';
-import {MarkdownModule, provideMarkdown} from 'ngx-markdown';
+import {Component, InjectionToken, InputSignal, Type} from '@angular/core';
 
 /**
- * Renders markdown text.
+ * Represents a component to be used to render markdown across the app.
  */
-@Component({
-  selector: 'app-markdown',
-  templateUrl: './markdown.component.html',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MarkdownModule,
-  ],
-  providers: [
-    provideMarkdown(),
-  ],
-})
-export class MarkdownComponent {
-  text = input('');
-  thought = input(false);
+export const MARKDOWN_COMPONENT = new InjectionToken<Type<MarkdownComponentInterface>>(
+    'MARKDOWN_COMPONENT',
+);
+
+/**
+ * Interface for Markdown component.
+ */
+export interface MarkdownComponentInterface {
+  text: InputSignal<string>;
+  thought: InputSignal<boolean>;
 }

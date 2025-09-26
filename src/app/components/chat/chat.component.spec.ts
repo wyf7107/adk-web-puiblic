@@ -56,6 +56,8 @@ import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/websocket.service';
 import {Component} from '@angular/core';
+import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
+import {MarkdownComponent} from '../markdown/markdown.component';
 
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
@@ -202,6 +204,7 @@ describe('ChatComponent', () => {
             {provide: Router, useValue: mockRouter},
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: Location, useValue: mockLocation},
+            {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
           ],
         })
         .compileComponents();

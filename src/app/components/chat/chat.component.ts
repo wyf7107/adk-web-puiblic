@@ -1471,7 +1471,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadExistingAgentConfiguration() {
-    this.agentService.getAgentBuilder(this.appName).subscribe({
+    this.agentService.getAgentBuilderTmp(this.appName).subscribe({
       next: (yamlContent: string) => {
         if (yamlContent) {
           this.canvasComponent()?.loadFromYaml(yamlContent, this.appName);

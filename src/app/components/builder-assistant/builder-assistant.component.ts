@@ -83,7 +83,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
         },
         streaming: false,
         stateDelta: {
-          "root_directory" : `${this.appName}`
+          "root_directory" : `${this.appName}/tmp/${this.appName}`
         }
       };
 
@@ -155,10 +155,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
           'role': 'user',
           'parts': [{'text': userText}],
         },
-        streaming: false,
-        stateDelta: {
-          "root_directory" : `${this.appName}/tmp`
-        }
+        streaming: false
       };
 
       this.agentService.runSse(req).subscribe({

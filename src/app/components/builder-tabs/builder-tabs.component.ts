@@ -647,6 +647,7 @@ export class BuilderTabsComponent {
   }
 
   cancelChanges() {
+    this.agentService.agentChangeCancel(this.appNameInput).subscribe((s) => {})
     this.exitBuilderMode.emit();
   }
 
@@ -664,16 +665,22 @@ export class BuilderTabsComponent {
 
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
-    this.agentService.agentBuild(formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(formData).subscribe((success) => {
       if (success) {
-        this.router.navigate(['/'], {
-          queryParams: { app: appName }
-        }).then(() => {
-          window.location.reload();
+        this.agentService.agentBuild(formData).subscribe((success) => {
+          if (success) {
+            this.router.navigate(['/'], {
+              queryParams: { app: appName }
+            }).then(() => {
+              window.location.reload();
+            });
+          } else {
+            this.snackBar.open("Something went wrong, please try again", "OK");
+          }
         });
-      } else {
-        this.snackBar.open("Something went wrong, please try again", "OK");
       }
-    });
+    })
+
+    
   }
 }

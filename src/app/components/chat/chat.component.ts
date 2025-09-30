@@ -44,7 +44,7 @@ import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
-import {LlmResponse} from '../../core/models/types';
+import {Event as AdkEvent} from '../../core/models/types';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService} from '../../core/services/artifact.service';
 import {AUDIO_SERVICE, AudioService} from '../../core/services/audio.service';
@@ -459,7 +459,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let index = this.eventMessageIndexArray.length - 1;
     this.streamingTextMessage = null;
     this.agentService.runSse(req).subscribe({
-      next: async (chunkJson: LlmResponse) => {
+      next: async (chunkJson: AdkEvent) => {
         if (chunkJson.error) {
           this.openSnackBar(chunkJson.error, 'OK');
           return;

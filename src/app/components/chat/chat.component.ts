@@ -896,6 +896,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (t) {
         this.removeFinishedLongRunningEvents(t.events);
         this.processRunSseResponse(t.response);
+        this.changeDetectorRef.detectChanges();
       }
     });
   }

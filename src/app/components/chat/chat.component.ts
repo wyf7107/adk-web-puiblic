@@ -66,7 +66,6 @@ import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
-import {EventTabComponent} from '../event-tab/event-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
 import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
@@ -147,7 +146,6 @@ const BIDI_STREAMING_RESTART_WARNING =
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   chatPanel = viewChild.required(ChatPanelComponent);
   sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
-  eventTabComponent = viewChild.required(EventTabComponent);
   sessionTab = viewChild(SessionTabComponent);
   evalTab = viewChild(EvalTabComponent);
   private scrollContainer = viewChild.required<ElementRef>('autoScroll');
@@ -1155,6 +1153,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.bottomPanelVisible = false;
+    this.changeDetectorRef.detectChanges();
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {

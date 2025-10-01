@@ -23,6 +23,25 @@
     </div>
   </div>
 </div>
+@if (isApplicationSelectorEnabledObs | async) {
+  <div class="app-select-container">
+    <mat-select
+      class="app-select"
+      (selectionChange)="appSelectionChange.emit($event)"
+      [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
+      [formControl]="selectedAppControl"
+    >
+      @if (apps$ | async; as availableApps) {
+        @for (appName of availableApps; track appName) {
+          <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
+        }
+      }
+      @if (selectedAppControl.value && isLoadingApps()) {
+        <mat-option class="app-name-option" [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
+      }
+    </mat-select>
+  </div>
+}
 } @if (appName != "" && showSidePanel) {
 <div class="tabs-container">
   <mat-tab-group (selectedTabChange)="tabChange.emit($event)">

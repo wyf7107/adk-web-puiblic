@@ -134,3 +134,40 @@
   text-align: right;
   margin-top: -5px;
 }
+
+.app-select {
+  width: 100%;
+}
+
+.app-select-container {
+  width: 35%;
+  margin-top: 12px;
+  background-color: #212123;
+  margin-left: 10px;
+  height: 30px;
+  display: flex;
+  justify-content: space-between;
+  padding-left: 20px;
+  padding-right: 20px;
+  border-radius: 10px;
+  padding-top: 5px;
+}
+
+.app-select-container {
+  @include mat.select-overrides(
+    (
+      placeholder-text-color: #8ab4f8,
+      enabled-trigger-text-color: #8ab4f8,
+      enabled-arrow-color: #8ab4f8,
+    )
+  );
+}
+
+.app-name-option,
+.app-select {
+  color: #9aa0a6;
+  font-family: 'Google Sans Mono', monospace;
+  font-style: normal;
+  font-weight: 400;
+  padding-left: unset;
+}

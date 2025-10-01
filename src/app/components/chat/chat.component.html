@@ -34,26 +34,11 @@
     >
   }
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
-  @if (isApplicationSelectorEnabledObs | async) {
-    <div class="app-select-container">
-      <mat-select
-        class="app-select"
-        (selectionChange)="onAppSelection($event)"
-        [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
-        [formControl]="selectedAppControl"
-      >
-        @if (apps$ | async; as availableApps) {
-          @for (appName of availableApps; track appName) {
-            <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
-          }
-        }
-        @if (selectedAppControl.value && isLoadingApps()) {
-          <mat-option class="app-name-option" [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
-        }
-      </mat-select>
-    </div>
-  }
     <app-side-panel
+      [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
+      [apps$]="apps$"
+      [isLoadingApps]="isLoadingApps"
+      [selectedAppControl]="selectedAppControl"
       [showSidePanel]="showSidePanel"
       [appName]="appName"
       [userId]="userId"
@@ -80,6 +65,7 @@
       (page)="handlePageEvent($event)"
       (closeSelectedEvent)="closeSelectedEvent()"
       (openImageDialog)="openViewImageDialog($event)"
+      (appSelectionChange)="onAppSelection($event)"
     >
     </app-side-panel>
   </mat-drawer>

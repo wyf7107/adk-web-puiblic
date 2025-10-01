@@ -17,8 +17,10 @@
 
 import {Location} from '@angular/common';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {MatOption} from '@angular/material/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {MatSelect, MatSelectChange} from '@angular/material/select';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTabGroup} from '@angular/material/tabs';
 import {By} from '@angular/platform-browser';
@@ -54,6 +56,7 @@ const EVAL_TAB_SELECTOR = By.css('app-eval-tab');
 const DETAILS_PANEL_CLOSE_BUTTON_SELECTOR =
     By.css('.details-panel-container mat-icon');
 const EVENT_GRAPH_SELECTOR = By.css('.event-graph-container div');
+const APP_SELECT_SELECTOR = By.css('.app-select');
 
 const EVENTS_TAB_INDEX = 1;
 const SESSIONS_TAB_INDEX = 4;
@@ -154,6 +157,7 @@ describe('SidePanelComponent', () => {
     mockFeatureFlagService.isImportSessionEnabled.and.returnValue(of(false));
     mockFeatureFlagService.isAlwaysOnSidePanelEnabled.and.returnValue(
         of(false));
+    mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(true);
     mockFeatureFlagService.isTraceEnabledResponse.next(true);
     mockFeatureFlagService.isArtifactsTabEnabledResponse.next(true);
     mockFeatureFlagService.isEvalEnabledResponse.next(true);
@@ -204,6 +208,41 @@ describe('SidePanelComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('App Selector', () => {
+    beforeEach(() => {
+      component.isApplicationSelectorEnabledObs = of(true);
+      component.apps$ = of(['app1', 'app2']);
+      fixture.detectChanges();
+    });
+
+    it('shows app selector', () => {
+      expect(fixture.debugElement.query(APP_SELECT_SELECTOR)).toBeTruthy();
+    });
+
+    it('shows all apps in selector', () => {
+      const appSelect = fixture.debugElement.query(APP_SELECT_SELECTOR);
+      const options = appSelect.componentInstance.options;
+      expect(options.map((option: MatOption) => option.value)).toEqual([
+        'app1',
+        'app2',
+      ]);
+    });
+
+    describe('when app is selected', () => {
+      beforeEach(() => {
+        spyOn(component.appSelectionChange, 'emit');
+        const appSelect = fixture.debugElement.query(APP_SELECT_SELECTOR);
+        const mockEvent =
+            new MatSelectChange(appSelect.componentInstance, 'app1');
+        appSelect.triggerEventHandler('selectionChange', mockEvent);
+      });
+      it('emits appSelectionChange event', () => {
+        expect(component.appSelectionChange.emit)
+            .toHaveBeenCalledWith(jasmine.objectContaining({value: 'app1'}));
+      });
+    });
   });
 
   describe('Tab hiding', () => {

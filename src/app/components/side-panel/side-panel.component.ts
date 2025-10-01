@@ -15,20 +15,24 @@
  * limitations under the License.
  */
 
-import {Component, EventEmitter, inject, Input, Output, viewChild, Type} from '@angular/core';
+import {AsyncPipe, NgComponentOutlet} from '@angular/common';
+import {Component, EventEmitter, inject, Input, Output, signal, Type, viewChild, type WritableSignal} from '@angular/core';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatMiniFabButton} from '@angular/material/button';
+import {MatOption} from '@angular/material/core';
 import {MatIcon} from '@angular/material/icon';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {MatSelect, MatSelectChange} from '@angular/material/select';
 import {MatTab, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
 import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {AsyncPipe, NgComponentOutlet} from '@angular/common';
+import {Observable, of} from 'rxjs';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
-import {LOGO_COMPONENT} from '../../injection_tokens';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
+import {LOGO_COMPONENT} from '../../injection_tokens';
 import {ArtifactTabComponent} from '../artifact-tab/artifact-tab.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
@@ -47,22 +51,13 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   styleUrls: ['./side-panel.component.scss'],
   standalone: true,
   imports: [
-    AsyncPipe,
-    NgComponentOutlet,
-    MatTooltip,
-    MatTabGroup,
-    MatTab,
-    MatTabLabel,
-    TraceTabComponent,
-    EventTabComponent,
-    StateTabComponent,
-    ArtifactTabComponent,
-    SessionTabComponent,
-    EvalTabComponent,
-    MatPaginator,
-    MatMiniFabButton,
-    MatIcon,
-    NgxJsonViewerModule,
+    AsyncPipe,         FormsModule,          NgComponentOutlet,
+    MatTooltip,        MatTabGroup,          MatTab,
+    MatTabLabel,       TraceTabComponent,    EventTabComponent,
+    StateTabComponent, ArtifactTabComponent, SessionTabComponent,
+    EvalTabComponent,  MatPaginator,         MatMiniFabButton,
+    MatIcon,           NgxJsonViewerModule,  MatOption,
+    MatSelect,         ReactiveFormsModule,
   ],
 })
 export class SidePanelComponent {
@@ -80,8 +75,16 @@ export class SidePanelComponent {
   @Input() llmRequest: any|undefined;
   @Input() llmResponse: any|undefined;
   @Input() showSidePanel = false;
+  @Input() isApplicationSelectorEnabledObs: Observable<boolean> = of(false);
+  @Input() apps$: Observable<string[]|undefined> = of([]);
+  @Input() isLoadingApps: WritableSignal<boolean> = signal(false);
+  @Input()
+  selectedAppControl = new FormControl<string>('', {
+    nonNullable: true,
+  });
 
   @Output() readonly closePanel = new EventEmitter<void>();
+  @Output() readonly appSelectionChange = new EventEmitter<MatSelectChange>();
   @Output() readonly tabChange = new EventEmitter<any>();
   @Output() readonly eventSelected = new EventEmitter<string>();
   @Output() readonly sessionSelected = new EventEmitter<Session>();

@@ -15,14 +15,17 @@
  * limitations under the License.
  */
 
+
 import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {Component} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
 import {EvalCase} from '../../core/models/Eval';
@@ -37,7 +40,6 @@ import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/session.service';
-import {StringToColorServiceImpl} from '../../core/services/string-to-color.service';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockArtifactService} from '../../core/services/testing/mock-artifact.service';
 import {MockAudioService} from '../../core/services/testing/mock-audio.service';
@@ -55,11 +57,11 @@ import {MockWebSocketService} from '../../core/services/testing/mock-websocket.s
 import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/websocket.service';
-import {Component} from '@angular/core';
-import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
-import {MarkdownComponent} from '../markdown/markdown.component';
-
+import {fakeAsync,
+        tick} from '../../testing/utils';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
+import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
+import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 
 import {ChatComponent} from './chat.component';
@@ -136,6 +138,8 @@ describe('ChatComponent', () => {
     mockStringToColorService = new MockStringToColorService();
     mockSafeValuesService = new MockSafeValuesService();
 
+    mockStringToColorService.stc.and.returnValue('#8c8526ff');
+
     mockSessionService.createSessionResponse.next(
         {id: SESSION_1_ID, state: {}});
     mockTraceService.selectedTraceRow$.next(undefined);
@@ -198,7 +202,10 @@ describe('ChatComponent', () => {
             {provide: TRACE_SERVICE, useValue: mockTraceService},
             {provide: AGENT_SERVICE, useValue: mockAgentService},
             {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
-            {provide: STRING_TO_COLOR_SERVICE, useClass: StringToColorServiceImpl},
+            {
+              provide: STRING_TO_COLOR_SERVICE,
+              useValue: mockStringToColorService,
+            },
             {provide: GRAPH_SERVICE, useValue: graphService},
             {provide: SAFE_VALUES_SERVICE, useValue: mockSafeValuesService},
             {provide: MatDialog, useValue: mockDialog},
@@ -206,7 +213,7 @@ describe('ChatComponent', () => {
             {provide: Router, useValue: mockRouter},
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: Location, useValue: mockLocation},
-            {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
+            {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
           ],
         })
         .compileComponents();

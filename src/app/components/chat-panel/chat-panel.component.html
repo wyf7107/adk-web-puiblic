@@ -355,6 +355,7 @@
           (click)="fileInput.click()"
           class="function-event-button"
           [matTooltip]="i18n.uploadFileTooltip"
+          [disabled]="!(isMessageFileUploadEnabledObs | async)"
         >
           <mat-icon>attach_file</mat-icon>
         </button>
@@ -363,6 +364,7 @@
           [matMenuTriggerFor]="moreMenu"
           class="function-event-button"
           [matTooltip]="i18n.moreOptionsTooltip"
+          [disabled]="!(isManualStateUpdateEnabledObs | async)"
         >
           <mat-icon>more_vert</mat-icon>
         </button>
@@ -379,6 +381,7 @@
               'background-color': isAudioRecording ? 'rgb(234, 67, 53)' : 'rgb(51, 53, 55)'
             }"
           [matTooltip]="isAudioRecording ? i18n.turnOffMicTooltip : i18n.useMicTooltip"
+          [disabled]="!(isBidiStreamingEnabledObs | async)"
         >
           <mat-icon>mic</mat-icon>
         </button>
@@ -390,6 +393,7 @@
               'background-color': isVideoRecording ? 'rgb(234, 67, 53)' : 'rgb(51, 53, 55)'
             }"
           [matTooltip]="isVideoRecording ? i18n.turnOffCamTooltip : i18n.useCamTooltip"
+          [disabled]="!(isBidiStreamingEnabledObs | async)"
         >
           <mat-icon>videocam</mat-icon>
         </button>

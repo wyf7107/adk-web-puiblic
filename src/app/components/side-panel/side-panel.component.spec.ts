@@ -154,7 +154,13 @@ describe('SidePanelComponent', () => {
     mockFeatureFlagService.isImportSessionEnabled.and.returnValue(of(false));
     mockFeatureFlagService.isAlwaysOnSidePanelEnabled.and.returnValue(
         of(false));
-    mockEvalService.getEvalResult.and.returnValue(of({}));
+    mockFeatureFlagService.isTraceEnabledResponse.next(true);
+    mockFeatureFlagService.isArtifactsTabEnabledResponse.next(true);
+    mockFeatureFlagService.isEvalEnabledResponse.next(true);
+    mockFeatureFlagService.isTokenStreamingEnabled.and.returnValue(of(true));
+    mockFeatureFlagService.isMessageFileUploadEnabled.and.returnValue(of(true));
+    mockFeatureFlagService.isManualStateUpdateEnabled.and.returnValue(of(true));
+    mockFeatureFlagService.isBidiStreamingEnabled.and.returnValue(of(true));
 
     await TestBed
         .configureTestingModule({
@@ -198,6 +204,44 @@ describe('SidePanelComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('Tab hiding', () => {
+    it('should hide Trace tab when isTraceEnabled is false', () => {
+      mockFeatureFlagService.isTraceEnabledResponse.next(false);
+      fixture.detectChanges();
+      const tabLabels = fixture.debugElement.queryAll(
+        By.css('.tab-label'),
+      );
+      const traceLabel = tabLabels.find(
+        (label) => label.nativeElement.textContent.trim() === 'Trace',
+      );
+      expect(traceLabel).toBeUndefined();
+    });
+
+    it('should hide Artifacts tab when isArtifactsTabEnabled is false', () => {
+      mockFeatureFlagService.isArtifactsTabEnabledResponse.next(false);
+      fixture.detectChanges();
+      const tabLabels = fixture.debugElement.queryAll(
+        By.css('.tab-label'),
+      );
+      const artifactsLabel = tabLabels.find(
+        (label) => label.nativeElement.textContent.trim() === 'Artifacts',
+      );
+      expect(artifactsLabel).toBeUndefined();
+    });
+
+    it('should hide Eval tab when isEvalEnabled is false', () => {
+      mockFeatureFlagService.isEvalEnabledResponse.next(false);
+      fixture.detectChanges();
+      const tabLabels = fixture.debugElement.queryAll(
+        By.css('.tab-label'),
+      );
+      const evalLabel = tabLabels.find(
+        (label) => label.nativeElement.textContent.trim() === 'Eval',
+      );
+      expect(evalLabel).toBeUndefined();
+    });
   });
 
   describe('Rendering', () => {

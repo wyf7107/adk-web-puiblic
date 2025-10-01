@@ -31,6 +31,7 @@ import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
 import type {EvalCase} from '../../core/models/Eval';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
@@ -104,13 +105,17 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   readonly markdownComponent: Type<MarkdownComponentInterface> = inject(
     MARKDOWN_COMPONENT,
   );
+  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   readonly MediaType = MediaType;
 
-  constructor(
-      private sanitizer: DomSanitizer,
-      @Inject(DOCUMENT) private document: Document,
-      private renderer: Renderer2,
-  ) {}
+  readonly isMessageFileUploadEnabledObs =
+      this.featureFlagService.isMessageFileUploadEnabled();
+  readonly isManualStateUpdateEnabledObs =
+      this.featureFlagService.isManualStateUpdateEnabled();
+  readonly isBidiStreamingEnabledObs =
+      this.featureFlagService.isBidiStreamingEnabled();
+
+  constructor(private sanitizer: DomSanitizer) {}
 
   ngAfterViewInit() {
     if (this.scrollContainer?.nativeElement) {

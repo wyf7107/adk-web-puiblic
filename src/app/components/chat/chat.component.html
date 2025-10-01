@@ -147,6 +147,7 @@
                 class="example-margin"
                 [checked]="enableSseIndicator()"
                 (change)="toggleSse()"
+                [disabled]="!(isTokenStreamingEnabledObs | async)"
               >
                 Token Streaming
               </mat-slide-toggle>

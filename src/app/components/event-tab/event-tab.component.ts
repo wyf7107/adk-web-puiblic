@@ -19,11 +19,12 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, comput
 import {MatDialog} from '@angular/material/dialog';
 
 import {Span} from '../../core/models/Trace';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
 import {TraceChartComponent} from './trace-chart/trace-chart.component';
 import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
 import { FormsModule } from '@angular/forms';
 import { MatList, MatListItem } from '@angular/material/list';
-import { KeyValuePipe } from '@angular/common';
+import {AsyncPipe, KeyValuePipe} from '@angular/common';
 import {InvocIdPipe} from './invoc-id.pipe';
 
 @Component({
@@ -38,6 +39,7 @@ import {InvocIdPipe} from './invoc-id.pipe';
         MatListItem,
         KeyValuePipe,
         InvocIdPipe,
+        AsyncPipe,
     ],
 })
 export class EventTabComponent {
@@ -45,6 +47,7 @@ export class EventTabComponent {
   readonly traceData = input<Span[]>([]);
   @Output() selectedEvent = new EventEmitter<string>();
   private readonly dialog = inject(MatDialog);
+  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
 
   readonly view = signal<string>('events');
   readonly isTraceView = computed(() => this.view() === 'trace');
@@ -67,6 +70,7 @@ export class EventTabComponent {
   });
 
   showJson: boolean[] = Array(this.eventsMap().size).fill(false);
+  readonly isTraceEnabledObs = this.featureFlagService.isTraceEnabled();
 
   toggleJson(index: number) {
     this.showJson[index] = !this.showJson[index];

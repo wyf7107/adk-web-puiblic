@@ -104,6 +104,19 @@ export class SidePanelComponent {
   readonly i18n = inject(SidePanelMessagesInjectionToken);
   readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
 
+  // Feature flag references for use in template.
   readonly isAlwaysOnSidePanelEnabledObs =
       this.featureFlagService.isAlwaysOnSidePanelEnabled();
+  readonly isTraceEnabledObs = this.featureFlagService.isTraceEnabled();
+  readonly isArtifactsTabEnabledObs =
+      this.featureFlagService.isArtifactsTabEnabled();
+  readonly isEvalEnabledObs = this.featureFlagService.isEvalEnabled();
+  readonly isTokenStreamingEnabledObs =
+      this.featureFlagService.isTokenStreamingEnabled();
+  readonly isMessageFileUploadEnabledObs =
+      this.featureFlagService.isMessageFileUploadEnabled();
+  readonly isManualStateUpdateEnabledObs =
+      this.featureFlagService.isManualStateUpdateEnabled();
+  readonly isBidiStreamingEnabledObs =
+      this.featureFlagService.isBidiStreamingEnabled
 }

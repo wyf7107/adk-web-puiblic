@@ -44,4 +44,32 @@ export class MockFeatureFlagService implements Partial<FeatureFlagService> {
   isApplicationSelectorEnabled =
       jasmine.createSpy('isApplicationSelectorEnabled')
           .and.returnValue(this.isApplicationSelectorEnabledResponse);
+  isTraceEnabledResponse = new ReplaySubject<boolean>(1);
+  isTraceEnabled =
+      jasmine.createSpy('isTraceEnabled')
+          .and.returnValue(this.isTraceEnabledResponse);
+  isArtifactsTabEnabledResponse = new ReplaySubject<boolean>(1);
+  isArtifactsTabEnabled =
+      jasmine.createSpy('isArtifactsTabEnabled')
+          .and.returnValue(this.isArtifactsTabEnabledResponse);
+  isEvalEnabledResponse = new ReplaySubject<boolean>(1);
+  isEvalEnabled =
+      jasmine.createSpy('isEvalEnabled')
+          .and.returnValue(this.isEvalEnabledResponse);
+  isTokenStreamingEnabledResponse = new ReplaySubject<boolean>(1);
+  isTokenStreamingEnabled =
+      jasmine.createSpy('isTokenStreamingEnabled')
+          .and.returnValue(this.isTokenStreamingEnabledResponse);
+  isMessageFileUploadEnabledResponse = new ReplaySubject<boolean>(1);
+  isMessageFileUploadEnabled =
+      jasmine.createSpy('isMessageFileUploadEnabled')
+          .and.returnValue(this.isMessageFileUploadEnabledResponse);
+  isManualStateUpdateEnabledResponse = new ReplaySubject<boolean>(1);
+  isManualStateUpdateEnabled =
+      jasmine.createSpy('isManualStateUpdateEnabled')
+          .and.returnValue(this.isManualStateUpdateEnabledResponse);
+  isBidiStreamingEnabledResponse = new ReplaySubject<boolean>(1);
+  isBidiStreamingEnabled =
+      jasmine.createSpy('isBidiStreamingEnabled')
+          .and.returnValue(this.isBidiStreamingEnabledResponse);
 }

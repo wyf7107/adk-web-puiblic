@@ -251,17 +251,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     shareReplay(),
   );
 
-  // Import session
-  importSessionEnabledObs: Observable<boolean>;
-
-  // Edit eval tool use
-  isEditFunctionArgsEnabledObs: Observable<boolean>;
-
-  // Session url
-  isSessionUrlEnabledObs: Observable<boolean>;
-
-  // Application selector
-  isApplicationSelectorEnabledObs: Observable<boolean>;
+  // Feature flag references for use in template.
+  readonly importSessionEnabledObs: Observable<boolean>;
+  readonly isEditFunctionArgsEnabledObs: Observable<boolean>;
+  readonly isSessionUrlEnabledObs: Observable<boolean>;
+  readonly isApplicationSelectorEnabledObs: Observable<boolean>;
+  readonly isTokenStreamingEnabledObs: Observable<boolean>;
 
   // Trace detail
   bottomPanelVisible = false;
@@ -294,6 +289,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isSessionUrlEnabledObs = this.featureFlagService.isSessionUrlEnabled();
     this.isApplicationSelectorEnabledObs =
         this.featureFlagService.isApplicationSelectorEnabled();
+    this.isTokenStreamingEnabledObs =
+        this.featureFlagService.isTokenStreamingEnabled();
   }
 
   ngOnInit(): void {

@@ -27,7 +27,9 @@
         @if (traceData()) {
           <mat-button-toggle-group name="fontStyle" aria-label="Font Style" style="scale: 0.8" [(ngModel)]="view">
             <mat-button-toggle value="events">Events</mat-button-toggle>
-            <mat-button-toggle value="trace">Trace</mat-button-toggle>
+            @if (isTraceEnabledObs | async) {
+              <mat-button-toggle value="trace">Trace</mat-button-toggle>
+            }
           </mat-button-toggle-group>
         }
       </div>

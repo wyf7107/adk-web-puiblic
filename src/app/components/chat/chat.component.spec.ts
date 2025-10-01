@@ -143,6 +143,8 @@ describe('ChatComponent', () => {
     mockFeatureFlagService.isImportSessionEnabledResponse.next(true);
     mockFeatureFlagService.isEditFunctionArgsEnabledResponse.next(true);
     mockFeatureFlagService.isSessionUrlEnabledResponse.next(true);
+    mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(true);
+    mockFeatureFlagService.isTokenStreamingEnabledResponse.next(true);
 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -851,6 +853,20 @@ describe('ChatComponent', () => {
       });
       it('should reset edit mode', () => {
         expect(component.isEvalEditMode()).toBe(false);
+      });
+    });
+  });
+
+  describe('Feature Disabling', () => {
+    describe('when token streaming is disabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isTokenStreamingEnabledResponse.next(false);
+        fixture.detectChanges();
+      });
+
+      it('should have the token streaming toggle disabled', () => {
+        const slideToggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
+        expect(slideToggle.componentInstance.disabled).toBe(true);
       });
     });
   });

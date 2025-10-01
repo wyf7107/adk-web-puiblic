@@ -26,12 +26,14 @@
 } @if (appName != "" && showSidePanel) {
 <div class="tabs-container">
   <mat-tab-group (selectedTabChange)="tabChange.emit($event)">
-    <mat-tab class="tabs-header">
-      <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.traceTabLabel }}</span>
-      </ng-template>
-      <app-trace-tab [traceData]="traceData"></app-trace-tab>
-    </mat-tab>
+    @if (isTraceEnabledObs | async) {
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.traceTabLabel }}</span>
+        </ng-template>
+        <app-trace-tab [traceData]="traceData"></app-trace-tab>
+      </mat-tab>
+    }
     <mat-tab class="tabs-header">
       <ng-template mat-tab-label>
         <span class="tab-label">{{ i18n.eventsTabLabel }}</span>
@@ -48,12 +50,14 @@
       </ng-template>
       <app-state-tab [sessionState]="currentSessionState"></app-state-tab>
     </mat-tab>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.artifactsTabLabel }}</span>
-      </ng-template>
-      <app-artifact-tab [artifacts]="artifacts"> </app-artifact-tab>
-    </mat-tab>
+    @if (isArtifactsTabEnabledObs | async) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.artifactsTabLabel }}</span>
+        </ng-template>
+        <app-artifact-tab [artifacts]="artifacts"> </app-artifact-tab>
+      </mat-tab>
+    }
     <mat-tab>
       <ng-template mat-tab-label>
         <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
@@ -67,21 +71,23 @@
       >
       </app-session-tab>
     </mat-tab>
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.evalTabLabel }}</span>
-      </ng-template>
-      <app-eval-tab
-        [appName]="appName"
-        [userId]="userId"
-        [sessionId]="sessionId"
-        (sessionSelected)="sessionSelected.emit($event)"
-        (evalCaseSelected)="evalCaseSelected.emit($event)"
-        (evalSetIdSelected)="evalSetIdSelected.emit($event)"
-        (shouldReturnToSession)="returnToSession.emit($event)"
-        (evalNotInstalledMsg)="evalNotInstalled.emit($event)"
-      ></app-eval-tab>
-    </mat-tab>
+    @if (isEvalEnabledObs | async) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.evalTabLabel }}</span>
+        </ng-template>
+        <app-eval-tab
+          [appName]="appName"
+          [userId]="userId"
+          [sessionId]="sessionId"
+          (sessionSelected)="sessionSelected.emit($event)"
+          (evalCaseSelected)="evalCaseSelected.emit($event)"
+          (evalSetIdSelected)="evalSetIdSelected.emit($event)"
+          (shouldReturnToSession)="returnToSession.emit($event)"
+          (evalNotInstalledMsg)="evalNotInstalled.emit($event)"
+        ></app-eval-tab>
+      </mat-tab>
+    }
   </mat-tab-group>
 </div>
 } @if (this.selectedEvent && showSidePanel) {

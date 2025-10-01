@@ -64,4 +64,32 @@ export class FeatureFlagService {
   isAlwaysOnSidePanelEnabled(): Observable<boolean> {
     return of(false);
   }
+
+  isTraceEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isArtifactsTabEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isEvalEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isTokenStreamingEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isMessageFileUploadEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isManualStateUpdateEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isBidiStreamingEnabled(): Observable<boolean> {
+    return of(true);
+  }
 }

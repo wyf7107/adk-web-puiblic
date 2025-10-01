@@ -15,8 +15,7 @@
 -->
 
 <div class="canvas-container">
-  <div class="canvas-workspace" [class.has-banner]="currentAgentTool()">
-    <!-- Agent Tool Banner -->
+  <div class="canvas-workspace" [class.has-banner]="currentAgentTool()">    <!-- Agent Tool Banner -->
     @if (currentAgentTool()) {
       <div class="agent-tool-banner">
         <div class="banner-content">
@@ -62,12 +61,8 @@
               {{ctx.node.data()?.name || 'root_agent'}}
             </div>
             <div class="action-button-bar">
-              <button matIconButton class="action-btn add-subagent-btn" (click)="addSubAgent(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Add sub-agent"
-                aria-label="Add sub-agent">
-                <mat-icon>smart_toy</mat-icon>
-              </button>
               @if (!isRootAgentForCurrentTab(ctx.node.data()?.name)) {
-                <button matIconButton class="action-btn add-subagent-btn" (click)="openDeleteSubAgentDialog(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Delete sub-agent"
+                <button matIconButton class="action-btn delete-subagent-btn" (click)="openDeleteSubAgentDialog(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Delete sub-agent"
                   aria-label="Delete sub-agent">
                   <mat-icon>delete</mat-icon>
                 </button>

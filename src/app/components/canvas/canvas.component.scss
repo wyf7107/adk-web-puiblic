@@ -256,7 +256,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #8ab4f8;
+    color: #00BBEA;
     font-size: 13px;
 
     mat-icon {
@@ -354,7 +354,7 @@
         font-size: 16px;
         width: 16px;
         height: 16px;
-        color: #8ab4f8;
+        color: #00BBEA;
     }
 }
 
@@ -399,7 +399,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        border: 2px dashed #8ab4f8;
+        border: 2px dashed #00BBEA;
         border-radius: 8px;
         margin: 16px;
         animation: dashMove 1s linear infinite;
@@ -466,7 +466,7 @@
     }
 
     &_selected {
-        border-color: #8ab4f8;
+        border-color: #00BBEA;
         background-color: #222730;
 
         mat-chip {
@@ -475,7 +475,7 @@
     }
 
     &_selected:hover {
-        border-color: #8ab4f8;
+        border-color: #00BBEA;
     }
 }
 
@@ -506,7 +506,7 @@
     border-bottom-color: rgba(255, 255, 255, 0.1);
 
     .node-title {
-        color: #8ab4f8;
+        color: #00BBEA;
     }
 }
 
@@ -539,7 +539,7 @@
 .callback-type {
     font-size: 11px;
     background: rgba(138, 180, 248, 0.2);
-    color: #8ab4f8;
+    color: #00BBEA;
     padding: 2px 6px;
     border-radius: 4px;
     margin-left: 4px;
@@ -631,7 +631,7 @@
         }
     }
 
-    .add-subagent-btn {
+    .delete-subagent-btn {
         &:hover {
             color: #e8eaed;
         }
@@ -666,7 +666,7 @@ mat-chip {
 
     &.selected {
         --mdc-chip-outline-width: 0;
-        background-color: #8ab4f8;
+        background-color: #00BBEA;
         --mdc-chip-label-text-color: #202124;
         --mdc-chip-with-trailing-icon-trailing-icon-color: #202124;
     }
@@ -707,4 +707,21 @@ mat-chip {
 // https://screenshot.googleplex.com/5MfKMEFJf725Xau
 :host ::ng-deep div[nodehandlescontroller][noderesizecontroller].wrapper {
     height: 0px !important;
+}
+
+:host ::ng-deep .interactive-edge {
+    stroke: #00BBEA !important;
+    stroke-width: 2 !important;
+}
+
+:host ::ng-deep .default-handle {
+    stroke: #00BBEA !important;
+    stroke-width:1  !important;
+    fill: rgba(0, 0, 0, 1) !important;
+}
+
+:host ::ng-deep .reconnect-handle {
+    stroke: #00BBEA !important;
+    stroke-width: 2 !important;
+    fill: rgba(0, 187, 234, 0.15) !important;
 }

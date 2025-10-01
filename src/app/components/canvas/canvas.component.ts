@@ -322,7 +322,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       id: newAgentName,
       point: signal({
         x: parentNode.point().x + subAgentIndex * 400,
-        y: parentNode.point().y + 210, // Position below the parent with spacing
+        y: parentNode.point().y + 300, // Position below the parent with spacing
       }),
       type: "html-template",
       data: signal(agentNodeData),

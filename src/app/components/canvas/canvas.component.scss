@@ -500,6 +500,18 @@
     font-weight: 500;
 }
 
+.node-badge {
+    margin-left: 8px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(0, 187, 234, 0.2), rgba(0, 78, 122, 0.4));
+    color: #00BBEA;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
 .tools-container {
     padding: 12px 6px 12px 12px;
 }
@@ -686,7 +698,7 @@ mat-chip {
 .add-subagent-container {
     position: absolute;
     left: 50%;
-    bottom: -58px;
+    bottom: -68px;
     transform: translateX(-50%);
     display: flex;
     justify-content: center;

@@ -15,7 +15,7 @@
 -->
 
 <div class="canvas-container">
-  <div class="canvas-workspace" [class.has-banner]="currentAgentTool()">    <!-- Agent Tool Banner -->
+  <div class="canvas-workspace" [class.has-banner]="currentAgentTool()" (click)="onCanvasClick($event)">    <!-- Agent Tool Banner -->
     @if (currentAgentTool()) {
       <div class="agent-tool-banner">
         <div class="banner-content">
@@ -54,6 +54,7 @@
           selectable
           [class.custom-node_selected]="isNodeSelected(ctx.node)"
           (click)="onCustomTemplateNodeClick(ctx.node, $event)"
+          (pointerdown)="onNodePointerDown(ctx.node, $event)"
         >
           <div class="node-title-wrapper">
             <div class="node-title">

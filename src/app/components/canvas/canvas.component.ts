@@ -172,28 +172,80 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     clickedVflowNode: HtmlTemplateDynamicNode,
     event: MouseEvent,
   ) {
-    if (!clickedVflowNode.data) {
+    if (this.shouldIgnoreNodeInteraction(event.target as HTMLElement | null)) {
       return;
     }
 
-    // If the click is on a tool, the selectTool method will handle it
-    if ((event.target as HTMLElement).closest('mat-chip')) {
+    this.selectAgentNode(clickedVflowNode, { openConfig: true });
+  }
+
+  onNodePointerDown(node: HtmlTemplateDynamicNode, event: PointerEvent) {
+    if (this.shouldIgnoreNodeInteraction(event.target as HTMLElement | null)) {
       return;
     }
 
-    const agentNodeData = this.agentBuilderService.getNode(
-      clickedVflowNode.data().name,
-    );
+    this.selectAgentNode(node, { openConfig: false });
+  }
 
-    if (!!agentNodeData) {
-      this.agentBuilderService.setSelectedTool(undefined);
-      this.agentBuilderService.setSelectedNode(agentNodeData);
+  onCanvasClick(event: MouseEvent) {
+    const target = event.target as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    const interactiveSelectors = [
+      '.custom-node',
+      '.action-button-bar',
+      '.open-panel-btn',
+      '.agent-tool-banner',
+      '.mat-mdc-menu-panel',
+    ];
+
+    if (target.closest(interactiveSelectors.join(','))) {
+      return;
+    }
+
+    this.clearCanvasSelection();
+  }
+
+  private shouldIgnoreNodeInteraction(target: HTMLElement | null): boolean {
+    if (!target) {
+      return false;
+    }
+
+    return !!target.closest('mat-chip');
+  }
+
+  private selectAgentNode(node: HtmlTemplateDynamicNode, options: { openConfig?: boolean } = {}) {
+    if (!node?.data) {
+      return;
+    }
+
+    const agentNodeData = this.agentBuilderService.getNode(node.data().name);
+    if (!agentNodeData) {
+      return;
+    }
+
+    this.agentBuilderService.setSelectedTool(undefined);
+    this.agentBuilderService.setSelectedNode(agentNodeData);
+
+    if (options.openConfig) {
       this.agentBuilderService.requestSideTabChange('config');
-      // this.agentBuilderService.setAgentTools(
-      //   agentNodeData.name,
-      //   agentNodeData.tools || [],
-      // );
     }
+  }
+
+  private clearCanvasSelection() {
+    if (!this.selectedAgents.length && !this.selectedTool && !this.selectedCallback) {
+      return;
+    }
+
+    this.selectedAgents = [];
+    this.selectedTool = undefined;
+    this.selectedCallback = undefined;
+    this.agentBuilderService.setSelectedNode(undefined);
+    this.agentBuilderService.setSelectedTool(undefined);
+    this.agentBuilderService.setSelectedCallback(undefined);
+    this.cdr.markForCheck();
   }
 
   onAddResource(nodeId: string) {

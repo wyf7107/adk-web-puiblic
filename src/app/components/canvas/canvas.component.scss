@@ -459,7 +459,9 @@
     border-radius: 8px;
     align-items: center;
     position: relative;
-    max-height: 245px;
+    max-height: none;
+    padding-bottom: 80px;
+    overflow: visible;
 
     &:hover {
         border-color: #666;
@@ -681,6 +683,49 @@ mat-chip {
     vertical-align: middle;
 }
 
+.add-subagent-container {
+    position: absolute;
+    left: 50%;
+    bottom: -58px;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.add-subagent-container .add-subagent-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #00BBEA;
+    background: radial-gradient(circle at 50% 50%, #1f2330 0%, #131314 100%);
+    color: #00BBEA;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    pointer-events: auto;
+
+    .add-subagent-symbol {
+        font-size: 28px;
+        line-height: 1;
+        font-weight: 400;
+    }
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 187, 234, 0.35);
+        background: radial-gradient(circle at 50% 50%, #222a3a 0%, #16181d 100%);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 187, 234, 0.35);
+    }
+}
+
 .open-panel-btn {
     position: absolute;
     width: 24px;
@@ -707,6 +752,12 @@ mat-chip {
 // https://screenshot.googleplex.com/5MfKMEFJf725Xau
 :host ::ng-deep div[nodehandlescontroller][noderesizecontroller].wrapper {
     height: 0px !important;
+    overflow: visible !important;
+}
+
+:host ::ng-deep foreignObject.selectable,
+:host ::ng-deep foreignObject.selectable > div {
+    overflow: visible !important;
 }
 
 :host ::ng-deep .interactive-edge {

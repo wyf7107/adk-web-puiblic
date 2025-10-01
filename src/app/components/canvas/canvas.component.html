@@ -101,6 +101,49 @@
               }
             }
           </div>
+          <div class="add-subagent-container">
+            <button
+              matIconButton
+              class="add-subagent-btn"
+              [matMenuTriggerFor]="agentMenu"
+              #agentMenuTrigger="matMenuTrigger"
+              matTooltip="Add sub-agent"
+              aria-label="Add sub-agent"
+              (click)="$event.stopPropagation()"
+            >
+              <span class="add-subagent-symbol">+</span>
+            </button>
+          </div>
+          <mat-menu #agentMenu="matMenu">
+            <button
+              mat-menu-item
+              (click)="handleAgentTypeSelection('LlmAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+            >
+              <mat-icon>psychology</mat-icon>
+              <span>LLM Agent</span>
+            </button>
+            <button
+              mat-menu-item
+              (click)="handleAgentTypeSelection('SequentialAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+            >
+              <mat-icon>more_horiz</mat-icon>
+              <span>Sequential Agent</span>
+            </button>
+            <button
+              mat-menu-item
+              (click)="handleAgentTypeSelection('LoopAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+            >
+              <mat-icon>sync</mat-icon>
+              <span>Loop Agent</span>
+            </button>
+            <button
+              mat-menu-item
+              (click)="handleAgentTypeSelection('ParallelAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+            >
+              <mat-icon>density_medium</mat-icon>
+              <span>Parallel Agent</span>
+            </button>
+          </mat-menu>
           <handle type="target" position="top" />
           <handle type="source" position="bottom" />
         </div>

@@ -25,21 +25,21 @@ import { Vflow, HtmlTemplateDynamicNode, Edge } from 'ngx-vflow';
 import { MatIcon } from '@angular/material/icon';
 import { MatChip, MatChipSet } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
-import { AGENT_BUILDER_SERVICE } from '../../core/services/agent-builder.service';
-import * as YAML from 'yaml';
-import { parse } from 'yaml';
-import { firstValueFrom, take, filter, Observable } from 'rxjs';
-import { YamlUtils } from '../../../utils/yaml-utils';
-import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
-import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
-import { AsyncPipe } from '@angular/common';
-import { BuilderAssistantComponent } from '../builder-assistant/builder-assistant.component';
-
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { AGENT_BUILDER_SERVICE } from "../../core/services/agent-builder.service";
+import * as YAML from "yaml";
+import { parse } from "yaml";
+import { firstValueFrom, take, filter, Observable } from "rxjs";
+import { YamlUtils } from "../../../utils/yaml-utils";
+import { ConfirmationDialogComponent } from "../confirmation-dialog/confirmation-dialog.component";
+import { AddToolDialogComponent } from "../add-tool-dialog/add-tool-dialog.component";
+import { AsyncPipe } from "@angular/common";
+import { BuilderAssistantComponent } from "../builder-assistant/builder-assistant.component";
 
 @Component({
-  selector: 'app-canvas',
-  templateUrl: './canvas.component.html',
-  styleUrl: './canvas.component.scss',
+  selector: "app-canvas",
+  templateUrl: "./canvas.component.html",
+  styleUrl: "./canvas.component.scss",
   standalone: true,
   imports: [
     Vflow,
@@ -47,20 +47,25 @@ import { BuilderAssistantComponent } from '../builder-assistant/builder-assistan
     MatChip,
     MatChipSet,
     MatTooltip,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
     AsyncPipe,
     BuilderAssistantComponent,
   ],
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private _snackBar = inject(MatSnackBar);
-  @ViewChild('canvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('svgCanvas', { static: false }) svgCanvasRef!: ElementRef<SVGElement>;
+  @ViewChild("canvas", { static: false })
+  canvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild("svgCanvas", { static: false })
+  svgCanvasRef!: ElementRef<SVGElement>;
   private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   private cdr = inject(ChangeDetectorRef);
 
   @Input() showSidePanel: boolean = true;
   @Input() showBuilderAssistant: boolean = false;
-  @Input() appNameInput: string = '';
+  @Input() appNameInput: string = "";
   @Output() toggleSidePanelRequest = new EventEmitter<void>();
   @Output() builderAssistantCloseRequest = new EventEmitter<void>();
 
@@ -73,7 +78,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   callbackId = 1;
   toolId = 1;
 
-  public appName = '';
+  public appName = "";
 
   public nodes = signal<HtmlTemplateDynamicNode[]>([]);
 
@@ -92,6 +97,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   existingAgent: string | undefined = undefined;
   public toolsMap$: Observable<Map<string, ToolNode[]>>;
 
+  private nodePositions = new Map<string, { x: number; y: number }>();
 
   constructor(
     private dialog: MatDialog,
@@ -99,7 +105,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     private router: Router
   ) {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
-    this.agentBuilderService.getSelectedTool().subscribe(tool => {
+    this.agentBuilderService.getSelectedTool().subscribe((tool) => {
       this.selectedTool = tool;
     });
   }
@@ -115,25 +121,29 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     if (this.appNameInput) {
       this.appName = this.appNameInput;
     }
-    this.agentBuilderService.getNewTabRequest().subscribe(request => {
+    this.agentBuilderService.getNewTabRequest().subscribe((request) => {
       if (request) {
-        const {tabName, currentAgentName} = request;
+        const { tabName, currentAgentName } = request;
         this.switchToAgentToolBoard(tabName, currentAgentName);
       }
     });
 
-    this.agentBuilderService.getTabDeletionRequest().subscribe(agentToolName => {
-      if (agentToolName) {
-        this.deleteAgentToolBoard(agentToolName);
-      }
-    });
+    this.agentBuilderService
+      .getTabDeletionRequest()
+      .subscribe((agentToolName) => {
+        if (agentToolName) {
+          this.deleteAgentToolBoard(agentToolName);
+        }
+      });
 
-    this.agentBuilderService.getSelectedCallback().subscribe(callback => {
+    this.agentBuilderService.getSelectedCallback().subscribe((callback) => {
       this.selectedCallback = callback;
     });
-    this.agentBuilderService.getAgentCallbacks().subscribe(update => {
+    this.agentBuilderService.getAgentCallbacks().subscribe((update) => {
       if (update) {
-        const node = this.nodes().find(node => node.data ? node.data().name === update.agentName : undefined);
+        const node = this.nodes().find((node) =>
+          node.data ? node.data().name === update.agentName : undefined
+        );
         if (node && node.data) {
           const data = node.data();
           data.callbacks = update.callbacks;
@@ -142,35 +152,42 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     });
 
-    this.agentBuilderService.getDeleteSubAgentSubject().subscribe((agentName) => {
-      if (!agentName) {
-        return ;
-      }
+    this.agentBuilderService
+      .getDeleteSubAgentSubject()
+      .subscribe((agentName) => {
+        if (!agentName) {
+          return;
+        }
 
-      this.openDeleteSubAgentDialog(agentName);
-    });
+        this.openDeleteSubAgentDialog(agentName);
+      });
 
-    this.agentBuilderService.getAddSubAgentSubject().subscribe((parentAgentName) => {
-      this.addSubAgent(parentAgentName);
-    });
+    this.agentBuilderService
+      .getAddSubAgentSubject()
+      .subscribe((parentAgentName) => {
+        this.addSubAgent(parentAgentName);
+      });
 
-    this.agentBuilderService.getSelectedNode().subscribe(selectedAgentNode => {
-      this.selectedAgents = this.nodes().filter(node => node.data && node.data().name === selectedAgentNode?.name);
-    });
+    this.agentBuilderService
+      .getSelectedNode()
+      .subscribe((selectedAgentNode) => {
+        this.selectedAgents = this.nodes().filter(
+          (node) => node.data && node.data().name === selectedAgentNode?.name
+        );
+      });
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['appNameInput'] && changes['appNameInput'].currentValue) {
-      this.appName = changes['appNameInput'].currentValue;
+    if (changes["appNameInput"] && changes["appNameInput"].currentValue) {
+      this.appName = changes["appNameInput"].currentValue;
     }
   }
 
-  ngAfterViewInit() {
-  }
+  ngAfterViewInit() {}
 
   onCustomTemplateNodeClick(
     clickedVflowNode: HtmlTemplateDynamicNode,
-    event: MouseEvent,
+    event: MouseEvent
   ) {
     if (this.shouldIgnoreNodeInteraction(event.target as HTMLElement | null)) {
       return;
@@ -194,14 +211,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     }
 
     const interactiveSelectors = [
-      '.custom-node',
-      '.action-button-bar',
-      '.open-panel-btn',
-      '.agent-tool-banner',
-      '.mat-mdc-menu-panel',
+      ".custom-node",
+      ".action-button-bar",
+      ".add-subagent-btn",
+      ".open-panel-btn",
+      ".agent-tool-banner",
+      ".mat-mdc-menu-panel",
     ];
 
-    if (target.closest(interactiveSelectors.join(','))) {
+    if (target.closest(interactiveSelectors.join(","))) {
       return;
     }
 
@@ -213,10 +231,13 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       return false;
     }
 
-    return !!target.closest('mat-chip');
+    return !!target.closest("mat-chip, .add-subagent-btn, .mat-mdc-menu-panel");
   }
 
-  private selectAgentNode(node: HtmlTemplateDynamicNode, options: { openConfig?: boolean } = {}) {
+  private selectAgentNode(
+    node: HtmlTemplateDynamicNode,
+    options: { openConfig?: boolean } = {}
+  ) {
     if (!node?.data) {
       return;
     }
@@ -228,14 +249,30 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     this.agentBuilderService.setSelectedTool(undefined);
     this.agentBuilderService.setSelectedNode(agentNodeData);
+    this.nodePositions.set(agentNodeData.name, { ...node.point() });
 
     if (options.openConfig) {
-      this.agentBuilderService.requestSideTabChange('config');
+      this.agentBuilderService.requestSideTabChange("config");
     }
   }
 
+  handleAgentTypeSelection(
+    agentClass: string,
+    parentAgentName: string | undefined,
+    trigger: MatMenuTrigger,
+    event: MouseEvent
+  ) {
+    event.stopPropagation();
+    trigger?.closeMenu();
+    this.onAgentTypeSelected(agentClass, parentAgentName);
+  }
+
   private clearCanvasSelection() {
-    if (!this.selectedAgents.length && !this.selectedTool && !this.selectedCallback) {
+    if (
+      !this.selectedAgents.length &&
+      !this.selectedTool &&
+      !this.selectedCallback
+    ) {
       return;
     }
 
@@ -252,41 +289,55 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     // This method can be used for general resource addition logic
   }
 
-  addSubAgent(parentAgentName: string) {
+  onAgentTypeSelected(agentClass: string, parentAgentName: string | undefined) {
+    if (!parentAgentName) {
+      return;
+    }
+
+    this.addSubAgent(parentAgentName, agentClass);
+  }
+
+  addSubAgent(parentAgentName: string, agentClass: string = "LlmAgent") {
     // Find the parent node
-    const parentNode: HtmlTemplateDynamicNode = this.nodes().find(node => node.data && node.data().name === parentAgentName) as HtmlTemplateDynamicNode;
+    const parentNode: HtmlTemplateDynamicNode = this.nodes().find(
+      (node) => node.data && node.data().name === parentAgentName
+    ) as HtmlTemplateDynamicNode;
     if (!parentNode || !parentNode.data) return;
 
     const newAgentName = this.agentBuilderService.getNextSubAgentName();
 
     const agentNodeData: AgentNode = {
-        name: newAgentName,
-        agent_class: 'LlmAgent',
-        model: 'gemini-2.5-flash',
-        instruction: 'You are a sub-agent that performs specialized tasks.',
-        isRoot: false,
-        sub_agents: [],
-        tools: []
-      };
+      name: newAgentName,
+      agent_class: agentClass,
+      model: "gemini-2.5-flash",
+      instruction: "You are a sub-agent that performs specialized tasks.",
+      isRoot: false,
+      sub_agents: [],
+      tools: [],
+    };
 
     const subAgentIndex = parentNode.data().sub_agents.length;
 
     const subAgentNode: HtmlTemplateDynamicNode = {
       id: newAgentName,
       point: signal({
-        x: parentNode.point().x + subAgentIndex * 400 + 50,
-        y: parentNode.point().y + 150 + 50 // Position below the parent
+        x: parentNode.point().x + subAgentIndex * 400,
+        y: parentNode.point().y + 210, // Position below the parent with spacing
       }),
-      type: 'html-template',
-      data: signal(agentNodeData)
+      type: "html-template",
+      data: signal(agentNodeData),
     };
+
+    this.nodePositions.set(newAgentName, { ...subAgentNode.point() });
 
     // Add the new node
     this.nodes.set([...this.nodes(), subAgentNode]);
 
     this.agentBuilderService.addNode(agentNodeData);
 
-    const parentAgentNode: AgentNode|undefined = parentNode.data ? this.agentBuilderService.getNode(parentNode.data().name) : undefined;
+    const parentAgentNode: AgentNode | undefined = parentNode.data
+      ? this.agentBuilderService.getNode(parentNode.data().name)
+      : undefined;
     if (!!parentAgentNode) {
       parentAgentNode.sub_agents.push(agentNodeData);
     }
@@ -304,12 +355,14 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     // Auto-select the newly created sub-agent and switch to Config tab
     this.agentBuilderService.setSelectedNode(agentNodeData);
-    this.agentBuilderService.requestSideTabChange('config');
+    this.agentBuilderService.requestSideTabChange("config");
   }
 
   addTool(parentNodeId: string) {
     // Find the parent node
-    const parentNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
+    const parentNode = this.nodes().find(
+      (node) => node.id === parentNodeId
+    ) as HtmlTemplateDynamicNode;
     if (!parentNode) return;
     if (!parentNode.data) return;
 
@@ -318,96 +371,103 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     if (!parentData) return;
 
     const dialogRef = this.dialog.open(AddToolDialogComponent, {
-      width: '500px'
+      width: "500px",
     });
 
-         dialogRef.afterClosed().subscribe(result => {
-       if (result) {
-         if (result.toolType === 'Agent Tool') {
-           // For Agent Tool, show the create agent dialog instead
-           this.createAgentTool(parentData.name);
-         } else {
-           const tool: any = {
-             toolType: result.toolType,
-             name: result.name
-           };
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (result.toolType === "Agent Tool") {
+          // For Agent Tool, show the create agent dialog instead
+          this.createAgentTool(parentData.name);
+        } else {
+          const tool: any = {
+            toolType: result.toolType,
+            name: result.name,
+          };
 
-           this.agentBuilderService.addTool(parentData.name, tool);
+          this.agentBuilderService.addTool(parentData.name, tool);
 
-           // Automatically select the newly created tool
-           this.agentBuilderService.setSelectedTool(tool);
-         }
-       }
-     });
+          // Automatically select the newly created tool
+          this.agentBuilderService.setSelectedTool(tool);
+        }
+      }
+    });
   }
 
   addCallback(parentNodeId: string) {
     // Find the parent node
-    const parentNode = this.nodes().find(node => node.id === parentNodeId) as HtmlTemplateDynamicNode;
+    const parentNode = this.nodes().find(
+      (node) => node.id === parentNodeId
+    ) as HtmlTemplateDynamicNode;
     if (!parentNode) return;
     if (!parentNode.data) return;
 
     const callback = {
       name: `callback_${this.callbackId}`,
-      type: 'before_agent' as const,
-      code: 'def callback_function(callback_context):\n    # Add your callback logic here\n    return None',
-      description: 'Auto-generated callback'
-    }
+      type: "before_agent" as const,
+      code: "def callback_function(callback_context):\n    # Add your callback logic here\n    return None",
+      description: "Auto-generated callback",
+    };
     this.callbackId++;
 
-    const result = this.agentBuilderService.addCallback(parentNode.data().name, callback);
+    const result = this.agentBuilderService.addCallback(
+      parentNode.data().name,
+      callback
+    );
     if (!result.success) {
-      this._snackBar.open(result.error || 'Failed to add callback', 'Close', {
+      this._snackBar.open(result.error || "Failed to add callback", "Close", {
         duration: 3000,
-        panelClass: ['error-snackbar']
+        panelClass: ["error-snackbar"],
       });
     }
   }
 
   createAgentTool(parentAgentName: string) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
-      width: '750px',
-      height: '310px',
+      width: "750px",
+      height: "310px",
       data: {
-        title: 'Create Agent Tool',
-        message: 'Please enter a name for the agent tool:',
-        confirmButtonText: 'Create',
+        title: "Create Agent Tool",
+        message: "Please enter a name for the agent tool:",
+        confirmButtonText: "Create",
         showInput: true,
-        inputLabel: 'Agent Tool Name',
-        inputPlaceholder: 'Enter agent tool name'
-      }
+        inputLabel: "Agent Tool Name",
+        inputPlaceholder: "Enter agent tool name",
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && typeof result === 'string') {
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result && typeof result === "string") {
         this.agentBuilderService.requestNewTab(result, parentAgentName);
       }
     });
   }
 
   deleteTool(agentName: string, tool: any) {
-    const isAgentTool = tool.toolType === 'Agent Tool';
-    const toolDisplayName = isAgentTool ? (tool.toolAgentName || tool.name) : tool.name;
+    const isAgentTool = tool.toolType === "Agent Tool";
+    const toolDisplayName = isAgentTool
+      ? tool.toolAgentName || tool.name
+      : tool.name;
 
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: isAgentTool ? 'Delete Agent Tool' : 'Delete Tool',
+        title: isAgentTool ? "Delete Agent Tool" : "Delete Tool",
         message: isAgentTool
           ? `Are you sure you want to delete the agent tool "${toolDisplayName}"? This will also delete the corresponding board.`
           : `Are you sure you want to delete ${toolDisplayName}?`,
-        confirmButtonText: 'Delete'
+        confirmButtonText: "Delete",
       },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === "confirm") {
         this.deleteToolWithoutDialog(agentName, tool);
       }
     });
   }
 
   private deleteToolWithoutDialog(agentName: string, tool: any) {
-    if (tool.toolType === 'Agent Tool') {
+    if (tool.toolType === "Agent Tool") {
       const agentToolName = tool.toolAgentName || tool.name;
       this.deleteAgentToolAndBoard(agentName, tool, agentToolName);
     } else {
@@ -424,20 +484,27 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   deleteCallback(agentName: string, callback: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: 'Delete Callback',
+        title: "Delete Callback",
         message: `Are you sure you want to delete ${callback.name}?`,
-        confirmButtonText: 'Delete'
+        confirmButtonText: "Delete",
       },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
-        const deleteResult = this.agentBuilderService.deleteCallback(agentName, callback);
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === "confirm") {
+        const deleteResult = this.agentBuilderService.deleteCallback(
+          agentName,
+          callback
+        );
         if (!deleteResult.success) {
-          this._snackBar.open(deleteResult.error || 'Failed to delete callback', 'Close', {
-            duration: 3000,
-            panelClass: ['error-snackbar']
-          });
+          this._snackBar.open(
+            deleteResult.error || "Failed to delete callback",
+            "Close",
+            {
+              duration: 3000,
+              panelClass: ["error-snackbar"],
+            }
+          );
         }
         this.cdr.detectChanges();
       }
@@ -447,24 +514,25 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   openDeleteSubAgentDialog(agentName: string) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
-        title: 'Delete sub agent',
+        title: "Delete sub agent",
         message: `Are you sure you want to delete ${agentName}? This will also delete all the underlying sub agents and tools.`,
-        confirmButtonText: 'Delete'
+        confirmButtonText: "Delete",
       },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === 'confirm') {
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === "confirm") {
         this.deleteSubAgent(agentName);
       }
     });
   }
 
   deleteSubAgent(agentName: string) {
-    const currentNode: AgentNode|undefined = this.agentBuilderService.getNode(agentName);
+    const currentNode: AgentNode | undefined =
+      this.agentBuilderService.getNode(agentName);
 
     if (!currentNode) {
-      return ;
+      return;
     }
 
     const parentNode = this.agentBuilderService.getParentNode(
@@ -475,26 +543,35 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     );
 
     if (!parentNode) {
-      return ;
+      return;
     }
 
-    const parentTemplateNode = this.nodes().find(node => !!node.data && node.data().name === parentNode.name);
+    const parentTemplateNode = this.nodes().find(
+      (node) => !!node.data && node.data().name === parentNode.name
+    );
 
     this.deleteSubAgentHelper(currentNode, parentNode);
 
     // select the parent node if the current selected node is deleted
-    this.agentBuilderService.getSelectedNode()
-      .pipe(take(1), filter(node => !!node))
-      .subscribe(node => {
+    this.agentBuilderService
+      .getSelectedNode()
+      .pipe(
+        take(1),
+        filter((node) => !!node)
+      )
+      .subscribe((node) => {
         if (!this.agentBuilderService.getNodes().includes(node)) {
           this.agentBuilderService.setSelectedNode(parentNode);
         }
-      })
+      });
   }
 
-  deleteSubAgentHelper(agentNode: AgentNode|undefined, parentNode: AgentNode) {
+  deleteSubAgentHelper(
+    agentNode: AgentNode | undefined,
+    parentNode: AgentNode
+  ) {
     if (!agentNode) {
-      return ;
+      return;
     }
 
     // recursive until it's leaf node
@@ -507,7 +584,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.deleteToolWithoutDialog(agentNode.name, tool);
     }
 
-    const subAgentNodeId = this.nodes().find(node => node.data && node.data().name === agentNode.name)?.id;
+    const subAgentNodeId = this.nodes().find(
+      (node) => node.data && node.data().name === agentNode.name
+    )?.id;
 
     //delte node and edge data in the canvas
     const newNodes = this.nodes().filter((node: HtmlTemplateDynamicNode) => {
@@ -515,18 +594,23 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     });
 
     this.nodes.set(newNodes);
+    this.nodePositions.delete(agentNode.name);
 
-    const newEdges = this.edges().filter(edge => edge.target !== subAgentNodeId);
+    const newEdges = this.edges().filter(
+      (edge) => edge.target !== subAgentNodeId
+    );
     this.edges.set(newEdges);
 
-    parentNode.sub_agents = parentNode.sub_agents.filter(subagent => subagent.name !== agentNode.name);
+    parentNode.sub_agents = parentNode.sub_agents.filter(
+      (subagent) => subagent.name !== agentNode.name
+    );
 
     // delete node data in builder service
     this.agentBuilderService.deleteNode(agentNode);
   }
 
   selectTool(tool: any, node: HtmlTemplateDynamicNode) {
-    if (tool.toolType === 'Agent Tool') {
+    if (tool.toolType === "Agent Tool") {
       const agentToolName = tool.name;
       this.switchToAgentToolBoard(agentToolName);
       return;
@@ -557,11 +641,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         this.agentBuilderService.setSelectedNode(agentNodeData);
       }
     }
-    this.agentBuilderService.requestSideTabChange('tools');
+    this.agentBuilderService.requestSideTabChange("tools");
   }
 
   saveAgent(appName: string) {
-    const rootAgent: AgentNode|undefined = this.agentBuilderService.getRootNode();
+    const rootAgent: AgentNode | undefined =
+      this.agentBuilderService.getRootNode();
 
     if (!rootAgent) {
       this._snackBar.open("Please create an agent first.", "OK");
@@ -575,15 +660,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     this.agentService.agentBuild(formData).subscribe((success) => {
       if (success) {
-        this.router.navigate(['/'], {
-          queryParams: { app: appName }
-        }).then(() => {
-          window.location.reload();
-        });
+        this.router
+          .navigate(["/"], {
+            queryParams: { app: appName },
+          })
+          .then(() => {
+            window.location.reload();
+          });
       } else {
         this._snackBar.open("Something went wrong, please try again", "OK");
       }
-    })
+    });
   }
 
   isRootAgent(agentName: string): boolean {
@@ -610,6 +697,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       const yamlData = YAML.parse(yamlContent);
 
       this.agentBuilderService.clear();
+      this.nodePositions.clear();
       this.agentToolBoards.set(new Map());
       this.agentBuilderService.setAgentToolBoards(new Map());
       this.currentAgentTool.set(null);
@@ -618,14 +706,14 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
       // Create root agent from YAML
       const rootAgent: AgentNode = {
-        name: yamlData.name || 'root_agent',
-        agent_class: yamlData.agent_class || 'LlmAgent',
-        model: yamlData.model || 'gemini-2.5-flash',
-        instruction: yamlData.instruction || '',
+        name: yamlData.name || "root_agent",
+        agent_class: yamlData.agent_class || "LlmAgent",
+        model: yamlData.model || "gemini-2.5-flash",
+        instruction: yamlData.instruction || "",
         isRoot: true,
         sub_agents: yamlData.sub_agents || [],
         tools: this.parseToolsFromYaml(yamlData.tools || []),
-        callbacks: this.parseCallbacksFromYaml(yamlData)
+        callbacks: this.parseCallbacksFromYaml(yamlData),
       };
 
       // Add to agent builder service
@@ -635,26 +723,30 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.processAgentToolsFromYaml(rootAgent.tools || [], appName);
 
       this.loadAgentBoard(rootAgent);
-
     } catch (error) {
-      console.error('Error parsing YAML:', error);
+      console.error("Error parsing YAML:", error);
     }
   }
 
   private parseToolsFromYaml(tools: any[]): ToolNode[] {
-    return tools.map(tool => {
+    return tools.map((tool) => {
       const toolNode: ToolNode = {
         name: tool.name,
         toolType: this.determineToolType(tool),
-        toolAgentName: tool.name
+        toolAgentName: tool.name,
       };
 
       // Handle agent tools - extract the actual agent name from config_path
-      if (tool.name === 'AgentTool' && tool.args && tool.args.agent && tool.args.agent.config_path) {
-        toolNode.toolType = 'Agent Tool';
+      if (
+        tool.name === "AgentTool" &&
+        tool.args &&
+        tool.args.agent &&
+        tool.args.agent.config_path
+      ) {
+        toolNode.toolType = "Agent Tool";
         // Extract the agent name from the config_path (e.g., "./at1.yaml" -> "at1")
         const configPath = tool.args.agent.config_path;
-        const agentName = configPath.replace('./', '').replace('.yaml', '');
+        const agentName = configPath.replace("./", "").replace(".yaml", "");
         toolNode.name = agentName; // Use the actual agent name
         toolNode.toolAgentName = agentName;
         toolNode.args = tool.args;
@@ -669,9 +761,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const callbacks: CallbackNode[] = [];
 
     // Look for callback groups at the root level
-    Object.keys(yamlData).forEach(key => {
-      if (key.endsWith('_callbacks') && Array.isArray(yamlData[key])) {
-        const callbackType = key.replace('_callbacks', '');
+    Object.keys(yamlData).forEach((key) => {
+      if (key.endsWith("_callbacks") && Array.isArray(yamlData[key])) {
+        const callbackType = key.replace("_callbacks", "");
 
         yamlData[key].forEach((callbackData: any) => {
           if (callbackData.name) {
@@ -688,19 +780,19 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   private determineToolType(tool: any): string {
-    if (tool.name === 'AgentTool' && tool.args && tool.args.agent) {
-      return 'Agent Tool';
-    } else if (tool.name && tool.name.includes('.') && tool.args) {
-      return 'Custom tool';
-    } else if (tool.name && tool.name.includes('.') && !tool.args) {
+    if (tool.name === "AgentTool" && tool.args && tool.args.agent) {
+      return "Agent Tool";
+    } else if (tool.name && tool.name.includes(".") && tool.args) {
+      return "Custom tool";
+    } else if (tool.name && tool.name.includes(".") && !tool.args) {
       return "Function tool";
     } else {
-      return 'Built-in tool';
+      return "Built-in tool";
     }
   }
 
   private processAgentToolsFromYaml(tools: ToolNode[], appName: string) {
-    const agentTools = tools.filter(tool => tool.toolType === 'Agent Tool');
+    const agentTools = tools.filter((tool) => tool.toolType === "Agent Tool");
 
     for (const agentTool of agentTools) {
       // Create board for agent tool
@@ -715,73 +807,96 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private loadAgentToolConfiguration(agentTool: ToolNode, appName: string) {
     const agentToolName = agentTool.name;
     // Try to fetch the agent tool's YAML file
-    this.agentService.getSubAgentBuilder(appName, `${agentToolName}.yaml`).subscribe({
-      next: (yamlContent: string) => {
-        if (yamlContent) {
-          try {
-            const yamlData = YAML.parse(yamlContent);
+    this.agentService
+      .getSubAgentBuilder(appName, `${agentToolName}.yaml`)
+      .subscribe({
+        next: (yamlContent: string) => {
+          if (yamlContent) {
+            try {
+              const yamlData = YAML.parse(yamlContent);
 
-            const agentToolAgent: AgentNode = {
-              name: yamlData.name || agentToolName,
-              agent_class: yamlData.agent_class || 'LlmAgent',
-              model: yamlData.model || 'gemini-2.5-flash',
-              instruction: yamlData.instruction || `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
-              isRoot: false,
-              sub_agents: yamlData.sub_agents || [],
-              tools: this.parseToolsFromYaml(yamlData.tools || []),
-              callbacks: this.parseCallbacksFromYaml(yamlData),
-              isAgentTool: true,
-              skip_summarization: !!agentTool.args?.['skip_summarization'],
-            };
+              const agentToolAgent: AgentNode = {
+                name: yamlData.name || agentToolName,
+                agent_class: yamlData.agent_class || "LlmAgent",
+                model: yamlData.model || "gemini-2.5-flash",
+                instruction:
+                  yamlData.instruction ||
+                  `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
+                isRoot: false,
+                sub_agents: yamlData.sub_agents || [],
+                tools: this.parseToolsFromYaml(yamlData.tools || []),
+                callbacks: this.parseCallbacksFromYaml(yamlData),
+                isAgentTool: true,
+                skip_summarization: !!agentTool.args?.["skip_summarization"],
+              };
 
-            const currentAgentToolBoards = this.agentToolBoards();
-            currentAgentToolBoards.set(agentToolName, agentToolAgent);
-            this.agentToolBoards.set(currentAgentToolBoards);
-            this.agentBuilderService.setAgentToolBoards(currentAgentToolBoards);
+              const currentAgentToolBoards = this.agentToolBoards();
+              currentAgentToolBoards.set(agentToolName, agentToolAgent);
+              this.agentToolBoards.set(currentAgentToolBoards);
+              this.agentBuilderService.setAgentToolBoards(
+                currentAgentToolBoards
+              );
 
-            this.agentBuilderService.addNode(agentToolAgent);
+              this.agentBuilderService.addNode(agentToolAgent);
 
-            this.processAgentToolsFromYaml(agentToolAgent.tools || [], appName);
+              this.processAgentToolsFromYaml(
+                agentToolAgent.tools || [],
+                appName
+              );
 
-            if (agentToolAgent.sub_agents && agentToolAgent.sub_agents.length > 0) {
-              for (const subAgent of agentToolAgent.sub_agents) {
-                if (subAgent.config_path) {
-                  this.agentService.getSubAgentBuilder(appName, subAgent.config_path).subscribe(a => {
-                    if (a) {
-                      const yamlData = YAML.parse(a) as AgentNode;
-                      this.processAgentToolsFromYaml(this.parseToolsFromYaml(yamlData.tools || []), appName)
-                    }
-                  })
+              if (
+                agentToolAgent.sub_agents &&
+                agentToolAgent.sub_agents.length > 0
+              ) {
+                for (const subAgent of agentToolAgent.sub_agents) {
+                  if (subAgent.config_path) {
+                    this.agentService
+                      .getSubAgentBuilder(appName, subAgent.config_path)
+                      .subscribe((a) => {
+                        if (a) {
+                          const yamlData = YAML.parse(a) as AgentNode;
+                          this.processAgentToolsFromYaml(
+                            this.parseToolsFromYaml(yamlData.tools || []),
+                            appName
+                          );
+                        }
+                      });
+                  }
                 }
               }
+            } catch (error) {
+              console.error(
+                `Error parsing YAML for agent tool ${agentToolName}:`,
+                error
+              );
+              this.createDefaultAgentToolConfiguration(agentTool);
             }
-          } catch (error) {
-            console.error(`Error parsing YAML for agent tool ${agentToolName}:`, error);
+          } else {
             this.createDefaultAgentToolConfiguration(agentTool);
           }
-        } else {
+        },
+        error: (error) => {
+          console.error(
+            `Error loading agent tool configuration for ${agentToolName}:`,
+            error
+          );
           this.createDefaultAgentToolConfiguration(agentTool);
-        }
-      },
-      error: (error) => {
-        console.error(`Error loading agent tool configuration for ${agentToolName}:`, error);
-        this.createDefaultAgentToolConfiguration(agentTool);
-      }
-    });
+        },
+      });
   }
 
   private createDefaultAgentToolConfiguration(agentTool: ToolNode) {
     const agentToolName = agentTool.name;
     const agentToolAgent: AgentNode = {
       name: agentToolName,
-      agent_class: 'LlmAgent',
-      model: 'gemini-2.5-flash',
+      agent_class: "LlmAgent",
+      model: "gemini-2.5-flash",
       instruction: `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
       isRoot: false,
       sub_agents: [],
       tools: [],
       isAgentTool: true,
-      skip_summarization: !!agentTool.args?.['skip_summarization'],
+      skip_summarization: !!agentTool.args?.["skip_summarization"],
     };
 
     const currentAgentToolBoards = this.agentToolBoards();
@@ -792,27 +907,27 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     this.agentBuilderService.addNode(agentToolAgent);
   }
 
-
-
   loadAgentTools(agent: AgentNode) {
     if (!agent.tools) {
-      agent.tools = []
+      agent.tools = [];
     } else {
       // Filter out any tools with empty names
-      agent.tools = agent.tools.filter(tool => tool.name && tool.name.trim() !== '');
-      agent.tools.map(tool => {
+      agent.tools = agent.tools.filter(
+        (tool) => tool.name && tool.name.trim() !== ""
+      );
+      agent.tools.map((tool) => {
         // Preserve Agent Tool type if already set
-        if (tool.toolType === 'Agent Tool') {
+        if (tool.toolType === "Agent Tool") {
           return; // Don't override Agent Tool type
         }
-        if (tool.name.includes('.') && tool.args) {
-          tool.toolType = 'Custom tool';
-        } else if (tool.name.includes('.') && !tool.args) {
-          tool.toolType =  "Function tool";
+        if (tool.name.includes(".") && tool.args) {
+          tool.toolType = "Custom tool";
+        } else if (tool.name.includes(".") && !tool.args) {
+          tool.toolType = "Function tool";
         } else {
-          tool.toolType = "Built-in tool"
+          tool.toolType = "Built-in tool";
         }
-      })
+      });
     }
   }
 
@@ -828,7 +943,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       parentId?: string;
       parentAgent?: AgentNode;
     };
-    const queue: BFSItem[] = [{ node: rootAgent, depth: 1, index: 1, parentId: undefined, parentAgent: undefined }];
+    const queue: BFSItem[] = [
+      {
+        node: rootAgent,
+        depth: 1,
+        index: 1,
+        parentId: undefined,
+        parentAgent: undefined,
+      },
+    ];
 
     const nodes: HtmlTemplateDynamicNode[] = [];
     const edges: Edge[] = [];
@@ -841,10 +964,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       let agentData = node;
       if (node.config_path) {
         try {
-          const subAgentData = await firstValueFrom(this.agentService.getSubAgentBuilder(appName, node.config_path));
+          const subAgentData = await firstValueFrom(
+            this.agentService.getSubAgentBuilder(appName, node.config_path)
+          );
           agentData = parse(subAgentData) as AgentNode;
           if (agentData.tools) {
-            agentData.tools = this.parseToolsFromYaml(agentData.tools || [])
+            agentData.tools = this.parseToolsFromYaml(agentData.tools || []);
           }
 
           this.processAgentToolsFromYaml(agentData.tools || [], appName);
@@ -867,19 +992,24 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       nodeIdCounter++;
       const currentNodeId = nodeIdCounter.toString();
 
+      const savedPosition = this.nodePositions.get(agentData.name);
+      const initialPoint = savedPosition ?? {
+        x: (index - 1) * 350 + 50,
+        y: depth * 150 + 50,
+      };
+
       const vflowNode: HtmlTemplateDynamicNode = {
         id: currentNodeId,
-        point: signal({
-          x: (index - 1) * 350 + 50,
-          y: depth * 150 + 50,
-        }),
-        type: 'html-template',
+        point: signal(initialPoint),
+        type: "html-template",
         data: signal(agentData),
       };
 
-      if (!parentId) {
+      if (!parentId && !savedPosition) {
         vflowNode.point.set({ x: 100, y: 150 });
       }
+
+      this.nodePositions.set(agentData.name, { ...vflowNode.point() });
 
       nodes.push(vflowNode);
 
@@ -915,7 +1045,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   switchToAgentToolBoard(agentToolName: string, currentAgentName?: string) {
-    const currentContext = this.currentAgentTool() || 'main';
+    const currentContext = this.currentAgentTool() || "main";
     if (currentContext !== agentToolName) {
       this.navigationStack.push(currentContext);
     }
@@ -927,8 +1057,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       agentToolAgent = {
         isRoot: false,
         name: agentToolName,
-        agent_class: 'LlmAgent',
-        model: 'gemini-2.5-flash',
+        agent_class: "LlmAgent",
+        model: "gemini-2.5-flash",
         instruction: `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
         sub_agents: [],
         tools: [],
@@ -953,14 +1083,14 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     this.loadAgentBoard(agentToolAgent);
 
     this.agentBuilderService.setSelectedNode(agentToolAgent);
-    this.agentBuilderService.requestSideTabChange('config');
+    this.agentBuilderService.requestSideTabChange("config");
   }
 
   backToMainCanvas() {
     if (this.navigationStack.length > 0) {
       const parentContext = this.navigationStack.pop();
 
-      if (parentContext === 'main') {
+      if (parentContext === "main") {
         this.currentAgentTool.set(null);
         this.isAgentToolMode = false;
 
@@ -969,7 +1099,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           this.loadAgentBoard(rootAgent);
 
           this.agentBuilderService.setSelectedNode(rootAgent);
-          this.agentBuilderService.requestSideTabChange('config');
+          this.agentBuilderService.requestSideTabChange("config");
         }
       } else {
         const agentToolBoards = this.agentToolBoards();
@@ -981,7 +1111,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           this.loadAgentBoard(parentAgent);
 
           this.agentBuilderService.setSelectedNode(parentAgent);
-          this.agentBuilderService.requestSideTabChange('config');
+          this.agentBuilderService.requestSideTabChange("config");
         }
       }
     } else {
@@ -993,12 +1123,13 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         this.loadAgentBoard(rootAgent);
 
         this.agentBuilderService.setSelectedNode(rootAgent);
-        this.agentBuilderService.requestSideTabChange('config');
+        this.agentBuilderService.requestSideTabChange("config");
       }
     }
   }
 
   async loadAgentBoard(agent: AgentNode) {
+    this.captureCurrentNodePositions();
     this.nodes.set([]);
     this.edges.set([]);
 
@@ -1020,10 +1151,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       const agentNode: HtmlTemplateDynamicNode = {
         id: this.nodeId.toString(),
         point: signal({ x: 100, y: 150 }),
-        type: 'html-template',
-        data: signal(agent)
+        type: "html-template",
+        data: signal(agent),
       };
       this.nodes.set([agentNode]);
+      this.nodePositions.set(agent.name, { ...agentNode.point() });
     }
     this.agentBuilderService.setSelectedNode(agent);
   }
@@ -1032,37 +1164,48 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const targetAgent = this.agentBuilderService.getNode(targetAgentName);
 
     if (targetAgent) {
-      if (targetAgent.tools && targetAgent.tools.some(tool => tool.name === agentToolName)) {
+      if (
+        targetAgent.tools &&
+        targetAgent.tools.some((tool) => tool.name === agentToolName)
+      ) {
         return;
       }
 
       const agentTool: ToolNode = {
         name: agentToolName,
-        toolType: 'Agent Tool',
-        toolAgentName: agentToolName
+        toolType: "Agent Tool",
+        toolAgentName: agentToolName,
       };
 
       if (!targetAgent.tools) {
         targetAgent.tools = [];
       }
       targetAgent.tools.push(agentTool);
-      targetAgent.tools = targetAgent.tools.filter(tool => tool.name && tool.name.trim() !== '');
+      targetAgent.tools = targetAgent.tools.filter(
+        (tool) => tool.name && tool.name.trim() !== ""
+      );
 
-      this.agentBuilderService.setAgentTools(targetAgentName, targetAgent.tools);
+      this.agentBuilderService.setAgentTools(
+        targetAgentName,
+        targetAgent.tools
+      );
     }
   }
 
   addAgentToolToRoot(agentToolName: string) {
     const rootAgent = this.agentBuilderService.getRootNode();
     if (rootAgent) {
-      if (rootAgent.tools && rootAgent.tools.some(tool => tool.name === agentToolName)) {
+      if (
+        rootAgent.tools &&
+        rootAgent.tools.some((tool) => tool.name === agentToolName)
+      ) {
         return;
       }
 
       const agentTool: ToolNode = {
         name: agentToolName,
-        toolType: 'Agent Tool',
-        toolAgentName: agentToolName
+        toolType: "Agent Tool",
+        toolAgentName: agentToolName,
       };
 
       if (!rootAgent.tools) {
@@ -1070,7 +1213,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
       rootAgent.tools.push(agentTool);
 
-      this.agentBuilderService.setAgentTools('root_agent', rootAgent.tools);
+      this.agentBuilderService.setAgentTools("root_agent", rootAgent.tools);
     }
   }
 
@@ -1084,14 +1227,20 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const allNodes = this.agentBuilderService.getNodes();
     for (const agent of allNodes) {
       if (agent.tools) {
-        agent.tools = agent.tools.filter(t =>
-          !(t.toolType === 'Agent Tool' && (t.toolAgentName === agentToolName || t.name === agentToolName))
+        agent.tools = agent.tools.filter(
+          (t) =>
+            !(
+              t.toolType === "Agent Tool" &&
+              (t.toolAgentName === agentToolName || t.name === agentToolName)
+            )
         );
         this.agentBuilderService.setAgentTools(agent.name, agent.tools);
       }
     }
 
-    this.navigationStack = this.navigationStack.filter(context => context !== agentToolName);
+    this.navigationStack = this.navigationStack.filter(
+      (context) => context !== agentToolName
+    );
 
     if (this.currentAgentTool() === agentToolName) {
       this.backToMainCanvas();
@@ -1100,10 +1249,13 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   getBackButtonTooltip(): string {
     if (this.navigationStack.length > 0) {
-      const parentContext = this.navigationStack[this.navigationStack.length - 1];
-      return parentContext === 'main' ? 'Back to Main Canvas' : `Back to ${parentContext}`;
+      const parentContext =
+        this.navigationStack[this.navigationStack.length - 1];
+      return parentContext === "main"
+        ? "Back to Main Canvas"
+        : `Back to ${parentContext}`;
     }
-    return 'Back to Main Canvas';
+    return "Back to Main Canvas";
   }
 
   onBuilderAssistantClose(): void {
@@ -1119,10 +1271,24 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           }
         },
         error: (error) => {
-          console.error('Error reloading canvas:', error);
-        }
+          console.error("Error reloading canvas:", error);
+        },
       });
     }
   }
 
+  private captureCurrentNodePositions() {
+    for (const node of this.nodes()) {
+      if (!node?.data) {
+        continue;
+      }
+
+      const data = node.data();
+      if (!data) {
+        continue;
+      }
+
+      this.nodePositions.set(data.name, { ...node.point() });
+    }
+  }
 }

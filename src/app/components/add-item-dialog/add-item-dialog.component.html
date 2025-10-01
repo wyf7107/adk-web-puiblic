@@ -14,17 +14,13 @@
  limitations under the License.
 -->
 
-<h2 mat-dialog-title>Create a new app</h2>
-<mat-dialog-content>
-  Please enter the app name
-</mat-dialog-content>
+<h2 mat-dialog-title class="new-app-title">Create a new app</h2>
+
 <mat-form-field style="padding-left:20px; padding-right: 24px;">
-    <mat-label>App Name</mat-label>
     <input
       [(ngModel)]="newAppName"
       matInput
-      (keydown.enter)="createNewApp()"
-      placeholder="Enter app name">
+      (keydown.enter)="createNewApp()">
       @if (!isNameValid()) {
         <mat-hint style="font-size: 12px; color: #666;">
         Start with a letter or underscore, and contain only letters, digits, and underscores.

@@ -65,3 +65,18 @@ markdown p {
     size: 80
   ));
 }
+
+:root {
+  @include mat.form-field-overrides((
+    disabled-input-text-placeholder-color: orange,
+    filled-active-indicator-color: red,
+  ));
+}
+
+.mdc-line-ripple {
+  display: none;
+}
+
+.mat-mdc-text-field-wrapper {
+  border-radius: 6px !important;
+}

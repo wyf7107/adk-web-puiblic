@@ -20,7 +20,6 @@ import {
   MAT_DIALOG_DATA,
   MatDialogActions,
   MatDialogClose,
-  MatDialogContent,
   MatDialogRef,
   MatDialogTitle
 } from '@angular/material/dialog';
@@ -29,11 +28,10 @@ import { AgentNode } from '../../core/models/AgentBuilder';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AGENT_SERVICE } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-add-item-dialog',
@@ -42,7 +40,6 @@ import { MatIcon } from '@angular/material/icon';
   standalone: true,
   imports: [
     MatDialogTitle,
-    MatDialogContent,
     MatFormField,
     MatInput,
     FormsModule,
@@ -50,7 +47,6 @@ import { MatIcon } from '@angular/material/icon';
     MatButton,
     MatDialogClose,
     MatHint,
-    MatLabel,
   ],
 })
 export class AddItemDialogComponent {

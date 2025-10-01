@@ -46,9 +46,7 @@ describe('ChatPanelComponent', () => {
             MatDialogModule,
             NoopAnimationsModule,
             HttpClientTestingModule,
-            // BEGIN_EXTERNAL
-            // MarkdownModule.forRoot(),
-            // END_EXTERNAL
+            MarkdownModule.forRoot(),
           ],
           providers: [
             {

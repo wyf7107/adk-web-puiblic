@@ -68,23 +68,11 @@
           </mat-select>
         </div>
         <div class="mode-toggle-container">
-          <button
-            mat-flat-button
-            (click)="openAddItemDialog()"
-            class="build-mode-button"
-            matTooltip="Create new agent in builder mode"
-          >
-            + Agent
-          </button>
-          <button
-            mat-flat-button
-            (click)="enterBuilderMode()"
-            class="build-mode-button"
-            matTooltip="Switch to Builder Mode"
-            [disabled]="!selectedAppControl.value || disableBuilderSwitch"
-          >
-            Edit
-          </button>
+          <mat-icon (click)="openAddItemDialog()" 
+          matTooltip="Create new agent in builder mode"
+          style="cursor: pointer; margin-right: 16px;">add</mat-icon>
+          <mat-icon (click)="enterBuilderMode()" 
+          matTooltip="Edit in Builder Mode" style="cursor: pointer; margin-right: 32px;">edit</mat-icon>
         </div>
       </div>
       <app-side-panel

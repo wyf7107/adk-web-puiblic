@@ -18,7 +18,7 @@
 // Builder tabs container
 .builder-tabs-container {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 40px;
   height: calc(95vh - 20px);
   display: flex;
   flex-direction: column;
@@ -31,14 +31,15 @@
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  border-bottom: 1px solid #444746;
 }
 
 .breadcrumb-chip {
   background-color: transparent;
-  color: #9aa0a6;
-  font-family: 'Google Sans Mono', monospace;
-  font-size: 13px;
-  font-weight: 400;
+  color: #5C5F5E;
+  font-family: "Google Sans";
+  font-size: 16px;
+  font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -52,7 +53,7 @@
   }
 
   &.current-agent {
-    color: #8ab4f8;
+    color: #DADCE0;
     font-weight: 500;
   }
 }
@@ -78,10 +79,10 @@
   }
 
   @include mat.form-field-overrides((
-    filled-container-color: #364150,
-    filled-focus-active-indicator-color: #364150,
-    filled-active-indicator-color:#364150,
-    filled-hover-active-indicator-color: #364150
+    filled-container-color: #333537,
+    filled-focus-active-indicator-color: #333537,
+    filled-active-indicator-color:#333537,
+    filled-hover-active-indicator-color: #333537
   ));
 }
 
@@ -104,15 +105,12 @@
 }
 
 
-
-
-
-
 // Configuration form
 .config-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-top: 20px;
 
   .form-row {
     display: flex;
@@ -493,7 +491,8 @@ mat-tab-group {
   padding: 16px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   flex-shrink: 0;
-  max-height: 120px;
+  margin-top: auto;
+  background-color: #202124;
 
   .save-button {
     background-color: #8ab4f8;
@@ -516,3 +515,30 @@ mat-tab-group {
   }
 }
 
+.builder-panel-wrapper {
+  border-bottom: 1px solid #444746;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.panel-title {
+  color: #C4C7C5;
+  font-family: "Google Sans";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  display: flex;
+  justify-content: space-between;
+
+  mat-icon {
+    cursor: pointer;
+  }
+}
+
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+}

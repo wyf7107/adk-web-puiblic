@@ -36,7 +36,7 @@
       </div>
     }
 
-    <mat-tab-group [(selectedIndex)]="selectedTabIndex">
+    <!-- <mat-tab-group [(selectedIndex)]="selectedTabIndex">
       <mat-tab class="tabs-header">
         <ng-template mat-tab-label>
           <span class="tab-label">Config</span>
@@ -47,7 +47,6 @@
           </div>
 
           @if (agentConfig) {
-            <!-- Agent Configuration Form -->
             <div class="config-form">
               <div class="form-row">
                 <mat-form-field class="agent-name-field">
@@ -288,7 +287,86 @@
           }
         </div>
       </mat-tab>
-    </mat-tab-group>
+    </mat-tab-group> -->
+    <div class="content-wrapper">
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          Configuration
+        </div>
+        <div>
+          @if (agentConfig) {
+            <div class="config-form">
+              <div class="form-row">
+                <mat-form-field class="agent-name-field">
+                  <mat-label>Agent Name</mat-label>
+                  <input matInput [(ngModel)]="agentConfig.name"/>
+                </mat-form-field>
+
+                <mat-form-field class="agent-type-field">
+                  <mat-label>Agent Type</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.agent_class">
+                    @for (type of agentTypes; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              @if (agentConfig.agent_class === 'LlmAgent') {
+                <mat-form-field>
+                  <mat-label>Model</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.model">
+                    @for (model of models; track model) {
+                    <mat-option [value]="model">{{model}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
+
+              <mat-form-field>
+                <mat-label>Instructions</mat-label>
+                <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
+              </mat-form-field>
+
+              @if (agentConfig.isAgentTool) {
+                <mat-checkbox [(ngModel)]="agentConfig.skip_summarization">Skip summarization</mat-checkbox>
+              }
+            </div>
+          } 
+        </div>
+      </div>
+
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          <div>
+            Tools
+          </div>
+          <div>
+            <mat-icon>add</mat-icon>
+          </div>
+        </div>
+      </div>
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          <div>
+            Sub Agents
+          </div>
+          <div>
+            <mat-icon>add</mat-icon>
+          </div>
+        </div>
+      </div>
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          <div>
+            Callbacks
+          </div>
+          <div>
+            <mat-icon>add</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <!-- Action Buttons -->
     <div class="action-buttons">

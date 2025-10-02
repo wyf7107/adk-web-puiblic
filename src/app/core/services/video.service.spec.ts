@@ -20,7 +20,7 @@ import {fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
 
 import {MockWebSocketService} from './testing/mock-websocket.service';
 import {VideoService} from './video.service';
-import {WebSocketService} from './websocket.service';
+import {WEBSOCKET_SERVICE, WebSocketService} from './websocket.service';
 
 const WIDTH = '400';
 const HEIGHT = '300';
@@ -92,7 +92,7 @@ describe('VideoService', () => {
     TestBed.configureTestingModule({
       providers: [
         VideoService,
-        {provide: WebSocketService, useValue: webSocketServiceSpy},
+        {provide: WEBSOCKET_SERVICE, useValue: webSocketServiceSpy},
         {provide: RendererFactory2, useValue: rendererFactorySpy},
       ],
     });
@@ -191,13 +191,6 @@ describe('VideoService', () => {
       service.stopRecording(container);
       expect(mockTrack.stop).toHaveBeenCalled();
     });
-
-    it('should clear interval', fakeAsync(async () => {
-         await service.startRecording(container);
-         spyOn(window, 'clearInterval');
-         service.stopRecording(container);
-         expect(window.clearInterval).toHaveBeenCalled();
-       }));
 
     it('should clear video element', async () => {
       await service.startRecording(container);

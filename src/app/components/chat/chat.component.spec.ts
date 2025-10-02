@@ -40,6 +40,7 @@ import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/session.service';
+import {STREAM_CHAT_SERVICE} from '../../core/services/stream-chat.service';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockArtifactService} from '../../core/services/testing/mock-artifact.service';
 import {MockAudioService} from '../../core/services/testing/mock-audio.service';
@@ -50,6 +51,7 @@ import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-f
 import {MockGraphService} from '../../core/services/testing/mock-graph.service';
 import {MockSafeValuesService} from '../../core/services/testing/mock-safevalues.service';
 import {MockSessionService} from '../../core/services/testing/mock-session.service';
+import {MockStreamChatService} from '../../core/services/testing/mock-stream-chat.service';
 import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
 import {MockTraceService} from '../../core/services/testing/mock-trace.service';
 import {MockVideoService} from '../../core/services/testing/mock-video.service';
@@ -108,6 +110,7 @@ describe('ChatComponent', () => {
   let mockAudioService: MockAudioService;
   let mockWebSocketService: MockWebSocketService;
   let mockVideoService: MockVideoService;
+  let mockStreamChatService: MockStreamChatService;
   let mockEventService: MockEventService;
   let mockDownloadService: MockDownloadService;
   let mockEvalService: MockEvalService;
@@ -129,6 +132,7 @@ describe('ChatComponent', () => {
     mockAudioService = new MockAudioService();
     mockWebSocketService = new MockWebSocketService();
     mockVideoService = new MockVideoService();
+    mockStreamChatService = new MockStreamChatService();
     mockEventService = new MockEventService();
     mockDownloadService = new MockDownloadService();
     mockEvalService = new MockEvalService();
@@ -197,6 +201,7 @@ describe('ChatComponent', () => {
             {provide: WEBSOCKET_SERVICE, useValue: mockWebSocketService},
             {provide: VIDEO_SERVICE, useValue: mockVideoService},
             {provide: EVENT_SERVICE, useValue: mockEventService},
+            {provide: STREAM_CHAT_SERVICE, useValue: mockStreamChatService},
             {provide: DOWNLOAD_SERVICE, useValue: mockDownloadService},
             {provide: EVAL_SERVICE, useValue: mockEvalService},
             {provide: TRACE_SERVICE, useValue: mockTraceService},

@@ -16,13 +16,18 @@
  */
 
 import {Injectable} from '@angular/core';
+import {Observable, ReplaySubject} from 'rxjs';
 
-import {AudioService} from '../audio.service';
+import {StreamChatService} from '../stream-chat.service';
 
 @Injectable()
-export class MockAudioService implements Partial<AudioService> {
-  startRecording = jasmine.createSpy('startRecording');
-  stopRecording = jasmine.createSpy('stopRecording');
-  getCombinedAudioBuffer = jasmine.createSpy('getCombinedAudioBuffer');
-  cleanAudioBuffer = jasmine.createSpy('cleanAudioBuffer');
+export class MockStreamChatService implements Partial<StreamChatService> {
+  startAudioChat = jasmine.createSpy('startAudioChat');
+  stopAudioChat = jasmine.createSpy('stopAudioChat');
+  startVideoChat = jasmine.createSpy('startVideoChat');
+  stopVideoChat = jasmine.createSpy('stopVideoChat');
+  closeStream = jasmine.createSpy('closeStream');
+  onStreamCloseResponse = new ReplaySubject<string>(1);
+  onStreamClose = jasmine.createSpy('onStreamClose')
+                      .and.returnValue(this.onStreamCloseResponse);
 }

@@ -47,7 +47,6 @@ import {Session, SessionState} from '../../core/models/Session';
 import {Event as AdkEvent} from '../../core/models/types';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService} from '../../core/services/artifact.service';
-import {AUDIO_SERVICE, AudioService} from '../../core/services/audio.service';
 import {DOWNLOAD_SERVICE, DownloadService} from '../../core/services/download.service';
 import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
@@ -56,9 +55,8 @@ import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
 import {SAFE_VALUES_SERVICE, SafeValuesService} from '../../core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {SESSION_SERVICE, SessionService} from '../../core/services/session.service';
+import {STREAM_CHAT_SERVICE, StreamChatService} from '../../core/services/stream-chat.service';
 import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
-import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
-import {WEBSOCKET_SERVICE, WebSocketService} from '../../core/services/websocket.service';
 import {ResizableBottomDirective} from '../../directives/resizable-bottom.directive';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {ArtifactTabComponent, getMediaTypeFromMimetype, MediaType} from '../artifact-tab/artifact-tab.component';
@@ -265,9 +263,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
       @Inject(SESSION_SERVICE) private sessionService: SessionService,
       @Inject(ARTIFACT_SERVICE) private artifactService: ArtifactService,
-      @Inject(AUDIO_SERVICE) private audioService: AudioService,
-      @Inject(WEBSOCKET_SERVICE) private webSocketService: WebSocketService,
-      @Inject(VIDEO_SERVICE) private videoService: VideoService,
+      @Inject(STREAM_CHAT_SERVICE) private streamChatService: StreamChatService,
       private dialog: MatDialog,
       @Inject(EVENT_SERVICE) private eventService: EventService,
       private route: ActivatedRoute,
@@ -297,7 +293,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.syncSelectedAppFromUrl();
     this.updateSelectedAppUrl();
 
-    this.webSocketService.onCloseReason().subscribe((closeReason) => {
+    this.streamChatService.onStreamClose().subscribe((closeReason) => {
       const error =
         'Please check server log for full details: \n' + closeReason;
       this.openSnackBar(error, 'OK');
@@ -951,7 +947,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.webSocketService.closeConnection();
+    this.streamChatService.closeStream();
   }
 
   onAppSelection(event: any) {
@@ -980,11 +976,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.isAudioRecording = true;
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    this.webSocketService.connect(
-      `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${this.appName}&user_id=${this.userId}&session_id=${this.sessionId}`,
-    );
-    this.audioService.startRecording();
+    this.streamChatService.startAudioChat({
+      appName: this.appName,
+      userId: this.userId,
+      sessionId: this.sessionId,
+    });
     this.messages.update(
         messages =>
             [...messages,
@@ -995,8 +991,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   stopAudioRecording() {
-    this.audioService.stopRecording();
-    this.webSocketService.closeConnection();
+    this.streamChatService.stopAudioChat();
     this.isAudioRecording = false;
   }
 
@@ -1015,12 +1010,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.isVideoRecording = true;
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    this.webSocketService.connect(
-      `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${this.appName}&user_id=${this.userId}&session_id=${this.sessionId}`,
-    );
-    this.videoService.startRecording(videoContainer);
-    this.audioService.startRecording();
+    this.streamChatService.startVideoChat({
+      appName: this.appName,
+      userId: this.userId,
+      sessionId: this.sessionId,
+      videoContainer,
+    });
     this.messages.update(
         messages => [...messages, {role: 'user', text: 'Speaking...'}]);
     this.sessionHasUsedBidi.add(this.sessionId);
@@ -1031,9 +1026,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!videoContainer) {
       return;
     }
-    this.audioService.stopRecording();
-    this.videoService.stopRecording(videoContainer);
-    this.webSocketService.closeConnection();
+    this.streamChatService.stopVideoChat(videoContainer);
     this.isVideoRecording = false;
   }
 

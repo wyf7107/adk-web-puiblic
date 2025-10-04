@@ -49,55 +49,55 @@
       [snapGrid]="[12, 12]"
     >
       <ng-template #nodeTemplate let-ctx nodeHtml>
+        @let nodeData = ctx.node.data?.();
+        @let nodeName = nodeData?.name || 'root_agent';
+        @let toolsMap = toolsMap$ | async;
+        @let tools = getToolsForNode(nodeName, toolsMap);
+        @let hasTools = tools.length > 0;
         <div 
           class="custom-node"
           selectable
           [class.custom-node_selected]="isNodeSelected(ctx.node)"
+          [class.custom-node_has-tools]="hasTools"
           (click)="onCustomTemplateNodeClick(ctx.node, $event)"
           (pointerdown)="onNodePointerDown(ctx.node, $event)"
         >
           <div class="node-title-wrapper">
             <div class="node-title">
               <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
-              {{ctx.node.data()?.name || 'root_agent'}}
-              @if (isRootAgent(ctx.node.data()?.name)) {
+              {{nodeName}}
+              @if (isRootAgent(nodeName)) {
                 <span class="node-badge">Root</span>
               }
             </div>
             <div class="action-button-bar">
-              @if (!isRootAgentForCurrentTab(ctx.node.data()?.name)) {
-                <button matIconButton class="action-btn delete-subagent-btn" (click)="openDeleteSubAgentDialog(ctx.node.data()?.name); $event.stopPropagation()" matTooltip="Delete sub-agent"
+              @if (!isRootAgentForCurrentTab(nodeName)) {
+                <button matIconButton class="action-btn delete-subagent-btn" (click)="openDeleteSubAgentDialog(nodeName); $event.stopPropagation()" matTooltip="Delete sub-agent"
                   aria-label="Delete sub-agent">
                   <mat-icon>delete</mat-icon>
                 </button>
               }
             </div>
           </div>
-          <div class="tools-container">
-            @if (toolsMap$ | async; as toolsMap) {
-              @if (ctx.node.data) {
-                @if (toolsMap.get(ctx.node.data().name); as tools) {
-                  @if (tools.length > 0) {
-                    <mat-chip-set>
-                      @for (tool of tools.slice(0, 2); track tool) {
-                        <mat-chip
-                          (click)="selectTool(tool, ctx.node)"
-                          [class.selected]="tool === selectedTool">
-                          <span class="tool-name-label">{{tool.name}}</span>
-                          <button matChipRemove (click)="deleteTool(ctx.node.data().name, tool); $event.stopPropagation()">
-                            <mat-icon>cancel</mat-icon>
-                          </button>
-                        </mat-chip>
-                      }
-                      @if (tools.length > 2) {
-                        <mat-chip (click)="openToolsTab(ctx.node)">...</mat-chip>
-                      }
-                    </mat-chip-set>
-                  }
+          @if (hasTools) {
+            <div class="tools-container">
+              <mat-chip-set>
+                @for (tool of tools.slice(0, 2); track tool.name) {
+                  <mat-chip
+                    (click)="selectTool(tool, ctx.node)"
+                    [class.selected]="tool === selectedTool">
+                    <span class="tool-name-label">{{tool.name}}</span>
+                    <button matChipRemove (click)="deleteTool(nodeName, tool); $event.stopPropagation()">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
                 }
-              }
-            }
-          </div>
+                @if (tools.length > 2) {
+                  <mat-chip (click)="openToolsTab(ctx.node)">...</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
           @if (isNodeSelected(ctx.node)) {
             <div class="add-subagent-container">
               <button
@@ -143,8 +143,12 @@
               </mat-menu>
             </div>
           }
-          <handle type="target" position="top" />
-          <handle type="source" position="bottom" />
+          @if (shouldShowHandle(ctx.node, 'target')) {
+            <handle type="target" position="top" />
+          }
+          @if (shouldShowHandle(ctx.node, 'source')) {
+            <handle type="source" position="bottom" />
+          }
         </div>
       </ng-template>
     </vflow>

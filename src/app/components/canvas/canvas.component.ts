@@ -691,6 +691,43 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return this.isRootAgent(agentName);
   }
 
+  shouldShowHandle(
+    node: HtmlTemplateDynamicNode,
+    position: 'source' | 'target'
+  ): boolean {
+    const nodeData = node.data ? node.data() : undefined;
+    const nodeName = nodeData?.name;
+    const isRoot = nodeName ? this.isRootAgent(nodeName) : false;
+
+    if (position === 'target') {
+      return !isRoot;
+    }
+
+    if (!isRoot) {
+      return true;
+    }
+
+    const nodeId = node.id;
+    if (!nodeId) {
+      return false;
+    }
+
+    return this.edges().some(
+      (edge) => edge.source === nodeId || edge.target === nodeId
+    );
+  }
+
+  getToolsForNode(
+    nodeName: string | undefined,
+    toolsMap: Map<string, ToolNode[]> | null | undefined
+  ): ToolNode[] {
+    if (!nodeName || !toolsMap) {
+      return [];
+    }
+
+    return toolsMap.get(nodeName) ?? [];
+  }
+
   loadFromYaml(yamlContent: string, appName: string) {
     try {
       // Parse the YAML content

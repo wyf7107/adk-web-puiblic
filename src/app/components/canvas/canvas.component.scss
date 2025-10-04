@@ -460,7 +460,7 @@
     align-items: center;
     position: relative;
     max-height: none;
-    padding-bottom: 80px;
+    padding-bottom: 0;
     overflow: visible;
 
     &:hover {
@@ -478,6 +478,10 @@
 
     &_selected:hover {
         border-color: #00BBEA;
+    }
+
+    &_has-tools {
+        padding-bottom: 24px;
     }
 }
 

@@ -486,6 +486,11 @@
     }
 }
 
+:host ::ng-deep .default-group-node {
+    background-color: #1C1C1C !important;
+    border: 2px solid #3E3E3E !important;
+}
+
 .node-title-wrapper {
     
     padding-top: 12px;
@@ -794,4 +799,31 @@ mat-chip {
     stroke: #00BBEA !important;
     stroke-width: 2 !important;
     fill: rgba(0, 187, 234, 0.15) !important;
+}
+:host ::ng-deep .workflow-group-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    color: #c4c7c5;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+:host ::ng-deep .workflow-group-placeholder__button {
+    border: 2px solid #00BBEA;
+    background-color: rgba(0, 187, 234, 0.1);
+    color: #00BBEA;
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+:host ::ng-deep .workflow-group-placeholder__label {
+    font-size: 14px;
+    font-weight: 500;
 }

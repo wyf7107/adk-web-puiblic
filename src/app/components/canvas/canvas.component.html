@@ -40,28 +40,76 @@
         >left_panel_open</span
       >
     }
-    @if (nodes().length > 0) {
+    @if (vflowNodes().length > 0) {
     <vflow 
       view="auto"
-      [nodes]="nodes()"
+      [nodes]="vflowNodes()"
       [edges]="edges()"
       [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }"
       [snapGrid]="[12, 12]"
     >
       <ng-template #nodeTemplate let-ctx nodeHtml>
         @let nodeData = ctx.node.data?.();
-        @let nodeName = nodeData?.name || 'root_agent';
-        @let toolsMap = toolsMap$ | async;
-        @let tools = getToolsForNode(nodeName, toolsMap);
-        @let hasTools = tools.length > 0;
-        <div 
-          class="custom-node"
-          selectable
-          [class.custom-node_selected]="isNodeSelected(ctx.node)"
-          [class.custom-node_has-tools]="hasTools"
-          (click)="onCustomTemplateNodeClick(ctx.node, $event)"
-          (pointerdown)="onNodePointerDown(ctx.node, $event)"
-        >
+        @if (nodeData?.kind === 'workflow-group-placeholder') {
+          <div class="workflow-group-placeholder" (click)="$event.stopPropagation()">
+            @let parentName = nodeData.parentAgentName;
+            <button
+              matIconButton
+              class="workflow-group-placeholder__button"
+              [matMenuTriggerFor]="workflowGroupMenu"
+              #workflowGroupMenuTrigger="matMenuTrigger"
+              aria-label="Add sub-agent"
+              (click)="$event.stopPropagation()"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+            <span class="workflow-group-placeholder__label">Add sub-agent</span>
+            <mat-menu #workflowGroupMenu="matMenu">
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('LlmAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>psychology</mat-icon>
+                <span>LLM Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('SequentialAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>more_horiz</mat-icon>
+                <span>Sequential Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('LoopAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>sync</mat-icon>
+                <span>Loop Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('ParallelAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>density_medium</mat-icon>
+                <span>Parallel Agent</span>
+              </button>
+            </mat-menu>
+            <handle type="target" position="top" />
+            <handle type="source" position="bottom" />
+          </div>
+        } @else {
+          @let nodeName = nodeData?.name || 'root_agent';
+          @let toolsMap = toolsMap$ | async;
+          @let tools = getToolsForNode(nodeName, toolsMap);
+          @let hasTools = tools.length > 0;
+          <div 
+            class="custom-node"
+            selectable
+            [class.custom-node_selected]="isNodeSelected(ctx.node)"
+            [class.custom-node_has-tools]="hasTools"
+            (click)="onCustomTemplateNodeClick(ctx.node, $event)"
+            (pointerdown)="onNodePointerDown(ctx.node, $event)"
+          >
           <div class="node-title-wrapper">
             <div class="node-title">
               <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
@@ -150,11 +198,12 @@
             <handle type="source" position="bottom" />
           }
         </div>
+        }
       </ng-template>
     </vflow>
     }
 
-    @if (nodes().length === 0) {
+    @if (vflowNodes().length === 0) {
     <div class="canvas-instructions">
       <div class="instruction-content">
         <mat-icon class="instruction-icon">touch_app</mat-icon>

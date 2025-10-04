@@ -454,8 +454,8 @@
 
 .custom-node {
     width: 340px;
-    background: #2a2a2a;
-    border: 2px solid #444;
+  background: rgba(85, 107, 116, 0.4);
+    border: 1px solid #474747;    
     border-radius: 8px;
     align-items: center;
     position: relative;
@@ -468,8 +468,9 @@
     }
 
     &_selected {
+        border: 2px solid;
         border-color: #00BBEA;
-        background-color: #222730;
+       
 
         mat-chip {
             --mdc-chip-outline-color: rgba(255, 255, 255, 0.1);
@@ -486,7 +487,7 @@
 }
 
 .node-title-wrapper {
-    border-bottom: 1px solid #444;
+    
     padding-top: 12px;
     padding-bottom: 12px;
     border-radius: 8px 8px 0 0;
@@ -496,6 +497,7 @@
 }
 
 .node-title {
+    
     padding-left: 12px;
     padding-right: 12px;
     display: flex;
@@ -518,6 +520,7 @@
 
 .tools-container {
     padding: 12px 6px 12px 12px;
+    border-top: 1px solid #444;
 }
 
 .custom-node_selected .node-title-wrapper {

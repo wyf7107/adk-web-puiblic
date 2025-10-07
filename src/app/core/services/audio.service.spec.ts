@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
 import {AUDIO_WORKLET_MODULE_PATH, AudioService} from './audio.service';
 import {MockWebSocketService} from './testing/mock-websocket.service';
@@ -61,7 +61,9 @@ describe('AudioService', () => {
     if (!navigator.mediaDevices) {
       (navigator as any).mediaDevices = {};
     }
-    spyOn(navigator.mediaDevices, 'getUserMedia').and.resolveTo(mockStream);
+    navigator.mediaDevices.getUserMedia =
+        jasmine.createSpy('getUserMedia')
+            .and.returnValue(Promise.resolve(mockStream));
     spyOn(window, 'AudioContext').and.returnValue(mockAudioContext);
     spyOn(window, 'AudioWorkletNode').and.returnValue(mockWorkletNode);
     mockAudioContext.audioWorklet.addModule.and.resolveTo();

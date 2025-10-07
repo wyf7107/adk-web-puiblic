@@ -16,7 +16,11 @@
  */
 
 import {ElementRef} from '@angular/core';
-import {fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
+
+import {URLUtil} from '../../../utils/url-util';
+import {fakeAsync,
+        tick} from '../../testing/utils';
 
 import {AUDIO_SERVICE} from './audio.service';
 import {StreamChatService} from './stream-chat.service';
@@ -35,6 +39,7 @@ describe('StreamChatService', () => {
 
 
   beforeEach(() => {
+    spyOn(URLUtil, 'getWSServerUrl').and.returnValue('localhost:9876');
     mockWebSocketService = new MockWebSocketService();
     mockAudioService = new MockAudioService();
     mockVideoService = new MockVideoService();

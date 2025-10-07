@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import {ElementRef, Renderer2, RendererFactory2,} from '@angular/core';
-import {fakeAsync, flush, TestBed, tick} from '@angular/core/testing';
+import {ElementRef, Renderer2, RendererFactory2} from '@angular/core';
+import {TestBed} from '@angular/core/testing';
 
 import {MockWebSocketService} from './testing/mock-websocket.service';
 import {VideoService} from './video.service';
@@ -84,7 +84,9 @@ describe('VideoService', () => {
     if (!navigator.mediaDevices) {
       (navigator as any).mediaDevices = {};
     }
-    spyOn(navigator.mediaDevices, 'getUserMedia').and.resolveTo(mockStream);
+    navigator.mediaDevices.getUserMedia =
+        jasmine.createSpy('getUserMedia')
+            .and.returnValue(Promise.resolve(mockStream));
     spyOn(window, 'MediaRecorder').and.returnValue(mockMediaRecorder);
 
     container = new ElementRef(document.createElement('div'));

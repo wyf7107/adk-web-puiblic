@@ -616,6 +616,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       return;
     }
 
+    // Open edit dialog for Function tool and Built-in tool
+    if (tool.toolType === 'Function tool' || tool.toolType === 'Built-in tool') {
+      if (node.data) {
+        const agentNodeData = this.agentBuilderService.getNode(node.data().name);
+        if (agentNodeData) {
+          this.editTool(tool, agentNodeData);
+        }
+      }
+      return;
+    }
+
     if (node.data) {
       const agentNodeData = this.agentBuilderService.getNode(node.data().name);
       if (agentNodeData) {
@@ -623,6 +634,29 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     }
     this.agentBuilderService.setSelectedTool(tool);
+  }
+
+  editTool(tool: any, agentNode: AgentNode) {
+    const dialogRef = this.dialog.open(AddToolDialogComponent, {
+      width: '500px',
+      data: {
+        toolType: tool.toolType,
+        toolName: tool.name,
+        isEditMode: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.isEditMode) {
+        // Update the tool name
+        const toolIndex = agentNode.tools?.findIndex(t => t.name === tool.name);
+        if (toolIndex !== undefined && toolIndex !== -1 && agentNode.tools) {
+          agentNode.tools[toolIndex].name = result.name;
+          // Trigger update in the service
+          this.agentBuilderService.setAgentTools(agentNode.name, agentNode.tools);
+        }
+      }
+    });
   }
 
   selectCallback(callback: any, node: HtmlTemplateDynamicNode) {

@@ -42,6 +42,8 @@ import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.compo
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 import { JsonEditorComponent } from '../json-editor/json-editor.component';
 import { FEATURE_FLAG_SERVICE } from '../../core/services/feature-flag.service';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -68,6 +70,10 @@ import { FEATURE_FLAG_SERVICE } from '../../core/services/feature-flag.service';
     MatTabGroup,
     MatTabLabel,
     MatTooltip,
+    MatMenu,
+    MatMenuTrigger,
+    MatMenuItem,
+    MatChipsModule
   ],
   templateUrl: './builder-tabs.component.html',
   styleUrl: './builder-tabs.component.scss',
@@ -405,31 +411,58 @@ export class BuilderTabsComponent {
       return;
     }
 
+    // Open edit dialog for Function tool and Built-in tool
+    if (tool.toolType === 'Function tool' || tool.toolType === 'Built-in tool') {
+      this.editTool(tool);
+      return;
+    }
+
     this.agentBuilderService.setSelectedTool(tool);
   }
 
-  addTool() {
+  editTool(tool: ToolNode) {
+    if (!this.agentConfig) return;
+
+    const dialogRef = this.dialog.open(AddToolDialogComponent, {
+      width: '500px',
+      data: {
+        toolType: tool.toolType,
+        toolName: tool.name,
+        isEditMode: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.isEditMode) {
+        // Update the tool name
+        const toolIndex = this.agentConfig!.tools?.findIndex(t => t.name === tool.name);
+        if (toolIndex !== undefined && toolIndex !== -1 && this.agentConfig!.tools) {
+          this.agentConfig!.tools[toolIndex].name = result.name;
+          // Trigger update in the service
+          this.agentBuilderService.setAgentTools(this.agentConfig!.name, this.agentConfig!.tools);
+        }
+      }
+    });
+  }
+
+  addTool(toolType: string) {
     if (this.agentConfig) {
       const dialogRef = this.dialog.open(AddToolDialogComponent, {
-        width: '500px'
+        width: '500px',
+        data: {toolType: toolType}
       });
 
         dialogRef.afterClosed().subscribe(result => {
           if (result) {
-            if (result.toolType === 'Agent Tool') {
-              // For Agent Tool, show the create agent dialog instead
-              this.createAgentTool();
-            } else {
-              const tool: any = {
-                toolType: result.toolType,
-                name: result.name
-              };
+            const tool: any = {
+              toolType: result.toolType,
+              name: result.name
+            };
 
-              this.agentBuilderService.addTool(this.agentConfig!.name, tool);
+            this.agentBuilderService.addTool(this.agentConfig!.name, tool);
 
-              // Automatically select the newly created tool
-              this.agentBuilderService.setSelectedTool(tool);
-            }
+            // Automatically select the newly created tool
+            this.agentBuilderService.setSelectedTool(tool);
           }
         });
     }

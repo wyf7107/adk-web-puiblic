@@ -13,31 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@use '@angular/material' as mat;
 
-.tool-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 400px;
-  max-width: 600px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-mat-dialog-content {
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-mat-dialog-actions {
-  padding: 16px 24px;
-  margin: 0;
-}
-
-mat-form-field {
-  margin-top: 8px !important;
+.dialog-title {
+    color: white !important;
+    font-family: 'Google Sans';
+    font-size: 24px;
 }

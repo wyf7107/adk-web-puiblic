@@ -252,6 +252,60 @@
   padding-right: 8px; /* Add some space between text and delete button */
 }
 
+// Tools chips styling
+.tools-chips-container {
+  margin-top: 12px;
+  padding: 0 4px;
+}
+
+::ng-deep .tools-chips-container {
+  .mat-mdc-chip {
+    background-color: #303030;
+    color: #e8eaed;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 4px;
+
+    &:hover {
+      background-color: #3c4043;
+    }
+  }
+
+  .mat-mdc-chip-action-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tool-chip-name {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tool-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .mat-mdc-chip-remove {
+    opacity: 1;
+    color: #9aa0a6;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      color: #e8eaed;
+    }
+  }
+}
+
 .back-button {
   margin-bottom: 16px;
 }

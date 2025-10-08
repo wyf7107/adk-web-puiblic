@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -43,17 +43,10 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatLabel,
   ],
 })
-export class AddToolDialogComponent {
+export class AddToolDialogComponent implements OnInit{
   toolName = '';
-  toolType = 'Custom tool';
+  toolType = 'Function tool';
   selectedBuiltInTool = 'google_search';
-
-  toolTypes = [
-    'Custom tool',
-    'Function tool',
-    'Built-in tool',
-    'Agent Tool'
-  ];
 
   builtInTools = [
     'EnterpriseWebSearchTool',
@@ -70,20 +63,39 @@ export class AddToolDialogComponent {
     'VertexAiSearchTool',
   ];
 
+  isEditMode = false;
+
   constructor(
+    @Inject(MAT_DIALOG_DATA)
+    public data: {toolType: string, toolName?: string, isEditMode?: boolean},
     public dialogRef: MatDialogRef<AddToolDialogComponent>,
   ) {}
 
+
+  ngOnInit() {
+    this.toolType = this.data.toolType;
+    this.isEditMode = this.data.isEditMode || false;
+
+    if (this.isEditMode && this.data.toolName) {
+      if (this.toolType === 'Function tool') {
+        this.toolName = this.data.toolName;
+      } else if (this.toolType === 'Built-in tool') {
+        this.selectedBuiltInTool = this.data.toolName;
+      }
+    }
+  }
+
   addTool() {
-    if (this.toolType === 'Custom tool' && !this.toolName.trim()) {
+    if (this.toolType === 'Function tool' && !this.toolName.trim()) {
       return;
     }
 
     const result: any = {
-      toolType: this.toolType
+      toolType: this.toolType,
+      isEditMode: this.isEditMode
     };
 
-    if (this.toolType === 'Custom tool' || this.toolType === 'Function tool') {
+    if (this.toolType === 'Function tool') {
       result.name = this.toolName.trim();
     } else if (this.toolType === 'Built-in tool') {
       result.name = this.selectedBuiltInTool;
@@ -97,6 +109,6 @@ export class AddToolDialogComponent {
   }
 
   createDisabled() {
-    return this.toolType === 'Custom Tool' && !this.toolName.trim();
+    return this.toolType === 'Function tool' && !this.toolName.trim();
   }
 }

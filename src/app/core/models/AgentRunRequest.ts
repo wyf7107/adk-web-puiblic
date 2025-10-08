@@ -19,8 +19,15 @@ export interface AgentRunRequest {
   appName: string;
   userId: string;
   sessionId: string;
-  newMessage: any;
+  newMessage: {
+    parts: Array<{
+      text?: string,
+      'function_response'?: {id?: string; name?: string; response?: any}
+    }>,
+    role: string,
+  };
   functionCallEventId?: string;
   streaming?: boolean;
   stateDelta?: any;
+  invocationId?: string;
 }

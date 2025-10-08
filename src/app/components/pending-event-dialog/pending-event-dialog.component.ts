@@ -79,6 +79,7 @@ export class PendingEventDialogComponent {
         'role': 'user',
         'parts': [],
       },
+      invocationId: this.data.invocationId
     };
     if (this.selectedEvent.response) {
       req.functionCallEventId = this.functionCallEventId;
@@ -92,8 +93,7 @@ export class PendingEventDialogComponent {
     }
 
     this.agentService.runSse(req).subscribe({
-      next: async (chunk) => {
-        const chunkJson = JSON.parse(chunk);
+      next: async (chunkJson) => {
         this.response.push(chunkJson);
       },
       error: (err) => console.error('SSE error:', err),

@@ -542,3 +542,42 @@ mat-tab-group {
   flex: 1;
   overflow-y: auto;
 }
+
+.drawer-logo {
+  margin-left: 9px;
+  display: flex;
+  align-items: center;
+
+  img {
+    margin-right: 9px;
+  }
+
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: 0.1px;
+}
+
+.drawer-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  @include mat.button-overrides(
+    (
+      filled-container-color: var(--side-panel-button-filled-container-color),
+      filled-label-text-color: var(--side-panel-button-filled-label-text-color),
+    )
+  );
+
+  .mat-icon {
+    width: 36px;
+    height: 36px;
+    color: var(--side-panel-mat-icon-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

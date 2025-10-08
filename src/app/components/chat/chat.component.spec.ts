@@ -15,14 +15,17 @@
  * limitations under the License.
  */
 
+
 import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {Component} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
 import {EvalCase} from '../../core/models/Eval';
@@ -33,14 +36,35 @@ import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/download.s
 import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
 import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from '../../core/services/feature-flag.service';
+import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
+import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
+import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/session.service';
+import {STREAM_CHAT_SERVICE} from '../../core/services/stream-chat.service';
+import {MockAgentService} from '../../core/services/testing/mock-agent.service';
+import {MockArtifactService} from '../../core/services/testing/mock-artifact.service';
+import {MockAudioService} from '../../core/services/testing/mock-audio.service';
+import {MockDownloadService} from '../../core/services/testing/mock-download.service';
+import {MockEvalService} from '../../core/services/testing/mock-eval.service';
+import {MockEventService} from '../../core/services/testing/mock-event.service';
+import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
+import {MockGraphService} from '../../core/services/testing/mock-graph.service';
+import {MockSafeValuesService} from '../../core/services/testing/mock-safevalues.service';
+import {MockSessionService} from '../../core/services/testing/mock-session.service';
+import {MockStreamChatService} from '../../core/services/testing/mock-stream-chat.service';
+import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
+import {MockTraceService} from '../../core/services/testing/mock-trace.service';
+import {MockVideoService} from '../../core/services/testing/mock-video.service';
+import {MockWebSocketService} from '../../core/services/testing/mock-websocket.service';
 import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/websocket.service';
-import {AGENT_BUILDER_SERVICE, AgentBuilderService} from '../../core/services/agent-builder.service';
-import {Component} from '@angular/core';
-
+import {fakeAsync,
+        tick} from '../../testing/utils';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
+import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
+import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
+import {SidePanelComponent} from '../side-panel/side-panel.component';
 
 import {ChatComponent} from './chat.component';
 
@@ -81,105 +105,55 @@ const NEW_RESPONSE = 'new response';
 describe('ChatComponent', () => {
   let component: ChatComponent;
   let fixture: ComponentFixture<ChatComponent>;
-  let mockSessionService: jasmine.SpyObj<SessionService>;
-  let mockArtifactService: jasmine.SpyObj<ArtifactService>;
-  let mockAudioService: jasmine.SpyObj<AudioService>;
-  let mockWebSocketService: jasmine.SpyObj<WebSocketService>;
-  let mockVideoService: jasmine.SpyObj<VideoService>;
-  let mockEventService: jasmine.SpyObj<EventService>;
-  let mockDownloadService: jasmine.SpyObj<DownloadService>;
-  let mockEvalService: jasmine.SpyObj<EvalService>;
-  let mockTraceService: jasmine.SpyObj<TraceService>;
-  let mockAgentService: jasmine.SpyObj<AgentService>;
-  let mockFeatureFlagService: jasmine.SpyObj<FeatureFlagService>;
+  let mockSessionService: MockSessionService;
+  let mockArtifactService: MockArtifactService;
+  let mockAudioService: MockAudioService;
+  let mockWebSocketService: MockWebSocketService;
+  let mockVideoService: MockVideoService;
+  let mockStreamChatService: MockStreamChatService;
+  let mockEventService: MockEventService;
+  let mockDownloadService: MockDownloadService;
+  let mockEvalService: MockEvalService;
+  let mockTraceService: MockTraceService;
+  let mockAgentService: MockAgentService;
+  let mockFeatureFlagService: MockFeatureFlagService;
+  let mockStringToColorService: MockStringToColorService;
+  let mockSafeValuesService: MockSafeValuesService;
   let mockDialog: jasmine.SpyObj<MatDialog>;
   let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockLocation: jasmine.SpyObj<Location>;
-  let mockAgentBuilderService: jasmine.SpyObj<AgentBuilderService>;
+  let graphService: MockGraphService;
 
   beforeEach(async () => {
-    mockSessionService = jasmine.createSpyObj('SessionService', {
-      createSession: of({id: SESSION_1_ID, state: {}}),
-      getSession: of({}),
-      deleteSession: of({}),
-      listSessions: of([]),
-      importSession: of({}),
-    });
-    mockArtifactService = jasmine.createSpyObj('ArtifactService', [
-      'getArtifactVersion',
-    ]);
-    mockAudioService = jasmine.createSpyObj('AudioService', [
-      'startRecording',
-      'stopRecording',
-    ]);
-    mockWebSocketService = jasmine.createSpyObj('WebSocketService', {
-      onCloseReason: NEVER,
-      connect: undefined,
-      closeConnection: undefined,
-    });
-    mockVideoService = jasmine.createSpyObj('VideoService', [
-      'startRecording',
-      'stopRecording',
-    ]);
-    mockEventService = jasmine.createSpyObj('EventService', {
-      getTrace: of([]),
-      getEventTrace: of({
-        'gcp.vertex.agent.llm_request': '{}',
-        'gcp.vertex.agent.llm_response': '{}',
-      }),
-      getEvent: of({}),
-    });
-    mockDownloadService = jasmine.createSpyObj('DownloadService', [
-      'downloadObjectAsJson',
-    ]);
-    mockEvalService = jasmine.createSpyObj('EvalService', {
-      updateEvalCase: undefined,
-      getEvalSets: of([]),
-      listEvalCases: undefined,
-      runEval: undefined,
-      getEvalCase: undefined,
-      deleteEvalCase: undefined,
-      listEvalResults: of([]),
-      getEvalResult: undefined,
-    });
-    mockTraceService = jasmine.createSpyObj(
-        'TraceService',
-        [
-          'setEventData',
-          'setMessages',
-          'resetTraceService',
-          'selectedRow',
-          'setHoveredMessages',
-        ],
-        {
-          selectedTraceRow$: of(null),
-          hoveredMessageIndicies$: of([]),
-        },
-    );
-    mockAgentService = jasmine.createSpyObj('AgentService', [
-      'listApps',
-      'getApp',
-      'getLoadingState',
-      'setApp',
-      'runSse',
-      'getAgentBuilder',
-    ]);
-    mockAgentBuilderService = jasmine.createSpyObj('AgentBuilderService', [
-      'buildAgent',
-      'setLoadedAgentData',
-      'clear'
-    ]);
-    const loadAgentDataSubject = new BehaviorSubject<string|undefined>(undefined);
-    mockAgentBuilderService.setLoadedAgentData.and.callFake((val) => {
-      loadAgentDataSubject.next(val);
-    });
-    mockFeatureFlagService = jasmine.createSpyObj('FeatureFlagService', {
-      isImportSessionEnabled: of(true),
-      isEditFunctionArgsEnabled: of(true),
-      isSessionUrlEnabled: of(true),
-    });
+    mockSessionService = new MockSessionService();
+    mockArtifactService = new MockArtifactService();
+    mockAudioService = new MockAudioService();
+    mockWebSocketService = new MockWebSocketService();
+    mockVideoService = new MockVideoService();
+    mockStreamChatService = new MockStreamChatService();
+    mockEventService = new MockEventService();
+    mockDownloadService = new MockDownloadService();
+    mockEvalService = new MockEvalService();
+    mockTraceService = new MockTraceService();
+    mockAgentService = new MockAgentService();
+    mockFeatureFlagService = new MockFeatureFlagService();
+    mockStringToColorService = new MockStringToColorService();
+    mockSafeValuesService = new MockSafeValuesService();
+
+    mockStringToColorService.stc.and.returnValue('#8c8526ff');
+
+    mockSessionService.createSessionResponse.next(
+        {id: SESSION_1_ID, state: {}});
+    mockTraceService.selectedTraceRow$.next(undefined);
+    mockTraceService.hoveredMessageIndicies$.next([]);
+    mockFeatureFlagService.isImportSessionEnabledResponse.next(true);
+    mockFeatureFlagService.isEditFunctionArgsEnabledResponse.next(true);
+    mockFeatureFlagService.isSessionUrlEnabledResponse.next(true);
+    mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(true);
+    mockFeatureFlagService.isTokenStreamingEnabledResponse.next(true);
+
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
     mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree'], {
@@ -194,8 +168,6 @@ describe('ChatComponent', () => {
       queryParams: of({}),
     };
 
-    mockAgentService.listApps.and.returnValue(
-        of([TEST_APP_1_NAME, TEST_APP_2_NAME]));
     const appName = new BehaviorSubject<string>(TEST_APP_1_NAME);
     mockAgentService.setApp.and.callFake((p) => {
       appName.next(p);
@@ -203,13 +175,16 @@ describe('ChatComponent', () => {
     mockAgentService.getApp.and.callFake(() => {
       return appName;
     });
-    mockAgentService.getLoadingState.and.returnValue(
-        new BehaviorSubject<boolean>(false),
-    );
-    mockAgentService.getAgentBuilder.and.returnValue(of('fake-agent'));
+    mockAgentService.getLoadingStateResponse.next(false);
     mockRouter.createUrlTree.and.returnValue({
       toString: () => '/?session=session-id',
     } as any);
+
+    graphService = new MockGraphService();
+    graphService.render.and.returnValue(Promise.resolve('svg'));
+    mockEventService.getEventResponse.next({
+      dotSrc: 'digraph {A -> B}',
+    });
 
     await TestBed
         .configureTestingModule({
@@ -226,17 +201,23 @@ describe('ChatComponent', () => {
             {provide: WEBSOCKET_SERVICE, useValue: mockWebSocketService},
             {provide: VIDEO_SERVICE, useValue: mockVideoService},
             {provide: EVENT_SERVICE, useValue: mockEventService},
+            {provide: STREAM_CHAT_SERVICE, useValue: mockStreamChatService},
             {provide: DOWNLOAD_SERVICE, useValue: mockDownloadService},
             {provide: EVAL_SERVICE, useValue: mockEvalService},
             {provide: TRACE_SERVICE, useValue: mockTraceService},
             {provide: AGENT_SERVICE, useValue: mockAgentService},
             {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
-            {provide: AGENT_BUILDER_SERVICE, useValue: mockAgentBuilderService},
+            {
+              provide: STRING_TO_COLOR_SERVICE,
+              useValue: mockStringToColorService,
+            },
+            {provide: GRAPH_SERVICE, useValue: graphService},
+            {provide: SAFE_VALUES_SERVICE, useValue: mockSafeValuesService},
             {provide: MatDialog, useValue: mockDialog},
             {provide: Router, useValue: mockRouter},
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: Location, useValue: mockLocation},
-            {provide: MatSnackBar, useValue: mockSnackBar},
+            {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
           ],
         })
         .compileComponents();
@@ -256,7 +237,7 @@ describe('ChatComponent', () => {
       let error: HttpErrorResponse;
       beforeEach(() => {
         error = new HttpErrorResponse({error: 'Failed to load apps'});
-        mockAgentService.listApps.and.returnValue(throwError(() => error));
+        mockAgentService.listAppsResponse.error(error);
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -268,10 +249,13 @@ describe('ChatComponent', () => {
 
     describe('when app in URL is invalid', () => {
       beforeEach(async () => {
+        mockAgentService.listAppsResponse.next(
+            [TEST_APP_1_NAME, TEST_APP_2_NAME]);
+
         mockActivatedRoute.snapshot!.queryParams = {
           [APP_QUERY_PARAM]: INVALID_APP_NAME,
         };
-        mockAgentService.listApps.and.returnValue(of([TEST_APP_1_NAME]));
+        mockAgentService.listAppsResponse.next([TEST_APP_1_NAME]);
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -290,6 +274,9 @@ describe('ChatComponent', () => {
   describe('Session Management', () => {
     describe('when session not in url', () => {
       beforeEach(() => {
+        mockAgentService.listAppsResponse.next(
+            [TEST_APP_1_NAME, TEST_APP_2_NAME]);
+
         mockActivatedRoute.snapshot!.queryParams = {
           [APP_QUERY_PARAM]: TEST_APP_2_NAME,
         };
@@ -307,14 +294,13 @@ describe('ChatComponent', () => {
 
     describe('when session ID is provided in URL', () => {
       beforeEach(async () => {
-        mockFeatureFlagService.isSessionUrlEnabled.and.returnValue(of(true));
+        mockFeatureFlagService.isSessionUrlEnabledResponse.next(true);
         mockActivatedRoute.snapshot!.queryParams = {
           [APP_QUERY_PARAM]: TEST_APP_1_NAME,
           [SESSION_QUERY_PARAM]: SESSION_2_ID,
         };
-        mockSessionService.getSession.and.returnValue(
-            of({id: SESSION_2_ID, state: {}, events: []}),
-        );
+        mockSessionService.getSessionResponse.next(
+            {id: SESSION_2_ID, state: {}, events: []});
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
         component.ngOnInit();
@@ -339,9 +325,8 @@ describe('ChatComponent', () => {
           [APP_QUERY_PARAM]: TEST_APP_1_NAME,
           [SESSION_QUERY_PARAM]: SESSION_2_ID,
         };
-        mockSessionService.getSession.and.returnValue(
-            throwError(() => new HttpErrorResponse({status: 404})),
-        );
+        mockSessionService.getSessionResponse.error(
+            new HttpErrorResponse({status: 404}));
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -364,7 +349,7 @@ describe('ChatComponent', () => {
 
     describe('when app selection changes and session URL is disabled', () => {
       beforeEach(async () => {
-        mockFeatureFlagService.isSessionUrlEnabled.and.returnValue(of(false));
+        mockFeatureFlagService.isSessionUrlEnabledResponse.next(false);
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -453,7 +438,7 @@ describe('ChatComponent', () => {
             ],
           };
           beforeEach(() => {
-            mockEventService.getTrace.and.returnValue(of([]));
+            mockEventService.getTraceResponse.next([]);
             component['updateWithSelectedSession'](mockSession as any);
             fixture.detectChanges();
           });
@@ -487,39 +472,9 @@ describe('ChatComponent', () => {
   });
 
   describe('UI and State', () => {
-    describe('Header', () => {
-      describe('toggle', () => {
-        beforeEach(() => {
-          spyOn(component.sideDrawer()!, 'open');
-          spyOn(component.sideDrawer()!, 'close');
-        });
-
-        it('should hide side drawer when it is open', () => {
-          component.showSidePanel = true;
-          fixture.detectChanges();
-
-          const closeButton = fixture.debugElement.query(
-              HEADER_TOGGLE_BUTTON_SELECTOR,
-          );
-          closeButton.nativeElement.click();
-
-          expect(component.sideDrawer()!.close).toHaveBeenCalled();
-          expect(component.showSidePanel).toBe(false);
-        });
-
-        it('should show side drawer when it is closed', () => {
-          component.showSidePanel = false;
-          fixture.detectChanges();
-
-          const closeButton = fixture.debugElement.query(
-              HEADER_TOGGLE_BUTTON_SELECTOR,
-          );
-          closeButton.nativeElement.click();
-
-          expect(component.sideDrawer()!.open).toHaveBeenCalled();
-          expect(component.showSidePanel).toBe(true);
-        });
-      });
+    beforeEach(() => {
+      mockAgentService.listAppsResponse.next(
+          [TEST_APP_1_NAME, TEST_APP_2_NAME]);
     });
 
     describe('toggleSidePanel', () => {
@@ -602,11 +557,17 @@ describe('ChatComponent', () => {
   });
 
   describe('Bi-directional Streaming', () => {
+    beforeEach(() => {
+      mockAgentService.listAppsResponse.next(
+          [TEST_APP_1_NAME, TEST_APP_2_NAME]);
+    });
+
     describe('when bidi streaming is restarted', () => {
-      it('should show snackbar', () => {
+      beforeEach(() => {
         component.sessionHasUsedBidi.add(component.sessionId);
         component.startAudioRecording();
-
+      });
+      it('should show snackbar', () => {
         expect(mockSnackBar.open)
             .toHaveBeenCalledWith(
                 'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.',
@@ -617,6 +578,11 @@ describe('ChatComponent', () => {
   });
 
   describe('ChatPanel integration', () => {
+    beforeEach(() => {
+      mockAgentService.listAppsResponse.next(
+          [TEST_APP_1_NAME, TEST_APP_2_NAME]);
+    });
+
     describe('when appName is set', () => {
       it('should display chat-panel', () => {
         const chatPanel =
@@ -649,7 +615,7 @@ describe('ChatComponent', () => {
       const mockEvent = new KeyboardEvent('keydown', {key: 'Enter'});
       beforeEach(() => {
         spyOn(component, 'sendMessage').and.callThrough();
-        mockAgentService.runSse.and.returnValue(of());
+        mockAgentService.runSseResponse.next('');
         const chatPanelDebugEl =
             fixture.debugElement.query(By.directive(ChatPanelComponent));
         chatPanelDebugEl.triggerEventHandler('sendMessage', mockEvent);
@@ -697,6 +663,11 @@ describe('ChatComponent', () => {
   });
 
   describe('File Handling', () => {
+    beforeEach(() => {
+      mockAgentService.listAppsResponse.next(
+          [TEST_APP_1_NAME, TEST_APP_2_NAME]);
+    });
+
     describe('when onFileSelect() is called', () => {
       beforeEach(() => {
         const file = new File([''], TEST_FILE_NAME, {type: 'text/plain'});
@@ -741,6 +712,9 @@ describe('ChatComponent', () => {
     };
 
     beforeEach(() => {
+      mockAgentService.listAppsResponse.next(
+          [TEST_APP_1_NAME, TEST_APP_2_NAME]);
+
       component.evalCase = mockEvalCase;
       component.messages.set([mockMessage]);
       fixture.detectChanges();
@@ -874,7 +848,7 @@ describe('ChatComponent', () => {
     describe('when saveEvalCase() is called', () => {
       beforeEach(() => {
         component.updatedEvalCase = mockEvalCase;
-        mockEvalService.updateEvalCase.and.returnValue(of({}));
+        mockEvalService.updateEvalCaseResponse.next({});
         (component as any).saveEvalCase();
       });
       it('should call updateEvalCase', () => {
@@ -892,6 +866,20 @@ describe('ChatComponent', () => {
       });
       it('should reset edit mode', () => {
         expect(component.isEvalEditMode()).toBe(false);
+      });
+    });
+  });
+
+  describe('Feature Disabling', () => {
+    describe('when token streaming is disabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isTokenStreamingEnabledResponse.next(false);
+        fixture.detectChanges();
+      });
+
+      it('should have the token streaming toggle disabled', () => {
+        const slideToggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
+        expect(slideToggle.componentInstance.disabled).toBe(true);
       });
     });
   });

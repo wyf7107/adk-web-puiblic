@@ -41,6 +41,7 @@ import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 import { JsonEditorComponent } from '../json-editor/json-editor.component';
+import { FEATURE_FLAG_SERVICE } from '../../core/services/feature-flag.service';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -78,6 +79,11 @@ export class BuilderTabsComponent {
   @ViewChild(JsonEditorComponent) jsonEditorComponent!: JsonEditorComponent;
   @Input() appNameInput: string = '';
   @Output() exitBuilderMode = new EventEmitter<void>();
+  @Output() readonly closePanel = new EventEmitter<void>();
+  
+  readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  readonly isAlwaysOnSidePanelEnabledObs =
+      this.featureFlagService.isAlwaysOnSidePanelEnabled();
 
   protected toolArgsString = signal('');
   editingToolArgs = signal(false);

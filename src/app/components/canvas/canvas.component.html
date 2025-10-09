@@ -129,21 +129,14 @@
           </div>
           @if (hasTools) {
             <div class="tools-container">
-              <mat-chip-set>
-                @for (tool of tools.slice(0, 2); track tool.name) {
-                  <mat-chip
-                    (click)="selectTool(tool, ctx.node)"
-                    [class.selected]="tool === selectedTool">
-                    <span class="tool-name-label">{{tool.name}}</span>
-                    <button matChipRemove (click)="deleteTool(nodeName, tool); $event.stopPropagation()">
-                      <mat-icon>cancel</mat-icon>
-                    </button>
-                  </mat-chip>
+              <div class="tools-list">
+                @for (tool of tools; track tool.name) {
+                  <div class="tool-item" (click)="selectTool(tool, ctx.node); $event.stopPropagation()">
+                    <mat-icon class="tool-item-icon">data_object</mat-icon>
+                    <span class="tool-item-name">{{tool.name}}</span>
+                  </div>
                 }
-                @if (tools.length > 2) {
-                  <mat-chip (click)="openToolsTab(ctx.node)">...</mat-chip>
-                }
-              </mat-chip-set>
+              </div>
             </div>
           }
           @if (isNodeSelected(ctx.node)) {

@@ -480,10 +480,6 @@
     &_selected:hover {
         border-color: #00BBEA;
     }
-
-    &_has-tools {
-        padding-bottom: 24px;
-    }
 }
 
 :host ::ng-deep .default-group-node {
@@ -524,8 +520,55 @@
 }
 
 .tools-container {
-    padding: 12px 6px 12px 12px;
+    padding: 8px 12px;
     border-top: 1px solid #444;
+}
+
+.tools-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tool-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    color: #e8eaed;
+
+    &:hover {
+        background-color: rgba(138, 180, 248, 0.1);
+    }
+
+    .tool-item-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+        color: #ffffff;
+        flex-shrink: 0;
+    }
+
+    .tool-item-name {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 15px;
+        font-weight: 400;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &.more-tools {
+        color: #9aa0a6;
+        font-style: italic;
+
+        .tool-item-icon {
+            color: #9aa0a6;
+        }
+    }
 }
 
 .custom-node_selected .node-title-wrapper {
@@ -687,25 +730,6 @@
     }
 }
 
-mat-chip {
-    --mdc-chip-outline-color: #444;
-
-    &.selected {
-        --mdc-chip-outline-width: 0;
-        background-color: #00BBEA;
-        --mdc-chip-label-text-color: #202124;
-        --mdc-chip-with-trailing-icon-trailing-icon-color: #202124;
-    }
-}
-
-.tool-name-label {
-    display: inline-block;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    vertical-align: middle;
-}
 
 .add-subagent-container {
     position: absolute;

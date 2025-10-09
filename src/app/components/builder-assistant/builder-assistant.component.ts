@@ -93,10 +93,9 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
-          const chunkJson = JSON.parse(chunk);
-          if (chunkJson.content) {
+          if (chunk.content) {
             let botText = '';
-            for (let part of chunkJson.content.parts) {
+            for (let part of chunk.content.parts) {
               if (part.text) {
                 botText += part.text;
               }
@@ -160,10 +159,9 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
-          const chunkJson = JSON.parse(chunk);
-          if (chunkJson.content) {
+          if (chunk.content) {
             let botText = '';
-            for (let part of chunkJson.content.parts) {
+            for (let part of chunk.content.parts) {
               if (part.text) {
                 botText += part.text;
               }

@@ -13,6 +13,23 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
+<div style="margin-top: 20px; margin-left: 20px; display: flex">
+  <div style="width: 100%">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
+          Agent Development Kit
+      </div>
+      <span
+        class="material-symbols-outlined"
+        style="color: #c4c7c5; cursor: pointer; margin-right: 15px"
+        matTooltip="Collapse panel"
+        (click)="closePanel.emit()"
+        >left_panel_close</span
+      >
+    </div>
+  </div>
+</div>
 
 <div class="builder-tabs-container">
   <div class="builder-tab-content">
@@ -342,9 +359,52 @@
             Tools
           </div>
           <div>
-            <mat-icon>add</mat-icon>
+            <mat-icon
+              [matMenuTriggerFor]="toolsMenu"
+              #agentMenuTrigger="matMenuTrigger"
+            >add
+            </mat-icon>
+            <mat-menu #toolsMenu="matMenu">
+                <button
+                  mat-menu-item
+                  (click)="addTool('Function tool')"
+                >
+                  <span>Function tool</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="addTool('Built-in tool')"
+                >
+                  <span>Built-in tool</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="createAgentTool()"
+                >
+                  <span>Agent tool</span>
+                </button>
+              </mat-menu>
           </div>
         </div>
+        @if (toolsMap$ | async; as toolsMap) {
+            @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
+              <div class="tools-chips-container">
+                <mat-chip-set aria-label="Tools">
+                  @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
+                    <mat-chip (click)="selectTool(tool)" class="tool-chip">
+                      @if (tool.toolType === 'Agent Tool') {
+                        <mat-icon class="tool-icon" matChipAvatar>smart_toy</mat-icon>
+                      }
+                      <span class="tool-chip-name">{{tool.name}}</span>
+                      <button matChipRemove (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()" aria-label="Remove tool">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
+          }
       </div>
       <div class="builder-panel-wrapper">
         <div class="panel-title">

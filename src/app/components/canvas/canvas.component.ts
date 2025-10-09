@@ -33,6 +33,8 @@ import { firstValueFrom, take, filter, Observable } from "rxjs";
 import { YamlUtils } from "../../../utils/yaml-utils";
 import { ConfirmationDialogComponent } from "../confirmation-dialog/confirmation-dialog.component";
 import { AddToolDialogComponent } from "../add-tool-dialog/add-tool-dialog.component";
+import { BuiltInToolDialogComponent } from "../built-in-tool-dialog/built-in-tool-dialog.component";
+import { getToolIcon } from "../../core/constants/tool-icons";
 import { AsyncPipe } from "@angular/common";
 import { BuilderAssistantComponent } from "../builder-assistant/builder-assistant.component";
 
@@ -637,21 +639,41 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   editTool(tool: any, agentNode: AgentNode) {
-    const dialogRef = this.dialog.open(AddToolDialogComponent, {
-      width: '500px',
-      data: {
-        toolType: tool.toolType,
-        toolName: tool.name,
-        isEditMode: true
-      }
-    });
+    let dialogRef;
+
+    if (tool.toolType === 'Built-in tool') {
+      dialogRef = this.dialog.open(BuiltInToolDialogComponent, {
+        width: '700px',
+        maxWidth: '90vw',
+        data: {
+          toolName: tool.name,
+          isEditMode: true,
+          toolArgs: tool.args
+        }
+      });
+    } else {
+      dialogRef = this.dialog.open(AddToolDialogComponent, {
+        width: '500px',
+        data: {
+          toolType: tool.toolType,
+          toolName: tool.name,
+          isEditMode: true
+        }
+      });
+    }
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.isEditMode) {
-        // Update the tool name
+        // Update the tool name and args
         const toolIndex = agentNode.tools?.findIndex(t => t.name === tool.name);
         if (toolIndex !== undefined && toolIndex !== -1 && agentNode.tools) {
           agentNode.tools[toolIndex].name = result.name;
+
+          // Update args if provided
+          if (result.args) {
+            agentNode.tools[toolIndex].args = result.args;
+          }
+
           // Trigger update in the service
           this.agentBuilderService.setAgentTools(agentNode.name, agentNode.tools);
         }
@@ -1361,5 +1383,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
       this.nodePositions.set(data.name, { ...node.point() });
     }
+  }
+
+  getToolIcon(tool: ToolNode): string {
+    return getToolIcon(tool.name, tool.toolType);
   }
 }

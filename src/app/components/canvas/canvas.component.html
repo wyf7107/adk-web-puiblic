@@ -84,7 +84,7 @@
               <div class="tools-list">
                 @for (tool of tools; track tool.name) {
                   <div class="tool-item" (click)="selectTool(tool, ctx.node); $event.stopPropagation()">
-                    <mat-icon class="tool-item-icon">data_object</mat-icon>
+                    <mat-icon class="tool-item-icon">{{ getToolIcon(tool) }}</mat-icon>
                     <span class="tool-item-name">{{tool.name}}</span>
                   </div>
                 }

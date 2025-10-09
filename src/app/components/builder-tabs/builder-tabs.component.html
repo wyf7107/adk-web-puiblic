@@ -392,9 +392,7 @@
                 <mat-chip-set aria-label="Tools">
                   @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
                     <mat-chip (click)="selectTool(tool)" class="tool-chip">
-                      @if (tool.toolType === 'Agent Tool') {
-                        <mat-icon class="tool-icon" matChipAvatar>smart_toy</mat-icon>
-                      }
+                      <mat-icon class="tool-icon" matChipAvatar>{{ getToolIcon(tool) }}</mat-icon>
                       <span class="tool-chip-name">{{tool.name}}</span>
                       <button matChipRemove (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()" aria-label="Remove tool">
                         <mat-icon>cancel</mat-icon>

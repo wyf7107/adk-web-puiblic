@@ -117,7 +117,16 @@ export class YamlUtils {
 
       // Handle regular tools
       if (tool.args) {
-        config.args = tool.args;
+        // Check if args object has any meaningful content
+        const hasContent = Object.keys(tool.args).some(key => {
+          const value = tool.args![key];
+          return value !== undefined && value !== null && value !== '';
+        });
+
+        // Only add args if there's actual content
+        if (hasContent) {
+          config.args = tool.args;
+        }
       }
 
       return config;

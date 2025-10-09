@@ -36,9 +36,11 @@ import { Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
 import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import { getToolIcon } from '../../core/constants/tool-icons';
 import { AGENT_SERVICE } from '../../core/services/agent.service';
 import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
+import { BuiltInToolDialogComponent } from '../built-in-tool-dialog/built-in-tool-dialog.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 import { JsonEditorComponent } from '../json-editor/json-editor.component';
 import { FEATURE_FLAG_SERVICE } from '../../core/services/feature-flag.service';
@@ -423,21 +425,41 @@ export class BuilderTabsComponent {
   editTool(tool: ToolNode) {
     if (!this.agentConfig) return;
 
-    const dialogRef = this.dialog.open(AddToolDialogComponent, {
-      width: '500px',
-      data: {
-        toolType: tool.toolType,
-        toolName: tool.name,
-        isEditMode: true
-      }
-    });
+    let dialogRef;
+
+    if (tool.toolType === 'Built-in tool') {
+      dialogRef = this.dialog.open(BuiltInToolDialogComponent, {
+        width: '700px',
+        maxWidth: '90vw',
+        data: {
+          toolName: tool.name,
+          isEditMode: true,
+          toolArgs: tool.args
+        }
+      });
+    } else {
+      dialogRef = this.dialog.open(AddToolDialogComponent, {
+        width: '500px',
+        data: {
+          toolType: tool.toolType,
+          toolName: tool.name,
+          isEditMode: true
+        }
+      });
+    }
 
     dialogRef.afterClosed().subscribe(result => {
       if (result && result.isEditMode) {
-        // Update the tool name
+        // Update the tool name and args
         const toolIndex = this.agentConfig!.tools?.findIndex(t => t.name === tool.name);
         if (toolIndex !== undefined && toolIndex !== -1 && this.agentConfig!.tools) {
           this.agentConfig!.tools[toolIndex].name = result.name;
+
+          // Update args if provided
+          if (result.args) {
+            this.agentConfig!.tools[toolIndex].args = result.args;
+          }
+
           // Trigger update in the service
           this.agentBuilderService.setAgentTools(this.agentConfig!.name, this.agentConfig!.tools);
         }
@@ -447,10 +469,20 @@ export class BuilderTabsComponent {
 
   addTool(toolType: string) {
     if (this.agentConfig) {
-      const dialogRef = this.dialog.open(AddToolDialogComponent, {
-        width: '500px',
-        data: {toolType: toolType}
-      });
+      let dialogRef;
+
+      if (toolType === 'Built-in tool') {
+        dialogRef = this.dialog.open(BuiltInToolDialogComponent, {
+          width: '700px',
+          maxWidth: '90vw',
+          data: {}
+        });
+      } else {
+        dialogRef = this.dialog.open(AddToolDialogComponent, {
+          width: '500px',
+          data: {toolType: toolType}
+        });
+      }
 
         dialogRef.afterClosed().subscribe(result => {
           if (result) {
@@ -720,6 +752,10 @@ export class BuilderTabsComponent {
       }
     })
 
-    
+
+  }
+
+  getToolIcon(tool: ToolNode): string {
+    return getToolIcon(tool.name, tool.toolType);
   }
 }

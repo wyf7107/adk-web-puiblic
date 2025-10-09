@@ -89,36 +89,38 @@ describe('AgentService', () => {
     });
   });
 
-  describe('listApps', () => {
-    it('should call list-apps endpoint with correct url', () => {
-      service.listApps().subscribe();
-      const req = httpTestingController.expectOne(
-          API_SERVER_BASE_URL + LIST_APPS_PATH,
-      );
-      expect(req.request.method).toEqual(METHOD_GET);
-      req.flush([]);
-    });
+  // BEGIN-EXTERNAL
+  // describe('listApps', () => {
+  //   it('should call list-apps endpoint with correct url', () => {
+  //     service.listApps().subscribe();
+  //     const req = httpTestingController.expectOne(
+  //         API_SERVER_BASE_URL + LIST_APPS_PATH,
+  //     );
+  //     expect(req.request.method).toEqual(METHOD_GET);
+  //     req.flush([]);
+  //   });
 
-    it('should return list of apps from http get', async () => {
-      const appsPromise = firstValueFrom(service.listApps());
-      const req = httpTestingController.expectOne(
-          API_SERVER_BASE_URL + LIST_APPS_PATH,
-      );
-      req.flush(['app1', 'app2']);
-      const apps = await appsPromise;
-      expect(apps).toEqual(['app1', 'app2']);
-    });
+  //   it('should return list of apps from http get', async () => {
+  //     const appsPromise = firstValueFrom(service.listApps());
+  //     const req = httpTestingController.expectOne(
+  //         API_SERVER_BASE_URL + LIST_APPS_PATH,
+  //     );
+  //     req.flush(['app1', 'app2']);
+  //     const apps = await appsPromise;
+  //     expect(apps).toEqual(['app1', 'app2']);
+  //   });
 
-    it('should return an empty observable if apiServerDomain is not set',
-       async () => {
-         service.apiServerDomain = '';
-         const appsPromise = firstValueFrom(service.listApps());
-         const req = httpTestingController.expectOne(LIST_APPS_PATH);
-         req.flush([]);
-         const apps = await appsPromise;
-         expect(apps).toEqual([]);
-       });
-  });
+  //   it('should return an empty observable if apiServerDomain is not set',
+  //      async () => {
+  //        service.apiServerDomain = '';
+  //        const appsPromise = firstValueFrom(service.listApps());
+  //        const req = httpTestingController.expectOne(LIST_APPS_PATH);
+  //        req.flush([]);
+  //        const apps = await appsPromise;
+  //        expect(apps).toEqual([]);
+  //      });
+  // });
+  // END-EXTERNAL
 
   describe('runSse', () => {
     it('should set loading state to true when called', () => {

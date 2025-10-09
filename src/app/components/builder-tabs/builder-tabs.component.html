@@ -422,15 +422,56 @@
             Callbacks
           </div>
           <div>
-            <mat-icon>add</mat-icon>
+            <mat-icon [matMenuTriggerFor]="callbacksMenu">add</mat-icon>
+            <mat-menu #callbacksMenu="matMenu">
+              <div class="menu-header">Agent Lifecycle</div>
+              <button mat-menu-item (click)="addCallback('Before Agent')">
+                <span>Before Agent</span>
+              </button>
+              <button mat-menu-item (click)="addCallback('After Agent')">
+                <span>After Agent</span>
+              </button>
+              <mat-divider></mat-divider>
+              <div class="menu-header">Model (LLM) Interaction</div>
+              <button mat-menu-item (click)="addCallback('Before Model')">
+                <span>Before Model</span>
+              </button>
+              <button mat-menu-item (click)="addCallback('After Model')">
+                <span>After Model</span>
+              </button>
+              <mat-divider></mat-divider>
+              <div class="menu-header">Tool Execution</div>
+              <button mat-menu-item (click)="addCallback('Before Tool')">
+                <span>Before Tool</span>
+              </button>
+              <button mat-menu-item (click)="addCallback('After Tool')">
+                <span>After Tool</span>
+              </button>
+            </mat-menu>
           </div>
         </div>
+        @if (callbacksMap$ | async; as callbacksMap) {
+          @if (agentConfig && callbacksMap.get(agentConfig.name) && callbacksMap.get(agentConfig.name)!.length > 0) {
+            <div class="tools-chips-container">
+              <mat-chip-set aria-label="Callbacks">
+                @for (callback of callbacksMap.get(agentConfig.name)!; track callback) {
+                  <mat-chip class="tool-chip">
+                    <span class="tool-chip-name">{{callback.name}} ({{callback.type}})</span>
+                    <button matChipRemove (click)="deleteCallback(agentConfig.name, callback); $event.stopPropagation()" aria-label="Remove callback">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+        }
       </div>
     </div>
     
     <!-- Action Buttons -->
     <div class="action-buttons">
-      <button mat-raised-button color="primary" class="save-button" (click)="saveChanges()">
+      <button mat-raised-button color="secondary" class="save-button" (click)="saveChanges()">
         Save
       </button>
       <button mat-button class="cancel-button" (click)="cancelChanges()">

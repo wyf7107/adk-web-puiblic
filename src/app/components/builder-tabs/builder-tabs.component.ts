@@ -44,6 +44,7 @@ import { JsonEditorComponent } from '../json-editor/json-editor.component';
 import { FEATURE_FLAG_SERVICE } from '../../core/services/feature-flag.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -73,7 +74,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatMenu,
     MatMenuTrigger,
     MatMenuItem,
-    MatChipsModule
+    MatChipsModule,
+    MatDividerModule
   ],
   templateUrl: './builder-tabs.component.html',
   styleUrl: './builder-tabs.component.scss',
@@ -183,6 +185,7 @@ export class BuilderTabsComponent {
   ]);
   protected header = 'Select an agent or tool to edit'
   public toolsMap$: Observable<Map<string, ToolNode[]>>;
+  public callbacksMap$: Observable<Map<string, CallbackNode[]>>;
 
   private getJsonStringForEditor(args: any): string {
     if (!args) {
@@ -195,6 +198,7 @@ export class BuilderTabsComponent {
 
   constructor() {
     this.toolsMap$ = this.agentBuilderService.getAgentToolsMap();
+    this.callbacksMap$ = this.agentBuilderService.getAgentCallbacksMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
       this.currentSelectedAgent = node;
@@ -482,10 +486,7 @@ export class BuilderTabsComponent {
             type: result.type,
           };
 
-          const addResult = this.agentBuilderService.addCallback(this.agentConfig!.name, callback);
-          if (!addResult.success) {
-            console.error('Failed to add callback:', addResult.error);
-          }
+          this.agentBuilderService.addCallback(this.agentConfig!.name, callback);
         }
       });
     }

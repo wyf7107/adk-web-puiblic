@@ -635,3 +635,28 @@ mat-tab-group {
     justify-content: center;
   }
 }
+
+::ng-deep .mat-mdc-menu-panel {
+  background-color: #303030 !important;
+
+  .menu-header {
+    color: #9aa0a6;
+    font-size: 12px;
+    padding: 8px 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .mat-mdc-menu-item {
+    color: #e8eaed;
+    &:hover {
+      background-color: #444746;
+    }
+  }
+
+  mat-divider {
+    border-top-color: #444746;
+    margin: 4px 0;
+  }
+}

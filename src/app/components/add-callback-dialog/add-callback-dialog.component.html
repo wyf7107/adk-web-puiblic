@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 
-<h2 mat-dialog-title>Add New {{callbackType}} Callback</h2>
+<h2 mat-dialog-title>Add {{callbackType}} Callback</h2>
 <mat-dialog-content>
   <mat-form-field appearance="outline" style="width: 100%;">
     <mat-label>Callback Name</mat-label>
@@ -28,9 +28,9 @@
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancel</button>
   <button 
-    mat-button 
+    mat-raised-button color="secondary"
     (click)="addCallback()"
     [disabled]="createDisabled()">
-    Add Callback
+    Add
   </button>
 </mat-dialog-actions>

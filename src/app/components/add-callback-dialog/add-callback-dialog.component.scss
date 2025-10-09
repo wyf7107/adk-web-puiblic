@@ -41,3 +41,7 @@ mat-dialog-actions {
 mat-form-field {
   margin-top: 8px !important;
 }
+
+.mat-mdc-raised-button.mat-secondary:not([disabled]) {
+  background-color: #8ab4f8;
+}

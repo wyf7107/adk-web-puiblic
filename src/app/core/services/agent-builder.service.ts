@@ -19,6 +19,7 @@ export class AgentBuilderService {
   private agentToolsMapSubject = new BehaviorSubject<Map<string, ToolNode[]>>(new Map());
   private agentToolsSubject = new BehaviorSubject<{ agentName: string, tools: ToolNode[] } | undefined>(undefined);
   private newAgentToolBoardSubject = new BehaviorSubject<{toolName: string, currentAgentName?: string}|undefined>(undefined);
+  private agentCallbacksMapSubject = new BehaviorSubject<Map<string, CallbackNode[]>>(new Map());
   private agentCallbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
   private agentToolDeletionSubject = new BehaviorSubject<string|undefined>(undefined);
   private deleteSubAgentSubject = new BehaviorSubject<string>('');
@@ -71,6 +72,12 @@ export class AgentBuilderService {
     const newMap = new Map(currentMap);
     newMap.set(newNode.name, newNode.tools || []);
     this.agentToolsMapSubject.next(newMap);
+
+    const currentCallbacksMap = this.agentCallbacksMapSubject.value;
+    const newCallbacksMap = new Map(currentCallbacksMap);
+    newCallbacksMap.set(newNode.name, newNode.callbacks || []);
+    this.agentCallbacksMapSubject.next(newCallbacksMap);
+
     this.setSelectedNode(this.selectedNodeSubject.value);
   }
 
@@ -84,6 +91,7 @@ export class AgentBuilderService {
     this.setSelectedNode(undefined);
     this.setSelectedTool(undefined);
     this.agentToolsMapSubject.next(new Map());
+    this.agentCallbacksMapSubject.next(new Map());
     this.setSelectedCallback(undefined);
     this.setAgentTools();
     this.setAgentCallbacks();
@@ -174,6 +182,12 @@ export class AgentBuilderService {
 
       agentNode.callbacks.push(callback);
       this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
+
+      const currentMap = this.agentCallbacksMapSubject.value;
+      const newMap = new Map(currentMap);
+      newMap.set(agentName, agentNode.callbacks);
+      this.agentCallbacksMapSubject.next(newMap);
+
       return { success: true };
     } catch (error) {
       return { success: false, error: 'Failed to add callback: ' + (error as Error).message };
@@ -199,6 +213,11 @@ export class AgentBuilderService {
       agentNode.callbacks.splice(callbackIndex, 1);
       this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
 
+      const currentMap = this.agentCallbacksMapSubject.value;
+      const newMap = new Map(currentMap);
+      newMap.set(agentName, agentNode.callbacks);
+      this.agentCallbacksMapSubject.next(newMap);
+
       // Clear selection if the deleted callback was selected
       if (this.selectedCallbackSubject.value?.name === callbackToDelete.name) {
         this.setSelectedCallback(undefined);
@@ -222,6 +241,9 @@ export class AgentBuilderService {
     return this.agentToolsMapSubject.asObservable();
   }
 
+  getAgentCallbacksMap(): Observable<Map<string, CallbackNode[]>> {
+    return this.agentCallbacksMapSubject.asObservable();
+  }
 
   requestSideTabChange(tabName: string) {
     this.tabChangeSubject.next(tabName);

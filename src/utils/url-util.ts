@@ -37,7 +37,7 @@ export class URLUtil {
    * @returns {string} Base URL (protocol + hostname + port)
    */
   static getApiServerBaseUrl(): string {
-    return (window as any)['runtimeConfig']?.backendUrl;
+    return (window as any)['runtimeConfig']?.backendUrl || '';
   }
 
   static getWSServerUrl(): string {

@@ -272,6 +272,15 @@ markdown p {
   @include mat.form-field-overrides((
     disabled-input-text-placeholder-color: orange,
     filled-active-indicator-color: red,
+    outlined-outline-color: #cccccc,
+    outlined-input-text-color: #cccccc,
+    outlined-label-text-color: #cccccc,
+    outlined-hover-label-text-color: #cccccc,
+    outlined-focus-label-text-color: #cccccc,
+    outlined-disabled-label-text-color: #cccccc,
+    outlined-disabled-input-text-color: #cccccc,
+    outlined-disabled-outline-color: #cccccc,
+    outlined-caret-color: #cccccc
   ));
 }
 

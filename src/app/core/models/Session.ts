@@ -26,7 +26,7 @@ export type SessionState = {
 /**
  * Interface representing a Session.
  */
-export interface Session {
+export declare interface Session {
   id?: string;
   appName?: string;
   userId?: string;

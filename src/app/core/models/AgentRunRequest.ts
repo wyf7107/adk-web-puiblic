@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-export interface AgentRunRequest {
+export declare interface AgentRunRequest {
   appName: string;
   userId: string;
   sessionId: string;

@@ -20,7 +20,7 @@
  * @description Represents a single evaluation metric and its associated
  * threshold.
  */
-export interface EvalMetric {
+export declare interface EvalMetric {
   metricName: string;
   threshold: number;
 }
@@ -36,7 +36,7 @@ export const DEFAULT_EVAL_METRICS: EvalMetric[] = [
   }
 ];
 
-export interface Invocation {
+export declare interface Invocation {
   invocationId: string;
   userContent: Content;
   finalResponse?: Content;
@@ -44,17 +44,17 @@ export interface Invocation {
   creationTimestamp: number;
 }
 
-export interface Content {
+export declare interface Content {
   parts?: any[];
   role?: string|null;
 }
 
-export interface IntermediateData {
+export declare interface IntermediateData {
   toolUses: any[];
   intermediateResponses: any[];
 }
 
-export interface EvalCase {
+export declare interface EvalCase {
   evalId: string;
   conversation: Invocation[];
   sessionInput: any;

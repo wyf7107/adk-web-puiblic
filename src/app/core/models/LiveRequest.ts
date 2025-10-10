@@ -1,4 +1,5 @@
 /**
+ * @license
  * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,7 @@
  * limitations under the License.
  */
 
-export interface LiveRequest {
+export declare interface LiveRequest {
   content?: any;
   blob?: any;
   close?: boolean;

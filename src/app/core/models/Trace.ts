@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface Span {
+export declare interface Span {
   name: string;
   start_time: number;
   end_time: number;
@@ -29,14 +29,14 @@ export interface Span {
   'gcp.vertex.agent.llm_response'?: string;
 }
 
-export interface SpanNode extends Span {
+export declare interface SpanNode extends Span {
   children: SpanNode[];
   depth: number;
   duration: number;
   id: string;  // Using span_id as string ID
 }
 
-export interface TimeTick {
+export declare interface TimeTick {
   position: number;
   label: string;
 }

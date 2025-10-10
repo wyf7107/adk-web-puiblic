@@ -15,13 +15,31 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { FormsModule, NgModel } from '@angular/forms';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogModule,
+} from '@angular/material/dialog';
+import { MatButton, MatButtonModule } from '@angular/material/button';
+import { MatError, MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatInput, MatInputModule } from '@angular/material/input';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { FormControl } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { CallbackNode } from '../../core/models/AgentBuilder';
+
+/** Error when invalid control is dirty, touched, or submitted. */
+export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
+  isErrorState(control: FormControl | null): boolean {
+    return !!(control && control.invalid);
+  }
+}
 
 @Component({
   selector: 'app-add-callback-dialog',
@@ -31,35 +49,60 @@ import { MatInput } from '@angular/material/input';
   imports: [
     CommonModule,
     FormsModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatFormField,
-    MatInput,
-    MatDialogActions,
-    MatButton,
-    MatLabel,
+    MatDialogModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatError,
+    MatSelectModule,
   ],
 })
 export class AddCallbackDialogComponent {
+  @ViewChild('callbackNameInput') callbackNameInput!: NgModel;
   callbackName = '';
-  callbackType: string;
+  callbackType: string = '';
+  existingCallbackNames: string[] = [];
+  matcher = new ImmediateErrorStateMatcher();
+  isEditMode = false;
+  availableCallbackTypes: string[] = [];
+  private originalCallbackName = '';
 
   constructor(
     public dialogRef: MatDialogRef<AddCallbackDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { callbackType: string }
+    @Inject(MAT_DIALOG_DATA)
+    public data?: {
+      callbackType: string;
+      existingCallbackNames?: string[];
+      isEditMode?: boolean;
+      callback?: CallbackNode;
+      availableCallbackTypes?: string[];
+    },
   ) {
-    // Use the callback type from the injected data
-    this.callbackType = data.callbackType;
+    this.callbackType = data?.callbackType ?? '';
+    this.existingCallbackNames = data?.existingCallbackNames ?? [];
+    this.isEditMode = !!data?.isEditMode;
+    this.availableCallbackTypes = data?.availableCallbackTypes ?? [];
+
+    if (this.isEditMode && data?.callback) {
+      this.callbackName = data.callback.name;
+      this.callbackType = data.callback.type;
+      this.originalCallbackName = data.callback.name;
+      this.existingCallbackNames = this.existingCallbackNames.filter(
+        name => name !== this.originalCallbackName,
+      );
+    }
   }
 
   addCallback() {
-    if (!this.callbackName.trim()) {
+    if (!this.callbackName.trim() || this.hasSpaces() || this.isDuplicateName()) {
       return;
     }
 
     const result = {
       name: this.callbackName.trim(),
       type: this.callbackType,
+      isEditMode: this.isEditMode,
+      originalName: this.originalCallbackName || this.callbackName.trim(),
     };
 
     this.dialogRef.close(result);
@@ -69,7 +112,30 @@ export class AddCallbackDialogComponent {
     this.dialogRef.close();
   }
 
+  isDuplicateName(): boolean {
+    if (!Array.isArray(this.existingCallbackNames)) {
+      return false;
+    }
+    const trimmedCallbackName = (this.callbackName || '').trim();
+    return this.existingCallbackNames.includes(trimmedCallbackName);
+  }
+
+  hasSpaces(): boolean {
+    const regex = /\s/;
+    return regex.test(this.callbackName || '');
+  }
+
   createDisabled() {
-    return !this.callbackName.trim();
+    return !this.callbackName.trim() || this.isDuplicateName() || this.hasSpaces();
+  }
+
+  validate() {
+    if (this.hasSpaces()) {
+      this.callbackNameInput.control.setErrors({ hasSpaces: true });
+    } else if (this.isDuplicateName()) {
+      this.callbackNameInput.control.setErrors({ duplicateName: true });
+    } else {
+      this.callbackNameInput.control.setErrors(null);
+    }
   }
 }

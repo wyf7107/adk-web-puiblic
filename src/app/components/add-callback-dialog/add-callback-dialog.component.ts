@@ -15,13 +15,29 @@
  * limitations under the License.
  */
 
-import { Component, Inject } from '@angular/core';
+import { AfterViewInit, Component, Inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
+import { FormsModule, NgModel } from '@angular/forms';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+  MatDialogModule,
+} from '@angular/material/dialog';
+import { MatButton, MatButtonModule } from '@angular/material/button';
+import { MatError, MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatInput, MatInputModule } from '@angular/material/input';
+import { ErrorStateMatcher } from '@angular/material/core';
+import { FormControl } from '@angular/forms';
+
+/** Error when invalid control is dirty, touched, or submitted. */
+export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
+  isErrorState(control: FormControl | null): boolean {
+    return !!(control && control.invalid);
+  }
+}
 
 @Component({
   selector: 'app-add-callback-dialog',
@@ -31,29 +47,31 @@ import { MatInput } from '@angular/material/input';
   imports: [
     CommonModule,
     FormsModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatFormField,
-    MatInput,
-    MatDialogActions,
-    MatButton,
-    MatLabel,
+    MatDialogModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatError,
   ],
 })
 export class AddCallbackDialogComponent {
+  @ViewChild('callbackNameInput') callbackNameInput!: NgModel;
   callbackName = '';
-  callbackType: string;
+  callbackType: string = '';
+  existingCallbackNames: string[] = [];
+  matcher = new ImmediateErrorStateMatcher();
 
   constructor(
     public dialogRef: MatDialogRef<AddCallbackDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { callbackType: string }
+    @Inject(MAT_DIALOG_DATA)
+    public data?: { callbackType: string; existingCallbackNames?: string[] },
   ) {
-    // Use the callback type from the injected data
-    this.callbackType = data.callbackType;
+    this.callbackType = data?.callbackType ?? '';
+    this.existingCallbackNames = data?.existingCallbackNames ?? [];
   }
 
   addCallback() {
-    if (!this.callbackName.trim()) {
+    if (!this.callbackName.trim() || this.isDuplicateName()) {
       return;
     }
 
@@ -69,7 +87,23 @@ export class AddCallbackDialogComponent {
     this.dialogRef.close();
   }
 
+  isDuplicateName(): boolean {
+    if (!Array.isArray(this.existingCallbackNames)) {
+      return false;
+    }
+    const trimmedCallbackName = (this.callbackName || '').trim();
+    return this.existingCallbackNames.includes(trimmedCallbackName);
+  }
+
   createDisabled() {
-    return !this.callbackName.trim();
+    return !this.callbackName.trim() || this.isDuplicateName();
+  }
+
+  validate() {
+    if (this.isDuplicateName()) {
+      this.callbackNameInput.control.setErrors({ 'duplicateName': true });
+    } else {
+      this.callbackNameInput.control.setErrors(null);
+    }
   }
 }

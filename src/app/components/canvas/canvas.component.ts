@@ -1667,4 +1667,18 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   getToolIcon(tool: ToolNode): string {
     return getToolIcon(tool.name, tool.toolType);
   }
+
+  getAgentIcon(agentClass: string | undefined): string {
+    switch (agentClass) {
+      case 'SequentialAgent':
+        return 'more_horiz';
+      case 'LoopAgent':
+        return 'sync';
+      case 'ParallelAgent':
+        return 'density_medium';
+      case 'LlmAgent':
+      default:
+        return 'psychology';
+    }
+  }
 }

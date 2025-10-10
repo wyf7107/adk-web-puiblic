@@ -112,7 +112,7 @@
           >
           <div class="node-title-wrapper">
             <div class="node-title">
-              <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
+              <mat-icon style="margin-right: 5px;">{{ getAgentIcon(nodeData?.agent_class) }}</mat-icon>
               {{nodeName}}
               @if (isRootAgent(nodeName)) {
                 <span class="node-badge">Root</span>
@@ -139,7 +139,7 @@
               </div>
             </div>
           }
-          @if (isNodeSelected(ctx.node)) {
+          @if (isNodeSelected(ctx.node) && nodeData?.agent_class === 'LlmAgent') {
             <div class="add-subagent-container">
               <button
                 matIconButton

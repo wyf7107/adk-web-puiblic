@@ -25,6 +25,8 @@
       [errorStateMatcher]="matcher"
       matInput>
     <mat-error *ngIf="callbackNameInput.hasError('duplicateName')">Same callback name has been used</mat-error>
+    <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Cannot have callback consist of two words</mat-error>
+    <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Callback function names cannot have spaces</mat-error>
   </mat-form-field>
 </mat-dialog-content>
 

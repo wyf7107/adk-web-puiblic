@@ -95,13 +95,20 @@ export class AddCallbackDialogComponent {
     return this.existingCallbackNames.includes(trimmedCallbackName);
   }
 
+  hasSpaces(): boolean {
+    const regex = /\s/;
+    return regex.test(this.callbackName || '');
+  }
+
   createDisabled() {
-    return !this.callbackName.trim() || this.isDuplicateName();
+    return !this.callbackName.trim() || this.isDuplicateName() || this.hasSpaces();
   }
 
   validate() {
-    if (this.isDuplicateName()) {
-      this.callbackNameInput.control.setErrors({ 'duplicateName': true });
+    if (this.hasSpaces()) {
+      this.callbackNameInput.control.setErrors({ hasSpaces: true });
+    } else if (this.isDuplicateName()) {
+      this.callbackNameInput.control.setErrors({ duplicateName: true });
     } else {
       this.callbackNameInput.control.setErrors(null);
     }

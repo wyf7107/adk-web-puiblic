@@ -506,9 +506,13 @@ export class BuilderTabsComponent {
 
   addCallback(callbackType: string) {
     if (this.agentConfig) {
+      const existingCallbackNames = this.agentConfig?.callbacks?.map(c => c.name) ?? [];
       const dialogRef = this.dialog.open(AddCallbackDialogComponent, {
         width: '500px',
-        data: { callbackType: callbackType }
+        data: {
+          callbackType: callbackType,
+          existingCallbackNames: existingCallbackNames
+        }
       });
 
       dialogRef.afterClosed().subscribe(result => {

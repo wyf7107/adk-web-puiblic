@@ -30,7 +30,7 @@ import {of} from 'rxjs';
 
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService,} from '../../core/services/artifact.service';
-import {AUDIO_RECORDING_SERVICE, AudioRecordingService} from '../../core/services/audio-recording.service';
+import {AUDIO_SERVICE, AudioService} from '../../core/services/audio.service';
 import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/download.service';
 import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
@@ -67,7 +67,7 @@ describe('SidePanelComponent', () => {
   let fixture: ComponentFixture<SidePanelComponent>;
   let mockSessionService: jasmine.SpyObj<SessionService>;
   let mockArtifactService: jasmine.SpyObj<ArtifactService>;
-  let mockAudioRecordingService: jasmine.SpyObj<AudioRecordingService>;
+  let mockAudioService: jasmine.SpyObj<AudioService>;
   let mockWebSocketService: jasmine.SpyObj<WebSocketService>;
   let mockVideoService: jasmine.SpyObj<VideoService>;
   let mockEventService: jasmine.SpyObj<EventService>;
@@ -94,7 +94,7 @@ describe('SidePanelComponent', () => {
         'ArtifactService',
         ['getArtifactVersion'],
     );
-    mockAudioRecordingService = jasmine.createSpyObj(
+    mockAudioService = jasmine.createSpyObj(
         'AudioService',
         ['startRecording', 'stopRecording'],
     );
@@ -172,10 +172,7 @@ describe('SidePanelComponent', () => {
           providers: [
             {provide: SESSION_SERVICE, useValue: mockSessionService},
             {provide: ARTIFACT_SERVICE, useValue: mockArtifactService},
-            {
-              provide: AUDIO_RECORDING_SERVICE,
-              useValue: mockAudioRecordingService
-            },
+            {provide: AUDIO_SERVICE, useValue: mockAudioService},
             {provide: WEBSOCKET_SERVICE, useValue: mockWebSocketService},
             {provide: VIDEO_SERVICE, useValue: mockVideoService},
             {provide: EVENT_SERVICE, useValue: mockEventService},
@@ -253,10 +250,10 @@ describe('SidePanelComponent', () => {
       mockFeatureFlagService.isTraceEnabledResponse.next(false);
       fixture.detectChanges();
       const tabLabels = fixture.debugElement.queryAll(
-          By.css('.tab-label'),
+        By.css('.tab-label'),
       );
       const traceLabel = tabLabels.find(
-          (label) => label.nativeElement.textContent.trim() === 'Trace',
+        (label) => label.nativeElement.textContent.trim() === 'Trace',
       );
       expect(traceLabel).toBeUndefined();
     });
@@ -265,10 +262,10 @@ describe('SidePanelComponent', () => {
       mockFeatureFlagService.isArtifactsTabEnabledResponse.next(false);
       fixture.detectChanges();
       const tabLabels = fixture.debugElement.queryAll(
-          By.css('.tab-label'),
+        By.css('.tab-label'),
       );
       const artifactsLabel = tabLabels.find(
-          (label) => label.nativeElement.textContent.trim() === 'Artifacts',
+        (label) => label.nativeElement.textContent.trim() === 'Artifacts',
       );
       expect(artifactsLabel).toBeUndefined();
     });
@@ -277,10 +274,10 @@ describe('SidePanelComponent', () => {
       mockFeatureFlagService.isEvalEnabledResponse.next(false);
       fixture.detectChanges();
       const tabLabels = fixture.debugElement.queryAll(
-          By.css('.tab-label'),
+        By.css('.tab-label'),
       );
       const evalLabel = tabLabels.find(
-          (label) => label.nativeElement.textContent.trim() === 'Eval',
+        (label) => label.nativeElement.textContent.trim() === 'Eval',
       );
       expect(evalLabel).toBeUndefined();
     });

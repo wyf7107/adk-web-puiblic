@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import {inject, Injectable, InjectionToken} from '@angular/core';
+import {Inject, Injectable, InjectionToken} from '@angular/core';
 
-export const AUDIO_RECORDING_SERVICE =
-    new InjectionToken<AudioRecordingService>('AudioRecordingService');
+import {LiveRequest} from '../models/LiveRequest';
+
+export const AUDIO_SERVICE = new InjectionToken<AudioService>('AudioService');
 export const AUDIO_WORKLET_MODULE_PATH =
     new InjectionToken<string>('AudioWorkletModulePath');
 
@@ -26,13 +27,17 @@ export const AUDIO_WORKLET_MODULE_PATH =
 @Injectable({
   providedIn: 'root',
 })
-export class AudioRecordingService {
-  private readonly audioWorkletModulePath = inject(AUDIO_WORKLET_MODULE_PATH);
-
+export class AudioService {
+  private mediaRecorder!: MediaRecorder;
   private stream!: MediaStream;
   private audioContext!: AudioContext;
   private source!: MediaStreamAudioSourceNode;
+  private processor!: ScriptProcessorNode;
   private audioBuffer: Uint8Array[] = [];
+
+  constructor(
+      @Inject(AUDIO_WORKLET_MODULE_PATH)
+      private readonly audioWorkletModulePath: string) {}
 
   async startRecording() {
     try {
@@ -62,6 +67,9 @@ export class AudioRecordingService {
   }
 
   stopRecording() {
+    if (this.processor) {
+      this.processor.disconnect();
+    }
     if (this.source) {
       this.source.disconnect();
     }

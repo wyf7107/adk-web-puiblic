@@ -17,15 +17,15 @@
 
 import {TestBed} from '@angular/core/testing';
 
-import {AUDIO_WORKLET_MODULE_PATH, AudioRecordingService} from './audio-recording.service';
+import {AUDIO_WORKLET_MODULE_PATH, AudioService} from './audio.service';
 import {MockWebSocketService} from './testing/mock-websocket.service';
-import {WEBSOCKET_SERVICE} from './websocket.service';
+import {WEBSOCKET_SERVICE, WebSocketService} from './websocket.service';
 
 const AUDIO_PROCESSOR_PATH = './assets/audio-processor.js';
 const AUDIO_PROCESSOR_NAME = 'audio-processor';
 
-describe('AudioRecordingService', () => {
-  let service: AudioRecordingService;
+describe('AudioService', () => {
+  let service: AudioService;
   let webSocketServiceSpy: MockWebSocketService;
   let mockStream: jasmine.SpyObj<MediaStream>;
   let mockTrack: jasmine.SpyObj<MediaStreamTrack>;
@@ -62,19 +62,20 @@ describe('AudioRecordingService', () => {
       (navigator as any).mediaDevices = {};
     }
     navigator.mediaDevices.getUserMedia =
-        jasmine.createSpy('getUserMedia').and.resolveTo(mockStream);
+        jasmine.createSpy('getUserMedia')
+            .and.returnValue(Promise.resolve(mockStream));
     spyOn(window, 'AudioContext').and.returnValue(mockAudioContext);
     spyOn(window, 'AudioWorkletNode').and.returnValue(mockWorkletNode);
     mockAudioContext.audioWorklet.addModule.and.resolveTo();
 
     TestBed.configureTestingModule({
       providers: [
-        AudioRecordingService,
+        AudioService,
         {provide: WEBSOCKET_SERVICE, useValue: webSocketServiceSpy},
         {provide: AUDIO_WORKLET_MODULE_PATH, useValue: AUDIO_PROCESSOR_PATH},
       ],
     });
-    service = TestBed.inject(AudioRecordingService);
+    service = TestBed.inject(AudioService);
   });
 
   it('should be created', () => {

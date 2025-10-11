@@ -17,11 +17,10 @@
 
 import {Injectable} from '@angular/core';
 
-import {AudioRecordingService} from '../audio-recording.service';
+import {AudioService} from '../audio.service';
 
 @Injectable()
-export class MockAudioRecordingService implements
-    Partial<AudioRecordingService> {
+export class MockAudioService implements Partial<AudioService> {
   startRecording = jasmine.createSpy('startRecording');
   stopRecording = jasmine.createSpy('stopRecording');
   getCombinedAudioBuffer = jasmine.createSpy('getCombinedAudioBuffer');

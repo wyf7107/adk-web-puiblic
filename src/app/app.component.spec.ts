@@ -20,26 +20,24 @@ import {MatDialog} from '@angular/material/dialog';
 import {DomSanitizer} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
-import {of} from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
 
 import {AppComponent} from './app.component';
-import {AGENT_SERVICE} from './core/services/agent.service';
-import {ARTIFACT_SERVICE} from './core/services/artifact.service';
-import {AUDIO_PLAYING_SERVICE} from './core/services/audio-playing.service';
-import {AUDIO_RECORDING_SERVICE} from './core/services/audio-recording.service';
-import {DOWNLOAD_SERVICE} from './core/services/download.service';
-import {EVAL_SERVICE} from './core/services/eval.service';
-import {EVENT_SERVICE} from './core/services/event.service';
-import {FEATURE_FLAG_SERVICE} from './core/services/feature-flag.service';
-import {GRAPH_SERVICE} from './core/services/graph.service';
+import {AGENT_SERVICE, AgentService} from './core/services/agent.service';
+import {ARTIFACT_SERVICE, ArtifactService,} from './core/services/artifact.service';
+import {AUDIO_SERVICE, AudioService} from './core/services/audio.service';
+import {DOWNLOAD_SERVICE, DownloadService,} from './core/services/download.service';
+import {EVAL_SERVICE, EvalService} from './core/services/eval.service';
+import {EVENT_SERVICE, EventService} from './core/services/event.service';
+import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from './core/services/feature-flag.service';
+import {GRAPH_SERVICE, GraphService} from './core/services/graph.service';
 import {SAFE_VALUES_SERVICE} from './core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from './core/services/interfaces/string-to-color';
-import {SESSION_SERVICE} from './core/services/session.service';
+import {SESSION_SERVICE, SessionService,} from './core/services/session.service';
 import {STREAM_CHAT_SERVICE} from './core/services/stream-chat.service';
 import {MockAgentService} from './core/services/testing/mock-agent.service';
 import {MockArtifactService} from './core/services/testing/mock-artifact.service';
-import {MockAudioPlayingService} from './core/services/testing/mock-audio-playing.service';
-import {MockAudioRecordingService} from './core/services/testing/mock-audio-recording.service';
+import {MockAudioService} from './core/services/testing/mock-audio.service';
 import {MockDownloadService} from './core/services/testing/mock-download.service';
 import {MockEvalService} from './core/services/testing/mock-eval.service';
 import {MockEventService} from './core/services/testing/mock-event.service';
@@ -52,9 +50,9 @@ import {MockStringToColorService} from './core/services/testing/mock-string-to-c
 import {MockTraceService} from './core/services/testing/mock-trace.service';
 import {MockVideoService} from './core/services/testing/mock-video.service';
 import {MockWebSocketService} from './core/services/testing/mock-websocket.service';
-import {TRACE_SERVICE} from './core/services/trace.service';
-import {VIDEO_SERVICE} from './core/services/video.service';
-import {WEBSOCKET_SERVICE} from './core/services/websocket.service';
+import {TRACE_SERVICE, TraceService} from './core/services/trace.service';
+import {VIDEO_SERVICE, VideoService} from './core/services/video.service';
+import {WEBSOCKET_SERVICE, WebSocketService,} from './core/services/websocket.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -63,8 +61,7 @@ describe('AppComponent', () => {
     const featureFlagService = new MockFeatureFlagService();
     const traceService = new MockTraceService();
     const artifactService = new MockArtifactService();
-    const audioRecordingService = new MockAudioRecordingService();
-    const audioPlayingService = new MockAudioPlayingService();
+    const audioService = new MockAudioService();
     const webSocketService = new MockWebSocketService();
     const videoService = new MockVideoService();
     const streamChatService = new MockStreamChatService();
@@ -84,8 +81,7 @@ describe('AppComponent', () => {
         .configureTestingModule({
           imports: [AppComponent, NoopAnimationsModule],
           providers: [
-            {provide: MatDialog, useValue: {}},
-            {
+            {provide: MatDialog, useValue: {}}, {
               provide: ActivatedRoute,
               useValue: {
                 snapshot: {queryParams: {}},
@@ -107,12 +103,8 @@ describe('AppComponent', () => {
               useValue: artifactService,
             },
             {
-              provide: AUDIO_RECORDING_SERVICE,
-              useValue: audioRecordingService,
-            },
-            {
-              provide: AUDIO_PLAYING_SERVICE,
-              useValue: audioPlayingService,
+              provide: AUDIO_SERVICE,
+              useValue: audioService,
             },
             {
               provide: WEBSOCKET_SERVICE,

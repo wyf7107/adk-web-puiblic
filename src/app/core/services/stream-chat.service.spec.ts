@@ -22,9 +22,9 @@ import {URLUtil} from '../../../utils/url-util';
 import {fakeAsync,
         tick} from '../../testing/utils';
 
-import {AUDIO_RECORDING_SERVICE} from './audio-recording.service';
+import {AUDIO_SERVICE} from './audio.service';
 import {StreamChatService} from './stream-chat.service';
-import {MockAudioRecordingService} from './testing/mock-audio-recording.service';
+import {MockAudioService} from './testing/mock-audio.service';
 import {MockVideoService} from './testing/mock-video.service';
 import {MockWebSocketService} from './testing/mock-websocket.service';
 import {VIDEO_SERVICE} from './video.service';
@@ -33,7 +33,7 @@ import {WEBSOCKET_SERVICE} from './websocket.service';
 describe('StreamChatService', () => {
   let service: StreamChatService;
   let mockWebSocketService: MockWebSocketService;
-  let mockAudioRecordingService: MockAudioRecordingService;
+  let mockAudioService: MockAudioService;
   let mockVideoService: MockVideoService;
   let videoContainer: ElementRef;
 
@@ -41,7 +41,7 @@ describe('StreamChatService', () => {
   beforeEach(() => {
     spyOn(URLUtil, 'getWSServerUrl').and.returnValue('localhost:9876');
     mockWebSocketService = new MockWebSocketService();
-    mockAudioRecordingService = new MockAudioRecordingService();
+    mockAudioService = new MockAudioService();
     mockVideoService = new MockVideoService();
     videoContainer = new ElementRef(document.createElement('div'));
 
@@ -49,7 +49,7 @@ describe('StreamChatService', () => {
       providers: [
         StreamChatService,
         {provide: WEBSOCKET_SERVICE, useValue: mockWebSocketService},
-        {provide: AUDIO_RECORDING_SERVICE, useValue: mockAudioRecordingService},
+        {provide: AUDIO_SERVICE, useValue: mockAudioService},
         {provide: VIDEO_SERVICE, useValue: mockVideoService}
       ],
     });
@@ -81,11 +81,11 @@ describe('StreamChatService', () => {
         sessionId: 'fake-session-id'
       });
 
-      expect(mockAudioRecordingService.startRecording).toHaveBeenCalled();
+      expect(mockAudioService.startRecording).toHaveBeenCalled();
     });
 
     it('should start to send buffered audio periodically', fakeAsync(() => {
-         mockAudioRecordingService.getCombinedAudioBuffer.and.returnValue(
+         mockAudioService.getCombinedAudioBuffer.and.returnValue(
              Uint8Array.of());
 
          service.startAudioChat({
@@ -103,7 +103,7 @@ describe('StreamChatService', () => {
     it('should stop audio recording', () => {
       service.stopAudioChat();
 
-      expect(mockAudioRecordingService.stopRecording).toHaveBeenCalled();
+      expect(mockAudioService.stopRecording).toHaveBeenCalled();
     });
 
     it('should close WebSocket connection', () => {
@@ -114,7 +114,7 @@ describe('StreamChatService', () => {
 
     it('should clear the stream to send buffered audio periodically',
        fakeAsync(() => {
-         mockAudioRecordingService.getCombinedAudioBuffer.and.returnValue(
+         mockAudioService.getCombinedAudioBuffer.and.returnValue(
              Uint8Array.of());
          service.startAudioChat({
            appName: 'fake-app-name',
@@ -155,7 +155,7 @@ describe('StreamChatService', () => {
         videoContainer
       });
 
-      expect(mockAudioRecordingService.startRecording).toHaveBeenCalled();
+      expect(mockAudioService.startRecording).toHaveBeenCalled();
     });
 
     it('should start video recording', async () => {
@@ -171,7 +171,7 @@ describe('StreamChatService', () => {
     });
 
     it('should start to send buffered audio periodically', fakeAsync(() => {
-         mockAudioRecordingService.getCombinedAudioBuffer.and.returnValue(
+         mockAudioService.getCombinedAudioBuffer.and.returnValue(
              Uint8Array.of());
 
          service.startVideoChat({
@@ -204,7 +204,7 @@ describe('StreamChatService', () => {
     it('should stop audio recording', () => {
       service.stopVideoChat(videoContainer);
 
-      expect(mockAudioRecordingService.stopRecording).toHaveBeenCalled();
+      expect(mockAudioService.stopRecording).toHaveBeenCalled();
     });
 
     it('should stop video recording', () => {
@@ -221,7 +221,7 @@ describe('StreamChatService', () => {
 
     it('should clear the stream to send buffered audio periodically',
        fakeAsync(() => {
-         mockAudioRecordingService.getCombinedAudioBuffer.and.returnValue(
+         mockAudioService.getCombinedAudioBuffer.and.returnValue(
              Uint8Array.of());
          service.startVideoChat({
            appName: 'fake-app-name',

@@ -18,11 +18,9 @@ import { Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, Elem
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatCard } from '@angular/material/card';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { MarkdownComponent } from 'ngx-markdown';
 import { SESSION_SERVICE, SessionService } from '../../core/services/session.service';
@@ -40,9 +38,8 @@ import { YamlUtils } from '../../../utils/yaml-utils';
     CommonModule,
     FormsModule,
     MatIcon,
+    MatIconButton,
     MatTooltip,
-    MatFormField,
-    MatInput,
     MatCard,
     TextFieldModule,
     MarkdownComponent,
@@ -61,6 +58,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
   userMessage: string = '';
   messages: any[] = [];
   private shouldAutoScroll = false;
+  isGenerating: boolean = false;
 
   @ViewChild('chatMessages') private chatMessages!: ElementRef;
 
@@ -90,6 +88,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
       // Add loading message for bot response
       this.messages.push({ role: 'bot', text: '', isLoading: true });
       this.shouldAutoScroll = true;
+      this.isGenerating = true;
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
@@ -120,8 +119,10 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
             lastMessage.isLoading = false;
             this.shouldAutoScroll = true;
           }
+          this.isGenerating = false;
         },
         complete: () => {
+          this.isGenerating = false;
         },
       })
     })
@@ -145,6 +146,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
       // Add loading message for bot response
       this.messages.push({ role: 'bot', text: '', isLoading: true });
       this.shouldAutoScroll = true;
+      this.isGenerating = true;
 
       const req: AgentRunRequest = {
         appName: this.assistantAppName,
@@ -187,8 +189,10 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
             lastMessage.isLoading = false;
             this.shouldAutoScroll = true;
           }
+          this.isGenerating = false;
         },
         complete: () => {
+          this.isGenerating = false;
         },
       });
     }

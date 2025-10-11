@@ -20,7 +20,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {importProvidersFrom} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
-import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {bootstrapApplication, BrowserModule} from '@angular/platform-browser';
 import {provideAnimations} from '@angular/platform-browser/animations';
@@ -89,6 +89,10 @@ fetch('./assets/config/runtime-config.json')
                 [{provide: LOGO_COMPONENT, useValue: CustomLogoComponent}] :
                 []),
         { provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService },
+        {
+          provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+          useValue: {appearance: 'fill'}
+        },
         provideAnimations(),
         provideMarkdown(),
       ]

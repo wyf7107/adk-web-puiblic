@@ -12,7 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
+
+@use '../../../styles/mixins' as mixins;
 
 .response-textarea {
   min-width: 500px;
@@ -20,6 +22,5 @@
 }
 
 .dialog-title {
-  font-weight: bold;
-  font-size: large;
+  @include mixins.dialog-title;
 }

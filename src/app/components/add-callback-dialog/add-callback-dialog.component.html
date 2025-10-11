@@ -26,15 +26,15 @@
       (keydown.enter)="addCallback()"
       matInput>
     <mat-error *ngIf="callbackNameInput.hasError('duplicateName')">Same callback name has been used</mat-error>
-    <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Cannot have callback consist of two words</mat-error>
-    <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Callback function names cannot have spaces</mat-error>
+    <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Callback function name cannot include spaces</mat-error>
   </mat-form-field>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="cancel()">Cancel</button>
   <button 
-    mat-raised-button color="secondary"
+    mat-raised-button
+    class="adk-primary-button"
     (click)="addCallback()"
     [disabled]="createDisabled()">
     Add

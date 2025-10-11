@@ -287,7 +287,8 @@
 } @if (appName != "" && isChatMode) {
 <div class="chat-input">
   <input type="file" multiple hidden (change)="fileSelect.emit($event)" #fileInput />
-  <mat-form-field class="input-field" appearance="outline">
+  <mat-form-field class="input-field">
+    <mat-label>{{ i18n.typeMessagePlaceholder }}</mat-label>
     @if ((selectedFiles.length && appName != "") || updatedSessionState) {
     <div class="file-preview">
       @for (file of selectedFiles; track file; let i = $index) {
@@ -332,7 +333,6 @@
       [ngModel]="userInput"
       (ngModelChange)="userInputChange.emit($event)"
       (keydown.enter)="sendMessage.emit($event)"
-      [placeholder]="i18n.typeMessagePlaceholder"
     ></textarea>
     <div class="chat-input-actions">
       <div>

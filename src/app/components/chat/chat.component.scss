@@ -34,47 +34,8 @@
   align-items: center;
   @include mat.button-overrides(
     (
-      filled-container-color: #89b4f8,
-      filled-label-text-color: black,
-    )
-  );
-
-  .mat-icon {
-    width: 36px;
-    height: 36px;
-    color: #bdc1c6;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .drawer-logo {
-    margin-left: 9px;
-    display: flex;
-    align-items: center;
-
-    img {
-      margin-right: 9px;
-    }
-
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px;
-    letter-spacing: 0.1px;
-  }
-}
-
-.drawer-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: #89b4f8,
-      filled-label-text-color: black,
+      filled-container-color: var(--filled-button-background-color),
+      filled-label-text-color: var(--filled-button-text-color),
     )
   );
 

@@ -583,14 +583,7 @@ export class BuilderTabsComponent {
         );
 
         if (!updateResult.success) {
-          this.snackBar.open(
-            updateResult.error || 'Failed to update callback',
-            'Close',
-            {
-              duration: 3000,
-              panelClass: ['error-snackbar'],
-            },
-          );
+          console.error('Failed to update callback:', updateResult.error);
         } else {
           this.cdr.markForCheck();
         }

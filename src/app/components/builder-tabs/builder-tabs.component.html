@@ -421,7 +421,6 @@
               type="button"
               class="panel-action-button"
               (click)="addSubAgent(agentConfig?.name)"
-              [disabled]="!agentConfig"
               aria-label="Add sub agent"
             >
               <mat-icon>add</mat-icon>
@@ -440,7 +439,6 @@
               type="button"
               class="panel-action-button"
               [matMenuTriggerFor]="callbacksMenu"
-              [disabled]="!agentConfig"
               aria-label="Add callback"
             >
               <mat-icon>add</mat-icon>

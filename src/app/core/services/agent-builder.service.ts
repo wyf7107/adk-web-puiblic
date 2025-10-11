@@ -216,11 +216,9 @@ export class AgentBuilderService {
         return { success: false, error: 'Callback not found' };
       }
 
-      if (!this.isValidCallbackName(updatedCallback.name)) {
-        return {
-          success: false,
-          error: "Callback name must follow the '{{AppName}}.callback_name' format",
-        };
+      const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+      if (!pythonIdentifierRegex.test(updatedCallback.name)) {
+        return { success: false, error: 'Callback name must be a valid Python identifier' };
       }
 
       const duplicateExists = agentNode.callbacks.some((cb, index) => {
@@ -252,11 +250,6 @@ export class AgentBuilderService {
     } catch (error) {
       return { success: false, error: 'Failed to update callback: ' + (error as Error).message };
     }
-  }
-
-  private isValidCallbackName(name: string): boolean {
-    const callbackNameFormatRegex = /^[A-Za-z][A-Za-z0-9_]*\.[a-zA-Z_][a-zA-Z0-9_]*$/;
-    return callbackNameFormatRegex.test(name);
   }
 
   deleteCallback(agentName: string, callbackToDelete: CallbackNode): { success: boolean, error?: string } {

@@ -29,7 +29,7 @@
     <p>Args</p>
     <p>{{ argsToJson(selectedEvent.args) }}</p>
 
-    <mat-form-field appearance="outline" class="response-textarea">
+    <mat-form-field class="response-textarea">
       <mat-label>Response</mat-label>
       <textarea matInput [(ngModel)]="selectedEvent.response"></textarea>
     </mat-form-field>
@@ -38,7 +38,11 @@
 </mat-dialog-content>
 <mat-dialog-actions>
   @if (selectedEvent && selectedEvent.response) {
-  <button mat-button (click)="sendResponse()" [disabled]="sending">
+  <button
+    mat-raised-button
+    class="adk-primary-button"
+    (click)="sendResponse()"
+    [disabled]="sending">
     {{ sending? "Sending...": "Send" }}
   </button>
   }

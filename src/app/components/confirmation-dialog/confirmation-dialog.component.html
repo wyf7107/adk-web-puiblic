@@ -23,7 +23,6 @@
       <input 
         matInput 
         [(ngModel)]="inputValue" 
-        [placeholder]="data.inputPlaceholder || 'Enter value'"
         (keydown)="onKeyDown($event)"
         cdkFocusInitial>
       <mat-hint *ngIf="!isInputValid()" style="font-size: 11px; color: #666;">
@@ -35,8 +34,8 @@
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Cancel</button>
   <button 
-    mat-button 
-    color="primary" 
+    mat-raised-button
+    class="adk-primary-button"
     (click)="onConfirm()" 
     [disabled]="data.showInput && !isInputValid()"
     cdkFocusInitial>

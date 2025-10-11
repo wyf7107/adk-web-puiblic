@@ -17,6 +17,7 @@
 /* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
 @use '../theme-colors.scss' as theme;
+@use './styles/mixins' as mixins;
 
 html {
   color-scheme: dark;
@@ -44,6 +45,20 @@ markdown p {
   --mat-sys-primary: black;
   --mdc-checkbox-selected-icon-color: white;
   --mat-sys-background: #131314;
+  --dialog-title-color: #e8eaed;
+  --dialog-title-font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
+  --dialog-title-font-size: 24px;
+  --dialog-title-font-weight: 500;
+  --filled-button-background-color: #8ab4f8;
+  --filled-button-text-color: #202124;
+  --form-field-label-color: #e8eaed;
+  --form-field-label-focused-color: #8ab4f8;
+  --form-field-caret-color: #e8eaed;
+  --mdc-filled-text-field-label-text-color: #e8eaed;
+  --mdc-filled-text-field-focus-label-text-color: #8ab4f8;
+  --mdc-filled-text-field-hover-label-text-color: #e8eaed;
+  --mdc-filled-text-field-disabled-label-text-color: rgba(232, 234, 237, 0.38);
+  --mdc-filled-text-field-caret-color: #e8eaed;
   // tab variable overrides
   --mat-tab-header-active-label-text-color: #8AB4F8;
   --mat-tab-header-active-hover-label-text-color: #8AB4F8;
@@ -125,7 +140,7 @@ markdown p {
   --artifact-tab-link-style-button-focus-outline-color: #007bff;
   --artifact-tab-link-style-button-active-color: #004085;
   --artifact-tab-link-style-button-disabled-color: #6c757d;
-  --audio-player-container-background-color: #f0f0f0;
+  --audio-player-container-background-color: #2b2b2f;
   --audio-player-container-box-shadow-color: rgba(0, 0, 0, 0.1);
   --audio-player-custom-controls-button-background-color: #007bff;
   --audio-player-custom-controls-button-color: white;
@@ -270,17 +285,19 @@ markdown p {
 
 :root {
   @include mat.form-field-overrides((
-    disabled-input-text-placeholder-color: orange,
-    filled-active-indicator-color: red,
-    outlined-outline-color: #cccccc,
-    outlined-input-text-color: #cccccc,
-    outlined-label-text-color: #cccccc,
-    outlined-hover-label-text-color: #cccccc,
-    outlined-focus-label-text-color: #cccccc,
-    outlined-disabled-label-text-color: #cccccc,
-    outlined-disabled-input-text-color: #cccccc,
-    outlined-disabled-outline-color: #cccccc,
-    outlined-caret-color: #cccccc
+    filled-container-color: #333537,
+    filled-active-indicator-color: #8ab4f8,
+    filled-hover-active-indicator-color: #8ab4f8,
+    filled-focus-active-indicator-color: #8ab4f8,
+    filled-input-text-color: #e8eaed,
+    filled-label-text-color: #e8eaed,
+    filled-hover-label-text-color: #e8eaed,
+    filled-focus-label-text-color: #8ab4f8,
+    filled-input-text-placeholder-color: #9aa0a6,
+    filled-disabled-input-text-color: rgba(232, 234, 237, 0.38),
+    filled-disabled-label-text-color: rgba(232, 234, 237, 0.38),
+    filled-disabled-container-color: #2b2b2f,
+    filled-disabled-active-indicator-color: rgba(138, 180, 248, 0.24)
   ));
 }
 
@@ -290,4 +307,37 @@ markdown p {
 
 .mat-mdc-text-field-wrapper {
   border-radius: 6px !important;
+}
+
+.mat-mdc-form-field .mdc-floating-label,
+.mat-mdc-form-field .mdc-floating-label--float-above {
+  color: var(--form-field-label-color) !important;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-floating-label,
+.mat-mdc-form-field.mat-focused .mdc-floating-label--float-above {
+  color: var(--form-field-label-focused-color) !important;
+}
+
+.mat-mdc-form-field .mdc-text-field {
+  caret-color: var(--form-field-caret-color);
+}
+
+.mat-mdc-form-field.mat-focused .mdc-text-field {
+  caret-color: var(--form-field-caret-color);
+}
+
+.mat-mdc-form-field .mat-mdc-input-element,
+.mat-input-element {
+  caret-color: var(--form-field-caret-color);
+}
+
+.adk-primary-button.mat-mdc-raised-button:not(.mat-mdc-button-disabled) {
+  @include mixins.filled-button-colors;
+  font-weight: 500;
+}
+
+.adk-primary-button.mat-mdc-raised-button.mat-mdc-button-disabled {
+  background-color: rgba(138, 180, 248, 0.24);
+  color: rgba(32, 33, 36, 0.45);
 }

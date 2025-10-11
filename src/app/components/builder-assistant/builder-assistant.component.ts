@@ -42,6 +42,7 @@ import { YamlUtils } from '../../../utils/yaml-utils';
     MatIcon,
     MatTooltip,
     MatFormField,
+    MatLabel,
     MatInput,
     MatCard,
     TextFieldModule,

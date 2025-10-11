@@ -50,7 +50,7 @@ const ROOT_AGENT = 'root_agent';
   imports: [
     CommonModule, FormsModule, MatIcon, MatCard,
     MatProgressBar, MatButtonModule, MatInput, TextFieldModule,
-    MatFormField,
+    MatFormField, MatLabel,
     MatMenu, MatMenuItem,
     MatMenuTrigger, NgxJsonViewerModule,
     AudioPlayerComponent, MatTooltip, NgClass, NgStyle,

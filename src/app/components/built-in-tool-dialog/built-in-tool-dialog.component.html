@@ -57,11 +57,17 @@
     @if (!isEditMode) {
       <button mat-button (click)="backToToolSelection()">Back</button>
     }
-    <button mat-button (click)="saveArgs()">{{ isEditMode ? 'Save' : 'Create' }}</button>
+    <button
+      mat-raised-button
+      class="adk-primary-button"
+      (click)="saveArgs()">
+      {{ isEditMode ? 'Save' : 'Create' }}
+    </button>
   } @else {
     <button mat-button (click)="cancel()">Cancel</button>
     <button
-      mat-button
+      mat-raised-button
+      class="adk-primary-button"
       cdkFocusInitial
       (click)="addTool()">
       {{ isEditMode ? 'Save' : 'Create' }}

@@ -1,0 +1,15 @@
+/**
+ * Shared styling utilities for ADK Web components.
+ */
+
+@mixin dialog-title {
+  color: var(--dialog-title-color) !important;
+  font-family: var(--dialog-title-font-family);
+  font-size: var(--dialog-title-font-size);
+  font-weight: var(--dialog-title-font-weight);
+}
+
+@mixin filled-button-colors {
+  background-color: var(--filled-button-background-color);
+  color: var(--filled-button-text-color);
+}

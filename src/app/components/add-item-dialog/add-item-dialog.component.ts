@@ -28,7 +28,7 @@ import { AgentNode } from '../../core/models/AgentBuilder';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AGENT_SERVICE } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatFormField, MatHint } from '@angular/material/form-field';
+import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -41,6 +41,7 @@ import { MatButton } from '@angular/material/button';
   imports: [
     MatDialogTitle,
     MatFormField,
+    MatLabel,
     MatInput,
     FormsModule,
     MatDialogActions,

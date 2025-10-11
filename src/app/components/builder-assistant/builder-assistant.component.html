@@ -73,14 +73,14 @@ limitations under the License.
     </div>
 
     <div class="chat-input-container">
-      <mat-form-field class="input-field" appearance="outline">
+      <mat-form-field class="input-field">
+        <mat-label>Ask your assistant...</mat-label>
         <textarea
           class="assistant-input-box"
           matInput
           cdkTextareaAutosize
           cdkAutosizeMinRows="3"
           [(ngModel)]="userMessage"
-          placeholder="Ask your assistant..."
           style="caret-color: white; padding-top: 5px"
           (keydown)="onKeyDown($event)"
         ></textarea>

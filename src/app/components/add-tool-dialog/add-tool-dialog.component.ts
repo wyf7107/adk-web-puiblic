@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
@@ -43,10 +43,11 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatLabel,
   ],
 })
-export class AddToolDialogComponent implements OnInit{
+export class AddToolDialogComponent implements OnInit, AfterViewInit {
   toolName = '';
   toolType = 'Function tool';
   selectedBuiltInTool = 'google_search';
+  private shouldFocusFunctionInput = false;
 
   builtInTools = [
     'EnterpriseWebSearchTool',
@@ -64,6 +65,8 @@ export class AddToolDialogComponent implements OnInit{
   ];
 
   isEditMode = false;
+
+  @ViewChild('functionNameInput') functionNameInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -83,6 +86,20 @@ export class AddToolDialogComponent implements OnInit{
         this.selectedBuiltInTool = this.data.toolName;
       }
     }
+
+    this.shouldFocusFunctionInput = this.toolType === 'Function tool';
+  }
+
+  ngAfterViewInit() {
+    this.dialogRef.afterOpened().subscribe(() => {
+      if (this.shouldFocusFunctionInput && this.functionNameInput) {
+        setTimeout(() => {
+          const inputEl = this.functionNameInput?.nativeElement;
+          inputEl?.focus();
+          inputEl?.select();
+        });
+      }
+    });
   }
 
   addTool() {

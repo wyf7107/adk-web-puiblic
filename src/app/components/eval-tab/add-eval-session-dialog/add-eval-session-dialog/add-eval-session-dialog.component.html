@@ -19,9 +19,17 @@
   Please enter the eval case name
 </mat-dialog-content>
 <mat-form-field style="padding-left:20px; padding-right: 24px;">
+    <mat-label>Eval Case Name</mat-label>
     <input [(ngModel)]="newCaseId" matInput (keydown.enter)="createNewEvalCase()">
   </mat-form-field>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Cancel</button>
-  <button mat-button cdkFocusInitial (click)="createNewEvalCase()">Create</button>
+  <button
+    mat-raised-button
+    class="adk-primary-button"
+    cdkFocusInitial
+    (click)="createNewEvalCase()"
+    [disabled]="!newCaseId?.trim()">
+    Create
+  </button>
 </mat-dialog-actions>

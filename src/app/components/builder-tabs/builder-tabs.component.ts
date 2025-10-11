@@ -528,6 +528,44 @@ export class BuilderTabsComponent {
     }
   }
 
+  editCallback(callback: CallbackNode) {
+    if (!this.agentConfig) {
+      return;
+    }
+
+    const existingCallbackNames = this.agentConfig.callbacks?.map(c => c.name) ?? [];
+    const dialogRef = this.dialog.open(AddCallbackDialogComponent, {
+      width: '500px',
+      data: {
+        callbackType: callback.type,
+        existingCallbackNames,
+        isEditMode: true,
+        callback,
+        availableCallbackTypes: this.callbackTypes,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.isEditMode) {
+        const updateResult = this.agentBuilderService.updateCallback(
+          this.agentConfig!.name,
+          callback.name,
+          {
+            ...callback,
+            name: result.name,
+            type: result.type,
+          },
+        );
+
+        if (!updateResult.success) {
+          console.error('Failed to update callback:', updateResult.error);
+        } else {
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
   deleteCallback(agentName: string, callback: any) {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {

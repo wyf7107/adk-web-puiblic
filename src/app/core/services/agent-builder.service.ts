@@ -194,6 +194,62 @@ export class AgentBuilderService {
     }
   }
 
+  updateCallback(
+    agentName: string,
+    originalCallbackName: string,
+    updatedCallback: CallbackNode,
+  ): { success: boolean; error?: string } {
+    try {
+      const agentNode = this.getNode(agentName);
+      if (!agentNode) {
+        return { success: false, error: 'Agent not found' };
+      }
+
+      if (!agentNode.callbacks) {
+        return { success: false, error: 'No callbacks found for this agent' };
+      }
+
+      const callbackIndex = agentNode.callbacks.findIndex(cb => cb.name === originalCallbackName);
+      if (callbackIndex === -1) {
+        return { success: false, error: 'Callback not found' };
+      }
+
+      const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+      if (!pythonIdentifierRegex.test(updatedCallback.name)) {
+        return { success: false, error: 'Callback name must be a valid Python identifier' };
+      }
+
+      const duplicateExists = agentNode.callbacks.some((cb, index) => {
+        return index !== callbackIndex && cb.name === updatedCallback.name;
+      });
+
+      if (duplicateExists) {
+        return { success: false, error: `Callback with name '${updatedCallback.name}' already exists` };
+      }
+
+      const mergedCallback = {
+        ...agentNode.callbacks[callbackIndex],
+        ...updatedCallback,
+      };
+
+      agentNode.callbacks[callbackIndex] = mergedCallback;
+      this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
+
+      const currentMap = this.agentCallbacksMapSubject.value;
+      const newMap = new Map(currentMap);
+      newMap.set(agentName, agentNode.callbacks);
+      this.agentCallbacksMapSubject.next(newMap);
+
+      if (this.selectedCallbackSubject.value?.name === originalCallbackName) {
+        this.setSelectedCallback(mergedCallback);
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Failed to update callback: ' + (error as Error).message };
+    }
+  }
+
   deleteCallback(agentName: string, callbackToDelete: CallbackNode): { success: boolean, error?: string } {
     try {
       const agentNode = this.getNode(agentName);

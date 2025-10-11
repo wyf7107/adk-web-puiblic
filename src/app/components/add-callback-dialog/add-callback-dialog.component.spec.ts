@@ -67,6 +67,26 @@ describe('AddCallbackDialogComponent', () => {
     expect(mockDialogRef.close).toHaveBeenCalledWith({
       name: 'test_callback',
       type: 'after_agent',
+      isEditMode: false,
+      originalName: 'test_callback',
+    });
+  });
+
+  it('should allow editing existing callback without flagging duplicate name', () => {
+    component.callbackName = 'existing_callback';
+    component.callbackType = 'before_agent';
+    component.isEditMode = true;
+    component['originalCallbackName'] = 'existing_callback';
+    component.existingCallbackNames = ['another_callback'];
+
+    expect(component.isDuplicateName()).toBeFalse();
+    component.addCallback();
+
+    expect(mockDialogRef.close).toHaveBeenCalledWith({
+      name: 'existing_callback',
+      type: 'before_agent',
+      isEditMode: true,
+      originalName: 'existing_callback',
     });
   });
 

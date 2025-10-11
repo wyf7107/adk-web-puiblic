@@ -16,13 +16,14 @@
 
 <h2 mat-dialog-title>Add {{callbackType}} Callback</h2>
 <mat-dialog-content>
-  <mat-form-field appearance="outline" style="width: 100%;">
+  <mat-form-field style="width: 100%;">
     <mat-label>Callback Name</mat-label>
     <input
       [(ngModel)]="callbackName"
       #callbackNameInput="ngModel"
       (ngModelChange)="validate()"
       [errorStateMatcher]="matcher"
+      (keydown.enter)="addCallback()"
       matInput>
     <mat-error *ngIf="callbackNameInput.hasError('duplicateName')">Same callback name has been used</mat-error>
     <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Cannot have callback consist of two words</mat-error>

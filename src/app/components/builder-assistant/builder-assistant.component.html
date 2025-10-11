@@ -17,8 +17,8 @@ limitations under the License.
 <div class="builder-assistant-panel" [class.hidden]="!isVisible">
   <div class="panel-header">
     <div class="panel-title">
-      <mat-icon>assistant</mat-icon>
-      <span>Builder Assistant</span>
+      <mat-icon>auto_awesome</mat-icon>
+      <span>Assistant</span>
     </div>
     <button
       mat-icon-button
@@ -43,57 +43,46 @@ limitations under the License.
             'user-message': message.role === 'user',
             'bot-message': message.role === 'bot'
           }">
-            @if (message.role === 'bot') {
-              <button mat-mini-fab class="bot-avatar">
-                <mat-icon>smart_toy</mat-icon>
-              </button>
-            }
             <mat-card class="message-card">
               @if (message.isLoading) {
                 <div class="loading-message">
-                  <mat-icon class="loading-icon">hourglass_empty</mat-icon>
-                  <span>Thinking...</span>
+                  <span class="dots">・・・</span>
                 </div>
               } @else {
                 @if (message.role === 'bot') {
+                  <div class="bot-label">Assistant</div>
                   <markdown class="message-text" [data]="message.text"></markdown>
                 } @else {
                   <div class="message-text">{{message.text}}</div>
                 }
               }
             </mat-card>
-            @if (message.role === 'user') {
-              <button mat-mini-fab class="user-avatar">
-                <mat-icon>person</mat-icon>
-              </button>
-            }
           </div>
         }
       }
     </div>
 
     <div class="chat-input-container">
-      <mat-form-field class="input-field" appearance="outline">
+      <div class="input-wrapper">
         <textarea
           class="assistant-input-box"
-          matInput
           cdkTextareaAutosize
-          cdkAutosizeMinRows="3"
+          cdkAutosizeMinRows="1"
+          cdkAutosizeMaxRows="5"
           [(ngModel)]="userMessage"
-          placeholder="Ask your assistant..."
-          style="caret-color: white; padding-top: 5px"
+          placeholder="Ask Gemini to build your agent"
           (keydown)="onKeyDown($event)"
+          [disabled]="isGenerating"
         ></textarea>
         <button
           mat-icon-button
-          matSuffix
           (click)="sendMessage()"
-          [disabled]="!userMessage.trim()"
+          [disabled]="!userMessage?.trim() || isGenerating"
           class="send-button"
           matTooltip="Send message">
           <mat-icon>send</mat-icon>
         </button>
-      </mat-form-field>
+      </div>
     </div>
   </div>
 </div>

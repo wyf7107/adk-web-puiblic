@@ -37,6 +37,7 @@ import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
 import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from '../../core/services/feature-flag.service';
 import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
+import {LOCAL_FILE_SERVICE} from '../../core/services/interfaces/localfile';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/session.service';
@@ -49,6 +50,7 @@ import {MockEvalService} from '../../core/services/testing/mock-eval.service';
 import {MockEventService} from '../../core/services/testing/mock-event.service';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
 import {MockGraphService} from '../../core/services/testing/mock-graph.service';
+import {MockLocalFileService} from '../../core/services/testing/mock-local-file.service';
 import {MockSafeValuesService} from '../../core/services/testing/mock-safevalues.service';
 import {MockSessionService} from '../../core/services/testing/mock-session.service';
 import {MockStreamChatService} from '../../core/services/testing/mock-stream-chat.service';
@@ -119,6 +121,7 @@ describe('ChatComponent', () => {
   let mockFeatureFlagService: MockFeatureFlagService;
   let mockStringToColorService: MockStringToColorService;
   let mockSafeValuesService: MockSafeValuesService;
+  let mockLocalFileService: MockLocalFileService;
   let mockDialog: jasmine.SpyObj<MatDialog>;
   let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
   let mockRouter: jasmine.SpyObj<Router>;
@@ -141,6 +144,7 @@ describe('ChatComponent', () => {
     mockFeatureFlagService = new MockFeatureFlagService();
     mockStringToColorService = new MockStringToColorService();
     mockSafeValuesService = new MockSafeValuesService();
+    mockLocalFileService = new MockLocalFileService();
 
     mockStringToColorService.stc.and.returnValue('#8c8526ff');
 
@@ -213,6 +217,7 @@ describe('ChatComponent', () => {
             },
             {provide: GRAPH_SERVICE, useValue: graphService},
             {provide: SAFE_VALUES_SERVICE, useValue: mockSafeValuesService},
+            {provide: LOCAL_FILE_SERVICE, useValue: mockLocalFileService},
             {provide: MatDialog, useValue: mockDialog},
             {provide: MatSnackBar, useValue: mockSnackBar},
             {provide: Router, useValue: mockRouter},

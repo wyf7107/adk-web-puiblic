@@ -84,3 +84,13 @@ This feature is subject to the "Pre-GA Offerings Terms" in the General Service T
 ---
 
 *Happy Agent Building!*
+
+## Updating the Material 3 Theme
+
+To refresh the Material 3 design tokens/colors used by ADK Web:
+1. Obtain the exported CSS bundle (containing `tokens.css`, `colors.module.css`, `typography.module.css`, `theme.css`, `theme.light.css`, and `theme.dark.css`).
+2. Run `node scripts/sync-material3-theme.mjs "/absolute/path/to/css bundle"` from the repo root.
+   - The script copies those files into `src/styles/material3/` and rewrites `_theme-colors.scss` with the new palette tones so Angular Material stays in sync.
+3. Rebuild (`npm run build`) to verify the new palette.
+
+Panel colors (e.g. the Configuration panel) resolve through the CSS variables defined in `src/styles.scss:261`–`src/styles.scss:272`. Those map to the Material tokens (e.g. `--md-sys-color-surface-container-high-dark`) in `src/styles/material3/tokens.css`.

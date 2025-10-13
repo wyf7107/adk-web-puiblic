@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-/* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
 @use '../theme-colors.scss' as theme;
 @use './styles/mixins' as mixins;
 
-html {
-  color-scheme: dark;
-  @include mat.theme((
-      color: theme.$primary-palette,
-    density: 0
-  ));
-}
+@import './styles/material3/tokens.css';
+
+@include mat.core();
+
+$light-theme: theme.$light-theme;
+$dark-theme: theme.$dark-theme;
 
 html {
+  color-scheme: dark;
   font-family: 'Google Sans', 'Helvetica Neue', sans-serif !important;
 }
 
 body {
   height: 100vh;
   margin: 0;
+  background: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
 }
 
 markdown p {
@@ -41,263 +42,313 @@ markdown p {
   margin-block-end: 0.5em;
 }
 
-:root {
-  --mat-sys-primary: black;
-  --mdc-checkbox-selected-icon-color: white;
-  --mat-sys-background: #131314;
-  --dialog-title-color: #e8eaed;
+@mixin adk-system-color-aliases($scheme) {
+  --md-sys-color-primary: var(--md-sys-color-primary-#{$scheme});
+  --md-sys-color-on-primary: var(--md-sys-color-on-primary-#{$scheme});
+  --md-sys-color-primary-container: var(--md-sys-color-primary-container-#{$scheme});
+  --md-sys-color-on-primary-container: var(--md-sys-color-on-primary-container-#{$scheme});
+  --md-sys-color-primary-fixed: var(--md-sys-color-primary-fixed-#{$scheme});
+  --md-sys-color-on-primary-fixed: var(--md-sys-color-on-primary-fixed-#{$scheme});
+  --md-sys-color-primary-fixed-dim: var(--md-sys-color-primary-fixed-dim-#{$scheme});
+  --md-sys-color-on-primary-fixed-variant: var(--md-sys-color-on-primary-fixed-variant-#{$scheme});
+  --md-sys-color-secondary: var(--md-sys-color-secondary-#{$scheme});
+  --md-sys-color-on-secondary: var(--md-sys-color-on-secondary-#{$scheme});
+  --md-sys-color-secondary-container: var(--md-sys-color-secondary-container-#{$scheme});
+  --md-sys-color-on-secondary-container: var(--md-sys-color-on-secondary-container-#{$scheme});
+  --md-sys-color-secondary-fixed: var(--md-sys-color-secondary-fixed-#{$scheme});
+  --md-sys-color-on-secondary-fixed: var(--md-sys-color-on-secondary-fixed-#{$scheme});
+  --md-sys-color-secondary-fixed-dim: var(--md-sys-color-secondary-fixed-dim-#{$scheme});
+  --md-sys-color-on-secondary-fixed-variant: var(--md-sys-color-on-secondary-fixed-variant-#{$scheme});
+  --md-sys-color-tertiary: var(--md-sys-color-tertiary-#{$scheme});
+  --md-sys-color-on-tertiary: var(--md-sys-color-on-tertiary-#{$scheme});
+  --md-sys-color-tertiary-container: var(--md-sys-color-tertiary-container-#{$scheme});
+  --md-sys-color-on-tertiary-container: var(--md-sys-color-on-tertiary-container-#{$scheme});
+  --md-sys-color-tertiary-fixed: var(--md-sys-color-tertiary-fixed-#{$scheme});
+  --md-sys-color-on-tertiary-fixed: var(--md-sys-color-on-tertiary-fixed-#{$scheme});
+  --md-sys-color-tertiary-fixed-dim: var(--md-sys-color-tertiary-fixed-dim-#{$scheme});
+  --md-sys-color-on-tertiary-fixed-variant: var(--md-sys-color-on-tertiary-fixed-variant-#{$scheme});
+  --md-sys-color-error: var(--md-sys-color-error-#{$scheme});
+  --md-sys-color-error-container: var(--md-sys-color-error-container-#{$scheme});
+  --md-sys-color-on-error: var(--md-sys-color-on-error-#{$scheme});
+  --md-sys-color-on-error-container: var(--md-sys-color-on-error-container-#{$scheme});
+  --md-sys-color-background: var(--md-sys-color-background-#{$scheme});
+  --md-sys-color-on-background: var(--md-sys-color-on-background-#{$scheme});
+  --md-sys-color-outline: var(--md-sys-color-outline-#{$scheme});
+  --md-sys-color-inverse-on-surface: var(--md-sys-color-inverse-on-surface-#{$scheme});
+  --md-sys-color-inverse-surface: var(--md-sys-color-inverse-surface-#{$scheme});
+  --md-sys-color-inverse-primary: var(--md-sys-color-inverse-primary-#{$scheme});
+  --md-sys-color-shadow: var(--md-sys-color-shadow-#{$scheme});
+  --md-sys-color-surface-tint: var(--md-sys-color-surface-tint-#{$scheme});
+  --md-sys-color-outline-variant: var(--md-sys-color-outline-variant-#{$scheme});
+  --md-sys-color-scrim: var(--md-sys-color-scrim-#{$scheme});
+  --md-sys-color-surface: var(--md-sys-color-surface-#{$scheme});
+  --md-sys-color-on-surface: var(--md-sys-color-on-surface-#{$scheme});
+  --md-sys-color-surface-variant: var(--md-sys-color-surface-variant-#{$scheme});
+  --md-sys-color-on-surface-variant: var(--md-sys-color-on-surface-variant-#{$scheme});
+  --md-sys-color-surface-container-highest: var(--md-sys-color-surface-container-highest-#{$scheme});
+  --md-sys-color-surface-container-high: var(--md-sys-color-surface-container-high-#{$scheme});
+  --md-sys-color-surface-container: var(--md-sys-color-surface-container-#{$scheme});
+  --md-sys-color-surface-container-low: var(--md-sys-color-surface-container-low-#{$scheme});
+  --md-sys-color-surface-container-lowest: var(--md-sys-color-surface-container-lowest-#{$scheme});
+  --md-sys-color-surface-dim: var(--md-sys-color-surface-dim-#{$scheme});
+  --md-sys-color-surface-bright: var(--md-sys-color-surface-bright-#{$scheme});
+}
+
+@mixin adk-component-vars() {
+  --mat-sys-primary: var(--md-sys-color-primary);
+  --mdc-checkbox-selected-icon-color: var(--md-sys-color-on-primary);
+  --mat-sys-background: var(--md-sys-color-background);
+  --dialog-title-color: var(--md-sys-color-on-surface);
   --dialog-title-font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
   --dialog-title-font-size: 24px;
   --dialog-title-font-weight: 500;
-  --filled-button-background-color: #8ab4f8;
-  --filled-button-text-color: #202124;
-  --form-field-label-color: #e8eaed;
-  --form-field-label-focused-color: #8ab4f8;
-  --form-field-caret-color: #e8eaed;
-  --mdc-filled-text-field-label-text-color: #e8eaed;
-  --mdc-filled-text-field-focus-label-text-color: #8ab4f8;
-  --mdc-filled-text-field-hover-label-text-color: #e8eaed;
-  --mdc-filled-text-field-disabled-label-text-color: rgba(232, 234, 237, 0.38);
-  --mdc-filled-text-field-caret-color: #e8eaed;
-  // tab variable overrides
-  --mat-tab-header-active-label-text-color: #8AB4F8;
-  --mat-tab-header-active-hover-label-text-color: #8AB4F8;
-  --mat-tab-header-active-focus-label-text-color: #8AB4F8;
+  --filled-button-background-color: var(--md-sys-color-primary);
+  --filled-button-text-color: var(--md-sys-color-on-primary);
+  --form-field-label-color: var(--md-sys-color-on-surface-variant);
+  --form-field-label-focused-color: var(--md-sys-color-primary);
+  --form-field-caret-color: var(--md-sys-color-primary);
+  --mdc-filled-text-field-label-text-color: var(--md-sys-color-on-surface-variant);
+  --mdc-filled-text-field-focus-label-text-color: var(--md-sys-color-primary);
+  --mdc-filled-text-field-hover-label-text-color: var(--md-sys-color-on-surface);
+  --mdc-filled-text-field-disabled-label-text-color: var(--md-sys-color-on-surface-variant);
+  --mdc-filled-text-field-caret-color: var(--md-sys-color-primary);
+  --mat-tab-header-active-label-text-color: var(--md-sys-color-primary);
+  --mat-tab-header-active-hover-label-text-color: var(--md-sys-color-primary);
+  --mat-tab-header-active-focus-label-text-color: var(--md-sys-color-primary);
   --mat-tab-header-label-text-weight: 500;
-  --mdc-text-button-label-text-color: #89b4f8;
+  --mdc-text-button-label-text-color: var(--md-sys-color-primary);
+  --chat-panel-function-event-button-background-color: var(--md-sys-color-surface-container);
+  --chat-panel-function-event-button-highlight-background-color: var(--md-sys-color-secondary-container);
+  --chat-panel-function-event-button-highlight-border-color: var(--md-sys-color-secondary);
+  --chat-panel-function-event-button-highlight-color: var(--md-sys-color-on-secondary-container);
+  --chat-panel-user-message-message-card-background-color: var(--md-sys-color-primary-container);
+  --chat-panel-user-message-message-card-color: var(--md-sys-color-on-primary-container);
+  --chat-panel-bot-message-message-card-background-color: var(--md-sys-color-surface-container-high);
+  --chat-panel-bot-message-message-card-color: var(--md-sys-color-on-surface);
+  --chat-panel-bot-message-focus-within-message-card-background-color: var(--md-sys-color-surface-variant);
+  --chat-panel-bot-message-focus-within-message-card-border-color: var(--md-sys-color-primary);
+  --chat-panel-message-textarea-background-color: var(--md-sys-color-surface-container-highest);
+  --chat-panel-message-textarea-focus-background-color: var(--md-sys-color-surface-container);
+  --chat-panel-eval-compare-container-background-color: var(--md-sys-color-surface-container-high);
+  --chat-panel-actual-result-border-right-color: var(--md-sys-color-outline);
+  --chat-panel-eval-response-header-border-bottom-color: var(--md-sys-color-outline-variant);
+  --chat-panel-header-expected-color: var(--md-sys-color-tertiary);
+  --chat-panel-header-actual-color: var(--md-sys-color-error);
+  --chat-panel-eval-pass-color: var(--md-sys-color-tertiary);
+  --chat-panel-eval-fail-color: var(--md-sys-color-error);
+  --chat-panel-input-field-textarea-color: var(--md-sys-color-on-surface);
+  --chat-panel-input-field-textarea-placeholder-color: var(--md-sys-color-on-surface-variant);
+  --chat-panel-input-field-button-color: var(--md-sys-color-on-primary);
+  --chat-panel-input-field-button-background-color: var(--md-sys-color-primary);
+  --chat-panel-mat-mdc-mini-fab-background-color: var(--md-sys-color-primary);
+  --chat-panel-mat-mdc-mini-fab-mat-icon-color: var(--md-sys-color-on-primary);
+  --chat-panel-input-field-mat-mdc-text-field-wrapper-border-color: var(--md-sys-color-outline);
+  --chat-panel-delete-button-background-color: var(--md-sys-color-scrim);
+  --chat-panel-delete-button-color: var(--md-sys-color-on-surface);
+  --chat-panel-file-container-background-color: var(--md-sys-color-surface-container);
+  --chat-panel-thought-chip-background-color: var(--md-sys-color-secondary-container);
+  --chat-panel-link-style-button-color: var(--md-sys-color-primary);
+  --artifact-tab-download-button-background-color: var(--md-sys-color-primary);
+  --artifact-tab-white-separator-border-top-color: var(--md-sys-color-outline-variant);
+  --artifact-tab-version-select-container-background-color: var(--md-sys-color-surface-container-high);
+  --artifact-tab-link-style-button-color: var(--md-sys-color-primary);
+  --artifact-tab-link-style-button-hover-color: var(--md-sys-color-primary-container);
+  --artifact-tab-link-style-button-focus-outline-color: var(--md-sys-color-primary);
+  --artifact-tab-link-style-button-active-color: var(--md-sys-color-primary-fixed-dim);
+  --artifact-tab-link-style-button-disabled-color: var(--md-sys-color-on-surface-variant);
+  --audio-player-container-background-color: var(--md-sys-color-surface-container-high);
+  --audio-player-container-box-shadow-color: var(--md-sys-color-shadow);
+  --audio-player-custom-controls-button-background-color: var(--md-sys-color-primary);
+  --audio-player-custom-controls-button-color: var(--md-sys-color-on-primary);
+  --audio-player-custom-controls-button-hover-background-color: var(--md-sys-color-primary-container);
+  --chat-drawer-container-background-color: var(--md-sys-color-surface-container-high);
+  --chat-event-container-color: var(--md-sys-color-on-surface);
+  --chat-card-background-color: var(--md-sys-color-surface-container);
+  --chat-function-event-button-background-color: var(--md-sys-color-surface-container);
+  --chat-function-event-button-highlight-background-color: var(--md-sys-color-secondary-container);
+  --chat-function-event-button-highlight-border-color: var(--md-sys-color-secondary);
+  --chat-function-event-button-highlight-color: var(--md-sys-color-on-secondary-container);
+  --chat-user-message-message-card-background-color: var(--md-sys-color-primary-container);
+  --chat-user-message-message-card-color: var(--md-sys-color-on-primary-container);
+  --chat-bot-message-message-card-background-color: var(--md-sys-color-surface-container-high);
+  --chat-bot-message-message-card-color: var(--md-sys-color-on-surface);
+  --chat-bot-message-focus-within-message-card-background-color: var(--md-sys-color-surface-variant);
+  --chat-bot-message-focus-within-message-card-border-color: var(--md-sys-color-primary);
+  --chat-message-textarea-background-color: var(--md-sys-color-surface-container-highest);
+  --chat-message-textarea-focus-background-color: var(--md-sys-color-surface-container);
+  --chat-eval-compare-container-background-color: var(--md-sys-color-surface-container-high);
+  --chat-actual-result-border-right-color: var(--md-sys-color-outline);
+  --chat-eval-response-header-border-bottom-color: var(--md-sys-color-outline-variant);
+  --chat-header-expected-color: var(--md-sys-color-tertiary);
+  --chat-header-actual-color: var(--md-sys-color-error);
+  --chat-eval-pass-color: var(--md-sys-color-tertiary);
+  --chat-eval-fail-color: var(--md-sys-color-error);
+  --chat-side-drawer-background-color: var(--md-sys-color-surface-container-high);
+  --chat-side-drawer-color: var(--md-sys-color-on-surface);
+  --chat-file-item-background-color: var(--md-sys-color-surface-container-low);
+  --chat-empty-state-container-color: var(--md-sys-color-surface-container-low);
+  --chat-warning-color: var(--md-sys-color-tertiary);
+  --chat-error-color: var(--md-sys-color-error);
+  --chat-mat-mdc-unelevated-button-color: var(--md-sys-color-on-primary);
+  --chat-mat-mdc-unelevated-button-background-color: var(--md-sys-color-primary);
+  --chat-mdc-linear-progress-buffer-dots-background-color: var(--md-sys-color-on-surface-variant);
+  --chat-mat-mdc-text-field-wrapper-border-color: var(--md-sys-color-outline);
+  --chat-segment-key-color: var(--md-sys-color-on-surface-variant);
+  --chat-bottom-resize-handler-background-color: var(--md-sys-color-outline-variant);
+  --chat-trace-detail-container-background-color: var(--md-sys-color-surface-container);
+  --chat-toolbar-background-color: var(--md-sys-color-surface-container-high);
+  --chat-toolbar-edit-mode-background-color: var(--md-sys-color-tertiary-container);
+  --chat-toolbar-session-text-color: var(--md-sys-color-on-surface);
+  --chat-toolbar-session-id-color: var(--md-sys-color-on-surface-variant);
+  --chat-toolbar-icon-color: var(--md-sys-color-on-surface-variant);
+  --chat-toolbar-new-session-color: var(--md-sys-color-on-surface-variant);
+  --chat-toolbar-sse-toggle-label-text-color: var(--md-sys-color-on-surface-variant);
+  --chat-toolbar-sse-toggle-selected-track-color: var(--md-sys-color-primary-container);
+  --chat-toolbar-sse-toggle-selected-handle-color: var(--md-sys-color-primary);
+  --chat-toolbar-sse-toggle-track-outline-color: var(--md-sys-color-primary);
+  --chat-mat-drawer-border-right-color: var(--md-sys-color-outline);
+  --edit-json-dialog-container-box-shadow-color: var(--md-sys-color-shadow);
+  --eval-tab-eval-set-actions-color: var(--md-sys-color-on-surface-variant);
+  --eval-tab-empty-eval-info-background-color: var(--md-sys-color-surface-container-high);
+  --eval-tab-empty-eval-info-box-shadow-color1: var(--md-sys-color-shadow);
+  --eval-tab-empty-eval-info-box-shadow-color2: var(--md-sys-color-shadow);
+  --eval-tab-info-title-color: var(--md-sys-color-on-surface);
+  --eval-tab-info-detail-color: var(--md-sys-color-on-surface-variant);
+  --eval-tab-info-create-color: var(--md-sys-color-primary);
+  --eval-tab-selected-eval-case-color: var(--md-sys-color-primary);
+  --eval-tab-save-session-btn-background-color1: var(--md-sys-color-primary-container);
+  --eval-tab-save-session-btn-background-color2: var(--md-sys-color-surface);
+  --eval-tab-save-session-btn-text-color: var(--md-sys-color-on-primary-container);
+  --eval-tab-run-eval-btn-border-color: var(--md-sys-color-outline);
+  --eval-tab-run-eval-btn-color: var(--md-sys-color-primary);
+  --eval-tab-run-eval-btn-hover-background-color: var(--md-sys-color-surface);
+  --eval-tab-result-btn-border-color: var(--md-sys-color-outline);
+  --eval-tab-result-btn-hover-background-color: var(--md-sys-color-surface);
+  --eval-tab-result-btn-pass-color: var(--md-sys-color-tertiary);
+  --eval-tab-result-btn-fail-color: var(--md-sys-color-error);
+  --eval-tab-status-card-background-color: var(--md-sys-color-surface-container-high);
+  --eval-tab-status-card-timestamp-color: var(--md-sys-color-on-surface-variant);
+  --eval-tab-status-card-metric-color: var(--md-sys-color-on-surface-variant);
+  --eval-tab-status-card-failed-color: var(--md-sys-color-error);
+  --eval-tab-status-card-separator-color: var(--md-sys-color-outline-variant);
+  --eval-tab-status-card-passed-color: var(--md-sys-color-tertiary);
+  --eval-tab-status-card-action-mat-icon-color: var(--md-sys-color-on-surface-variant);
+  --eval-tab-status-card-icon-color: var(--md-sys-color-on-surface-variant);
+  --run-eval-config-dialog-container-box-shadow-color: var(--md-sys-color-shadow);
+  --run-eval-config-dialog-threshold-slider-active-track-color: var(--md-sys-color-primary);
+  --run-eval-config-dialog-threshold-slider-inactive-track-color: var(--md-sys-color-outline-variant);
+  --run-eval-config-dialog-threshold-slider-handle-color: var(--md-sys-color-primary);
+  --run-eval-config-dialog-threshold-slider-ripple-color: var(--md-sys-color-primary);
+  --run-eval-config-dialog-mdc-slider-thumb-background-color: var(--md-sys-color-on-primary);
+  --event-tab-events-wrapper-color: var(--md-sys-color-on-surface-variant);
+  --event-tab-event-index-color: var(--md-sys-color-on-surface-variant);
+  --event-tab-event-list-active-indicator-color: var(--md-sys-color-primary);
+  --event-tab-event-list-list-item-container-color: var(--md-sys-color-surface-container-high);
+  --event-tab-mdc-list-item-border-color: var(--md-sys-color-outline);
+  --event-tab-mdc-list-item-hover-background-color: var(--md-sys-color-surface-container);
+  --trace-chart-trace-label-color: var(--md-sys-color-on-surface);
+  --trace-chart-trace-bar-background-color: var(--md-sys-color-primary-container);
+  --trace-chart-trace-bar-color: var(--md-sys-color-on-primary-container);
+  --trace-chart-trace-duration-color: var(--md-sys-color-on-surface-variant);
+  --trace-chart-vertical-line-background-color: var(--md-sys-color-outline);
+  --trace-chart-horizontal-line-background-color: var(--md-sys-color-outline);
+  --session-tab-session-wrapper-color: var(--md-sys-color-on-surface-variant);
+  --session-tab-session-item-background-color: var(--md-sys-color-surface-container);
+  --session-tab-session-item-hover-background-color: var(--md-sys-color-surface-container-high);
+  --session-tab-session-item-current-background-color: var(--md-sys-color-primary-container);
+  --session-tab-session-id-color: var(--md-sys-color-on-surface);
+  --session-tab-session-date-color: var(--md-sys-color-on-surface-variant);
+  --side-panel-button-filled-container-color: var(--md-sys-color-primary);
+  --side-panel-button-filled-label-text-color: var(--md-sys-color-on-primary);
+  --side-panel-mat-icon-color: var(--md-sys-color-on-surface-variant);
+  --side-panel-resize-handler-background-color: var(--md-sys-color-outline-variant);
+  --side-panel-details-panel-container-background-color: var(--md-sys-color-surface-container-high);
+  --side-panel-details-content-color: var(--md-sys-color-on-surface);
+  --side-panel-powered-by-adk-color: var(--md-sys-color-on-surface-variant);
+  --side-panel-app-select-container-background-color: var(--md-sys-color-surface-container);
+  --side-panel-select-placeholder-text-color: var(--md-sys-color-on-surface-variant);
+  --side-panel-select-enabled-trigger-text-color: var(--md-sys-color-primary);
+  --side-panel-select-enabled-arrow-color: var(--md-sys-color-primary);
+  --side-panel-app-name-option-color: var(--md-sys-color-on-surface-variant);
+  --trace-tab-trace-title-color: var(--md-sys-color-on-surface-variant);
+  --trace-tab-trace-label-color: var(--md-sys-color-on-surface);
+  --trace-tab-trace-bar-background-color: var(--md-sys-color-primary-container);
+  --trace-tab-trace-bar-color: var(--md-sys-color-on-primary-container);
+  --trace-tab-trace-duration-color: var(--md-sys-color-on-surface-variant);
+  --trace-tab-vertical-line-background-color: var(--md-sys-color-outline);
+  --trace-tab-horizontal-line-background-color: var(--md-sys-color-outline);
+  --trace-tab-trace-item-container-background-color: var(--md-sys-color-surface-container);
+  --trace-tab-trace-item-header-focus-state-layer-color: var(--md-sys-color-primary);
+  --trace-tab-trace-item-header-description-color: var(--md-sys-color-on-surface-variant);
+  --trace-tab-mat-expansion-panel-header-focus-background-color: var(--md-sys-color-surface-container-high);
+  --trace-tab-mat-expansion-panel-header-background-color: var(--md-sys-color-surface-container);
+  --trace-tab-mat-expansion-panel-header-hover-background-color: var(--md-sys-color-surface-container-high);
+  --trace-event-json-viewer-container-background-color: var(--md-sys-color-surface-container-high);
+  --trace-tree-trace-label-color: var(--md-sys-color-on-surface);
+  --trace-tree-trace-bar-background-color: var(--md-sys-color-primary-container);
+  --trace-tree-trace-bar-color: var(--md-sys-color-on-primary-container);
+  --trace-tree-short-trace-bar-duration-color: var(--md-sys-color-on-primary-container);
+  --trace-tree-trace-duration-color: var(--md-sys-color-on-surface-variant);
+  --trace-tree-trace-row-hover-background-color: var(--md-sys-color-surface-variant);
+  --trace-tree-trace-row-selected-background-color: var(--md-sys-color-primary-container);
+  --trace-tree-vertical-line-background-color: var(--md-sys-color-outline);
+  --trace-tree-horizontal-line-background-color: var(--md-sys-color-outline-variant);
+  --trace-tree-invocation-id-container-color: var(--md-sys-color-on-surface-variant);
+  --trace-tree-trace-row-left-span-div-color: var(--md-sys-color-on-surface);
+  --trace-tree-trace-row-left-is-event-row-color: var(--md-sys-color-primary);
 }
 
 :root {
-  @include mat.dialog-overrides((
-    container-color: #2b2b2f,
-    subhead-color: white,
-  ));
+  @include adk-system-color-aliases(dark);
+  @include adk-component-vars();
+  @include mat.all-component-themes($dark-theme);
+}
 
-  // Custom property for dialog subhead font
+.mat-mdc-dialog-container .mat-mdc-dialog-title.mdc-dialog__title {
+  font-family: var(--dialog-title-font-family);
+  font-style: normal;
+  font-weight: var(--dialog-title-font-weight);
+  font-size: var(--dialog-title-font-size);
+  line-height: 32px;
+  color: var(--dialog-title-color);
+}
+
+:root {
   --mdc-dialog-subhead-font-family: 'Google Sans';
   --mdc-dialog-subhead-font-style: normal;
   --mdc-dialog-subhead-font-weight: 400;
   --mdc-dialog-subhead-font-size: 24px;
   --mdc-dialog-subhead-line-height: 32px;
-  --mdc-dialog-subhead-color: #E3E3E3;
-}
+  --mdc-dialog-subhead-color: var(--md-sys-color-on-surface-variant);
 
-.mat-mdc-dialog-container .mat-mdc-dialog-title.mdc-dialog__title {
-  font-family: var(--mdc-dialog-subhead-font-family);
-  font-style: var(--mdc-dialog-subhead-font-style);
-  font-weight: var(--mdc-dialog-subhead-font-weight);
-  font-size: var(--mdc-dialog-subhead-font-size);
-  line-height: var(--mdc-dialog-subhead-line-height);
-  color: var(--mdc-dialog-subhead-color);
+  @include mat.dialog-overrides((
+    container-color: var(--md-sys-color-surface-container-high),
+    subhead-color: var(--md-sys-color-on-surface)
+  ));
 }
 
 :root {
   @include mat.progress-spinner-overrides((
-    active-indicator-color: #a8c7fa,
+    active-indicator-color: var(--md-sys-color-primary),
     size: 80
   ));
-
-  --chat-panel-function-event-button-background-color: white;
-  --chat-panel-function-event-button-highlight-background-color: rgb(
-    15,
-    82,
-    35
-  );
-  --chat-panel-function-event-button-highlight-border-color: rgb(15, 82, 35);
-  --chat-panel-function-event-button-highlight-color: white;
-  --chat-panel-user-message-message-card-background-color: #004a77;
-  --chat-panel-user-message-message-card-color: white;
-  --chat-panel-bot-message-message-card-background-color: #303030;
-  --chat-panel-bot-message-message-card-color: white;
-  --chat-panel-bot-message-focus-within-message-card-background-color: #131314;
-  --chat-panel-bot-message-focus-within-message-card-border-color: #8ab4f8;
-  --chat-panel-message-textarea-background-color: #303030;
-  --chat-panel-message-textarea-focus-background-color: #131314;
-  --chat-panel-eval-compare-container-background-color: #484848;
-  --chat-panel-actual-result-border-right-color: #8a8686;
-  --chat-panel-eval-response-header-border-bottom-color: #8a8686;
-  --chat-panel-header-expected-color: #44c265;
-  --chat-panel-header-actual-color: #ff8983;
-  --chat-panel-eval-pass-color: #44c265;
-  --chat-panel-eval-fail-color: #ff8983;
-  --chat-panel-input-field-textarea-color: white;
-  --chat-panel-input-field-textarea-placeholder-color: #8e918f;
-  --chat-panel-input-field-button-color: white;
-  --chat-panel-input-field-button-background-color: rgb(51, 53, 55);
-  --chat-panel-mat-mdc-mini-fab-background-color: white;
-  --chat-panel-mat-mdc-mini-fab-mat-icon-color: black;
-  --chat-panel-input-field-mat-mdc-text-field-wrapper-border-color: #8e918f;
-  --chat-panel-delete-button-background-color: rgba(0, 0, 0, 0.7);
-  --chat-panel-delete-button-color: white;
-  --chat-panel-file-container-background-color: #1e1e1e;
-  --chat-panel-thought-chip-background-color: #8ab4f8;
-  --chat-panel-link-style-button-color: #007bff;
-  --artifact-tab-download-button-background-color: #8ab4f8;
-  --artifact-tab-white-separator-border-top-color: white;
-  --artifact-tab-version-select-container-background-color: #212123;
-  --artifact-tab-link-style-button-color: #007bff;
-  --artifact-tab-link-style-button-hover-color: #0056b3;
-  --artifact-tab-link-style-button-focus-outline-color: #007bff;
-  --artifact-tab-link-style-button-active-color: #004085;
-  --artifact-tab-link-style-button-disabled-color: #6c757d;
-  --audio-player-container-background-color: #2b2b2f;
-  --audio-player-container-box-shadow-color: rgba(0, 0, 0, 0.1);
-  --audio-player-custom-controls-button-background-color: #007bff;
-  --audio-player-custom-controls-button-color: white;
-  --audio-player-custom-controls-button-hover-background-color: #0056b3;
-  --chat-drawer-container-background-color: #131314;
-  --chat-event-container-color: white;
-  --chat-card-background-color: #131314;
-  --chat-function-event-button-background-color: white;
-  --chat-function-event-button-highlight-background-color: rgb(15, 82, 35);
-  --chat-function-event-button-highlight-border-color: rgb(15, 82, 35);
-  --chat-function-event-button-highlight-color: white;
-  --chat-user-message-message-card-background-color: #004a77;
-  --chat-user-message-message-card-color: white;
-  --chat-bot-message-message-card-background-color: #303030;
-  --chat-bot-message-message-card-color: white;
-  --chat-bot-message-focus-within-message-card-background-color: #131314;
-  --chat-bot-message-focus-within-message-card-border-color: #8ab4f8;
-  --chat-message-textarea-background-color: #303030;
-  --chat-message-textarea-focus-background-color: #131314;
-  --chat-eval-compare-container-background-color: #484848;
-  --chat-actual-result-border-right-color: #8a8686;
-  --chat-eval-response-header-border-bottom-color: #8a8686;
-  --chat-header-expected-color: #44c265;
-  --chat-header-actual-color: #ff8983;
-  --chat-eval-pass-color: #44c265;
-  --chat-eval-fail-color: #ff8983;
-  --chat-side-drawer-background-color: #1b1b1b;
-  --chat-side-drawer-color: white;
-  --chat-file-item-background-color: #eee;
-  --chat-empty-state-container-color: #eee;
-  --chat-warning-color: #ffc185;
-  --chat-error-color: #ff4545;
-  --chat-mat-mdc-unelevated-button-color: #202124;
-  --chat-mat-mdc-unelevated-button-background-color: #8ab4f8;
-  --chat-mdc-linear-progress-buffer-dots-background-color: white;
-  --chat-mat-mdc-text-field-wrapper-border-color: #8e918f;
-  --chat-segment-key-color: lightgray;
-  --chat-bottom-resize-handler-background-color: #5f6368;
-  --chat-trace-detail-container-background-color: #1b1b1b;
-  --chat-toolbar-background-color: #1b1b1b;
-  --chat-toolbar-edit-mode-background-color: #44c2651a;
-  --chat-toolbar-session-text-color: #fdfdfd;
-  --chat-toolbar-session-id-color: #9aa0a6;
-  --chat-toolbar-icon-color: #c4c7c5;
-  --chat-toolbar-new-session-color: #9aa0a6;
-  --chat-toolbar-sse-toggle-label-text-color: #9aa0a6;
-  --chat-toolbar-sse-toggle-selected-track-color: #8ab4f9;
-  --chat-toolbar-sse-toggle-selected-handle-color: #1b73e8;
-  --chat-toolbar-sse-toggle-track-outline-color: #1b73e8;
-  --chat-mat-drawer-border-right-color: #444746;
-  --edit-json-dialog-container-box-shadow-color: rgba(0, 0, 0, 0.4);
-  --eval-tab-eval-set-actions-color: #9aa0a6;
-  --eval-tab-empty-eval-info-background-color: #202124;
-  --eval-tab-empty-eval-info-box-shadow-color1: rgba(0, 0, 0, 0.15);
-  --eval-tab-empty-eval-info-box-shadow-color2: rgba(0, 0, 0, 0.3);
-  --eval-tab-info-title-color: #e8eaed;
-  --eval-tab-info-detail-color: #e8eaed;
-  --eval-tab-info-create-color: #8ab4f8;
-  --eval-tab-selected-eval-case-color: #8ab4f8;
-  --eval-tab-save-session-btn-background-color1: rgba(138, 180, 248, 0.24);
-  --eval-tab-save-session-btn-background-color2: #202124;
-  --eval-tab-save-session-btn-text-color: #d2e3fc;
-  --eval-tab-run-eval-btn-border-color: #5f6368;
-  --eval-tab-run-eval-btn-color: #8ab4f8;
-  --eval-tab-run-eval-btn-hover-background-color: #202124;
-  --eval-tab-result-btn-border-color: #5f6368;
-  --eval-tab-result-btn-hover-background-color: #202124;
-  --eval-tab-result-btn-pass-color: #44c265;
-  --eval-tab-result-btn-fail-color: #ff8983;
-  --eval-tab-status-card-background-color: #2d2d2d;
-  --eval-tab-status-card-timestamp-color: #e0e0e0;
-  --eval-tab-status-card-metric-color: #bbb;
-  --eval-tab-status-card-failed-color: #ff6b6b;
-  --eval-tab-status-card-separator-color: #666;
-  --eval-tab-status-card-passed-color: #63e6be;
-  --eval-tab-status-card-action-mat-icon-color: #bdbdbd;
-  --eval-tab-status-card-icon-color: #bdbdbd;
-  --run-eval-config-dialog-container-box-shadow-color: rgba(0, 0, 0, 0.4);
-  --run-eval-config-dialog-threshold-slider-active-track-color: #4285f4;
-  --run-eval-config-dialog-threshold-slider-inactive-track-color: #616161;
-  --run-eval-config-dialog-threshold-slider-handle-color: #4285f4;
-  --run-eval-config-dialog-threshold-slider-ripple-color: #4285f4;
-  --run-eval-config-dialog-mdc-slider-thumb-background-color: black;
-  --event-tab-events-wrapper-color: #9aa0a6;
-  --event-tab-event-index-color: #80868b;
-  --event-tab-event-list-active-indicator-color: orange;
-  --event-tab-event-list-list-item-container-color: #2b2b2f;
-  --event-tab-mdc-list-item-border-color: #5f6368;
-  --event-tab-mdc-list-item-hover-background-color: #1c1b1c;
-  --trace-chart-trace-label-color: #e3e3e3;
-  --trace-chart-trace-bar-background-color: #2f4d65;
-  --trace-chart-trace-bar-color: #8dabbf;
-  --trace-chart-trace-duration-color: #888;
-  --trace-chart-vertical-line-background-color: #ccc;
-  --trace-chart-horizontal-line-background-color: #ccc;
-  --session-tab-session-wrapper-color: #9aa0a6;
-  --session-tab-session-item-background-color: #303030;
-  --session-tab-session-item-hover-background-color: #141414;
-  --session-tab-session-item-current-background-color: #004a77;
-  --session-tab-session-id-color: #e8eaed;
-  --session-tab-session-date-color: #9aa0a6;
-  --side-panel-button-filled-container-color: #89b4f8;
-  --side-panel-button-filled-label-text-color: black;
-  --side-panel-mat-icon-color: #bdc1c6;
-  --side-panel-resize-handler-background-color: #5f6368;
-  --side-panel-details-panel-container-background-color: #242424;
-  --side-panel-details-content-color: white;
-  --side-panel-powered-by-adk-color: grey;
-  --side-panel-app-select-container-background-color: #212123;
-  --side-panel-select-placeholder-text-color: #8ab4f8;
-  --side-panel-select-enabled-trigger-text-color: #8ab4f8;
-  --side-panel-select-enabled-arrow-color: #8ab4f8;
-  --side-panel-app-name-option-color: #9aa0a6;
-  --trace-tab-trace-title-color: #9aa0a6;
-  --trace-tab-trace-label-color: #e3e3e3;
-  --trace-tab-trace-bar-background-color: #2f4d65;
-  --trace-tab-trace-bar-color: #8dabbf;
-  --trace-tab-trace-duration-color: #888;
-  --trace-tab-vertical-line-background-color: #ccc;
-  --trace-tab-horizontal-line-background-color: #ccc;
-  --trace-tab-trace-item-container-background-color: #333537;
-  --trace-tab-trace-item-header-focus-state-layer-color: red;
-  --trace-tab-trace-item-header-description-color: #8e918f;
-  --trace-tab-mat-expansion-panel-header-focus-background-color: #444746;
-  --trace-tab-mat-expansion-panel-header-background-color: #444746;
-  --trace-tab-mat-expansion-panel-header-hover-background-color: #444746;
-  --trace-event-json-viewer-container-background-color: #1b1b1b;
-  --trace-tree-trace-label-color: #e3e3e3;
-  --trace-tree-trace-bar-background-color: #2f4d65;
-  --trace-tree-trace-bar-color: #8dabbf;
-  --trace-tree-short-trace-bar-duration-color: #8dabbf;
-  --trace-tree-trace-duration-color: #888;
-  --trace-tree-trace-row-hover-background-color: #3b3d3c;
-  --trace-tree-trace-row-selected-background-color: #3b3d3c;
-  --trace-tree-vertical-line-background-color: #ccc;
-  --trace-tree-horizontal-line-background-color: #ccc;
-  --trace-tree-invocation-id-container-color: #9aa0a6;
-  --trace-tree-trace-row-left-span-div-color: white;
-  --trace-tree-trace-row-left-is-event-row-color: #8ab4f8;
 }
-
 
 :root {
   @include mat.form-field-overrides((
-    filled-container-color: #333537,
-    filled-active-indicator-color: #8ab4f8,
-    filled-hover-active-indicator-color: #8ab4f8,
-    filled-focus-active-indicator-color: #8ab4f8,
-    filled-input-text-color: #e8eaed,
-    filled-label-text-color: #e8eaed,
-    filled-hover-label-text-color: #e8eaed,
-    filled-focus-label-text-color: #8ab4f8,
-    filled-input-text-placeholder-color: #9aa0a6,
-    filled-disabled-input-text-color: rgba(232, 234, 237, 0.38),
-    filled-disabled-label-text-color: rgba(232, 234, 237, 0.38),
-    filled-disabled-container-color: #2b2b2f,
-    filled-disabled-active-indicator-color: rgba(138, 180, 248, 0.24)
+    filled-container-color: var(--md-sys-color-surface-container-high),
+    filled-active-indicator-color: var(--md-sys-color-primary),
+    filled-hover-active-indicator-color: var(--md-sys-color-primary),
+    filled-focus-active-indicator-color: var(--md-sys-color-primary),
+    filled-input-text-color: var(--md-sys-color-on-surface),
+    filled-label-text-color: var(--md-sys-color-on-surface-variant),
+    filled-hover-label-text-color: var(--md-sys-color-on-surface),
+    filled-focus-label-text-color: var(--md-sys-color-primary),
+    filled-input-text-placeholder-color: var(--md-sys-color-on-surface-variant),
+    filled-disabled-input-text-color: var(--md-sys-color-on-surface-variant),
+    filled-disabled-label-text-color: var(--md-sys-color-on-surface-variant),
+    filled-disabled-container-color: var(--md-sys-color-surface-container),
+    filled-disabled-active-indicator-color: var(--md-sys-color-outline-variant)
   ));
 }
 
@@ -338,6 +389,6 @@ markdown p {
 }
 
 .adk-primary-button.mat-mdc-raised-button.mat-mdc-button-disabled {
-  background-color: rgba(138, 180, 248, 0.24);
-  color: rgba(32, 33, 36, 0.45);
+  background-color: color-mix(in srgb, var(--md-sys-color-primary) 24%, transparent);
+  color: color-mix(in srgb, var(--md-sys-color-on-primary) 45%, transparent);
 }

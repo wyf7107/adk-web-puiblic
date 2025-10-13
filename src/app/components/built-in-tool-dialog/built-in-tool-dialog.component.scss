@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 @use '@angular/material' as mat;
+@use '../../../styles/mixins' as mixins;
 
 .dialog-title {
-    color: white !important;
-    font-family: 'Google Sans';
-    font-size: 24px;
+    @include mixins.dialog-title;
 }
 
 .tool-categories-container {

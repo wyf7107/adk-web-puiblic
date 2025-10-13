@@ -17,6 +17,7 @@
 <h2 mat-dialog-title class="new-app-title">Create a new app</h2>
 
 <mat-form-field style="padding-left:20px; padding-right: 24px;">
+    <mat-label>App Name</mat-label>
     <input
       [(ngModel)]="newAppName"
       matInput
@@ -30,7 +31,8 @@
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Cancel</button>
   <button
-    mat-button
+    mat-raised-button
+    class="adk-primary-button"
     cdkFocusInitial
     (click)="createNewApp()"
     [disabled]="!isNameValid()">

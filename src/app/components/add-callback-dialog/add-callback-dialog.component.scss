@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 .callback-form {
   display: flex;
@@ -40,8 +40,4 @@ mat-dialog-actions {
 
 mat-form-field {
   margin-top: 8px !important;
-}
-
-.mat-mdc-raised-button.mat-secondary:not([disabled]) {
-  background-color: #8ab4f8;
 }

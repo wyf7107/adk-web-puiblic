@@ -163,7 +163,7 @@ describe('AgentBuilderService - Callback Management', () => {
       invalidCallbacks.forEach((callback) => {
         const result = service.addCallback('test-agent', callback);
         expect(result.success).toBe(false);
-        expect(result.error).toContain('valid Python identifier');
+        expect(result.error).toContain('{{AppName}}.callback_name');
       });
 
       const validCallbacks = [

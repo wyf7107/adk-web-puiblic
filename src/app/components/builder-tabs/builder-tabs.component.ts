@@ -521,8 +521,21 @@ export class BuilderTabsComponent {
             name: result.name,
             type: result.type,
           };
+          const addResult = this.agentBuilderService.addCallback(
+            this.agentConfig!.name,
+            callback,
+          );
 
-          this.agentBuilderService.addCallback(this.agentConfig!.name, callback);
+          if (!addResult.success) {
+            this.snackBar.open(
+              addResult.error || 'Failed to add callback',
+              'Close',
+              {
+                duration: 3000,
+                panelClass: ['error-snackbar'],
+              },
+            );
+          }
         }
       });
     }
@@ -558,7 +571,14 @@ export class BuilderTabsComponent {
         );
 
         if (!updateResult.success) {
-          console.error('Failed to update callback:', updateResult.error);
+          this.snackBar.open(
+            updateResult.error || 'Failed to update callback',
+            'Close',
+            {
+              duration: 3000,
+              panelClass: ['error-snackbar'],
+            },
+          );
         } else {
           this.cdr.markForCheck();
         }

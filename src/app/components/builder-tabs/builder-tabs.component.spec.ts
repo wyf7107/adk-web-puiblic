@@ -16,27 +16,39 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+
 import { BuilderTabsComponent } from './builder-tabs.component';
 import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
-import {AGENT_SERVICE} from '../../core/services/agent.service';
-import {CallbackNode} from '../../core/models/AgentBuilder';
-import {provideNoopAnimations} from '@angular/platform-browser/animations';
+import { AGENT_SERVICE } from '../../core/services/agent.service';
+import { CallbackNode } from '../../core/models/AgentBuilder';
 
 describe('BuilderTabsComponent - Callback Support', () => {
   let component: BuilderTabsComponent;
   let fixture: ComponentFixture<BuilderTabsComponent>;
+  let dialogSpy: jasmine.SpyObj<MatDialog>;
+  let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
 
   beforeEach(async () => {
     const agentServiceSpy = jasmine.createSpyObj('AgentService', [
       'getApp',
       'agentBuild',
     ]);
+    agentServiceSpy.getApp.and.returnValue(of('TestApp'));
+
+    dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     await TestBed.configureTestingModule({
       imports: [BuilderTabsComponent],
       providers: [
         {provide: AGENT_BUILDER_SERVICE, useExisting: AgentBuilderService},
         {provide: AGENT_SERVICE, useValue: agentServiceSpy},
+        {provide: MatDialog, useValue: dialogSpy},
+        {provide: MatSnackBar, useValue: snackBarSpy},
         provideNoopAnimations(),
       ],
     }).compileComponents();
@@ -224,6 +236,91 @@ describe('BuilderTabsComponent - Callback Support', () => {
     });
   });
 
+  describe('Callback Error Handling', () => {
+    it('should surface add callback errors to the user', () => {
+      fixture.detectChanges();
+      component.agentConfig = {
+        name: 'test-agent',
+        isRoot: true,
+        agent_class: 'LlmAgent',
+        model: 'gemini-2.5-flash',
+        instruction: 'test',
+        sub_agents: [],
+        tools: [],
+        callbacks: [],
+      };
+
+      dialogSpy.open.and.returnValue({
+        afterClosed: () => of({
+          name: 'TestApp.invalid_callback',
+          type: 'before_agent',
+        }),
+      } as any);
+
+      const agentBuilderService = TestBed.inject(AgentBuilderService);
+      spyOn(agentBuilderService, 'addCallback').and.returnValue({
+        success: false,
+        error: 'Callback name must follow format',
+      });
+
+      component.addCallback('before_agent');
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith(
+        'Callback name must follow format',
+        'Close',
+        jasmine.objectContaining({
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }),
+      );
+    });
+
+    it('should surface update callback errors to the user', () => {
+      fixture.detectChanges();
+      const existingCallback: CallbackNode = {
+        name: 'TestApp.callback',
+        type: 'before_agent',
+        code: '',
+      };
+
+      component.agentConfig = {
+        name: 'test-agent',
+        isRoot: true,
+        agent_class: 'LlmAgent',
+        model: 'gemini-2.5-flash',
+        instruction: 'test',
+        sub_agents: [],
+        tools: [],
+        callbacks: [existingCallback],
+      };
+
+      dialogSpy.open.and.returnValue({
+        afterClosed: () => of({
+          isEditMode: true,
+          name: 'TestApp.callback',
+          type: 'before_agent',
+        }),
+      } as any);
+
+      const agentBuilderService = TestBed.inject(AgentBuilderService);
+      spyOn(agentBuilderService, 'updateCallback').and.returnValue({
+        success: false,
+        error: 'Duplicate callback',
+      });
+
+      component.editCallback(existingCallback);
+
+      expect(snackBarSpy.open).toHaveBeenCalledWith(
+        'Duplicate callback',
+        'Close',
+        jasmine.objectContaining({
+          duration: 3000,
+          panelClass: ['error-snackbar'],
+        }),
+      );
+    });
+  });
+ 
   describe('Agent Config with Callbacks', () => {
     it('should update agent callbacks when service emits update', () => {
       const cdr = (component as any).cdr;

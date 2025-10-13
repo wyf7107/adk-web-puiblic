@@ -15,9 +15,12 @@
  * limitations under the License.
  */
 
-export declare interface LiveRequest {
-  content?: any;
-  blob?: any;
-  close?: boolean;
-  model_config?: any;
+import {Injectable} from '@angular/core';
+
+import {LocalFileService} from '../interfaces/localfile';
+
+/** Mock implementation of LocalFileService. */
+@Injectable()
+export class MockLocalFileService implements Partial<LocalFileService> {
+  createMessagePartFromFile = jasmine.createSpy('createMessagePartFromFile');
 }

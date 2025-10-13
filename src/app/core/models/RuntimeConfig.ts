@@ -19,7 +19,7 @@
  * Runtime configuration for the ADK web app. Corresponds to the JSON file
  * read by the web app at runtime (runtime-config.json).
  */
-export interface RuntimeConfig {
+export declare interface RuntimeConfig {
   backendUrl: string;
   logo?: LogoConfig;
 }
@@ -27,7 +27,7 @@ export interface RuntimeConfig {
 /**
  * Logo configuration for the ADK web app.
  */
-export interface LogoConfig {
+export declare interface LogoConfig {
   text: string;
   imageUrl: string;
 }

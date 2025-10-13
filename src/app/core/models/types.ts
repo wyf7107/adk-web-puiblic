@@ -17,27 +17,27 @@
 
 // ADK Event types, see: https://github.com/google/adk-python/blob/632bf8b0bcf18ff4e4505e4e5f4c626510f366a2/src/google/adk/events/event.py#L30
 // TODO: Replace with genai TS types when they're available.
-export interface Blob {
+export declare interface Blob {
   mimeType?: string;
   data: string;
 }
 
-export interface FunctionCall {
+export declare interface FunctionCall {
   name: string;
   args: {[key: string]: any};
 }
 
-export interface FunctionResponse {
+export declare interface FunctionResponse {
   name: string;
   response: {[key: string]: any};
 }
 
-export interface FileData {
+export declare interface FileData {
   mimeType: string;
   fileUri: string;
 }
 
-export interface Part {
+export declare interface Part {
   text?: string;
   inlineData?: Blob;
   functionCall?: FunctionCall;
@@ -45,30 +45,30 @@ export interface Part {
   fileData?: FileData;
 }
 
-export interface GenAiContent {
+export declare interface GenAiContent {
   role: string;
   parts: Part[];
 }
 
-export interface LlmRequest {
+export declare interface LlmRequest {
   contents: GenAiContent[];
 }
 
-export interface LlmResponse {
+export declare interface LlmResponse {
   content: GenAiContent;
   error?: string;
   errorMessage?: string;
   longRunningToolIds?: string[];
 }
 
-export interface EventActions {
+export declare interface EventActions {
   message?: string;
   functionCall?: FunctionCall;
   functionResponse?: FunctionResponse;
   finishReason?: string;
 }
 
-export interface Event extends LlmResponse {
+export declare interface Event extends LlmResponse {
   id?: string;
   author?: string
   invocationId?: string;

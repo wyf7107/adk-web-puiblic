@@ -50,6 +50,7 @@ import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
 import {FEATURE_FLAG_SERVICE, FeatureFlagService} from '../../core/services/feature-flag.service';
 import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
+import {LOCAL_FILE_SERVICE, LocalFileService} from '../../core/services/interfaces/localfile';
 import {SAFE_VALUES_SERVICE, SafeValuesService} from '../../core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {SESSION_SERVICE, SessionService} from '../../core/services/session.service';
@@ -222,6 +223,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
+  private readonly localFileService = inject(LOCAL_FILE_SERVICE);
   protected openBase64InNewTab = this.safeValuesService.openBase64InNewTab;
 
   // Load apps
@@ -610,13 +612,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.selectedFiles.length > 0) {
       for (const file of this.selectedFiles) {
-        parts.push({
-          inlineData: {
-            displayName: file.file.name,
-            data: await this.readFileAsBytes(file.file),
-            mimeType: file.file.type,
-          },
-        });
+        parts.push(
+            await this.localFileService.createMessagePartFromFile(file.file));
       }
     }
     return parts;

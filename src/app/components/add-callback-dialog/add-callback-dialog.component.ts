@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { AfterViewInit, Component, Inject, ViewChild } from '@angular/core';
+import { Component, Inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgModel } from '@angular/forms';
 import {
@@ -31,6 +31,8 @@ import { MatError, MatFormField, MatFormFieldModule, MatLabel } from '@angular/m
 import { MatInput, MatInputModule } from '@angular/material/input';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { FormControl } from '@angular/forms';
+import { MatSelectModule } from '@angular/material/select';
+import { CallbackNode } from '../../core/models/AgentBuilder';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
@@ -52,6 +54,7 @@ export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
     MatFormFieldModule,
     MatInputModule,
     MatError,
+    MatSelectModule,
   ],
 })
 export class AddCallbackDialogComponent {
@@ -60,24 +63,46 @@ export class AddCallbackDialogComponent {
   callbackType: string = '';
   existingCallbackNames: string[] = [];
   matcher = new ImmediateErrorStateMatcher();
+  isEditMode = false;
+  availableCallbackTypes: string[] = [];
+  private originalCallbackName = '';
 
   constructor(
     public dialogRef: MatDialogRef<AddCallbackDialogComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: { callbackType: string; existingCallbackNames?: string[] },
+    public data?: {
+      callbackType: string;
+      existingCallbackNames?: string[];
+      isEditMode?: boolean;
+      callback?: CallbackNode;
+      availableCallbackTypes?: string[];
+    },
   ) {
     this.callbackType = data?.callbackType ?? '';
     this.existingCallbackNames = data?.existingCallbackNames ?? [];
+    this.isEditMode = !!data?.isEditMode;
+    this.availableCallbackTypes = data?.availableCallbackTypes ?? [];
+
+    if (this.isEditMode && data?.callback) {
+      this.callbackName = data.callback.name;
+      this.callbackType = data.callback.type;
+      this.originalCallbackName = data.callback.name;
+      this.existingCallbackNames = this.existingCallbackNames.filter(
+        name => name !== this.originalCallbackName,
+      );
+    }
   }
 
   addCallback() {
-    if (!this.callbackName.trim() || this.isDuplicateName()) {
+    if (!this.callbackName.trim() || this.hasSpaces() || this.isDuplicateName()) {
       return;
     }
 
     const result = {
       name: this.callbackName.trim(),
       type: this.callbackType,
+      isEditMode: this.isEditMode,
+      originalName: this.originalCallbackName || this.callbackName.trim(),
     };
 
     this.dialogRef.close(result);

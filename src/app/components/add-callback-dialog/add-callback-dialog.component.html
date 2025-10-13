@@ -14,8 +14,16 @@
  limitations under the License.
 -->
 
-<h2 mat-dialog-title>Add {{callbackType}} Callback</h2>
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit Callback' : 'Add ' + callbackType + ' Callback' }}</h2>
 <mat-dialog-content>
+  <ng-container *ngIf="isEditMode">
+    <mat-form-field style="width: 100%;">
+      <mat-label>Callback Type</mat-label>
+      <mat-select [(ngModel)]="callbackType">
+        <mat-option *ngFor="let type of availableCallbackTypes" [value]="type">{{ type }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-container>
   <mat-form-field style="width: 100%;">
     <mat-label>Callback Name</mat-label>
     <input
@@ -37,6 +45,6 @@
     class="adk-primary-button"
     (click)="addCallback()"
     [disabled]="createDisabled()">
-    Add
+    {{ isEditMode ? 'Save' : 'Add' }}
   </button>
 </mat-dialog-actions>

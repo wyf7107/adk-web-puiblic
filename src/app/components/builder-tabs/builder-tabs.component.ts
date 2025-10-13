@@ -203,13 +203,25 @@ export class BuilderTabsComponent {
     this.callbacksMap$ = this.agentBuilderService.getAgentCallbacksMap();
     this.agentBuilderService.getSelectedNode().subscribe(node => {
       this.agentConfig = node;
-      this.currentSelectedAgent = node;
+      this.currentSelectedAgent = node ?? undefined;
+
       if (node) {
         this.editingTool = null;
         this.editingCallback = null;
         this.header = 'Agent configuration';
         this.updateBreadcrumb(node);
+        this.agentBuilderService.setAgentTools(
+          node.name,
+          node.tools ?? [],
+        );
+        this.agentBuilderService.setAgentCallbacks(
+          node.name,
+          node.callbacks ?? [],
+        );
+      } else {
+        this.clearBuilderState();
       }
+
       this.cdr.markForCheck();
     });
 
@@ -715,9 +727,20 @@ export class BuilderTabsComponent {
         if (tool.args && this.getObjectKeys(tool.args).length > 0) {
           this.editingToolArgs.set(true);
         }
-        this.cdr.markForCheck();
-      });
-    }
+      this.cdr.markForCheck();
+    });
+  }
+
+  private clearBuilderState() {
+    this.editingTool = null;
+    this.selectedTool = undefined;
+    this.editingCallback = null;
+    this.selectedCallback = undefined;
+    this.hierarchyPath = [];
+    this.header = 'Select an agent to edit';
+    this.agentBuilderService.setAgentCallbacks();
+    this.agentBuilderService.setAgentTools();
+  }
   }
 
   selectCallback(callback: CallbackNode) {

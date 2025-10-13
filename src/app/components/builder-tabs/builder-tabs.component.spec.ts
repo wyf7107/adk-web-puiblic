@@ -320,7 +320,65 @@ describe('BuilderTabsComponent - Callback Support', () => {
       );
     });
   });
- 
+
+  describe('Panel Action State', () => {
+    it('should disable tool, sub-agent, and callback actions when no agent is selected', () => {
+      component.agentConfig = undefined;
+      fixture.detectChanges();
+
+      const actionButtons = fixture.nativeElement.querySelectorAll('button.panel-action-button');
+      expect(actionButtons.length).toBeGreaterThan(0);
+      actionButtons.forEach((button: HTMLButtonElement) => {
+        expect(button.disabled).toBeTrue();
+      });
+
+      const disabledPanels = Array.from(
+        fixture.nativeElement.querySelectorAll('.builder-panel-wrapper'),
+      ) as HTMLElement[];
+      disabledPanels.forEach(panel => {
+        expect(panel.classList.contains('panel-disabled')).toBeTrue();
+      });
+    });
+
+    it('should clear builder state when the selection is removed', () => {
+      const agentBuilderService = TestBed.inject(AgentBuilderService);
+      const callbacksSpy = spyOn(agentBuilderService, 'setAgentCallbacks').and.callThrough();
+      const toolsSpy = spyOn(agentBuilderService, 'setAgentTools').and.callThrough();
+
+      const agent: AgentNode = {
+        name: 'TestAgent',
+        isRoot: false,
+        agent_class: 'LlmAgent',
+        model: 'gemini-2.5-flash',
+        instruction: 'Test',
+        sub_agents: [],
+        tools: [],
+        callbacks: [],
+      };
+
+      agentBuilderService.addNode(agent);
+      agentBuilderService.setSelectedNode(agent);
+      fixture.detectChanges();
+
+      expect(component.agentConfig).toEqual(agent);
+      expect(callbacksSpy).toHaveBeenCalledWith('TestAgent', []);
+      expect(toolsSpy).toHaveBeenCalledWith('TestAgent', []);
+
+      agentBuilderService.setSelectedNode(undefined);
+      fixture.detectChanges();
+
+      expect(component.agentConfig).toBeUndefined();
+      expect(component.editingTool).toBeNull();
+      expect(component.selectedTool).toBeUndefined();
+      expect(component.editingCallback).toBeNull();
+      expect(component.selectedCallback).toBeUndefined();
+      expect(component.hierarchyPath.length).toBe(0);
+      expect(component.header).toBe('Select an agent to edit');
+      expect(callbacksSpy).toHaveBeenCalledWith();
+      expect(toolsSpy).toHaveBeenCalledWith();
+    });
+  });
+
   describe('Agent Config with Callbacks', () => {
     it('should update agent callbacks when service emits update', () => {
       const cdr = (component as any).cdr;

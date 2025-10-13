@@ -306,7 +306,7 @@
       </mat-tab>
     </mat-tab-group> -->
     <div class="content-wrapper">
-      <div class="builder-panel-wrapper">
+    <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
         <div class="panel-title">
           Configuration
         </div>
@@ -353,7 +353,7 @@
         </div>
       </div>
 
-      <div class="builder-panel-wrapper">
+      <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
         <div class="panel-title">
           <div>
             Tools
@@ -364,6 +364,7 @@
               type="button"
               class="panel-action-button"
               [matMenuTriggerFor]="toolsMenu"
+              [disabled]="!agentConfig"
               #agentMenuTrigger="matMenuTrigger"
               aria-label="Add tool"
             >
@@ -409,7 +410,7 @@
             }
           }
       </div>
-      <div class="builder-panel-wrapper">
+      <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
         <div class="panel-title">
           <div>
             Sub Agents
@@ -420,6 +421,7 @@
               type="button"
               class="panel-action-button"
               (click)="addSubAgent(agentConfig?.name)"
+              [disabled]="!agentConfig"
               aria-label="Add sub agent"
             >
               <mat-icon>add</mat-icon>
@@ -427,7 +429,7 @@
           </div>
         </div>
       </div>
-      <div class="builder-panel-wrapper">
+      <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
         <div class="panel-title">
           <div>
             Callbacks
@@ -438,6 +440,7 @@
               type="button"
               class="panel-action-button"
               [matMenuTriggerFor]="callbacksMenu"
+              [disabled]="!agentConfig"
               aria-label="Add callback"
             >
               <mat-icon>add</mat-icon>

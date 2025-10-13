@@ -689,6 +689,12 @@ mat-tab-group {
   padding-bottom: 12px;
   padding-left: 24px;
   padding-right: 24px;
+
+  &.panel-disabled {
+    opacity: 0.35;
+    pointer-events: none;
+    filter: grayscale(45%);
+  }
 }
 
 .panel-title {

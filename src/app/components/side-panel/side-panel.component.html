@@ -24,23 +24,34 @@
   </div>
 </div>
 @if (isApplicationSelectorEnabledObs | async) {
-  <div class="app-select-container">
-    <mat-select
-      class="app-select"
-      (selectionChange)="appSelectionChange.emit($event)"
-      [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
-      [formControl]="selectedAppControl"
-    >
-      @if (apps$ | async; as availableApps) {
-        @for (appName of availableApps; track appName) {
-          <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
+  <div class="app-actions">
+    <div class="app-select-container">
+      <mat-select
+        class="app-select"
+        (selectionChange)="appSelectionChange.emit($event)"
+        [placeholder]="isLoadingApps() ? 'Loading...' : 'Select an agent'"
+        [formControl]="selectedAppControl"
+      >
+        @if (apps$ | async; as availableApps) {
+          @for (appName of availableApps; track appName) {
+            <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
+          }
         }
-      }
-      @if (selectedAppControl.value && isLoadingApps()) {
-        <mat-option class="app-name-option" [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
-      }
-    </mat-select>
-  </div>
+        @if (selectedAppControl.value && isLoadingApps()) {
+          <mat-option class="app-name-option" [value]="selectedAppControl.value">{{ selectedAppControl.value }}</mat-option>
+        }
+      </mat-select>
+    </div>
+    @if (!isBuilderMode) {
+      <div class="mode-toggle-container">
+        <mat-icon (click)="openAddItemDialog.emit(true)" 
+        matTooltip="Create new agent in builder mode"
+        style="cursor: pointer; margin-right: 16px;">add</mat-icon>
+        <mat-icon (click)="enterBuilderMode.emit(true)" 
+        matTooltip="Edit in Builder Mode" style="cursor: pointer; margin-right: 32px;">edit</mat-icon>
+      </div>
+    }
+  </div> 
 }
 } @if (appName != "" && showSidePanel) {
 <div class="tabs-container">

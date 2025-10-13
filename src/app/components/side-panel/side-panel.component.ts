@@ -82,6 +82,7 @@ export class SidePanelComponent {
   selectedAppControl = new FormControl<string>('', {
     nonNullable: true,
   });
+  @Input() isBuilderMode = false;
 
   @Output() readonly closePanel = new EventEmitter<void>();
   @Output() readonly appSelectionChange = new EventEmitter<MatSelectChange>();
@@ -96,6 +97,9 @@ export class SidePanelComponent {
   @Output() readonly page = new EventEmitter<PageEvent>();
   @Output() readonly closeSelectedEvent = new EventEmitter<void>();
   @Output() readonly openImageDialog = new EventEmitter<string|null>();
+  @Output() readonly openAddItemDialog = new EventEmitter<boolean>();
+  @Output() readonly enterBuilderMode = new EventEmitter<boolean>();
+
 
   readonly eventTabComponent = viewChild(EventTabComponent);
   readonly sessionTabComponent = viewChild(SessionTabComponent);

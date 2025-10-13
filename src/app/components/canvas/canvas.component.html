@@ -1,0 +1,229 @@
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="canvas-container">
+  <div class="canvas-workspace" [class.has-banner]="currentAgentTool()" (click)="onCanvasClick($event)">    <!-- Agent Tool Banner -->
+    @if (currentAgentTool()) {
+      <div class="agent-tool-banner">
+        <div class="banner-content">
+          <button mat-icon-button class="back-to-main-btn" (click)="backToMainCanvas()" [matTooltip]="getBackButtonTooltip()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="banner-info">
+            <span class="material-symbols-outlined banner-icon">smart_toy</span>
+            <div class="banner-text">
+              <h3 class="agent-tool-name">{{currentAgentTool()}}</h3>
+              <p class="banner-subtitle">Agent Tool</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+    @if (!showSidePanel) {
+      <span
+        class="material-symbols-outlined open-panel-btn"
+        matTooltip="Open panel"
+        (click)="toggleSidePanelRequest.emit()"
+        >left_panel_open</span
+      >
+    }
+    @if (vflowNodes().length > 0) {
+    <vflow 
+      view="auto"
+      [nodes]="vflowNodes()"
+      [edges]="edges()"
+      [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }"
+      [snapGrid]="[12, 12]"
+    >
+      <ng-template #nodeTemplate let-ctx nodeHtml>
+        @let nodeData = ctx.node.data?.();
+        @if (nodeData?.kind === 'workflow-group-placeholder') {
+          <div class="workflow-group-placeholder" (click)="$event.stopPropagation()">
+            @let parentName = nodeData.parentAgentName;
+            <button
+              matIconButton
+              class="workflow-group-placeholder__button"
+              [matMenuTriggerFor]="workflowGroupMenu"
+              #workflowGroupMenuTrigger="matMenuTrigger"
+              aria-label="Add sub-agent"
+              (click)="$event.stopPropagation()"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+            <span class="workflow-group-placeholder__label">Add sub-agent</span>
+            <mat-menu #workflowGroupMenu="matMenu">
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('LlmAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>psychology</mat-icon>
+                <span>LLM Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('SequentialAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>more_horiz</mat-icon>
+                <span>Sequential Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('LoopAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>sync</mat-icon>
+                <span>Loop Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="handleAgentTypeSelection('ParallelAgent', parentName, workflowGroupMenuTrigger, $event)"
+              >
+                <mat-icon>density_medium</mat-icon>
+                <span>Parallel Agent</span>
+              </button>
+            </mat-menu>
+            <handle type="target" position="top" />
+            <handle type="source" position="bottom" />
+          </div>
+        } @else {
+          @let nodeName = nodeData?.name || 'root_agent';
+          @let toolsMap = toolsMap$ | async;
+          @let tools = getToolsForNode(nodeName, toolsMap);
+          @let hasTools = tools.length > 0;
+          <div 
+            class="custom-node"
+            selectable
+            [class.custom-node_selected]="isNodeSelected(ctx.node)"
+            [class.custom-node_has-tools]="hasTools"
+            (click)="onCustomTemplateNodeClick(ctx.node, $event)"
+            (pointerdown)="onNodePointerDown(ctx.node, $event)"
+          >
+          <div class="node-title-wrapper">
+            <div class="node-title">
+              <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
+              {{nodeName}}
+              @if (isRootAgent(nodeName)) {
+                <span class="node-badge">Root</span>
+              }
+            </div>
+            <div class="action-button-bar">
+              @if (!isRootAgentForCurrentTab(nodeName)) {
+                <button matIconButton class="action-btn delete-subagent-btn" (click)="openDeleteSubAgentDialog(nodeName); $event.stopPropagation()" matTooltip="Delete sub-agent"
+                  aria-label="Delete sub-agent">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+          @if (hasTools) {
+            <div class="tools-container">
+              <div class="tools-list">
+                @for (tool of tools; track tool.name) {
+                  <div class="tool-item" (click)="selectTool(tool, ctx.node); $event.stopPropagation()">
+                    <mat-icon class="tool-item-icon">{{ getToolIcon(tool) }}</mat-icon>
+                    <span class="tool-item-name">{{tool.name}}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+          @if (isNodeSelected(ctx.node)) {
+            <div class="add-subagent-container">
+              <button
+                matIconButton
+                class="add-subagent-btn"
+                [matMenuTriggerFor]="agentMenu"
+                #agentMenuTrigger="matMenuTrigger"
+                matTooltip="Add sub-agent"
+                aria-label="Add sub-agent"
+                (click)="$event.stopPropagation()"
+              >
+                <span class="add-subagent-symbol">+</span>
+              </button>
+              <mat-menu #agentMenu="matMenu">
+                <button
+                  mat-menu-item
+                  (click)="handleAgentTypeSelection('LlmAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+                >
+                  <mat-icon>psychology</mat-icon>
+                  <span>LLM Agent</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="handleAgentTypeSelection('SequentialAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+                >
+                  <mat-icon>more_horiz</mat-icon>
+                  <span>Sequential Agent</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="handleAgentTypeSelection('LoopAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+                >
+                  <mat-icon>sync</mat-icon>
+                  <span>Loop Agent</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="handleAgentTypeSelection('ParallelAgent', ctx.node.data()?.name, agentMenuTrigger, $event)"
+                >
+                  <mat-icon>density_medium</mat-icon>
+                  <span>Parallel Agent</span>
+                </button>
+              </mat-menu>
+            </div>
+          }
+          @if (shouldShowHandle(ctx.node, 'target')) {
+            <handle type="target" position="top" />
+          }
+          @if (shouldShowHandle(ctx.node, 'source')) {
+            <handle type="source" position="bottom" />
+          }
+        </div>
+        }
+      </ng-template>
+    </vflow>
+    }
+
+    @if (vflowNodes().length === 0) {
+    <div class="canvas-instructions">
+      <div class="instruction-content">
+        <mat-icon class="instruction-icon">touch_app</mat-icon>
+        <h4>Start Building Your ADK</h4>
+        <p>Drag components from the left panel to create your workflow</p>
+        <div class="instruction-tips">
+          <div class="tip">
+            <mat-icon>drag_indicator</mat-icon>
+            <span>Drag to move nodes</span>
+          </div>
+          <div class="tip">
+            <mat-icon>link</mat-icon>
+            <span>Shift + Click to connect nodes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+
+  </div>
+  
+  <!-- Builder Assistant Panel -->
+  <app-builder-assistant 
+    [isVisible]="showBuilderAssistant"
+    (closePanel)="onBuilderAssistantClose()"
+    (reloadCanvas)="reloadCanvasFromYaml()"
+    [appName]="appName">
+  </app-builder-assistant>
+</div>

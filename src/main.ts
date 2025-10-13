@@ -24,6 +24,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {bootstrapApplication, BrowserModule} from '@angular/platform-browser';
 import {provideAnimations} from '@angular/platform-browser/animations';
+import {provideMarkdown} from 'ngx-markdown';
 
 import {AppRoutingModule} from './app/app-routing.module';
 import {AppComponent} from './app/app.component';
@@ -50,10 +51,12 @@ import {TRACE_SERVICE, TraceService} from './app/core/services/trace.service';
 import {VIDEO_SERVICE, VideoService} from './app/core/services/video.service';
 import {WEBSOCKET_SERVICE, WebSocketService} from './app/core/services/websocket.service';
 import {LOGO_COMPONENT} from './app/injection_tokens';
+import {AGENT_BUILDER_SERVICE, AgentBuilderService} from './app/core/services/agent-builder.service';
 
 fetch('./assets/config/runtime-config.json')
   .then((response) => response.json())
   .then((config) => {
+    // Make the config available globally
     (window as any)['runtimeConfig'] = config;
 
     bootstrapApplication(AppComponent, {
@@ -85,7 +88,9 @@ fetch('./assets/config/runtime-config.json')
         ...(config.logo ?
                 [{provide: LOGO_COMPONENT, useValue: CustomLogoComponent}] :
                 []),
+        { provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService },
         provideAnimations(),
+        provideMarkdown(),
       ]
     }).catch((err) => console.error(err));
   });

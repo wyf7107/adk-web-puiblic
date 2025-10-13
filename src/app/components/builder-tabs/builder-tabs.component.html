@@ -1,0 +1,480 @@
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<div style="margin-top: 20px; margin-left: 20px; display: flex">
+  <div style="width: 100%">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
+          Agent Development Kit
+      </div>
+      <span
+        class="material-symbols-outlined"
+        style="color: #c4c7c5; cursor: pointer; margin-right: 15px"
+        matTooltip="Collapse panel"
+        (click)="closePanel.emit()"
+        >left_panel_close</span
+      >
+    </div>
+  </div>
+</div>
+
+<div class="builder-tabs-container">
+  <div class="builder-tab-content">
+    @if (hierarchyPath.length > 0) {
+      <div class="agent-breadcrumb-container">
+        @for (agent of hierarchyPath; track agent.name; let i = $index) {
+          <div 
+            class="breadcrumb-chip"
+            [class.current-agent]="currentSelectedAgent?.name === agent.name"
+            (click)="selectAgentFromBreadcrumb(agent)">
+            @if (i === 0 && isInAgentToolContext()) {
+              AgentTool: {{agent.name}}
+            } @else {
+              {{agent.name}}
+            }
+          </div>
+          @if (i < hierarchyPath.length - 1) {
+            <mat-icon class="breadcrumb-arrow">chevron_right</mat-icon>
+          }
+        }
+      </div>
+    }
+
+    <!-- <mat-tab-group [(selectedIndex)]="selectedTabIndex">
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Config</span>
+        </ng-template>
+        <div class="tab-content-container">
+          <div class="components-section">
+            <h4>{{header}}</h4>
+          </div>
+
+          @if (agentConfig) {
+            <div class="config-form">
+              <div class="form-row">
+                <mat-form-field class="agent-name-field">
+                  <mat-label>Agent Name</mat-label>
+                  <input matInput [(ngModel)]="agentConfig.name"/>
+                </mat-form-field>
+
+                <mat-form-field class="agent-type-field">
+                  <mat-label>Agent Type</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.agent_class">
+                    @for (type of agentTypes; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              @if (agentConfig.agent_class === 'LlmAgent') {
+                <mat-form-field>
+                  <mat-label>Model</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.model">
+                    @for (model of models; track model) {
+                    <mat-option [value]="model">{{model}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
+
+              <mat-form-field>
+                <mat-label>Instructions</mat-label>
+                <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
+              </mat-form-field>
+
+              @if (agentConfig.isAgentTool) {
+                <mat-checkbox [(ngModel)]="agentConfig.skip_summarization">Skip summarization</mat-checkbox>
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Sub agents</span>
+        </ng-template>
+        <button class="add-tool-button" (click)="addSubAgent(agentConfig?.name)">
+          <div class="add-tool-button-detail">
+            <mat-icon>add</mat-icon>
+            <div class="add-tool-button-text">
+              Add sub agent
+            </div>
+          </div>
+        </button>
+        @if (agentConfig && agentConfig.sub_agents && agentConfig.sub_agents.length > 0) {
+          <ul class="tools-list">
+            @for (subAgent of agentConfig.sub_agents; track subAgent) {
+              <li (click)="selectAgent(subAgent)" class="tool-name">
+                {{subAgent.name}}
+                <button mat-icon-button (click)="deleteSubAgent(subAgent.name); $event.stopPropagation()">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="no-tools-message">This agent has no sub agents</div>
+        }
+      </mat-tab>
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Tools</span>
+        </ng-template>
+        <div class="tab-content-container">
+          @if (editingTool) {
+            <button mat-icon-button (click)="backToToolList()" class="back-button">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div class="config-form">
+              <mat-form-field class="tool-type-field">
+                <mat-label>Tool Type</mat-label>
+                <mat-select [(ngModel)]="editingTool.toolType" (selectionChange)="onToolTypeSelectionChange(editingTool)" disabled>
+                    @for (type of toolTypes; track type) {
+                        <mat-option [value]="type">{{type}}</mat-option>
+                    }
+                </mat-select>
+              </mat-form-field>
+              @if (editingTool.toolType === 'Custom tool') {
+                <mat-form-field class="tool-name-field">
+                  <mat-label>Tool Name</mat-label>
+                  <input matInput [(ngModel)]="editingTool.name" disabled/>
+                </mat-form-field>
+                @if (editingTool.args) {
+                  <h2 class="tool-args-header">Custom Tool Arguments</h2>
+                  @if (editingToolArgs()) {
+                    <div class="json-editor-wrapper">
+                      <app-json-editor
+                        [jsonString]="toolArgsString()"
+                      ></app-json-editor>
+                    </div>
+                    <div class="edit-buttons">
+                      <button mat-button (click)="saveToolArgs(editingTool)">Save</button>
+                      <button mat-button (click)="cancelEditToolArgs(editingTool)">Cancel</button>
+                    </div>
+                  } @else {
+                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
+                  }
+                }
+              } @else if (editingTool.toolType === 'Built-in tool') {
+                <mat-form-field class="built-in-tool-field">
+                  <mat-label>Built-in Tool</mat-label>
+                  <mat-select [(ngModel)]="editingTool.name" (selectionChange)="onBuiltInToolSelectionChange(editingTool)" disabled>
+                    @for (tool of builtInTools; track tool) {
+                      <mat-option [value]="tool">{{ tool }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                @if (builtInToolArgs.has(editingTool.name) && editingTool.args && getObjectKeys(editingTool.args).length > 0) {
+                  <h2 class="tool-args-header">Built-In Tool Arguments</h2>
+                  @if (editingToolArgs()) {
+                    <div class="json-editor-wrapper">
+                      <app-json-editor
+                        [jsonString]="toolArgsString()"
+                      ></app-json-editor>
+                    </div>
+                    <div class="edit-buttons">
+                      <button mat-button (click)="saveToolArgs(editingTool)">Save</button>
+                      <button mat-button (click)="cancelEditToolArgs(editingTool)">Cancel</button>
+                    </div>
+                  } @else {
+                    <button mat-button (click)="editToolArgs()">Edit tool args</button>
+                  }
+                }
+              } @else if (editingTool.toolType === 'Agent Tool') {
+                <div class="agent-tool-section">
+                  <h3>Agent as Tool Configuration</h3>
+                  <p>Create an agent that can be used as a tool by other agents.</p>
+                  <button mat-raised-button color="primary" class="create-agent-tool-btn" (click)="createAgentTool()">
+                    Create an agent as tool
+                  </button>
+                </div>
+              } @else if (editingTool.toolType === 'Function tool') {
+                <mat-form-field class="tool-name-field">
+                  <mat-label>Function Name</mat-label>
+                  <input matInput [(ngModel)]="editingTool.name" disabled/>
+                </mat-form-field>
+              }
+            </div>
+          } @else {
+            <button class="add-tool-button" (click)="addTool()">
+              <div class="add-tool-button-detail">
+                <mat-icon>add</mat-icon>
+                <div class="add-tool-button-text">
+                  Add tool
+                </div>
+              </div>
+            </button>
+            @if (toolsMap$ | async; as toolsMap) {
+              @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
+                <ul class="tools-list">
+                  @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
+                    <li (click)="selectTool(tool)" class="tool-name">
+                      @if (tool.toolType === 'Agent Tool') {
+                        <mat-icon class="tool-icon">smart_toy</mat-icon>
+                      }
+                      <span class="tool-list-item-name">{{tool.name}}</span>
+                      <button mat-icon-button (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <div class="no-tools-message">This agent has no tools</div>
+              }
+            }
+          }
+        </div>
+      </mat-tab>
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">Callbacks</span>
+        </ng-template>
+        <div class="tab-content-container">
+          @if (editingCallback) {
+            <button mat-icon-button (click)="backToCallbackList()" class="back-button">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div class="config-form">
+              <mat-form-field class="callback-type-field">
+                <mat-label>Callback Type</mat-label>
+                <mat-select [(ngModel)]="editingCallback.type" (selectionChange)="onCallbackTypeChange(editingCallback)" disabled>
+                  @for (type of callbackTypes; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field class="callback-name-field">
+                <mat-label>Callback Name</mat-label>
+                <input matInput [(ngModel)]="editingCallback.name" disabled />
+              </mat-form-field>
+            </div>
+          } @else {
+            <div class="callback-groups-wrapper">
+              @for (callbackType of callbackTypes; track callbackType) {
+                @if (getCallbacksByType().get(callbackType); as callbacks) {
+                  <div class="callback-group">
+                    <mat-expansion-panel [expanded]="true">
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>{{callbackType}} ({{callbacks.length}})</mat-panel-title>
+                        <mat-action-row>
+                          <button mat-icon-button 
+                                  (click)="addCallback(callbackType); $event.stopPropagation()" 
+                                  matTooltip="Add {{callbackType}} callback"
+                                  class="add-callback-icon">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </mat-action-row>
+                      </mat-expansion-panel-header>
+                      @if (callbacks.length > 0) {
+                        <div class="callback-list">
+                          @for (callback of callbacks; track callback) {
+                            <div (click)="selectCallback(callback)" class="callback-item">
+                              <span class="callback-name">{{callback.name}}</span>
+                              <button mat-icon-button (click)="deleteCallback(agentConfig?.name || '', callback); $event.stopPropagation()">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                            </div>
+                          }
+                        </div>
+                      } @else {
+                        <div class="no-callbacks-in-type">No callbacks in this type</div>
+                      }
+                    </mat-expansion-panel>
+                  </div>
+                }
+              }
+            </div>
+          }
+        </div>
+      </mat-tab>
+    </mat-tab-group> -->
+    <div class="content-wrapper">
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          Configuration
+        </div>
+        <div>
+          @if (agentConfig) {
+            <div class="config-form">
+              <div class="form-row">
+                <mat-form-field class="agent-name-field">
+                  <mat-label>Agent Name</mat-label>
+                  <input matInput [(ngModel)]="agentConfig.name"/>
+                </mat-form-field>
+
+                <mat-form-field class="agent-type-field">
+                  <mat-label>Agent Type</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.agent_class">
+                    @for (type of agentTypes; track type) {
+                    <mat-option [value]="type">{{type}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              @if (agentConfig.agent_class === 'LlmAgent') {
+                <mat-form-field>
+                  <mat-label>Model</mat-label>
+                  <mat-select [(ngModel)]="agentConfig.model">
+                    @for (model of models; track model) {
+                    <mat-option [value]="model">{{model}}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              }
+
+              <mat-form-field>
+                <mat-label>Instructions</mat-label>
+                <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
+              </mat-form-field>
+
+              @if (agentConfig.isAgentTool) {
+                <mat-checkbox [(ngModel)]="agentConfig.skip_summarization">Skip summarization</mat-checkbox>
+              }
+            </div>
+          } 
+        </div>
+      </div>
+
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          <div>
+            Tools
+          </div>
+          <div>
+            <mat-icon
+              [matMenuTriggerFor]="toolsMenu"
+              #agentMenuTrigger="matMenuTrigger"
+            >add
+            </mat-icon>
+            <mat-menu #toolsMenu="matMenu">
+                <button
+                  mat-menu-item
+                  (click)="addTool('Function tool')"
+                >
+                  <span>Function tool</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="addTool('Built-in tool')"
+                >
+                  <span>Built-in tool</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="createAgentTool()"
+                >
+                  <span>Agent tool</span>
+                </button>
+              </mat-menu>
+          </div>
+        </div>
+        @if (toolsMap$ | async; as toolsMap) {
+            @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
+              <div class="tools-chips-container">
+                <mat-chip-set aria-label="Tools">
+                  @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
+                    <mat-chip (click)="selectTool(tool)" class="tool-chip">
+                      <mat-icon class="tool-icon" matChipAvatar>{{ getToolIcon(tool) }}</mat-icon>
+                      <span class="tool-chip-name">{{tool.name}}</span>
+                      <button matChipRemove (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()" aria-label="Remove tool">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
+          }
+      </div>
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          <div>
+            Sub Agents
+          </div>
+          <div>
+            <mat-icon>add</mat-icon>
+          </div>
+        </div>
+      </div>
+      <div class="builder-panel-wrapper">
+        <div class="panel-title">
+          <div>
+            Callbacks
+          </div>
+          <div>
+            <mat-icon [matMenuTriggerFor]="callbacksMenu">add</mat-icon>
+            <mat-menu #callbacksMenu="matMenu">
+              <div class="menu-header">Agent Lifecycle</div>
+              <button mat-menu-item (click)="addCallback('Before Agent')">
+                <span>Before Agent</span>
+              </button>
+              <button mat-menu-item (click)="addCallback('After Agent')">
+                <span>After Agent</span>
+              </button>
+              <mat-divider></mat-divider>
+              <div class="menu-header">Model (LLM) Interaction</div>
+              <button mat-menu-item (click)="addCallback('Before Model')">
+                <span>Before Model</span>
+              </button>
+              <button mat-menu-item (click)="addCallback('After Model')">
+                <span>After Model</span>
+              </button>
+              <mat-divider></mat-divider>
+              <div class="menu-header">Tool Execution</div>
+              <button mat-menu-item (click)="addCallback('Before Tool')">
+                <span>Before Tool</span>
+              </button>
+              <button mat-menu-item (click)="addCallback('After Tool')">
+                <span>After Tool</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+        @if (callbacksMap$ | async; as callbacksMap) {
+          @if (agentConfig && callbacksMap.get(agentConfig.name) && callbacksMap.get(agentConfig.name)!.length > 0) {
+            <div class="tools-chips-container">
+              <mat-chip-set aria-label="Callbacks">
+                @for (callback of callbacksMap.get(agentConfig.name)!; track callback) {
+                  <mat-chip class="tool-chip">
+                    <span class="tool-chip-name">{{callback.name}} ({{callback.type}})</span>
+                    <button matChipRemove (click)="deleteCallback(agentConfig.name, callback); $event.stopPropagation()" aria-label="Remove callback">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+        }
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-raised-button color="secondary" class="save-button" (click)="saveChanges()">
+        Save
+      </button>
+      <button mat-button class="cancel-button" (click)="cancelChanges()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

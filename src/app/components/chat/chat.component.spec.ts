@@ -83,6 +83,9 @@ class MockEvalTabComponent {
   }
 }
 
+const HEADER_TOGGLE_BUTTON_SELECTOR =
+    By.css('.drawer-header .material-symbols-outlined');
+
 const SESSION_1_ID = 'session-1';
 const SESSION_2_ID = 'session-2';
 const TEST_APP_1_NAME = 'test-app';
@@ -94,9 +97,6 @@ const EVENT_1_ID = 'event1';
 const OK_BUTTON_TEXT = 'OK';
 const APP_QUERY_PARAM = 'app';
 const SESSION_QUERY_PARAM = 'session';
-const SSE_ERROR_RESPONSE = '{"error": "SSE error"}';
-const CALL_FUNCTION_USER_INPUT = 'call a function';
-const FUNC1_NAME = 'func1';
 const STATE_KEY = 'key';
 const STATE_VALUE = 'value';
 const TEST_MESSAGE = 'test message';
@@ -219,7 +219,6 @@ describe('ChatComponent', () => {
             {provide: SAFE_VALUES_SERVICE, useValue: mockSafeValuesService},
             {provide: LOCAL_FILE_SERVICE, useValue: mockLocalFileService},
             {provide: MatDialog, useValue: mockDialog},
-            {provide: MatSnackBar, useValue: mockSnackBar},
             {provide: Router, useValue: mockRouter},
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: Location, useValue: mockLocation},
@@ -231,6 +230,7 @@ describe('ChatComponent', () => {
     fixture = TestBed.createComponent(ChatComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   describe('Component Initialization', () => {
@@ -498,6 +498,7 @@ describe('ChatComponent', () => {
           expect(component.showSidePanel).toBe(false);
         });
       });
+
       describe('when panel is closed', () => {
         beforeEach(() => {
           component.showSidePanel = false;

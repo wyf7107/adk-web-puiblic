@@ -418,20 +418,35 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return { shellNode, groupNode, groupEdge };
   }
 
-  /**
-   * Creates an edge for a sub-agent inside a workflow group.
-   * - Loop/Parallel: Connects workflow shell node to the sub-agent
-   * - Not in a group: Returns null 
-   */
   private createWorkflowChildEdge(
     childNode: HtmlTemplateDynamicNode,
     parentGroupId: string | undefined
+  ): Edge | null {
+    return this.createWorkflowChildEdgeFromArrays(
+      childNode,
+      parentGroupId,
+      this.nodes(),
+      this.groupNodes()
+    );
+  }
+
+  /**
+   * Creates an edge for a sub-agent inside a workflow group.
+   * - Loop/Parallel: Connects workflow shell node to the sub-agent
+   * - Sequential: Connects to the previous sibling in the chain
+   *
+   */
+  private createWorkflowChildEdgeFromArrays(
+    childNode: HtmlTemplateDynamicNode,
+    parentGroupId: string | undefined,
+    shellNodes: HtmlTemplateDynamicNode[],
+    groupNodes: TemplateDynamicGroupNode<any>[]
   ): Edge | null {
     if (!parentGroupId) {
       return null;
     }
 
-    const parentGroupNode = this.groupNodes().find(g => g.id === parentGroupId);
+    const parentGroupNode = groupNodes.find(g => g.id === parentGroupId);
     if (!parentGroupNode || !parentGroupNode.data) {
       return null;
     }
@@ -439,7 +454,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const workflowAgentClass = parentGroupNode.data().agent_class;
 
     if (workflowAgentClass === "LoopAgent" || workflowAgentClass === "ParallelAgent") {
-      const workflowShellNode = this.nodes().find(n =>
+      const workflowShellNode = shellNodes.find(n =>
         n.data && n.data().name === parentGroupNode.data!().name
       );
 
@@ -450,6 +465,33 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           target: childNode.id,
         };
       }
+    }
+
+    if (workflowAgentClass === "SequentialAgent") {
+      // Get all siblings in the group
+      const siblings = shellNodes.filter(n =>
+        n.parentId && n.parentId() === parentGroupId
+      );
+
+      if (siblings.length === 0) {
+        return null;
+      }
+
+      siblings.sort((a, b) => a.point().x - b.point().x);
+
+      const currentIndex = siblings.findIndex(n => n.id === childNode.id);
+
+      if (currentIndex <= 0) {
+        return null;
+      }
+
+      const previousSibling = siblings[currentIndex - 1];
+
+      return {
+        id: this.generateEdgeId(),
+        source: previousSibling.id,
+        target: childNode.id,
+      };
     }
 
     return null;
@@ -1509,24 +1551,16 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
       if (parentShellId) {
         if (parentGroupId) {
-          const parentGroupNode = groupNodes.find(g => g.id === parentGroupId);
+          // Use the refactored helper method for workflow child edges
+          const workflowEdge = this.createWorkflowChildEdgeFromArrays(
+            shellNode,
+            parentGroupId,
+            shellNodes,
+            groupNodes
+          );
 
-          if (parentGroupNode && parentGroupNode.data) {
-            const workflowAgentClass = parentGroupNode.data().agent_class;
-
-            if (workflowAgentClass === "LoopAgent" || workflowAgentClass === "ParallelAgent") {
-              const workflowShellNode = shellNodes.find(n =>
-                n.data && n.data().name === parentGroupNode.data!().name
-              );
-
-              if (workflowShellNode) {
-                edges.push({
-                  id: this.generateEdgeId(),
-                  source: workflowShellNode.id,
-                  target: shellNode.id,
-                });
-              }
-            }
+          if (workflowEdge) {
+            edges.push(workflowEdge);
           }
         } else {
           const edge: Edge = {

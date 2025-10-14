@@ -15,19 +15,14 @@
 -->
 
 <mat-drawer-container class="drawer-container" autosize>
-  @if (!showSidePanel && appName === "") {
-  <span class="material-symbols-outlined" style="
-        position: absolute;
-        width: 24px;
-        height: 24px;
-        color: #c4c7c5;
-        cursor: pointer;
-        margin-left: 20px;
-        margin-top: 20px;
-        z-index: 9999;
-      " matTooltip="Open panel" (click)="toggleSidePanel()">left_panel_open</span>
-  }
-  <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
+  <mat-drawer
+    class="side-drawer"
+    #sideDrawer
+    [mode]="isBuilderMode() ? 'over' : 'side'"
+    [position]="isBuilderMode() ? 'end' : 'start'"
+    hasBackdrop="false"
+    appResizableDrawer
+  >
     @if (!isBuilderMode()) {
       <app-side-panel
         [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
@@ -48,7 +43,7 @@
         [rawSvgString]="rawSvgString"
         [llmRequest]="llmRequest"
         [llmResponse]="llmResponse"
-        (closePanel)="toggleSidePanel()"
+        (closePanel)="closeSidePanel()"
         (tabChange)="handleTabChange($event)"
         (eventSelected)="selectEvent($event)"
         (sessionSelected)="updateWithSelectedSession($event)"
@@ -69,7 +64,7 @@
       <app-builder-tabs 
         [appNameInput]="appName" 
         (exitBuilderMode)="exitBuilderMode()"
-        (closePanel)="toggleSidePanel()"
+        (closePanel)="closeSidePanel()"
       ></app-builder-tabs>
       <div class="resize-handler"></div>
     }
@@ -77,19 +72,36 @@
 
   <!-- Builder Mode Layout - Canvas for Diagrams -->
   @if (isBuilderMode()) {
-  <div class="builder-mode-container">
-    <div class="builder-exit-button">
-      <button mat-icon-button (click)="saveAgentBuilder()" class="builder-mode-action-button" matTooltip="Accept">
-        <mat-icon>check</mat-icon>
-      </button>
-      <button mat-icon-button (click)="exitBuilderMode()" class="builder-mode-action-button" matTooltip="Exit Builder Mode">
-        <mat-icon>close</mat-icon>
-      </button>
-      <button mat-icon-button (click)="toggleBuilderAssistant()" class="builder-mode-action-button" matTooltip="Builder Assistant" [class.active]="showBuilderAssistant">
-        <mat-icon>assistant</mat-icon>
-      </button>
+  <div class="builder-mode-container" [class.assistant-open]="showBuilderAssistant">
+    <div class="builder-action-bar">
+      <div class="builder-action-left">
+        @if (!showBuilderAssistant) {
+          <button mat-stroked-button class="builder-assistant-toggle" (click)="toggleBuilderAssistant()">
+            <mat-icon>assistant</mat-icon>
+            <span>Builder Assistant</span>
+          </button>
+        }
+      </div>
+      <div class="builder-action-center">
+        <button mat-flat-button color="primary" (click)="saveAgentBuilder()">
+          <mat-icon>check</mat-icon>
+          <span>Accept</span>
+        </button>
+        <button mat-stroked-button color="warn" (click)="exitBuilderMode()">
+          <mat-icon>close</mat-icon>
+          <span>Exit Builder Mode</span>
+        </button>
+      </div>
     </div>
-    <app-canvas [showSidePanel]="showSidePanel" [showBuilderAssistant]="showBuilderAssistant" [appNameInput]="appName" (toggleSidePanelRequest)="toggleSidePanel()" (builderAssistantCloseRequest)="toggleBuilderAssistant()"></app-canvas>
+    <app-canvas
+      [showSidePanel]="showSidePanel"
+      [showBuilderAssistant]="showBuilderAssistant"
+      [appNameInput]="appName"
+      (toggleSidePanelRequest)="openSidePanel()"
+      (ensureSidePanelRequest)="openSidePanel()"
+      (requestClosePanel)="closeSidePanel()"
+      (builderAssistantCloseRequest)="toggleBuilderAssistant()"
+    ></app-canvas>
   </div>
   } @else {
   <!-- Test Mode Layout (existing chat interface) -->
@@ -109,7 +121,7 @@
               z-index: 9999;
             "
             matTooltip="Open panel"
-            (click)="toggleSidePanel()"
+            (click)="openSidePanel()"
             >left_panel_open</span
           >
         }

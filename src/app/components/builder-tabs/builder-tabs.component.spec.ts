@@ -373,9 +373,136 @@ describe('BuilderTabsComponent - Callback Support', () => {
       expect(component.editingCallback).toBeNull();
       expect(component.selectedCallback).toBeUndefined();
       expect(component.hierarchyPath.length).toBe(0);
+      expect(component.displayBreadcrumbs.length).toBe(0);
       expect(component.header).toBe('Select an agent to edit');
       expect(callbacksSpy).toHaveBeenCalledWith();
       expect(toolsSpy).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('Breadcrumb Display', () => {
+    function createAgent(name: string, isRoot = false): AgentNode {
+      return {
+        name,
+        isRoot,
+        agent_class: 'LlmAgent',
+        model: '',
+        instruction: '',
+        sub_agents: [],
+        tools: [],
+        callbacks: [],
+      };
+    }
+
+    it('should condense breadcrumbs with ellipsis when path is long', () => {
+      component.hierarchyPath = [
+        createAgent('root', true),
+        createAgent('child1'),
+        createAgent('child2'),
+        createAgent('child3'),
+      ];
+
+      component['updateDisplayBreadcrumbs']();
+
+      expect(component.displayBreadcrumbs.length).toBe(4);
+      expect(component.displayBreadcrumbs[0].label).toBe('root');
+      expect(component.displayBreadcrumbs[1].isEllipsis).toBeTrue();
+      expect(component.displayBreadcrumbs[1].node).toBeUndefined();
+      expect(component.displayBreadcrumbs[2].label).toBe('child2');
+      expect(component.displayBreadcrumbs[3].label).toBe('child3');
+    });
+
+    it('should show full breadcrumbs when path is short', () => {
+      component.hierarchyPath = [
+        createAgent('root', true),
+        createAgent('child1'),
+      ];
+
+      component['updateDisplayBreadcrumbs']();
+
+      expect(component.displayBreadcrumbs.length).toBe(2);
+      expect(component.displayBreadcrumbs[1].label).toBe('child1');
+      expect(component.displayBreadcrumbs.some(crumb => crumb.isEllipsis)).toBeFalse();
+    });
+  });
+
+  describe('Panel Resize', () => {
+    const mouseEvent = (x: number): any => ({
+      clientX: x,
+      preventDefault: () => {},
+      stopPropagation: () => {},
+    });
+
+    it('should increase width when dragging handle to the right', () => {
+      const initialWidth = component.panelWidth;
+      component.startResize(mouseEvent(400));
+      component.onResizeMouseMove(mouseEvent(460));
+      component.stopResize();
+
+      expect(component.panelWidth).toBeGreaterThan(initialWidth);
+    });
+
+    it('should clamp width within allowed bounds and reset on double-click', () => {
+      component.startResize(mouseEvent(400));
+      component.onResizeMouseMove(mouseEvent(0));
+      component.stopResize();
+
+      expect(component.panelWidth).toBeGreaterThanOrEqual(320);
+
+      component.panelWidth = 520;
+      component.resetPanelWidth();
+      expect(component.panelWidth).toBe(component.defaultPanelWidth);
+    });
+  });
+
+  describe('Instructions Overlay', () => {
+    it('should open overlay and populate draft from agent config', () => {
+      const agentBuilderService = TestBed.inject(AgentBuilderService);
+      const agent: AgentNode = {
+        name: 'InstructionAgent',
+        isRoot: false,
+        agent_class: 'LlmAgent',
+        model: 'gemini-2.5-flash',
+        instruction: 'Original instructions',
+        sub_agents: [],
+        tools: [],
+        callbacks: [],
+      };
+
+      agentBuilderService.addNode(agent);
+      agentBuilderService.setSelectedNode(agent);
+      fixture.detectChanges();
+
+      component.openInstructionsOverlay();
+
+      expect(component.instructionsOverlayOpen).toBeTrue();
+      expect(component.instructionsDraft).toBe('Original instructions');
+
+      component.instructionsDraft = 'Updated instructions';
+      component.closeInstructionsOverlay(true);
+
+      expect(component.instructionsOverlayOpen).toBeFalse();
+      expect(component.agentConfig?.instruction).toBe('Updated instructions');
+    });
+
+    it('should close overlay without saving when cancelled', () => {
+      component.agentConfig = {
+        name: 'TestAgent',
+        isRoot: false,
+        agent_class: 'LlmAgent',
+        model: 'gemini-2.5-flash',
+        instruction: 'Keep me',
+        sub_agents: [],
+        tools: [],
+        callbacks: [],
+      };
+
+      component.openInstructionsOverlay();
+      component.instructionsDraft = 'Discarded';
+      component.closeInstructionsOverlay(false);
+
+      expect(component.instructionsOverlayOpen).toBeFalse();
+      expect(component.agentConfig?.instruction).toBe('Keep me');
     });
   });
 

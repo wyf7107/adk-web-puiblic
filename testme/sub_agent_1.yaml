@@ -1,0 +1,7 @@
+name: sub_agent_1
+model: gemini-2.5-flash
+agent_class: LlmAgent
+description: ""
+instruction: You are a sub-agent that performs specialized tasks.
+sub_agents: []
+tools: []

@@ -178,7 +178,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   functionCallEventId = '';
   redirectUri = URLUtil.getBaseUrlWithoutPath();
   showSidePanel = true;
-  showBuilderAssistant = true;
+  showBuilderAssistant = false;
   useSse = false;
   currentSessionState: SessionState|undefined = {};
   root_agent = ROOT_AGENT;
@@ -1122,13 +1122,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  toggleSidePanel() {
-    if (this.showSidePanel) {
-      this.sideDrawer()?.close();
-    } else {
-      this.sideDrawer()?.open();
+  openSidePanel() {
+    this.sideDrawer()?.open();
+    this.showSidePanel = true;
+  }
+
+  closeSidePanel() {
+    if (!this.showSidePanel) {
+      return;
     }
-    this.showSidePanel = !this.showSidePanel;
+    this.sideDrawer()?.close();
+    this.showSidePanel = false;
+    this.canvasComponent()?.clearSelectionFromHost();
   }
 
   protected handleTabChange(event: any) {

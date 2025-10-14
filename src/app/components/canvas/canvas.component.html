@@ -15,7 +15,12 @@
 -->
 
 <div class="canvas-container">
-  <div class="canvas-workspace" [class.has-banner]="currentAgentTool()" (click)="onCanvasClick($event)">    <!-- Agent Tool Banner -->
+  <div
+    class="canvas-workspace"
+    #canvasWorkspace
+    [class.has-banner]="currentAgentTool()"
+    (click)="onCanvasClick($event)"
+  >    <!-- Agent Tool Banner -->
     @if (currentAgentTool()) {
       <div class="agent-tool-banner">
         <div class="banner-content">
@@ -31,14 +36,6 @@
           </div>
         </div>
       </div>
-    }
-    @if (!showSidePanel) {
-      <span
-        class="material-symbols-outlined open-panel-btn"
-        matTooltip="Open panel"
-        (click)="toggleSidePanelRequest.emit()"
-        >left_panel_open</span
-      >
     }
     @if (vflowNodes().length > 0) {
     <vflow 

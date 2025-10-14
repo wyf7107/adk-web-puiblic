@@ -46,7 +46,7 @@ export class ResizableDrawerDirective implements AfterViewInit {
           this.resizeHandle, 'mousedown',
           (event) => this.onResizeHandleMouseDown(event));
     }
-    document.documentElement.style.setProperty('--side-drawer-width', '570px');
+    document.documentElement.style.setProperty("--side-drawer-width", "396px");
 
     this.renderer.setStyle(
         this.el.nativeElement, 'width', 'var(--side-drawer-width)');
@@ -71,18 +71,21 @@ export class ResizableDrawerDirective implements AfterViewInit {
     const newWidth = this.resizingEvent.startingWidth + cursorDeltaX;
     this.sideDrawerWidth = newWidth;
     this.renderer.addClass(document.body, 'resizing');
+    this.notifyWidthChange();
   }
 
   @HostListener('document:mouseup')
   onMouseUp() {
     this.resizingEvent.isResizing = false;
     this.renderer.removeClass(document.body, 'resizing');
+    this.notifyWidthChange();
   }
 
   @HostListener('window:resize')
   onResize() {
     this.sideDrawerMaxWidth = window.innerWidth / 2;
     this.sideDrawerWidth = this.sideDrawerWidth;
+    this.notifyWidthChange();
   }
 
   private set sideDrawerWidth(width: number) {
@@ -98,5 +101,12 @@ export class ResizableDrawerDirective implements AfterViewInit {
     const parsedWidth = parseFloat(widthString);
 
     return isNaN(parsedWidth) ? 500 : parsedWidth;
+  }
+
+  private notifyWidthChange() {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.dispatchEvent(new CustomEvent('side-drawer-width-change'));
   }
 }

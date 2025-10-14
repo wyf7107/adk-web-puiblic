@@ -62,6 +62,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild("svgCanvas", { static: false })
   svgCanvasRef!: ElementRef<SVGElement>;
+  @ViewChild("canvasWorkspace", { static: false })
+  canvasWorkspaceRef?: ElementRef<HTMLDivElement>;
   private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   private cdr = inject(ChangeDetectorRef);
 
@@ -69,6 +71,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   @Input() showBuilderAssistant: boolean = false;
   @Input() appNameInput: string = "";
   @Output() toggleSidePanelRequest = new EventEmitter<void>();
+  @Output() ensureSidePanelRequest = new EventEmitter<void>();
+  @Output() requestClosePanel = new EventEmitter<void>();
   @Output() builderAssistantCloseRequest = new EventEmitter<void>();
 
   private ctx!: CanvasRenderingContext2D;
@@ -107,6 +111,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   ]);
 
   public selectedAgents: HtmlTemplateDynamicNode[] = [];
+  private selectedNodeId: string | null = null;
 
   public selectedTool: any;
   public selectedCallback: any;
@@ -130,6 +135,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     this.agentBuilderService.getSelectedTool().subscribe((tool) => {
       this.selectedTool = tool;
     });
+
   }
 
   ngOnInit() {
@@ -196,12 +202,21 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         this.selectedAgents = this.nodes().filter(
           (node) => node.data && node.data().name === selectedAgentNode?.name
         );
+        this.selectedNodeId = this.selectedAgents.length
+          ? this.selectedAgents[0].id
+          : null;
       });
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes["appNameInput"] && changes["appNameInput"].currentValue) {
       this.appName = changes["appNameInput"].currentValue;
+    }
+
+    if (changes["showSidePanel"]) {
+      if (changes["showSidePanel"].currentValue === false) {
+        this.clearCanvasSelection();
+      }
     }
   }
 
@@ -228,24 +243,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   onCanvasClick(event: MouseEvent) {
     const target = event.target as HTMLElement | null;
-    if (!target) {
-      return;
-    }
-
-    const interactiveSelectors = [
-      ".custom-node",
-      ".action-button-bar",
-      ".add-subagent-btn",
-      ".open-panel-btn",
-      ".agent-tool-banner",
-      ".mat-mdc-menu-panel",
-    ];
-
-    if (target.closest(interactiveSelectors.join(","))) {
-      return;
-    }
-
-    this.clearCanvasSelection();
+    this.handleWorkspaceBackgroundInteraction(target);
   }
 
   private shouldIgnoreNodeInteraction(target: HTMLElement | null): boolean {
@@ -254,6 +252,47 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     }
 
     return !!target.closest("mat-chip, .add-subagent-btn, .mat-mdc-menu-panel");
+  }
+
+  private isWithinWorkspace(target: HTMLElement | null): boolean {
+    if (!target) {
+      return false;
+    }
+    const workspaceEl = this.canvasWorkspaceRef?.nativeElement;
+    return workspaceEl ? workspaceEl.contains(target) : false;
+  }
+
+  private isWorkspaceInteractiveTarget(target: HTMLElement | null): boolean {
+    if (!target) {
+      return false;
+    }
+    const interactiveSelectors = [
+      '.custom-node',
+      '.action-button-bar',
+      '.add-subagent-btn',
+      '.open-panel-btn',
+      '.agent-tool-banner',
+      '.mat-mdc-menu-panel',
+      '.mat-mdc-dialog-container',
+      '.mat-mdc-tooltip-panel',
+      '.cdk-overlay-container',
+      'mat-chip',
+      '.mat-chip',
+      '.mat-mdc-chip',
+    ];
+    return interactiveSelectors.some(selector => !!target.closest(selector));
+  }
+
+  private handleWorkspaceBackgroundInteraction(target: HTMLElement | null) {
+    if (!this.isWithinWorkspace(target)) {
+      return;
+    }
+
+    if (this.isWorkspaceInteractiveTarget(target)) {
+      return;
+    }
+
+    this.clearCanvasSelection({ closePanel: true });
   }
 
   private selectAgentNode(
@@ -271,6 +310,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     this.agentBuilderService.setSelectedTool(undefined);
     this.agentBuilderService.setSelectedNode(agentNodeData);
+    this.selectedAgents = [node];
+    this.selectedNodeId = node.id;
+    this.ensureSidePanelRequest.emit();
     this.nodePositions.set(agentNodeData.name, { ...node.point() });
 
     if (options.openConfig) {
@@ -289,22 +331,19 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     this.onAgentTypeSelected(agentClass, parentAgentName);
   }
 
-  private clearCanvasSelection() {
-    if (
-      !this.selectedAgents.length &&
-      !this.selectedTool &&
-      !this.selectedCallback
-    ) {
-      return;
-    }
-
+  private clearCanvasSelection(options: { closePanel?: boolean } = {}) {
+    const { closePanel = false } = options;
     this.selectedAgents = [];
+    this.selectedNodeId = null;
     this.selectedTool = undefined;
     this.selectedCallback = undefined;
     this.agentBuilderService.setSelectedNode(undefined);
     this.agentBuilderService.setSelectedTool(undefined);
     this.agentBuilderService.setSelectedCallback(undefined);
     this.cdr.markForCheck();
+    if (closePanel) {
+      this.requestClosePanel.emit();
+    }
   }
 
   onAddResource(nodeId: string) {
@@ -529,6 +568,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
       this.agentBuilderService.setSelectedNode(agentNodeData);
       this.selectedAgents = [bundle.shellNode];
+      this.selectedNodeId = bundle.shellNode.id;
     } else {
       const baseShellPoint = parentIsWorkflow
         ? { x: 40 + subAgentIndex * 200, y: 40 }
@@ -540,6 +580,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
       this.nodes.set([...this.nodes(), shellNode]);
       this.selectedAgents = [shellNode];
+      this.selectedNodeId = shellNode.id;
     }
 
     this.agentBuilderService.addNode(agentNodeData);
@@ -871,6 +912,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     }
     this.agentBuilderService.setSelectedTool(tool);
+    this.ensureSidePanelRequest.emit();
   }
 
   editTool(tool: any, agentNode: AgentNode) {
@@ -924,6 +966,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     }
     this.agentBuilderService.setSelectedCallback(callback);
+    this.ensureSidePanelRequest.emit();
   }
   openToolsTab(node: HtmlTemplateDynamicNode) {
     if (node.data) {
@@ -933,6 +976,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
     }
     this.agentBuilderService.requestSideTabChange("tools");
+    this.ensureSidePanelRequest.emit();
   }
 
   saveAgent(appName: string) {
@@ -1264,7 +1308,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   isNodeSelected(node: HtmlTemplateDynamicNode): boolean {
-    return this.selectedAgents.includes(node);
+    return this.selectedNodeId === node.id;
   }
 
   async loadSubAgents(appName: string, rootAgent: AgentNode) {
@@ -1662,6 +1706,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
       this.nodePositions.set(data.name, { ...node.point() });
     }
+  }
+
+  public clearSelectionFromHost() {
+    this.clearCanvasSelection();
   }
 
   getToolIcon(tool: ToolNode): string {

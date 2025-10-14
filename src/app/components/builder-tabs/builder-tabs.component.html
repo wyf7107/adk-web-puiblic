@@ -13,43 +13,42 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<div style="margin-top: 20px; margin-left: 20px; display: flex">
-  <div style="width: 100%">
-    <div class="drawer-header">
-      <div class="drawer-logo">
-        <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
-          Agent Development Kit
+<div class="builder-panel-resizer">
+  <div class="builder-panel" [style.width.px]="panelWidth">
+    <div class="builder-tabs-container">
+      <div class="builder-tab-content">
+    <div class="panel-header">
+      <button mat-icon-button type="button" (click)="closePanel.emit()" class="panel-back-button" matTooltip="Collapse panel">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <div class="panel-title-text">
+        <div class="panel-title-text-content">
+          <mat-icon>smart_toy</mat-icon>
+          <span class="panel-title-main">{{appNameInput || agentConfig?.name || 'Select an agent'}}</span>
+        </div>
       </div>
-      <span
-        class="material-symbols-outlined"
-        style="color: #c4c7c5; cursor: pointer; margin-right: 15px"
-        matTooltip="Collapse panel"
-        (click)="closePanel.emit()"
-        >left_panel_close</span
-      >
     </div>
-  </div>
-</div>
 
-<div class="builder-tabs-container">
-  <div class="builder-tab-content">
-    @if (hierarchyPath.length > 0) {
-      <div class="agent-breadcrumb-container">
-        @for (agent of hierarchyPath; track agent.name; let i = $index) {
-          <div 
-            class="breadcrumb-chip"
-            [class.current-agent]="currentSelectedAgent?.name === agent.name"
-            (click)="selectAgentFromBreadcrumb(agent)">
-            @if (i === 0 && isInAgentToolContext()) {
-              AgentTool: {{agent.name}}
-            } @else {
-              {{agent.name}}
+    @if (displayBreadcrumbs.length > 0) {
+      <div class="panel-breadcrumb">
+        <div class="agent-breadcrumb-container">
+          @for (crumb of displayBreadcrumbs; track crumb.label; let i = $index) {
+            <div
+              class="breadcrumb-chip"
+              [class.current-agent]="crumb.node && currentSelectedAgent?.name === crumb.node.name"
+              [class.ellipsis]="crumb.isEllipsis"
+              (click)="crumb.node && selectAgentFromBreadcrumb(crumb.node)">
+              @if (crumb.node && i === 0 && isInAgentToolContext()) {
+                AgentTool: {{ crumb.label }}
+              } @else {
+                {{ crumb.label }}
+              }
+            </div>
+            @if (i < displayBreadcrumbs.length - 1) {
+              <mat-icon class="breadcrumb-arrow">chevron_right</mat-icon>
             }
-          </div>
-          @if (i < hierarchyPath.length - 1) {
-            <mat-icon class="breadcrumb-arrow">chevron_right</mat-icon>
           }
-        }
+        </div>
       </div>
     }
 
@@ -94,7 +93,7 @@
 
               <mat-form-field>
                 <mat-label>Instructions</mat-label>
-                <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
+                <textarea matInput rows="3" [(ngModel)]="agentConfig.instruction"></textarea>
               </mat-form-field>
 
               @if (agentConfig.isAgentTool) {
@@ -307,9 +306,7 @@
     </mat-tab-group> -->
     <div class="content-wrapper">
     <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
-        <div class="panel-title">
-          Configuration
-        </div>
+        <div class="panel-section-header">Configuration</div>
         <div>
           @if (agentConfig) {
             <div class="config-form">
@@ -340,10 +337,60 @@
                 </mat-form-field>
               }
 
-              <mat-form-field>
-                <mat-label>Instructions</mat-label>
-                <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
-              </mat-form-field>
+              <div class="instructions-container">
+                <div
+                  cdkOverlayOrigin
+                  #instructionsOrigin="cdkOverlayOrigin"
+                  class="instructions-preview"
+                  tabindex="0"
+                  role="button"
+                  aria-haspopup="dialog"
+                  [attr.aria-expanded]="instructionsOverlayOpen"
+                  (click)="openInstructionsOverlay($event)"
+                  (keydown.enter)="openInstructionsOverlay($event)"
+                  (keydown.space)="openInstructionsOverlay($event)"
+                  (focus)="openInstructionsOverlay($event)"
+                >
+                  <div class="preview-label">Instructions</div>
+                  <div class="preview-content" [class.empty]="!(agentConfig.instruction.trim())">
+                    {{ agentConfig.instruction.trim() ? agentConfig.instruction : 'Add instructions' }}
+                  </div>
+                  <div class="preview-icon">
+                    <mat-icon>open_in_full</mat-icon>
+                  </div>
+                </div>
+
+                <ng-template
+                  cdkConnectedOverlay
+                  [cdkConnectedOverlayOrigin]="instructionsOrigin"
+                  [cdkConnectedOverlayOpen]="instructionsOverlayOpen"
+                  [cdkConnectedOverlayHasBackdrop]="true"
+                  [cdkConnectedOverlayBackdropClass]="'instructions-overlay-backdrop'"
+                  (backdropClick)="closeInstructionsOverlay(false)"
+                  (detach)="closeInstructionsOverlay(false)"
+                >
+                  <div class="instructions-overlay" (click)="$event.stopPropagation()">
+                    <div class="overlay-header">
+                      <span>Instructions</span>
+                      <button mat-icon-button type="button" (click)="closeInstructionsOverlay(false)">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </div>
+                    <mat-form-field appearance="fill" class="instructions-textarea">
+                      <textarea
+                        matInput
+                        rows="8"
+                        [(ngModel)]="instructionsDraft"
+                        (keydown.escape)="closeInstructionsOverlay(false)"
+                      ></textarea>
+                    </mat-form-field>
+                    <div class="overlay-actions">
+                      <button mat-button type="button" (click)="closeInstructionsOverlay(false)">Cancel</button>
+                      <button mat-raised-button color="primary" type="button" (click)="closeInstructionsOverlay(true)">Save</button>
+                    </div>
+                  </div>
+                </ng-template>
+              </div>
 
               @if (agentConfig.isAgentTool) {
                 <mat-checkbox [(ngModel)]="agentConfig.skip_summarization">Skip summarization</mat-checkbox>
@@ -354,10 +401,8 @@
       </div>
 
       <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
-        <div class="panel-title">
-          <div>
-            Tools
-          </div>
+        <div class="panel-section-header">
+          <div>Tools</div>
           <div>
             <button
               mat-icon-button
@@ -411,10 +456,8 @@
           }
       </div>
       <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
-        <div class="panel-title">
-          <div>
-            Sub Agents
-          </div>
+        <div class="panel-section-header">
+          <div>Sub Agents</div>
           <div>
             <button
               mat-icon-button
@@ -430,10 +473,8 @@
         </div>
       </div>
       <div class="builder-panel-wrapper" [class.panel-disabled]="!agentConfig">
-        <div class="panel-title">
-          <div>
-            Callbacks
-          </div>
+        <div class="panel-section-header">
+          <div>Callbacks</div>
           <div>
             <button
               mat-icon-button
@@ -501,14 +542,10 @@
       </div>
     </div>
     
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <button mat-raised-button color="secondary" class="save-button" (click)="saveChanges()">
-        Save
-      </button>
-      <button mat-button class="cancel-button" (click)="cancelChanges()">
-        Cancel
-      </button>
-    </div>
+  </div>
+</div>
+</div>
+  <div class="panel-resize-handle" (mousedown)="startResize($event)" (dblclick)="resetPanelWidth()" [class.active]="isResizing">
+    <span></span>
   </div>
 </div>

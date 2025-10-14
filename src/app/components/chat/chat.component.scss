@@ -274,7 +274,10 @@
   background-color: var(--chat-side-drawer-background-color);
   color: var(--chat-side-drawer-color);
   border-radius: 0;
+  width: var(--side-drawer-width);
+  z-index: 1200;
 }
+
 
 .file-preview {
   display: flex;
@@ -511,6 +514,15 @@ button {
   border-right: 1px solid var(--chat-mat-drawer-border-right-color) !important;
 }
 
+::ng-deep .mat-drawer-backdrop,
+::ng-deep .mat-drawer-container.mat-drawer-container-has-open .mat-drawer-backdrop {
+  display: none !important;
+}
+
+::ng-deep .mat-drawer-container.mat-drawer-container-has-open .mat-drawer-content {
+  filter: none !important;
+}
+
 // Builder mode container and exit button
 .builder-mode-container {
   position: relative;
@@ -519,34 +531,49 @@ button {
   display: flex;
   flex-direction: column;
   background-color: #131314;
+  transition: padding-left 0.3s ease;
+
+  &.assistant-open {
+    padding-left: 320px;
+  }
 }
 
-.builder-exit-button {
+.builder-action-bar {
   position: absolute;
   top: 20px;
-  right: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1000;
-}
+  pointer-events: none;
 
-.builder-mode-action-button {
-  background-color: rgba(0, 0, 0, 0.7);
-  color: #c4c7c5;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  margin-right: 0px !important;
-
-  &:hover {
-    background-color: rgba(234, 67, 53, 0.8);
-    color: white;
+  .builder-action-left,
+  .builder-action-center {
+    pointer-events: auto;
   }
 
-  &.active {
-    background-color: rgba(138, 180, 248, 0.8);
-    color: white;
+  .builder-action-left {
+    position: absolute;
+    left: 20px;
+    display: flex;
   }
 
-  mat-icon {
-    font-size: 20px;
+  .builder-action-center {
+    display: flex;
+    gap: 12px;
+  }
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .builder-assistant-toggle {
+    background: rgba(138, 180, 248, 0.1);
+    border-color: rgba(138, 180, 248, 0.4);
   }
 }
 

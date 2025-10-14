@@ -29,7 +29,7 @@
     class="adk-primary-button"
     cdkFocusInitial
     (click)="createNewEvalSet()"
-    [disabled]="!newSetId?.trim()">
+    [disabled]="!(newSetId || '').trim()">
     Create
   </button>
 </mat-dialog-actions>

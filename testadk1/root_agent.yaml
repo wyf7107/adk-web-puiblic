@@ -1,0 +1,15 @@
+name: testadk1
+model: gemini-2.5-flash
+agent_class: LlmAgent
+description: ""
+instruction: You are the root agent that coordinates other agents.
+sub_agents: []
+tools:
+  - name: tests
+  - name: AgentTool
+    args:
+      agent:
+        config_path: ./test1.yaml
+      skip_summarization: false
+After Model_callbacks:
+  - name: test

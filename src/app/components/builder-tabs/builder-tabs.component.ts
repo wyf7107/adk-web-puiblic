@@ -16,7 +16,8 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, Output, signal, ViewChild } from '@angular/core';
+import { OverlayModule, CdkConnectedOverlay, CdkOverlayOrigin } from '@angular/cdk/overlay';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input, Output, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
@@ -77,7 +78,10 @@ import { MatDividerModule } from '@angular/material/divider';
     MatMenuTrigger,
     MatMenuItem,
     MatChipsModule,
-    MatDividerModule
+    MatDividerModule,
+    OverlayModule,
+    CdkConnectedOverlay,
+    CdkOverlayOrigin
   ],
   templateUrl: './builder-tabs.component.html',
   styleUrl: './builder-tabs.component.scss',
@@ -101,19 +105,11 @@ export class BuilderTabsComponent {
   public selectedTabIndex = 0;
 
   // Agent configuration properties
-  agentConfig: AgentNode | undefined = {
-    isRoot: false,
-    name: '',
-    agent_class: '',
-    model: '',
-    instruction: '',
-    sub_agents: [],
-    tools: [],
-    callbacks: []
-  };
+  agentConfig: AgentNode | undefined = undefined;
 
   // Breadcrumb tracking
   hierarchyPath: AgentNode[] = [];
+  displayBreadcrumbs: { label: string; node?: AgentNode; isEllipsis?: boolean }[] = [];
   currentSelectedAgent: AgentNode | undefined = undefined;
 
   // Agent configuration options
@@ -188,6 +184,16 @@ export class BuilderTabsComponent {
   protected header = 'Select an agent or tool to edit'
   public toolsMap$: Observable<Map<string, ToolNode[]>>;
   public callbacksMap$: Observable<Map<string, CallbackNode[]>>;
+  public instructionsOverlayOpen = false;
+  public instructionsDraft = '';
+  public panelWidth = 398;
+  public readonly defaultPanelWidth = 398;
+
+  private readonly minPanelWidth = 320;
+  private readonly maxPanelWidth = 640;
+  public isResizing = false;
+  private resizeStartX = 0;
+  private resizeStartWidth = this.panelWidth;
 
   private getJsonStringForEditor(args: any): string {
     if (!args) {
@@ -210,6 +216,8 @@ export class BuilderTabsComponent {
         this.editingCallback = null;
         this.header = 'Agent configuration';
         this.updateBreadcrumb(node);
+        this.instructionsOverlayOpen = false;
+        this.instructionsDraft = '';
         this.agentBuilderService.setAgentTools(
           node.name,
           node.tools ?? [],
@@ -220,6 +228,7 @@ export class BuilderTabsComponent {
         );
       } else {
         this.clearBuilderState();
+        this.closePanel.emit();
       }
 
       this.cdr.markForCheck();
@@ -332,6 +341,7 @@ export class BuilderTabsComponent {
 
   private updateBreadcrumb(agent: AgentNode) {
     this.hierarchyPath = this.buildHierarchyPath(agent);
+    this.updateDisplayBreadcrumbs();
   }
 
   private buildHierarchyPath(targetAgent: AgentNode): AgentNode[] {
@@ -711,36 +721,149 @@ export class BuilderTabsComponent {
   }
 
   onBuiltInToolSelectionChange(tool: ToolNode | undefined | null) {
-    if (tool) {
-      // Force re-initialization of the JSON editor by toggling the signal
-      this.editingToolArgs.set(false);
+    if (!tool) {
+      return;
+    }
 
-      setTimeout(() => {
-        tool.args = {skip_summarization: false};
-        const argNames = this.builtInToolArgs.get(tool.name);
-        if (argNames) {
-          for (const argName of argNames) {
-            if(tool.args) tool.args[argName] = '';
+    // Force re-initialization of the JSON editor by toggling the signal
+    this.editingToolArgs.set(false);
+
+    setTimeout(() => {
+      tool.args = { skip_summarization: false };
+      const argNames = this.builtInToolArgs.get(tool.name);
+      if (argNames) {
+        for (const argName of argNames) {
+          if (tool.args) {
+            tool.args[argName] = '';
           }
         }
-        this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
-        if (tool.args && this.getObjectKeys(tool.args).length > 0) {
-          this.editingToolArgs.set(true);
-        }
+      }
+      this.toolArgsString.set(this.getJsonStringForEditor(tool.args));
+      if (tool.args && this.getObjectKeys(tool.args).length > 0) {
+        this.editingToolArgs.set(true);
+      }
       this.cdr.markForCheck();
     });
   }
 
   private clearBuilderState() {
+    this.agentConfig = undefined;
     this.editingTool = null;
     this.selectedTool = undefined;
     this.editingCallback = null;
     this.selectedCallback = undefined;
+    this.currentSelectedAgent = undefined;
     this.hierarchyPath = [];
+    this.displayBreadcrumbs = [];
     this.header = 'Select an agent to edit';
+    this.instructionsOverlayOpen = false;
+    this.instructionsDraft = '';
     this.agentBuilderService.setAgentCallbacks();
     this.agentBuilderService.setAgentTools();
   }
+
+  openInstructionsOverlay(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+      if (typeof (event as any).preventDefault === 'function') {
+        (event as any).preventDefault();
+      }
+    }
+
+    if (!this.agentConfig || this.instructionsOverlayOpen) {
+      return;
+    }
+
+    this.instructionsDraft = this.agentConfig.instruction || '';
+    this.instructionsOverlayOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  closeInstructionsOverlay(save: boolean) {
+    if (!this.instructionsOverlayOpen) {
+      return;
+    }
+
+    if (save && this.agentConfig) {
+      this.agentConfig.instruction = this.instructionsDraft;
+    }
+
+    this.instructionsOverlayOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  private updateDisplayBreadcrumbs() {
+    const path = this.hierarchyPath ?? [];
+    const maxVisible = 4;
+
+    if (path.length === 0) {
+      this.displayBreadcrumbs = [];
+      return;
+    }
+
+    if (path.length <= maxVisible) {
+      this.displayBreadcrumbs = path.map(node => ({ label: node.name, node }));
+      return;
+    }
+
+    const first = path[0];
+    const lastTwo = path.slice(-2);
+
+    this.displayBreadcrumbs = [
+      { label: first.name, node: first },
+      { label: '…', isEllipsis: true },
+      ...lastTwo.map(node => ({ label: node.name, node })),
+    ];
+  }
+
+  startResize(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isResizing = true;
+    this.resizeStartX = event.clientX;
+    this.resizeStartWidth = this.panelWidth;
+  }
+
+  onResizeMouseMove(event: MouseEvent) {
+    if (!this.isResizing) {
+      return;
+    }
+
+    const delta = event.clientX - this.resizeStartX;
+    const nextWidth = this.resizeStartWidth + delta;
+    const clampedWidth = Math.min(
+      this.maxPanelWidth,
+      Math.max(this.minPanelWidth, nextWidth),
+    );
+
+    if (clampedWidth !== this.panelWidth) {
+      this.panelWidth = clampedWidth;
+      this.cdr.markForCheck();
+    }
+  }
+
+  stopResize() {
+    if (this.isResizing) {
+      this.isResizing = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  resetPanelWidth() {
+    if (this.panelWidth !== this.defaultPanelWidth) {
+      this.panelWidth = this.defaultPanelWidth;
+      this.cdr.markForCheck();
+    }
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  handleWindowMouseMove(event: MouseEvent) {
+    this.onResizeMouseMove(event);
+  }
+
+  @HostListener('window:mouseup')
+  handleWindowMouseUp() {
+    this.stopResize();
   }
 
   selectCallback(callback: CallbackNode) {

@@ -477,32 +477,24 @@ describe('ChatComponent', () => {
           [TEST_APP_1_NAME, TEST_APP_2_NAME]);
     });
 
-    describe('toggleSidePanel', () => {
+    describe('openSidePanel/closeSidePanel', () => {
       beforeEach(() => {
         spyOn(component.sideDrawer()!, 'open');
         spyOn(component.sideDrawer()!, 'close');
       });
 
-      describe('when panel is open', () => {
-        beforeEach(() => {
-          component.showSidePanel = true;
-          component.toggleSidePanel();
-        });
-        it('closes panel', () => {
-          expect(component.sideDrawer()!.close).toHaveBeenCalled();
-          expect(component.showSidePanel).toBe(false);
-        });
+      it('opens panel when openSidePanel called', () => {
+        component.showSidePanel = false;
+        component.openSidePanel();
+        expect(component.sideDrawer()!.open).toHaveBeenCalled();
+        expect(component.showSidePanel).toBe(true);
       });
 
-      describe('when panel is closed', () => {
-        beforeEach(() => {
-          component.showSidePanel = false;
-          component.toggleSidePanel();
-        });
-        it('opens panel', () => {
-          expect(component.sideDrawer()!.open).toHaveBeenCalled();
-          expect(component.showSidePanel).toBe(true);
-        });
+      it('closes panel when closeSidePanel called', () => {
+        component.showSidePanel = true;
+        component.closeSidePanel();
+        expect(component.sideDrawer()!.close).toHaveBeenCalled();
+        expect(component.showSidePanel).toBe(false);
       });
     });
 

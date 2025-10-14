@@ -23,7 +23,7 @@ import {ResizableDrawerDirective} from './resizable-drawer.directive';
 
 // Directive constants
 const SIDE_DRAWER_WIDTH_VAR = '--side-drawer-width';
-const INITIAL_WIDTH = 570;
+const INITIAL_WIDTH = 396;
 const MIN_WIDTH = 310;
 
 // Test constants

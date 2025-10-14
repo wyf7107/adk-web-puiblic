@@ -439,12 +439,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
         this.groupNodes.set([...this.groupNodes(), groupNode]);
 
-        const shellToGroupEdge: Edge = {
-          id: this.generateEdgeId(),
-          source: shellNode.id,
-          target: newGroupId,
-        };
-        this.edges.set([...this.edges(), shellToGroupEdge]);
+        // Only create edge for Sequential workflows, not for Loop or Parallel
+        if (agentClass === "SequentialAgent") {
+          const shellToGroupEdge: Edge = {
+            id: this.generateEdgeId(),
+            source: shellNode.id,
+            target: newGroupId,
+          };
+          this.edges.set([...this.edges(), shellToGroupEdge]);
+        }
       }
     } else if (isClickedNodeWorkflow) {
       const clickedAgentData = clickedNode.data();
@@ -501,12 +504,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
         this.groupNodes.set([...this.groupNodes(), groupNode]);
 
-        const shellToGroupEdge: Edge = {
-          id: this.generateEdgeId(),
-          source: shellNode.id,
-          target: newGroupId,
-        };
-        this.edges.set([...this.edges(), shellToGroupEdge]);
+        // Only create edge for Sequential workflows, not for Loop or Parallel
+        if (agentClass === "SequentialAgent") {
+          const shellToGroupEdge: Edge = {
+            id: this.generateEdgeId(),
+            source: shellNode.id,
+            target: newGroupId,
+          };
+          this.edges.set([...this.edges(), shellToGroupEdge]);
+        }
       }
     } else {
       // Normal LLM agent
@@ -542,12 +548,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
         this.groupNodes.set([...this.groupNodes(), groupNode]);
 
-        const shellToGroupEdge: Edge = {
-          id: this.generateEdgeId(),
-          source: shellNode.id,
-          target: newGroupId,
-        };
-        this.edges.set([...this.edges(), shellToGroupEdge]);
+        // Only create edge for Sequential workflows, not for Loop or Parallel
+        if (agentClass === "SequentialAgent") {
+          const shellToGroupEdge: Edge = {
+            id: this.generateEdgeId(),
+            source: shellNode.id,
+            target: newGroupId,
+          };
+          this.edges.set([...this.edges(), shellToGroupEdge]);
+        }
       }
     }
 
@@ -988,14 +997,36 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   shouldShowHandle(
-    node: HtmlTemplateDynamicNode,
+    node: HtmlTemplateDynamicNode | TemplateDynamicGroupNode<any>,
     position: "source" | "target"
   ): boolean {
     const nodeData = node.data ? node.data() : undefined;
     const nodeName = nodeData?.name;
     const isRoot = nodeName ? this.isRootAgent(nodeName) : false;
 
+    const isGroupNode = node.type === 'template-group';
+
+    if (isGroupNode) {
+      if (position === "target" && nodeData?.agent_class === "SequentialAgent") {
+        return true;
+      }
+      return false;
+    }
+
+  
     if (node.parentId && node.parentId()) {
+      const parentGroupId = node.parentId();
+      const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+      if (parentGroup && parentGroup.data) {
+        const parentAgentClass = parentGroup.data().agent_class;
+
+        if (position === "target" &&
+            (parentAgentClass === "LoopAgent" || parentAgentClass === "ParallelAgent")) {
+          return true;
+        }
+      }
+
       return false;
     }
 
@@ -1372,12 +1403,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
           groupNodes.push(newGroupNode);
 
-          const shellToGroupEdge: Edge = {
-            id: this.generateEdgeId(),
-            source: shellNode.id,
-            target: newGroupId,
-          };
-          edges.push(shellToGroupEdge);
+          // Only create edge for Sequential workflows, not for Loop or Parallel
+          if (agentData.agent_class === "SequentialAgent") {
+            const shellToGroupEdge: Edge = {
+              id: this.generateEdgeId(),
+              source: shellNode.id,
+              target: newGroupId,
+            };
+            edges.push(shellToGroupEdge);
+          }
         }
       } else {
         // Normal positioning
@@ -1425,12 +1459,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
           groupNodes.push(newGroupNode);
 
-          const shellToGroupEdge: Edge = {
-            id: this.generateEdgeId(),
-            source: shellNode.id,
-            target: newGroupId,
-          };
-          edges.push(shellToGroupEdge);
+          // Only create edge for Sequential workflows, not for Loop or Parallel
+          if (agentData.agent_class === "SequentialAgent") {
+            const shellToGroupEdge: Edge = {
+              id: this.generateEdgeId(),
+              source: shellNode.id,
+              target: newGroupId,
+            };
+            edges.push(shellToGroupEdge);
+          }
         }
       }
 
@@ -1598,12 +1635,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
         this.groupNodes.set([groupNode]);
 
-        const shellToGroupEdge: Edge = {
-          id: this.generateEdgeId(),
-          source: shellNode.id,
-          target: groupId,
-        };
-        this.edges.set([shellToGroupEdge]);
+        // Only create edge for Sequential workflows, not for Loop or Parallel
+        if (agent.agent_class === "SequentialAgent") {
+          const shellToGroupEdge: Edge = {
+            id: this.generateEdgeId(),
+            source: shellNode.id,
+            target: groupId,
+          };
+          this.edges.set([shellToGroupEdge]);
+        }
       }
     }
     this.agentBuilderService.setSelectedNode(agent);

@@ -739,6 +739,13 @@
     display: flex;
     justify-content: center;
     pointer-events: none;
+
+    .custom-node.in-group & {
+        left: auto;
+        right: -68px;
+        bottom: 50%;
+        transform: translateY(50%);
+    }
 }
 
 .add-subagent-container .add-subagent-btn {
@@ -850,4 +857,36 @@
 :host ::ng-deep .workflow-group-placeholder__label {
     font-size: 14px;
     font-weight: 500;
+}
+
+:host ::ng-deep .workflow-group-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(0, 187, 234, 0.2);
+    border: 1px solid rgba(0, 187, 234, 0.4);
+    border-radius: 16px;
+    color: #00BBEA;
+    font-family: "Google Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    height: 32px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+
+    .workflow-chip-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+    }
+
+    .workflow-chip-label {
+        color: #e8eaed;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 1;
+    }
 }

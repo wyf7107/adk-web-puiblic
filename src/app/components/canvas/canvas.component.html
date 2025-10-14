@@ -41,14 +41,41 @@
       >
     }
     @if (vflowNodes().length > 0) {
-    <vflow 
+    <vflow
       view="auto"
       [nodes]="vflowNodes()"
       [edges]="edges()"
       [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }"
       [snapGrid]="[12, 12]"
     >
-      <ng-template #nodeTemplate let-ctx nodeHtml>
+      <ng-template groupNode let-ctx>
+        <svg:g>
+          <svg:rect
+            selectable
+            rx="12"
+            ry="12"
+            [attr.width]="ctx.width()"
+            [attr.height]="ctx.height()"
+            [style.stroke]="'rgba(0, 187, 234, 0.5)'"
+            [style.fill]="'rgba(0, 187, 234, 0.05)'"
+            [style.stroke-width]="2"
+          />
+          <svg:foreignObject
+            [attr.width]="200"
+            [attr.height]="32"
+            x="12"
+            y="12"
+          >
+            <div class="workflow-group-chip">
+              <mat-icon class="workflow-chip-icon">{{ getAgentIcon(ctx.node.data?.()?.agent_class) }}</mat-icon>
+              <span class="workflow-chip-label">{{ ctx.node.data?.()?.agent_class }}</span>
+            </div>
+          </svg:foreignObject>
+          <handle type="target" position="top" />
+        </svg:g>
+      </ng-template>
+
+      <ng-template nodeHtml let-ctx>
         @let nodeData = ctx.node.data?.();
         @if (nodeData?.kind === 'workflow-group-placeholder') {
           <div class="workflow-group-placeholder" (click)="$event.stopPropagation()">
@@ -102,17 +129,18 @@
           @let toolsMap = toolsMap$ | async;
           @let tools = getToolsForNode(nodeName, toolsMap);
           @let hasTools = tools.length > 0;
-          <div 
+          <div
             class="custom-node"
             selectable
             [class.custom-node_selected]="isNodeSelected(ctx.node)"
             [class.custom-node_has-tools]="hasTools"
+            [class.in-group]="ctx.node.parentId && ctx.node.parentId()"
             (click)="onCustomTemplateNodeClick(ctx.node, $event)"
             (pointerdown)="onNodePointerDown(ctx.node, $event)"
           >
           <div class="node-title-wrapper">
             <div class="node-title">
-              <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
+              <mat-icon style="margin-right: 5px;">{{ getAgentIcon(nodeData?.agent_class) }}</mat-icon>
               {{nodeName}}
               @if (isRootAgent(nodeName)) {
                 <span class="node-badge">Root</span>
@@ -139,7 +167,7 @@
               </div>
             </div>
           }
-          @if (isNodeSelected(ctx.node)) {
+          @if (isNodeSelected(ctx.node) && !isWorkflowAgent(nodeData?.agent_class)) {
             <div class="add-subagent-container">
               <button
                 matIconButton

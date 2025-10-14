@@ -1428,6 +1428,23 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return this.selectedAgents.includes(node);
   }
 
+  isGroupSelected(groupNode: TemplateDynamicGroupNode<any>): boolean {
+    if (!groupNode.data) {
+      return false;
+    }
+
+    const groupAgentName = groupNode.data().name;
+    const shellNode = this.nodes().find(n =>
+      n.data && n.data().name === groupAgentName
+    );
+
+    if (!shellNode) {
+      return false;
+    }
+
+    return this.isNodeSelected(shellNode);
+  }
+
   async loadSubAgents(appName: string, rootAgent: AgentNode) {
     type BFSItem = {
       node: AgentNode;

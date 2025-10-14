@@ -1781,4 +1781,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         return 'psychology';
     }
   }
+
+  isGroupEmpty(groupId: string): boolean {
+    // Check if the group has any child nodes
+    const hasChildren = this.nodes().some(node =>
+      node.parentId && node.parentId() === groupId
+    );
+    return !hasChildren;
+  }
 }

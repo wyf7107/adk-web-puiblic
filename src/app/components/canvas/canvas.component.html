@@ -71,60 +71,64 @@
               <span class="workflow-chip-label">{{ ctx.node.data?.()?.agent_class }}</span>
             </div>
           </svg:foreignObject>
+          @if (isGroupEmpty(ctx.node.id)) {
+            <svg:foreignObject
+              [attr.width]="200"
+              [attr.height]="100"
+              [attr.x]="ctx.width() / 2 - 100"
+              [attr.y]="ctx.height() / 2 - 40"
+            >
+              <div class="empty-group-placeholder" (click)="$event.stopPropagation()">
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="emptyGroupMenu"
+                  #emptyGroupMenuTrigger="matMenuTrigger"
+                  matTooltip="Add sub-agent"
+                  aria-label="Add sub-agent"
+                  (click)="$event.stopPropagation()"
+                >
+                  <mat-icon>add</mat-icon>
+                </button>
+                <span class="empty-group-label">Add sub-agent</span>
+                <mat-menu #emptyGroupMenu="matMenu">
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('LlmAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                  >
+                    <mat-icon>psychology</mat-icon>
+                    <span>LLM Agent</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('SequentialAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                  >
+                    <mat-icon>more_horiz</mat-icon>
+                    <span>Sequential Agent</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('LoopAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                  >
+                    <mat-icon>sync</mat-icon>
+                    <span>Loop Agent</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('ParallelAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                  >
+                    <mat-icon>density_medium</mat-icon>
+                    <span>Parallel Agent</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </svg:foreignObject>
+          }
           <handle type="target" position="top" />
         </svg:g>
       </ng-template>
 
       <ng-template nodeHtml let-ctx>
         @let nodeData = ctx.node.data?.();
-        @if (nodeData?.kind === 'workflow-group-placeholder') {
-          <div class="workflow-group-placeholder" (click)="$event.stopPropagation()">
-            @let parentName = nodeData.parentAgentName;
-            <button
-              matIconButton
-              class="workflow-group-placeholder__button"
-              [matMenuTriggerFor]="workflowGroupMenu"
-              #workflowGroupMenuTrigger="matMenuTrigger"
-              aria-label="Add sub-agent"
-              (click)="$event.stopPropagation()"
-            >
-              <mat-icon>add</mat-icon>
-            </button>
-            <span class="workflow-group-placeholder__label">Add sub-agent</span>
-            <mat-menu #workflowGroupMenu="matMenu">
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('LlmAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>psychology</mat-icon>
-                <span>LLM Agent</span>
-              </button>
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('SequentialAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>more_horiz</mat-icon>
-                <span>Sequential Agent</span>
-              </button>
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('LoopAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>sync</mat-icon>
-                <span>Loop Agent</span>
-              </button>
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('ParallelAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>density_medium</mat-icon>
-                <span>Parallel Agent</span>
-              </button>
-            </mat-menu>
-            <handle type="target" position="top" />
-            <handle type="source" position="bottom" />
-          </div>
-        } @else {
           @let nodeName = nodeData?.name || 'root_agent';
           @let toolsMap = toolsMap$ | async;
           @let tools = getToolsForNode(nodeName, toolsMap);
@@ -219,7 +223,6 @@
             <handle type="source" position="bottom" />
           }
         </div>
-        }
       </ng-template>
     </vflow>
     }

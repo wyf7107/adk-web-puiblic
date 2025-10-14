@@ -219,10 +219,10 @@
             </div>
           }
           @if (shouldShowHandle(ctx.node, 'target')) {
-            <handle type="target" position="top" />
+            <handle type="target" [position]="getHandlePosition(ctx.node, 'target')" />
           }
           @if (shouldShowHandle(ctx.node, 'source')) {
-            <handle type="source" position="bottom" />
+            <handle type="source" [position]="getHandlePosition(ctx.node, 'source')" />
           }
         </div>
       </ng-template>

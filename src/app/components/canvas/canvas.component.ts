@@ -1050,7 +1050,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       return false;
     }
 
-  
+
     if (node.parentId && node.parentId()) {
       const parentGroupId = node.parentId();
       const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
@@ -1058,9 +1058,32 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       if (parentGroup && parentGroup.data) {
         const parentAgentClass = parentGroup.data().agent_class;
 
+        // Loop/Parallel: Show target handles
         if (position === "target" &&
             (parentAgentClass === "LoopAgent" || parentAgentClass === "ParallelAgent")) {
           return true;
+        }
+
+        // Sequential: Show both source and target handles for chaining
+        if (parentAgentClass === "SequentialAgent") {
+          const siblings = this.nodes().filter(n =>
+            n.parentId && n.parentId() === parentGroupId
+          );
+
+          if (siblings.length <= 1) {
+            return false;
+          }
+
+          siblings.sort((a, b) => a.point().x - b.point().x);
+          const nodeIndex = siblings.findIndex(n => n.id === node.id);
+
+          if (position === "target") {
+            // Show target for all except the first node
+            return nodeIndex > 0;
+          } else {
+            // Show source for all except the last node
+            return nodeIndex < siblings.length - 1;
+          }
         }
       }
 
@@ -1083,6 +1106,29 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return this.edges().some(
       (edge) => edge.source === nodeId || edge.target === nodeId
     );
+  }
+
+  getHandlePosition(
+    node: HtmlTemplateDynamicNode,
+    type: "source" | "target"
+  ): "top" | "bottom" | "left" | "right" {
+    if (node.parentId && node.parentId()) {
+      const parentGroupId = node.parentId();
+      const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+      if (parentGroup && parentGroup.data) {
+        const parentAgentClass = parentGroup.data().agent_class;
+
+        if (parentAgentClass === "SequentialAgent") {
+          return type === "target" ? "left" : "right";
+        } else {
+          return "top";
+        }
+      }
+    }
+
+    // Default: top for target, bottom for source
+    return type === "target" ? "top" : "bottom";
   }
 
   getToolsForNode(

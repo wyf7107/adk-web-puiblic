@@ -345,6 +345,56 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return shellNode;
   }
 
+  private createWorkflowGroup(
+    agentData: AgentNode,
+    shellNode: HtmlTemplateDynamicNode,
+    shellPoint: { x: number; y: number },
+    parentGroupId?: string
+  ): { groupNode: TemplateDynamicGroupNode<any>; edge: Edge | null } {
+    const groupPoint = {
+      x: shellPoint.x + this.workflowGroupXOffset,
+      y: shellPoint.y + this.workflowGroupYOffset,
+    };
+
+    const newGroupId = this.generateNodeId();
+    const groupNode: TemplateDynamicGroupNode<any> = {
+      id: newGroupId,
+      point: signal(groupPoint),
+      type: "template-group",
+      data: signal(agentData),
+      parentId: parentGroupId ? signal(parentGroupId) : signal(null),
+      width: signal(this.workflowGroupWidth),
+      height: signal(this.workflowGroupHeight),
+    };
+
+    // Only create edge for Sequential workflows, not for Loop or Parallel
+    const edge = agentData.agent_class === "SequentialAgent"
+      ? {
+          id: this.generateEdgeId(),
+          source: shellNode.id,
+          target: newGroupId,
+        }
+      : null;
+
+    return { groupNode, edge };
+  }
+
+  private calculateWorkflowChildPosition(
+    subAgentIndex: number,
+    groupHeight: number
+  ): { x: number; y: number } {
+    const NODE_WIDTH = 340;
+    const ADD_BUTTON_WIDTH = 68;
+    const SPACING = 20;
+    const nodeHeight = 20;
+    const verticalCenter = (groupHeight - nodeHeight) / 2;
+
+    return {
+      x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
+      y: verticalCenter,
+    };
+  }
+
   isWorkflowAgent(agentClass: string | undefined): boolean {
     if (!agentClass) {
       return false;
@@ -403,50 +453,23 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
 
       const subAgentIndex = workflowParentAgent.sub_agents.length;
-      const NODE_WIDTH = 340;
-      const ADD_BUTTON_WIDTH = 68;
-      const SPACING = 20;
-
       const groupHeight = existingGroupNode.height ? existingGroupNode.height() : this.workflowGroupHeight;
-      const nodeHeight = 20;
-      const verticalCenter = (groupHeight - nodeHeight) / 2;
-
-      const shellPoint = {
-        x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
-        y: verticalCenter,
-      };
+      const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
 
       shellNode = this.createNode(agentNodeData, shellPoint, groupId);
       workflowParentAgent.sub_agents.push(agentNodeData);
 
-
       if (this.isWorkflowAgent(agentClass)) {
-        const groupPoint = {
-          x: shellPoint.x + this.workflowGroupXOffset,
-          y: shellPoint.y + this.workflowGroupYOffset,
-        };
-
-        const newGroupId = this.generateNodeId();
-        groupNode = {
-          id: newGroupId,
-          point: signal(groupPoint),
-          type: "template-group",
-          data: signal(agentNodeData),
-          parentId: signal(groupId ?? null),
-          width: signal(this.workflowGroupWidth),
-          height: signal(this.workflowGroupHeight),
-        };
-
+        const { groupNode: newGroupNode, edge } = this.createWorkflowGroup(
+          agentNodeData,
+          shellNode,
+          shellPoint,
+          groupId
+        );
+        groupNode = newGroupNode;
         this.groupNodes.set([...this.groupNodes(), groupNode]);
-
-        // Only create edge for Sequential workflows, not for Loop or Parallel
-        if (agentClass === "SequentialAgent") {
-          const shellToGroupEdge: Edge = {
-            id: this.generateEdgeId(),
-            source: shellNode.id,
-            target: newGroupId,
-          };
-          this.edges.set([...this.edges(), shellToGroupEdge]);
+        if (edge) {
+          this.edges.set([...this.edges(), edge]);
         }
       }
     } else if (isClickedNodeWorkflow) {
@@ -468,50 +491,23 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
 
       const subAgentIndex = clickedAgentServiceData.sub_agents.length;
-      const NODE_WIDTH = 340;
-      const ADD_BUTTON_WIDTH = 68;
-      const SPACING = 20;
-
       const groupHeight = groupForClickedNode.height ? groupForClickedNode.height() : this.workflowGroupHeight;
-      const nodeHeight = 20;
-      const verticalCenter = (groupHeight - nodeHeight) / 2;
-
-      const shellPoint = {
-        x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
-        y: verticalCenter,
-      };
+      const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
 
       shellNode = this.createNode(agentNodeData, shellPoint, groupForClickedNode.id);
-
       clickedAgentServiceData.sub_agents.push(agentNodeData);
 
       if (this.isWorkflowAgent(agentClass)) {
-        const groupPoint = {
-          x: shellPoint.x + this.workflowGroupXOffset,
-          y: shellPoint.y + this.workflowGroupYOffset,
-        };
-
-        const newGroupId = this.generateNodeId();
-        groupNode = {
-          id: newGroupId,
-          point: signal(groupPoint),
-          type: "template-group",
-          data: signal(agentNodeData),
-          parentId: signal(groupForClickedNode.id),
-          width: signal(this.workflowGroupWidth),
-          height: signal(this.workflowGroupHeight),
-        };
-
+        const { groupNode: newGroupNode, edge } = this.createWorkflowGroup(
+          agentNodeData,
+          shellNode,
+          shellPoint,
+          groupForClickedNode.id
+        );
+        groupNode = newGroupNode;
         this.groupNodes.set([...this.groupNodes(), groupNode]);
-
-        // Only create edge for Sequential workflows, not for Loop or Parallel
-        if (agentClass === "SequentialAgent") {
-          const shellToGroupEdge: Edge = {
-            id: this.generateEdgeId(),
-            source: shellNode.id,
-            target: newGroupId,
-          };
-          this.edges.set([...this.edges(), shellToGroupEdge]);
+        if (edge) {
+          this.edges.set([...this.edges(), edge]);
         }
       }
     } else {
@@ -531,31 +527,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
       // If new node is a workflow agent, create its group
       if (this.isWorkflowAgent(agentClass)) {
-        const groupPoint = {
-          x: shellPoint.x + this.workflowGroupXOffset,
-          y: shellPoint.y + this.workflowGroupYOffset,
-        };
-
-        const newGroupId = this.generateNodeId();
-        groupNode = {
-          id: newGroupId,
-          point: signal(groupPoint),
-          type: "template-group",
-          data: signal(agentNodeData),
-          width: signal(this.workflowGroupWidth),
-          height: signal(this.workflowGroupHeight),
-        };
-
+        const { groupNode: newGroupNode, edge } = this.createWorkflowGroup(
+          agentNodeData,
+          shellNode,
+          shellPoint
+        );
+        groupNode = newGroupNode;
         this.groupNodes.set([...this.groupNodes(), groupNode]);
-
-        // Only create edge for Sequential workflows, not for Loop or Parallel
-        if (agentClass === "SequentialAgent") {
-          const shellToGroupEdge: Edge = {
-            id: this.generateEdgeId(),
-            source: shellNode.id,
-            target: newGroupId,
-          };
-          this.edges.set([...this.edges(), shellToGroupEdge]);
+        if (edge) {
+          this.edges.set([...this.edges(), edge]);
         }
       }
     }
@@ -1366,51 +1346,20 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       let newGroupNode: TemplateDynamicGroupNode<any> | null = null;
 
       if (parentIsWorkflow && !agentData.isRoot) {
-        const NODE_WIDTH = 340;
-        const ADD_BUTTON_WIDTH = 68;
-        const SPACING = 20;
         const subAgentIndex = parentAgent?.sub_agents.indexOf(agentData) ?? index;
-
         const parentGroupNode = groupNodes.find(g => g.id === parentGroupId);
         const groupHeight = parentGroupNode?.height ? parentGroupNode.height() : this.workflowGroupHeight;
-        const nodeHeight = 20;
-        const verticalCenter = (groupHeight - nodeHeight) / 2;
 
-        shellPoint = savedPosition ?? {
-          x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
-          y: verticalCenter,
-        };
-
+        shellPoint = savedPosition ?? this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
         shellNode = this.createNode(agentData, shellPoint, parentGroupId ?? undefined);
         shellNodes.push(shellNode);
 
         if (isWorkflow) {
-          const groupPoint = {
-            x: shellPoint.x + this.workflowGroupXOffset,
-            y: shellPoint.y + this.workflowGroupYOffset,
-          };
-
-          const newGroupId = this.generateNodeId();
-          newGroupNode = {
-            id: newGroupId,
-            point: signal(groupPoint),
-            type: "template-group",
-            data: signal(agentData),
-            parentId: parentGroupId ? signal(parentGroupId) : signal(null),
-            width: signal(this.workflowGroupWidth),
-            height: signal(this.workflowGroupHeight),
-          };
-
+          const { groupNode, edge } = this.createWorkflowGroup(agentData, shellNode, shellPoint, parentGroupId);
+          newGroupNode = groupNode;
           groupNodes.push(newGroupNode);
-
-          // Only create edge for Sequential workflows, not for Loop or Parallel
-          if (agentData.agent_class === "SequentialAgent") {
-            const shellToGroupEdge: Edge = {
-              id: this.generateEdgeId(),
-              source: shellNode.id,
-              target: newGroupId,
-            };
-            edges.push(shellToGroupEdge);
+          if (edge) {
+            edges.push(edge);
           }
         }
       } else {
@@ -1446,27 +1395,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
             x: shellPoint.x,
             y: shellPoint.y + this.workflowGroupYOffset,
           };
-
-          const newGroupId = this.generateNodeId();
-          newGroupNode = {
-            id: newGroupId,
-            point: signal(groupPoint),
-            type: "template-group",
-            data: signal(agentData),
-            width: signal(this.workflowGroupWidth),
-            height: signal(this.workflowGroupHeight),
-          };
-
+          const { groupNode, edge } = this.createWorkflowGroup(agentData, shellNode, shellPoint);
+          newGroupNode = groupNode;
           groupNodes.push(newGroupNode);
-
-          // Only create edge for Sequential workflows, not for Loop or Parallel
-          if (agentData.agent_class === "SequentialAgent") {
-            const shellToGroupEdge: Edge = {
-              id: this.generateEdgeId(),
-              source: shellNode.id,
-              target: newGroupId,
-            };
-            edges.push(shellToGroupEdge);
+          if (edge) {
+            edges.push(edge);
           }
         }
       }
@@ -1618,31 +1551,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.nodes.set([shellNode]);
 
       if (this.isWorkflowAgent(agent.agent_class)) {
-        const groupPoint = {
-          x: shellPoint.x,
-          y: shellPoint.y + this.workflowGroupYOffset,
-        };
-
-        const groupId = this.generateNodeId();
-        const groupNode: TemplateDynamicGroupNode<any> = {
-          id: groupId,
-          point: signal(groupPoint),
-          type: "template-group",
-          data: signal(agent),
-          width: signal(this.workflowGroupWidth),
-          height: signal(this.workflowGroupHeight),
-        };
-
+        const { groupNode, edge } = this.createWorkflowGroup(agent, shellNode, shellPoint);
         this.groupNodes.set([groupNode]);
-
-        // Only create edge for Sequential workflows, not for Loop or Parallel
-        if (agent.agent_class === "SequentialAgent") {
-          const shellToGroupEdge: Edge = {
-            id: this.generateEdgeId(),
-            source: shellNode.id,
-            target: groupId,
-          };
-          this.edges.set([shellToGroupEdge]);
+        if (edge) {
+          this.edges.set([edge]);
         }
       }
     }

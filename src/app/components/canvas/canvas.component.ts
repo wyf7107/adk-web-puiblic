@@ -418,6 +418,43 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return { shellNode, groupNode, groupEdge };
   }
 
+  /**
+   * Creates an edge for a sub-agent inside a workflow group.
+   * - Loop/Parallel: Connects workflow shell node to the sub-agent
+   * - Not in a group: Returns null 
+   */
+  private createWorkflowChildEdge(
+    childNode: HtmlTemplateDynamicNode,
+    parentGroupId: string | undefined
+  ): Edge | null {
+    if (!parentGroupId) {
+      return null;
+    }
+
+    const parentGroupNode = this.groupNodes().find(g => g.id === parentGroupId);
+    if (!parentGroupNode || !parentGroupNode.data) {
+      return null;
+    }
+
+    const workflowAgentClass = parentGroupNode.data().agent_class;
+
+    if (workflowAgentClass === "LoopAgent" || workflowAgentClass === "ParallelAgent") {
+      const workflowShellNode = this.nodes().find(n =>
+        n.data && n.data().name === parentGroupNode.data!().name
+      );
+
+      if (workflowShellNode) {
+        return {
+          id: this.generateEdgeId(),
+          source: workflowShellNode.id,
+          target: childNode.id,
+        };
+      }
+    }
+
+    return null;
+  }
+
   isWorkflowAgent(agentClass: string | undefined): boolean {
     if (!agentClass) {
       return false;
@@ -559,15 +596,25 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.updateGroupDimensions();
     }
 
-    // Create an edge connecting the parent to the sub-agent
-    const edge: Edge = {
-      id: this.generateEdgeId(),
-      source: clickedNode.id,
-      target: shellNode.id,
-    };
+    // Create edges connecting the parent to the sub-agent
+    if (isClickedNodeWorkflow || isInsideGroup) {
+      const parentGroupId = shellNode.parentId ? shellNode.parentId() ?? undefined : undefined;
+      const workflowEdge = this.createWorkflowChildEdge(
+        shellNode,
+        parentGroupId
+      );
 
-    // Add the edge
-    this.edges.set([...this.edges(), edge]);
+      if (workflowEdge) {
+        this.edges.set([...this.edges(), workflowEdge]);
+      }
+    } else {
+      const edge: Edge = {
+        id: this.generateEdgeId(),
+        source: clickedNode.id,
+        target: shellNode.id,
+      };
+      this.edges.set([...this.edges(), edge]);
+    }
 
     // Auto-select the newly created sub-agent and switch to Config tab
     this.agentBuilderService.setSelectedNode(agentNodeData);
@@ -1415,12 +1462,34 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       }
 
       if (parentShellId) {
-        const edge: Edge = {
-          id: this.generateEdgeId(),
-          source: parentShellId,
-          target: shellNode.id,
-        };
-        edges.push(edge);
+        if (parentGroupId) {
+          const parentGroupNode = groupNodes.find(g => g.id === parentGroupId);
+
+          if (parentGroupNode && parentGroupNode.data) {
+            const workflowAgentClass = parentGroupNode.data().agent_class;
+
+            if (workflowAgentClass === "LoopAgent" || workflowAgentClass === "ParallelAgent") {
+              const workflowShellNode = shellNodes.find(n =>
+                n.data && n.data().name === parentGroupNode.data!().name
+              );
+
+              if (workflowShellNode) {
+                edges.push({
+                  id: this.generateEdgeId(),
+                  source: workflowShellNode.id,
+                  target: shellNode.id,
+                });
+              }
+            }
+          }
+        } else {
+          const edge: Edge = {
+            id: this.generateEdgeId(),
+            source: parentShellId,
+            target: shellNode.id,
+          };
+          edges.push(edge);
+        }
       }
 
       if (agentData.sub_agents && agentData.sub_agents.length > 0) {

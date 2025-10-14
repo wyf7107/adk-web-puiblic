@@ -407,9 +407,13 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       const ADD_BUTTON_WIDTH = 68;
       const SPACING = 20;
 
+      const groupHeight = existingGroupNode.height ? existingGroupNode.height() : this.workflowGroupHeight;
+      const nodeHeight = 20;
+      const verticalCenter = (groupHeight - nodeHeight) / 2;
+
       const shellPoint = {
         x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
-        y: 45,
+        y: verticalCenter,
       };
 
       shellNode = this.createNode(agentNodeData, shellPoint, groupId);
@@ -841,6 +845,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     // delete node data in builder service
     this.agentBuilderService.deleteNode(agentNode);
+
+    if (shellNode && shellNode.parentId && shellNode.parentId()) {
+      this.updateGroupDimensions();
+    }
   }
 
   selectTool(tool: any, node: HtmlTemplateDynamicNode) {
@@ -1796,5 +1804,40 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       node.parentId && node.parentId() === groupId
     );
     return !hasChildren;
+  }
+
+  shouldShowAddButton(node: HtmlTemplateDynamicNode): boolean {
+    const nodeData = node.data ? node.data() : undefined;
+    if (!nodeData) return false;
+
+    // Don't show for workflow agents
+    if (this.isWorkflowAgent(nodeData.agent_class)) {
+      return false;
+    }
+
+    // If node is not selected, don't show
+    if (!this.isNodeSelected(node)) {
+      return false;
+    }
+
+    // If node is inside a group, only show if it's the rightmost sibling
+    if (node.parentId && node.parentId()) {
+      const parentGroupId = node.parentId();
+
+      // Get all sibling nodes in the same group
+      const siblings = this.nodes().filter(n =>
+        n.parentId && n.parentId() === parentGroupId
+      );
+
+      if (siblings.length === 0) return true;
+      const rightmostSibling = siblings.reduce((rightmost, current) => {
+        return current.point().x > rightmost.point().x ? current : rightmost;
+      }, siblings[0]);
+
+      return node.id === rightmostSibling.id;
+    }
+
+    // For nodes not in a group, show the button
+    return true;
   }
 }

@@ -171,7 +171,7 @@
               </div>
             </div>
           }
-          @if (isNodeSelected(ctx.node) && !isWorkflowAgent(nodeData?.agent_class)) {
+          @if (shouldShowAddButton(ctx.node)) {
             <div class="add-subagent-container">
               <button
                 matIconButton

@@ -190,6 +190,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           (node) => node.data && node.data().name === selectedAgentNode?.name
         );
       });
+
+    // Listen for tool changes and update group dimensions
+    this.toolsMap$.subscribe((toolsMap) => {
+      const hasNodesInGroups = this.nodes().some(node =>
+        node.parentId && node.parentId()
+      );
+
+      if (hasNodesInGroups && this.groupNodes().length > 0) {
+        this.updateGroupDimensions();
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -1871,9 +1882,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   private updateGroupDimensions() {
     const NODE_WIDTH = 340;
-    const NODE_HEIGHT = 200;
+    const BASE_NODE_HEIGHT = 120;
+    const TOOL_ITEM_HEIGHT = 36;
+    const TOOLS_CONTAINER_PADDING = 20;
     const ADD_BUTTON_WIDTH = 68;
     const PADDING = 40;
+    const FIXED_NODE_Y = 80;
 
     for (const groupNode of this.groupNodes()) {
       if (!groupNode.data) continue;
@@ -1890,12 +1904,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         continue;
       }
 
-      // Reposition sub-agents to ensure proper spacing
       subAgents.sort((a, b) => a.point().x - b.point().x);
 
-      const groupHeight = groupNode.height ? groupNode.height() : this.workflowGroupHeight;
       subAgents.forEach((node, index) => {
-        const newPosition = this.calculateWorkflowChildPosition(index, groupHeight);
+        const NODE_WIDTH = 340;
+        const ADD_BUTTON_WIDTH = 68;
+        const SPACING = 20;
+        const xPosition = 45 + index * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING);
+
+        const newPosition = { x: xPosition, y: FIXED_NODE_Y };
         node.point.set(newPosition);
 
         if (node.data) {
@@ -1910,10 +1927,16 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
       for (const node of subAgents) {
         const point = node.point();
+        const nodeData = node.data ? node.data() : undefined;
+        let nodeHeight = BASE_NODE_HEIGHT;
+        if (nodeData && nodeData.tools && nodeData.tools.length > 0) {
+          nodeHeight += TOOLS_CONTAINER_PADDING + (nodeData.tools.length * TOOL_ITEM_HEIGHT);
+        }
+
         minX = Math.min(minX, point.x);
         minY = Math.min(minY, point.y);
         maxX = Math.max(maxX, point.x + NODE_WIDTH + ADD_BUTTON_WIDTH);
-        maxY = Math.max(maxY, point.y + NODE_HEIGHT);
+        maxY = Math.max(maxY, point.y + nodeHeight);
       }
 
       const width = maxX - minX + PADDING * 2;

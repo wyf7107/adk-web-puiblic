@@ -1793,6 +1793,22 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         continue;
       }
 
+      // Reposition sub-agents to ensure proper spacing
+      subAgents.sort((a, b) => a.point().x - b.point().x);
+
+      const groupHeight = groupNode.height ? groupNode.height() : this.workflowGroupHeight;
+      subAgents.forEach((node, index) => {
+        const newPosition = this.calculateWorkflowChildPosition(index, groupHeight);
+        node.point.set(newPosition);
+
+        if (node.data) {
+          const agentData = node.data();
+          if (agentData) {
+            this.nodePositions.set(agentData.name, newPosition);
+          }
+        }
+      });
+
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
       for (const node of subAgents) {

@@ -465,9 +465,13 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       const ADD_BUTTON_WIDTH = 68;
       const SPACING = 20;
 
+      const groupHeight = groupForClickedNode.height ? groupForClickedNode.height() : this.workflowGroupHeight;
+      const nodeHeight = 20;
+      const verticalCenter = (groupHeight - nodeHeight) / 2;
+
       const shellPoint = {
         x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
-        y: 45,
+        y: verticalCenter,
       };
 
       shellNode = this.createNode(agentNodeData, shellPoint, groupForClickedNode.id);
@@ -1286,7 +1290,6 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     while (queue.length > 0) {
       const { node, depth, index, parentShellId, parentAgent, parentGroupId } = queue.shift()!;
-
       let agentData = node;
       if (node.config_path) {
         try {
@@ -1329,9 +1332,14 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         const SPACING = 20;
         const subAgentIndex = parentAgent?.sub_agents.indexOf(agentData) ?? index;
 
+        const parentGroupNode = groupNodes.find(g => g.id === parentGroupId);
+        const groupHeight = parentGroupNode?.height ? parentGroupNode.height() : this.workflowGroupHeight;
+        const nodeHeight = 20;
+        const verticalCenter = (groupHeight - nodeHeight) / 2;
+
         shellPoint = savedPosition ?? {
           x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
-          y: 45,
+          y: verticalCenter,
         };
 
         shellNode = this.createNode(agentData, shellPoint, parentGroupId ?? undefined);

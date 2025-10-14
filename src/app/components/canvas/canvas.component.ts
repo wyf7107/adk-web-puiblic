@@ -395,6 +395,29 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     };
   }
 
+  private createAgentNodeWithGroup(
+    agentData: AgentNode,
+    shellPoint: { x: number; y: number },
+    parentGroupId?: string
+  ): {
+    shellNode: HtmlTemplateDynamicNode;
+    groupNode: TemplateDynamicGroupNode<any> | null;
+    groupEdge: Edge | null;
+  } {
+    const shellNode = this.createNode(agentData, shellPoint, parentGroupId);
+
+    let groupNode: TemplateDynamicGroupNode<any> | null = null;
+    let groupEdge: Edge | null = null;
+
+    if (this.isWorkflowAgent(agentData.agent_class)) {
+      const result = this.createWorkflowGroup(agentData, shellNode, shellPoint, parentGroupId);
+      groupNode = result.groupNode;
+      groupEdge = result.edge;
+    }
+
+    return { shellNode, groupNode, groupEdge };
+  }
+
   isWorkflowAgent(agentClass: string | undefined): boolean {
     if (!agentClass) {
       return false;
@@ -456,21 +479,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       const groupHeight = existingGroupNode.height ? existingGroupNode.height() : this.workflowGroupHeight;
       const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
 
-      shellNode = this.createNode(agentNodeData, shellPoint, groupId);
+      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint, groupId);
+      shellNode = result.shellNode;
+      groupNode = result.groupNode;
+
       workflowParentAgent.sub_agents.push(agentNodeData);
 
-      if (this.isWorkflowAgent(agentClass)) {
-        const { groupNode: newGroupNode, edge } = this.createWorkflowGroup(
-          agentNodeData,
-          shellNode,
-          shellPoint,
-          groupId
-        );
-        groupNode = newGroupNode;
+      if (groupNode) {
         this.groupNodes.set([...this.groupNodes(), groupNode]);
-        if (edge) {
-          this.edges.set([...this.edges(), edge]);
-        }
+      }
+      if (result.groupEdge) {
+        this.edges.set([...this.edges(), result.groupEdge]);
       }
     } else if (isClickedNodeWorkflow) {
       const clickedAgentData = clickedNode.data();
@@ -494,21 +513,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       const groupHeight = groupForClickedNode.height ? groupForClickedNode.height() : this.workflowGroupHeight;
       const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
 
-      shellNode = this.createNode(agentNodeData, shellPoint, groupForClickedNode.id);
+      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint, groupForClickedNode.id);
+      shellNode = result.shellNode;
+      groupNode = result.groupNode;
+
       clickedAgentServiceData.sub_agents.push(agentNodeData);
 
-      if (this.isWorkflowAgent(agentClass)) {
-        const { groupNode: newGroupNode, edge } = this.createWorkflowGroup(
-          agentNodeData,
-          shellNode,
-          shellPoint,
-          groupForClickedNode.id
-        );
-        groupNode = newGroupNode;
+      if (groupNode) {
         this.groupNodes.set([...this.groupNodes(), groupNode]);
-        if (edge) {
-          this.edges.set([...this.edges(), edge]);
-        }
+      }
+      if (result.groupEdge) {
+        this.edges.set([...this.edges(), result.groupEdge]);
       }
     } else {
       // Normal LLM agent
@@ -518,25 +533,20 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         y: clickedNode.point().y + 300,
       };
 
-      shellNode = this.createNode(agentNodeData, shellPoint);
+      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint);
+      shellNode = result.shellNode;
+      groupNode = result.groupNode;
 
       const clickedAgentData = this.agentBuilderService.getNode(clickedNode.data().name);
       if (clickedAgentData) {
         clickedAgentData.sub_agents.push(agentNodeData);
       }
 
-      // If new node is a workflow agent, create its group
-      if (this.isWorkflowAgent(agentClass)) {
-        const { groupNode: newGroupNode, edge } = this.createWorkflowGroup(
-          agentNodeData,
-          shellNode,
-          shellPoint
-        );
-        groupNode = newGroupNode;
+      if (groupNode) {
         this.groupNodes.set([...this.groupNodes(), groupNode]);
-        if (edge) {
-          this.edges.set([...this.edges(), edge]);
-        }
+      }
+      if (result.groupEdge) {
+        this.edges.set([...this.edges(), result.groupEdge]);
       }
     }
 
@@ -1351,16 +1361,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         const groupHeight = parentGroupNode?.height ? parentGroupNode.height() : this.workflowGroupHeight;
 
         shellPoint = savedPosition ?? this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
-        shellNode = this.createNode(agentData, shellPoint, parentGroupId ?? undefined);
-        shellNodes.push(shellNode);
 
-        if (isWorkflow) {
-          const { groupNode, edge } = this.createWorkflowGroup(agentData, shellNode, shellPoint, parentGroupId);
-          newGroupNode = groupNode;
+        const result = this.createAgentNodeWithGroup(agentData, shellPoint, parentGroupId ?? undefined);
+        shellNode = result.shellNode;
+        newGroupNode = result.groupNode;
+
+        shellNodes.push(shellNode);
+        if (newGroupNode) {
           groupNodes.push(newGroupNode);
-          if (edge) {
-            edges.push(edge);
-          }
+        }
+        if (result.groupEdge) {
+          edges.push(result.groupEdge);
         }
       } else {
         // Normal positioning
@@ -1386,20 +1397,19 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           shellPoint = savedPosition;
         }
 
-        shellNode = this.createNode(agentData, shellPoint);
+        const result = this.createAgentNodeWithGroup(agentData, shellPoint);
+        shellNode = result.shellNode;
+        newGroupNode = result.groupNode;
+
         shellNodes.push(shellNode);
 
         // If this is a workflow agent, create its group
         if (isWorkflow && !agentData.isRoot) {
-          const groupPoint = {
-            x: shellPoint.x,
-            y: shellPoint.y + this.workflowGroupYOffset,
-          };
-          const { groupNode, edge } = this.createWorkflowGroup(agentData, shellNode, shellPoint);
-          newGroupNode = groupNode;
-          groupNodes.push(newGroupNode);
-          if (edge) {
-            edges.push(edge);
+          if (newGroupNode) {
+            groupNodes.push(newGroupNode);
+          }
+          if (result.groupEdge) {
+            edges.push(result.groupEdge);
           }
         }
       }

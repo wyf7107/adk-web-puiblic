@@ -286,11 +286,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     agentClass: string,
     parentAgentName: string | undefined,
     trigger: MatMenuTrigger,
-    event: MouseEvent
+    event: MouseEvent,
+    isFromEmptyGroup: boolean = false
   ) {
     event.stopPropagation();
     trigger?.closeMenu();
-    this.onAgentTypeSelected(agentClass, parentAgentName);
+    this.onAgentTypeSelected(agentClass, parentAgentName, isFromEmptyGroup);
   }
 
   private clearCanvasSelection() {
@@ -315,12 +316,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     // This method can be used for general resource addition logic
   }
 
-  onAgentTypeSelected(agentClass: string, parentAgentName: string | undefined) {
+  onAgentTypeSelected(agentClass: string, parentAgentName: string | undefined, isFromEmptyGroup: boolean = false) {
     if (!parentAgentName) {
       return;
     }
 
-    this.addSubAgent(parentAgentName, agentClass);
+    this.addSubAgent(parentAgentName, agentClass, isFromEmptyGroup);
   }
 
   private generateNodeId(): string {
@@ -544,7 +545,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     );
   }
 
-  addSubAgent(parentAgentName: string, agentClass: string = "LlmAgent") {
+  addSubAgent(parentAgentName: string, agentClass: string = "LlmAgent", isFromEmptyGroup: boolean = false) {
     const clickedNode: HtmlTemplateDynamicNode = this.nodes().find(
       (node) => node.data && node.data().name === parentAgentName
     ) as HtmlTemplateDynamicNode;
@@ -572,10 +573,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     let shellNode: HtmlTemplateDynamicNode;
     let groupNode: TemplateDynamicGroupNode<any> | null = null;
 
-    // Priority: If clicked node is a workflow agent, add to its own group
-    if (isClickedNodeWorkflow) {
+    //If this is from the empty group button, always add to the workflow's own group
+    if (isFromEmptyGroup && isClickedNodeWorkflow) {
       const clickedAgentData = clickedNode.data();
       if (!clickedAgentData) return;
+
       const groupForClickedNode = this.groupNodes().find(
         g => g.data && g.data()?.name === clickedAgentData.name
       );
@@ -608,6 +610,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         this.edges.set([...this.edges(), result.groupEdge]);
       }
     } else if (isInsideGroup) {
+      //Node inside a group (+ button) - add sibling to parent group
       const groupId = clickedNode.parentId!() ?? undefined;
       const existingGroupNode = this.groupNodes().find(g => g.id === groupId);
 
@@ -2001,21 +2004,21 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const nodeData = node.data ? node.data() : undefined;
     if (!nodeData) return false;
 
-    // Don't show for workflow agents
-    if (this.isWorkflowAgent(nodeData.agent_class)) {
+    const isWorkflow = this.isWorkflowAgent(nodeData.agent_class);
+    const isInsideGroup = node.parentId && node.parentId();
+
+    // Don't show for workflow agents UNLESS they are inside a group (nested workflows)
+    if (isWorkflow && !isInsideGroup) {
       return false;
     }
 
-    // If node is not selected, don't show
     if (!this.isNodeSelected(node)) {
       return false;
     }
 
-    // If node is inside a group, only show if it's the rightmost sibling
-    if (node.parentId && node.parentId()) {
+    if (isInsideGroup && node.parentId) {
       const parentGroupId = node.parentId();
 
-      // Get all sibling nodes in the same group
       const siblings = this.nodes().filter(n =>
         n.parentId && n.parentId() === parentGroupId
       );
@@ -2028,7 +2031,6 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       return node.id === rightmostSibling.id;
     }
 
-    // For nodes not in a group, show the button
     return true;
   }
 }

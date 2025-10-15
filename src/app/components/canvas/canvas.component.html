@@ -93,28 +93,28 @@
                 <mat-menu #emptyGroupMenu="matMenu">
                   <button
                     mat-menu-item
-                    (click)="handleAgentTypeSelection('LlmAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                    (click)="handleAgentTypeSelection('LlmAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
                   >
                     <mat-icon>psychology</mat-icon>
                     <span>LLM Agent</span>
                   </button>
                   <button
                     mat-menu-item
-                    (click)="handleAgentTypeSelection('SequentialAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                    (click)="handleAgentTypeSelection('SequentialAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
                   >
                     <mat-icon>more_horiz</mat-icon>
                     <span>Sequential Agent</span>
                   </button>
                   <button
                     mat-menu-item
-                    (click)="handleAgentTypeSelection('LoopAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                    (click)="handleAgentTypeSelection('LoopAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
                   >
                     <mat-icon>sync</mat-icon>
                     <span>Loop Agent</span>
                   </button>
                   <button
                     mat-menu-item
-                    (click)="handleAgentTypeSelection('ParallelAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event)"
+                    (click)="handleAgentTypeSelection('ParallelAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
                   >
                     <mat-icon>density_medium</mat-icon>
                     <span>Parallel Agent</span>

@@ -59,6 +59,8 @@
             [style.stroke]="isGroupSelected(ctx.node) ? 'rgba(0, 187, 234, 0.8)' : 'rgba(0, 187, 234, 0.3)'"
             [style.fill]="isGroupSelected(ctx.node) ? 'rgba(0, 187, 234, 0.1)' : 'rgba(0, 187, 234, 0.03)'"
             [style.stroke-width]="isGroupSelected(ctx.node) ? 3 : 2"
+            (click)="onGroupClick(ctx.node, $event)"
+            (pointerdown)="onGroupPointerDown(ctx.node, $event)"
           />
           <svg:foreignObject
             [attr.width]="200"

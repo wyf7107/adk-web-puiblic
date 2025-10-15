@@ -232,6 +232,38 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     this.selectAgentNode(node, { openConfig: false });
   }
 
+  onGroupClick(groupNode: TemplateDynamicGroupNode<any>, event: MouseEvent) {
+    if (!groupNode?.data) {
+      return;
+    }
+
+    // Find the corresponding shell node for this group
+    const groupAgentName = groupNode.data().name;
+    const shellNode = this.nodes().find(n =>
+      n.data && n.data().name === groupAgentName
+    );
+
+    if (shellNode) {
+      this.selectAgentNode(shellNode, { openConfig: true });
+    }
+  }
+
+  onGroupPointerDown(groupNode: TemplateDynamicGroupNode<any>, event: PointerEvent) {
+    if (!groupNode?.data) {
+      return;
+    }
+
+    // Find the corresponding shell node for this group
+    const groupAgentName = groupNode.data().name;
+    const shellNode = this.nodes().find(n =>
+      n.data && n.data().name === groupAgentName
+    );
+
+    if (shellNode) {
+      this.selectAgentNode(shellNode, { openConfig: false });
+    }
+  }
+
   onCanvasClick(event: MouseEvent) {
     const target = event.target as HTMLElement | null;
     if (!target) {

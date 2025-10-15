@@ -361,22 +361,59 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     agentData: AgentNode,
     shellNode: HtmlTemplateDynamicNode,
     shellPoint: { x: number; y: number },
-    parentGroupId?: string
+    parentGroupId?: string,
+    groupNodesArray?: TemplateDynamicGroupNode<any>[],
+    shellNodesArray?: HtmlTemplateDynamicNode[]
   ): { groupNode: TemplateDynamicGroupNode<any>; edge: Edge | null } {
     let groupPoint: { x: number; y: number };
     let actualParentGroupId: string | null = null;
 
     // Check if this workflow is nested inside another group
     if (parentGroupId) {
-      const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+      // Use provided array or fallback to component signal
+      const groupsToSearch = groupNodesArray || this.groupNodes();
+      const parentGroup = groupsToSearch.find(g => g.id === parentGroupId);
 
       if (parentGroup) {
         const parentGroupPoint = parentGroup.point();
-        const parentGroupHeight = parentGroup.height ? parentGroup.height() : this.workflowGroupHeight;
+        // Calculate actual height based on the parent group's content
+        let actualParentGroupHeight = parentGroup.height ? parentGroup.height() : this.workflowGroupHeight;
+
+        // If we have shell nodes array, calculate the actual height based on parent group's children
+        if (shellNodesArray && groupNodesArray) {
+          // Find all shell nodes that are children of the parent group
+          const parentChildren = shellNodesArray.filter(n =>
+            n.parentId && n.parentId() === parentGroup.id
+          );
+
+          if (parentChildren.length > 0) {
+            // Calculate the actual height needed for parent group content
+            const NODE_WIDTH = 340;
+            const BASE_NODE_HEIGHT = 120;
+            const TOOL_ITEM_HEIGHT = 36;
+            const TOOLS_CONTAINER_PADDING = 20;
+            const ADD_BUTTON_WIDTH = 68;
+            const PADDING = 40;
+            const FIXED_NODE_Y = 80;
+
+            let maxHeight = 0;
+            for (const child of parentChildren) {
+              const childData = child.data ? child.data() : undefined;
+              let nodeHeight = BASE_NODE_HEIGHT;
+              if (childData && childData.tools && childData.tools.length > 0) {
+                nodeHeight += TOOLS_CONTAINER_PADDING + (childData.tools.length * TOOL_ITEM_HEIGHT);
+              }
+              maxHeight = Math.max(maxHeight, nodeHeight);
+            }
+
+            // Calculate total height with padding
+            actualParentGroupHeight = Math.max(220, FIXED_NODE_Y + maxHeight + PADDING);
+          }
+        }
 
         groupPoint = {
           x: parentGroupPoint.x,
-          y: parentGroupPoint.y + parentGroupHeight + 60,
+          y: parentGroupPoint.y + actualParentGroupHeight + 60,
         };
         actualParentGroupId = null;
       } else {
@@ -434,7 +471,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private createAgentNodeWithGroup(
     agentData: AgentNode,
     shellPoint: { x: number; y: number },
-    parentGroupId?: string
+    parentGroupId?: string,
+    groupNodesArray?: TemplateDynamicGroupNode<any>[],
+    shellNodesArray?: HtmlTemplateDynamicNode[]
   ): {
     shellNode: HtmlTemplateDynamicNode;
     groupNode: TemplateDynamicGroupNode<any> | null;
@@ -446,7 +485,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     let groupEdge: Edge | null = null;
 
     if (this.isWorkflowAgent(agentData.agent_class)) {
-      const result = this.createWorkflowGroup(agentData, shellNode, shellPoint, parentGroupId);
+      const result = this.createWorkflowGroup(agentData, shellNode, shellPoint, parentGroupId, groupNodesArray, shellNodesArray);
       groupNode = result.groupNode;
       groupEdge = result.edge;
     }
@@ -1151,6 +1190,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           );
 
           if (siblings.length <= 1) {
+            // Check if this single node is a nested workflow
+            if (position === "source" && nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
+              return true;
+            }
             return false;
           }
 
@@ -1161,10 +1204,18 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
             // Show target for all except the first node
             return nodeIndex > 0;
           } else {
-            // Show source for all except the last node
+            if (nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
+              return true;
+            }
             return nodeIndex < siblings.length - 1;
           }
         }
+      }
+
+      // Check if this node is a nested workflow (workflow inside a group)
+      // If so, it needs a source handle to connect to its own group
+      if (position === "source" && nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
+        return true;
       }
 
       return false;
@@ -1199,6 +1250,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       if (parentGroup && parentGroup.data) {
         const parentAgentClass = parentGroup.data().agent_class;
 
+        // workflow agent has bottom handles always
+        if (type === "source") {
+          const nodeData = node.data ? node.data() : undefined;
+          if (nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
+            return "bottom";
+          }
+        }
+
+        // For Sequential parent groups: left/right handles
         if (parentAgentClass === "SequentialAgent") {
           return type === "target" ? "left" : "right";
         } else {
@@ -1552,7 +1612,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
         shellPoint = savedPosition ?? this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
 
-        const result = this.createAgentNodeWithGroup(agentData, shellPoint, parentGroupId ?? undefined);
+        const result = this.createAgentNodeWithGroup(agentData, shellPoint, parentGroupId ?? undefined, groupNodes, shellNodes);
         shellNode = result.shellNode;
         newGroupNode = result.groupNode;
 
@@ -1587,7 +1647,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           shellPoint = savedPosition;
         }
 
-        const result = this.createAgentNodeWithGroup(agentData, shellPoint);
+        const result = this.createAgentNodeWithGroup(agentData, shellPoint, undefined, groupNodes, shellNodes);
         shellNode = result.shellNode;
         newGroupNode = result.groupNode;
 

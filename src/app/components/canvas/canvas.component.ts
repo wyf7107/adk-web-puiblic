@@ -1161,9 +1161,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   /**
-   * Left handles: Only for chained sub-agents inside Sequential workflow
+   * Horizontal handles (left/right): Only for chained sub-agents inside Sequential workflow
+   * @param node The node to check
+   * @param position 'left' for left handle (not first node), 'right' for right handle (not last node)
    */
-  shouldShowLeftHandle(node: HtmlTemplateDynamicNode): boolean {
+  shouldShowHorizontalHandle(node: HtmlTemplateDynamicNode, position: 'left' | 'right'): boolean {
     if (!node.parentId || !node.parentId()) {
       return false;
     }
@@ -1192,42 +1194,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     siblings.sort((a, b) => a.point().x - b.point().x);
     const nodeIndex = siblings.findIndex(n => n.id === node.id);
 
-    return nodeIndex > 0;
+    return position === 'left' ? nodeIndex > 0 : nodeIndex < siblings.length - 1;
   }
 
-  /**
-   * Right handles: Same as left handles (for chained sub-agents in Sequential)
-   */
+  shouldShowLeftHandle(node: HtmlTemplateDynamicNode): boolean {
+    return this.shouldShowHorizontalHandle(node, 'left');
+  }
+
   shouldShowRightHandle(node: HtmlTemplateDynamicNode): boolean {
-    if (!node.parentId || !node.parentId()) {
-      return false;
-    }
-
-    const parentGroupId = node.parentId();
-    const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
-
-    if (!parentGroup || !parentGroup.data) {
-      return false;
-    }
-
-    const parentAgentClass = parentGroup.data().agent_class;
-
-    if (parentAgentClass !== "SequentialAgent") {
-      return false;
-    }
-
-    const siblings = this.nodes().filter(n =>
-      n.parentId && n.parentId() === parentGroupId
-    );
-
-    if (siblings.length <= 1) {
-      return false;
-    }
-
-    siblings.sort((a, b) => a.point().x - b.point().x);
-    const nodeIndex = siblings.findIndex(n => n.id === node.id);
-
-    return nodeIndex < siblings.length - 1;
+    return this.shouldShowHorizontalHandle(node, 'right');
   }
 
   /**

@@ -936,10 +936,6 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       return;
     }
 
-    const parentTemplateNode = this.nodes().find(
-      (node) => !!node.data && node.data().name === parentNode.name
-    );
-
     this.deleteSubAgentHelper(currentNode, parentNode);
 
     // select the parent node if the current selected node is deleted
@@ -954,6 +950,54 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           this.agentBuilderService.setSelectedNode(parentNode);
         }
       });
+  }
+
+  /**
+   * Check if a node is inside a sequential workflow group
+   */
+  private isNodeInSequentialWorkflow(node: HtmlTemplateDynamicNode): boolean {
+    if (!node.parentId || !node.parentId()) {
+      return false;
+    }
+
+    const parentGroupId = node.parentId();
+    const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+    if (!parentGroup || !parentGroup.data) {
+      return false;
+    }
+
+    return parentGroup.data().agent_class === "SequentialAgent";
+  }
+
+  /**
+   * Get the previous and next siblings of a node in a sequential workflow
+   */
+  private getSequentialSiblings(node: HtmlTemplateDynamicNode): {
+    previous: HtmlTemplateDynamicNode | undefined;
+    next: HtmlTemplateDynamicNode | undefined;
+  } {
+    if (!node.parentId || !node.parentId()) {
+      return { previous: undefined, next: undefined };
+    }
+
+    const parentGroupId = node.parentId();
+    const siblings = this.nodes().filter(n =>
+      n.parentId && n.parentId() === parentGroupId
+    );
+
+    siblings.sort((a, b) => a.point().x - b.point().x);
+
+    const currentIndex = siblings.findIndex(n => n.id === node.id);
+
+    if (currentIndex === -1) {
+      return { previous: undefined, next: undefined };
+    }
+
+    return {
+      previous: currentIndex > 0 ? siblings[currentIndex - 1] : undefined,
+      next: currentIndex < siblings.length - 1 ? siblings[currentIndex + 1] : undefined,
+    };
   }
 
   deleteSubAgentHelper(
@@ -979,6 +1023,16 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     );
 
     if (shellNode) {
+      const isInSequentialWorkflow = this.isNodeInSequentialWorkflow(shellNode);
+      let previousSibling: HtmlTemplateDynamicNode | undefined;
+      let nextSibling: HtmlTemplateDynamicNode | undefined;
+
+      if (isInSequentialWorkflow) {
+        const siblings = this.getSequentialSiblings(shellNode);
+        previousSibling = siblings.previous;
+        nextSibling = siblings.next;
+      }
+
       this.nodes.set(
         this.nodes().filter((node: HtmlTemplateDynamicNode) => {
           return node.id !== shellNode.id;
@@ -1007,6 +1061,18 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           (edge) => edge.target !== shellNode.id && edge.source !== shellNode.id
         );
         this.edges.set(newEdges);
+      }
+
+      // Reconnect siblings in sequential workflow
+      if (isInSequentialWorkflow && previousSibling && nextSibling) {
+        const reconnectionEdge: Edge = {
+          id: this.generateEdgeId(),
+          source: previousSibling.id,
+          sourceHandle: 'source-right',
+          target: nextSibling.id,
+          targetHandle: 'target-left',
+        };
+        this.edges.set([...this.edges(), reconnectionEdge]);
       }
     }
 

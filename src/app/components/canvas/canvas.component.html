@@ -123,8 +123,8 @@
               </div>
             </svg:foreignObject>
           }
-          @if (shouldShowHandle(ctx.node, 'target')) {
-            <handle type="target" position="top" />
+          @if (shouldShowTopHandle(ctx.node)) {
+            <handle type="target" position="top" id="target-top" />
           }
         </svg:g>
       </ng-template>
@@ -218,11 +218,18 @@
               </mat-menu>
             </div>
           }
-          @if (shouldShowHandle(ctx.node, 'target')) {
-            <handle type="target" [position]="getHandlePosition(ctx.node, 'target')" />
+          @if (shouldShowLeftHandle(ctx.node)) {
+            <handle type="target" position="left" id="target-left" />
           }
-          @if (shouldShowHandle(ctx.node, 'source')) {
-            <handle type="source" [position]="getHandlePosition(ctx.node, 'source')" />
+          @if (shouldShowTopHandle(ctx.node)) {
+            <handle type="target" position="top" id="target-top" />
+          }
+
+          @if (shouldShowRightHandle(ctx.node)) {
+            <handle type="source" position="right" id="source-right" />
+          }
+          @if (shouldShowBottomHandle(ctx.node)) {
+            <handle type="source" position="bottom" id="source-bottom" />
           }
         </div>
       </ng-template>

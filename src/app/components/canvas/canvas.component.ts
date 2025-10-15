@@ -445,7 +445,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       ? {
           id: this.generateEdgeId(),
           source: shellNode.id,
+          sourceHandle: 'source-bottom',
           target: newGroupId,
+          targetHandle: 'target-top',
         }
       : null;
 
@@ -537,7 +539,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         return {
           id: this.generateEdgeId(),
           source: workflowShellNode.id,
+          sourceHandle: 'source-bottom',
           target: childNode.id,
+          targetHandle: 'target-top',
         };
       }
     }
@@ -565,7 +569,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       return {
         id: this.generateEdgeId(),
         source: previousSibling.id,
+        sourceHandle: 'source-right',
         target: childNode.id,
+        targetHandle: 'target-left',
       };
     }
 
@@ -730,7 +736,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       const edge: Edge = {
         id: this.generateEdgeId(),
         source: clickedNode.id,
+        sourceHandle: 'source-bottom',
         target: shellNode.id,
+        targetHandle: 'target-top',
       };
       this.edges.set([...this.edges(), edge]);
     }
@@ -1152,10 +1160,104 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return this.isRootAgent(agentName);
   }
 
-  shouldShowHandle(
-    node: HtmlTemplateDynamicNode | TemplateDynamicGroupNode<any>,
-    position: "source" | "target"
-  ): boolean {
+  /**
+   * Left handles: Only for chained sub-agents inside Sequential workflow
+   */
+  shouldShowLeftHandle(node: HtmlTemplateDynamicNode): boolean {
+    if (!node.parentId || !node.parentId()) {
+      return false;
+    }
+
+    const parentGroupId = node.parentId();
+    const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+    if (!parentGroup || !parentGroup.data) {
+      return false;
+    }
+
+    const parentAgentClass = parentGroup.data().agent_class;
+
+    if (parentAgentClass !== "SequentialAgent") {
+      return false;
+    }
+
+    const siblings = this.nodes().filter(n =>
+      n.parentId && n.parentId() === parentGroupId
+    );
+
+    if (siblings.length <= 1) {
+      return false;
+    }
+
+    siblings.sort((a, b) => a.point().x - b.point().x);
+    const nodeIndex = siblings.findIndex(n => n.id === node.id);
+
+    return nodeIndex > 0;
+  }
+
+  /**
+   * Right handles: Same as left handles (for chained sub-agents in Sequential)
+   */
+  shouldShowRightHandle(node: HtmlTemplateDynamicNode): boolean {
+    if (!node.parentId || !node.parentId()) {
+      return false;
+    }
+
+    const parentGroupId = node.parentId();
+    const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+    if (!parentGroup || !parentGroup.data) {
+      return false;
+    }
+
+    const parentAgentClass = parentGroup.data().agent_class;
+
+    if (parentAgentClass !== "SequentialAgent") {
+      return false;
+    }
+
+    const siblings = this.nodes().filter(n =>
+      n.parentId && n.parentId() === parentGroupId
+    );
+
+    if (siblings.length <= 1) {
+      return false;
+    }
+
+    siblings.sort((a, b) => a.point().x - b.point().x);
+    const nodeIndex = siblings.findIndex(n => n.id === node.id);
+
+    return nodeIndex < siblings.length - 1;
+  }
+
+  /**
+   * Bottom handle appears when:
+   * - Shell node is a workflow agent OR
+   * - LLM agent has sub-agents
+   */
+  shouldShowBottomHandle(node: HtmlTemplateDynamicNode): boolean {
+    const nodeData = node.data ? node.data() : undefined;
+    if (!nodeData) {
+      return false;
+    }
+
+    if (this.isWorkflowAgent(nodeData.agent_class)) {
+      return true;
+    }
+    if (nodeData.agent_class === "LlmAgent" && nodeData.sub_agents && nodeData.sub_agents.length > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Top handle appears when:
+   * 1. Sequential workflow group always has top handle
+   * 2. Sub-agents inside Loop and Parallel workflows
+   * 3. All LLM Agents that have a parent
+   */
+  shouldShowTopHandle(node: HtmlTemplateDynamicNode | TemplateDynamicGroupNode<any>): boolean {
     const nodeData = node.data ? node.data() : undefined;
     const nodeName = nodeData?.name;
     const isRoot = nodeName ? this.isRootAgent(nodeName) : false;
@@ -1163,12 +1265,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const isGroupNode = node.type === 'template-group';
 
     if (isGroupNode) {
-      if (position === "target" && nodeData?.agent_class === "SequentialAgent") {
-        return true;
-      }
-      return false;
+      return nodeData?.agent_class === "SequentialAgent";
     }
 
+    if (isRoot) {
+      return false;
+    }
 
     if (node.parentId && node.parentId()) {
       const parentGroupId = node.parentId();
@@ -1177,98 +1279,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       if (parentGroup && parentGroup.data) {
         const parentAgentClass = parentGroup.data().agent_class;
 
-        // Loop/Parallel: Show target handles
-        if (position === "target" &&
-            (parentAgentClass === "LoopAgent" || parentAgentClass === "ParallelAgent")) {
+        if (parentAgentClass === "LoopAgent" || parentAgentClass === "ParallelAgent") {
           return true;
         }
-
-        // Sequential: Show both source and target handles for chaining
-        if (parentAgentClass === "SequentialAgent") {
-          const siblings = this.nodes().filter(n =>
-            n.parentId && n.parentId() === parentGroupId
-          );
-
-          if (siblings.length <= 1) {
-            // Check if this single node is a nested workflow
-            if (position === "source" && nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
-              return true;
-            }
-            return false;
-          }
-
-          siblings.sort((a, b) => a.point().x - b.point().x);
-          const nodeIndex = siblings.findIndex(n => n.id === node.id);
-
-          if (position === "target") {
-            // Show target for all except the first node
-            return nodeIndex > 0;
-          } else {
-            if (nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
-              return true;
-            }
-            return nodeIndex < siblings.length - 1;
-          }
-        }
-      }
-
-      // Check if this node is a nested workflow (workflow inside a group)
-      // If so, it needs a source handle to connect to its own group
-      if (position === "source" && nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
-        return true;
       }
 
       return false;
     }
 
-    if (position === "target") {
-      return !isRoot;
-    }
-
-    if (!isRoot) {
-      return true;
-    }
-
-    const nodeId = node.id;
-    if (!nodeId) {
-      return false;
-    }
-
-    return this.edges().some(
-      (edge) => edge.source === nodeId || edge.target === nodeId
-    );
-  }
-
-  getHandlePosition(
-    node: HtmlTemplateDynamicNode,
-    type: "source" | "target"
-  ): "top" | "bottom" | "left" | "right" {
-    if (node.parentId && node.parentId()) {
-      const parentGroupId = node.parentId();
-      const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
-
-      if (parentGroup && parentGroup.data) {
-        const parentAgentClass = parentGroup.data().agent_class;
-
-        // workflow agent has bottom handles always
-        if (type === "source") {
-          const nodeData = node.data ? node.data() : undefined;
-          if (nodeData && this.isWorkflowAgent(nodeData.agent_class)) {
-            return "bottom";
-          }
-        }
-
-        // For Sequential parent groups: left/right handles
-        if (parentAgentClass === "SequentialAgent") {
-          return type === "target" ? "left" : "right";
-        } else {
-          return "top";
-        }
-      }
-    }
-
-    // Default: top for target, bottom for source
-    return type === "target" ? "top" : "bottom";
+    return true;
   }
 
   getToolsForNode(
@@ -1681,7 +1700,9 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           const edge: Edge = {
             id: this.generateEdgeId(),
             source: parentShellId,
+            sourceHandle: 'source-bottom',
             target: shellNode.id,
+            targetHandle: 'target-top',
           };
           edges.push(edge);
         }

@@ -233,6 +233,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   onGroupClick(groupNode: TemplateDynamicGroupNode<any>, event: MouseEvent) {
+    event.stopPropagation();
+
     if (!groupNode?.data) {
       return;
     }
@@ -249,6 +251,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   }
 
   onGroupPointerDown(groupNode: TemplateDynamicGroupNode<any>, event: PointerEvent) {
+    event.stopPropagation();
+
     if (!groupNode?.data) {
       return;
     }

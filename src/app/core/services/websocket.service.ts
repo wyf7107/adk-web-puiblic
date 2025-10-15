@@ -15,28 +15,29 @@
  * limitations under the License.
  */
 
-import {Injectable, InjectionToken} from '@angular/core';
+import {inject, Injectable, InjectionToken} from '@angular/core';
 import {BehaviorSubject, Subject} from 'rxjs';
-import {webSocket, WebSocketSubject} from 'rxjs/webSocket';
+import {WebSocketSubject} from 'rxjs/webSocket';
 
 import {LiveRequest} from '../models/LiveRequest';
 import {Event} from '../models/types';
 
-export const WEBSOCKET_SERVICE = new InjectionToken<WebSocketService>('WebSocketService');
+import {AUDIO_PLAYING_SERVICE, AudioPlayingService} from './audio-playing.service';
+
+export const WEBSOCKET_SERVICE =
+    new InjectionToken<WebSocketService>('WebSocketService');
 
 @Injectable({
   providedIn: 'root',
 })
 export class WebSocketService {
+  private readonly audioPlayingService = inject(AUDIO_PLAYING_SERVICE);
+
   private socket$!: WebSocketSubject<any>;
   private messages$: BehaviorSubject<string> = new BehaviorSubject<string>('');
-  private audioContext = new AudioContext({sampleRate: 22000});
   private audioBuffer: Uint8Array[] = [];
   private audioIntervalId: any = null;
-  private lastAudioTime = 0;
   private closeReasonSubject = new Subject<string>();
-
-  constructor() {}
 
   connect(serverUrl: string) {
     this.socket$ = new WebSocketSubject({
@@ -51,14 +52,19 @@ export class WebSocketService {
     });
 
     this.socket$.subscribe(
-      (message) => {
-        this.handleIncomingAudio(message), this.messages$.next(message);
-      },
-      (error) => {
-        console.error('WebSocket error:', error);
-      },
+        (message) => {
+          this.handleIncomingAudio(message), this.messages$.next(message);
+        },
+        (error) => {
+          console.error('WebSocket error:', error);
+        },
     );
-    this.audioIntervalId = setInterval(() => this.processBufferedAudio(), 250);
+    this.audioIntervalId = setInterval(() => this.playIncomingAudio(), 250);
+  }
+
+  private playIncomingAudio() {
+    this.audioPlayingService.playAudio(this.audioBuffer);
+    this.audioBuffer = [];
   }
 
   sendMessage(data: LiveRequest) {
@@ -106,25 +112,6 @@ export class WebSocketService {
     }
   }
 
-  private processBufferedAudio() {
-    if (this.audioBuffer.length === 0) return;
-
-    // Merge received chunks into a single buffer
-    const totalLength = this.audioBuffer.reduce(
-      (sum, chunk) => sum + chunk.length,
-      0,
-    );
-    const mergedBuffer = new Uint8Array(totalLength);
-    let offset = 0;
-    for (const chunk of this.audioBuffer) {
-      mergedBuffer.set(chunk, offset);
-      offset += chunk.length;
-    }
-
-    this.playPCM(mergedBuffer); // Play combined audio
-    this.audioBuffer = []; // Clear buffer after processing
-  }
-
   private base64ToUint8Array(base64: string): Uint8Array {
     const binaryString = atob(this.urlSafeBase64ToBase64(base64));
     const len = binaryString.length;
@@ -133,32 +120,6 @@ export class WebSocketService {
       bytes[i] = binaryString.charCodeAt(i);
     }
     return bytes;
-  }
-
-  private playPCM(pcmBytes: Uint8Array) {
-    const float32Array = new Float32Array(pcmBytes.length / 2);
-    for (let i = 0; i < float32Array.length; i++) {
-      let int16 = pcmBytes[i * 2] | (pcmBytes[i * 2 + 1] << 8);
-      if (int16 >= 32768) int16 -= 65536; // Convert unsigned to signed
-      float32Array[i] = int16 / 32768.0; // Normalize to [-1, 1]
-    }
-
-    const buffer = this.audioContext.createBuffer(
-      1,
-      float32Array.length,
-      22000,
-    );
-    buffer.copyToChannel(float32Array, 0);
-
-    const source = this.audioContext.createBufferSource();
-    source.buffer = buffer;
-    source.connect(this.audioContext.destination);
-
-    const currentTime = this.audioContext.currentTime;
-    const startTime = Math.max(this.lastAudioTime, currentTime);
-    source.start(startTime);
-
-    this.lastAudioTime = startTime + buffer.duration;
   }
 
   urlSafeBase64ToBase64(urlSafeBase64: string): string {

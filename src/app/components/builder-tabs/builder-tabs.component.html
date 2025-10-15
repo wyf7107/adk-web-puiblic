@@ -472,26 +472,26 @@
             <mat-icon [matMenuTriggerFor]="callbacksMenu">add</mat-icon>
             <mat-menu #callbacksMenu="matMenu">
               <div class="menu-header">Agent Lifecycle</div>
-              <button mat-menu-item (click)="addCallback('Before Agent')">
+              <button mat-menu-item (click)="addCallback('before_agent')">
                 <span>Before Agent</span>
               </button>
-              <button mat-menu-item (click)="addCallback('After Agent')">
+              <button mat-menu-item (click)="addCallback('after_agent')">
                 <span>After Agent</span>
               </button>
               <mat-divider></mat-divider>
               <div class="menu-header">Model (LLM) Interaction</div>
-              <button mat-menu-item (click)="addCallback('Before Model')">
+              <button mat-menu-item (click)="addCallback('before_model')">
                 <span>Before Model</span>
               </button>
-              <button mat-menu-item (click)="addCallback('After Model')">
+              <button mat-menu-item (click)="addCallback('after_model')">
                 <span>After Model</span>
               </button>
               <mat-divider></mat-divider>
               <div class="menu-header">Tool Execution</div>
-              <button mat-menu-item (click)="addCallback('Before Tool')">
+              <button mat-menu-item (click)="addCallback('before_tool')">
                 <span>Before Tool</span>
               </button>
-              <button mat-menu-item (click)="addCallback('After Tool')">
+              <button mat-menu-item (click)="addCallback('after_tool')">
                 <span>After Tool</span>
               </button>
             </mat-menu>

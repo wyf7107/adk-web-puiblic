@@ -174,12 +174,6 @@ export class AgentBuilderService {
         return { success: false, error: `Callback with name '${callback.name}' already exists` };
       }
 
-      // Validate callback name (must be valid Python identifier)
-      const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-      if (!pythonIdentifierRegex.test(callback.name)) {
-        return { success: false, error: 'Callback name must be a valid Python identifier' };
-      }
-
       agentNode.callbacks.push(callback);
       this.agentCallbacksSubject.next({ agentName, callbacks: agentNode.callbacks });
 

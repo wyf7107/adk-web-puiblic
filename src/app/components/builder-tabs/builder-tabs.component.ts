@@ -759,4 +759,29 @@ export class BuilderTabsComponent {
   getToolIcon(tool: ToolNode): string {
     return getToolIcon(tool.name, tool.toolType);
   }
+
+  getAgentIcon(agentClass: string | undefined): string {
+    switch (agentClass) {
+      case 'SequentialAgent':
+        return 'more_horiz';
+      case 'LoopAgent':
+        return 'sync';
+      case 'ParallelAgent':
+        return 'density_medium';
+      case 'LlmAgent':
+      default:
+        return 'psychology';
+    }
+  }
+
+  addSubAgentWithType(agentClass: string) {
+    if (!this.agentConfig?.name) {
+      return;
+    }
+
+    // For workflow agents (non-LlmAgent), set isFromEmptyGroup to true so the sub-agent is added inside the group
+    const isWorkflowAgent = this.agentConfig.agent_class !== 'LlmAgent';
+
+    this.agentBuilderService.setAddSubAgentSubject(this.agentConfig.name, agentClass, isWorkflowAgent);
+  }
 }

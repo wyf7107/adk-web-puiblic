@@ -23,7 +23,7 @@ export class AgentBuilderService {
   private agentCallbacksSubject = new BehaviorSubject<{ agentName: string, callbacks: CallbackNode[] } | undefined>(undefined);
   private agentToolDeletionSubject = new BehaviorSubject<string|undefined>(undefined);
   private deleteSubAgentSubject = new BehaviorSubject<string>('');
-  private addSubAgentSubject = new BehaviorSubject<string>('');
+  private addSubAgentSubject = new BehaviorSubject<{parentAgentName: string, agentClass?: string, isFromEmptyGroup?: boolean}>({parentAgentName: ''});
   private tabChangeSubject = new BehaviorSubject<string|undefined>(undefined);
   private agentToolBoardsSubject = new BehaviorSubject<Map<string, AgentNode>>(new Map());
 
@@ -297,12 +297,12 @@ export class AgentBuilderService {
     this.deleteSubAgentSubject.next(agentName);
   }
 
-  getAddSubAgentSubject(): Observable<string> {
+  getAddSubAgentSubject(): Observable<{parentAgentName: string, agentClass?: string, isFromEmptyGroup?: boolean}> {
     return this.addSubAgentSubject.asObservable();
   }
 
-  setAddSubAgentSubject(agentName: string) {
-    this.addSubAgentSubject.next(agentName);
+  setAddSubAgentSubject(agentName: string, agentClass?: string, isFromEmptyGroup?: boolean) {
+    this.addSubAgentSubject.next({parentAgentName: agentName, agentClass, isFromEmptyGroup});
   }
 
   setAgentTools(agentName?: string, tools?: ToolNode[]) {

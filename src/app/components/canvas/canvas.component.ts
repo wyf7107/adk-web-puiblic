@@ -179,8 +179,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     this.agentBuilderService
       .getAddSubAgentSubject()
-      .subscribe((parentAgentName) => {
-        this.addSubAgent(parentAgentName);
+      .subscribe((request) => {
+        if (request.parentAgentName) {
+          this.addSubAgent(request.parentAgentName, request.agentClass, request.isFromEmptyGroup);
+        }
       });
 
     this.agentBuilderService

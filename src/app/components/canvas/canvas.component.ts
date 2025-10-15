@@ -362,10 +362,34 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     shellPoint: { x: number; y: number },
     parentGroupId?: string
   ): { groupNode: TemplateDynamicGroupNode<any>; edge: Edge | null } {
-    const groupPoint = {
-      x: shellPoint.x + this.workflowGroupXOffset,
-      y: shellPoint.y + this.workflowGroupYOffset,
-    };
+    let groupPoint: { x: number; y: number };
+    let actualParentGroupId: string | null = null;
+
+    // Check if this workflow is nested inside another group
+    if (parentGroupId) {
+      const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+      if (parentGroup) {
+        const parentGroupPoint = parentGroup.point();
+        const parentGroupHeight = parentGroup.height ? parentGroup.height() : this.workflowGroupHeight;
+
+        groupPoint = {
+          x: parentGroupPoint.x,
+          y: parentGroupPoint.y + parentGroupHeight + 60,
+        };
+        actualParentGroupId = null;
+      } else {
+        groupPoint = {
+          x: shellPoint.x + this.workflowGroupXOffset,
+          y: shellPoint.y + this.workflowGroupYOffset,
+        };
+      }
+    } else {
+      groupPoint = {
+        x: shellPoint.x + this.workflowGroupXOffset,
+        y: shellPoint.y + this.workflowGroupYOffset,
+      };
+    }
 
     const newGroupId = this.generateNodeId();
     const groupNode: TemplateDynamicGroupNode<any> = {
@@ -373,7 +397,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       point: signal(groupPoint),
       type: "template-group",
       data: signal(agentData),
-      parentId: parentGroupId ? signal(parentGroupId) : signal(null),
+      parentId: signal(actualParentGroupId),
       width: signal(this.workflowGroupWidth),
       height: signal(this.workflowGroupHeight),
     };
@@ -548,40 +572,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     let shellNode: HtmlTemplateDynamicNode;
     let groupNode: TemplateDynamicGroupNode<any> | null = null;
 
-    if (isInsideGroup) {
-      const groupId = clickedNode.parentId!() ?? undefined;
-      const existingGroupNode = this.groupNodes().find(g => g.id === groupId);
-
-      if (!existingGroupNode || !existingGroupNode.data) {
-        console.error('Could not find parent group node');
-        return;
-      }
-
-      const workflowParentName = existingGroupNode.data().name;
-      const workflowParentAgent = this.agentBuilderService.getNode(workflowParentName);
-
-      if (!workflowParentAgent) {
-        console.error('Could not find workflow parent agent');
-        return;
-      }
-
-      const subAgentIndex = workflowParentAgent.sub_agents.length;
-      const groupHeight = existingGroupNode.height ? existingGroupNode.height() : this.workflowGroupHeight;
-      const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
-
-      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint, groupId);
-      shellNode = result.shellNode;
-      groupNode = result.groupNode;
-
-      workflowParentAgent.sub_agents.push(agentNodeData);
-
-      if (groupNode) {
-        this.groupNodes.set([...this.groupNodes(), groupNode]);
-      }
-      if (result.groupEdge) {
-        this.edges.set([...this.edges(), result.groupEdge]);
-      }
-    } else if (isClickedNodeWorkflow) {
+    // Priority: If clicked node is a workflow agent, add to its own group
+    if (isClickedNodeWorkflow) {
       const clickedAgentData = clickedNode.data();
       if (!clickedAgentData) return;
       const groupForClickedNode = this.groupNodes().find(
@@ -615,8 +607,40 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       if (result.groupEdge) {
         this.edges.set([...this.edges(), result.groupEdge]);
       }
+    } else if (isInsideGroup) {
+      const groupId = clickedNode.parentId!() ?? undefined;
+      const existingGroupNode = this.groupNodes().find(g => g.id === groupId);
+
+      if (!existingGroupNode || !existingGroupNode.data) {
+        console.error('Could not find parent group node');
+        return;
+      }
+
+      const workflowParentName = existingGroupNode.data().name;
+      const workflowParentAgent = this.agentBuilderService.getNode(workflowParentName);
+
+      if (!workflowParentAgent) {
+        console.error('Could not find workflow parent agent');
+        return;
+      }
+
+      const subAgentIndex = workflowParentAgent.sub_agents.length;
+      const groupHeight = existingGroupNode.height ? existingGroupNode.height() : this.workflowGroupHeight;
+      const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
+
+      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint, groupId);
+      shellNode = result.shellNode;
+      groupNode = result.groupNode;
+
+      workflowParentAgent.sub_agents.push(agentNodeData);
+
+      if (groupNode) {
+        this.groupNodes.set([...this.groupNodes(), groupNode]);
+      }
+      if (result.groupEdge) {
+        this.edges.set([...this.edges(), result.groupEdge]);
+      }
     } else {
-      // Normal LLM agent
       const subAgentIndex = clickedNode.data().sub_agents.length;
       const shellPoint = {
         x: clickedNode.point().x + subAgentIndex * 400,

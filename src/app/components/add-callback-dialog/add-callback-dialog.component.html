@@ -14,13 +14,28 @@
  limitations under the License.
 -->
 
-<h2 mat-dialog-title>Add {{callbackType}} Callback</h2>
+<h2 mat-dialog-title>{{ isEditMode ? 'Edit Callback' : 'Add ' + callbackType + ' Callback' }}</h2>
 <mat-dialog-content>
-  <mat-form-field appearance="outline" style="width: 100%;">
+  <ng-container *ngIf="isEditMode">
+    <mat-form-field style="width: 100%;">
+      <mat-label>Callback Type</mat-label>
+      <mat-select [(ngModel)]="callbackType">
+        <mat-option *ngFor="let type of availableCallbackTypes" [value]="type">{{ type }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </ng-container>
+  <mat-form-field style="width: 100%;">
     <mat-label>Callback Name</mat-label>
     <input
       [(ngModel)]="callbackName"
+      #callbackNameInput="ngModel"
+      (ngModelChange)="validate()"
+      [errorStateMatcher]="matcher"
+      (keydown.enter)="addCallback()"
       matInput>
+    <mat-error *ngIf="callbackNameInput.hasError('duplicateName')">Same callback name has been used</mat-error>
+    <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Cannot have callback consist of two words</mat-error>
+    <mat-error *ngIf="callbackNameInput.hasError('hasSpaces')">Callback function names cannot have spaces</mat-error>
   </mat-form-field>
 </mat-dialog-content>
 
@@ -30,6 +45,6 @@
     mat-raised-button color="secondary"
     (click)="addCallback()"
     [disabled]="createDisabled()">
-    Add
+    {{ isEditMode ? 'Save' : 'Add' }}
   </button>
 </mat-dialog-actions>

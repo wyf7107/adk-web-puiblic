@@ -426,6 +426,21 @@
             </button>
           </div>
         </div>
+        @if (agentConfig && agentConfig.sub_agents && agentConfig.sub_agents.length > 0) {
+          <div class="tools-chips-container">
+            <mat-chip-set aria-label="Sub Agents">
+              @for (subAgent of agentConfig.sub_agents; track subAgent.name) {
+                <mat-chip (click)="selectAgent(subAgent)" class="tool-chip">
+                  <mat-icon class="tool-icon" matChipAvatar>{{ getAgentIcon(subAgent.agent_class) }}</mat-icon>
+                  <span class="tool-chip-name">{{subAgent.name}}</span>
+                  <button matChipRemove (click)="deleteSubAgent(subAgent.name); $event.stopPropagation()" aria-label="Remove sub agent">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
       </div>
       <div class="builder-panel-wrapper">
         <div class="panel-title">
@@ -444,26 +459,26 @@
             </button>
             <mat-menu #callbacksMenu="matMenu">
               <div class="menu-header">Agent Lifecycle</div>
-              <button mat-menu-item (click)="addCallback('Before Agent')">
+              <button mat-menu-item (click)="addCallback('before_agent')">
                 <span>Before Agent</span>
               </button>
-              <button mat-menu-item (click)="addCallback('After Agent')">
+              <button mat-menu-item (click)="addCallback('after_agent')">
                 <span>After Agent</span>
               </button>
               <mat-divider></mat-divider>
               <div class="menu-header">Model (LLM) Interaction</div>
-              <button mat-menu-item (click)="addCallback('Before Model')">
+              <button mat-menu-item (click)="addCallback('before_model')">
                 <span>Before Model</span>
               </button>
-              <button mat-menu-item (click)="addCallback('After Model')">
+              <button mat-menu-item (click)="addCallback('after_model')">
                 <span>After Model</span>
               </button>
               <mat-divider></mat-divider>
               <div class="menu-header">Tool Execution</div>
-              <button mat-menu-item (click)="addCallback('Before Tool')">
+              <button mat-menu-item (click)="addCallback('before_tool')">
                 <span>Before Tool</span>
               </button>
-              <button mat-menu-item (click)="addCallback('After Tool')">
+              <button mat-menu-item (click)="addCallback('after_tool')">
                 <span>After Tool</span>
               </button>
             </mat-menu>

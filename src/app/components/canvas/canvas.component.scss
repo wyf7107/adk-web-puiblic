@@ -739,6 +739,13 @@
     display: flex;
     justify-content: center;
     pointer-events: none;
+
+    .custom-node.in-group & {
+        left: auto;
+        right: -68px;
+        bottom: 50%;
+        transform: translateY(50%);
+    }
 }
 
 .add-subagent-container .add-subagent-btn {
@@ -824,30 +831,86 @@
     stroke-width: 2 !important;
     fill: rgba(0, 187, 234, 0.15) !important;
 }
-:host ::ng-deep .workflow-group-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
-    color: #c4c7c5;
-    background: rgba(255, 255, 255, 0.04);
-}
 
-:host ::ng-deep .workflow-group-placeholder__button {
-    border: 2px solid #00BBEA;
-    background-color: rgba(0, 187, 234, 0.1);
-    color: #00BBEA;
-    width: 36px;
-    height: 36px;
+:host ::ng-deep .workflow-group-chip {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    border-radius: 50%;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(0, 187, 234, 0.2);
+    border: 1px solid rgba(0, 187, 234, 0.4);
+    border-radius: 16px;
+    color: #00BBEA;
+    font-family: "Google Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    height: 32px;
+    box-sizing: border-box;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+
+    .workflow-chip-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+    }
+
+    .workflow-chip-label {
+        color: #e8eaed;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 1;
+    }
 }
 
-:host ::ng-deep .workflow-group-placeholder__label {
-    font-size: 14px;
-    font-weight: 500;
+:host ::ng-deep .empty-group-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px dashed rgba(0, 187, 234, 0.3);
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(0, 187, 234, 0.5);
+    }
+
+    button {
+        border: 2px solid #00BBEA;
+        background-color: rgba(0, 187, 234, 0.1);
+        color: #00BBEA;
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: rgba(0, 187, 234, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 187, 234, 0.35);
+        }
+
+        mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    .empty-group-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #9aa0a6;
+        font-family: "Google Sans", sans-serif;
+    }
 }

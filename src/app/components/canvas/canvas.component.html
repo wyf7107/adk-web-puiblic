@@ -41,78 +41,114 @@
       >
     }
     @if (vflowNodes().length > 0) {
-    <vflow 
+    <vflow
       view="auto"
       [nodes]="vflowNodes()"
       [edges]="edges()"
       [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }"
       [snapGrid]="[12, 12]"
     >
-      <ng-template #nodeTemplate let-ctx nodeHtml>
-        @let nodeData = ctx.node.data?.();
-        @if (nodeData?.kind === 'workflow-group-placeholder') {
-          <div class="workflow-group-placeholder" (click)="$event.stopPropagation()">
-            @let parentName = nodeData.parentAgentName;
-            <button
-              matIconButton
-              class="workflow-group-placeholder__button"
-              [matMenuTriggerFor]="workflowGroupMenu"
-              #workflowGroupMenuTrigger="matMenuTrigger"
-              aria-label="Add sub-agent"
-              (click)="$event.stopPropagation()"
+      <ng-template groupNode let-ctx>
+        <svg:g>
+          <svg:rect
+            selectable
+            rx="12"
+            ry="12"
+            [attr.width]="ctx.width()"
+            [attr.height]="ctx.height()"
+            [style.stroke]="isGroupSelected(ctx.node) ? 'rgba(0, 187, 234, 0.8)' : 'rgba(0, 187, 234, 0.3)'"
+            [style.fill]="isGroupSelected(ctx.node) ? 'rgba(0, 187, 234, 0.1)' : 'rgba(0, 187, 234, 0.03)'"
+            [style.stroke-width]="isGroupSelected(ctx.node) ? 3 : 2"
+            (click)="onGroupClick(ctx.node, $event)"
+            (pointerdown)="onGroupPointerDown(ctx.node, $event)"
+          />
+          <svg:foreignObject
+            [attr.width]="200"
+            [attr.height]="32"
+            x="12"
+            y="12"
+          >
+            <div class="workflow-group-chip">
+              <mat-icon class="workflow-chip-icon">{{ getAgentIcon(ctx.node.data?.()?.agent_class) }}</mat-icon>
+              <span class="workflow-chip-label">{{ ctx.node.data?.()?.agent_class }}</span>
+            </div>
+          </svg:foreignObject>
+          @if (isGroupEmpty(ctx.node.id)) {
+            <svg:foreignObject
+              [attr.width]="200"
+              [attr.height]="100"
+              [attr.x]="ctx.width() / 2 - 100"
+              [attr.y]="ctx.height() / 2 - 40"
             >
-              <mat-icon>add</mat-icon>
-            </button>
-            <span class="workflow-group-placeholder__label">Add sub-agent</span>
-            <mat-menu #workflowGroupMenu="matMenu">
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('LlmAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>psychology</mat-icon>
-                <span>LLM Agent</span>
-              </button>
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('SequentialAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>more_horiz</mat-icon>
-                <span>Sequential Agent</span>
-              </button>
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('LoopAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>sync</mat-icon>
-                <span>Loop Agent</span>
-              </button>
-              <button
-                mat-menu-item
-                (click)="handleAgentTypeSelection('ParallelAgent', parentName, workflowGroupMenuTrigger, $event)"
-              >
-                <mat-icon>density_medium</mat-icon>
-                <span>Parallel Agent</span>
-              </button>
-            </mat-menu>
-            <handle type="target" position="top" />
-            <handle type="source" position="bottom" />
-          </div>
-        } @else {
+              <div class="empty-group-placeholder" (click)="$event.stopPropagation()">
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="emptyGroupMenu"
+                  #emptyGroupMenuTrigger="matMenuTrigger"
+                  matTooltip="Add sub-agent"
+                  aria-label="Add sub-agent"
+                  (click)="$event.stopPropagation()"
+                >
+                  <mat-icon>add</mat-icon>
+                </button>
+                <span class="empty-group-label">Add sub-agent</span>
+                <mat-menu #emptyGroupMenu="matMenu">
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('LlmAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
+                  >
+                    <mat-icon>psychology</mat-icon>
+                    <span>LLM Agent</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('SequentialAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
+                  >
+                    <mat-icon>more_horiz</mat-icon>
+                    <span>Sequential Agent</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('LoopAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
+                  >
+                    <mat-icon>sync</mat-icon>
+                    <span>Loop Agent</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="handleAgentTypeSelection('ParallelAgent', ctx.node.data?.()?.name, emptyGroupMenuTrigger, $event, true)"
+                  >
+                    <mat-icon>density_medium</mat-icon>
+                    <span>Parallel Agent</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </svg:foreignObject>
+          }
+          @if (shouldShowTopHandle(ctx.node)) {
+            <handle type="target" position="top" id="target-top" />
+          }
+        </svg:g>
+      </ng-template>
+
+      <ng-template nodeHtml let-ctx>
+        @let nodeData = ctx.node.data?.();
           @let nodeName = nodeData?.name || 'root_agent';
           @let toolsMap = toolsMap$ | async;
           @let tools = getToolsForNode(nodeName, toolsMap);
           @let hasTools = tools.length > 0;
-          <div 
+          <div
             class="custom-node"
             selectable
             [class.custom-node_selected]="isNodeSelected(ctx.node)"
             [class.custom-node_has-tools]="hasTools"
+            [class.in-group]="ctx.node.parentId && ctx.node.parentId()"
             (click)="onCustomTemplateNodeClick(ctx.node, $event)"
             (pointerdown)="onNodePointerDown(ctx.node, $event)"
           >
           <div class="node-title-wrapper">
             <div class="node-title">
-              <span class="material-symbols-outlined" style="margin-right: 5px;">robot_2</span>
+              <mat-icon style="margin-right: 5px;">{{ getAgentIcon(nodeData?.agent_class) }}</mat-icon>
               {{nodeName}}
               @if (isRootAgent(nodeName)) {
                 <span class="node-badge">Root</span>
@@ -139,7 +175,7 @@
               </div>
             </div>
           }
-          @if (isNodeSelected(ctx.node)) {
+          @if (shouldShowAddButton(ctx.node)) {
             <div class="add-subagent-container">
               <button
                 matIconButton
@@ -184,14 +220,20 @@
               </mat-menu>
             </div>
           }
-          @if (shouldShowHandle(ctx.node, 'target')) {
-            <handle type="target" position="top" />
+          @if (shouldShowLeftHandle(ctx.node)) {
+            <handle type="target" position="left" id="target-left" />
           }
-          @if (shouldShowHandle(ctx.node, 'source')) {
-            <handle type="source" position="bottom" />
+          @if (shouldShowTopHandle(ctx.node)) {
+            <handle type="target" position="top" id="target-top" />
+          }
+
+          @if (shouldShowRightHandle(ctx.node)) {
+            <handle type="source" position="right" id="source-right" />
+          }
+          @if (shouldShowBottomHandle(ctx.node)) {
+            <handle type="source" position="bottom" id="source-bottom" />
           }
         </div>
-        }
       </ng-template>
     </vflow>
     }

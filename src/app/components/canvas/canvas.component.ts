@@ -21,7 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { Vflow, HtmlTemplateDynamicNode, Edge, DefaultDynamicGroupNode } from 'ngx-vflow';
+import { Vflow, HtmlTemplateDynamicNode, Edge, TemplateDynamicGroupNode } from 'ngx-vflow';
 import { MatIcon } from '@angular/material/icon';
 import { MatChip, MatChipSet } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -93,17 +93,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
   private readonly workflowGroupXOffset = -40;
   private readonly workflowInnerNodePoint = { x: 40, y: 80 };
 
-  private agentNodeBundles = new Map<
-    string,
-    { shellId: string; groupId: string; placeholderId?: string }
-  >();
-
-  private groupNodes = signal<DefaultDynamicGroupNode[]>([]);
-  private groupPlaceholders = signal<HtmlTemplateDynamicNode[]>([]);
+  private groupNodes = signal<TemplateDynamicGroupNode<any>[]>([]);
   public vflowNodes = computed(() => [
     ...this.groupNodes(),
     ...this.nodes(),
-    ...this.groupPlaceholders(),
   ]);
 
   public selectedAgents: HtmlTemplateDynamicNode[] = [];
@@ -186,8 +179,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     this.agentBuilderService
       .getAddSubAgentSubject()
-      .subscribe((parentAgentName) => {
-        this.addSubAgent(parentAgentName);
+      .subscribe((request) => {
+        if (request.parentAgentName) {
+          this.addSubAgent(request.parentAgentName, request.agentClass, request.isFromEmptyGroup);
+        }
       });
 
     this.agentBuilderService
@@ -197,6 +192,17 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           (node) => node.data && node.data().name === selectedAgentNode?.name
         );
       });
+
+    // Listen for tool changes and update group dimensions
+    this.toolsMap$.subscribe((toolsMap) => {
+      const hasNodesInGroups = this.nodes().some(node =>
+        node.parentId && node.parentId()
+      );
+
+      if (hasNodesInGroups && this.groupNodes().length > 0) {
+        this.updateGroupDimensions();
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -224,6 +230,42 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     }
 
     this.selectAgentNode(node, { openConfig: false });
+  }
+
+  onGroupClick(groupNode: TemplateDynamicGroupNode<any>, event: MouseEvent) {
+    event.stopPropagation();
+
+    if (!groupNode?.data) {
+      return;
+    }
+
+    // Find the corresponding shell node for this group
+    const groupAgentName = groupNode.data().name;
+    const shellNode = this.nodes().find(n =>
+      n.data && n.data().name === groupAgentName
+    );
+
+    if (shellNode) {
+      this.selectAgentNode(shellNode, { openConfig: true });
+    }
+  }
+
+  onGroupPointerDown(groupNode: TemplateDynamicGroupNode<any>, event: PointerEvent) {
+    event.stopPropagation();
+
+    if (!groupNode?.data) {
+      return;
+    }
+
+    // Find the corresponding shell node for this group
+    const groupAgentName = groupNode.data().name;
+    const shellNode = this.nodes().find(n =>
+      n.data && n.data().name === groupAgentName
+    );
+
+    if (shellNode) {
+      this.selectAgentNode(shellNode, { openConfig: false });
+    }
   }
 
   onCanvasClick(event: MouseEvent) {
@@ -282,11 +324,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     agentClass: string,
     parentAgentName: string | undefined,
     trigger: MatMenuTrigger,
-    event: MouseEvent
+    event: MouseEvent,
+    isFromEmptyGroup: boolean = false
   ) {
     event.stopPropagation();
     trigger?.closeMenu();
-    this.onAgentTypeSelected(agentClass, parentAgentName);
+    this.onAgentTypeSelected(agentClass, parentAgentName, isFromEmptyGroup);
   }
 
   private clearCanvasSelection() {
@@ -311,12 +354,12 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     // This method can be used for general resource addition logic
   }
 
-  onAgentTypeSelected(agentClass: string, parentAgentName: string | undefined) {
+  onAgentTypeSelected(agentClass: string, parentAgentName: string | undefined, isFromEmptyGroup: boolean = false) {
     if (!parentAgentName) {
       return;
     }
 
-    this.addSubAgent(parentAgentName, agentClass);
+    this.addSubAgent(parentAgentName, agentClass, isFromEmptyGroup);
   }
 
   private generateNodeId(): string {
@@ -329,107 +372,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return this.edgeId.toString();
   }
 
-  private createNodeBundle(
+  private createNode(
     agentData: AgentNode,
     shellPoint: { x: number; y: number },
-    options?: { parentGroupId?: string; order?: number; includePlaceholder?: boolean }
-  ): {
-    shellNode: HtmlTemplateDynamicNode;
-    groupNode: DefaultDynamicGroupNode;
-    placeholderNode?: HtmlTemplateDynamicNode;
-    shellPlaceholderEdge?: Edge;
-    placeholderId?: string;
-  } {
-    const dataSignal = signal(agentData);
-
-    const shellId = this.generateNodeId();
-    const shellNode: HtmlTemplateDynamicNode = {
-      id: shellId,
-      point: signal({ ...shellPoint }),
-      type: "html-template",
-      data: dataSignal,
-    };
-
-    const groupId = this.generateNodeId();
-    const groupPoint = {
-      x: shellPoint.x + this.workflowGroupXOffset,
-      y: shellPoint.y + this.workflowGroupYOffset,
-    };
-    const groupNode: DefaultDynamicGroupNode = {
-      id: groupId,
-      point: signal(groupPoint),
-      type: "default-group",
-      width: signal(this.workflowGroupWidth),
-      height: signal(this.workflowGroupHeight),
-      color: signal("rgba(85, 107, 116, 1)"),
-      resizable: signal(false),
-    };
-
-    const includePlaceholder = options?.includePlaceholder ?? true;
-
-    let placeholderNode: HtmlTemplateDynamicNode | undefined;
-    let placeholderEdge: Edge | undefined;
-    let placeholderId: string | undefined;
-
-    if (includePlaceholder) {
-      placeholderId = this.generateNodeId();
-      placeholderNode = {
-        id: placeholderId,
-        point: signal({ ...this.workflowInnerNodePoint }),
-        type: "html-template",
-        parentId: signal(groupId),
-        data: signal({
-          kind: "workflow-group-placeholder",
-          parentAgentName: agentData.name,
-        }),
-      };
-
-      placeholderEdge = {
-        id: this.generateEdgeId(),
-        source: shellId,
-        target: placeholderId,
-      };
-    }
-
-    if (options?.parentGroupId) {
-      const parentGroupId = options.parentGroupId;
-      const sequenceIndex = options.order ?? 0;
-      const localShellPoint = {
-        x: 40 + sequenceIndex * 200,
-        y: 40,
-      };
-
-      shellNode.point.set(localShellPoint);
-      shellNode.parentId = signal(parentGroupId);
-
-      const localGroupPoint = {
-        x: localShellPoint.x + this.workflowGroupXOffset,
-        y: localShellPoint.y + this.workflowGroupYOffset,
-      };
-      groupNode.point.set(localGroupPoint);
-      groupNode.parentId = signal(parentGroupId);
-    }
-
-    this.agentNodeBundles.set(agentData.name, {
-      shellId,
-      groupId,
-      placeholderId,
-    });
-
-    this.nodePositions.set(agentData.name, { ...shellNode.point() });
-
-    return {
-      shellNode,
-      groupNode,
-      placeholderNode,
-      shellPlaceholderEdge: placeholderEdge,
-      placeholderId,
-    };
-  }
-
-  private createShellNodeOnly(
-    agentData: AgentNode,
-    shellPoint: { x: number; y: number }
+    parentGroupId?: string
   ): HtmlTemplateDynamicNode {
     const dataSignal = signal(agentData);
     const shellId = this.generateNodeId();
@@ -440,13 +386,237 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       data: dataSignal,
     };
 
-    this.agentNodeBundles.delete(agentData.name);
+    if (parentGroupId) {
+      shellNode.parentId = signal(parentGroupId);
+    }
+
     this.nodePositions.set(agentData.name, { ...shellNode.point() });
 
     return shellNode;
   }
 
-  private isWorkflowAgent(agentClass: string | undefined): boolean {
+  private createWorkflowGroup(
+    agentData: AgentNode,
+    shellNode: HtmlTemplateDynamicNode,
+    shellPoint: { x: number; y: number },
+    parentGroupId?: string,
+    groupNodesArray?: TemplateDynamicGroupNode<any>[],
+    shellNodesArray?: HtmlTemplateDynamicNode[]
+  ): { groupNode: TemplateDynamicGroupNode<any>; edge: Edge | null } {
+    let groupPoint: { x: number; y: number };
+    let actualParentGroupId: string | null = null;
+
+    // Check if this workflow is nested inside another group
+    if (parentGroupId) {
+      // Use provided array or fallback to component signal
+      const groupsToSearch = groupNodesArray || this.groupNodes();
+      const parentGroup = groupsToSearch.find(g => g.id === parentGroupId);
+
+      if (parentGroup) {
+        const parentGroupPoint = parentGroup.point();
+        // Calculate actual height based on the parent group's content
+        let actualParentGroupHeight = parentGroup.height ? parentGroup.height() : this.workflowGroupHeight;
+
+        // If we have shell nodes array, calculate the actual height based on parent group's children
+        if (shellNodesArray && groupNodesArray) {
+          // Find all shell nodes that are children of the parent group
+          const parentChildren = shellNodesArray.filter(n =>
+            n.parentId && n.parentId() === parentGroup.id
+          );
+
+          if (parentChildren.length > 0) {
+            // Calculate the actual height needed for parent group content
+            const NODE_WIDTH = 340;
+            const BASE_NODE_HEIGHT = 120;
+            const TOOL_ITEM_HEIGHT = 36;
+            const TOOLS_CONTAINER_PADDING = 20;
+            const ADD_BUTTON_WIDTH = 68;
+            const PADDING = 40;
+            const FIXED_NODE_Y = 80;
+
+            let maxHeight = 0;
+            for (const child of parentChildren) {
+              const childData = child.data ? child.data() : undefined;
+              let nodeHeight = BASE_NODE_HEIGHT;
+              if (childData && childData.tools && childData.tools.length > 0) {
+                nodeHeight += TOOLS_CONTAINER_PADDING + (childData.tools.length * TOOL_ITEM_HEIGHT);
+              }
+              maxHeight = Math.max(maxHeight, nodeHeight);
+            }
+
+            // Calculate total height with padding
+            actualParentGroupHeight = Math.max(220, FIXED_NODE_Y + maxHeight + PADDING);
+          }
+        }
+
+        groupPoint = {
+          x: parentGroupPoint.x,
+          y: parentGroupPoint.y + actualParentGroupHeight + 60,
+        };
+        actualParentGroupId = null;
+      } else {
+        groupPoint = {
+          x: shellPoint.x + this.workflowGroupXOffset,
+          y: shellPoint.y + this.workflowGroupYOffset,
+        };
+      }
+    } else {
+      groupPoint = {
+        x: shellPoint.x + this.workflowGroupXOffset,
+        y: shellPoint.y + this.workflowGroupYOffset,
+      };
+    }
+
+    const newGroupId = this.generateNodeId();
+    const groupNode: TemplateDynamicGroupNode<any> = {
+      id: newGroupId,
+      point: signal(groupPoint),
+      type: "template-group",
+      data: signal(agentData),
+      parentId: signal(actualParentGroupId),
+      width: signal(this.workflowGroupWidth),
+      height: signal(this.workflowGroupHeight),
+    };
+
+    // Only create edge for Sequential workflows, not for Loop or Parallel
+    const edge = agentData.agent_class === "SequentialAgent"
+      ? {
+          id: this.generateEdgeId(),
+          source: shellNode.id,
+          sourceHandle: 'source-bottom',
+          target: newGroupId,
+          targetHandle: 'target-top',
+        }
+      : null;
+
+    return { groupNode, edge };
+  }
+
+  private calculateWorkflowChildPosition(
+    subAgentIndex: number,
+    groupHeight: number
+  ): { x: number; y: number } {
+    const NODE_WIDTH = 340;
+    const ADD_BUTTON_WIDTH = 68;
+    const SPACING = 20;
+    const nodeHeight = 20;
+    const verticalCenter = (groupHeight - nodeHeight) / 2;
+
+    return {
+      x: 45 + subAgentIndex * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING),
+      y: verticalCenter,
+    };
+  }
+
+  private createAgentNodeWithGroup(
+    agentData: AgentNode,
+    shellPoint: { x: number; y: number },
+    parentGroupId?: string,
+    groupNodesArray?: TemplateDynamicGroupNode<any>[],
+    shellNodesArray?: HtmlTemplateDynamicNode[]
+  ): {
+    shellNode: HtmlTemplateDynamicNode;
+    groupNode: TemplateDynamicGroupNode<any> | null;
+    groupEdge: Edge | null;
+  } {
+    const shellNode = this.createNode(agentData, shellPoint, parentGroupId);
+
+    let groupNode: TemplateDynamicGroupNode<any> | null = null;
+    let groupEdge: Edge | null = null;
+
+    if (this.isWorkflowAgent(agentData.agent_class)) {
+      const result = this.createWorkflowGroup(agentData, shellNode, shellPoint, parentGroupId, groupNodesArray, shellNodesArray);
+      groupNode = result.groupNode;
+      groupEdge = result.edge;
+    }
+
+    return { shellNode, groupNode, groupEdge };
+  }
+
+  private createWorkflowChildEdge(
+    childNode: HtmlTemplateDynamicNode,
+    parentGroupId: string | undefined
+  ): Edge | null {
+    return this.createWorkflowChildEdgeFromArrays(
+      childNode,
+      parentGroupId,
+      this.nodes(),
+      this.groupNodes()
+    );
+  }
+
+  /**
+   * Creates an edge for a sub-agent inside a workflow group.
+   * - Loop/Parallel: Connects workflow shell node to the sub-agent
+   * - Sequential: Connects to the previous sibling in the chain
+   *
+   */
+  private createWorkflowChildEdgeFromArrays(
+    childNode: HtmlTemplateDynamicNode,
+    parentGroupId: string | undefined,
+    shellNodes: HtmlTemplateDynamicNode[],
+    groupNodes: TemplateDynamicGroupNode<any>[]
+  ): Edge | null {
+    if (!parentGroupId) {
+      return null;
+    }
+
+    const parentGroupNode = groupNodes.find(g => g.id === parentGroupId);
+    if (!parentGroupNode || !parentGroupNode.data) {
+      return null;
+    }
+
+    const workflowAgentClass = parentGroupNode.data().agent_class;
+
+    if (workflowAgentClass === "LoopAgent" || workflowAgentClass === "ParallelAgent") {
+      const workflowShellNode = shellNodes.find(n =>
+        n.data && n.data().name === parentGroupNode.data!().name
+      );
+
+      if (workflowShellNode) {
+        return {
+          id: this.generateEdgeId(),
+          source: workflowShellNode.id,
+          sourceHandle: 'source-bottom',
+          target: childNode.id,
+          targetHandle: 'target-top',
+        };
+      }
+    }
+
+    if (workflowAgentClass === "SequentialAgent") {
+      // Get all siblings in the group
+      const siblings = shellNodes.filter(n =>
+        n.parentId && n.parentId() === parentGroupId
+      );
+
+      if (siblings.length === 0) {
+        return null;
+      }
+
+      siblings.sort((a, b) => a.point().x - b.point().x);
+
+      const currentIndex = siblings.findIndex(n => n.id === childNode.id);
+
+      if (currentIndex <= 0) {
+        return null;
+      }
+
+      const previousSibling = siblings[currentIndex - 1];
+
+      return {
+        id: this.generateEdgeId(),
+        source: previousSibling.id,
+        sourceHandle: 'source-right',
+        target: childNode.id,
+        targetHandle: 'target-left',
+      };
+    }
+
+    return null;
+  }
+
+  isWorkflowAgent(agentClass: string | undefined): boolean {
     if (!agentClass) {
       return false;
     }
@@ -458,12 +628,11 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     );
   }
 
-  addSubAgent(parentAgentName: string, agentClass: string = "LlmAgent") {
-    // Find the parent node
-    const parentNode: HtmlTemplateDynamicNode = this.nodes().find(
+  addSubAgent(parentAgentName: string, agentClass: string = "LlmAgent", isFromEmptyGroup: boolean = false) {
+    const clickedNode: HtmlTemplateDynamicNode = this.nodes().find(
       (node) => node.data && node.data().name === parentAgentName
     ) as HtmlTemplateDynamicNode;
-    if (!parentNode || !parentNode.data) return;
+    if (!clickedNode || !clickedNode.data) return;
 
     const newAgentName = this.agentBuilderService.getNextSubAgentName();
 
@@ -477,89 +646,140 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       tools: [],
     };
 
-    const subAgentIndex = parentNode.data().sub_agents.length;
-
-    const shellPoint = {
-      x: parentNode.point().x + subAgentIndex * 400,
-      y: parentNode.point().y + 300,
-    };
-
-    const isWorkflow = this.isWorkflowAgent(agentClass);
-    const parentIsWorkflow = this.isWorkflowAgent(
-      parentNode.data().agent_class
+    const isClickedNodeWorkflow = this.isWorkflowAgent(
+      clickedNode.data().agent_class
     );
-    const parentBundle = this.agentNodeBundles.get(parentNode.data().name);
-    const parentHadPlaceholder = !!parentBundle?.placeholderId;
 
-    if (parentBundle?.placeholderId) {
-      const placeholderId = parentBundle.placeholderId;
-      this.groupPlaceholders.set(
-        this.groupPlaceholders().filter((node) => node.id !== placeholderId)
-      );
-      this.edges.set(
-        this.edges().filter(
-          (edge) => edge.target !== placeholderId && edge.source !== placeholderId
-        )
-      );
-      this.agentNodeBundles.set(parentNode.data().name, {
-        ...parentBundle,
-        placeholderId: undefined,
-      });
-    }
+    const isInsideGroup = clickedNode.parentId && clickedNode.parentId() &&
+      this.groupNodes().some(g => g.id === clickedNode.parentId!());
 
     let shellNode: HtmlTemplateDynamicNode;
+    let groupNode: TemplateDynamicGroupNode<any> | null = null;
 
-    if (isWorkflow) {
-      const bundle = this.createNodeBundle(agentNodeData, shellPoint, {
-        parentGroupId:
-          parentIsWorkflow && !parentHadPlaceholder
-            ? parentBundle?.groupId
-            : undefined,
-        order: subAgentIndex,
-      });
-      shellNode = bundle.shellNode;
-      this.nodes.set([...this.nodes(), bundle.shellNode]);
-      this.groupNodes.set([...this.groupNodes(), bundle.groupNode]);
-      if (bundle.placeholderNode && bundle.shellPlaceholderEdge) {
-        this.groupPlaceholders.set([
-          ...this.groupPlaceholders(),
-          bundle.placeholderNode,
-        ]);
-        this.edges.set([...this.edges(), bundle.shellPlaceholderEdge]);
+    //If this is from the empty group button, always add to the workflow's own group
+    if (isFromEmptyGroup && isClickedNodeWorkflow) {
+      const clickedAgentData = clickedNode.data();
+      if (!clickedAgentData) return;
+
+      const groupForClickedNode = this.groupNodes().find(
+        g => g.data && g.data()?.name === clickedAgentData.name
+      );
+
+      if (!groupForClickedNode) {
+        console.error('Could not find group for workflow node');
+        return;
       }
-      this.agentBuilderService.setSelectedNode(agentNodeData);
-      this.selectedAgents = [bundle.shellNode];
+
+      const clickedAgentServiceData = this.agentBuilderService.getNode(clickedNode.data().name);
+      if (!clickedAgentServiceData) {
+        console.error('Could not find clicked agent data');
+        return;
+      }
+
+      const subAgentIndex = clickedAgentServiceData.sub_agents.length;
+      const groupHeight = groupForClickedNode.height ? groupForClickedNode.height() : this.workflowGroupHeight;
+      const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
+
+      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint, groupForClickedNode.id);
+      shellNode = result.shellNode;
+      groupNode = result.groupNode;
+
+      clickedAgentServiceData.sub_agents.push(agentNodeData);
+
+      if (groupNode) {
+        this.groupNodes.set([...this.groupNodes(), groupNode]);
+      }
+      if (result.groupEdge) {
+        this.edges.set([...this.edges(), result.groupEdge]);
+      }
+    } else if (isInsideGroup) {
+      //Node inside a group (+ button) - add sibling to parent group
+      const groupId = clickedNode.parentId!() ?? undefined;
+      const existingGroupNode = this.groupNodes().find(g => g.id === groupId);
+
+      if (!existingGroupNode || !existingGroupNode.data) {
+        console.error('Could not find parent group node');
+        return;
+      }
+
+      const workflowParentName = existingGroupNode.data().name;
+      const workflowParentAgent = this.agentBuilderService.getNode(workflowParentName);
+
+      if (!workflowParentAgent) {
+        console.error('Could not find workflow parent agent');
+        return;
+      }
+
+      const subAgentIndex = workflowParentAgent.sub_agents.length;
+      const groupHeight = existingGroupNode.height ? existingGroupNode.height() : this.workflowGroupHeight;
+      const shellPoint = this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
+
+      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint, groupId);
+      shellNode = result.shellNode;
+      groupNode = result.groupNode;
+
+      workflowParentAgent.sub_agents.push(agentNodeData);
+
+      if (groupNode) {
+        this.groupNodes.set([...this.groupNodes(), groupNode]);
+      }
+      if (result.groupEdge) {
+        this.edges.set([...this.edges(), result.groupEdge]);
+      }
     } else {
-      const baseShellPoint = parentIsWorkflow
-        ? { x: 40 + subAgentIndex * 200, y: 40 }
-        : shellPoint;
+      const subAgentIndex = clickedNode.data().sub_agents.length;
+      const shellPoint = {
+        x: clickedNode.point().x + subAgentIndex * 400,
+        y: clickedNode.point().y + 300,
+      };
 
-      shellNode = this.createShellNodeOnly(agentNodeData, baseShellPoint);
-      if (parentIsWorkflow && parentBundle?.groupId) {
-        shellNode.parentId = signal(parentBundle.groupId);
+      const result = this.createAgentNodeWithGroup(agentNodeData, shellPoint);
+      shellNode = result.shellNode;
+      groupNode = result.groupNode;
+
+      const clickedAgentData = this.agentBuilderService.getNode(clickedNode.data().name);
+      if (clickedAgentData) {
+        clickedAgentData.sub_agents.push(agentNodeData);
       }
-      this.nodes.set([...this.nodes(), shellNode]);
-      this.selectedAgents = [shellNode];
+
+      if (groupNode) {
+        this.groupNodes.set([...this.groupNodes(), groupNode]);
+      }
+      if (result.groupEdge) {
+        this.edges.set([...this.edges(), result.groupEdge]);
+      }
     }
 
     this.agentBuilderService.addNode(agentNodeData);
 
-    const parentAgentNode: AgentNode | undefined = parentNode.data
-      ? this.agentBuilderService.getNode(parentNode.data().name)
-      : undefined;
-    if (!!parentAgentNode) {
-      parentAgentNode.sub_agents.push(agentNodeData);
+    this.nodes.set([...this.nodes(), shellNode]);
+    this.selectedAgents = [shellNode];
+
+    if (isInsideGroup || isClickedNodeWorkflow) {
+      this.updateGroupDimensions();
     }
 
-    // Create an edge connecting the parent to the sub-agent
-    const edge: Edge = {
-      id: this.generateEdgeId(),
-      source: parentNode.id,
-      target: shellNode.id,
-    };
+    // Create edges connecting the parent to the sub-agent
+    if (isClickedNodeWorkflow || isInsideGroup) {
+      const parentGroupId = shellNode.parentId ? shellNode.parentId() ?? undefined : undefined;
+      const workflowEdge = this.createWorkflowChildEdge(
+        shellNode,
+        parentGroupId
+      );
 
-    // Add the edge
-    this.edges.set([...this.edges(), edge]);
+      if (workflowEdge) {
+        this.edges.set([...this.edges(), workflowEdge]);
+      }
+    } else {
+      const edge: Edge = {
+        id: this.generateEdgeId(),
+        source: clickedNode.id,
+        sourceHandle: 'source-bottom',
+        target: shellNode.id,
+        targetHandle: 'target-top',
+      };
+      this.edges.set([...this.edges(), edge]);
+    }
 
     // Auto-select the newly created sub-agent and switch to Config tab
     this.agentBuilderService.setSelectedNode(agentNodeData);
@@ -754,10 +974,6 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       return;
     }
 
-    const parentTemplateNode = this.nodes().find(
-      (node) => !!node.data && node.data().name === parentNode.name
-    );
-
     this.deleteSubAgentHelper(currentNode, parentNode);
 
     // select the parent node if the current selected node is deleted
@@ -772,6 +988,54 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           this.agentBuilderService.setSelectedNode(parentNode);
         }
       });
+  }
+
+  /**
+   * Check if a node is inside a sequential workflow group
+   */
+  private isNodeInSequentialWorkflow(node: HtmlTemplateDynamicNode): boolean {
+    if (!node.parentId || !node.parentId()) {
+      return false;
+    }
+
+    const parentGroupId = node.parentId();
+    const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+    if (!parentGroup || !parentGroup.data) {
+      return false;
+    }
+
+    return parentGroup.data().agent_class === "SequentialAgent";
+  }
+
+  /**
+   * Get the previous and next siblings of a node in a sequential workflow
+   */
+  private getSequentialSiblings(node: HtmlTemplateDynamicNode): {
+    previous: HtmlTemplateDynamicNode | undefined;
+    next: HtmlTemplateDynamicNode | undefined;
+  } {
+    if (!node.parentId || !node.parentId()) {
+      return { previous: undefined, next: undefined };
+    }
+
+    const parentGroupId = node.parentId();
+    const siblings = this.nodes().filter(n =>
+      n.parentId && n.parentId() === parentGroupId
+    );
+
+    siblings.sort((a, b) => a.point().x - b.point().x);
+
+    const currentIndex = siblings.findIndex(n => n.id === node.id);
+
+    if (currentIndex === -1) {
+      return { previous: undefined, next: undefined };
+    }
+
+    return {
+      previous: currentIndex > 0 ? siblings[currentIndex - 1] : undefined,
+      next: currentIndex < siblings.length - 1 ? siblings[currentIndex + 1] : undefined,
+    };
   }
 
   deleteSubAgentHelper(
@@ -792,47 +1056,61 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.deleteToolWithoutDialog(agentNode.name, tool);
     }
 
-    const bundle = this.agentNodeBundles.get(agentNode.name);
+    const shellNode = this.nodes().find(
+      (node) => node.data && node.data().name === agentNode.name
+    );
 
-    if (bundle) {
-      this.nodes.set(this.nodes().filter((node) => node.id !== bundle.shellId));
-      this.groupNodes.set(
-        this.groupNodes().filter((node) => node.id !== bundle.groupId)
-      );
-      if (bundle.placeholderId) {
-        this.groupPlaceholders.set(
-          this.groupPlaceholders().filter((node) => node.id !== bundle.placeholderId)
-        );
+    if (shellNode) {
+      const isInSequentialWorkflow = this.isNodeInSequentialWorkflow(shellNode);
+      let previousSibling: HtmlTemplateDynamicNode | undefined;
+      let nextSibling: HtmlTemplateDynamicNode | undefined;
+
+      if (isInSequentialWorkflow) {
+        const siblings = this.getSequentialSiblings(shellNode);
+        previousSibling = siblings.previous;
+        nextSibling = siblings.next;
       }
 
-      this.agentNodeBundles.delete(agentNode.name);
-
-      const newEdges = this.edges().filter(
-        (edge) =>
-          edge.target !== bundle.shellId &&
-          edge.source !== bundle.shellId &&
-          edge.target !== bundle.placeholderId &&
-          edge.source !== bundle.placeholderId &&
-          edge.target !== bundle.groupId &&
-          edge.source !== bundle.groupId
+      this.nodes.set(
+        this.nodes().filter((node: HtmlTemplateDynamicNode) => {
+          return node.id !== shellNode.id;
+        })
       );
-      this.edges.set(newEdges);
-    } else {
-      const shellNodeId = this.nodes().find(
-        (node) => node.data && node.data().name === agentNode.name
-      )?.id;
 
-      if (shellNodeId) {
-        this.nodes.set(
-          this.nodes().filter((node: HtmlTemplateDynamicNode) => {
-            return node.id !== shellNodeId;
-          })
+      const groupNode = this.groupNodes().find(
+        (node) => node.data && node.data().name === agentNode.name
+      );
+
+      if (groupNode) {
+        this.groupNodes.set(
+          this.groupNodes().filter((node) => node.id !== groupNode.id)
         );
 
         const newEdges = this.edges().filter(
-          (edge) => edge.target !== shellNodeId && edge.source !== shellNodeId
+          (edge) =>
+            edge.target !== shellNode.id &&
+            edge.source !== shellNode.id &&
+            edge.target !== groupNode.id &&
+            edge.source !== groupNode.id
         );
         this.edges.set(newEdges);
+      } else {
+        const newEdges = this.edges().filter(
+          (edge) => edge.target !== shellNode.id && edge.source !== shellNode.id
+        );
+        this.edges.set(newEdges);
+      }
+
+      // Reconnect siblings in sequential workflow
+      if (isInSequentialWorkflow && previousSibling && nextSibling) {
+        const reconnectionEdge: Edge = {
+          id: this.generateEdgeId(),
+          source: previousSibling.id,
+          sourceHandle: 'source-right',
+          target: nextSibling.id,
+          targetHandle: 'target-left',
+        };
+        this.edges.set([...this.edges(), reconnectionEdge]);
       }
     }
 
@@ -844,6 +1122,10 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     // delete node data in builder service
     this.agentBuilderService.deleteNode(agentNode);
+
+    if (shellNode && shellNode.parentId && shellNode.parentId()) {
+      this.updateGroupDimensions();
+    }
   }
 
   selectTool(tool: any, node: HtmlTemplateDynamicNode) {
@@ -982,34 +1264,109 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return this.isRootAgent(agentName);
   }
 
-  shouldShowHandle(
-    node: HtmlTemplateDynamicNode,
-    position: "source" | "target"
-  ): boolean {
+  /**
+   * Horizontal handles (left/right): Only for chained sub-agents inside Sequential workflow
+   * @param node The node to check
+   * @param position 'left' for left handle (not first node), 'right' for right handle (not last node)
+   */
+  shouldShowHorizontalHandle(node: HtmlTemplateDynamicNode, position: 'left' | 'right'): boolean {
+    if (!node.parentId || !node.parentId()) {
+      return false;
+    }
+
+    const parentGroupId = node.parentId();
+    const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+    if (!parentGroup || !parentGroup.data) {
+      return false;
+    }
+
+    const parentAgentClass = parentGroup.data().agent_class;
+
+    if (parentAgentClass !== "SequentialAgent") {
+      return false;
+    }
+
+    const siblings = this.nodes().filter(n =>
+      n.parentId && n.parentId() === parentGroupId
+    );
+
+    if (siblings.length <= 1) {
+      return false;
+    }
+
+    siblings.sort((a, b) => a.point().x - b.point().x);
+    const nodeIndex = siblings.findIndex(n => n.id === node.id);
+
+    return position === 'left' ? nodeIndex > 0 : nodeIndex < siblings.length - 1;
+  }
+
+  shouldShowLeftHandle(node: HtmlTemplateDynamicNode): boolean {
+    return this.shouldShowHorizontalHandle(node, 'left');
+  }
+
+  shouldShowRightHandle(node: HtmlTemplateDynamicNode): boolean {
+    return this.shouldShowHorizontalHandle(node, 'right');
+  }
+
+  /**
+   * Bottom handle appears when:
+   * - Shell node is a workflow agent OR
+   * - LLM agent has sub-agents
+   */
+  shouldShowBottomHandle(node: HtmlTemplateDynamicNode): boolean {
+    const nodeData = node.data ? node.data() : undefined;
+    if (!nodeData) {
+      return false;
+    }
+
+    if (this.isWorkflowAgent(nodeData.agent_class)) {
+      return true;
+    }
+    if (nodeData.agent_class === "LlmAgent" && nodeData.sub_agents && nodeData.sub_agents.length > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Top handle appears when:
+   * 1. Sequential workflow group always has top handle
+   * 2. Sub-agents inside Loop and Parallel workflows
+   * 3. All LLM Agents that have a parent
+   */
+  shouldShowTopHandle(node: HtmlTemplateDynamicNode | TemplateDynamicGroupNode<any>): boolean {
     const nodeData = node.data ? node.data() : undefined;
     const nodeName = nodeData?.name;
     const isRoot = nodeName ? this.isRootAgent(nodeName) : false;
 
+    const isGroupNode = node.type === 'template-group';
+
+    if (isGroupNode) {
+      return nodeData?.agent_class === "SequentialAgent";
+    }
+
+    if (isRoot) {
+      return false;
+    }
+
     if (node.parentId && node.parentId()) {
+      const parentGroupId = node.parentId();
+      const parentGroup = this.groupNodes().find(g => g.id === parentGroupId);
+
+      if (parentGroup && parentGroup.data) {
+        const parentAgentClass = parentGroup.data().agent_class;
+
+        if (parentAgentClass === "LoopAgent" || parentAgentClass === "ParallelAgent") {
+          return true;
+        }
+      }
+
       return false;
     }
 
-    if (position === "target") {
-      return !isRoot;
-    }
-
-    if (!isRoot) {
-      return true;
-    }
-
-    const nodeId = node.id;
-    if (!nodeId) {
-      return false;
-    }
-
-    return this.edges().some(
-      (edge) => edge.source === nodeId || edge.target === nodeId
-    );
+    return true;
   }
 
   getToolsForNode(
@@ -1267,6 +1624,23 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return this.selectedAgents.includes(node);
   }
 
+  isGroupSelected(groupNode: TemplateDynamicGroupNode<any>): boolean {
+    if (!groupNode.data) {
+      return false;
+    }
+
+    const groupAgentName = groupNode.data().name;
+    const shellNode = this.nodes().find(n =>
+      n.data && n.data().name === groupAgentName
+    );
+
+    if (!shellNode) {
+      return false;
+    }
+
+    return this.isNodeSelected(shellNode);
+  }
+
   async loadSubAgents(appName: string, rootAgent: AgentNode) {
     type BFSItem = {
       node: AgentNode;
@@ -1274,6 +1648,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       index: number;
       parentShellId?: string;
       parentAgent?: AgentNode;
+      parentGroupId?: string;
     };
     const queue: BFSItem[] = [
       {
@@ -1282,17 +1657,16 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         index: 1,
         parentShellId: undefined,
         parentAgent: undefined,
+        parentGroupId: undefined,
       },
     ];
 
     const shellNodes: HtmlTemplateDynamicNode[] = [];
-    const groupNodes: DefaultDynamicGroupNode[] = [];
-    const placeholderNodes: HtmlTemplateDynamicNode[] = [];
+    const groupNodes: TemplateDynamicGroupNode<any>[] = [];
     const edges: Edge[] = [];
 
     while (queue.length > 0) {
-      const { node, depth, index, parentShellId, parentAgent } = queue.shift()!;
-
+      const { node, depth, index, parentShellId, parentAgent, parentGroupId } = queue.shift()!;
       let agentData = node;
       if (node.config_path) {
         try {
@@ -1322,68 +1696,101 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.agentBuilderService.addNode(agentData);
 
       const savedPosition = this.nodePositions.get(agentData.name);
-      let shellPoint = savedPosition ?? {
-        x: (index - 1) * 350 + 50,
-        y: depth * 150 + 50,
-      };
+      const isWorkflow = this.isWorkflowAgent(agentData.agent_class);
+      const parentIsWorkflow = parentAgent ? this.isWorkflowAgent(parentAgent.agent_class) : false;
 
-      if (!parentShellId && !savedPosition) {
-        shellPoint = { x: 100, y: 150 };
-      }
-
-      const shouldBundle =
-        this.isWorkflowAgent(agentData.agent_class) && !agentData.isRoot;
-      const parentIsWorkflow = parentAgent
-        ? this.isWorkflowAgent(parentAgent.agent_class)
-        : false;
-      const parentBundle = parentAgent
-        ? this.agentNodeBundles.get(parentAgent.name)
-        : undefined;
-
+      let shellPoint: { x: number; y: number };
       let shellNode: HtmlTemplateDynamicNode;
+      let newGroupNode: TemplateDynamicGroupNode<any> | null = null;
 
-      if (shouldBundle) {
-        const includePlaceholder =
-          (agentData.sub_agents?.length ?? 0) === 0;
-        const bundle = this.createNodeBundle(agentData, shellPoint, {
-          order: parentAgent?.sub_agents.indexOf(agentData) ?? index,
-          includePlaceholder,
-        });
-        shellNode = bundle.shellNode;
-        shellNodes.push(bundle.shellNode);
-        groupNodes.push(bundle.groupNode);
-        if (bundle.placeholderNode && bundle.shellPlaceholderEdge) {
-          placeholderNodes.push(bundle.placeholderNode);
-          edges.push(bundle.shellPlaceholderEdge);
+      if (parentIsWorkflow && !agentData.isRoot) {
+        const subAgentIndex = parentAgent?.sub_agents.indexOf(agentData) ?? index;
+        const parentGroupNode = groupNodes.find(g => g.id === parentGroupId);
+        const groupHeight = parentGroupNode?.height ? parentGroupNode.height() : this.workflowGroupHeight;
+
+        shellPoint = savedPosition ?? this.calculateWorkflowChildPosition(subAgentIndex, groupHeight);
+
+        const result = this.createAgentNodeWithGroup(agentData, shellPoint, parentGroupId ?? undefined, groupNodes, shellNodes);
+        shellNode = result.shellNode;
+        newGroupNode = result.groupNode;
+
+        shellNodes.push(shellNode);
+        if (newGroupNode) {
+          groupNodes.push(newGroupNode);
+        }
+        if (result.groupEdge) {
+          edges.push(result.groupEdge);
         }
       } else {
-        const baseShellPoint = parentIsWorkflow
-          ? {
-              x:
-                40 +
-                (parentAgent?.sub_agents.indexOf(agentData) ?? index) * 200,
-              y: 40,
+        // Normal positioning
+        if (!savedPosition) {
+          if (!parentShellId) {
+            // Root agent
+            shellPoint = { x: 100, y: 150 };
+          } else {
+            const parentNode = shellNodes.find(n => n.id === parentShellId);
+            if (parentNode) {
+              shellPoint = {
+                x: parentNode.point().x + (index - 1) * 400,
+                y: parentNode.point().y + 300,
+              };
+            } else {
+              shellPoint = {
+                x: 100,
+                y: depth * 150 + 50,
+              };
             }
-          : shellPoint;
-
-        shellNode = this.createShellNodeOnly(agentData, baseShellPoint);
-        if (parentIsWorkflow && parentBundle?.groupId) {
-          shellNode.parentId = signal(parentBundle.groupId);
+          }
+        } else {
+          shellPoint = savedPosition;
         }
+
+        const result = this.createAgentNodeWithGroup(agentData, shellPoint, undefined, groupNodes, shellNodes);
+        shellNode = result.shellNode;
+        newGroupNode = result.groupNode;
+
         shellNodes.push(shellNode);
+
+        // If this is a workflow agent, create its group
+        if (isWorkflow && !agentData.isRoot) {
+          if (newGroupNode) {
+            groupNodes.push(newGroupNode);
+          }
+          if (result.groupEdge) {
+            edges.push(result.groupEdge);
+          }
+        }
       }
 
       if (parentShellId) {
-        const edge: Edge = {
-          id: this.generateEdgeId(),
-          source: parentShellId,
-          target: shellNode.id,
-        };
-        edges.push(edge);
+        if (parentGroupId) {
+          // Use the refactored helper method for workflow child edges
+          const workflowEdge = this.createWorkflowChildEdgeFromArrays(
+            shellNode,
+            parentGroupId,
+            shellNodes,
+            groupNodes
+          );
+
+          if (workflowEdge) {
+            edges.push(workflowEdge);
+          }
+        } else {
+          const edge: Edge = {
+            id: this.generateEdgeId(),
+            source: parentShellId,
+            sourceHandle: 'source-bottom',
+            target: shellNode.id,
+            targetHandle: 'target-top',
+          };
+          edges.push(edge);
+        }
       }
 
       if (agentData.sub_agents && agentData.sub_agents.length > 0) {
         let subIndex = 1;
+        const groupIdForChildren = isWorkflow && newGroupNode ? newGroupNode.id : parentGroupId;
+
         for (const sub of agentData.sub_agents) {
           queue.push({
             node: sub,
@@ -1391,6 +1798,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
             depth: depth + 1,
             index: subIndex,
             parentAgent: agentData,
+            parentGroupId: groupIdForChildren,
           });
           subIndex++;
         }
@@ -1399,8 +1807,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     this.nodes.set(shellNodes);
     this.groupNodes.set(groupNodes);
-    this.groupPlaceholders.set(placeholderNodes);
     this.edges.set(edges);
+    this.updateGroupDimensions();
   }
 
   switchToAgentToolBoard(agentToolName: string, currentAgentName?: string) {
@@ -1491,9 +1899,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     this.captureCurrentNodePositions();
     this.nodes.set([]);
     this.groupNodes.set([]);
-    this.groupPlaceholders.set([]);
     this.edges.set([]);
-    this.agentNodeBundles.clear();
 
     this.nodeId = 0;
     this.edgeId = 0;
@@ -1514,19 +1920,16 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         x: 100,
         y: 150,
       };
+
+      const shellNode = this.createNode(agent, shellPoint);
+      this.nodes.set([shellNode]);
+
       if (this.isWorkflowAgent(agent.agent_class)) {
-        const bundle = this.createNodeBundle(agent, shellPoint, {
-          includePlaceholder: true,
-        });
-        this.nodes.set([bundle.shellNode]);
-        this.groupNodes.set([bundle.groupNode]);
-        if (bundle.placeholderNode && bundle.shellPlaceholderEdge) {
-          this.groupPlaceholders.set([bundle.placeholderNode]);
-          this.edges.set([bundle.shellPlaceholderEdge]);
+        const { groupNode, edge } = this.createWorkflowGroup(agent, shellNode, shellPoint);
+        this.groupNodes.set([groupNode]);
+        if (edge) {
+          this.edges.set([edge]);
         }
-      } else {
-        const shellNode = this.createShellNodeOnly(agent, shellPoint);
-        this.nodes.set([shellNode]);
       }
     }
     this.agentBuilderService.setSelectedNode(agent);
@@ -1664,7 +2067,130 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     }
   }
 
+  private updateGroupDimensions() {
+    const NODE_WIDTH = 340;
+    const BASE_NODE_HEIGHT = 120;
+    const TOOL_ITEM_HEIGHT = 36;
+    const TOOLS_CONTAINER_PADDING = 20;
+    const ADD_BUTTON_WIDTH = 68;
+    const PADDING = 40;
+    const FIXED_NODE_Y = 80;
+
+    for (const groupNode of this.groupNodes()) {
+      if (!groupNode.data) continue;
+
+      const groupAgentName = groupNode.data().name;
+
+      const subAgents = this.nodes().filter(node =>
+        node.parentId && node.parentId() === groupNode.id
+      );
+
+      if (subAgents.length === 0) {
+        if (groupNode.width) groupNode.width.set(480);
+        if (groupNode.height) groupNode.height.set(220);
+        continue;
+      }
+
+      subAgents.sort((a, b) => a.point().x - b.point().x);
+
+      subAgents.forEach((node, index) => {
+        const NODE_WIDTH = 340;
+        const ADD_BUTTON_WIDTH = 68;
+        const SPACING = 20;
+        const xPosition = 45 + index * (NODE_WIDTH + ADD_BUTTON_WIDTH + SPACING);
+
+        const newPosition = { x: xPosition, y: FIXED_NODE_Y };
+        node.point.set(newPosition);
+
+        if (node.data) {
+          const agentData = node.data();
+          if (agentData) {
+            this.nodePositions.set(agentData.name, newPosition);
+          }
+        }
+      });
+
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+      for (const node of subAgents) {
+        const point = node.point();
+        const nodeData = node.data ? node.data() : undefined;
+        let nodeHeight = BASE_NODE_HEIGHT;
+        if (nodeData && nodeData.tools && nodeData.tools.length > 0) {
+          nodeHeight += TOOLS_CONTAINER_PADDING + (nodeData.tools.length * TOOL_ITEM_HEIGHT);
+        }
+
+        minX = Math.min(minX, point.x);
+        minY = Math.min(minY, point.y);
+        maxX = Math.max(maxX, point.x + NODE_WIDTH + ADD_BUTTON_WIDTH);
+        maxY = Math.max(maxY, point.y + nodeHeight);
+      }
+
+      const width = maxX - minX + PADDING * 2;
+      const height = maxY - minY + PADDING * 2;
+
+      if (groupNode.width) groupNode.width.set(Math.max(480, width));
+      if (groupNode.height) groupNode.height.set(Math.max(220, height));
+    }
+  }
+
   getToolIcon(tool: ToolNode): string {
     return getToolIcon(tool.name, tool.toolType);
+  }
+
+  getAgentIcon(agentClass: string | undefined): string {
+    switch (agentClass) {
+      case 'SequentialAgent':
+        return 'more_horiz';
+      case 'LoopAgent':
+        return 'sync';
+      case 'ParallelAgent':
+        return 'density_medium';
+      case 'LlmAgent':
+      default:
+        return 'psychology';
+    }
+  }
+
+  isGroupEmpty(groupId: string): boolean {
+    // Check if the group has any child nodes
+    const hasChildren = this.nodes().some(node =>
+      node.parentId && node.parentId() === groupId
+    );
+    return !hasChildren;
+  }
+
+  shouldShowAddButton(node: HtmlTemplateDynamicNode): boolean {
+    const nodeData = node.data ? node.data() : undefined;
+    if (!nodeData) return false;
+
+    const isWorkflow = this.isWorkflowAgent(nodeData.agent_class);
+    const isInsideGroup = node.parentId && node.parentId();
+
+    // Don't show for workflow agents UNLESS they are inside a group (nested workflows)
+    if (isWorkflow && !isInsideGroup) {
+      return false;
+    }
+
+    if (!this.isNodeSelected(node)) {
+      return false;
+    }
+
+    if (isInsideGroup && node.parentId) {
+      const parentGroupId = node.parentId();
+
+      const siblings = this.nodes().filter(n =>
+        n.parentId && n.parentId() === parentGroupId
+      );
+
+      if (siblings.length === 0) return true;
+      const rightmostSibling = siblings.reduce((rightmost, current) => {
+        return current.point().x > rightmost.point().x ? current : rightmost;
+      }, siblings[0]);
+
+      return node.id === rightmostSibling.id;
+    }
+
+    return true;
   }
 }

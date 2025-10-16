@@ -208,11 +208,6 @@ export class AgentBuilderService {
         return { success: false, error: 'Callback not found' };
       }
 
-      const pythonIdentifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-      if (!pythonIdentifierRegex.test(updatedCallback.name)) {
-        return { success: false, error: 'Callback name must be a valid Python identifier' };
-      }
-
       const duplicateExists = agentNode.callbacks.some((cb, index) => {
         return index !== callbackIndex && cb.name === updatedCallback.name;
       });

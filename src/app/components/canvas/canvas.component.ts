@@ -1453,8 +1453,8 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
     // Look for callback groups at the root level
     Object.keys(yamlData).forEach((key) => {
-      if (key.endsWith("_callbacks") && Array.isArray(yamlData[key])) {
-        const callbackType = key.replace("_callbacks", "");
+      if (key.endsWith("_callback") && Array.isArray(yamlData[key])) {
+        const callbackType = key.replace("_callback", "");
 
         yamlData[key].forEach((callbackData: any) => {
           if (callbackData.name) {

@@ -22,6 +22,7 @@ export interface AgentNode {
     model: string;
     instruction: string;
     description?: string;
+    max_iterations?: number;
     sub_agents: AgentNode[];
     tools?: ToolNode[];
     callbacks?: CallbackNode[];
@@ -50,6 +51,7 @@ export interface YamlConfig {
   agent_class: string;
   description?: string;
   instruction: string;
+  max_iterations?: number;
   sub_agents: any;
   tools: any[];
   callbacks?: any[];

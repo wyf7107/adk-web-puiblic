@@ -51,6 +51,11 @@ export class YamlUtils {
       delete yamlConfig.description;
     }
 
+    // Add max_iteration for LoopAgent
+    if (agentNode.agent_class === 'LoopAgent' && agentNode.max_iterations) {
+      yamlConfig.max_iterations = agentNode.max_iterations;
+    }
+
     // Add callbacks directly to root level if they exist
     const callbacksConfig = this.buildCallbacksConfig(agentNode.callbacks);
     if (Object.keys(callbacksConfig).length > 0) {

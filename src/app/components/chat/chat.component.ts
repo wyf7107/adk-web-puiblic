@@ -16,19 +16,15 @@
  */
 
 import {AsyncPipe, DOCUMENT, Location, NgClass} from '@angular/common';
-import {AsyncPipe, DOCUMENT, Location, NgClass} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButton, MatFabButton} from '@angular/material/button';
-import {MatButton, MatFabButton} from '@angular/material/button';
 import {MatCard} from '@angular/material/card';
 import {MatOption} from '@angular/material/core';
 import {MatDialog} from '@angular/material/dialog';
-import {MatDialog} from '@angular/material/dialog';
 import {MatDivider} from '@angular/material/divider';
 import {MatIcon} from '@angular/material/icon';
-import {MatPaginatorIntl} from '@angular/material/paginator';
 import {MatPaginatorIntl} from '@angular/material/paginator';
 import {MatSelect} from '@angular/material/select';
 import {MatDrawer, MatDrawerContainer} from '@angular/material/sidenav';

@@ -33,16 +33,19 @@ import {MarkdownComponent} from './app/components/markdown/markdown.component';
 import {MARKDOWN_COMPONENT} from './app/components/markdown/markdown.component.interface';
 import {AGENT_SERVICE, AgentService} from './app/core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService} from './app/core/services/artifact.service';
-import {AUDIO_SERVICE, AUDIO_WORKLET_MODULE_PATH, AudioService} from './app/core/services/audio.service';
+import {AUDIO_PLAYING_SERVICE, AudioPlayingService} from './app/core/services/audio-playing.service';
+import {AUDIO_RECORDING_SERVICE, AUDIO_WORKLET_MODULE_PATH, AudioRecordingService} from './app/core/services/audio-recording.service';
 import {DOWNLOAD_SERVICE, DownloadService} from './app/core/services/download.service';
 import {EVAL_SERVICE, EvalService} from './app/core/services/eval.service';
 import {EVENT_SERVICE, EventService} from './app/core/services/event.service';
 import {FEATURE_FLAG_SERVICE, FeatureFlagService} from './app/core/services/feature-flag.service';
 import {GRAPH_SERVICE, GraphService} from './app/core/services/graph.service';
 import {LOCAL_FILE_SERVICE} from './app/core/services/interfaces/localfile';
+import {PENDING_EVENT_SERVICE} from './app/core/services/interfaces/pendingevent';
 import {SAFE_VALUES_SERVICE} from './app/core/services/interfaces/safevalues';
-import {STRING_TO_COLOR_SERVICE, StringToColorService} from './app/core/services/interfaces/string-to-color';
+import {STRING_TO_COLOR_SERVICE} from './app/core/services/interfaces/string-to-color';
 import {LocalFileServiceImpl} from './app/core/services/local-file.service';
+import {PendingEventServiceImpl} from './app/core/services/pending-event.service';
 import {SafeValuesServiceImpl} from './app/core/services/safevalues.service';
 import {SESSION_SERVICE, SessionService} from './app/core/services/session.service';
 import {STREAM_CHAT_SERVICE, StreamChatService} from './app/core/services/stream-chat.service';
@@ -54,43 +57,47 @@ import {LOGO_COMPONENT} from './app/injection_tokens';
 import {AGENT_BUILDER_SERVICE, AgentBuilderService} from './app/core/services/agent-builder.service';
 
 fetch('./assets/config/runtime-config.json')
-  .then((response) => response.json())
-  .then((config) => {
-    // Make the config available globally
-    (window as any)['runtimeConfig'] = config;
+    .then((response) => response.json())
+    .then((config) => {
+      (window as any)['runtimeConfig'] = config;
 
-    bootstrapApplication(AppComponent, {
-      providers: [
-        importProvidersFrom(
-            BrowserModule, FormsModule, HttpClientModule, AppRoutingModule,
-            MatInputModule, MatFormFieldModule, MatButtonModule),
-        {provide: SESSION_SERVICE, useClass: SessionService},
-        {provide: AGENT_SERVICE, useClass: AgentService},
-        {provide: WEBSOCKET_SERVICE, useClass: WebSocketService},
-        {
-          provide: AUDIO_WORKLET_MODULE_PATH,
-          useValue: './assets/audio-processor.js'
-        },
-        {provide: AUDIO_SERVICE, useClass: AudioService},
-        {provide: VIDEO_SERVICE, useClass: VideoService},
-        {provide: STREAM_CHAT_SERVICE, useClass: StreamChatService},
-        {provide: EVENT_SERVICE, useClass: EventService},
-        {provide: EVAL_SERVICE, useClass: EvalService},
-        {provide: ARTIFACT_SERVICE, useClass: ArtifactService},
-        {provide: DOWNLOAD_SERVICE, useClass: DownloadService},
-        {provide: TRACE_SERVICE, useClass: TraceService},
-        {provide: FEATURE_FLAG_SERVICE, useClass: FeatureFlagService},
-        {provide: GRAPH_SERVICE, useClass: GraphService},
-        {provide: STRING_TO_COLOR_SERVICE, useClass: StringToColorServiceImpl},
-        {provide: SAFE_VALUES_SERVICE, useClass: SafeValuesServiceImpl},
-        {provide: LOCAL_FILE_SERVICE, useClass: LocalFileServiceImpl},
-        {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
-        ...(config.logo ?
-                [{provide: LOGO_COMPONENT, useValue: CustomLogoComponent}] :
-                []),
-        { provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService },
+      bootstrapApplication(AppComponent, {
+        providers: [
+          importProvidersFrom(
+              BrowserModule, FormsModule, HttpClientModule, AppRoutingModule,
+              MatInputModule, MatFormFieldModule, MatButtonModule),
+          {provide: SESSION_SERVICE, useClass: SessionService},
+          {provide: AGENT_SERVICE, useClass: AgentService},
+          {provide: WEBSOCKET_SERVICE, useClass: WebSocketService},
+          {
+            provide: AUDIO_WORKLET_MODULE_PATH,
+            useValue: './assets/audio-processor.js'
+          },
+          {provide: AUDIO_RECORDING_SERVICE, useClass: AudioRecordingService},
+          {provide: AUDIO_PLAYING_SERVICE, useClass: AudioPlayingService},
+          {provide: VIDEO_SERVICE, useClass: VideoService},
+          {provide: STREAM_CHAT_SERVICE, useClass: StreamChatService},
+          {provide: EVENT_SERVICE, useClass: EventService},
+          {provide: EVAL_SERVICE, useClass: EvalService},
+          {provide: ARTIFACT_SERVICE, useClass: ArtifactService},
+          {provide: DOWNLOAD_SERVICE, useClass: DownloadService},
+          {provide: TRACE_SERVICE, useClass: TraceService},
+          {provide: FEATURE_FLAG_SERVICE, useClass: FeatureFlagService},
+          {provide: GRAPH_SERVICE, useClass: GraphService},
+          {
+            provide: STRING_TO_COLOR_SERVICE,
+            useClass: StringToColorServiceImpl
+          },
+          {provide: SAFE_VALUES_SERVICE, useClass: SafeValuesServiceImpl},
+          {provide: LOCAL_FILE_SERVICE, useClass: LocalFileServiceImpl},
+          {provide: PENDING_EVENT_SERVICE, useClass: PendingEventServiceImpl},
+          {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
+          ...(config.logo ?
+                  [{provide: LOGO_COMPONENT, useValue: CustomLogoComponent}] :
+                  []),
+          { provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService },
         provideAnimations(),
-        provideMarkdown(),
+          provideMarkdown(),
       ]
-    }).catch((err) => console.error(err));
-  });
+      }).catch((err) => console.error(err));
+    });

@@ -17,8 +17,8 @@
 
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {CommonModule, DOCUMENT, NgClass, NgStyle} from '@angular/common';
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Inject, Input, OnChanges, Output, Renderer2, signal, SimpleChanges, ViewChild, Type} from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, inject, Inject, Input, OnChanges, Output, Renderer2, signal, SimpleChanges, Type, ViewChild} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
@@ -48,12 +48,21 @@ const ROOT_AGENT = 'root_agent';
   styleUrl: './chat-panel.component.scss',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, MatIcon, MatCard,
-    MatProgressBar, MatButtonModule, MatInput, TextFieldModule,
-    MatFormField,
-    MatMenu, MatMenuItem,
-    MatMenuTrigger, NgxJsonViewerModule,
-    AudioPlayerComponent, MatTooltip, NgClass, NgStyle,
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatCardModule,
+    MatProgressBarModule,
+    MatButtonModule,
+    MatInputModule,
+    TextFieldModule,
+    MatFormFieldModule,
+    MatMenuModule,
+    NgxJsonViewerModule,
+    AudioPlayerComponent,
+    MatTooltipModule,
+    NgClass,
+    NgStyle,
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {
@@ -106,7 +115,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   readonly markdownComponent: Type<MarkdownComponentInterface> = inject(
-    MARKDOWN_COMPONENT,
+      MARKDOWN_COMPONENT,
   );
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   readonly MediaType = MediaType;
@@ -165,7 +174,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   customIconColorClass(i: number) {
     const agentName = this.getAgentNameFromEvent(i);
     return agentName !== ROOT_AGENT ?
-        `custom-icon-color-${this.stringToColorService.stc(agentName).replace('#', '')}` :
+        `custom-icon-color-${
+            this.stringToColorService.stc(agentName).replace('#', '')}` :
         '';
   }
 

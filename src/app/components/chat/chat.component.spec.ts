@@ -25,13 +25,11 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
 import {EvalCase} from '../../core/models/Eval';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService,} from '../../core/services/artifact.service';
-import {AUDIO_SERVICE, AudioService} from '../../core/services/audio.service';
 import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/download.service';
 import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
 import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
@@ -44,7 +42,6 @@ import {SESSION_SERVICE, SessionService,} from '../../core/services/session.serv
 import {STREAM_CHAT_SERVICE} from '../../core/services/stream-chat.service';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockArtifactService} from '../../core/services/testing/mock-artifact.service';
-import {MockAudioService} from '../../core/services/testing/mock-audio.service';
 import {MockDownloadService} from '../../core/services/testing/mock-download.service';
 import {MockEvalService} from '../../core/services/testing/mock-eval.service';
 import {MockEventService} from '../../core/services/testing/mock-event.service';
@@ -109,7 +106,6 @@ describe('ChatComponent', () => {
   let fixture: ComponentFixture<ChatComponent>;
   let mockSessionService: MockSessionService;
   let mockArtifactService: MockArtifactService;
-  let mockAudioService: MockAudioService;
   let mockWebSocketService: MockWebSocketService;
   let mockVideoService: MockVideoService;
   let mockStreamChatService: MockStreamChatService;
@@ -132,7 +128,6 @@ describe('ChatComponent', () => {
   beforeEach(async () => {
     mockSessionService = new MockSessionService();
     mockArtifactService = new MockArtifactService();
-    mockAudioService = new MockAudioService();
     mockWebSocketService = new MockWebSocketService();
     mockVideoService = new MockVideoService();
     mockStreamChatService = new MockStreamChatService();
@@ -145,7 +140,6 @@ describe('ChatComponent', () => {
     mockStringToColorService = new MockStringToColorService();
     mockSafeValuesService = new MockSafeValuesService();
     mockLocalFileService = new MockLocalFileService();
-
     mockStringToColorService.stc.and.returnValue('#8c8526ff');
 
     mockSessionService.createSessionResponse.next(
@@ -201,7 +195,6 @@ describe('ChatComponent', () => {
           providers: [
             {provide: SESSION_SERVICE, useValue: mockSessionService},
             {provide: ARTIFACT_SERVICE, useValue: mockArtifactService},
-            {provide: AUDIO_SERVICE, useValue: mockAudioService},
             {provide: WEBSOCKET_SERVICE, useValue: mockWebSocketService},
             {provide: VIDEO_SERVICE, useValue: mockVideoService},
             {provide: EVENT_SERVICE, useValue: mockEventService},
@@ -473,6 +466,7 @@ describe('ChatComponent', () => {
             expect(mockEventService.getTrace)
                 .toHaveBeenCalledWith(SESSION_1_ID);
           });
+
         });
   });
 
@@ -883,7 +877,8 @@ describe('ChatComponent', () => {
       });
 
       it('should have the token streaming toggle disabled', () => {
-        const slideToggle = fixture.debugElement.query(By.css('mat-slide-toggle'));
+        const slideToggle =
+            fixture.debugElement.query(By.css('mat-slide-toggle'));
         expect(slideToggle.componentInstance.disabled).toBe(true);
       });
     });

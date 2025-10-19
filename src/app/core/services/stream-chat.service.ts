@@ -20,7 +20,7 @@ import {ElementRef, Inject, Injectable, InjectionToken} from '@angular/core';
 import {URLUtil} from '../../../utils/url-util';
 import {LiveRequest} from '../models/LiveRequest';
 
-import {AUDIO_SERVICE, AudioService} from './audio.service';
+import {AUDIO_RECORDING_SERVICE, AudioRecordingService} from './audio-recording.service';
 import {VIDEO_SERVICE, VideoService} from './video.service';
 import {WEBSOCKET_SERVICE, WebSocketService} from './websocket.service';
 
@@ -38,7 +38,8 @@ export class StreamChatService {
   private videoIntervalId: number|undefined = undefined;
 
   constructor(
-      @Inject(AUDIO_SERVICE) private readonly audioService: AudioService,
+      @Inject(AUDIO_RECORDING_SERVICE) private readonly audioRecordingService:
+          AudioRecordingService,
       @Inject(VIDEO_SERVICE) private readonly videoService: VideoService,
       @Inject(WEBSOCKET_SERVICE) private readonly webSocketService:
           WebSocketService,
@@ -65,7 +66,7 @@ export class StreamChatService {
 
   private async startAudioStreaming() {
     try {
-      await this.audioService.startRecording();
+      await this.audioRecordingService.startRecording();
       this.audioIntervalId = setInterval(() => this.sendBufferedAudio(), 250);
     } catch (error) {
       console.error('Error accessing microphone:', error);
@@ -75,11 +76,11 @@ export class StreamChatService {
   private stopAudioStreaming() {
     clearInterval(this.audioIntervalId);
     this.audioIntervalId = undefined;
-    this.audioService.stopRecording();
+    this.audioRecordingService.stopRecording();
   }
 
   private sendBufferedAudio() {
-    const combinedBuffer = this.audioService.getCombinedAudioBuffer();
+    const combinedBuffer = this.audioRecordingService.getCombinedAudioBuffer();
     if (!combinedBuffer) return;
 
     const request: LiveRequest = {
@@ -89,7 +90,7 @@ export class StreamChatService {
       },
     };
     this.webSocketService.sendMessage(request);
-    this.audioService.cleanAudioBuffer();
+    this.audioRecordingService.cleanAudioBuffer();
   }
 
   async startVideoChat({

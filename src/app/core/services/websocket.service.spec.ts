@@ -17,31 +17,22 @@
 
 import {TestBed} from '@angular/core/testing';
 
+import {AUDIO_PLAYING_SERVICE} from './audio-playing.service';
+import {MockAudioPlayingService} from './testing/mock-audio-playing.service';
 import {WebSocketService} from './websocket.service';
 
 describe('WebSocketService', () => {
   let service: WebSocketService;
-  let mockAudioContext: any;
+  let mockAudioPlayingService: MockAudioPlayingService;
 
   beforeEach(() => {
-    mockAudioContext = {
-      destination: {},
-      createBuffer: jasmine.createSpy('createBuffer').and.returnValue({
-        copyToChannel: jasmine.createSpy('copyToChannel'),
-        duration: 1,
-      }),
-      createBufferSource:
-          jasmine.createSpy('createBufferSource').and.returnValue({
-            connect: jasmine.createSpy('connect'),
-            start: jasmine.createSpy('start'),
-            buffer: null,
-          }),
-      currentTime: 0,
-    };
-    spyOn(window, 'AudioContext').and.returnValue(mockAudioContext);
+    mockAudioPlayingService = new MockAudioPlayingService();
 
     TestBed.configureTestingModule({
-      providers: [WebSocketService],
+      providers: [
+        WebSocketService,
+        {provide: AUDIO_PLAYING_SERVICE, useValue: mockAudioPlayingService}
+      ],
     });
     service = TestBed.inject(WebSocketService);
   });

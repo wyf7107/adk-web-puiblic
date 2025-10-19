@@ -1399,6 +1399,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         agent_class: yamlData.agent_class || "LlmAgent",
         model: yamlData.model || "gemini-2.5-flash",
         instruction: yamlData.instruction || "",
+        description: yamlData.description || "",
         isRoot: true,
         sub_agents: yamlData.sub_agents || [],
         tools: this.parseToolsFromYaml(yamlData.tools || []),
@@ -1511,6 +1512,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
                 instruction:
                   yamlData.instruction ||
                   `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
+                description: yamlData.description || "",
                 isRoot: false,
                 sub_agents: yamlData.sub_agents || [],
                 tools: this.parseToolsFromYaml(yamlData.tools || []),

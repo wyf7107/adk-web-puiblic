@@ -21,6 +21,7 @@ export interface AgentNode {
     agent_class: string;
     model: string;
     instruction: string;
+    description?: string;
     sub_agents: AgentNode[];
     tools?: ToolNode[];
     callbacks?: CallbackNode[];
@@ -47,7 +48,7 @@ export interface YamlConfig {
   name: string;
   model: string;
   agent_class: string;
-  description: string;
+  description?: string;
   instruction: string;
   sub_agents: any;
   tools: any[];

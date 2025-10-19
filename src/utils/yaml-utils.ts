@@ -41,10 +41,14 @@ export class YamlUtils {
       name: agentNode.name,
       model: agentNode.model,
       agent_class: agentNode.agent_class,
-      description: '',
+      description: agentNode.description || '',
       instruction: agentNode.instruction,
       sub_agents: subAgents,
       tools: this.buildToolsConfig(agentNode.tools, allTabAgents)
+    }
+
+    if (!agentNode.description || agentNode.description.trim() === '') {
+      delete yamlConfig.description;
     }
 
     // Add callbacks directly to root level if they exist

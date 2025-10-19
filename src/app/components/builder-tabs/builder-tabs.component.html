@@ -63,12 +63,12 @@
               <div class="form-row">
                 <mat-form-field class="agent-name-field">
                   <mat-label>Agent Name</mat-label>
-                  <input matInput [(ngModel)]="agentConfig.name"/>
+                  <input matInput [(ngModel)]="agentConfig.name" [disabled]="agentConfig.isRoot"/>
                 </mat-form-field>
 
                 <mat-form-field class="agent-type-field">
                   <mat-label>Agent Type</mat-label>
-                  <mat-select [(ngModel)]="agentConfig.agent_class">
+                  <mat-select [(ngModel)]="agentConfig.agent_class" disabled>
                     @for (type of agentTypes; track type) {
                     <mat-option [value]="type">{{type}}</mat-option>
                     }
@@ -87,12 +87,11 @@
                 </mat-form-field>
               }
 
-              <mat-form-field>
-                <mat-label>Instructions</mat-label>
-                <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
-              </mat-form-field>
-
               @if (agentConfig.agent_class === 'LlmAgent') {
+                <mat-form-field>
+                  <mat-label>Instructions</mat-label>
+                  <textarea matInput rows="5" [(ngModel)]="agentConfig.instruction"></textarea>
+                </mat-form-field>
                 <mat-form-field>
                   <mat-label>Description (optional)</mat-label>
                   <textarea matInput rows="3" [(ngModel)]="agentConfig.description"></textarea>

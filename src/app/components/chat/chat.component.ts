@@ -41,7 +41,7 @@ import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
-import {Event as AdkEvent} from '../../core/models/types';
+import {Event as AdkEvent, Part} from '../../core/models/types';
 import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
 import {ARTIFACT_SERVICE, ArtifactService} from '../../core/services/artifact.service';
 import {DOWNLOAD_SERVICE, DownloadService} from '../../core/services/download.service';
@@ -442,7 +442,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
         if (chunkJson.content) {
-          for (let part of chunkJson.content.parts) {
+          for (let part of this.combineTextParts(chunkJson.content.parts)) {
             this.processPart(chunkJson, part);
             this.traceService.setEventData(this.eventData);
           }
@@ -561,6 +561,31 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     return parts;
+  }
+
+  /**
+   * Collapse consecutive text parts into a single part. Preserves relative
+   * order of other parts.
+   */
+  private combineTextParts(parts: Part[]) {
+    const result: Part[] = [];
+    let combinedTextPart: Part | undefined;
+
+    for (const part of parts) {
+      if (part.text) {
+        if (!combinedTextPart) {
+          combinedTextPart = {text: part.text};
+          result.push(combinedTextPart);
+        } else {
+          combinedTextPart.text += part.text;
+        }
+      } else {
+        combinedTextPart = undefined;
+        result.push(part);
+      }
+    }
+
+    return result;
   }
 
   private updateRedirectUri(urlString: string, newRedirectUri: string): string {

@@ -607,13 +607,65 @@ describe('ChatComponent', () => {
         expect(messageCards[0].nativeElement.textContent)
             .toContain(TEST_MESSAGE);
       });
+
+      describe('when event contains multiple text parts', () => {
+        it('should combine consecutive text parts into a single message',
+           async () => {
+             const sseEvent = {
+               id: 'event-1',
+               author: 'bot',
+               content:
+                   {role: 'bot', parts: [{text: 'Hello '}, {text: 'World!'}]},
+             };
+             component.messages.set([]);
+             component.userInput = 'test message';
+             await component.sendMessage(
+                 new KeyboardEvent('keydown', {key: 'Enter'}));
+             mockAgentService.runSseResponse.next(sseEvent);
+             fixture.detectChanges();
+
+             const botMessages =
+                 component.messages().filter(m => m.role === 'bot');
+             expect(botMessages.length).toBe(1);
+             expect(botMessages[0].text).toBe('Hello World!');
+           });
+
+        it('should not combine non-consecutive text parts', async () => {
+          const sseEvent = {
+            id: 'event-1',
+            author: 'bot',
+            content: {
+              role: 'bot',
+              parts: [
+                {text: 'Hello '},
+                {functionCall: {name: 'foo', args: {}}},
+                {text: 'World!'},
+              ]
+            },
+          };
+          component.messages.set([]);
+          component.userInput = 'test message';
+          await component.sendMessage(
+              new KeyboardEvent('keydown', {key: 'Enter'}));
+          mockAgentService.runSseResponse.next(sseEvent);
+          fixture.detectChanges();
+
+          const botMessages =
+              component.messages().filter(m => m.role === 'bot');
+          expect(botMessages.length).toBe(3);
+          expect(botMessages[0].text).toBe('Hello ');
+          expect(botMessages[1].functionCall).toEqual({name: 'foo', args: {}});
+          expect(botMessages[2].text).toBe('World!');
+        });
+      });
     });
 
     describe('when chat-panel emits sendMessage', () => {
       const mockEvent = new KeyboardEvent('keydown', {key: 'Enter'});
       beforeEach(() => {
         spyOn(component, 'sendMessage').and.callThrough();
-        mockAgentService.runSseResponse.next('');
+        mockAgentService.runSseResponse.next(
+            {content: {role: 'bot', parts: []}});
         const chatPanelDebugEl =
             fixture.debugElement.query(By.directive(ChatPanelComponent));
         chatPanelDebugEl.triggerEventHandler('sendMessage', mockEvent);

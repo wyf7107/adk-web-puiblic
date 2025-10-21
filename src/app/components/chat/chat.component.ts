@@ -462,6 +462,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.openSnackBar(err, 'OK');
       },
       complete: () => {
+        if (this.updatedSessionState()) {
+          this.currentSessionState = this.updatedSessionState();
+          this.updatedSessionState.set(null);
+        }
         this.streamingTextMessage = null;
         this.sessionTab?.reloadSession(this.sessionId);
         this.eventService.getTrace(this.sessionId)
@@ -476,11 +480,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
               this.changeDetectorRef.detectChanges();
             });
         this.traceService.setMessages(this.messages());
+        this.changeDetectorRef.detectChanges();
       },
     });
     // Clear input
     this.userInput = '';
-    this.updatedSessionState.set(null);
     this.changeDetectorRef.detectChanges();
   }
 

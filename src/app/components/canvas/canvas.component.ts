@@ -1400,6 +1400,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         model: yamlData.model || "gemini-2.5-flash",
         instruction: yamlData.instruction || "",
         description: yamlData.description || "",
+        ...(yamlData.output_key && { output_key: yamlData.output_key }),
         ...(yamlData.max_iterations && { max_iterations: yamlData.max_iterations }),
         isRoot: true,
         sub_agents: yamlData.sub_agents || [],
@@ -1514,6 +1515,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
                   yamlData.instruction ||
                   `You are the ${agentToolName} agent that can be used as a tool by other agents.`,
                 description: yamlData.description || "",
+                ...(yamlData.output_key && { output_key: yamlData.output_key }),
                 ...(yamlData.max_iterations && { max_iterations: yamlData.max_iterations }),
                 isRoot: false,
                 sub_agents: yamlData.sub_agents || [],

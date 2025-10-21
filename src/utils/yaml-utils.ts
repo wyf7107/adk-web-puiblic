@@ -43,12 +43,17 @@ export class YamlUtils {
       agent_class: agentNode.agent_class,
       description: agentNode.description || '',
       instruction: agentNode.instruction,
+      output_key: agentNode.output_key,
       sub_agents: subAgents,
       tools: this.buildToolsConfig(agentNode.tools, allTabAgents)
     }
 
     if (!agentNode.description || agentNode.description.trim() === '') {
       delete yamlConfig.description;
+    }
+
+    if (!agentNode.output_key || agentNode.output_key.trim() === '') {
+      delete yamlConfig.output_key;
     }
 
     // Add max_iteration for LoopAgent

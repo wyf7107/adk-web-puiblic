@@ -17,7 +17,7 @@
 
 import {AsyncPipe, DOCUMENT, Location, NgClass} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButton, MatFabButton} from '@angular/material/button';
 import {MatCard} from '@angular/material/card';
@@ -42,19 +42,19 @@ import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
 import {Event as AdkEvent, Part} from '../../core/models/types';
-import {AGENT_SERVICE, AgentService} from '../../core/services/agent.service';
-import {ARTIFACT_SERVICE, ArtifactService} from '../../core/services/artifact.service';
-import {DOWNLOAD_SERVICE, DownloadService} from '../../core/services/download.service';
-import {EVAL_SERVICE, EvalService} from '../../core/services/eval.service';
-import {EVENT_SERVICE, EventService} from '../../core/services/event.service';
-import {FEATURE_FLAG_SERVICE, FeatureFlagService} from '../../core/services/feature-flag.service';
-import {GRAPH_SERVICE, GraphService} from '../../core/services/graph.service';
-import {LOCAL_FILE_SERVICE, LocalFileService} from '../../core/services/interfaces/localfile';
+import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {ARTIFACT_SERVICE} from '../../core/services/interfaces/artifact';
+import {DOWNLOAD_SERVICE} from '../../core/services/interfaces/download';
+import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
+import {EVENT_SERVICE} from '../../core/services/interfaces/event';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {GRAPH_SERVICE} from '../../core/services/interfaces/graph';
+import {LOCAL_FILE_SERVICE} from '../../core/services/interfaces/localfile';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
-import {SESSION_SERVICE, SessionService} from '../../core/services/session.service';
-import {STREAM_CHAT_SERVICE, StreamChatService} from '../../core/services/stream-chat.service';
-import {TRACE_SERVICE, TraceService} from '../../core/services/trace.service';
+import {SESSION_SERVICE} from '../../core/services/interfaces/session';
+import {STREAM_CHAT_SERVICE} from '../../core/services/interfaces/stream-chat';
+import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 import {ResizableBottomDirective} from '../../directives/resizable-bottom.directive';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {getMediaTypeFromMimetype, MediaType} from '../artifact-tab/artifact-tab.component';
@@ -135,13 +135,34 @@ const BIDI_STREAMING_RESTART_WARNING =
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
+  private readonly _snackBar = inject(MatSnackBar);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly agentService = inject(AGENT_SERVICE);
+  private readonly artifactService = inject(ARTIFACT_SERVICE);
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
+  private readonly dialog = inject(MatDialog);
+  private readonly document = inject(DOCUMENT);
+  private readonly downloadService = inject(DOWNLOAD_SERVICE);
+  private readonly evalService = inject(EVAL_SERVICE);
+  private readonly eventService = inject(EVENT_SERVICE);
+  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  private readonly graphService = inject(GRAPH_SERVICE);
+  private readonly localFileService = inject(LOCAL_FILE_SERVICE);
+  private readonly location = inject(Location);
+  private readonly renderer = inject(Renderer2);
+  private readonly router = inject(Router);
+  private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
+  private readonly sessionService = inject(SESSION_SERVICE);
+  private readonly streamChatService = inject(STREAM_CHAT_SERVICE);
+  private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
+  private readonly traceService = inject(TRACE_SERVICE);
+
   chatPanel = viewChild.required(ChatPanelComponent);
   sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
   sessionTab = viewChild(SessionTabComponent);
   evalTab = viewChild(EvalTabComponent);
   private scrollContainer = viewChild.required<ElementRef>('autoScroll');
   bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
-  private _snackBar = inject(MatSnackBar);
   enableSseIndicator = signal(false);
   isChatMode = signal(true);
   isEvalCaseEditing = signal(false);
@@ -196,16 +217,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected MediaType = MediaType;
 
   // Sync query params with value from agent picker.
-  private readonly router = inject(Router);
-  private readonly activatedRoute = inject(ActivatedRoute);
   protected readonly selectedAppControl = new FormControl<string>('', {
     nonNullable: true,
   });
 
-  private readonly changeDetectorRef = inject(ChangeDetectorRef);
-  private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
-  private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
-  private readonly localFileService = inject(LOCAL_FILE_SERVICE);
   protected openBase64InNewTab = this.safeValuesService.openBase64InNewTab;
 
   // Load apps
@@ -230,7 +245,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.selectedAppControl.enable();
       if (app?.length == 1) {
         this.router.navigate([], {
-          relativeTo: this.route,
+          relativeTo: this.activatedRoute,
           queryParams: { app: app[0] },
         });
       }
@@ -239,44 +254,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   );
 
   // Feature flag references for use in template.
-  readonly importSessionEnabledObs: Observable<boolean>;
-  readonly isEditFunctionArgsEnabledObs: Observable<boolean>;
-  readonly isSessionUrlEnabledObs: Observable<boolean>;
-  readonly isApplicationSelectorEnabledObs: Observable<boolean>;
-  readonly isTokenStreamingEnabledObs: Observable<boolean>;
+  readonly importSessionEnabledObs: Observable<boolean> = this.featureFlagService.isImportSessionEnabled();
+  readonly isEditFunctionArgsEnabledObs: Observable<boolean> = this.featureFlagService.isEditFunctionArgsEnabled();
+  readonly isSessionUrlEnabledObs: Observable<boolean> = this.featureFlagService.isSessionUrlEnabled();
+  readonly isApplicationSelectorEnabledObs: Observable<boolean> = this.featureFlagService.isApplicationSelectorEnabled();
+  readonly isTokenStreamingEnabledObs: Observable<boolean> = this.featureFlagService.isTokenStreamingEnabled();
 
   // Trace detail
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
 
-  constructor(
-      @Inject(SESSION_SERVICE) private sessionService: SessionService,
-      @Inject(ARTIFACT_SERVICE) private artifactService: ArtifactService,
-      @Inject(STREAM_CHAT_SERVICE) private streamChatService: StreamChatService,
-      private dialog: MatDialog,
-      @Inject(EVENT_SERVICE) private eventService: EventService,
-      private route: ActivatedRoute,
-      @Inject(DOWNLOAD_SERVICE) private downloadService: DownloadService,
-      @Inject(EVAL_SERVICE) private evalService: EvalService,
-      @Inject(TRACE_SERVICE) private traceService: TraceService,
-      private location: Location,
-      private renderer: Renderer2,
-      @Inject(DOCUMENT) private document: Document,
-      @Inject(AGENT_SERVICE) private agentService: AgentService,
-      @Inject(FEATURE_FLAG_SERVICE) private featureFlagService:
-          FeatureFlagService,
-      @Inject(GRAPH_SERVICE) private graphService: GraphService,
-  ) {
-    this.importSessionEnabledObs =
-        this.featureFlagService.isImportSessionEnabled();
-    this.isEditFunctionArgsEnabledObs =
-        this.featureFlagService.isEditFunctionArgsEnabled();
-    this.isSessionUrlEnabledObs = this.featureFlagService.isSessionUrlEnabled();
-    this.isApplicationSelectorEnabledObs =
-        this.featureFlagService.isApplicationSelectorEnabled();
-    this.isTokenStreamingEnabledObs =
-        this.featureFlagService.isTokenStreamingEnabled();
-  }
+  constructor() {}
 
   ngOnInit(): void {
     this.syncSelectedAppFromUrl();
@@ -330,7 +318,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     })
 
-    this.traceService.hoveredMessageIndicies$.subscribe(i => this.hoveredEventMessageIndices = i);
+    this.traceService.hoveredMessageIndices$.subscribe(i => this.hoveredEventMessageIndices = i);
   }
 
   ngAfterViewInit() {
@@ -383,7 +371,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sessionService.createSession(this.userId, this.appName)
       .subscribe((res) => {
         this.currentSessionState = res.state;
-        this.sessionId = res.id;
+        this.sessionId = res.id ?? '';
         this.sessionTab()?.refreshSession();
 
         this.isSessionUrlEnabledObs.subscribe((enabled) => {

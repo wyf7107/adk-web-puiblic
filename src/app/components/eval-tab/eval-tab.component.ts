@@ -16,7 +16,7 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnChanges, OnInit, output, signal, SimpleChanges, viewChildren, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnChanges, OnInit, output, signal, SimpleChanges, viewChildren} from '@angular/core';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog} from '@angular/material/dialog';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
@@ -26,9 +26,9 @@ import {catchError} from 'rxjs/operators';
 import {DEFAULT_EVAL_METRICS, EvalMetric, EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {Invocation} from '../../core/models/Eval';
-import {EvalService, EVAL_SERVICE} from '../../core/services/eval.service';
-import {FeatureFlagService, FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
-import {SessionService, SESSION_SERVICE} from '../../core/services/session.service';
+import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
+import {FeatureFlagService} from '../../core/services/feature-flag.service';
+import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
@@ -135,11 +135,10 @@ export class EvalTabComponent implements OnInit, OnChanges {
   readonly dialog = inject(MatDialog);
 
   protected appEvaluationResults: AppEvaluationResult = {};
+  private readonly evalService = inject(EVAL_SERVICE);
+  private readonly sessionService = inject(SESSION_SERVICE);
 
-  constructor(
-      @Inject(EVAL_SERVICE) private evalService: EvalService,
-      @Inject(SESSION_SERVICE) private sessionService: SessionService,
-  ) {
+  constructor() {
     this.evalCasesSubject.subscribe((evalCases: string[]) => {
       if (!this.selectedEvalCase() && this.deletedEvalCaseIndex >= 0 &&
           evalCases.length > 0) {

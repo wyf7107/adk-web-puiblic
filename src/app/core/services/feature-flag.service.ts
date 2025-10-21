@@ -86,4 +86,8 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
   isBidiStreamingEnabled(): Observable<boolean> {
     return of(true);
   }
+
+  isExportSessionEnabled(): Observable<boolean> {
+    return of(true);
+  }
 }

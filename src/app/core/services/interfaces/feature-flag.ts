@@ -42,4 +42,5 @@ export declare abstract class FeatureFlagService {
   abstract isMessageFileUploadEnabled(): Observable<boolean>;
   abstract isManualStateUpdateEnabled(): Observable<boolean>;
   abstract isBidiStreamingEnabled(): Observable<boolean>;
+  abstract isExportSessionEnabled(): Observable<boolean>;
 }

@@ -153,13 +153,15 @@
           >
             delete
           </span>
-          <span
-            class="material-symbols-outlined toolbar-icon"
-            matTooltip="Export current session"
-            (click)="exportSession()"
-          >
-            download
-          </span>
+          @if (isExportSessionEnabledObs | async) {
+            <span
+              class="material-symbols-outlined toolbar-icon"
+              matTooltip="Export current session"
+              (click)="exportSession()"
+            >
+              download
+            </span>
+          }
           @if (importSessionEnabledObs | async) {
           <span
             class="material-symbols-outlined toolbar-icon"

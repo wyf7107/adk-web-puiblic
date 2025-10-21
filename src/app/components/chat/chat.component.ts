@@ -264,6 +264,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.featureFlagService.isApplicationSelectorEnabled();
   readonly isTokenStreamingEnabledObs: Observable<boolean> =
       this.featureFlagService.isTokenStreamingEnabled();
+  readonly isExportSessionEnabledObs: Observable<boolean> =
+      this.featureFlagService.isExportSessionEnabled();
 
   // Trace detail
   bottomPanelVisible = false;

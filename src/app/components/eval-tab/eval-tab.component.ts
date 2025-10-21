@@ -27,6 +27,7 @@ import {DEFAULT_EVAL_METRICS, EvalMetric, EvalCase} from '../../core/models/Eval
 import {Session} from '../../core/models/Session';
 import {Invocation} from '../../core/models/Eval';
 import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {FeatureFlagService} from '../../core/services/feature-flag.service';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 
@@ -112,7 +113,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
 
   private readonly evalCasesSubject = new BehaviorSubject<string[]>([]);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
-  private readonly flagService = inject(FeatureFlagService);
+  private readonly flagService = inject<FeatureFlagService>(FEATURE_FLAG_SERVICE);
 
   displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
   evalsets: any[] = [];

@@ -396,7 +396,8 @@ describe('ChatComponent', () => {
               'sessionTab', ['refreshSession', 'getSession']);
           sessionTabSpy.refreshSession.and.returnValue(
               {id: SESSION_2_ID} as any);
-          spyOn(component, 'sessionTab').and.returnValue(sessionTabSpy);
+          spyOnProperty(component, 'sessionTab', 'get')
+              .and.returnValue(sessionTabSpy);
           component.deleteSession(SESSION_1_ID);
         });
         it('should delete session', () => {

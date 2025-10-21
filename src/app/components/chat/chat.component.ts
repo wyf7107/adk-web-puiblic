@@ -159,7 +159,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   chatPanel = viewChild.required(ChatPanelComponent);
   sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
-  sessionTab = viewChild(SessionTabComponent);
+  sidePanel = viewChild.required(SidePanelComponent);
   evalTab = viewChild(EvalTabComponent);
   private scrollContainer = viewChild.required<ElementRef>('autoScroll');
   bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
@@ -316,6 +316,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.traceService.selectedTraceRow$.subscribe(node => {
       const eventId = node?.attributes['gcp.vertex.agent.event_id'];
+
       if (eventId && this.eventData.has(eventId)) {
         this.bottomPanelVisible = true;
       } else {
@@ -325,6 +326,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.traceService.hoveredMessageIndices$.subscribe(
         i => this.hoveredEventMessageIndices = i);
+  }
+
+  get sessionTab() {
+    return this.sidePanel().sessionTabComponent();
   }
 
   ngAfterViewInit() {
@@ -383,7 +388,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         .subscribe((res) => {
           this.currentSessionState = res.state;
           this.sessionId = res.id ?? '';
-          this.sessionTab()?.refreshSession();
+          this.sessionTab?.refreshSession();
 
           this.isSessionUrlEnabledObs.subscribe((enabled) => {
             if (enabled) {
@@ -456,7 +461,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       complete: () => {
         this.streamingTextMessage = null;
-        this.sessionTab()?.reloadSession(this.sessionId);
+        this.sessionTab?.reloadSession(this.sessionId);
         this.eventService.getTrace(this.sessionId)
             .pipe(catchError((error) => {
               if (error.status === 404) {
@@ -1072,7 +1077,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected handleReturnToSession(event: boolean) {
-    this.sessionTab()?.getSession(this.sessionId);
+    this.sessionTab?.getSession(this.sessionId);
     this.evalTab()?.resetEvalCase();
     this.isChatMode.set(true);
   }
@@ -1393,9 +1398,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (result) {
         this.sessionService.deleteSession(this.userId, this.appName, session)
             .subscribe((res) => {
-              const nextSession = this.sessionTab()?.refreshSession(session);
+              const nextSession = this.sessionTab?.refreshSession(session);
               if (nextSession) {
-                this.sessionTab()?.getSession(nextSession.id);
+                this.sessionTab?.getSession(nextSession.id);
               } else {
                 window.location.reload();
               }
@@ -1591,7 +1596,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                     sessionData.userId, sessionData.appName, sessionData.events)
                 .subscribe((res) => {
                   this.openSnackBar('Session imported', 'OK');
-                  this.sessionTab()?.refreshSession();
+                  this.sessionTab?.refreshSession();
                 });
           } catch (error) {
             this.openSnackBar('Error parsing session file', 'OK');

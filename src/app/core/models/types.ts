@@ -42,6 +42,7 @@ export declare interface Part {
   inlineData?: Blob;
   functionCall?: FunctionCall;
   functionResponse?: FunctionResponse;
+  thought?: boolean;
   fileData?: FileData;
 }
 

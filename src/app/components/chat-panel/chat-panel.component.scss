@@ -201,6 +201,7 @@
     border: none;
     padding: 10px;
     box-sizing: content-box;
+    caret-color: white;
 
     &::placeholder {
       color: var(--chat-panel-input-field-textarea-placeholder-color);

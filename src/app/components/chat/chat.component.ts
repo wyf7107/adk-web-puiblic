@@ -591,7 +591,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let combinedTextPart: Part|undefined;
 
     for (const part of parts) {
-      if (part.text) {
+      if (part.text && !part.thought) {
         if (!combinedTextPart) {
           combinedTextPart = {text: part.text};
           result.push(combinedTextPart);

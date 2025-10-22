@@ -51,7 +51,11 @@
           <img [src]="file.url" alt="attachment" class="image-preview-chat" />
           } @if (!file.file.type.startsWith("image/")) {
           <mat-icon>insert_drive_file</mat-icon>
+          @if (file.url) {
           <a [href]="file.url" download>{{ file.file.name }}</a>
+          } @else {
+          {{ file.file.name }}
+          }
           }
         </div>
         }

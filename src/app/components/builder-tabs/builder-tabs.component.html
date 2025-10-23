@@ -113,62 +113,64 @@
         </div>
       </div>
 
-      <div class="builder-panel-wrapper">
-        <div class="panel-title">
-          <div>
-            Tools
+      @if (agentConfig?.agent_class === 'LlmAgent') {
+        <div class="builder-panel-wrapper">
+          <div class="panel-title">
+            <div>
+              Tools
+            </div>
+            <div>
+              <button
+                mat-icon-button
+                type="button"
+                class="panel-action-button"
+                [matMenuTriggerFor]="toolsMenu"
+                #agentMenuTrigger="matMenuTrigger"
+                aria-label="Add tool"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+              <mat-menu #toolsMenu="matMenu">
+                  <button
+                    mat-menu-item
+                    (click)="addTool('Function tool')"
+                  >
+                    <span>Function tool</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="addTool('Built-in tool')"
+                  >
+                    <span>Built-in tool</span>
+                  </button>
+                  <button
+                    mat-menu-item
+                    (click)="createAgentTool()"
+                  >
+                    <span>Agent tool</span>
+                  </button>
+                </mat-menu>
+            </div>
           </div>
-          <div>
-            <button
-              mat-icon-button
-              type="button"
-              class="panel-action-button"
-              [matMenuTriggerFor]="toolsMenu"
-              #agentMenuTrigger="matMenuTrigger"
-              aria-label="Add tool"
-            >
-              <mat-icon>add</mat-icon>
-            </button>
-            <mat-menu #toolsMenu="matMenu">
-                <button
-                  mat-menu-item
-                  (click)="addTool('Function tool')"
-                >
-                  <span>Function tool</span>
-                </button>
-                <button
-                  mat-menu-item
-                  (click)="addTool('Built-in tool')"
-                >
-                  <span>Built-in tool</span>
-                </button>
-                <button
-                  mat-menu-item
-                  (click)="createAgentTool()"
-                >
-                  <span>Agent tool</span>
-                </button>
-              </mat-menu>
-          </div>
-        </div>
-        @if (toolsMap$ | async; as toolsMap) {
-            @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
-              <div class="tools-chips-container">
-                <mat-chip-set aria-label="Tools">
-                  @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
-                    <mat-chip (click)="selectTool(tool)" class="tool-chip">
-                      <mat-icon class="tool-icon" matChipAvatar>{{ getToolIcon(tool) }}</mat-icon>
-                      <span class="tool-chip-name">{{tool.name}}</span>
-                      <button matChipRemove (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()" aria-label="Remove tool">
-                        <mat-icon>cancel</mat-icon>
-                      </button>
-                    </mat-chip>
-                  }
-                </mat-chip-set>
-              </div>
+          @if (toolsMap$ | async; as toolsMap) {
+              @if (agentConfig && toolsMap.get(agentConfig.name) && toolsMap.get(agentConfig.name)!.length > 0) {
+                <div class="tools-chips-container">
+                  <mat-chip-set aria-label="Tools">
+                    @for (tool of toolsMap.get(agentConfig.name)!; track tool) {
+                      <mat-chip (click)="selectTool(tool)" class="tool-chip">
+                        <mat-icon class="tool-icon" matChipAvatar>{{ getToolIcon(tool) }}</mat-icon>
+                        <span class="tool-chip-name">{{tool.name}}</span>
+                        <button matChipRemove (click)="deleteTool(agentConfig.name, tool); $event.stopPropagation()" aria-label="Remove tool">
+                          <mat-icon>cancel</mat-icon>
+                        </button>
+                      </mat-chip>
+                    }
+                  </mat-chip-set>
+                </div>
+              }
             }
-          }
-      </div>
+        </div>
+      }
       <div class="builder-panel-wrapper">
         <div class="panel-title">
           <div>
@@ -225,22 +227,24 @@
               <button mat-menu-item (click)="addCallback('after_agent')" [matTooltip]="callbackMenuTooltips('after_agent')" matTooltipPosition="right">
                 <span>After Agent</span>
               </button>
-              <mat-divider></mat-divider>
-              <div class="menu-header">Model (LLM) Interaction</div>
-              <button mat-menu-item (click)="addCallback('before_model')" [matTooltip]="callbackMenuTooltips('before_model')" matTooltipPosition="right">
-                <span>Before Model</span>
-              </button>
-              <button mat-menu-item (click)="addCallback('after_model')" [matTooltip]="callbackMenuTooltips('after_model')" matTooltipPosition="right">
-                <span>After Model</span>
-              </button>
-              <mat-divider></mat-divider>
-              <div class="menu-header">Tool Execution</div>
-              <button mat-menu-item (click)="addCallback('before_tool')" [matTooltip]="callbackMenuTooltips('before_tool')" matTooltipPosition="right">
-                <span>Before Tool</span>
-              </button>
-              <button mat-menu-item (click)="addCallback('after_tool')" [matTooltip]="callbackMenuTooltips('after_tool')" matTooltipPosition="right">
-                <span>After Tool</span>
-              </button>
+              @if (agentConfig?.agent_class === 'LlmAgent') {
+                <mat-divider></mat-divider>
+                <div class="menu-header">Model (LLM) Interaction</div>
+                <button mat-menu-item (click)="addCallback('before_model')" [matTooltip]="callbackMenuTooltips('before_model')" matTooltipPosition="right">
+                  <span>Before Model</span>
+                </button>
+                <button mat-menu-item (click)="addCallback('after_model')" [matTooltip]="callbackMenuTooltips('after_model')" matTooltipPosition="right">
+                  <span>After Model</span>
+                </button>
+                <mat-divider></mat-divider>
+                <div class="menu-header">Tool Execution</div>
+                <button mat-menu-item (click)="addCallback('before_tool')" [matTooltip]="callbackMenuTooltips('before_tool')" matTooltipPosition="right">
+                  <span>Before Tool</span>
+                </button>
+                <button mat-menu-item (click)="addCallback('after_tool')" [matTooltip]="callbackMenuTooltips('after_tool')" matTooltipPosition="right">
+                  <span>After Tool</span>
+                </button>
+              }
             </mat-menu>
           </div>
         </div>

@@ -76,7 +76,7 @@ limitations under the License.
         ></textarea>
         <button
           mat-icon-button
-          (click)="sendMessage()"
+          (click)="sendMessage(userMessage.trim())"
           [disabled]="!userMessage?.trim() || isGenerating"
           class="send-button"
           matTooltip="Send message">

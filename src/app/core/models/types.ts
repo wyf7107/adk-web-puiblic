@@ -58,6 +58,7 @@ export declare interface LlmResponse {
   content: GenAiContent;
   error?: string;
   errorMessage?: string;
+  errorCode?: string;
   longRunningToolIds?: string[];
 }
 

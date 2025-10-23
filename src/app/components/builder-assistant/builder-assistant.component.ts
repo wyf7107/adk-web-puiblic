@@ -132,13 +132,13 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
     this.closePanel.emit();
   }
 
-  sendMessage() {
+  sendMessage(msg: string) {
     if (this.userMessage?.trim() && this.currentSession) {
       // save to tmp
       this.saveAgent(this.appName);
 
       // Add user message
-      this.messages.push({ role: 'user', text: this.userMessage });
+      this.messages.push({ role: 'user', text: msg });
 
       const userText = this.userMessage;
       this.userMessage = '';
@@ -161,6 +161,10 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
+          if (chunk.errorCode && (chunk.errorCode == "MALFORMED_FUNCTION_CALL" || chunk.errorCode == "STOP")) {
+            this.sendMessage("try again");
+            return;
+          }
           if (chunk.content) {
             let botText = '';
             for (let part of chunk.content.parts) {
@@ -225,8 +229,10 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
         return;
       } else {
         // Enter only: Send message
-        event.preventDefault();
-        this.sendMessage();
+        if (this.userMessage?.trim() && this.currentSession) {
+          event.preventDefault();
+          this.sendMessage(this.userMessage);
+        }
       }
     }
   }

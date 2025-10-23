@@ -219,26 +219,26 @@
             </button>
             <mat-menu #callbacksMenu="matMenu">
               <div class="menu-header">Agent Lifecycle</div>
-              <button mat-menu-item (click)="addCallback('before_agent')">
+              <button mat-menu-item (click)="addCallback('before_agent')" [matTooltip]="callbackMenuTooltips('before_agent')" matTooltipPosition="right">
                 <span>Before Agent</span>
               </button>
-              <button mat-menu-item (click)="addCallback('after_agent')">
+              <button mat-menu-item (click)="addCallback('after_agent')" [matTooltip]="callbackMenuTooltips('after_agent')" matTooltipPosition="right">
                 <span>After Agent</span>
               </button>
               <mat-divider></mat-divider>
               <div class="menu-header">Model (LLM) Interaction</div>
-              <button mat-menu-item (click)="addCallback('before_model')">
+              <button mat-menu-item (click)="addCallback('before_model')" [matTooltip]="callbackMenuTooltips('before_model')" matTooltipPosition="right">
                 <span>Before Model</span>
               </button>
-              <button mat-menu-item (click)="addCallback('after_model')">
+              <button mat-menu-item (click)="addCallback('after_model')" [matTooltip]="callbackMenuTooltips('after_model')" matTooltipPosition="right">
                 <span>After Model</span>
               </button>
               <mat-divider></mat-divider>
               <div class="menu-header">Tool Execution</div>
-              <button mat-menu-item (click)="addCallback('before_tool')">
+              <button mat-menu-item (click)="addCallback('before_tool')" [matTooltip]="callbackMenuTooltips('before_tool')" matTooltipPosition="right">
                 <span>Before Tool</span>
               </button>
-              <button mat-menu-item (click)="addCallback('after_tool')">
+              <button mat-menu-item (click)="addCallback('after_tool')" [matTooltip]="callbackMenuTooltips('after_tool')" matTooltipPosition="right">
                 <span>After Tool</span>
               </button>
             </mat-menu>

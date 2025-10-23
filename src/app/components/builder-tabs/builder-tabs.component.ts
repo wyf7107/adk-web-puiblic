@@ -47,6 +47,7 @@ import { FEATURE_FLAG_SERVICE } from '../../core/services/feature-flag.service';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { TooltipUtil } from '../../../utils/tooltip-util';
 
 @Component({
   selector: 'app-builder-tabs',
@@ -825,5 +826,9 @@ export class BuilderTabsComponent {
     const isWorkflowAgent = this.agentConfig.agent_class !== 'LlmAgent';
 
     this.agentBuilderService.setAddSubAgentSubject(this.agentConfig.name, agentClass, isWorkflowAgent);
+  }
+
+  callbackMenuTooltips(callbackName: string) {
+    return TooltipUtil.getCallbackMenuTooltips(callbackName);
   }
 }

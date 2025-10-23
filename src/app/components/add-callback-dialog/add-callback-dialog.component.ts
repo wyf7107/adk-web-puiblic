@@ -33,6 +33,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { FormControl } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { CallbackNode } from '../../core/models/AgentBuilder';
+import { MarkdownComponent } from 'ngx-markdown';
 
 /** Error when invalid control is dirty, touched, or submitted. */
 export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
@@ -55,6 +56,7 @@ export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
     MatInputModule,
     MatError,
     MatSelectModule,
+    MarkdownComponent
   ],
 })
 export class AddCallbackDialogComponent {

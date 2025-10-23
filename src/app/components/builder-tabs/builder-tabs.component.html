@@ -96,10 +96,6 @@
                   <mat-label>Description (optional)</mat-label>
                   <textarea matInput rows="3" [(ngModel)]="agentConfig.description"></textarea>
                 </mat-form-field>
-                <mat-form-field>
-                  <mat-label>Output Key (optional)</mat-label>
-                  <input matInput [(ngModel)]="agentConfig.output_key"/>
-                </mat-form-field>
               }
 
               @if (agentConfig.agent_class === 'LoopAgent') {

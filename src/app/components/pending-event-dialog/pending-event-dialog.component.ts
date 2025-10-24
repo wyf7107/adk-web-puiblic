@@ -19,6 +19,7 @@ import {Component, inject} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {PENDING_EVENT_SERVICE, PendingEventService} from '../../core/services/interfaces/pendingevent';
 import { NgIf } from '@angular/common';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
@@ -48,6 +49,7 @@ export class PendingEventDialogComponent {
   readonly dialogRef = inject(MatDialogRef<PendingEventDialogComponent>);
   readonly data: any = inject(MAT_DIALOG_DATA);
   private readonly agentService = inject(AGENT_SERVICE);
+  private readonly pendingEventService = inject(PENDING_EVENT_SERVICE);
 
   selectedEvent: any = this.data.event;
   appName: string = this.data.appName;
@@ -77,13 +79,11 @@ export class PendingEventDialogComponent {
     };
     if (this.selectedEvent.response) {
       req.functionCallEventId = this.functionCallEventId;
-      req.newMessage.parts.push({
-        'function_response': {
-          id: this.selectedEvent.id,
-          name: this.selectedEvent.name,
-          response: {'response': this.selectedEvent.response},
-        },
-      });
+      req.newMessage.parts.push(this.pendingEventService.createFunctionResponse(
+          this.selectedEvent.id,
+          this.selectedEvent.name,
+          {'response': this.selectedEvent.response},
+          ));
     }
 
     this.agentService.runSse(req).subscribe({

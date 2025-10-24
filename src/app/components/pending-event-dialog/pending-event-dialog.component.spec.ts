@@ -27,6 +27,7 @@ import { AgentService } from '../../core/services/agent.service';
 import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {PENDING_EVENT_SERVICE, PendingEventService} from '../../core/services/interfaces/pendingevent';
 
 describe('PendingEventDialogComponent', () => {
   let component: PendingEventDialogComponent;
@@ -39,26 +40,33 @@ describe('PendingEventDialogComponent', () => {
     const agentService = jasmine.createSpyObj<AgentService>(['runSse']);
     agentService.runSse.and.returnValue(of(createFakeLlmResponse()));
 
-    await TestBed.configureTestingModule({
-      imports: [
-        MatDialogModule,
-        PendingEventDialogComponent,
-        NoopAnimationsModule,
-      ],
-      providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        {
-          provide: MAT_DIALOG_DATA,
-          useValue: {
-            event: {},
-            appName: 'Test App',
-            userId: 'testuser',
-            sessionId: 'testsession',
-          },
-        },
-        { provide: AGENT_SERVICE, useValue: agentService },
-      ],
-    }).compileComponents();
+    const mockPendingEventService =
+        jasmine.createSpyObj<PendingEventService>(['createFunctionResponse']);
+
+    await TestBed
+        .configureTestingModule({
+          imports: [
+            MatDialogModule,
+            PendingEventDialogComponent,
+            NoopAnimationsModule,
+          ],
+          providers: [
+            {provide: MatDialogRef, useValue: mockDialogRef},
+            {
+              provide: MAT_DIALOG_DATA,
+              useValue: {
+                event: {},
+                appName: 'Test App',
+                userId: 'testuser',
+                sessionId: 'testsession',
+              },
+            },
+            {provide: AGENT_SERVICE, useValue: agentService},
+            {provide: PENDING_EVENT_SERVICE, useValue: mockPendingEventService},
+
+          ],
+        })
+        .compileComponents();
 
     fixture = TestBed.createComponent(PendingEventDialogComponent);
     component = fixture.componentInstance;

@@ -51,6 +51,11 @@ export class YamlUtils {
       delete yamlConfig.description;
     }
 
+    if (agentNode.agent_class != "LlmAgent") {
+      delete yamlConfig.instruction;
+      delete yamlConfig.tools;
+    }
+
     // Add max_iteration for LoopAgent
     if (agentNode.agent_class === 'LoopAgent' && agentNode.max_iterations) {
       yamlConfig.max_iterations = agentNode.max_iterations;

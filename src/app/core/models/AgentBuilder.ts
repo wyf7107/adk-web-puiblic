@@ -51,10 +51,10 @@ export interface YamlConfig {
   model: string;
   agent_class: string;
   description?: string;
-  instruction: string;
+  instruction?: string;
   max_iterations?: number;
   sub_agents: any;
-  tools: any[];
+  tools?: any[];
   callbacks?: any[];
 }
 

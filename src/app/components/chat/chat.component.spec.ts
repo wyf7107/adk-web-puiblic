@@ -28,10 +28,6 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
 import {EvalCase} from '../../core/models/Eval';
-import {
-  EVAL_TAB_COMPONENT,
-  EvalTabComponent,
-} from '../eval-tab/eval-tab.component';
 import {AGENT_SERVICE, AgentService} from '../../core/services/interfaces/agent';
 import {ARTIFACT_SERVICE, ArtifactService,} from '../../core/services/interfaces/artifact';
 import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/interfaces/download';
@@ -41,10 +37,13 @@ import {FEATURE_FLAG_SERVICE, FeatureFlagService,} from '../../core/services/int
 import {GRAPH_SERVICE, GraphService} from '../../core/services/interfaces/graph';
 import {LOCAL_FILE_SERVICE} from '../../core/services/interfaces/localfile';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
-import {LOCATION_SERVICE} from '../../core/services/location.service';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from '../../core/services/interfaces/stream-chat';
+import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
+import {TRACE_SERVICE, TraceService} from '../../core/services/interfaces/trace';
+import {VIDEO_SERVICE, VideoService} from '../../core/services/interfaces/video';
+import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/interfaces/websocket';
+import {LOCATION_SERVICE} from '../../core/services/location.service';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockArtifactService} from '../../core/services/testing/mock-artifact.service';
 import {MockDownloadService} from '../../core/services/testing/mock-download.service';
@@ -60,12 +59,10 @@ import {MockStringToColorService} from '../../core/services/testing/mock-string-
 import {MockTraceService} from '../../core/services/testing/mock-trace.service';
 import {MockVideoService} from '../../core/services/testing/mock-video.service';
 import {MockWebSocketService} from '../../core/services/testing/mock-websocket.service';
-import {TRACE_SERVICE, TraceService} from '../../core/services/interfaces/trace';
-import {VIDEO_SERVICE, VideoService} from '../../core/services/interfaces/video';
-import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/interfaces/websocket';
 import {fakeAsync,
         tick} from '../../testing/utils';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
+import {EVAL_TAB_COMPONENT, EvalTabComponent,} from '../eval-tab/eval-tab.component';
 import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
@@ -513,6 +510,32 @@ describe('ChatComponent', () => {
         it('opens panel', () => {
           expect(component.sideDrawer()!.open).toHaveBeenCalled();
           expect(component.showSidePanel).toBe(true);
+        });
+      });
+    });
+
+    describe('mat-drawer', () => {
+      describe('when app selector is disabled', () => {
+        beforeEach(() => {
+          mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(
+              false);
+          fixture.detectChanges();
+        });
+
+        it('should disable close', () => {
+          expect(component.sideDrawer().disableClose).toBe(true);
+        });
+      });
+
+      describe('when app selector is enabled', () => {
+        beforeEach(() => {
+          mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(
+              true);
+          fixture.detectChanges();
+        });
+
+        it('should enable close', () => {
+          expect(component.sideDrawer().disableClose).toBe(false);
         });
       });
     });

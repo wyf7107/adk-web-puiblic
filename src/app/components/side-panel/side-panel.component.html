@@ -95,16 +95,7 @@
         <ng-template mat-tab-label>
           <span class="tab-label">{{ i18n.evalTabLabel }}</span>
         </ng-template>
-        <app-eval-tab
-          [appName]="appName()"
-          [userId]="userId()"
-          [sessionId]="sessionId()"
-          (sessionSelected)="sessionSelected.emit($event)"
-          (evalCaseSelected)="evalCaseSelected.emit($event)"
-          (evalSetIdSelected)="evalSetIdSelected.emit($event)"
-          (shouldReturnToSession)="returnToSession.emit($event)"
-          (evalNotInstalledMsg)="evalNotInstalled.emit($event)"
-        ></app-eval-tab>
+        <ng-container #evalTabContainer></ng-container>
       </mat-tab>
     }
   </mat-tab-group>

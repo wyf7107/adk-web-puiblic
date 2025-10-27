@@ -28,6 +28,10 @@ import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
 import {EvalCase} from '../../core/models/Eval';
+import {
+  EVAL_TAB_COMPONENT,
+  EvalTabComponent,
+} from '../eval-tab/eval-tab.component';
 import {AGENT_SERVICE, AgentService} from '../../core/services/interfaces/agent';
 import {ARTIFACT_SERVICE, ArtifactService,} from '../../core/services/interfaces/artifact';
 import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/interfaces/download';
@@ -194,6 +198,7 @@ describe('ChatComponent', () => {
             MockEvalTabComponent,
           ],
           providers: [
+            {provide: EVAL_TAB_COMPONENT, useValue: EvalTabComponent},
             {provide: SESSION_SERVICE, useValue: mockSessionService},
             {provide: ARTIFACT_SERVICE, useValue: mockArtifactService},
             {provide: WEBSOCKET_SERVICE, useValue: mockWebSocketService},

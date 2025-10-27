@@ -16,7 +16,7 @@
  */
 
 import {AsyncPipe, NgComponentOutlet} from '@angular/common';
-import {Component, inject, input, output, signal, Type, viewChild, type WritableSignal} from '@angular/core';
+import {Component, inject, input, output, signal, Type, viewChild, type WritableSignal, ViewContainerRef, AfterViewInit, EnvironmentInjector, DestroyRef, effect, runInInjectionContext} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatMiniFabButton} from '@angular/material/button';
 import {MatOption} from '@angular/material/core';
@@ -28,13 +28,14 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {Observable, of} from 'rxjs';
+import {first} from 'rxjs/operators';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {LOGO_COMPONENT} from '../../injection_tokens';
 import {ArtifactTabComponent} from '../artifact-tab/artifact-tab.component';
-import {EvalTabComponent} from '../eval-tab/eval-tab.component';
+import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {StateTabComponent} from '../state-tab/state-tab.component';
@@ -51,16 +52,28 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   styleUrls: ['./side-panel.component.scss'],
   standalone: true,
   imports: [
-    AsyncPipe,         FormsModule,          NgComponentOutlet,
-    MatTooltip,        MatTabGroup,          MatTab,
-    MatTabLabel,       TraceTabComponent,    EventTabComponent,
-    StateTabComponent, ArtifactTabComponent, SessionTabComponent,
-    EvalTabComponent,  MatPaginator,         MatMiniFabButton,
-    MatIcon,           NgxJsonViewerModule,  MatOption,
-    MatSelect,         ReactiveFormsModule,
+    AsyncPipe,
+    FormsModule,
+    NgComponentOutlet,
+    MatTooltip,
+    MatTabGroup,
+    MatTab,
+    MatTabLabel,
+    TraceTabComponent,
+    EventTabComponent,
+    StateTabComponent,
+    ArtifactTabComponent,
+    SessionTabComponent,
+    MatPaginator,
+    MatMiniFabButton,
+    MatIcon,
+    NgxJsonViewerModule,
+    MatOption,
+    MatSelect,
+    ReactiveFormsModule,
   ],
 })
-export class SidePanelComponent {
+export class SidePanelComponent implements AfterViewInit {
   appName = input('');
   userId = input('');
   sessionId = input('');
@@ -99,12 +112,17 @@ export class SidePanelComponent {
   readonly eventTabComponent = viewChild(EventTabComponent);
   readonly sessionTabComponent = viewChild(SessionTabComponent);
   readonly evalTabComponent = viewChild(EvalTabComponent);
+  readonly evalTabContainer =
+      viewChild('evalTabContainer', {read: ViewContainerRef});
 
   readonly logoComponent: Type<Component> | null = inject(LOGO_COMPONENT, {
     optional: true,
   });
   readonly i18n = inject(SidePanelMessagesInjectionToken);
   readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  readonly evalTabComponentClass = inject(EVAL_TAB_COMPONENT, {optional: true});
+  private readonly environmentInjector = inject(EnvironmentInjector);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Feature flag references for use in template.
   readonly isAlwaysOnSidePanelEnabledObs =
@@ -120,5 +138,59 @@ export class SidePanelComponent {
   readonly isManualStateUpdateEnabledObs =
       this.featureFlagService.isManualStateUpdateEnabled();
   readonly isBidiStreamingEnabledObs =
-      this.featureFlagService.isBidiStreamingEnabled
+      this.featureFlagService.isBidiStreamingEnabled;
+
+  ngAfterViewInit() {
+    // Wait one tick until the eval tab container is ready.
+    setTimeout(() => {
+      this.initEvalTab();
+    });
+  }
+
+  /**
+   * Dynamically create the eval tab. We must do this programmatically until
+   * ngComponentOutlet supports input/output bindings: https://github.com/angular/angular/issues/63099
+  */
+  private initEvalTab() {
+    this.isEvalEnabledObs.pipe(first()).subscribe((isEvalEnabled) => {
+      if (isEvalEnabled) {
+        const evalTabComponent = this.evalTabContainer()?.createComponent(
+            this.evalTabComponentClass ?? EvalTabComponent,
+            {
+              environmentInjector: this.environmentInjector,
+            }
+        );
+        if (!evalTabComponent) return;
+
+        runInInjectionContext(this.environmentInjector, () => {
+          // Ensure inputs are updated dynamically using effect.
+          effect(() => {
+            evalTabComponent.setInput('appName', this.appName());
+            evalTabComponent.setInput('userId', this.userId());
+            evalTabComponent.setInput('sessionId', this.sessionId());
+          });
+        });
+        evalTabComponent.instance.sessionSelected
+          .subscribe((session: Session) => {
+            this.sessionSelected.emit(session);
+          });
+        evalTabComponent.instance.evalCaseSelected
+          .subscribe((evalCase: EvalCase) => {
+            this.evalCaseSelected.emit(evalCase);
+          });
+        evalTabComponent.instance.evalSetIdSelected
+          .subscribe((evalSetId: string) => {
+            this.evalSetIdSelected.emit(evalSetId);
+          });
+        evalTabComponent.instance.shouldReturnToSession
+          .subscribe((returnToSession: boolean) => {
+            this.returnToSession.emit(returnToSession);
+          });
+        evalTabComponent.instance.evalNotInstalledMsg
+          .subscribe((message: string) => {
+            this.evalNotInstalled.emit(message);
+          });
+      }
+    });
+  }
 }

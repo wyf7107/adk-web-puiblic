@@ -207,8 +207,8 @@ describe('SidePanelComponent', () => {
 
     fixture = TestBed.createComponent(SidePanelComponent);
     component = fixture.componentInstance;
-    component.appName = 'test-app';
-    component.showSidePanel = true;
+    fixture.componentRef.setInput('appName', 'test-app');
+    fixture.componentRef.setInput('showSidePanel', true);
     fixture.detectChanges();
   });
 
@@ -226,8 +226,8 @@ describe('SidePanelComponent', () => {
 
   describe('App Selector', () => {
     beforeEach(() => {
-      component.isApplicationSelectorEnabledObs = of(true);
-      component.apps$ = of(['app1', 'app2']);
+      fixture.componentRef.setInput('isApplicationSelectorEnabledObs', of(true));
+      fixture.componentRef.setInput('apps$', of(['app1', 'app2']));
       fixture.detectChanges();
     });
 
@@ -300,7 +300,7 @@ describe('SidePanelComponent', () => {
   describe('Rendering', () => {
     describe('when appName is empty', () => {
       beforeEach(() => {
-        component.appName = '';
+        fixture.componentRef.setInput('appName', '');
         fixture.detectChanges();
       });
       it('does not show tabs container', () => {
@@ -317,7 +317,7 @@ describe('SidePanelComponent', () => {
 
     describe('when selectedEvent is undefined', () => {
       beforeEach(() => {
-        component.selectedEvent = undefined;
+        fixture.componentRef.setInput('selectedEvent', undefined);
         fixture.detectChanges();
       });
       it('does not show details panel', () => {
@@ -327,7 +327,7 @@ describe('SidePanelComponent', () => {
 
     describe('when selectedEvent is defined', () => {
       beforeEach(() => {
-        component.selectedEvent = {id: 'event1'};
+        fixture.componentRef.setInput('selectedEvent', {id: 'event1'});
         fixture.detectChanges();
       });
       it('shows details panel', () => {
@@ -476,7 +476,7 @@ describe('SidePanelComponent', () => {
 
   describe('Details Panel', () => {
     beforeEach(() => {
-      component.selectedEvent = {id: 'event1'};
+      fixture.componentRef.setInput('selectedEvent', {id: 'event1'});
       fixture.detectChanges();
     });
 
@@ -508,7 +508,7 @@ describe('SidePanelComponent', () => {
 
     describe('when event graph is clicked', () => {
       beforeEach(async () => {
-        component.renderedEventGraph = '<div>graph</div>';
+        fixture.componentRef.setInput('renderedEventGraph', '<div>graph</div>');
         fixture.detectChanges();
         await fixture.whenStable();
         fixture.detectChanges();

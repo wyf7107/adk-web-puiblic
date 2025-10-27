@@ -55,6 +55,7 @@ import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from '../../core/services/interfaces/stream-chat';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {LOCATION_SERVICE} from '../../core/services/location.service';
 import {ResizableBottomDirective} from '../../directives/resizable-bottom.directive';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {getMediaTypeFromMimetype, MediaType} from '../artifact-tab/artifact-tab.component';
@@ -148,7 +149,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   private readonly graphService = inject(GRAPH_SERVICE);
   private readonly localFileService = inject(LOCAL_FILE_SERVICE);
-  private readonly location = inject(Location);
+  private readonly location = inject(LOCATION_SERVICE);
   private readonly renderer = inject(Renderer2);
   private readonly router = inject(Router);
   private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);

@@ -133,14 +133,14 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
   }
 
   sendMessage(msg: string) {
-    if (this.userMessage?.trim() && this.currentSession) {
+    if (msg.trim()) {
       // save to tmp
       this.saveAgent(this.appName);
 
       // Add user message
       this.messages.push({ role: 'user', text: msg });
 
-      const userText = this.userMessage;
+      const userText = msg;
       this.userMessage = '';
 
       // Add loading message for bot response
@@ -162,7 +162,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
           if (chunk.errorCode && (chunk.errorCode == "MALFORMED_FUNCTION_CALL" || chunk.errorCode == "STOP")) {
-            this.sendMessage("try again");
+            this.sendMessage("Something went wrong, please try again");
             return;
           }
           if (chunk.content) {

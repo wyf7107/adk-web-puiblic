@@ -392,5 +392,28 @@ describe('ChatPanelComponent', () => {
       expect(button!.nativeElement.disabled).toBeTrue();
     });
 
+    describe('when canEditSession is false', () => {
+      beforeEach(() => {
+        fixture.componentRef.instance.canEditSession.set(false);
+        fixture.detectChanges();
+      });
+
+      it('should not render the chat input', () => {
+        const textarea = fixture.debugElement.query(By.css('textarea'));
+        expect(textarea).toBeFalsy();
+      });
+    });
+
+    describe('when canEditSession is true', () => {
+      beforeEach(() => {
+        fixture.componentRef.instance.canEditSession.set(true);
+        fixture.detectChanges();
+      });
+
+      it('should render the chat input', () => {
+        const textarea = fixture.debugElement.query(By.css('textarea'));
+        expect(textarea).toBeTruthy();
+      });
+    });
   });
 });

@@ -288,7 +288,7 @@
   }
 </div>
 } @if (appName != "" && isChatMode) {
-    
+  @if(canEditSession()) {
   <div class="chat-input">
     <input type="file" multiple hidden (change)="fileSelect.emit($event)" #fileInput />
     <mat-form-field class="input-field" appearance="outline">
@@ -360,7 +360,7 @@
           </button>
           <mat-menu #moreMenu="matMenu">
             <span mat-menu-item
-              (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }} 
+              (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }}
             </span>
           </mat-menu>
         </div>
@@ -392,5 +392,7 @@
     </mat-form-field>
     </div>
 
-  
+  } @else {
+    <div class="readonly-session-message">{{i18n.cannotEditSessionMessage}}</div>
+  }
 }

@@ -142,6 +142,8 @@ describe('ChatComponent', () => {
     mockStringToColorService = new MockStringToColorService();
     mockSafeValuesService = new MockSafeValuesService();
     mockLocalFileService = new MockLocalFileService();
+    mockSessionService.canEdit =
+        jasmine.createSpy('canEdit').and.returnValue(of(true));
     mockStringToColorService.stc.and.returnValue('#8c8526ff');
 
     mockSessionService.createSessionResponse.next(
@@ -498,6 +500,38 @@ describe('ChatComponent', () => {
                 .toHaveBeenCalledWith(SESSION_1_ID);
           });
 
+          describe('canEdit', () => {
+            it('should be called', () => {
+              expect(mockSessionService.canEdit)
+                  .toHaveBeenCalledWith(USER_ID, mockSession);
+            });
+
+            describe('when canEdit returns false', () => {
+              beforeEach(() => {
+                mockSessionService.canEdit.and.returnValue(of(false));
+                mockEventService.getTraceResponse.next([]);
+                component['updateWithSelectedSession'](mockSession as any);
+                fixture.detectChanges();
+              });
+
+              it('should set canEditSession to false', () => {
+                expect(component.chatPanel()?.canEditSession()).toBe(false);
+              });
+            });
+
+            describe('when canEdit returns true', () => {
+              beforeEach(() => {
+                mockSessionService.canEdit.and.returnValue(of(true));
+                mockEventService.getTraceResponse.next([]);
+                component['updateWithSelectedSession'](mockSession as any);
+                fixture.detectChanges();
+              });
+
+              it('should set canEditSession to true', () => {
+                expect(component.chatPanel()?.canEditSession()).toBe(true);
+              });
+            });
+          });
         });
   });
 

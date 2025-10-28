@@ -24,7 +24,9 @@
       <div class="session-info">
         <div class="session-id">
           {{session.id}}
-          
+          @if ((sessionService.canEdit(userId, session) | async) === false) {
+          <mat-chip>Readonly</mat-chip>
+          }
         </div>
         <div class="session-date">{{ getDate(session) }}</div>
       </div>

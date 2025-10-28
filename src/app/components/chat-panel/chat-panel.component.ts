@@ -125,6 +125,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       this.featureFlagService.isManualStateUpdateEnabled();
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled();
+  readonly canEditSession = signal(true);
 
   constructor(private sanitizer: DomSanitizer) {}
 

@@ -42,4 +42,5 @@ export declare abstract class SessionService {
     appName: string,
     events: any[],
   ): Observable<Session>;
+  abstract canEdit(userId: string, session: Session): Observable<boolean>;
 }

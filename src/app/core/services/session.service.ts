@@ -78,4 +78,7 @@ export class SessionService implements SessionServiceInterface {
     return new Observable<Session>();
   }
 
+  canEdit(userId: string, session: Session): Observable<boolean> {
+    return of(true);
+  }
 }

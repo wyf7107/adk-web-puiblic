@@ -1130,6 +1130,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.traceService.setMessages(this.messages());
     });
 
+    this.sessionService.canEdit(this.userId, session).subscribe((canEdit) => {
+      this.chatPanel()?.canEditSession.set(canEdit);
+    });
     this.bottomPanelVisible = false;
     this.changeDetectorRef.detectChanges();
   }

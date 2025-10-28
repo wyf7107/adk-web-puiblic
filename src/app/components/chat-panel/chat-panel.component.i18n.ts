@@ -46,6 +46,8 @@ export const CHAT_PANEL_MESSAGES = {
   turnOffCamTooltip: 'Turn off camera',
   useCamTooltip: 'Use camera',
   updatedSessionStateChipLabel: 'Updated session state',
+  cannotEditSessionMessage:
+      'This session is read-only. You cannot send messages or update the state.',
 };
 
 

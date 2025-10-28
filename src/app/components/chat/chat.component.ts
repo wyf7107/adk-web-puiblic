@@ -18,6 +18,7 @@
 import {AsyncPipe, DOCUMENT, Location, NgClass} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButton, MatFabButton} from '@angular/material/button';
 import {MatCard} from '@angular/material/card';
@@ -267,6 +268,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.featureFlagService.isTokenStreamingEnabled();
   readonly isExportSessionEnabledObs: Observable<boolean> =
       this.featureFlagService.isExportSessionEnabled();
+  readonly isEventFilteringEnabled =
+      toSignal(this.featureFlagService.isEventFilteringEnabled());
   readonly isDeleteSessionEnabledObs: Observable<boolean> =
       this.featureFlagService.isDeleteSessionEnabled();
 
@@ -925,41 +928,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clickEvent(i: number) {
     const key = this.messages()[i].eventId;
-
     this.sideDrawer()?.open();
     this.showSidePanel = true;
-    this.selectedEvent = this.eventData.get(key);
-    this.selectedEventIndex = this.getIndexOfKeyInMap(key);
 
-    const eventTraceParam = key;
-
-    this.eventService.getEventTrace(eventTraceParam).subscribe((res) => {
-      if (res[this.llmRequestKey]) {
-        this.llmRequest = JSON.parse(res[this.llmRequestKey]);
-      }
-      if (res[this.llmResponseKey]) {
-        this.llmResponse = JSON.parse(res[this.llmResponseKey]);
-      }
-    });
-
-    this.eventService
-        .getEvent(
-            this.userId,
-            this.appName,
-            this.sessionId,
-            this.selectedEvent.id,
-            )
-        .subscribe(async (res) => {
-          if (!res.dotSrc) {
-            this.renderedEventGraph = undefined;
-            return;
-          }
-          const graphSrc = res.dotSrc;
-          const svg = await this.graphService.render(graphSrc);
-          this.rawSvgString = svg;
-          this.renderedEventGraph =
-              this.safeValuesService.bypassSecurityTrustHtml(svg);
-        });
+    this.selectEvent(key);
   }
 
   ngOnDestroy(): void {
@@ -1376,8 +1348,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
 
-    const eventTraceParam = this.selectedEvent.id;
+    let filter = undefined;
+    if (this.isEventFilteringEnabled() && this.selectedEvent.invocationId &&
+        (this.selectedEvent.timestamp ||
+         this.selectedEvent.timestampInMillis)) {
+      filter = {
+        invocationId: this.selectedEvent.invocationId,
+        timestamp:
+            this.selectedEvent.timestamp ?? this.selectedEvent.timestampInMillis
+      };
+    }
 
+    const eventTraceParam = {id: this.selectedEvent.id, ...filter};
     this.eventService.getEventTrace(eventTraceParam).subscribe((res) => {
       if (res[this.llmRequestKey]) {
         this.llmRequest = JSON.parse(res[this.llmRequestKey]);

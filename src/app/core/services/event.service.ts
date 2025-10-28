@@ -17,12 +17,8 @@
 
 import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
-
 import {URLUtil} from '../../../utils/url-util';
-
-import {
-
-  EventService as EventServiceInterface} from './interfaces/event';
+import {EventIdentifier, EventService as EventServiceInterface} from './interfaces/event';
 
 @Injectable({
   providedIn: 'root',
@@ -34,8 +30,8 @@ export class EventService implements EventServiceInterface {
   /**
    * Returns the trace data for a given event id.
    */
-    getEventTrace(id: string) {
-     const url = this.apiServerDomain + `/debug/trace/${id}`;
+  getEventTrace(event: EventIdentifier) {
+    const url = this.apiServerDomain + `/debug/trace/${event.id!}`;
     return this.http.get<any>(url);
   }
 

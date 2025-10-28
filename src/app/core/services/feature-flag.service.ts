@@ -91,6 +91,10 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
     return of(true);
   }
 
+  isEventFilteringEnabled(): Observable<boolean> {
+    return of(false);
+  }
+
   isDeleteSessionEnabled(): Observable<boolean> {
     return of(true);
   }

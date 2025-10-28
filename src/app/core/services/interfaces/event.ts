@@ -22,10 +22,17 @@ import {Observable} from 'rxjs';
 export const EVENT_SERVICE = new InjectionToken<EventService>('EventService');
 
 /**
+ * Event identifier used to fetch event trace.
+ *
+ * This is a subset of the Event interface that is used to identify an event.
+ */
+export type EventIdentifier = Pick<Event, 'id'|'invocationId'|'timestamp'>;
+
+/**
  * Service to provide methods to handle events.
  */
 export declare abstract class EventService {
-  abstract getEventTrace(id: string): Observable<any>;
+  abstract getEventTrace(event: EventIdentifier): Observable<any>;
   abstract getTrace(sessionId: string): Observable<any>;
   abstract getEvent(
       userId: string,

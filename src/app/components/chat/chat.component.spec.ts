@@ -153,6 +153,7 @@ describe('ChatComponent', () => {
     mockFeatureFlagService.isSessionUrlEnabledResponse.next(true);
     mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(true);
     mockFeatureFlagService.isTokenStreamingEnabledResponse.next(true);
+    mockFeatureFlagService.isEventFilteringEnabledResponse.next(true);
     mockFeatureFlagService.isDeleteSessionEnabledResponse.next(true);
 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -556,7 +557,9 @@ describe('ChatComponent', () => {
         component.clickEvent(0);
         expect(component.sideDrawer()!.open).toHaveBeenCalled();
         expect(component.selectedEvent.id).toBe(EVENT_1_ID);
-        expect(mockEventService.getEventTrace).toHaveBeenCalledWith(EVENT_1_ID);
+        expect(mockEventService.getEventTrace).toHaveBeenCalledWith({
+          id: EVENT_1_ID
+        });
         expect(mockEventService.getEvent)
             .toHaveBeenCalledWith(
                 USER_ID,
@@ -586,7 +589,11 @@ describe('ChatComponent', () => {
 
            component.clickEvent(0);
 
-           expect(mockEventService.getEventTrace).toHaveBeenCalledWith(EVENT_1_ID);
+           expect(mockEventService.getEventTrace).toHaveBeenCalledWith({
+             id: EVENT_1_ID,
+             invocationId,
+             timestamp,
+           });
            expect(component.llmRequest).toEqual(llmRequest);
            expect(component.llmResponse).toEqual(llmResponse);
          });

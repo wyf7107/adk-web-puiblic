@@ -25,7 +25,9 @@ import {EventService} from './event.service';
 describe('EventService', () => {
   let service: EventService;
   let httpTestingController: HttpTestingController;
-  const EVENT_ID = 'trace1';
+  const EVENT_ID = {
+    id: 'trace1',
+  };
   beforeEach(() => {
     spyOn(URLUtil, 'getApiServerBaseUrl').and.returnValue('http://test.com');
     TestBed.configureTestingModule({

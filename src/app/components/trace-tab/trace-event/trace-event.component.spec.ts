@@ -23,8 +23,10 @@ import {of} from 'rxjs';
 
 import {Span} from '../../../core/models/Trace';
 import {EVENT_SERVICE, EventService} from '../../../core/services/interfaces/event';
+import {FEATURE_FLAG_SERVICE} from '../../../core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE, GraphService} from '../../../core/services/interfaces/graph';
 import {MockEventService} from '../../../core/services/testing/mock-event.service';
+import {MockFeatureFlagService} from '../../../core/services/testing/mock-feature-flag.service';
 import {MockGraphService} from '../../../core/services/testing/mock-graph.service';
 import {MockTraceService} from '../../../core/services/testing/mock-trace.service';
 import {TRACE_SERVICE, TraceService} from '../../../core/services/interfaces/trace';
@@ -51,6 +53,7 @@ describe('TraceEventComponent', () => {
   let matDialog: jasmine.SpyObj<MatDialog>;
   let domSanitizer: jasmine.SpyObj<DomSanitizer>;
   let graphService: MockGraphService;
+  let featureFlagService: MockFeatureFlagService;
 
   const span: Span = {
     name: 'test-span',
@@ -81,6 +84,8 @@ describe('TraceEventComponent', () => {
     ]);
     graphService = new MockGraphService();
     graphService.render.and.returnValue(Promise.resolve('svg'));
+    featureFlagService = new MockFeatureFlagService();
+    featureFlagService.isEventFilteringEnabled.and.returnValue(of(true));
 
     await TestBed
         .configureTestingModule({
@@ -90,6 +95,7 @@ describe('TraceEventComponent', () => {
             {provide: TRACE_SERVICE, useValue: traceService},
             {provide: EVENT_SERVICE, useValue: eventService},
             {provide: GRAPH_SERVICE, useValue: graphService},
+            {provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService},
             {
               provide: DomSanitizer,
               useValue: domSanitizer,
@@ -122,7 +128,7 @@ describe('TraceEventComponent', () => {
     });
 
     it('should call event service to get trace for the selected row', () => {
-      expect(eventService.getEventTrace).toHaveBeenCalledWith(EVENT_ID);
+      expect(eventService.getEventTrace).toHaveBeenCalledWith({id: EVENT_ID});
     });
 
     it('should call event service to get event details for the selected row',
@@ -161,7 +167,11 @@ describe('TraceEventComponent', () => {
            start_time: startTime,
          });
 
-         expect(eventService.getEventTrace).toHaveBeenCalledWith(EVENT_ID);
+         expect(eventService.getEventTrace).toHaveBeenCalledWith({
+          id: EVENT_ID,
+           invocationId,
+           timestamp: startTime / 1000000,
+         });
          expect(component.llmRequest).toEqual(llmRequest);
          expect(component.llmResponse).toEqual(llmResponse);
        });

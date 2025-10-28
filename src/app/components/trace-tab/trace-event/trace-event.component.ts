@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {MatIconButton} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
 import {MatIcon} from '@angular/material/icon';
@@ -24,6 +25,7 @@ import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
 import {Span} from '../../../core/models/Trace';
 import {EVENT_SERVICE} from '../../../core/services/interfaces/event';
+import {FEATURE_FLAG_SERVICE} from '../../../core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE} from '../../../core/services/interfaces/graph';
 import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
 import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialog.component';
@@ -54,7 +56,12 @@ export class TraceEventComponent implements OnInit {
   private readonly traceService = inject(TRACE_SERVICE);
   private readonly eventService = inject(EVENT_SERVICE);
   private readonly graphService = inject(GRAPH_SERVICE);
+  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   private readonly sanitizer = inject(DomSanitizer);
+
+  private readonly isEventFilteringEnabled = toSignal(
+      this.featureFlagService.isEventFilteringEnabled(),
+  );
 
   constructor() {}
 
@@ -63,8 +70,15 @@ export class TraceEventComponent implements OnInit {
       this.selectedRow = span;
       const eventId = this.getEventIdFromSpan();
       if (eventId) {
-        const eventTraceParam = eventId;
-
+        let filter = undefined;
+        if (this.isEventFilteringEnabled() && this.selectedRow?.invoc_id &&
+            this.selectedRow?.start_time) {
+          filter = {
+            invocationId: this.selectedRow.invoc_id,
+            timestamp: this.selectedRow.start_time / 1000000,
+          };
+        }
+        const eventTraceParam = {id: eventId, ...filter};
         this.eventService.getEventTrace(eventTraceParam).subscribe((res) => {
           this.llmRequest = JSON.parse(res[this.llmRequestKey]);
           this.llmResponse = JSON.parse(res[this.llmResponseKey]);

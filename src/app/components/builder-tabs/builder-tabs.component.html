@@ -181,11 +181,41 @@
               mat-icon-button
               type="button"
               class="panel-action-button"
-              (click)="addSubAgent(agentConfig?.name)"
+              [matMenuTriggerFor]="subAgentMenu"
               aria-label="Add sub agent"
             >
               <mat-icon>add</mat-icon>
             </button>
+            <mat-menu #subAgentMenu="matMenu">
+              <button
+                mat-menu-item
+                (click)="addSubAgentWithType('LlmAgent')"
+              >
+                <mat-icon>psychology</mat-icon>
+                <span>LLM Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="addSubAgentWithType('SequentialAgent')"
+              >
+                <mat-icon>more_horiz</mat-icon>
+                <span>Sequential Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="addSubAgentWithType('LoopAgent')"
+              >
+                <mat-icon>sync</mat-icon>
+                <span>Loop Agent</span>
+              </button>
+              <button
+                mat-menu-item
+                (click)="addSubAgentWithType('ParallelAgent')"
+              >
+                <mat-icon>density_medium</mat-icon>
+                <span>Parallel Agent</span>
+              </button>
+            </mat-menu>
           </div>
         </div>
         @if (agentConfig && agentConfig.sub_agents && agentConfig.sub_agents.length > 0) {

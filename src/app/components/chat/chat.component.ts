@@ -1313,10 +1313,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  protected updateSessionState(session: Session) {
-    this.currentSessionState = session.state;
-  }
-
   onNewSessionClick() {
     this.createSession();
     this.eventData.clear();

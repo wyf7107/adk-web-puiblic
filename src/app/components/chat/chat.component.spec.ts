@@ -311,7 +311,8 @@ describe('ChatComponent', () => {
 
       describe('on initial load without application selector', () => {
         beforeEach(async () => {
-          mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(false);
+          mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(
+              false);
           fixture = TestBed.createComponent(ChatComponent);
           component = fixture.componentInstance;
           fixture.detectChanges();
@@ -355,24 +356,53 @@ describe('ChatComponent', () => {
           [APP_QUERY_PARAM]: TEST_APP_1_NAME,
           [SESSION_QUERY_PARAM]: SESSION_2_ID,
         };
-        mockSessionService.getSessionResponse.error(
-            new HttpErrorResponse({status: 404}));
+        mockSessionService.getSession.and.callFake(
+            (userId: string, app: string, sessionId: string) => {
+              if (sessionId === SESSION_2_ID) {
+                return throwError(() => new HttpErrorResponse({status: 404}));
+              }
+              return of({id: SESSION_1_ID, state: {}, events: []});
+            },
+        );
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
         component.selectApp(TEST_APP_2_NAME);
         await fixture.whenStable();
       });
-      it('should create new session', () => {
+
+      it('should try load the session', () => {
+        expect(mockSessionService.getSession)
+            .toHaveBeenCalledWith(
+                USER_ID,
+                TEST_APP_2_NAME,
+                SESSION_2_ID,
+            );
+      });
+
+
+      it('should show snackbar', () => {
         expect(mockSnackBar.open)
             .toHaveBeenCalledWith(
                 'Cannot find specified session. Creating a new one.',
                 OK_BUTTON_TEXT,
             );
+      });
+
+      it('should create new session', () => {
         expect(mockSessionService.createSession)
             .toHaveBeenCalledWith(
                 USER_ID,
                 TEST_APP_2_NAME,
+            );
+      });
+
+      it('should load the new session', () => {
+        expect(mockSessionService.getSession)
+            .toHaveBeenCalledWith(
+                USER_ID,
+                TEST_APP_1_NAME,
+                SESSION_1_ID,
             );
       });
     });

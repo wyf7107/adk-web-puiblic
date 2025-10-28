@@ -270,6 +270,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.featureFlagService.isExportSessionEnabled();
   readonly isEventFilteringEnabled =
       toSignal(this.featureFlagService.isEventFilteringEnabled());
+  readonly isApplicationSelectorEnabled =
+      toSignal(this.featureFlagService.isApplicationSelectorEnabled());
   readonly isDeleteSessionEnabledObs: Observable<boolean> =
       this.featureFlagService.isDeleteSessionEnabled();
 
@@ -344,6 +346,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showSidePanel = true;
     this.sideDrawer()?.open();
 
+    if (!this.isApplicationSelectorEnabled()) {
+      this.loadSessionByUrlOrReset();
+    }
   }
 
   selectApp(appName: string) {

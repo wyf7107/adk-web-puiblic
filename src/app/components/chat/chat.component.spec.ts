@@ -307,6 +307,25 @@ describe('ChatComponent', () => {
             {id: SESSION_2_ID, state: {}, events: []});
       });
 
+      describe('on initial load without application selector', () => {
+        beforeEach(async () => {
+          mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(false);
+          fixture = TestBed.createComponent(ChatComponent);
+          component = fixture.componentInstance;
+          fixture.detectChanges();
+          await fixture.whenStable();
+        });
+        it('should load session from URL', () => {
+          expect(mockSessionService.getSession)
+              .toHaveBeenCalledWith(
+                  USER_ID,
+                  TEST_APP_1_NAME,
+                  SESSION_2_ID,
+              );
+          expect(component.sessionId).toBe(SESSION_2_ID);
+        });
+      });
+
       describe('on app change', () => {
         beforeEach(async () => {
           fixture = TestBed.createComponent(ChatComponent);

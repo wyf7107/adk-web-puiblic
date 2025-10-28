@@ -61,7 +61,7 @@ export class SessionTabComponent implements OnInit {
                   Number(b.lastUpdateTime) - Number(a.lastUpdateTime),
           );
           this.sessionList = res;
-          this.changeDetectorRef.detectChanges();
+          this.changeDetectorRef.markForCheck();
         });
   }
 

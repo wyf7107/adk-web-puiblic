@@ -18,8 +18,12 @@
 import {HttpClientTestingModule, HttpTestingController,} from '@angular/common/http/testing';
 import {TestBed} from '@angular/core/testing';
 import {firstValueFrom} from 'rxjs';
+import {toArray} from 'rxjs/operators';
 
 import {URLUtil} from '../../../utils/url-util';
+import {
+  fakeAsync,
+} from '../../testing/utils';
 import {createFakeLlmResponse} from '../models/testing/fake_genai_types';
 import {LlmResponse} from '../models/types';
 
@@ -65,7 +69,7 @@ describe('AgentService', () => {
     }
   });
 
-  it('should be created', () => {
+  it('should be created', async () => {
     expect(service).toBeTruthy();
   });
 
@@ -84,13 +88,13 @@ describe('AgentService', () => {
   });
 
   describe('LoadingState', () => {
-    it('should return loading state behavior subject', () => {
+    it('should return loading state behavior subject', async () => {
       expect(service.getLoadingState().value).toBeFalse();
     });
   });
 
   describe('listApps', () => {
-    it('should call list-apps endpoint with correct url', () => {
+    it('should call list-apps endpoint with correct url', async () => {
       service.listApps().subscribe();
       const req = httpTestingController.expectOne(
           API_SERVER_BASE_URL + LIST_APPS_PATH,
@@ -121,13 +125,13 @@ describe('AgentService', () => {
   });
 
   describe('runSse', () => {
-    it('should set loading state to true when called', () => {
+    it('should set loading state to true when called', async () => {
       spyOn(window, 'fetch').and.resolveTo(new Response());
       service.runSse(RUN_SSE_PAYLOAD).subscribe();
       expect(service.getLoadingState().value).toBeTrue();
     });
 
-    it('should make a POST request to /run_sse with correct arguments', () => {
+    it('should make a POST request to /run_sse with correct arguments', async () => {
       spyOn(window, 'fetch').and.resolveTo(new Response());
       service.runSse(RUN_SSE_PAYLOAD).subscribe();
       expect(window.fetch)
@@ -142,7 +146,7 @@ describe('AgentService', () => {
     });
 
     it(
-        'should emit LlmResponses received from fetch', (done) => {
+        'should emit LlmResponses received from fetch', async () => {
           const fakeResponse1 = createFakeLlmResponse();
           const fakeResponse2 = createFakeLlmResponse({
             content: {role: 'model', parts: [{text: 'fake response 2'}]},
@@ -160,74 +164,59 @@ describe('AgentService', () => {
             },
           });
           spyOn(window, 'fetch').and.resolveTo(new Response(mockBody));
-          const results: LlmResponse[] = [];
-          service.runSse(RUN_SSE_PAYLOAD).subscribe({
-            next: (data) => {
-              results.push(data);
-            },
-            complete: () => {
-              expect(results).toEqual([fakeResponse1, fakeResponse2]);
-              done();
-            },
-          });
-        });
+
+          const results = await firstValueFrom(
+              service.runSse(RUN_SSE_PAYLOAD).pipe(toArray()),
+          );
+
+          expect(results).toEqual([fakeResponse1, fakeResponse2]);
+    });
 
     it(
-        'should set loading state to false when fetch is done', (done) => {
+        'should set loading state to false when fetch is done', async () => {
           const mockBody = new ReadableStream({
             start(controller) {
               controller.close();
             },
           });
           spyOn(window, 'fetch').and.resolveTo(new Response(mockBody));
-          service.runSse(RUN_SSE_PAYLOAD).subscribe({
-            complete: () => {
-              expect(service.getLoadingState().value).toBeFalse();
-              done();
-            },
-          });
+
+          await firstValueFrom(service.runSse(RUN_SSE_PAYLOAD).pipe(toArray()));
+
+          expect(service.getLoadingState().value).toBeFalse();
         });
 
 
-    it('should emit error if fetch fails', (done) => {
+    it('should emit error if fetch fails', async () => {
       spyOn(window, 'fetch').and.rejectWith(new Error('Fetch failed'));
-      service.runSse(RUN_SSE_PAYLOAD).subscribe({
-        error: (err) => {
-          expect(err.message).toBe('Fetch failed');
-          done();
-        },
-      });
+
+      await expectAsync(
+        firstValueFrom(service.runSse(RUN_SSE_PAYLOAD)),
+      ).toBeRejectedWithError('Fetch failed');
     });
 
-    // BEGIN-EXTERNAL
-    // it('should handle incomplete JSON chunks', (done) => {
-    //   const fakeResponse = createFakeLlmResponse();
-    //   const fakeResponseJson = JSON.stringify(fakeResponse);
-    //   const mid = Math.floor(fakeResponseJson.length / 2);
-    //   const chunk1 = fakeResponseJson.substring(0, mid);
-    //   const chunk2 = fakeResponseJson.substring(mid);
+    it('should handle incomplete JSON chunks', async () => {
+      const fakeResponse = createFakeLlmResponse();
+      const fakeResponseJson = JSON.stringify(fakeResponse);
+      const mid = Math.floor(fakeResponseJson.length / 2);
+      const chunk1 = fakeResponseJson.substring(0, mid);
+      const chunk2 = fakeResponseJson.substring(mid);
 
-    //   const mockBody = new ReadableStream({
-    //     start(controller) {
-    //       const encoder = new TextEncoder();
-    //       controller.enqueue(encoder.encode(`data: ${chunk1}`));
-    //       controller.enqueue(encoder.encode(`${chunk2}\n`));
-    //       controller.close();
-    //     },
-    //   });
-    //   spyOn(window, 'fetch').and.resolveTo(new Response(mockBody));
-    //   const results: LlmResponse[] = [];
-    //   service.runSse(RUN_SSE_PAYLOAD).subscribe({
-    //     next: (data) => {
-    //       results.push(data);
-    //     },
-    //     complete: () => {
-    //       expect(results).toEqual([fakeResponse]);
-    //       done();
-    //     },
-    //   });
-    // });
-    // END-EXTERNAL
+      const mockBody = new ReadableStream({
+        start(controller) {
+          const encoder = new TextEncoder();
+          controller.enqueue(encoder.encode(`data: ${chunk1}`));
+          controller.enqueue(encoder.encode(`${chunk2}\n`));
+          controller.close();
+        },
+      });
+      spyOn(window, 'fetch').and.resolveTo(new Response(mockBody));
 
+      const results = await firstValueFrom(
+          service.runSse(RUN_SSE_PAYLOAD).pipe(toArray()),
+      );
+
+      expect(results).toEqual([fakeResponse]);
+    });
   });
 });

@@ -82,4 +82,8 @@ export class MockFeatureFlagService implements Partial<FeatureFlagService> {
   isDeleteSessionEnabled =
       jasmine.createSpy('isDeleteSessionEnabled')
           .and.returnValue(this.isDeleteSessionEnabledResponse);
+  isSessionsTabReorderingEnabledResponse = new ReplaySubject<boolean>(1);
+  isSessionsTabReorderingEnabled =
+      jasmine.createSpy('isSessionsTabReorderingEnabled')
+          .and.returnValue(this.isSessionsTabReorderingEnabledResponse);
 }

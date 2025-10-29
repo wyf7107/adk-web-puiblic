@@ -44,7 +44,25 @@
 }
 } @if (appName() != "" && showSidePanel()) {
 <div class="tabs-container">
-  <mat-tab-group (selectedTabChange)="tabChange.emit($event)">
+  <!-- Change sessionsTabIndex$ logic when adding new tabs -->
+  <mat-tab-group
+    (selectedTabChange)="tabChange.emit($event)">
+    @let sessionTabReorderingEnabled = isSessionsTabReorderingEnabledObs | async;
+    @if (sessionTabReorderingEnabled) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
+        </ng-template>
+        <app-session-tab
+          [userId]="userId()"
+          [appName]="appName()"
+          [sessionId]="sessionId()"
+          (sessionSelected)="sessionSelected.emit($event)"
+          (sessionReloaded)="sessionReloaded.emit($event)"
+        >
+        </app-session-tab>
+      </mat-tab>
+    }
     @if (isTraceEnabledObs | async) {
       <mat-tab class="tabs-header">
         <ng-template mat-tab-label>
@@ -77,19 +95,21 @@
         <app-artifact-tab [artifacts]="artifacts()"> </app-artifact-tab>
       </mat-tab>
     }
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
-      </ng-template>
-      <app-session-tab
-        [userId]="userId()"
-        [appName]="appName()"
-        [sessionId]="sessionId()"
-        (sessionSelected)="sessionSelected.emit($event)"
-        (sessionReloaded)="sessionReloaded.emit($event)"
-      >
-      </app-session-tab>
-    </mat-tab>
+    @if (!sessionTabReorderingEnabled) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
+        </ng-template>
+        <app-session-tab
+          [userId]="userId()"
+          [appName]="appName()"
+          [sessionId]="sessionId()"
+          (sessionSelected)="sessionSelected.emit($event)"
+          (sessionReloaded)="sessionReloaded.emit($event)"
+        >
+        </app-session-tab>
+      </mat-tab>
+    }
     @if (isEvalEnabledObs | async) {
       <mat-tab>
         <ng-template mat-tab-label>

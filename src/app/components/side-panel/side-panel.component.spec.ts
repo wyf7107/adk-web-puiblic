@@ -358,27 +358,6 @@ describe('SidePanelComponent', () => {
   });
 
   describe('Tabs', () => {
-    it('when sessionsTabReordering is disabled, Session tab should be the 4th tab',
-       () => {
-         const tabGroup = fixture.debugElement.query(By.directive(MatTabGroup));
-         const tabLabels = tabGroup.queryAll(By.css('.tab-label'));
-         const sessionsLabel = tabLabels[SESSIONS_TAB_INDEX];
-         expect(sessionsLabel.nativeElement.textContent.trim())
-             .toEqual('Sessions');
-       });
-
-    it('when sessionsTabReordering is enabled, Session tab should be the 0th tab',
-       () => {
-         mockFeatureFlagService.isSessionsTabReorderingEnabledResponse.next(
-             true);
-         fixture.detectChanges();
-         const tabGroup = fixture.debugElement.query(By.directive(MatTabGroup));
-         const tabLabels = tabGroup.queryAll(By.css('.tab-label'));
-         const sessionsLabel = tabLabels[0];
-         expect(sessionsLabel.nativeElement.textContent.trim())
-             .toEqual('Sessions');
-       });
-
     describe('when tab is changed', () => {
       beforeEach(() => {
         spyOn(component.tabChange, 'emit');

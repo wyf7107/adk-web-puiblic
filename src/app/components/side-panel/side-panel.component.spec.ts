@@ -27,6 +27,7 @@ import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, Router} from '@angular/router';
 import {of} from 'rxjs';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {
   EVAL_TAB_COMPONENT,
   EvalTabComponent,
@@ -56,6 +57,7 @@ import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 import {VIDEO_SERVICE} from '../../core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from '../../core/services/interfaces/websocket';
+import {initTestBed} from '../../testing/utils';
 
 import {SidePanelComponent} from './side-panel.component';
 
@@ -180,6 +182,7 @@ describe('SidePanelComponent', () => {
     mockFeatureFlagService.isManualStateUpdateEnabled.and.returnValue(of(true));
     mockFeatureFlagService.isBidiStreamingEnabled.and.returnValue(of(true));
 
+    initTestBed();  // required for 1p compatibility
     await TestBed
         .configureTestingModule({
           imports: [SidePanelComponent, MatDialogModule, NoopAnimationsModule],

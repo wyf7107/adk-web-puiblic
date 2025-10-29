@@ -30,6 +30,6 @@ export class GraphService implements GraphServiceInterface {
       engine: 'dot',
     };
     const viz = await instance();
-    return viz.renderString(graphSrc, options);
+return viz.renderString(graphSrc, options);
   }
 }

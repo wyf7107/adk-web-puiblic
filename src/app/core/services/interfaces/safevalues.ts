@@ -17,6 +17,7 @@
 
 import {InjectionToken} from '@angular/core';
 import {SafeHtml} from '@angular/platform-browser';
+// 1p-ONLY-IMPORT
 
 export const SAFE_VALUES_SERVICE = new InjectionToken<SafeValuesService>(
   'SafeValuesService',

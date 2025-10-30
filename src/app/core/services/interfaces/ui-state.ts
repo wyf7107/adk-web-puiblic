@@ -29,4 +29,6 @@ export declare abstract class UiStateService {
   abstract setIsSessionLoading(isLoading: boolean): void;
   abstract isSessionListLoading(): boolean;
   abstract setIsSessionListLoading(isLoading: boolean): void;
+  abstract isEventRequestResponseLoading(): boolean;
+  abstract setIsEventRequestResponseLoading(isLoading: boolean): void;
 }

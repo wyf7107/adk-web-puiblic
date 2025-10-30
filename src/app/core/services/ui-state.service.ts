@@ -29,6 +29,7 @@ import {UiStateService as UiStateServiceInterface} from './interfaces/ui-state';
 export class UiStateService implements UiStateServiceInterface {
   private readonly _isSessionLoading = signal(false);
   private readonly _isSessionListLoading = signal(false);
+  private readonly _isEventRequestResponseLoading = signal(false);
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
 
   isSessionLoading(): boolean {
@@ -51,5 +52,16 @@ export class UiStateService implements UiStateServiceInterface {
 
   setIsSessionListLoading(isLoading: boolean) {
     this._isSessionListLoading.set(isLoading);
+  }
+
+  isEventRequestResponseLoading(): boolean {
+    if (!this.featureFlagService.isLoadingAnimationsEnabled()) {
+      return false;
+    }
+    return this._isEventRequestResponseLoading();
+  }
+
+  setIsEventRequestResponseLoading(isLoading: boolean) {
+    this._isEventRequestResponseLoading.set(isLoading);
   }
 }

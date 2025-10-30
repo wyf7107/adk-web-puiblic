@@ -29,6 +29,12 @@ export class MockUiStateService implements UiStateServiceInterface {
   readonly setIsSessionLoading = jasmine.createSpy('setIsSessionLoading');
   readonly setIsSessionListLoading =
       jasmine.createSpy('setIsSessionListLoading');
+
+  readonly isEventRequestResponseLoading = jasmine.createSpy(
+      'isEventRequestResponseLoading',
+  );
+  readonly setIsEventRequestResponseLoading =
+      jasmine.createSpy('setIsEventRequestResponseLoading');
 }
 
 /**

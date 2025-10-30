@@ -394,3 +394,10 @@ button.video-rec-btn {
     background-color: var(--chat-panel-eval-fail-color);
   }
 }
+
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

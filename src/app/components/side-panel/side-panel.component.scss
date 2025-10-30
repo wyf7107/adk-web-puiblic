@@ -171,3 +171,10 @@
   font-weight: 400;
   padding-left: unset;
 }
+
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}

@@ -16,14 +16,15 @@
  */
 
 import {AsyncPipe, NgComponentOutlet} from '@angular/common';
-import {Component, inject, input, output, signal, Type, viewChild, type WritableSignal, ViewContainerRef, AfterViewInit, EnvironmentInjector, DestroyRef, effect, runInInjectionContext} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef, type WritableSignal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatMiniFabButton} from '@angular/material/button';
 import {MatOption} from '@angular/material/core';
 import {MatIcon} from '@angular/material/icon';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatSelect, MatSelectChange} from '@angular/material/select';
-import {MatTab, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
+import {MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
 import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
@@ -33,6 +34,7 @@ import {first} from 'rxjs/operators';
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {LOGO_COMPONENT} from '../../injection_tokens';
 import {ArtifactTabComponent} from '../artifact-tab/artifact-tab.component';
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
@@ -71,6 +73,7 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatOption,
     MatSelect,
     ReactiveFormsModule,
+    MatProgressSpinner,
   ],
 })
 export class SidePanelComponent implements AfterViewInit {
@@ -115,13 +118,14 @@ export class SidePanelComponent implements AfterViewInit {
   readonly evalTabContainer =
       viewChild('evalTabContainer', {read: ViewContainerRef});
 
-  readonly logoComponent: Type<Component> | null = inject(LOGO_COMPONENT, {
+  readonly logoComponent: Type<Component>|null = inject(LOGO_COMPONENT, {
     optional: true,
   });
   readonly i18n = inject(SidePanelMessagesInjectionToken);
   readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   readonly evalTabComponentClass = inject(EVAL_TAB_COMPONENT, {optional: true});
   private readonly environmentInjector = inject(EnvironmentInjector);
+  protected readonly uiStateService = inject(UI_STATE_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
 
   // Feature flag references for use in template.
@@ -149,17 +153,16 @@ export class SidePanelComponent implements AfterViewInit {
 
   /**
    * Dynamically create the eval tab. We must do this programmatically until
-   * ngComponentOutlet supports input/output bindings: https://github.com/angular/angular/issues/63099
-  */
+   * ngComponentOutlet supports input/output bindings:
+   * https://github.com/angular/angular/issues/63099
+   */
   private initEvalTab() {
     this.isEvalEnabledObs.pipe(first()).subscribe((isEvalEnabled) => {
       if (isEvalEnabled) {
         const evalTabComponent = this.evalTabContainer()?.createComponent(
-            this.evalTabComponentClass ?? EvalTabComponent,
-            {
+            this.evalTabComponentClass ?? EvalTabComponent, {
               environmentInjector: this.environmentInjector,
-            }
-        );
+            });
         if (!evalTabComponent) return;
 
         runInInjectionContext(this.environmentInjector, () => {
@@ -170,26 +173,26 @@ export class SidePanelComponent implements AfterViewInit {
             evalTabComponent.setInput('sessionId', this.sessionId());
           });
         });
-        evalTabComponent.instance.sessionSelected
-          .subscribe((session: Session) => {
-            this.sessionSelected.emit(session);
-          });
-        evalTabComponent.instance.evalCaseSelected
-          .subscribe((evalCase: EvalCase) => {
-            this.evalCaseSelected.emit(evalCase);
-          });
-        evalTabComponent.instance.evalSetIdSelected
-          .subscribe((evalSetId: string) => {
-            this.evalSetIdSelected.emit(evalSetId);
-          });
-        evalTabComponent.instance.shouldReturnToSession
-          .subscribe((returnToSession: boolean) => {
-            this.returnToSession.emit(returnToSession);
-          });
-        evalTabComponent.instance.evalNotInstalledMsg
-          .subscribe((message: string) => {
-            this.evalNotInstalled.emit(message);
-          });
+        evalTabComponent.instance.sessionSelected.subscribe(
+            (session: Session) => {
+              this.sessionSelected.emit(session);
+            });
+        evalTabComponent.instance.evalCaseSelected.subscribe(
+            (evalCase: EvalCase) => {
+              this.evalCaseSelected.emit(evalCase);
+            });
+        evalTabComponent.instance.evalSetIdSelected.subscribe(
+            (evalSetId: string) => {
+              this.evalSetIdSelected.emit(evalSetId);
+            });
+        evalTabComponent.instance.shouldReturnToSession.subscribe(
+            (returnToSession: boolean) => {
+              this.returnToSession.emit(returnToSession);
+            });
+        evalTabComponent.instance.evalNotInstalledMsg.subscribe(
+            (message: string) => {
+              this.evalNotInstalled.emit(message);
+            });
       }
     });
   }

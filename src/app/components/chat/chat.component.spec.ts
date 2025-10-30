@@ -24,6 +24,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {BehaviorSubject, NEVER, of, Subject, throwError} from 'rxjs';
 
 import {EvalCase} from '../../core/models/Eval';
@@ -39,11 +40,11 @@ import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from '../../core/services/interfaces/stream-chat';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
-import {LOCATION_SERVICE} from '../../core/services/location.service';
 import {TRACE_SERVICE, TraceService} from '../../core/services/interfaces/trace';
+import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/interfaces/video';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/interfaces/websocket';
-import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
+import {LOCATION_SERVICE} from '../../core/services/location.service';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockArtifactService} from '../../core/services/testing/mock-artifact.service';
 import {MockDownloadService} from '../../core/services/testing/mock-download.service';
@@ -57,14 +58,15 @@ import {MockSessionService} from '../../core/services/testing/mock-session.servi
 import {MockStreamChatService} from '../../core/services/testing/mock-stream-chat.service';
 import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
 import {MockTraceService} from '../../core/services/testing/mock-trace.service';
+import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
 import {MockVideoService} from '../../core/services/testing/mock-video.service';
 import {MockWebSocketService} from '../../core/services/testing/mock-websocket.service';
-// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {fakeAsync, initTestBed, tick} from '../../testing/utils';
+import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 import {EVAL_TAB_COMPONENT, EvalTabComponent,} from '../eval-tab/eval-tab.component';
+import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
-import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 
 import {ChatComponent} from './chat.component';
 
@@ -125,6 +127,7 @@ describe('ChatComponent', () => {
   let mockActivatedRoute: Partial<ActivatedRoute>;
   let mockLocation: jasmine.SpyObj<Location>;
   let graphService: MockGraphService;
+  let mockUiStateService: MockUiStateService;
 
   beforeEach(async () => {
     mockSessionService = new MockSessionService();
@@ -141,6 +144,7 @@ describe('ChatComponent', () => {
     mockStringToColorService = new MockStringToColorService();
     mockSafeValuesService = new MockSafeValuesService();
     mockLocalFileService = new MockLocalFileService();
+    mockUiStateService = new MockUiStateService();
     mockSessionService.canEdit =
         jasmine.createSpy('canEdit').and.returnValue(of(true));
     mockStringToColorService.stc.and.returnValue('#8c8526ff');
@@ -224,6 +228,7 @@ describe('ChatComponent', () => {
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: LOCATION_SERVICE, useValue: mockLocation},
             {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
+            {provide: UI_STATE_SERVICE, useValue: mockUiStateService}
           ],
         })
         .compileComponents();
@@ -652,34 +657,35 @@ describe('ChatComponent', () => {
             );
       });
 
-      it('should call getEventTrace with filter and parse llm request/response',
-         () => {
-           const invocationId = 'inv-1';
-           const timestamp = 123456789;
-           component.eventData = new Map([[
-             EVENT_1_ID, {
-               id: EVENT_1_ID,
-               invocationId,
-               timestampInMillis: timestamp,
-             }
-           ]]);
-           const llmRequest = {prompt: 'test prompt'};
-           const llmResponse = {response: 'test response'};
-           mockEventService.getEventTraceResponse.next({
-             'gcp.vertex.agent.llm_request': JSON.stringify(llmRequest),
-             'gcp.vertex.agent.llm_response': JSON.stringify(llmResponse),
-           });
+      it(
+          'should call getEventTrace with filter and parse llm request/response',
+          () => {
+            const invocationId = 'inv-1';
+            const timestamp = 123456789;
+            component.eventData = new Map([[
+              EVENT_1_ID, {
+                id: EVENT_1_ID,
+                invocationId,
+                timestampInMillis: timestamp,
+              }
+            ]]);
+            const llmRequest = {prompt: 'test prompt'};
+            const llmResponse = {response: 'test response'};
+            mockEventService.getEventTraceResponse.next({
+              'gcp.vertex.agent.llm_request': JSON.stringify(llmRequest),
+              'gcp.vertex.agent.llm_response': JSON.stringify(llmResponse),
+            });
 
-           component.clickEvent(0);
+            component.clickEvent(0);
 
-           expect(mockEventService.getEventTrace).toHaveBeenCalledWith({
-             id: EVENT_1_ID,
-             invocationId,
-             timestamp,
-           });
-           expect(component.llmRequest).toEqual(llmRequest);
-           expect(component.llmResponse).toEqual(llmResponse);
-         });
+            expect(mockEventService.getEventTrace).toHaveBeenCalledWith({
+              id: EVENT_1_ID,
+              invocationId,
+              timestamp,
+            });
+            expect(component.llmRequest).toEqual(llmRequest);
+            expect(component.llmResponse).toEqual(llmResponse);
+          });
     });
 
     describe('when updateState() is called', () => {
@@ -764,54 +770,57 @@ describe('ChatComponent', () => {
       });
 
       describe('when event contains multiple text parts', () => {
-        it('should combine consecutive text parts into a single message',
-           async () => {
-             const sseEvent = {
-               id: 'event-1',
-               author: 'bot',
-               content:
-                   {role: 'bot', parts: [{text: 'Hello '}, {text: 'World!'}]},
-             };
-             component.messages.set([]);
-             component.userInput = 'test message';
-             await component.sendMessage(
-                 new KeyboardEvent('keydown', {key: 'Enter'}));
-             mockAgentService.runSseResponse.next(sseEvent);
-             fixture.detectChanges();
+        it(
+            'should combine consecutive text parts into a single message',
+            async () => {
+              const sseEvent = {
+                id: 'event-1',
+                author: 'bot',
+                content:
+                    {role: 'bot', parts: [{text: 'Hello '}, {text: 'World!'}]},
+              };
+              component.messages.set([]);
+              component.userInput = 'test message';
+              await component.sendMessage(
+                  new KeyboardEvent('keydown', {key: 'Enter'}));
+              mockAgentService.runSseResponse.next(sseEvent);
+              fixture.detectChanges();
 
-             const botMessages =
-                 component.messages().filter(m => m.role === 'bot');
-             expect(botMessages.length).toBe(1);
-             expect(botMessages[0].text).toBe('Hello World!');
-           });
+              const botMessages =
+                  component.messages().filter(m => m.role === 'bot');
+              expect(botMessages.length).toBe(1);
+              expect(botMessages[0].text).toBe('Hello World!');
+            });
 
-        it('should not combine non-consecutive text parts', async () => {
-          const sseEvent = {
-            id: 'event-1',
-            author: 'bot',
-            content: {
-              role: 'bot',
-              parts: [
-                {text: 'Hello '},
-                {functionCall: {name: 'foo', args: {}}},
-                {text: 'World!'},
-              ]
-            },
-          };
-          component.messages.set([]);
-          component.userInput = 'test message';
-          await component.sendMessage(
-              new KeyboardEvent('keydown', {key: 'Enter'}));
-          mockAgentService.runSseResponse.next(sseEvent);
-          fixture.detectChanges();
+        it(
+            'should not combine non-consecutive text parts', async () => {
+              const sseEvent = {
+                id: 'event-1',
+                author: 'bot',
+                content: {
+                  role: 'bot',
+                  parts: [
+                    {text: 'Hello '},
+                    {functionCall: {name: 'foo', args: {}}},
+                    {text: 'World!'},
+                  ]
+                },
+              };
+              component.messages.set([]);
+              component.userInput = 'test message';
+              await component.sendMessage(
+                  new KeyboardEvent('keydown', {key: 'Enter'}));
+              mockAgentService.runSseResponse.next(sseEvent);
+              fixture.detectChanges();
 
-          const botMessages =
-              component.messages().filter(m => m.role === 'bot');
-          expect(botMessages.length).toBe(3);
-          expect(botMessages[0].text).toBe('Hello ');
-          expect(botMessages[1].functionCall).toEqual({name: 'foo', args: {}});
-          expect(botMessages[2].text).toBe('World!');
-        });
+              const botMessages =
+                  component.messages().filter(m => m.role === 'bot');
+              expect(botMessages.length).toBe(3);
+              expect(botMessages[0].text).toBe('Hello ');
+              expect(botMessages[1].functionCall)
+                  .toEqual({name: 'foo', args: {}});
+              expect(botMessages[2].text).toBe('World!');
+            });
       });
     });
 
@@ -958,19 +967,20 @@ describe('ChatComponent', () => {
       });
 
       it('should set cursor position', fakeAsync(() => {
-           component['editEvalCaseMessage'](message);
+                    component['editEvalCaseMessage'](message);
 
-           tick();
-           expect(mockTextarea.setSelectionRange)
-               .toHaveBeenCalledWith(message.text.length, message.text.length);
-         }));
+                    tick();
+                    expect(mockTextarea.setSelectionRange)
+                        .toHaveBeenCalledWith(
+                            message.text.length, message.text.length);
+                  }));
 
       it('should focus textarea ', fakeAsync(() => {
-           component['editEvalCaseMessage'](message);
+                    component['editEvalCaseMessage'](message);
 
-           tick();
-           expect(mockTextarea.focus).toHaveBeenCalled();
-         }));
+                    tick();
+                    expect(mockTextarea.focus).toHaveBeenCalled();
+                  }));
     });
 
     describe('when editEvalCaseMessage() is called with newline at end', () => {
@@ -989,20 +999,20 @@ describe('ChatComponent', () => {
       });
 
       it('should set cursor position before newline', fakeAsync(() => {
-           component['editEvalCaseMessage'](message);
+                    component['editEvalCaseMessage'](message);
 
-           tick();
-           expect(mockTextarea.setSelectionRange)
-               .toHaveBeenCalledWith(
-                   message.text.length - 1, message.text.length - 1);
-         }));
+                    tick();
+                    expect(mockTextarea.setSelectionRange)
+                        .toHaveBeenCalledWith(
+                            message.text.length - 1, message.text.length - 1);
+                  }));
 
       it('should focus textarea', fakeAsync(() => {
-           component['editEvalCaseMessage'](message);
+                    component['editEvalCaseMessage'](message);
 
-           tick();
-           expect(mockTextarea.focus).toHaveBeenCalled();
-         }));
+                    tick();
+                    expect(mockTextarea.focus).toHaveBeenCalled();
+                  }));
     });
 
     describe('when cancelEditMessage() is called', () => {

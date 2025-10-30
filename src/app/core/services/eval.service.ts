@@ -16,7 +16,7 @@
  */
 
 import {HttpClient} from '@angular/common/http';
-import {Injectable} from '@angular/core';
+import {Injectable, inject} from '@angular/core';
 import {Observable} from 'rxjs';
 
 import {URLUtil} from '../../../utils/url-util';
@@ -27,8 +27,9 @@ import {EvalService as EvalServiceInterface} from './interfaces/eval';
   providedIn: 'root',
 })
 export class EvalService implements EvalServiceInterface {
+  protected http = inject(HttpClient);
+
   apiServerDomain = URLUtil.getApiServerBaseUrl();
-  constructor(private http: HttpClient) {}
 
   getEvalSets(appName: string) {
     if (this.apiServerDomain != undefined) {

@@ -22,7 +22,7 @@ import {InjectionToken} from '@angular/core';
  */
 export const SESSION_TAB_MESSAGES = {
   noSessionsFound: 'No sessions found',
-  readonlyChip: 'Readonly',
+  readonlyChip: 'Read only',
 };
 
 

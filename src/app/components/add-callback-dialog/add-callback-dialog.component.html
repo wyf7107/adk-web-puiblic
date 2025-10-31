@@ -16,6 +16,32 @@
 
 <h2 mat-dialog-title>{{ isEditMode ? 'Edit Callback' : 'Add ' + callbackType + ' Callback' }}</h2>
 <mat-dialog-content>
+  <ng-container *ngIf="getCallbackInfo()">
+    <div class="callback-info-container">
+      <div class="callback-info-header" (click)="toggleCallbackInfo()">
+        <mat-icon class="callback-info-icon">info</mat-icon>
+        <div class="callback-info-title">
+          <span>Callback Information</span>
+        </div>
+        <button mat-icon-button class="callback-info-toggle" type="button" aria-label="Toggle callback information">
+          <mat-icon>{{ isCallbackInfoExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+      <div class="callback-info-body" [class.expanded]="isCallbackInfoExpanded">
+        <div class="callback-info-content">
+          <div class="callback-info-short">{{ getCallbackInfo()?.shortDescription }}</div>
+          <div class="callback-info-detailed">{{ getCallbackInfo()?.detailedDescription }}</div>
+        </div>
+        <div class="callback-info-link-container">
+          <a [href]="getCallbackInfo()?.docLink" target="_blank" rel="noopener noreferrer" class="callback-info-link">
+            <mat-icon>open_in_new</mat-icon>
+            <span>View Official Documentation</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
   <ng-container *ngIf="isEditMode">
     <mat-form-field style="width: 100%;">
       <mat-label>Callback Type</mat-label>
@@ -24,6 +50,7 @@
       </mat-select>
     </mat-form-field>
   </ng-container>
+
   <mat-form-field style="width: 100%;">
     <mat-label>Callback Name</mat-label>
     <input

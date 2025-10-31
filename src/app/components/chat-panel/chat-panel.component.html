@@ -360,7 +360,7 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #moreMenu="matMenu">
-            <span mat-menu-item
+            <span mat-menu-item [matTooltip]="i18n.updateStateMenuTooltip"
               (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }}
             </span>
           </mat-menu>

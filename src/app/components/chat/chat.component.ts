@@ -361,7 +361,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadSessionByUrlOrReset() {
     this.isSessionUrlEnabledObs.subscribe((sessionUrlEnabled) => {
-      const sessionUrl = this.activatedRoute.snapshot.queryParams['session'];
+      const queryParams = this.activatedRoute.snapshot.queryParams;
+      const sessionUrl = queryParams['session'];
+      const userUrl = queryParams['userId'];
+
+      if (userUrl) {
+        this.userId = userUrl;
+      }
 
       if (!sessionUrlEnabled || !sessionUrl) {
         this.createSessionAndReset();

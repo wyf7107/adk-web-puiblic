@@ -86,4 +86,8 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isLoadingAnimationsEnabled =
       jasmine.createSpy('isLoadingAnimationsEnabled')
           .and.returnValue(this.isLoadingAnimationsEnabledResponse);
+  isSessionsTabReorderingEnabledResponse = new ReplaySubject<boolean>(1);
+  isSessionsTabReorderingEnabled =
+      jasmine.createSpy('isSessionsTabReorderingEnabled')
+          .and.returnValue(this.isSessionsTabReorderingEnabledResponse);
 }

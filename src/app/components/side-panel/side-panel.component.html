@@ -52,7 +52,17 @@
 
 @if (appName() != "" && showSidePanel() && !uiStateService.isSessionLoading()) {
 <div class="tabs-container">
-  <mat-tab-group (selectedTabChange)="tabChange.emit($event)">
+  <mat-tab-group
+    (selectedTabChange)="tabChange.emit($event)">
+    @let sessionTabReorderingEnabled = isSessionsTabReorderingEnabledObs | async;
+    @if (sessionTabReorderingEnabled) {
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
+        </ng-template>
+        <ng-container *ngTemplateOutlet="sessionsTabBody"></ng-container>
+      </mat-tab>
+    }
     @if (isTraceEnabledObs | async) {
       <mat-tab class="tabs-header">
         <ng-template mat-tab-label>
@@ -85,19 +95,14 @@
         <app-artifact-tab [artifacts]="artifacts()"> </app-artifact-tab>
       </mat-tab>
     }
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
-      </ng-template>
-      <app-session-tab
-        [userId]="userId()"
-        [appName]="appName()"
-        [sessionId]="sessionId()"
-        (sessionSelected)="sessionSelected.emit($event)"
-        (sessionReloaded)="sessionReloaded.emit($event)"
-      >
-      </app-session-tab>
-    </mat-tab>
+    @if (!sessionTabReorderingEnabled) {
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
+        </ng-template>
+        <ng-container *ngTemplateOutlet="sessionsTabBody"></ng-container>
+      </mat-tab>
+    }
     @if (isEvalEnabledObs | async) {
       <mat-tab>
         <ng-template mat-tab-label>
@@ -107,6 +112,16 @@
       </mat-tab>
     }
   </mat-tab-group>
+  <ng-template #sessionsTabBody>
+    <app-session-tab
+      [userId]="userId()"
+      [appName]="appName()"
+      [sessionId]="sessionId()"
+      (sessionSelected)="sessionSelected.emit($event)"
+      (sessionReloaded)="sessionReloaded.emit($event)"
+    >
+    </app-session-tab>
+  </ng-template>
 </div>
 } @if (selectedEvent() && showSidePanel() && !uiStateService.isSessionLoading()) {
 <div class="details-panel-container">

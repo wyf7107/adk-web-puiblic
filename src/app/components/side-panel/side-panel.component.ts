@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {AsyncPipe, NgComponentOutlet} from '@angular/common';
+import {AsyncPipe, NgComponentOutlet, NgTemplateOutlet} from '@angular/common';
 import {AfterViewInit, Component, DestroyRef, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef, type WritableSignal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatMiniFabButton} from '@angular/material/button';
@@ -28,8 +28,8 @@ import {MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel} from '@angular/mate
 import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {Observable, of} from 'rxjs';
-import {first} from 'rxjs/operators';
+import {combineLatest, Observable, of} from 'rxjs';
+import {first, map} from 'rxjs/operators';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
@@ -57,6 +57,7 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     AsyncPipe,
     FormsModule,
     NgComponentOutlet,
+    NgTemplateOutlet,
     MatTooltip,
     MatTabGroup,
     MatTab,
@@ -143,6 +144,8 @@ export class SidePanelComponent implements AfterViewInit {
       this.featureFlagService.isManualStateUpdateEnabled();
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled;
+  protected readonly isSessionsTabReorderingEnabledObs =
+      this.featureFlagService.isSessionsTabReorderingEnabled();
 
   ngAfterViewInit() {
     // Wait one tick until the eval tab container is ready.

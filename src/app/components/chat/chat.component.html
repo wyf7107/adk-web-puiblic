@@ -76,6 +76,7 @@
     </app-side-panel>
   </mat-drawer>
   <div class="chat-container">
+    <ng-content select="[adk-web-chat-container-top]"></ng-content>
     @if (appName != "") {
     <div class="chat-toolbar" [ngClass]="{'edit-mode': isEvalEditMode()}">
       @if (!showSidePanel) {

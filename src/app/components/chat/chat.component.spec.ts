@@ -83,6 +83,18 @@ class MockEvalTabComponent {
   }
 }
 
+@Component({
+  selector: 'test-host-component',
+  template: `<app-chat>
+    <div adk-web-chat-container-top id="projected-content">
+      This is projected content.
+    </div>
+  </app-chat>`,
+  standalone: true,
+  imports: [ChatComponent],
+})
+class TestHostComponent {}
+
 const SESSION_1_ID = 'session-1';
 const SESSION_2_ID = 'session-2';
 const TEST_APP_1_NAME = 'test-app';
@@ -201,6 +213,7 @@ describe('ChatComponent', () => {
             MatDialogModule,
             NoopAnimationsModule,
             MockEvalTabComponent,
+            TestHostComponent,
           ],
           providers: [
             {provide: EVAL_TAB_COMPONENT, useValue: EvalTabComponent},
@@ -242,6 +255,17 @@ describe('ChatComponent', () => {
     it('should create', () => {
       expect(component).toBeTruthy();
     });
+
+    it(
+        'should project content into adk-web-chat-container-top', () => {
+          const hostFixture = TestBed.createComponent(TestHostComponent);
+          hostFixture.detectChanges();
+          const projectedContent =
+              hostFixture.debugElement.query(By.css('#projected-content'));
+          expect(projectedContent).toBeTruthy();
+          expect(projectedContent.nativeElement.textContent)
+              .toContain('This is projected content.');
+        });
 
     describe('when listApps fails', () => {
       let error: HttpErrorResponse;

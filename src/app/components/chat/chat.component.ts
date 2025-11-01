@@ -1475,7 +1475,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private updateSelectedSessionUrl() {
     const url = this.router
                     .createUrlTree([], {
-                      queryParams: {'session': this.sessionId},
+                      queryParams: {
+                        'session': this.sessionId,
+                        'userId': this.userId,
+                      },
                       queryParamsHandling: 'merge',
                     })
                     .toString();

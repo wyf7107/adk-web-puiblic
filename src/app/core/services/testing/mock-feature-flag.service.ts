@@ -18,10 +18,10 @@
 import {Injectable} from '@angular/core';
 import {of, ReplaySubject} from 'rxjs';
 
-import {FeatureFlagService} from '../feature-flag.service';
+import {FeatureFlagService} from '../interfaces/feature-flag';
 
 @Injectable()
-export class MockFeatureFlagService implements Partial<FeatureFlagService> {
+export class MockFeatureFlagService implements FeatureFlagService {
   isImportSessionEnabledResponse = new ReplaySubject<boolean>(1);
   isImportSessionEnabled =
       jasmine.createSpy('isImportSessionEnabled')
@@ -82,4 +82,12 @@ export class MockFeatureFlagService implements Partial<FeatureFlagService> {
   isDeleteSessionEnabled =
       jasmine.createSpy('isDeleteSessionEnabled')
           .and.returnValue(this.isDeleteSessionEnabledResponse);
+  isLoadingAnimationsEnabledResponse = new ReplaySubject<boolean>(1);
+  isLoadingAnimationsEnabled =
+      jasmine.createSpy('isLoadingAnimationsEnabled')
+          .and.returnValue(this.isLoadingAnimationsEnabledResponse);
+  isSessionsTabReorderingEnabledResponse = new ReplaySubject<boolean>(1);
+  isSessionsTabReorderingEnabled =
+      jasmine.createSpy('isSessionsTabReorderingEnabled')
+          .and.returnValue(this.isSessionsTabReorderingEnabledResponse);
 }

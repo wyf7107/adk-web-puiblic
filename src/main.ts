@@ -57,6 +57,7 @@ import {SESSION_SERVICE} from './app/core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from './app/core/services/interfaces/stream-chat';
 import {STRING_TO_COLOR_SERVICE} from './app/core/services/interfaces/string-to-color';
 import {TRACE_SERVICE} from './app/core/services/interfaces/trace';
+import {UI_STATE_SERVICE} from './app/core/services/interfaces/ui-state';
 import {VIDEO_SERVICE} from './app/core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from './app/core/services/interfaces/websocket';
 import {LocalFileServiceImpl} from './app/core/services/local-file.service';
@@ -70,6 +71,7 @@ import {VideoService} from './app/core/services/video.service';
 import {WebSocketService} from './app/core/services/websocket.service';
 import {LOGO_COMPONENT} from './app/injection_tokens';
 import {LOCATION_SERVICE} from './app/core/services/location.service';
+import {UiStateService} from './app/core/services/ui-state.service';
 
 fetch('./assets/config/runtime-config.json')
     .then((response) => response.json())
@@ -112,7 +114,8 @@ fetch('./assets/config/runtime-config.json')
                   []),
           {provide: EVAL_TAB_COMPONENT, useValue: EvalTabComponent},
           provideAnimations(),
-          {provide: LOCATION_SERVICE, useClass: Location}
+          {provide: LOCATION_SERVICE, useClass: Location},
+          {provide: UI_STATE_SERVICE, useClass: UiStateService}
         ]
       }).catch((err) => console.error(err));
     });

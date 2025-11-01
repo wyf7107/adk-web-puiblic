@@ -26,10 +26,12 @@ import {Span} from '../../../core/models/Trace';
 import {EVENT_SERVICE, EventService} from '../../../core/services/interfaces/event';
 import {FEATURE_FLAG_SERVICE} from '../../../core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE, GraphService} from '../../../core/services/interfaces/graph';
+import {UI_STATE_SERVICE} from '../../../core/services/interfaces/ui-state';
 import {MockEventService} from '../../../core/services/testing/mock-event.service';
 import {MockFeatureFlagService} from '../../../core/services/testing/mock-feature-flag.service';
 import {MockGraphService} from '../../../core/services/testing/mock-graph.service';
 import {MockTraceService} from '../../../core/services/testing/mock-trace.service';
+import {MockUiStateService} from '../../../core/services/testing/mock-ui-state.service';
 import {TRACE_SERVICE, TraceService} from '../../../core/services/interfaces/trace';
 import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialog.component';
 import {fakeAsync,
@@ -56,6 +58,7 @@ describe('TraceEventComponent', () => {
   let domSanitizer: jasmine.SpyObj<DomSanitizer>;
   let graphService: MockGraphService;
   let featureFlagService: MockFeatureFlagService;
+  let uiStateService: MockUiStateService;
 
   const span: Span = {
     name: 'test-span',
@@ -71,6 +74,7 @@ describe('TraceEventComponent', () => {
   beforeEach(async () => {
     traceService = new MockTraceService();
     eventService = new MockEventService();
+    uiStateService = new MockUiStateService();
 
     traceService.selectedTraceRow$.next(span);
     traceService.eventData$.next(
@@ -100,6 +104,7 @@ describe('TraceEventComponent', () => {
             {provide: EVENT_SERVICE, useValue: eventService},
             {provide: GRAPH_SERVICE, useValue: graphService},
             {provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService},
+            {provide: UI_STATE_SERVICE, useValue: uiStateService},
             {
               provide: DomSanitizer,
               useValue: domSanitizer,
@@ -133,6 +138,16 @@ describe('TraceEventComponent', () => {
 
     it('should call event service to get trace for the selected row', () => {
       expect(eventService.getEventTrace).toHaveBeenCalledWith({id: EVENT_ID});
+    });
+
+    it('should set loading state for event trace', () => {
+      expect(uiStateService.setIsEventRequestResponseLoading)
+          .toHaveBeenCalledWith(true);
+      expect(uiStateService.setIsEventRequestResponseLoading)
+          .toHaveBeenCalledWith(false);
+      const calls =
+          uiStateService.setIsEventRequestResponseLoading.calls.allArgs();
+      expect(calls).toEqual([[true], [false]]);
     });
 
     it('should call event service to get event details for the selected row',

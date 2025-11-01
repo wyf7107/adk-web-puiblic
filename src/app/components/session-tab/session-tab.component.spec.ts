@@ -19,26 +19,34 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { SessionTabComponent } from './session-tab.component';
 import { SESSION_SERVICE, SessionService } from '../../core/services/interfaces/session';
+import { UI_STATE_SERVICE, UiStateService } from '../../core/services/interfaces/ui-state';
+import { MockUiStateService } from '../../core/services/testing/mock-ui-state.service';
 import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('SessionTabComponent', () => {
   let component: SessionTabComponent;
   let fixture: ComponentFixture<SessionTabComponent>;
+  let mockUiStateService: MockUiStateService;
 
   beforeEach(async () => {
     const sessionService = jasmine.createSpyObj<SessionService>([
       'listSessions',
       'getSession',
+      'canEdit',
     ]);
     sessionService.listSessions.and.returnValue(of([]));
     sessionService.getSession.and.returnValue(of({} as any));
+    sessionService.canEdit.and.returnValue(of(true));
+    mockUiStateService = new MockUiStateService();
+
 
     await TestBed.configureTestingModule({
       imports: [MatDialogModule, SessionTabComponent, NoopAnimationsModule],
       providers: [
         { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
         { provide: SESSION_SERVICE, useValue: sessionService },
+        { provide: UI_STATE_SERVICE, useValue: mockUiStateService },
       ],
     }).compileComponents();
 
@@ -49,5 +57,10 @@ describe('SessionTabComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should set session loading state when getting a session', () => {
+    component.getSession('session1');
+    expect(mockUiStateService.setIsSessionLoading).toHaveBeenCalledWith(true);
   });
 });

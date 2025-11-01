@@ -55,9 +55,11 @@ import {MockSessionService} from './core/services/testing/mock-session.service';
 import {MockStreamChatService} from './core/services/testing/mock-stream-chat.service';
 import {MockStringToColorService} from './core/services/testing/mock-string-to-color.service';
 import {MockTraceService} from './core/services/testing/mock-trace.service';
+import {MockUiStateService} from './core/services/testing/mock-ui-state.service';
 import {MockVideoService} from './core/services/testing/mock-video.service';
 import {MockWebSocketService} from './core/services/testing/mock-websocket.service';
 import {TRACE_SERVICE} from './core/services/interfaces/trace';
+import {UI_STATE_SERVICE} from './core/services/interfaces/ui-state';
 import {VIDEO_SERVICE} from './core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from './core/services/interfaces/websocket';
 
@@ -79,6 +81,7 @@ describe('AppComponent', () => {
     const stringToColorService = new MockStringToColorService();
     const safeValuesService = new MockSafeValuesService();
     const localFileService = new MockLocalFileService();
+    const mockUiStateService = new MockUiStateService();
 
     traceService.selectedTraceRow$.next(undefined);
     traceService.hoveredMessageIndices$.next([]);
@@ -179,7 +182,11 @@ describe('AppComponent', () => {
             {
               provide: LOCATION_SERVICE,
               useClass: Location,
-            }
+            },
+            {
+              provide: UI_STATE_SERVICE,
+              useValue: mockUiStateService,
+            },
           ],
         })
         .compileComponents();

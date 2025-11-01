@@ -76,6 +76,7 @@
     </app-side-panel>
   </mat-drawer>
   <div class="chat-container">
+    <ng-content select="[adk-web-chat-container-top]"></ng-content>
     @if (appName != "") {
     <div class="chat-toolbar" [ngClass]="{'edit-mode': isEvalEditMode()}">
       @if (!showSidePanel) {
@@ -129,11 +130,19 @@
       </div>
       } @else {
       <div style="display: flex">
+        @let isSessionLoading = uiStateService.isSessionLoading() | async;
+        @if (isSessionLoading === false) {
         <div class="toolbar-session-text">Session ID</div>
         <div class="toolbar-session-id">{{ sessionId }}</div>
-        <div class="toolbar-session-text" style="margin-left: 16px">User ID</div>
+        <div class="toolbar-session-text" style="margin-left: 16px">
+          User ID
+        </div>
         <div class="toolbar-session-id">{{ userId }}</div>
+        } @else {
+        <div class="toolbar-session-text">Loading session...</div>
+        }
       </div>
+      @if (isSessionLoading === false) {
       <div class="toolbar-actions">
         <div class="toolbar-sse-toggle">
           <mat-slide-toggle
@@ -181,7 +190,7 @@
           }
         </div>
       </div>
-      }
+      } }
     </div>
     }
     <mat-card class="chat-card">

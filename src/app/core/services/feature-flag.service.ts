@@ -98,4 +98,12 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
   isDeleteSessionEnabled(): Observable<boolean> {
     return of(true);
   }
+
+  isLoadingAnimationsEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
+  isSessionsTabReorderingEnabled(): Observable<boolean> {
+    return of(false);
+  }
 }

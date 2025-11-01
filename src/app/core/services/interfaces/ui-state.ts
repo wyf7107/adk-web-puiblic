@@ -16,25 +16,20 @@
  */
 
 import {InjectionToken} from '@angular/core';
+import {Observable} from 'rxjs';
+
+// Injection token for the UI state service.
+export const UI_STATE_SERVICE =
+    new InjectionToken<UiStateService>('UiStateService');
 
 /**
- * Default English messages for SessionTabComponent.
+ * Service to provide methods to handle traces.
  */
-export const SESSION_TAB_MESSAGES = {
-  noSessionsFound: 'No sessions found',
-  readonlyChip: 'Read only',
-};
-
-
-/**
- * Interface for human-readable messages displayed in the SessionTabComponent.
- */
-export type SessionTabMessages = typeof SESSION_TAB_MESSAGES;
-
-/**
- * Injection token for SessionTabComponent messages.
- */
-export const SessionTabMessagesInjectionToken =
-    new InjectionToken<SessionTabMessages>('Session Tab Messages', {
-      factory: () => SESSION_TAB_MESSAGES,
-    });
+export declare abstract class UiStateService {
+  abstract isSessionLoading(): Observable<boolean>;
+  abstract setIsSessionLoading(isLoading: boolean): void;
+  abstract isSessionListLoading(): Observable<boolean>;
+  abstract setIsSessionListLoading(isLoading: boolean): void;
+  abstract isEventRequestResponseLoading(): Observable<boolean>;
+  abstract setIsEventRequestResponseLoading(isLoading: boolean): void;
+}

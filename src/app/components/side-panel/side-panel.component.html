@@ -42,9 +42,29 @@
     </mat-select>
   </div>
 }
-} @if (appName() != "" && showSidePanel()) {
-<div class="tabs-container">
-  <mat-tab-group (selectedTabChange)="tabChange.emit($event)">
+}
+
+@let isSessionLoading = uiStateService.isSessionLoading() | async;
+
+@if (isSessionLoading) {
+  <div class="loading-spinner-container">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+  </div>
+}
+
+@if (appName() != "" && showSidePanel()) {
+<div class="tabs-container" [hidden]="isSessionLoading">
+  <mat-tab-group
+    (selectedTabChange)="tabChange.emit($event)">
+    @let sessionTabReorderingEnabled = isSessionsTabReorderingEnabledObs | async;
+    @if (sessionTabReorderingEnabled) {
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
+        </ng-template>
+        <ng-container *ngTemplateOutlet="sessionsTabBody"></ng-container>
+      </mat-tab>
+    }
     @if (isTraceEnabledObs | async) {
       <mat-tab class="tabs-header">
         <ng-template mat-tab-label>
@@ -77,19 +97,14 @@
         <app-artifact-tab [artifacts]="artifacts()"> </app-artifact-tab>
       </mat-tab>
     }
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
-      </ng-template>
-      <app-session-tab
-        [userId]="userId()"
-        [appName]="appName()"
-        [sessionId]="sessionId()"
-        (sessionSelected)="sessionSelected.emit($event)"
-        (sessionReloaded)="sessionReloaded.emit($event)"
-      >
-      </app-session-tab>
-    </mat-tab>
+    @if (!sessionTabReorderingEnabled) {
+      <mat-tab class="tabs-header">
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
+        </ng-template>
+        <ng-container *ngTemplateOutlet="sessionsTabBody"></ng-container>
+      </mat-tab>
+    }
     @if (isEvalEnabledObs | async) {
       <mat-tab>
         <ng-template mat-tab-label>
@@ -99,9 +114,19 @@
       </mat-tab>
     }
   </mat-tab-group>
+  <ng-template #sessionsTabBody>
+    <app-session-tab
+      [userId]="userId()"
+      [appName]="appName()"
+      [sessionId]="sessionId()"
+      (sessionSelected)="sessionSelected.emit($event)"
+      (sessionReloaded)="sessionReloaded.emit($event)"
+    >
+    </app-session-tab>
+  </ng-template>
 </div>
 } @if (selectedEvent() && showSidePanel()) {
-<div class="details-panel-container">
+<div class="details-panel-container" [hidden]="isSessionLoading">
   <div class="details-content">
     <div style="display: flex; justify-content: flex-end; margin-top: 10px">
       <mat-paginator
@@ -131,14 +156,30 @@
         </div>
       </mat-tab>
       <mat-tab label="{{ i18n.requestDetailsTabLabel }}">
-        <div class="json-viewer-container">
-          <ngx-json-viewer [json]="llmRequest()"></ngx-json-viewer>
-        </div>
+        @if ((uiStateService.isEventRequestResponseLoading() | async) === true) {
+          <div class="request-response-loading-spinner-container">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+        } @else if (!llmRequest()) {
+          <div class="request-response-empty-state">{{ i18n.requestIsNotAvailable }}</div>
+        } @else {
+          <div class="json-viewer-container">
+            <ngx-json-viewer [json]="llmRequest()"></ngx-json-viewer>
+          </div>
+        }
       </mat-tab>
       <mat-tab label="{{ i18n.responseDetailsTabLabel }}">
+        @if ((uiStateService.isEventRequestResponseLoading() | async) === true) {
+          <div class="request-response-loading-spinner-container">
+            <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+          </div>
+        } @else if (!llmResponse()) {
+          <div class="request-response-empty-state">{{ i18n.responseIsNotAvailable }}</div>
+        } @else {
         <div class="json-viewer-container">
           <ngx-json-viewer [json]="llmResponse()"></ngx-json-viewer>
         </div>
+        }
       </mat-tab>
     </mat-tab-group>
   </div>

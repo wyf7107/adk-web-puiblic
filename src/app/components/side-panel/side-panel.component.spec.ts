@@ -43,6 +43,7 @@ import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {SessionService} from '../../core/services/session.service';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
 import {MockSafeValuesService} from '../../core/services/testing/mock-safevalues.service';
+import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
 import {TraceService} from '../../core/services/trace.service';
 import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
@@ -55,6 +56,7 @@ import {EVENT_SERVICE} from '../../core/services/interfaces/event';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {UI_STATE_SERVICE, UiStateService as UiStateServiceInterface} from '../../core/services/interfaces/ui-state';
 import {VIDEO_SERVICE} from '../../core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from '../../core/services/interfaces/websocket';
 import {initTestBed} from '../../testing/utils';
@@ -91,6 +93,7 @@ describe('SidePanelComponent', () => {
   let mockEvalService: jasmine.SpyObj<EvalService>;
   let mockTraceService: jasmine.SpyObj<TraceService>;
   let mockAgentService: jasmine.SpyObj<AgentService>;
+  let mockUiStateService: MockUiStateService;
   let mockFeatureFlagService: MockFeatureFlagService;
   let mockDialog: jasmine.SpyObj<MatDialog>;
   let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
@@ -155,6 +158,7 @@ describe('SidePanelComponent', () => {
         'AgentService',
         ['listApps', 'getApp', 'getLoadingState', 'setApp', 'runSse'],
     );
+    mockUiStateService = new MockUiStateService();
     mockFeatureFlagService = new MockFeatureFlagService();
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -201,6 +205,7 @@ describe('SidePanelComponent', () => {
             {provide: EVAL_SERVICE, useValue: mockEvalService},
             {provide: TRACE_SERVICE, useValue: mockTraceService},
             {provide: AGENT_SERVICE, useValue: mockAgentService},
+            {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
             {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
             {provide: MatDialog, useValue: mockDialog},
             {provide: MatSnackBar, useValue: mockSnackBar},
@@ -358,6 +363,27 @@ describe('SidePanelComponent', () => {
   });
 
   describe('Tabs', () => {
+    it('when sessionsTabReordering is disabled, Session tab should be the 4th tab',
+       () => {
+         const tabGroup = fixture.debugElement.query(By.directive(MatTabGroup));
+         const tabLabels = tabGroup.queryAll(By.css('.tab-label'));
+         const sessionsLabel = tabLabels[SESSIONS_TAB_INDEX];
+         expect(sessionsLabel.nativeElement.textContent.trim())
+             .toEqual('Sessions');
+       });
+
+    it('when sessionsTabReordering is enabled, Session tab should be the 0th tab',
+       () => {
+         mockFeatureFlagService.isSessionsTabReorderingEnabledResponse.next(
+             true);
+         fixture.detectChanges();
+         const tabGroup = fixture.debugElement.query(By.directive(MatTabGroup));
+         const tabLabels = tabGroup.queryAll(By.css('.tab-label'));
+         const sessionsLabel = tabLabels[0];
+         expect(sessionsLabel.nativeElement.textContent.trim())
+             .toEqual('Sessions');
+       });
+
     describe('when tab is changed', () => {
       beforeEach(() => {
         spyOn(component.tabChange, 'emit');
@@ -529,6 +555,55 @@ describe('SidePanelComponent', () => {
       });
       it('emits openImageDialog', () => {
         expect(component.openImageDialog.emit).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('Loading state', () => {
+    describe('when session is loading', () => {
+      beforeEach(() => {
+        mockUiStateService.isSessionLoadingResponse.next(true);
+        fixture.detectChanges();
+      });
+
+      it('shows loading spinner', () => {
+        const spinner =
+            fixture.debugElement.query(By.css('mat-progress-spinner'));
+        expect(spinner).toBeTruthy();
+      });
+
+      it('hides tabs container', () => {
+        expect(fixture.debugElement.query(TABS_CONTAINER_SELECTOR)!.nativeElement.hidden).toBeTrue();
+      });
+
+      it('hides details panel', () => {
+        fixture.componentRef.setInput('selectedEvent', {id: 'event1'});
+        fixture.detectChanges();
+        expect(fixture.debugElement.query(DETAILS_PANEL_SELECTOR)!.nativeElement.hidden).toBeTrue();
+      });
+    });
+
+    describe('when session is not loading', () => {
+      beforeEach(() => {
+        mockUiStateService.isSessionLoadingResponse.next(false);
+        fixture.detectChanges();
+      });
+
+      it('hides loading spinner', () => {
+        const spinner =
+            fixture.debugElement.query(By.css('mat-progress-spinner'));
+        expect(spinner).toBeFalsy();
+      });
+
+      it('shows tabs container', () => {
+        expect(fixture.debugElement.query(TABS_CONTAINER_SELECTOR)!.nativeElement.hidden)
+            .toBeFalse();
+      });
+
+      it('shows details panel when event is selected', () => {
+        fixture.componentRef.setInput('selectedEvent', {id: 'event1'});
+        fixture.detectChanges();
+        expect(fixture.debugElement.query(DETAILS_PANEL_SELECTOR)!.nativeElement.hidden).toBeFalse();
       });
     });
   });

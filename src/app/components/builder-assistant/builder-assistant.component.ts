@@ -138,7 +138,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
       this.saveAgent(this.appName);
 
       // Add user message, hide try again message for now
-      if (msg != "Something went wrong, please try again") {
+      if (msg != "____Something went wrong, please try again") {
         this.messages.push({ role: 'user', text: msg });
       }
 
@@ -164,7 +164,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
           if (chunk.errorCode && (chunk.errorCode == "MALFORMED_FUNCTION_CALL" || chunk.errorCode == "STOP")) {
-            this.sendMessage("Something went wrong, please try again");
+            this.sendMessage("____Something went wrong, please try again");
             return;
           }
           if (chunk.content) {

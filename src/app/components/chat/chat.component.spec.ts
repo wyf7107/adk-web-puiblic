@@ -238,6 +238,7 @@ describe('ChatComponent', () => {
             {provide: SAFE_VALUES_SERVICE, useValue: mockSafeValuesService},
             {provide: LOCAL_FILE_SERVICE, useValue: mockLocalFileService},
             {provide: MatDialog, useValue: mockDialog},
+            {provide: MatSnackBar, useValue: mockSnackBar},
             {provide: Router, useValue: mockRouter},
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: LOCATION_SERVICE, useValue: mockLocation},

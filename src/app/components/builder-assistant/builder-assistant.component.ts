@@ -23,8 +23,8 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatCard } from '@angular/material/card';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { MarkdownComponent } from 'ngx-markdown';
-import { SESSION_SERVICE, SessionService } from '../../core/services/session.service';
-import { AGENT_SERVICE, AgentService } from '../../core/services/agent.service';
+import { SESSION_SERVICE, SessionService } from '../../core/services/interfaces/session';
+import { AGENT_SERVICE, AgentService } from '../../core/services/interfaces/agent';
 import { AgentRunRequest } from '../../core/models/AgentRunRequest';
 import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { YamlUtils } from '../../../utils/yaml-utils';
@@ -53,7 +53,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
   assistantAppName = "__adk_agent_builder_assistant";
   userId = "user";
-  currentSession = "";
+  currentSession: string | undefined = "";
 
   userMessage: string = '';
   messages: any[] = [];
@@ -70,7 +70,6 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
   ngOnInit() {
     this.sessionService.createSession(this.userId, this.assistantAppName).subscribe(session => {
       this.currentSession = session.id;
-      console.log(this.appName)
       const req: AgentRunRequest = {
         appName: this.assistantAppName,
         userId: this.userId,

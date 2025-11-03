@@ -34,40 +34,53 @@
   >
   }
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
-    <app-side-panel
-      [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
-      [apps$]="apps$"
-      [isLoadingApps]="isLoadingApps"
-      [selectedAppControl]="selectedAppControl"
-      [showSidePanel]="showSidePanel"
-      [appName]="appName"
-      [userId]="userId"
-      [sessionId]="sessionId"
-      [traceData]="traceData"
-      [eventData]="eventData"
-      [currentSessionState]="currentSessionState"
-      [artifacts]="artifacts"
-      [selectedEvent]="selectedEvent"
-      [selectedEventIndex]="selectedEventIndex"
-      [renderedEventGraph]="renderedEventGraph"
-      [rawSvgString]="rawSvgString"
-      [llmRequest]="llmRequest"
-      [llmResponse]="llmResponse"
-      (closePanel)="toggleSidePanel()"
-      (tabChange)="handleTabChange($event)"
-      (eventSelected)="selectEvent($event)"
-      (sessionSelected)="updateWithSelectedSession($event)"
-      (sessionReloaded)="updateWithSelectedSession($event)"
-      (evalCaseSelected)="updateWithSelectedEvalCase($event)"
-      (evalSetIdSelected)="updateSelectedEvalSetId($event)"
-      (returnToSession)="handleReturnToSession($event)"
-      (evalNotInstalled)="handleEvalNotInstalled($event)"
-      (page)="handlePageEvent($event)"
-      (closeSelectedEvent)="closeSelectedEvent()"
-      (openImageDialog)="openViewImageDialog($event)"
-      (appSelectionChange)="onAppSelection($event)"
-    >
-    </app-side-panel>
+    @if (!isBuilderMode()) {
+      <app-side-panel
+        [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
+        [apps$]="apps$"
+        [isLoadingApps]="isLoadingApps"
+        [selectedAppControl]="selectedAppControl"
+        [showSidePanel]="showSidePanel"
+        [appName]="appName"
+        [userId]="userId"
+        [sessionId]="sessionId"
+        [traceData]="traceData"
+        [eventData]="eventData"
+        [currentSessionState]="currentSessionState"
+        [artifacts]="artifacts"
+        [selectedEvent]="selectedEvent"
+        [selectedEventIndex]="selectedEventIndex"
+        [renderedEventGraph]="renderedEventGraph"
+        [rawSvgString]="rawSvgString"
+        [llmRequest]="llmRequest"
+        [llmResponse]="llmResponse"
+        [disableBuilderIcon]="disableBuilderSwitch"
+        (closePanel)="toggleSidePanel()"
+        (tabChange)="handleTabChange($event)"
+        (eventSelected)="selectEvent($event)"
+        (sessionSelected)="updateWithSelectedSession($event)"
+        (sessionReloaded)="updateWithSelectedSession($event)"
+        (evalCaseSelected)="updateWithSelectedEvalCase($event)"
+        (evalSetIdSelected)="updateSelectedEvalSetId($event)"
+        (returnToSession)="handleReturnToSession($event)"
+        (evalNotInstalled)="handleEvalNotInstalled($event)"
+        (page)="handlePageEvent($event)"
+        (closeSelectedEvent)="closeSelectedEvent()"
+        (openImageDialog)="openViewImageDialog($event)"
+        (appSelectionChange)="onAppSelection($event)"
+        (openAddItemDialog)="openAddItemDialog()"
+        (enterBuilderMode)="enterBuilderMode()"
+      >
+      </app-side-panel>
+    } @else {
+      <app-builder-tabs 
+        [appNameInput]="appName" 
+        (exitBuilderMode)="exitBuilderMode()"
+        (closePanel)="toggleSidePanel()"
+      ></app-builder-tabs>
+      <div class="resize-handler"></div>
+    }
+    
   </mat-drawer>
 
   <!-- Builder Mode Layout - Canvas for Diagrams -->

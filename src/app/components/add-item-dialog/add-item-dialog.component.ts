@@ -26,7 +26,7 @@ import {
 import { Router } from '@angular/router';
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { YamlUtils } from '../../../utils/yaml-utils';
-import { AGENT_SERVICE } from '../../core/services/agent.service';
+import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';

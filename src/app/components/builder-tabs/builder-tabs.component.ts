@@ -37,13 +37,13 @@ import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
 import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
 import { getToolIcon } from '../../core/constants/tool-icons';
-import { AGENT_SERVICE } from '../../core/services/agent.service';
+import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
 import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 import { BuiltInToolDialogComponent } from '../built-in-tool-dialog/built-in-tool-dialog.component';
 import { ConfirmationDialogComponent, ConfirmationDialogData } from '../confirmation-dialog/confirmation-dialog.component';
 import { JsonEditorComponent } from '../json-editor/json-editor.component';
-import { FEATURE_FLAG_SERVICE } from '../../core/services/feature-flag.service';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
@@ -765,7 +765,7 @@ export class BuilderTabsComponent {
   }
 
   cancelChanges() {
-    this.agentService.agentChangeCancel(this.appNameInput).subscribe((s) => {})
+    this.agentService.agentChangeCancel(this.appNameInput).subscribe((s: any) => {})
     this.exitBuilderMode.emit();
   }
 

@@ -170,6 +170,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   private readonly traceService = inject(TRACE_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
+  protected readonly agentBuilderService = inject(AGENT_BUILDER_SERVICE);
 
   chatPanel = viewChild.required(ChatPanelComponent);
   canvasComponent = viewChild.required(CanvasComponent);
@@ -323,10 +324,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.agentService.getApp().subscribe((app) => {
       this.appName = app;
-    });
-
-    this.apps$.subscribe((apps) => {
-      this.apps = apps ?? [];
     });
 
     combineLatest([
@@ -1391,7 +1388,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.useSse = !this.useSse;
   }
 
-  protected enterBuilderMode() {
+  enterBuilderMode() {
     const url = this.router
       .createUrlTree([], {
         queryParams: {mode: 'builder'},
@@ -1407,6 +1404,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+
   private loadExistingAgentConfiguration() {
     this.agentService.getAgentBuilderTmp(this.appName).subscribe({
       next: (yamlContent: string) => {
@@ -1414,7 +1412,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.canvasComponent()?.loadFromYaml(yamlContent, this.appName);
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading agent configuration:', error);
         this._snackBar.open('Error loading agent configuration', 'OK');
       },
@@ -1438,9 +1436,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openAddItemDialog(): void {
-    const dialogRef = this.dialog.open(AddItemDialogComponent, {
-      width: '600px',
-      data: {existingAppNames: this.apps},
+    this.apps$.pipe(take(1)).subscribe((apps) => {
+      const dialogRef = this.dialog.open(AddItemDialogComponent, {
+        width: '600px',
+        data: {existingAppNames: apps ?? []},
+      });
     });
   }
 
@@ -1539,7 +1539,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         const app = params['app'];
         if (app && apps.includes(app)) {
           this.selectedAppControl.setValue(app);
-          this.agentService.getAgentBuilder(app).subscribe((res) => {
+          this.agentService.getAgentBuilder(app).subscribe((res: any) => {
             if (!res || res == '') {
               this.disableBuilderSwitch = true;
               this.agentBuilderService.setLoadedAgentData(undefined);
@@ -1548,6 +1548,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
               this.agentBuilderService.setLoadedAgentData(res);
             }
           });
+          this.isBuilderMode.set(false);
         } else if (app) {
           this.openSnackBar(`Agent '${app}' not found`, 'OK');
         }
@@ -1570,7 +1571,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           }
           this.router.navigate([], {
-            queryParams: {'app': app},
+            queryParams: {'app': app, 'mode': null},
             queryParamsHandling: 'merge',
           });
         });

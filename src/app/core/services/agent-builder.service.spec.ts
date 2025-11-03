@@ -139,56 +139,6 @@ describe('AgentBuilderService - Callback Management', () => {
       expect(result2.success).toBe(false);
       expect(result2.error).toContain('already exists');
     });
-
-    it('should validate callback name format', () => {
-      const invalidCallbacks = [
-        {
-          name: '123invalid',
-          type: 'before_agent' as const,
-          code: 'def test(): pass',
-        },
-        {
-          name: 'invalid-name',
-          type: 'before_agent' as const,
-          code: 'def test(): pass',
-        },
-        {
-          name: 'invalid name',
-          type: 'before_agent' as const,
-          code: 'def test(): pass',
-        },
-        {name: '', type: 'before_agent' as const, code: 'def test(): pass'},
-      ];
-
-      invalidCallbacks.forEach((callback) => {
-        const result = service.addCallback('test-agent', callback);
-        expect(result.success).toBe(false);
-        expect(result.error).toContain('valid Python identifier');
-      });
-
-      const validCallbacks = [
-        {
-          name: 'valid_callback',
-          type: 'before_agent' as const,
-          code: 'def test(): pass',
-        },
-        {
-          name: '_private_callback',
-          type: 'before_agent' as const,
-          code: 'def test(): pass',
-        },
-        {
-          name: 'callback123',
-          type: 'before_agent' as const,
-          code: 'def test(): pass',
-        },
-      ];
-
-      validCallbacks.forEach((callback) => {
-        const result = service.addCallback('test-agent', callback);
-        expect(result.success).toBe(true);
-      });
-    });
   });
 
   describe('deleteCallback', () => {

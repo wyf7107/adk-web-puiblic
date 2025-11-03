@@ -156,7 +156,7 @@ export class YamlUtils {
     const groupedCallbacks: { [key: string]: any[] } = {};
 
     callbacks.forEach(callback => {
-      const callbackTypeKey = `${callback.type}_callback`;
+      const callbackTypeKey = `${callback.type}_callbacks`;
       if (!groupedCallbacks[callbackTypeKey]) {
         groupedCallbacks[callbackTypeKey] = [];
       }

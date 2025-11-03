@@ -19,8 +19,8 @@ import {AsyncPipe, NgClass} from '@angular/common';
 import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
 import {MatChip} from '@angular/material/chips';
 import {MatProgressBar} from '@angular/material/progress-bar';
-import {Subject} from 'rxjs';
-import {debounceTime, map, switchMap, tap} from 'rxjs/operators';
+import {of, Subject} from 'rxjs';
+import {catchError, debounceTime, map, switchMap, tap} from 'rxjs/operators';
 
 import {Session} from '../../core/models/Session';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
@@ -86,15 +86,17 @@ export class SessionTabComponent implements OnInit {
             tap(() => {
               this.uiStateService.setIsSessionLoading(true);
             }),
-            switchMap(
-                (sessionId) => this.sessionService.getSession(
-                    this.userId, this.appName, sessionId)),
+            switchMap((sessionId) => {
+              return this.sessionService
+                  .getSession(this.userId, this.appName, sessionId)
+                  .pipe(catchError(() => of(null)));
+            }),
             tap((res) => {
+              if (!res) return;
               const session = this.fromApiResultToSession(res);
               this.sessionSelected.emit(session);
               this.changeDetectorRef.markForCheck();
             }),
-            debounceTime(300),
             )
         .subscribe(
             (session) => {

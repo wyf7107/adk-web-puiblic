@@ -46,6 +46,7 @@ import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/interfaces/video';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/interfaces/websocket';
 import {LOCATION_SERVICE} from '../../core/services/location.service';
+import {AGENT_BUILDER_SERVICE} from '../../core/services/agent-builder.service';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockArtifactService} from '../../core/services/testing/mock-artifact.service';
 import {MockDownloadService} from '../../core/services/testing/mock-download.service';
@@ -139,6 +140,7 @@ describe('ChatComponent', () => {
   let mockLocation: jasmine.SpyObj<Location>;
   let graphService: MockGraphService;
   let mockUiStateService: MockUiStateService;
+  let mockAgentBuilderService: jasmine.SpyObj<any>;
 
   beforeEach(async () => {
     mockSessionService = new MockSessionService();
@@ -178,6 +180,7 @@ describe('ChatComponent', () => {
       events: of(new NavigationEnd(1, '', '')),
     });
     mockLocation = jasmine.createSpyObj('Location', ['replaceState']);
+    mockAgentBuilderService = jasmine.createSpyObj('AgentBuilderService', ['clear', 'setLoadedAgentData']);
 
     mockActivatedRoute = {
       snapshot: {
@@ -239,7 +242,8 @@ describe('ChatComponent', () => {
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: LOCATION_SERVICE, useValue: mockLocation},
             {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
-            {provide: UI_STATE_SERVICE, useValue: mockUiStateService}
+            {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
+            {provide: AGENT_BUILDER_SERVICE, useValue: mockAgentBuilderService}
           ],
         })
         .compileComponents();

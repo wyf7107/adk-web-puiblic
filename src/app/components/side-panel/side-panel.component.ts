@@ -83,6 +83,7 @@ export class SidePanelComponent {
     nonNullable: true,
   });
   @Input() isBuilderMode = false;
+  @Input() disableBuilderIcon = false;
 
   @Output() readonly closePanel = new EventEmitter<void>();
   @Output() readonly appSelectionChange = new EventEmitter<MatSelectChange>();

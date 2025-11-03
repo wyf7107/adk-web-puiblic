@@ -197,6 +197,8 @@ describe('ChatComponent', () => {
       return appName;
     });
     mockAgentService.getLoadingStateResponse.next(false);
+    mockAgentService.getAgentBuilderResponse.next('');
+    mockAgentService.getAgentBuilderTmpResponse.next('');
     mockRouter.createUrlTree.and.returnValue({
       toString: () => '/?session=session-id',
     } as any);

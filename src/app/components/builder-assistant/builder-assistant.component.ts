@@ -137,8 +137,10 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
       // save to tmp
       this.saveAgent(this.appName);
 
-      // Add user message
-      this.messages.push({ role: 'user', text: msg });
+      // Add user message, hide try again message for now
+      if (msg != "Something went wrong, please try again") {
+        this.messages.push({ role: 'user', text: msg });
+      }
 
       const userText = msg;
       this.userMessage = '';

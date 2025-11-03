@@ -121,7 +121,8 @@ export class BuilderTabsComponent {
   isRootAgentEditable: boolean = true;
 
   models = [
-    "gemini-2.5-flash"
+    "gemini-2.5-flash",
+    "gemini-2.5-pro"
   ];
 
   agentTypes = [

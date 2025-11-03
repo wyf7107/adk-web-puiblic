@@ -21,7 +21,32 @@ export interface CallbackInfo {
     docLink: string;
 }
 
+export interface ToolInfo {
+    shortDescription: string;
+    detailedDescription: string;
+    docLink: string;
+}
+
 export class TooltipUtil {
+    private static readonly toolMenuTooltips = new Map<string, string>([
+        ["Function tool", "Build custom tools for your specific ADK agent needs."],
+        ["Built-in tool", "Ready-to-use functionality such as Google Search or code executors that provide agents with common capabilities. "],
+        ["Agent tool", "A sub-agent that can be invoked as a tool by another agent."]
+    ]);
+
+    private static readonly toolDetailedInfo = new Map<string, ToolInfo>([
+        ["Function tool", {
+            shortDescription: "Build custom tools for your specific ADK agent needs.",
+            detailedDescription: "The ADK framework automatically inspects your Python function's signature—including its name, docstring, parameters, type hints, and default values—to generate a schema. This schema is what the LLM uses to understand the tool's purpose, when to use it, and what arguments it requires.",
+            docLink: "https://google.github.io/adk-docs/tools/function-tools/"
+        }],
+        ["Agent tool", {
+            shortDescription: "Wraps a sub-agent as a callable tool, enabling modular and hierarchical agent architectures.",
+            detailedDescription: "Agent tools allow you to use one agent as a tool within another agent, creating powerful multi-agent workflows.",
+            docLink: "https://google.github.io/adk-docs/agents/multi-agents/#c-explicit-invocation-agenttool"
+        }]
+    ]);
+
     private static readonly callbackMenuTooltips = new Map<string, string>([
         ["before_agent", "Called immediately before the agent's _run_async_impl (or _run_live_impl) method is executed."],
         ["after_agent", "Called immediately after the agent's _run_async_impl (or _run_live_impl) method successfully completes."],
@@ -72,6 +97,14 @@ export class TooltipUtil {
             docLink: "https://google.github.io/adk-docs/callbacks/types-of-callbacks/#after-tool-callback"
         }]
     ]);
+
+    static getToolMenuTooltips(toolType: string) {
+        return TooltipUtil.toolMenuTooltips.get(toolType);
+    }
+
+    static getToolDetailedInfo(toolType: string): ToolInfo | undefined {
+        return TooltipUtil.toolDetailedInfo.get(toolType);
+    }
 
     static getCallbackMenuTooltips(callbackName: string) {
         return TooltipUtil.callbackMenuTooltips.get(callbackName);

@@ -719,14 +719,16 @@ export class BuilderTabsComponent {
   createAgentTool() {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '750px',
-      height: '310px',
+      height: '450px',
       data: {
         title: 'Create Agent Tool',
         message: 'Please enter a name for the agent tool:',
         confirmButtonText: 'Create',
         showInput: true,
         inputLabel: 'Agent Tool Name',
-        inputPlaceholder: 'Enter agent tool name'
+        inputPlaceholder: 'Enter agent tool name',
+        showToolInfo: true,
+        toolType: 'Agent tool'
       } as ConfirmationDialogData
     });
 
@@ -830,5 +832,9 @@ export class BuilderTabsComponent {
 
   callbackMenuTooltips(callbackName: string) {
     return TooltipUtil.getCallbackMenuTooltips(callbackName);
+  }
+
+  toolMenuTooltips(toolType: string) {
+    return TooltipUtil.getToolMenuTooltips(toolType);
   }
 }

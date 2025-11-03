@@ -134,18 +134,24 @@
                   <button
                     mat-menu-item
                     (click)="addTool('Function tool')"
+                    [matTooltip]="toolMenuTooltips('Function tool')"
+                    matTooltipPosition="right"
                   >
                     <span>Function tool</span>
                   </button>
                   <button
                     mat-menu-item
                     (click)="addTool('Built-in tool')"
+                    [matTooltip]="toolMenuTooltips('Built-in tool')"
+                    matTooltipPosition="right"
                   >
                     <span>Built-in tool</span>
                   </button>
                   <button
                     mat-menu-item
                     (click)="createAgentTool()"
+                    [matTooltip]="toolMenuTooltips('Agent tool')"
+                    matTooltipPosition="right"
                   >
                     <span>Agent tool</span>
                   </button>

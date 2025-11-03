@@ -24,10 +24,12 @@ import {
   MatDialogContent,
   MatDialogActions,
 } from '@angular/material/dialog';
-import {MatButtonModule} from '@angular/material/button';
+import {MatButtonModule, MatIconButton} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
+import {MatIcon} from '@angular/material/icon';
 import {FormsModule} from '@angular/forms';
+import {TooltipUtil} from '../../../utils/tooltip-util';
 
 export interface ConfirmationDialogData {
   title: string;
@@ -37,6 +39,8 @@ export interface ConfirmationDialogData {
   inputLabel?: string;
   inputPlaceholder?: string;
   inputValue?: string;
+  showToolInfo?: boolean;
+  toolType?: string;
 }
 
 @Component({
@@ -47,6 +51,8 @@ export interface ConfirmationDialogData {
   imports: [
     CommonModule,
     MatButtonModule,
+    MatIconButton,
+    MatIcon,
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
@@ -57,6 +63,7 @@ export interface ConfirmationDialogData {
 })
 export class ConfirmationDialogComponent {
   inputValue = '';
+  isToolInfoExpanded = false;
 
   constructor(
     public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
@@ -108,5 +115,16 @@ export class ConfirmationDialogComponent {
     if (event.key === 'Enter' && this.data.showInput) {
       this.onConfirm();
     }
+  }
+
+  getToolInfo() {
+    if (this.data.toolType) {
+      return TooltipUtil.getToolDetailedInfo(this.data.toolType);
+    }
+    return undefined;
+  }
+
+  toggleToolInfo() {
+    this.isToolInfoExpanded = !this.isToolInfoExpanded;
   }
 }

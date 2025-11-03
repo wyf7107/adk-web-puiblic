@@ -19,10 +19,12 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
+import { MatIcon } from '@angular/material/icon';
+import { TooltipUtil } from '../../../utils/tooltip-util';
 
 @Component({
   selector: 'app-add-tool-dialog',
@@ -40,6 +42,8 @@ import { MatOption, MatSelect } from '@angular/material/select';
     MatOption,
     MatDialogActions,
     MatButton,
+    MatIconButton,
+    MatIcon,
     MatLabel,
   ],
 })
@@ -64,6 +68,7 @@ export class AddToolDialogComponent implements OnInit{
   ];
 
   isEditMode = false;
+  isToolInfoExpanded = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA)
@@ -110,5 +115,13 @@ export class AddToolDialogComponent implements OnInit{
 
   createDisabled() {
     return this.toolType === 'Function tool' && !this.toolName.trim();
+  }
+
+  getToolInfo() {
+    return TooltipUtil.getToolDetailedInfo(this.toolType);
+  }
+
+  toggleToolInfo() {
+    this.isToolInfoExpanded = !this.isToolInfoExpanded;
   }
 }

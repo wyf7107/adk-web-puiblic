@@ -16,13 +16,39 @@
 
 <h2 mat-dialog-title>{{ data.title }}</h2>
 <mat-dialog-content>
+  <ng-container *ngIf="data.showToolInfo && getToolInfo()">
+    <div class="tool-info-container">
+      <div class="tool-info-header" (click)="toggleToolInfo()">
+        <mat-icon class="tool-info-icon">info</mat-icon>
+        <div class="tool-info-title">
+          <span>Tool Information</span>
+        </div>
+        <button mat-icon-button class="tool-info-toggle" type="button" aria-label="Toggle tool information">
+          <mat-icon>{{ isToolInfoExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+      <div class="tool-info-body" [class.expanded]="isToolInfoExpanded">
+        <div class="tool-info-content">
+          <div class="tool-info-short">{{ getToolInfo()?.shortDescription }}</div>
+          <div class="tool-info-detailed">{{ getToolInfo()?.detailedDescription }}</div>
+        </div>
+        <div class="tool-info-link-container">
+          <a [href]="getToolInfo()?.docLink" target="_blank" rel="noopener noreferrer" class="tool-info-link">
+            <mat-icon>open_in_new</mat-icon>
+            <span>View Official Documentation</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
   <p>{{ data.message }}</p>
   @if (data.showInput) {
     <mat-form-field style="width: 100%; margin-top: 16px;">
       <mat-label>{{ data.inputLabel || 'Input' }}</mat-label>
-      <input 
-        matInput 
-        [(ngModel)]="inputValue" 
+      <input
+        matInput
+        [(ngModel)]="inputValue"
         [placeholder]="data.inputPlaceholder || 'Enter value'"
         (keydown)="onKeyDown($event)"
         cdkFocusInitial>

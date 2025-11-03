@@ -289,6 +289,14 @@ describe('ChatPanelComponent', () => {
       expect(component.clickEvent.emit).toHaveBeenCalledWith(0);
     });
 
+    it('should disable bot icon when eventId is not set', () => {
+      component.messages = [{role: 'bot', text: 'message'}];
+      fixture.detectChanges();
+      const botIcon =
+          fixture.debugElement.query(By.css('button[mat-mini-fab]'));
+      expect(botIcon.nativeElement.disabled).toBeTrue();
+    });
+
     it('should emit clickEvent when function call button is clicked', () => {
       component.messages =
           [{role: 'bot', functionCall: {name: 'func1'}, eventId: '1'}];

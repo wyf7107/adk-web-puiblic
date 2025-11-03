@@ -28,6 +28,7 @@
     @if (message.role === "bot") {
     <button
       mat-mini-fab
+      [disabled]="!message.eventId"
       (click)="clickEvent.emit(i)"
       [matTooltip]="getAgentNameFromEvent(i)"
       [class]="customIconColorClass(i)"

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
@@ -62,9 +62,11 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
   @ViewChild('chatMessages') private chatMessages!: ElementRef;
 
-  constructor(@Inject(SESSION_SERVICE) private sessionService: SessionService,
-              @Inject(AGENT_SERVICE) private agentService: AgentService,
-              @Inject(AGENT_BUILDER_SERVICE) private agentBuilderService: AgentBuilderService){
+  private agentService = inject(AGENT_SERVICE);
+  private sessionService = inject(SESSION_SERVICE);
+  private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
+
+  constructor(){
   }
 
   ngOnInit() {

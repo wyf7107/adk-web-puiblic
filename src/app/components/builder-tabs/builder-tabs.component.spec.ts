@@ -18,7 +18,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BuilderTabsComponent } from './builder-tabs.component';
 import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
-import {AGENT_SERVICE} from '../../core/services/agent.service';
+import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {CallbackNode} from '../../core/models/AgentBuilder';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 

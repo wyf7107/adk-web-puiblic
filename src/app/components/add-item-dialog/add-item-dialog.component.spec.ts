@@ -16,7 +16,7 @@
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {AGENT_SERVICE} from '../../core/services/agent.service';
+import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 
 import {AddItemDialogComponent} from './add-item-dialog.component';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';

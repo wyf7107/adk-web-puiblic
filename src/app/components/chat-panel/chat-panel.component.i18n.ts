@@ -41,11 +41,14 @@ export const CHAT_PANEL_MESSAGES = {
   uploadFileTooltip: 'Upload local file',
   moreOptionsTooltip: 'More options',
   updateStateMenuLabel: 'Update state',
+  updateStateMenuTooltip: 'Update the session state',
   turnOffMicTooltip: 'Turn off microphone',
   useMicTooltip: 'Use microphone',
   turnOffCamTooltip: 'Turn off camera',
   useCamTooltip: 'Use camera',
   updatedSessionStateChipLabel: 'Updated session state',
+  cannotEditSessionMessage:
+      'This session is read-only. You cannot send messages or update the state.',
 };
 
 

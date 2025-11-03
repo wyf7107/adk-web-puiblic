@@ -29,7 +29,7 @@ ADK web is the built-in dev UI that comes along with adk for easier development 
 
 - **Install [Angular CLI](https://angular.dev/tools/cli)**
 
-- **Install [google-adk (Python)](https://github.com/google/adk-python)** 
+- **Install [google-adk (Python)](https://github.com/google/adk-python)**
 
 - **Install [google-adk (Java)](https://github.com/google/adk-java/)**
 
@@ -71,7 +71,13 @@ Go to `localhost:4200` and start developing!
 We welcome contributions from the community! Whether it's bug reports, feature requests, documentation improvements, or code contributions, please see our
 
 - [General contribution guideline and flow](https://google.github.io/adk-docs/contributing-guide/#questions).
-- Then if you want to contribute code, please read [Code Contributing Guidelines](./CONTRIBUTING.md) to get started.
+
+### Testing quirks
+
+To maintain compatibility with upstream 1p code, testing code in this repo must
+follow a few rules:
+
+- `initTestBed()` from `./src/app/testing/utils.ts` must be called before `TestBed.configureTestingModule()`
 
 ## 📄 License
 

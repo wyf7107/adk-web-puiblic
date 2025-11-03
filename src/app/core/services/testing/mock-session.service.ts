@@ -38,4 +38,6 @@ export class MockSessionService implements Partial<SessionService> {
   importSessionResponse = new ReplaySubject<Session>(1);
   importSession = jasmine.createSpy('importSession')
                       .and.returnValue(this.importSessionResponse);
+  canEditResponse = new ReplaySubject<boolean>(1);
+  canEdit = jasmine.createSpy('canEdit').and.returnValue(this.canEditResponse);
 }

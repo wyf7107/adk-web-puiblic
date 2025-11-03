@@ -14,7 +14,8 @@
  limitations under the License.
 -->
 
-@if (appName != "") {
+@let isSessionLoading = uiStateService.isSessionLoading() | async;
+@if (appName != "" && !isSessionLoading) {
 <div #autoScroll class="chat-messages">
   <div #videoContainer></div>
   @for (message of messages; track message; let i = $index) {
@@ -27,6 +28,7 @@
     @if (message.role === "bot") {
     <button
       mat-mini-fab
+      [disabled]="!message.eventId"
       (click)="clickEvent.emit(i)"
       [matTooltip]="getAgentNameFromEvent(i)"
       [class]="customIconColorClass(i)"
@@ -52,7 +54,11 @@
           <img [src]="file.url" alt="attachment" class="image-preview-chat" />
           } @if (!file.file.type.startsWith("image/")) {
           <mat-icon>insert_drive_file</mat-icon>
+          @if (file.url) {
           <a [href]="file.url" download>{{ file.file.name }}</a>
+          } @else {
+          {{ file.file.name }}
+          }
           }
         </div>
         }
@@ -284,8 +290,8 @@
   </div>
   }
 </div>
-} @if (appName != "" && isChatMode) {
-    
+} @if (appName != "" && isChatMode && !isSessionLoading) {
+  @if(canEditSession()) {
   <div class="chat-input">
     <input type="file" multiple hidden (change)="fileSelect.emit($event)" #fileInput />
     <mat-form-field class="input-field" appearance="outline">
@@ -356,8 +362,8 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #moreMenu="matMenu">
-            <span mat-menu-item
-              (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }} 
+            <span mat-menu-item [matTooltip]="i18n.updateStateMenuTooltip"
+              (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }}
             </span>
           </mat-menu>
         </div>
@@ -389,5 +395,13 @@
     </mat-form-field>
     </div>
 
-  
+  } @else {
+    <div class="readonly-session-message">{{i18n.cannotEditSessionMessage}}</div>
+  }
+}
+
+@if (isSessionLoading) {
+  <div class="loading-spinner-container">
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+  </div>
 }

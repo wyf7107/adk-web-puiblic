@@ -28,58 +28,46 @@
       margin-top: 20px;
       z-index: 9999;
     "
-    matTooltip="Open panel"
+    [matTooltip]="i18n.openPanelTooltip"
     (click)="toggleSidePanel()"
     >left_panel_open</span
   >
   }
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
-    @if (!isBuilderMode()) {
-      <app-side-panel
-        [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
-        [apps$]="apps$"
-        [isLoadingApps]="isLoadingApps"
-        [selectedAppControl]="selectedAppControl"
-        [showSidePanel]="showSidePanel"
-        [appName]="appName"
-        [userId]="userId"
-        [sessionId]="sessionId"
-        [traceData]="traceData"
-        [eventData]="eventData"
-        [currentSessionState]="currentSessionState"
-        [artifacts]="artifacts"
-        [selectedEvent]="selectedEvent"
-        [selectedEventIndex]="selectedEventIndex"
-        [renderedEventGraph]="renderedEventGraph"
-        [rawSvgString]="rawSvgString"
-        [llmRequest]="llmRequest"
-        [llmResponse]="llmResponse"
-        [disableBuilderIcon]="disableBuilderSwitch"
-        (closePanel)="toggleSidePanel()"
-        (tabChange)="handleTabChange($event)"
-        (eventSelected)="selectEvent($event)"
-        (sessionSelected)="updateWithSelectedSession($event)"
-        (sessionReloaded)="updateSessionState($event)"
-        (evalCaseSelected)="updateWithSelectedEvalCase($event)"
-        (evalSetIdSelected)="updateSelectedEvalSetId($event)"
-        (returnToSession)="handleReturnToSession($event)"
-        (evalNotInstalled)="handleEvalNotInstalled($event)"
-        (page)="handlePageEvent($event)"
-        (closeSelectedEvent)="closeSelectedEvent()"
-        (openImageDialog)="openViewImageDialog($event)"
-        (appSelectionChange)="onAppSelection($event)"
-        (openAddItemDialog)="openAddItemDialog()"
-        (enterBuilderMode)="enterBuilderMode()"
-      >
-      </app-side-panel>
-    } @else {
-      <app-builder-tabs 
-        [appNameInput]="appName" 
-        (exitBuilderMode)="exitBuilderMode()"
-        (closePanel)="toggleSidePanel()"
-      ></app-builder-tabs>
-      <div class="resize-handler"></div>
-    }
+    <app-side-panel
+      [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
+      [apps$]="apps$"
+      [isLoadingApps]="isLoadingApps"
+      [selectedAppControl]="selectedAppControl"
+      [showSidePanel]="showSidePanel"
+      [appName]="appName"
+      [userId]="userId"
+      [sessionId]="sessionId"
+      [traceData]="traceData"
+      [eventData]="eventData"
+      [currentSessionState]="currentSessionState"
+      [artifacts]="artifacts"
+      [selectedEvent]="selectedEvent"
+      [selectedEventIndex]="selectedEventIndex"
+      [renderedEventGraph]="renderedEventGraph"
+      [rawSvgString]="rawSvgString"
+      [llmRequest]="llmRequest"
+      [llmResponse]="llmResponse"
+      (closePanel)="toggleSidePanel()"
+      (tabChange)="handleTabChange($event)"
+      (eventSelected)="selectEvent($event)"
+      (sessionSelected)="updateWithSelectedSession($event)"
+      (sessionReloaded)="updateWithSelectedSession($event)"
+      (evalCaseSelected)="updateWithSelectedEvalCase($event)"
+      (evalSetIdSelected)="updateSelectedEvalSetId($event)"
+      (returnToSession)="handleReturnToSession($event)"
+      (evalNotInstalled)="handleEvalNotInstalled($event)"
+      (page)="handlePageEvent($event)"
+      (closeSelectedEvent)="closeSelectedEvent()"
+      (openImageDialog)="openViewImageDialog($event)"
+      (appSelectionChange)="onAppSelection($event)"
+    >
+    </app-side-panel>
   </mat-drawer>
 
   <!-- Builder Mode Layout - Canvas for Diagrams -->
@@ -101,6 +89,7 @@
   } @else {
   <!-- Test Mode Layout (existing chat interface) -->
   <div class="chat-container">
+    <ng-content select="[adk-web-chat-container-top]"></ng-content>
     @if (appName != "") {
     <div class="chat-toolbar" [ngClass]="{'edit-mode': isEvalEditMode()}">
       @if (!showSidePanel) {
@@ -115,37 +104,37 @@
           margin-top: -2px;
           z-index: 9999;
         "
-        matTooltip="Open panel"
+        [matTooltip]="i18n.openPanelTooltip"
         (click)="toggleSidePanel()"
         >left_panel_open</span
       >
       } @if (evalCase) {
       <div style="display: flex">
-        <div class="toolbar-session-text">Eval Case ID</div>
+        <div class="toolbar-session-text">{{ i18n.evalCaseIdLabel }}</div>
         <div class="toolbar-session-id">{{ evalCase.evalId }}</div>
       </div>
       <div class="toolbar-actions">
         @if (this.isEvalEditMode()) {
-        <button mat-button (click)="cancelEditEvalCase()" style="height: 30px">Cancel</button>
+        <button mat-button (click)="cancelEditEvalCase()" style="height: 30px">{{ i18n.cancelButton }}</button>
         <button
           mat-flat-button
           (click)="saveEvalCase()"
           style="height: 30px"
           [disabled]="!hasEvalCaseChanged() || isEvalCaseEditing()"
         >
-          Save
+          {{ i18n.saveButton }}
         </button>
         } @else {
         <span
           class="material-symbols-outlined toolbar-icon"
-          matTooltip="Edit current eval case"
+          [matTooltip]="i18n.editEvalCaseTooltip"
           (click)="editEvalCase()"
         >
           edit
         </span>
         <span
           class="material-symbols-outlined toolbar-icon"
-          matTooltip="Delete current eval case"
+          [matTooltip]="i18n.deleteEvalCaseTooltip"
           (click)="deleteEvalCase()"
         >
           delete
@@ -154,9 +143,15 @@
       </div>
       } @else {
       <div style="display: flex">
-        <div class="toolbar-session-text">Session ID</div>
+        @let isSessionLoading = uiStateService.isSessionLoading() | async; @if (isSessionLoading ===
+        false) {
+        <div class="toolbar-session-text">{{ i18n.sessionIdLabel }}</div>
         <div class="toolbar-session-id">{{ sessionId }}</div>
+        } @else {
+        <div class="toolbar-session-text">{{ i18n.loadingSessionLabel }}</div>
+        }
       </div>
+      @if (isSessionLoading === false) {
       <div class="toolbar-actions">
         <div class="toolbar-sse-toggle">
           <mat-slide-toggle
@@ -165,7 +160,7 @@
             (change)="toggleSse()"
             [disabled]="!(isTokenStreamingEnabledObs | async)"
           >
-            Token Streaming
+            {{ i18n.tokenStreamingLabel }}
           </mat-slide-toggle>
         </div>
         <mat-divider
@@ -173,28 +168,37 @@
           style="margin-left: 8px; margin-right: 8px; height: 22px"
         ></mat-divider>
         <div style="display: flex; align-items: center">
-          <div (click)="onNewSessionClick()" class="toolbar-new-sesison">
+          <div
+            (click)="onNewSessionClick()"
+            id="toolbar-new-session-button"
+            [matTooltip]="i18n.createNewSessionTooltip"
+          >
             <mat-icon>add</mat-icon>
-            New Session
+            {{ i18n.newSessionButton }}
           </div>
+          @if (isDeleteSessionEnabledObs | async) {
           <span
             class="material-symbols-outlined toolbar-icon"
-            matTooltip="Delete current session"
+            id="toolbar-delete-session-button"
+            [matTooltip]="i18n.deleteSessionTooltip"
             (click)="deleteSession(sessionId)"
           >
             delete
           </span>
+          } @if (isExportSessionEnabledObs | async) {
           <span
             class="material-symbols-outlined toolbar-icon"
-            matTooltip="Export current session"
+            id="toolbar-export-session-button"
+            [matTooltip]="i18n.exportSessionTooltip"
             (click)="exportSession()"
           >
             download
           </span>
-          @if (importSessionEnabledObs | async) {
+          } @if (importSessionEnabledObs | async) {
           <span
             class="material-symbols-outlined toolbar-icon"
-            matTooltip="Import session"
+            id="toolbar-import-session-button"
+            [matTooltip]="i18n.importSessionTooltip"
             (click)="importSession()"
           >
             upload
@@ -202,30 +206,30 @@
           }
         </div>
       </div>
-      }
+      } }
     </div>
     }
     <mat-card class="chat-card">
       @if (!selectedAppControl.value) { @if (isLoadingApps()) {
       <div class="empty-state-container">
-        <span>Loading agents, please wait...</span>
+        <span>{{ i18n.loadingAgentsLabel }}</span>
       </div>
       } @else if (isApplicationSelectorEnabledObs | async) {
       <div class="empty-state-container">
         @if (((apps$ | async) || []).length > 0) {
         <span
-          >Welcome to ADK!<br />
-          Select an agent on the left to begin with.</span
+          >{{ i18n.welcomeMessage }}<br />
+          {{ i18n.selectAgentMessage }}</span
         >
         } @else {
         <div>
-          Failed to load agents. To get started, run
+          {{ i18n.failedToLoadAgentsMessage }}
           <pre>adk web</pre>
           in the folder that contains the agents.<br />
-          @if (loadingError()) { Error message: <br />
+          @if (loadingError()) { {{ i18n.errorMessageLabel }} <br />
           <pre class="error">{{ loadingError() }}</pre>
           } @else {
-          <pre class="warning">Warning: No agents found in current folder.</pre>
+          <pre class="warning">{{ i18n.noAgentsFoundWarning }}</pre>
           }
         </div>
         }

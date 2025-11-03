@@ -26,13 +26,15 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
 import type {EvalCase} from '../../core/models/Eval';
-import {FEATURE_FLAG_SERVICE} from '../../core/services/feature-flag.service';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
+import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
@@ -57,6 +59,7 @@ const ROOT_AGENT = 'root_agent';
     TextFieldModule,
     MatFormFieldModule,
     MatMenuModule,
+    MatProgressSpinnerModule,
     NgxJsonViewerModule,
     AudioPlayerComponent,
     MatTooltipModule,
@@ -112,6 +115,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   scrollInterrupted = false;
   private previousMessageCount = 0;
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
+  protected readonly uiStateService = inject(UI_STATE_SERVICE);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   readonly markdownComponent: Type<MarkdownComponentInterface> = inject(
       MARKDOWN_COMPONENT,
@@ -125,6 +129,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       this.featureFlagService.isManualStateUpdateEnabled();
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled();
+  readonly canEditSession = signal(true);
 
   constructor(private sanitizer: DomSanitizer) {}
 

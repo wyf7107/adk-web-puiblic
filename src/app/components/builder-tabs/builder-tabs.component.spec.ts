@@ -21,6 +21,11 @@ import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {CallbackNode} from '../../core/models/AgentBuilder';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
+import {MatDialog} from '@angular/material/dialog';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Router} from '@angular/router';
 
 describe('BuilderTabsComponent - Callback Support', () => {
   let component: BuilderTabsComponent;
@@ -31,12 +36,20 @@ describe('BuilderTabsComponent - Callback Support', () => {
       'getApp',
       'agentBuild',
     ]);
+    const mockFeatureFlagService = new MockFeatureFlagService();
+    const mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    const mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
+    const mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       imports: [BuilderTabsComponent],
       providers: [
         {provide: AGENT_BUILDER_SERVICE, useExisting: AgentBuilderService},
         {provide: AGENT_SERVICE, useValue: agentServiceSpy},
+        {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
+        {provide: MatDialog, useValue: mockDialog},
+        {provide: MatSnackBar, useValue: mockSnackBar},
+        {provide: Router, useValue: mockRouter},
         provideNoopAnimations(),
       ],
     }).compileComponents();

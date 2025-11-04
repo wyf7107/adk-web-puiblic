@@ -84,8 +84,12 @@
 }
 
 .function-event-button-highlight {
-  background-color: var(--chat-function-event-button-highlight-background-color);
-  border-color: var(--chat-function-event-button-highlight-border-color) !important;
+  background-color: var(
+    --chat-function-event-button-highlight-background-color
+  );
+  border-color: var(
+    --chat-function-event-button-highlight-border-color
+  ) !important;
   color: var(--chat-function-event-button-highlight-color) !important;
 }
 
@@ -114,8 +118,11 @@
 
 .bot-message:focus-within {
   .message-card {
-    background-color: var(--chat-bot-message-focus-within-message-card-background-color);
-    border: 1px solid var(--chat-bot-message-focus-within-message-card-border-color);
+    background-color: var(
+      --chat-bot-message-focus-within-message-card-background-color
+    );
+    border: 1px solid
+      var(--chat-bot-message-focus-within-message-card-border-color);
   }
 }
 
@@ -373,6 +380,7 @@ button {
   margin-left: auto;
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .toolbar-session-text {
@@ -386,6 +394,7 @@ button {
   text-transform: uppercase;
   margin-left: 20px;
   padding-top: 4px;
+  flex-shrink: 0;
 }
 
 .toolbar-session-id {
@@ -397,6 +406,7 @@ button {
   line-height: 20px;
   letter-spacing: 0.25px;
   margin-left: 5px;
+  flex-shrink: 0;
 }
 
 .toolbar-icon {
@@ -407,7 +417,7 @@ button {
   margin-right: 16px;
 }
 
-.toolbar-new-sesison {
+#toolbar-new-session-button {
   font-size: 14px;
   margin-right: 16px;
   color: var(--chat-toolbar-new-session-color);
@@ -422,17 +432,53 @@ button {
       label-text-size: 14px,
       label-text-color: var(--chat-toolbar-sse-toggle-label-text-color),
       selected-track-color: var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-focus-track-color: var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-hover-track-color: var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-handle-color: var(--chat-toolbar-sse-toggle-selected-handle-color),
-      selected-focus-handle-color: var(--chat-toolbar-sse-toggle-selected-handle-color),
-      selected-hover-handle-color: var(--chat-toolbar-sse-toggle-selected-handle-color),
+      selected-focus-track-color:
+        var(--chat-toolbar-sse-toggle-selected-track-color),
+      selected-hover-track-color:
+        var(--chat-toolbar-sse-toggle-selected-track-color),
+      selected-handle-color:
+        var(--chat-toolbar-sse-toggle-selected-handle-color),
+      selected-focus-handle-color:
+        var(--chat-toolbar-sse-toggle-selected-handle-color),
+      selected-hover-handle-color:
+        var(--chat-toolbar-sse-toggle-selected-handle-color),
       track-height: 24px,
       track-width: 46px,
       track-outline-color: var(--chat-toolbar-sse-toggle-track-outline-color),
       with-icon-handle-size: 20px,
     )
   );
+}
+
+.readonly-badge {
+  color: var(--chat-readonly-badge-color);
+  background-color: var(--chat-readonly-badge-background-color);
+  border-radius: 4px;
+  padding: 1px 6px;
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  gap: 4px;
+  white-space: nowrap;
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    padding-top: 1px;
+    flex-shrink: 0;
+  }
+}
+
+.readonly-session-message {
+  display: block;
+  color: var(--chat-toolbar-session-text-color);
+  margin-left: 1em;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  flex-shrink: 1;
 }
 
 ::ng-deep .mat-drawer-content {

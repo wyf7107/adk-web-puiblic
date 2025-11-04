@@ -28,6 +28,7 @@
     @if (message.role === "bot") {
     <button
       mat-mini-fab
+      [disabled]="!message.eventId"
       (click)="clickEvent.emit(i)"
       [matTooltip]="getAgentNameFromEvent(i)"
       [class]="customIconColorClass(i)"
@@ -393,13 +394,11 @@
     </mat-form-field>
     </div>
 
-  } @else {
-    <div class="readonly-session-message">{{i18n.cannotEditSessionMessage}}</div>
   }
 }
 
 @if (isSessionLoading) {
   <div class="loading-spinner-container">
-    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
   </div>
 }

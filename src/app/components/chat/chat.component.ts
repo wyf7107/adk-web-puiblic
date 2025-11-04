@@ -70,6 +70,7 @@ import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
+import {CHAT_MESSAGES, ChatMessagesInjectionToken} from './chat.component.i18n';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -113,6 +114,7 @@ const BIDI_STREAMING_RESTART_WARNING =
   styleUrl: './chat.component.scss',
   providers: [
     {provide: MatPaginatorIntl, useClass: CustomPaginatorIntl},
+    {provide: ChatMessagesInjectionToken, useValue: CHAT_MESSAGES},
   ],
   imports: [
     MatDrawerContainer,
@@ -137,6 +139,7 @@ const BIDI_STREAMING_RESTART_WARNING =
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
+  protected readonly i18n = inject(ChatMessagesInjectionToken);
   private readonly _snackBar = inject(MatSnackBar);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly agentService = inject(AGENT_SERVICE);
@@ -197,6 +200,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   root_agent = ROOT_AGENT;
   updatedSessionState: WritableSignal<any> = signal(null);
   private readonly isModelThinkingSubject = new BehaviorSubject(false);
+  protected readonly canEditSession = signal(true);
 
   // TODO: Remove this once backend supports restarting bidi streaming.
   sessionHasUsedBidi = new Set<string>();
@@ -404,19 +408,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createSession() {
-    this.sessionService.createSession(this.userId, this.appName)
-        .subscribe((res) => {
-          this.currentSessionState = res.state;
-          this.sessionId = res.id ?? '';
-          this.sessionTab?.refreshSession();
-          this.sessionTab?.reloadSession(this.sessionId);
+    this.uiStateService.setIsSessionListLoading(true);
 
-          this.isSessionUrlEnabledObs.subscribe((enabled) => {
-            if (enabled) {
-              this.updateSelectedSessionUrl();
-            }
-          });
-        });
+    this.sessionService.createSession(this.userId, this.appName)
+        .subscribe(
+            (res) => {
+              this.uiStateService.setIsSessionListLoading(false);
+
+              this.currentSessionState = res.state;
+              this.sessionId = res.id ?? '';
+              this.sessionTab?.refreshSession();
+              this.sessionTab?.reloadSession(this.sessionId);
+
+              this.isSessionUrlEnabledObs.subscribe((enabled) => {
+                if (enabled) {
+                  this.updateSelectedSessionUrl();
+                }
+              });
+            },
+            () => {
+              this.uiStateService.setIsSessionListLoading(false);
+            });
   }
 
   async sendMessage(event: Event) {
@@ -1140,6 +1152,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sessionService.canEdit(this.userId, session).subscribe((canEdit) => {
       this.chatPanel()?.canEditSession.set(canEdit);
+      this.canEditSession.set(canEdit);
     });
     this.bottomPanelVisible = false;
     this.changeDetectorRef.detectChanges();

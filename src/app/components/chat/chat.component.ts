@@ -200,6 +200,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   root_agent = ROOT_AGENT;
   updatedSessionState: WritableSignal<any> = signal(null);
   private readonly isModelThinkingSubject = new BehaviorSubject(false);
+  protected readonly canEditSession = signal(true);
 
   // TODO: Remove this once backend supports restarting bidi streaming.
   sessionHasUsedBidi = new Set<string>();
@@ -1145,6 +1146,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sessionService.canEdit(this.userId, session).subscribe((canEdit) => {
       this.chatPanel()?.canEditSession.set(canEdit);
+      this.canEditSession.set(canEdit);
     });
     this.bottomPanelVisible = false;
     this.changeDetectorRef.detectChanges();

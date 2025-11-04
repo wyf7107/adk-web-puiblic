@@ -15,8 +15,8 @@
 -->
 
 <div class="session-wrapper">
-  @let isSessionListLoading = uiStateService.isSessionListLoading() | async;
-  @if (isSessionListLoading) {
+  @let isSessionListLoading = uiStateService.isSessionListLoading() | async; @if
+  (isSessionListLoading) {
   <div class="loading-spinner-container">
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </div>
@@ -30,13 +30,12 @@
       [ngClass]="session.id === sessionId ? 'session-item current': 'session-item'"
     >
       <div class="session-info">
-        <div class="session-id">
-          {{session.id}} @if ((sessionService.canEdit(userId, session) | async) === false) {
-          <mat-chip>{{ i18n.readonlyChip }}</mat-chip>
-          }
-        </div>
+        <div class="session-id">{{session.id}}</div>
         <div class="session-date">{{ getDate(session) }}</div>
       </div>
+      @if ((sessionService.canEdit(userId, session) | async) === false) {
+      <mat-chip>{{ i18n.readonlyChip }}</mat-chip>
+      }
     </div>
     }
   </div>

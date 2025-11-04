@@ -41,6 +41,9 @@ export const CHAT_MESSAGES = {
   failedToLoadAgentsMessage: 'Failed to load agents. To get started, run',
   errorMessageLabel: 'Error message:',
   noAgentsFoundWarning: 'Warning: No agents found in current folder.',
+  cannotEditSessionMessage:
+      'Chat is disabled to prevent changes to the end user\'s session.',
+  readOnlyBadgeLabel: 'Read only',
 };
 
 /**
@@ -51,7 +54,7 @@ export type ChatMessages = typeof CHAT_MESSAGES;
 /**
  * Injection token for ChatComponent messages.
  */
-export const ChatMessagesInjectionToken = new InjectionToken<ChatMessages>(
-    'Chat Messages', {
+export const ChatMessagesInjectionToken =
+    new InjectionToken<ChatMessages>('Chat Messages', {
       factory: () => CHAT_MESSAGES,
     });

@@ -33,6 +33,7 @@
 .session-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   border: none;
   background-color: var(--session-tab-session-item-background-color);
   border-radius: 8px;
@@ -44,6 +45,10 @@
   }
   &.current {
     background-color: var(--session-tab-session-item-current-background-color);
+  }
+
+  mat-chip {
+    margin-right: 11px;
   }
 }
 

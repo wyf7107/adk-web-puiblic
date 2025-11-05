@@ -128,7 +128,9 @@
       </div>
       <div class="toolbar-actions">
         @if (this.isEvalEditMode()) {
-        <button mat-button (click)="cancelEditEvalCase()" style="height: 30px">{{ i18n.cancelButton }}</button>
+        <button mat-button (click)="cancelEditEvalCase()" style="height: 30px">
+          {{ i18n.cancelButton }}
+        </button>
         <button
           mat-flat-button
           (click)="saveEvalCase()"
@@ -155,12 +157,18 @@
         }
       </div>
       } @else {
-      <div style="display: flex">
+      <div style="display: flex; align-items: center">
         @let isSessionLoading = uiStateService.isSessionLoading() | async; @if (isSessionLoading ===
         false) {
         <div class="toolbar-session-text">{{ i18n.sessionIdLabel }}</div>
         <div class="toolbar-session-id">{{ sessionId }}</div>
-        } @else {
+        @if (!canEditSession()) {
+          <div class="readonly-badge">
+            <mat-icon>visibility</mat-icon>
+            {{ i18n.readOnlyBadgeLabel }}
+          </div>
+          <div class="readonly-session-message">{{i18n.cannotEditSessionMessage}}</div>
+        } } @else {
         <div class="toolbar-session-text">{{ i18n.loadingSessionLabel }}</div>
         }
       </div>

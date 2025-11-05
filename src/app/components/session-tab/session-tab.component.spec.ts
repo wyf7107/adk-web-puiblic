@@ -18,7 +18,7 @@
 import {ComponentFixture, TestBed,} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-// 1p-ONLY-IMPORTS: import {beforeEach, describe, it,}
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, it, }
 import {of} from 'rxjs';
 
 import {SESSION_SERVICE, SessionService,} from '../../core/services/interfaces/session';
@@ -117,6 +117,46 @@ describe('SessionTabComponent', () => {
           sessionService.getSession.calls.reset();
           sessionService.getSessionResponse.next({} as any);
           component.getSession('session1');
+        });
+
+        it('fetches session again', () => {
+          expect(sessionService.getSession).toHaveBeenCalled();
+        });
+      });
+    });
+  });
+
+  describe('when reloading a session', () => {
+    beforeEach(() => {
+      spyOn(component.sessionReloaded, 'emit');
+    });
+
+    describe('when reloading a session is successful', () => {
+      beforeEach(() => {
+        sessionService.getSessionResponse.next({} as any);
+        component.reloadSession('session1');
+      });
+
+      it('emits sessionReloaded', () => {
+        expect(component.sessionReloaded.emit).toHaveBeenCalled();
+      });
+    });
+
+    describe('when reloading a session throws error', () => {
+      beforeEach(() => {
+        sessionService.getSessionResponse.error(new Error('error'));
+        component.reloadSession('session1');
+      });
+
+      it('does not emit sessionReloaded', () => {
+        expect(component.sessionReloaded.emit).not.toHaveBeenCalled();
+      });
+
+      describe('on retry', () => {
+        beforeEach(() => {
+          sessionService.getSession.calls.reset();
+          sessionService.getSessionResponse.next({} as any);
+          component.reloadSession('session1');
         });
 
         it('fetches session again', () => {

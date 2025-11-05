@@ -110,9 +110,12 @@ export class SessionTabComponent implements OnInit {
     this.reloadSessionSubject
         .pipe(
             switchMap(
-                (sessionId) => this.sessionService.getSession(
-                    this.userId, this.appName, sessionId)),
+                (sessionId) =>
+                    this.sessionService
+                        .getSession(this.userId, this.appName, sessionId)
+                        .pipe(catchError(() => of(null)))),
             tap((res) => {
+              if (!res) return;
               const session = this.fromApiResultToSession(res);
               this.sessionReloaded.emit(session);
               this.changeDetectorRef.markForCheck();

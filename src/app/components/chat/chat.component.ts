@@ -36,7 +36,7 @@ import {SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
-import {catchError, distinctUntilChanged, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
+import {catchError, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 
 import {URLUtil} from '../../../utils/url-util';
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
@@ -70,6 +70,7 @@ import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
+
 import {CHAT_MESSAGES, ChatMessagesInjectionToken} from './chat.component.i18n';
 
 const ROOT_AGENT = 'root_agent';
@@ -496,10 +497,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.streamingTextMessage = null;
         this.sessionTab?.reloadSession(this.sessionId);
         this.eventService.getTrace(this.sessionId)
-            .pipe(catchError((error) => {
-              if (error.status === 404) {
-                return of(null);
-              }
+            .pipe(first(),catchError((error) => {
               return of([]);
             }))
             .subscribe(res => {
@@ -1138,16 +1136,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     });
 
-    this.eventService.getTrace(this.sessionId).subscribe(res => {
-      this.traceData = res;
-      this.traceService.setEventData(this.eventData);
-      this.traceService.setMessages(this.messages());
-    });
+    this.eventService.getTrace(this.sessionId)
+        .pipe(first(), catchError(() => of([])))
+        .subscribe(res => {
+          this.traceData = res;
+          this.traceService.setEventData(this.eventData);
+          this.traceService.setMessages(this.messages());
+        });
 
-    this.sessionService.canEdit(this.userId, session).subscribe((canEdit) => {
-      this.chatPanel()?.canEditSession.set(canEdit);
-      this.canEditSession.set(canEdit);
-    });
+    this.sessionService.canEdit(this.userId, session)
+        .pipe(first(), catchError(() => of(true)))
+        .subscribe((canEdit) => {
+          this.chatPanel()?.canEditSession.set(canEdit);
+          this.canEditSession.set(canEdit);
+        });
     this.bottomPanelVisible = false;
     this.changeDetectorRef.detectChanges();
   }

@@ -16,7 +16,7 @@
  */
 
 import {InjectionToken} from '@angular/core';
-import {BehaviorSubject, Observable, of} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import {AgentRunRequest} from '../../models/AgentRunRequest';
 import {LlmResponse} from '../../models/types';
 
@@ -25,34 +25,10 @@ export const AGENT_SERVICE = new InjectionToken<AgentService>('AgentService');
 /**
  * Service to provide methods to handle agent.
  */
-export abstract class AgentService {
+export declare abstract class AgentService {
   abstract getApp(): Observable<string>;
   abstract setApp(name: string): void;
   abstract getLoadingState(): BehaviorSubject<boolean>;
   abstract runSse(req: AgentRunRequest): Observable<LlmResponse>;
   abstract listApps(): Observable<string[]>;
-  getAgentBuilderTmp(agentName: string): Observable<string> {
-    console.warn('unimplemented');
-    return of('');
-  }
-  getAgentBuilder(agentName: string): Observable<string> {
-    console.warn('unimplemented');
-    return of('');
-  }
-  getSubAgentBuilder(appName: string, relativePath: string): Observable<string> {
-    console.warn('unimplemented');
-    return of('');
-  }
-  agentChangeCancel(appName: string): any {
-    console.warn('unimplemented');
-    return undefined;
-  }
-  agentBuildTmp(req: any): Observable<boolean> {
-    console.warn('unimplemented');
-    return of(false);
-  }
-  agentBuild(req: any): Observable<boolean> {
-    console.warn('unimplemented');
-    return of(false);
-  }
 }

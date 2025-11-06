@@ -98,8 +98,6 @@ export class SidePanelComponent implements AfterViewInit {
   selectedAppControl = input(new FormControl<string>('', {
     nonNullable: true,
   }));
-  readonly isBuilderMode = input<boolean>(false);
-  readonly disableBuilderIcon = input<boolean>(false);
 
   readonly closePanel = output<void>();
   readonly appSelectionChange = output<MatSelectChange>();
@@ -114,9 +112,6 @@ export class SidePanelComponent implements AfterViewInit {
   readonly page = output<PageEvent>();
   readonly closeSelectedEvent = output<void>();
   readonly openImageDialog = output<string|null>();
-  readonly openAddItemDialog = output<boolean>();
-  readonly enterBuilderMode = output<boolean>();
-
 
   readonly eventTabComponent = viewChild(EventTabComponent);
   readonly sessionTabComponent = viewChild(SessionTabComponent);

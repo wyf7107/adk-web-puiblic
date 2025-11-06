@@ -37,10 +37,6 @@ export class VideoService implements VideoServiceInterface {
   }
 
   createVideoElement(container: ElementRef) {
-    if (!container?.nativeElement) {
-      return;
-    }
-
     this.clearVideoElement(container);
 
     this.videoElement = this.renderer.createElement('video');
@@ -57,9 +53,7 @@ export class VideoService implements VideoServiceInterface {
 
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({video: true});
-      if (this.videoElement) {
-        this.videoElement.srcObject = this.stream;
-      }
+      this.videoElement.srcObject = this.stream;
 
       this.mediaRecorder = new MediaRecorder(this.stream, {
         mimeType: 'video/webm',
@@ -89,11 +83,6 @@ export class VideoService implements VideoServiceInterface {
   private async captureFrame(): Promise<Blob> {
     return new Promise((resolve, reject) => {
       try {
-        if (!this.videoElement) {
-          reject(new Error('Video element not available'));
-          return;
-        }
-
         const canvas = document.createElement('canvas');
         canvas.width = this.videoElement.videoWidth;
         canvas.height = this.videoElement.videoHeight;

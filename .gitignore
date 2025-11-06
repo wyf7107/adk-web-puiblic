@@ -28,12 +28,4 @@ e2e/*.js
 e2e/*.map
 
 # System Files
-.DS_Store/
-
-# Python virtual environment
-adk-env/
-
-# ADK samples
-adk-samples/
-
-venv/
+.DS_Store

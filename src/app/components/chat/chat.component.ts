@@ -44,7 +44,6 @@ import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
 import {Event as AdkEvent, Part} from '../../core/models/types';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
-import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from '../../core/services/interfaces/artifact';
 import {DOWNLOAD_SERVICE} from '../../core/services/interfaces/download';
 import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
@@ -71,11 +70,7 @@ import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
-import { CanvasComponent } from '../canvas/canvas.component';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
-import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
-import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
-import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
+
 import {CHAT_MESSAGES, ChatMessagesInjectionToken} from './chat.component.i18n';
 
 const ROOT_AGENT = 'root_agent';
@@ -142,8 +137,6 @@ const BIDI_STREAMING_RESTART_WARNING =
     AsyncPipe,
     ChatPanelComponent,
     SidePanelComponent,
-    CanvasComponent,
-    BuilderTabsComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -170,20 +163,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   private readonly traceService = inject(TRACE_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
-  protected readonly agentBuilderService = inject(AGENT_BUILDER_SERVICE);
 
   chatPanel = viewChild.required(ChatPanelComponent);
-  canvasComponent = viewChild.required(CanvasComponent);
   sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
   sidePanel = viewChild.required(SidePanelComponent);
   evalTab = viewChild(EvalTabComponent);
+  private scrollContainer = viewChild.required<ElementRef>('autoScroll');
   bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
   enableSseIndicator = signal(false);
   isChatMode = signal(true);
   isEvalCaseEditing = signal(false);
   hasEvalCaseChanged = signal(false);
   isEvalEditMode = signal(false);
-  isBuilderMode = signal(false); // Default to builder mode off
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   messages = signal<any[]>([]);
@@ -205,7 +196,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   functionCallEventId = '';
   redirectUri = URLUtil.getBaseUrlWithoutPath();
   showSidePanel = true;
-  showBuilderAssistant = true;
   useSse = false;
   currentSessionState: SessionState|undefined = {};
   root_agent = ROOT_AGENT;
@@ -295,9 +285,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
 
-  // Builder
-  disableBuilderSwitch = false;
-
   constructor() {}
 
   ngOnInit(): void {
@@ -328,20 +315,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     combineLatest([
-      this.agentService.getLoadingState(),
-      this.isModelThinkingSubject,
+      this.agentService.getLoadingState(), this.isModelThinkingSubject
     ]).subscribe(([isLoading, isModelThinking]) => {
       const lastMessage = this.messages()[this.messages().length - 1];
 
       if (isLoading) {
         if (!lastMessage?.isLoading && !this.streamingTextMessage) {
-          this.messages.update((messages) => [
-            ...messages,
-            {role: 'bot', isLoading: true},
-          ]);
+          this.messages.update(
+              messages => [...messages, {role: 'bot', isLoading: true}]);
         }
       } else if (lastMessage?.isLoading && !isModelThinking) {
-        this.messages.update((messages) => messages.slice(0, -1));
+        this.messages.update(messages => messages.slice(0, -1));
         this.changeDetectorRef.detectChanges();
       }
     });
@@ -455,10 +439,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Add user message
     if (!!this.userInput.trim()) {
-      this.messages.update((messages) => [
-        ...messages,
-        {role: 'user', text: this.userInput},
-      ]);
+      this.messages.update(
+          messages => [...messages, {role: 'user', text: this.userInput}]);
     }
 
     // Add user message attachments
@@ -477,8 +459,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       userId: this.userId,
       sessionId: this.sessionId,
       newMessage: {
-        role: 'user',
-        parts: await this.getUserMessageParts(),
+        'role': 'user',
+        'parts': await this.getUserMessageParts(),
       },
       streaming: this.useSse,
       stateDelta: this.updatedSessionState(),
@@ -517,12 +499,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.eventService.getTrace(this.sessionId)
             .pipe(first(),catchError((error) => {
               return of([]);
-            })
-          )
-          .subscribe((res) => {
-            this.traceData = res;
-            this.changeDetectorRef.detectChanges();
-          });
+            }))
+            .subscribe(res => {
+              this.traceData = res;
+              this.changeDetectorRef.detectChanges();
+            });
         this.traceService.setMessages(this.messages());
         this.changeDetectorRef.detectChanges();
       },
@@ -552,7 +533,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             role: 'bot',
             text: this.processThoughtText(newChunk),
             thought: true,
-            eventId: chunkJson.id,
+            eventId: chunkJson.id
           };
 
           this.insertMessageBeforeLoadingMessage(thoughtMessage);
@@ -563,7 +544,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           role: 'bot',
           text: this.processThoughtText(newChunk),
           thought: part.thought ? true : false,
-          eventId: chunkJson.id,
+          eventId: chunkJson.id
         };
 
         if (renderedContent) {
@@ -605,7 +586,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let parts: any = [];
 
     if (!!this.userInput.trim()) {
-      parts.push({text: `${this.userInput}`});
+      parts.push({'text': `${this.userInput}`});
     }
 
     if (this.selectedFiles.length > 0) {
@@ -663,7 +644,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private storeMessage(
       part: any, e: any, role: string, invocationIndex?: number,
-      additionalIndices?: any) {
+      additionalIndeces?: any) {
     if (e?.author) {
       this.createAgentIconColorClass(e.author);
     }
@@ -716,16 +697,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       expectedInvocationToolUses: e?.expectedInvocationToolUses,
       actualFinalResponse: e?.actualFinalResponse,
       expectedFinalResponse: e?.expectedFinalResponse,
-      invocationIndex:
-        invocationIndex !== undefined ? invocationIndex : undefined,
+      invocationIndex: invocationIndex !== undefined ? invocationIndex :
+                                                       undefined,
       finalResponsePartIndex:
-        additionalIndices?.finalResponsePartIndex !== undefined
-          ? additionalIndices.finalResponsePartIndex
-          : undefined,
-      toolUseIndex:
-        additionalIndices?.toolUseIndex !== undefined
-          ? additionalIndices.toolUseIndex
-          : undefined,
+          additionalIndeces?.finalResponsePartIndex !== undefined ?
+          additionalIndeces.finalResponsePartIndex :
+          undefined,
+      toolUseIndex: additionalIndeces?.toolUseIndex !== undefined ?
+          additionalIndeces.toolUseIndex :
+          undefined,
     };
     if (part) {
       if (part.inlineData) {
@@ -771,7 +751,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private insertMessageBeforeLoadingMessage(message: any) {
-    this.messages.update((messages) => {
+    this.messages.update(messages => {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage?.isLoading) {
         return [...messages.slice(0, -1), message, lastMessage];
@@ -800,9 +780,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const currentMessages = this.messages();
     const lastMessage = currentMessages[currentMessages.length - 1];
-    const currentIndex = lastMessage?.isLoading
-      ? currentMessages.length - 2
-      : currentMessages.length - 1;
+    const currentIndex = lastMessage?.isLoading ? currentMessages.length - 2 :
+                                                  currentMessages.length - 1;
 
     this.artifactService
         .getArtifactVersion(
@@ -886,8 +865,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       userId: this.userId,
       sessionId: this.sessionId,
       newMessage: {
-        role: 'user',
-        parts: [],
+        'role': 'user',
+        'parts': [],
       },
     };
 
@@ -897,7 +876,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     authResponse.functionCallEventId = this.functionCallEventId;
     authResponse.newMessage.parts.push({
-      function_response: {
+      'function_response': {
         id: func.id,
         name: func.name,
         response: authConfig,
@@ -957,10 +936,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   createAgentIconColorClass(agentName: string) {
     const agentIconColor = this.stringToColorService.stc(agentName);
 
-    const agentIconColorClass = `custom-icon-color-${agentIconColor.replace(
-      '#',
-      ''
-    )}`;
+    const agentIconColorClass =
+        `custom-icon-color-${agentIconColor.replace('#', '')}`;
 
     // Inject the style for this unique class
     this.injectCustomIconColorStyle(agentIconColorClass, agentIconColor);
@@ -999,7 +976,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   startAudioRecording() {
     if (this.sessionHasUsedBidi.has(this.sessionId)) {
-      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK');
+      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK')
       return;
     }
 
@@ -1030,7 +1007,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   startVideoRecording() {
     if (this.sessionHasUsedBidi.has(this.sessionId)) {
-      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK');
+      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK')
       return;
     }
     const videoContainer = this.chatPanel()?.videoContainer;
@@ -1082,7 +1059,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       // Listen for messages from the popup
       const listener = (event: MessageEvent) => {
         if (event.origin !== window.location.origin) {
-          return; // Ignore messages from unknown sources
+          return;  // Ignore messages from unknown sources
         }
         const {authResponseUrl} = event.data;
         if (authResponseUrl) {
@@ -1195,7 +1172,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         let toolUseIndex = 0;
         for (const toolUse of invocation.intermediateData.toolUses) {
           const functionCallPart = {
-            functionCall: {name: toolUse.name, args: toolUse.args},
+            functionCall: {name: toolUse.name, args: toolUse.args}
           };
           this.storeMessage(
               functionCallPart, null, 'bot', invocationIndex, {toolUseIndex});
@@ -1248,7 +1225,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       data: {
         dialogHeader: 'Edit function arguments',
         functionName: message.functionCall.name,
-        jsonContent: message.functionCall.args,
+        jsonContent: message.functionCall.args
       },
     });
 
@@ -1259,25 +1236,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         message.functionCall.args = result;
 
         this.updatedEvalCase = structuredClone(this.evalCase!);
-        this.updatedEvalCase!.conversation[
-          message.invocationIndex
-        ].intermediateData!.toolUses![message.toolUseIndex].args = result;
+        this.updatedEvalCase!.conversation[message.invocationIndex]
+            .intermediateData!.toolUses![message.toolUseIndex]
+            .args = result;
       }
     });
   }
 
   protected saveEvalCase() {
     this.evalService
-      .updateEvalCase(
-        this.appName,
-        this.evalSetId,
-        this.updatedEvalCase!.evalId,
-        this.updatedEvalCase!
-      )
-      .subscribe((res) => {
-        this.openSnackBar('Eval case updated', 'OK');
-        this.resetEditEvalCaseVars();
-      });
+        .updateEvalCase(
+            this.appName, this.evalSetId, this.updatedEvalCase!.evalId,
+            this.updatedEvalCase!)
+        .subscribe((res) => {
+          this.openSnackBar('Eval case updated', 'OK');
+          this.resetEditEvalCaseVars()
+        });
   }
 
   protected cancelEditEvalCase() {
@@ -1324,7 +1298,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected deleteEvalCaseMessage(message: any, index: number) {
     this.hasEvalCaseChanged.set(true);
-    this.messages.update((messages) => messages.filter((m, i) => i !== index));
+    this.messages.update(messages => messages.filter((m, i) => i !== index));
 
     this.updatedEvalCase = structuredClone(this.evalCase!);
     this.updatedEvalCase!.conversation[message.invocationIndex]
@@ -1351,7 +1325,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.evalTab()?.deleteEvalCase(this.evalCase!.evalId);
-        this.openSnackBar('Eval case deleted', 'OK');
+        this.openSnackBar('Eval case deleted', 'OK')
       }
     });
   }
@@ -1389,66 +1363,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleSse() {
     this.useSse = !this.useSse;
-  }
-
-  enterBuilderMode() {
-    const url = this.router
-      .createUrlTree([], {
-        queryParams: {mode: 'builder'},
-        queryParamsHandling: 'merge',
-      })
-      .toString();
-    this.location.replaceState(url);
-    this.isBuilderMode.set(true);
-
-    // Load existing agent configuration if app is selected
-    if (this.appName) {
-      this.loadExistingAgentConfiguration();
-    }
-  }
-
-
-  private loadExistingAgentConfiguration() {
-    this.agentService.getAgentBuilderTmp(this.appName).subscribe({
-      next: (yamlContent: string) => {
-        if (yamlContent) {
-          this.canvasComponent()?.loadFromYaml(yamlContent, this.appName);
-        }
-      },
-      error: (error: any) => {
-        console.error('Error loading agent configuration:', error);
-        this._snackBar.open('Error loading agent configuration', 'OK');
-      },
-    });
-  }
-
-  protected exitBuilderMode() {
-    const url = this.router
-      .createUrlTree([], {
-        queryParams: {mode: null},
-        queryParamsHandling: 'merge',
-      })
-      .toString();
-    this.location.replaceState(url);
-    this.isBuilderMode.set(false);
-    this.agentBuilderService.clear();
-  }
-
-  protected toggleBuilderAssistant() {
-    this.showBuilderAssistant = !this.showBuilderAssistant;
-  }
-
-  openAddItemDialog(): void {
-    this.apps$.pipe(take(1)).subscribe((apps) => {
-      const dialogRef = this.dialog.open(AddItemDialogComponent, {
-        width: '600px',
-        data: {existingAppNames: apps ?? []},
-      });
-    });
-  }
-
-  saveAgentBuilder() {
-    this.canvasComponent()?.saveAgent(this.appName);
   }
 
   selectEvent(key: string) {
@@ -1542,22 +1456,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         const app = params['app'];
         if (app && apps.includes(app)) {
           this.selectedAppControl.setValue(app);
-          this.agentService.getAgentBuilder(app).subscribe((res: any) => {
-            if (!res || res == '') {
-              this.disableBuilderSwitch = true;
-              this.agentBuilderService.setLoadedAgentData(undefined);
-            } else {
-              this.disableBuilderSwitch = false;
-              this.agentBuilderService.setLoadedAgentData(res);
-            }
-          });
-          this.isBuilderMode.set(false);
         } else if (app) {
           this.openSnackBar(`Agent '${app}' not found`, 'OK');
         }
-      }
-      if (params['mode'] === 'builder') {
-        this.enterBuilderMode();
       }
     });
   }
@@ -1574,7 +1475,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           }
           this.router.navigate([], {
-            queryParams: {'app': app, 'mode': null},
+            queryParams: {'app': app},
             queryParamsHandling: 'merge',
           });
         });
@@ -1582,11 +1483,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private updateSelectedSessionUrl() {
     const url = this.router
-      .createUrlTree([], {
-        queryParams: {session: this.sessionId},
-        queryParamsHandling: 'merge',
-      })
-      .toString();
+                    .createUrlTree([], {
+                      queryParams: {'session': this.sessionId},
+                      queryParamsHandling: 'merge',
+                    })
+                    .toString();
     this.location.replaceState(url);
   }
 
@@ -1620,7 +1521,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       index++;
     }
-    return undefined; // Key not found
+    return undefined;  // Key not found
   }
 
   private getKeyAtIndexInMap(index: number): string|undefined {
@@ -1635,7 +1536,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (index >= 0 && index < sortedKeys.length) {
       return sortedKeys[index];
     }
-    return undefined; // Index out of bounds
+    return undefined;  // Index out of bounds
   }
 
   openSnackBar(message: string, action: string) {
@@ -1681,10 +1582,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const dialogRef = this.dialog.open(EditJsonDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',
-      data: {
-        dialogHeader: 'Update state',
-        jsonContent: this.currentSessionState,
-      },
+      data:
+          {dialogHeader: 'Update state', jsonContent: this.currentSessionState},
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
@@ -1754,7 +1653,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const style = this.renderer.createElement('style');
-    this.renderer.setAttribute(style, 'id', className); // Set an ID to check for existence later
+    this.renderer.setAttribute(
+        style, 'id', className);  // Set an ID to check for existence later
     this.renderer.setAttribute(style, 'type', 'text/css');
 
     // Define the CSS
@@ -1765,6 +1665,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     `;
 
     this.renderer.appendChild(style, this.renderer.createText(css));
-    this.renderer.appendChild(this.document.head, style); // Append to the head of the document
+    this.renderer.appendChild(
+        this.document.head, style);  // Append to the head of the document
   }
 }

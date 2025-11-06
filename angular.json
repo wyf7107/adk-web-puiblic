@@ -73,10 +73,7 @@
               "buildTarget": "agent_framework_web:build:development"
             }
           },
-          "defaultConfiguration": "development",
-          "options": {
-            "poll": 2000
-          }
+          "defaultConfiguration": "development"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n"

@@ -34,17 +34,14 @@ export class JsonEditorComponent implements AfterViewInit {
     let content = {
       text: this.jsonString,
     };
-    setTimeout(() => {
-      this.editor = createJSONEditor({
-        target: document.getElementById('json-editor') as Element,
-        props: {
-          content,
-          mode: Mode.text,
-          mainMenuBar: false,
-          statusBar: false,
-        },
-      });
-    })
+    this.editor = createJSONEditor({
+      target: document.getElementById('json-editor') as Element,
+      props: {
+        content,
+        mode: Mode.text,
+        mainMenuBar: false,
+      },
+    });
   }
 
   getJsonString(): string {

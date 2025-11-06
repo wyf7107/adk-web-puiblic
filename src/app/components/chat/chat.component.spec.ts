@@ -248,7 +248,7 @@ describe('ChatComponent', () => {
             {provide: LOCATION_SERVICE, useValue: mockLocation},
             {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
             {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
-            {provide: AGENT_BUILDER_SERVICE, useValue: mockAgentBuilderService}
+            {provide: AGENT_BUILDER_SERVICE, useValue: mockAgentBuilderService},
             {provide: ErrorHandler, useValue: mockErrorHandler},
           ],
         })

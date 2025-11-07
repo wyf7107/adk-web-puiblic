@@ -513,7 +513,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.updatedSessionState.set(null);
         }
         this.streamingTextMessage = null;
-        this.sessionTab?.reloadSession(this.sessionId);
         this.eventService.getTrace(this.sessionId)
             .pipe(first(),catchError((error) => {
               return of([]);

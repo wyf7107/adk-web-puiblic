@@ -76,7 +76,6 @@ import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
-
 import {CHAT_MESSAGES, ChatMessagesInjectionToken} from './chat.component.i18n';
 
 const ROOT_AGENT = 'root_agent';

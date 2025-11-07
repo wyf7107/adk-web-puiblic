@@ -142,7 +142,6 @@ describe('ChatComponent', () => {
   let mockUiStateService: MockUiStateService;
   let mockErrorHandler: jasmine.SpyObj<ErrorHandler>;
   let mockAgentBuilderService: jasmine.SpyObj<any>;
-  let mockErrorHandler: jasmine.SpyObj<ErrorHandler>;
 
   beforeEach(async () => {
     mockSessionService = new MockSessionService();

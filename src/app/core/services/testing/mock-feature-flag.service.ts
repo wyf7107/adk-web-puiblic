@@ -90,4 +90,8 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isSessionsTabReorderingEnabled =
       jasmine.createSpy('isSessionsTabReorderingEnabled')
           .and.returnValue(this.isSessionsTabReorderingEnabledResponse);
+  isSessionReloadOnNewMessageEnabledResponse = new ReplaySubject<boolean>(1);
+  isSessionReloadOnNewMessageEnabled =
+      jasmine.createSpy('isSessionReloadOnNewMessageEnabled')
+          .and.returnValue(this.isSessionReloadOnNewMessageEnabledResponse);
 }

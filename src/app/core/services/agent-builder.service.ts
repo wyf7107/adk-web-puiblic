@@ -19,13 +19,12 @@ import { Injectable, InjectionToken } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AgentNode, ToolNode, CallbackNode } from '../models/AgentBuilder';
-
-export const AGENT_BUILDER_SERVICE = new InjectionToken<AgentBuilderService>('AgentBuilderService');
+import { AgentBuilderService as AgentBuilderServiceInterface } from './interfaces/agent-builder';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AgentBuilderService {
+export class AgentBuilderService implements AgentBuilderServiceInterface {
   private nodes: AgentNode[] = [];
   private subAgentIdCounter = 1;
 

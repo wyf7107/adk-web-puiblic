@@ -17,8 +17,9 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BuilderTabsComponent } from './builder-tabs.component';
-import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
 import {CallbackNode} from '../../core/models/AgentBuilder';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
@@ -26,6 +27,8 @@ import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-f
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {initTestBed} from '../../testing/utils';
 
 describe('BuilderTabsComponent - Callback Support', () => {
   let component: BuilderTabsComponent;
@@ -41,6 +44,7 @@ describe('BuilderTabsComponent - Callback Support', () => {
     const mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
     const mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
+    initTestBed();  // required for 1p compat
     await TestBed.configureTestingModule({
       imports: [BuilderTabsComponent],
       providers: [

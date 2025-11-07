@@ -16,84 +16,84 @@
 @use '@angular/material' as mat;
 
 .dialog-title {
-    color: white !important;
-    font-family: 'Google Sans';
-    font-size: 24px;
+  color: white !important;
+  font-family: 'Google Sans';
+  font-size: 24px;
 }
 
 .tool-categories-container {
-    padding: 16px 0;
+  padding: 16px 0;
 }
 
 .tool-category {
-    margin-bottom: 24px;
+  margin-bottom: 24px;
 
-    &:last-child {
-        margin-bottom: 0;
-    }
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .category-title {
-    font-family: 'Google Sans';
-    font-size: 16px;
-    font-weight: 500;
-    color: #e8eaed;
-    margin: 0 0 12px 0;
-    padding-left: 8px;
+  font-family: 'Google Sans';
+  font-size: 16px;
+  font-weight: 500;
+  color: #e8eaed;
+  margin: 0 0 12px 0;
+  padding-left: 8px;
 }
 
 .tool-list {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
 }
 
 .tool-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background-color: rgba(255, 255, 255, 0.05);
-    min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.05);
+  min-width: 0;
 
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 
-    &.selected {
-        background-color: rgba(138, 180, 248, 0.2);
-        border: 1px solid #8ab4f8;
-    }
+  &.selected {
+    background-color: rgba(138, 180, 248, 0.2);
+    border: 1px solid #8ab4f8;
+  }
 
-    .tool-icon {
-        color: #8ab4f8;
-        margin-right: 12px;
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-        flex-shrink: 0;
-    }
+  .tool-icon {
+    color: #8ab4f8;
+    margin-right: 12px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
 
-    .tool-name {
-        font-family: 'Google Sans';
-        font-size: 14px;
-        color: #e8eaed;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
+  .tool-name {
+    font-family: 'Google Sans';
+    font-size: 14px;
+    color: #e8eaed;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .args-editor-container {
-    padding: 16px 0;
+  padding: 16px 0;
 }
 
 .args-editor-title {
-    font-family: 'Google Sans';
-    font-size: 16px;
-    font-weight: 500;
-    color: #e8eaed;
-    margin: 0 0 16px 0;
+  font-family: 'Google Sans';
+  font-size: 16px;
+  font-weight: 500;
+  color: #e8eaed;
+  margin: 0 0 16px 0;
 }

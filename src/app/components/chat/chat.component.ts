@@ -35,7 +35,6 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {provideMarkdown} from 'ngx-markdown';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {catchError, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
 
@@ -45,6 +44,7 @@ import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
 import {Event as AdkEvent, Part} from '../../core/models/types';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from '../../core/services/interfaces/artifact';
 import {DOWNLOAD_SERVICE} from '../../core/services/interfaces/download';
 import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
@@ -72,7 +72,7 @@ import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 import { CanvasComponent } from '../canvas/canvas.component';
-import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
@@ -664,7 +664,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private storeMessage(
       part: any, e: any, role: string, invocationIndex?: number,
-      additionalIndeces?: any) {
+      additionalIndices?: any) {
     if (e?.author) {
       this.createAgentIconColorClass(e.author);
     }
@@ -720,12 +720,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       invocationIndex:
         invocationIndex !== undefined ? invocationIndex : undefined,
       finalResponsePartIndex:
-        additionalIndeces?.finalResponsePartIndex !== undefined
-          ? additionalIndeces.finalResponsePartIndex
+        additionalIndices?.finalResponsePartIndex !== undefined
+          ? additionalIndices.finalResponsePartIndex
           : undefined,
       toolUseIndex:
-        additionalIndeces?.toolUseIndex !== undefined
-          ? additionalIndeces.toolUseIndex
+        additionalIndices?.toolUseIndex !== undefined
+          ? additionalIndices.toolUseIndex
           : undefined,
     };
     if (part) {

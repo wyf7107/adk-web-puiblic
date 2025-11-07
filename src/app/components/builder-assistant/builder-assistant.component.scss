@@ -49,7 +49,7 @@
   font-weight: 400;
   font-size: 16px;
   color: #e3e3e3;
-  font-family: "Google Sans", "Helvetica Neue", sans-serif;
+  font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
 
   mat-icon {
     color: #e3e3e3;
@@ -61,7 +61,7 @@
 
 .close-btn {
   color: #c4c7c5;
-  
+
   &:hover {
     color: #e8eaed;
     background-color: rgba(138, 180, 248, 0.1);
@@ -98,7 +98,7 @@
     font-size: 20px;
     font-weight: 500;
     color: #e8eaed;
-    font-family: "Google Sans", "Helvetica Neue", sans-serif;
+    font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
   }
 
   p {
@@ -248,39 +248,40 @@
   font-weight: 500;
   color: #9aa0a6;
   margin-bottom: 8px;
-  font-family: "Google Sans", "Helvetica Neue", sans-serif;
+  font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
 }
 
 .message-text {
   white-space: pre-line;
   word-break: break-word;
   overflow-wrap: break-word;
-  font-family: "Google Sans", "Helvetica Neue", sans-serif;
-  
+  font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
+
   // Markdown-specific styles
   ::ng-deep {
     p {
       margin: 0;
       line-height: 1.4;
-      
+
       &:first-child {
         margin-top: 0;
       }
-      
+
       &:last-child {
         margin-bottom: 0;
       }
     }
-    
-    ul, ol {
+
+    ul,
+    ol {
       margin: 0;
       padding-left: 1.5em;
     }
-    
+
     li {
       margin: 0;
     }
-    
+
     code {
       background-color: rgba(255, 255, 255, 0.1);
       padding: 2px 4px;
@@ -288,20 +289,20 @@
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 0.9em;
     }
-    
+
     pre {
       background-color: rgba(255, 255, 255, 0.05);
       padding: 8px 12px;
       border-radius: 6px;
       overflow-x: auto;
       margin: 0.5em 0;
-      
+
       code {
         background: none;
         padding: 0;
       }
     }
-    
+
     blockquote {
       border-left: 3px solid #8ab4f8;
       padding-left: 12px;
@@ -309,11 +310,11 @@
       font-style: italic;
       color: #c4c7c5;
     }
-    
+
     strong {
       font-weight: 600;
     }
-    
+
     em {
       font-style: italic;
     }
@@ -324,7 +325,7 @@
   display: flex;
   align-items: center;
   color: #9aa0a6;
-  font-family: "Google Sans", "Helvetica Neue", sans-serif;
+  font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
   padding: 0;
   margin: 0;
 
@@ -338,12 +339,11 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
     opacity: 1;
   }
 }
-
-

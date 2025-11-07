@@ -20,10 +20,12 @@
 
 html {
   color-scheme: dark;
-  @include mat.theme((
+  @include mat.theme(
+    (
       color: theme.$primary-palette,
-    density: 0
-  ));
+      density: 0,
+    )
+  );
 }
 
 html {
@@ -45,18 +47,20 @@ markdown p {
   --mdc-checkbox-selected-icon-color: white;
   --mat-sys-background: #131314;
   // tab variable overrides
-  --mat-tab-header-active-label-text-color: #8AB4F8;
-  --mat-tab-header-active-hover-label-text-color: #8AB4F8;
-  --mat-tab-header-active-focus-label-text-color: #8AB4F8;
+  --mat-tab-header-active-label-text-color: #8ab4f8;
+  --mat-tab-header-active-hover-label-text-color: #8ab4f8;
+  --mat-tab-header-active-focus-label-text-color: #8ab4f8;
   --mat-tab-header-label-text-weight: 500;
   --mdc-text-button-label-text-color: #89b4f8;
 }
 
 :root {
-  @include mat.dialog-overrides((
-    container-color: #2b2b2f,
-    subhead-color: white,
-  ));
+  @include mat.dialog-overrides(
+    (
+      container-color: #2b2b2f,
+      subhead-color: white,
+    )
+  );
 
   // Custom property for dialog subhead font
   --mdc-dialog-subhead-font-family: 'Google Sans';
@@ -64,7 +68,7 @@ markdown p {
   --mdc-dialog-subhead-font-weight: 400;
   --mdc-dialog-subhead-font-size: 24px;
   --mdc-dialog-subhead-line-height: 32px;
-  --mdc-dialog-subhead-color: #E3E3E3;
+  --mdc-dialog-subhead-color: #e3e3e3;
 }
 
 .mat-mdc-dialog-container .mat-mdc-dialog-title.mdc-dialog__title {
@@ -77,10 +81,12 @@ markdown p {
 }
 
 :root {
-  @include mat.progress-spinner-overrides((
-    active-indicator-color: #a8c7fa,
-    size: 80
-  ));
+  @include mat.progress-spinner-overrides(
+    (
+      active-indicator-color: #a8c7fa,
+      size: 80,
+    )
+  );
 
   --chat-panel-function-event-button-background-color: white;
   --chat-panel-function-event-button-highlight-background-color: rgb(
@@ -270,21 +276,22 @@ markdown p {
   --trace-tree-trace-row-left-is-event-row-color: #8ab4f8;
 }
 
-
 :root {
-  @include mat.form-field-overrides((
-    disabled-input-text-placeholder-color: orange,
-    filled-active-indicator-color: red,
-    outlined-outline-color: #cccccc,
-    outlined-input-text-color: #cccccc,
-    outlined-label-text-color: #cccccc,
-    outlined-hover-label-text-color: #cccccc,
-    outlined-focus-label-text-color: #cccccc,
-    outlined-disabled-label-text-color: #cccccc,
-    outlined-disabled-input-text-color: #cccccc,
-    outlined-disabled-outline-color: #cccccc,
-    outlined-caret-color: #cccccc
-  ));
+  @include mat.form-field-overrides(
+    (
+      disabled-input-text-placeholder-color: orange,
+      filled-active-indicator-color: red,
+      outlined-outline-color: #cccccc,
+      outlined-input-text-color: #cccccc,
+      outlined-label-text-color: #cccccc,
+      outlined-hover-label-text-color: #cccccc,
+      outlined-focus-label-text-color: #cccccc,
+      outlined-disabled-label-text-color: #cccccc,
+      outlined-disabled-input-text-color: #cccccc,
+      outlined-disabled-outline-color: #cccccc,
+      outlined-caret-color: #cccccc,
+    )
+  );
 }
 
 .mdc-line-ripple {

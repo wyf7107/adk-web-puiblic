@@ -18,6 +18,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {initTestBed} from '../../testing/utils';
 
 import { AddCallbackDialogComponent } from './add-callback-dialog.component';
 
@@ -29,6 +31,7 @@ describe('AddCallbackDialogComponent', () => {
   beforeEach(async () => {
     const dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
+    initTestBed();  // required for 1p compat
     await TestBed.configureTestingModule({
       imports: [AddCallbackDialogComponent, NoopAnimationsModule],
       providers: [

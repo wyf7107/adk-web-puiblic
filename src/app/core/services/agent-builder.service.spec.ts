@@ -16,19 +16,23 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { AGENT_BUILDER_SERVICE, AgentBuilderService } from './agent-builder.service';
+import { AgentBuilderService } from './agent-builder.service';
+import {AGENT_BUILDER_SERVICE} from './interfaces/agent-builder';
 import { AgentNode, CallbackNode } from '../models/AgentBuilder';
 import {firstValueFrom} from 'rxjs';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {initTestBed} from '../../testing/utils';
 
 describe('AgentBuilderService - Callback Management', () => {
   let service: AgentBuilderService;
   let mockAgentNode: AgentNode;
 
   beforeEach(() => {
+    initTestBed();  // required for 1p compat
     TestBed.configureTestingModule({providers: [
-      {provide: AGENT_BUILDER_SERVICE, useClass: AgentBuilderService}
+      AgentBuilderService,
     ]});
-    service = TestBed.inject(AGENT_BUILDER_SERVICE);
+    service = TestBed.inject(AgentBuilderService);
 
     mockAgentNode = {
       name: 'test-agent',

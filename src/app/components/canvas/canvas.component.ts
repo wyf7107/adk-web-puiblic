@@ -19,17 +19,16 @@ import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, OnChanges, Simp
 import { DiagramConnection, AgentNode, ToolNode, CallbackNode, YamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
+import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Vflow, HtmlTemplateDynamicNode, Edge, TemplateDynamicGroupNode } from 'ngx-vflow';
 import { MatIcon } from '@angular/material/icon';
-import { MatChip, MatChipSet } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
-import { AGENT_BUILDER_SERVICE } from "../../core/services/agent-builder.service";
-import * as YAML from "yaml";
-import { parse } from "yaml";
-import { firstValueFrom, take, filter, Observable } from "rxjs";
+import * as YAML from 'yaml';
+import { firstValueFrom, Observable } from "rxjs";
+import { take, filter } from "rxjs/operators";
 import { YamlUtils } from "../../../utils/yaml-utils";
 import { ConfirmationDialogComponent } from "../confirmation-dialog/confirmation-dialog.component";
 import { AddToolDialogComponent } from "../add-tool-dialog/add-tool-dialog.component";
@@ -46,8 +45,6 @@ import { BuilderAssistantComponent } from "../builder-assistant/builder-assistan
   imports: [
     Vflow,
     MatIcon,
-    MatChip,
-    MatChipSet,
     MatTooltip,
     MatMenu,
     MatMenuItem,
@@ -1608,7 +1605,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       agent.tools = agent.tools.filter(
         (tool) => tool.name && tool.name.trim() !== ""
       );
-      agent.tools.map((tool) => {
+      agent.tools.forEach((tool) => {
         // Preserve Agent Tool type if already set
         if (tool.toolType === "Agent Tool") {
           return; // Don't override Agent Tool type
@@ -1677,7 +1674,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           const subAgentData = await firstValueFrom(
             this.agentService.getSubAgentBuilder(appName, node.config_path)
           );
-          agentData = parse(subAgentData) as AgentNode;
+          agentData = YAML.parse(subAgentData) as AgentNode;
           if (agentData.tools) {
             agentData.tools = this.parseToolsFromYaml(agentData.tools || []);
           }

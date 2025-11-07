@@ -35,9 +35,10 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
-import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { getToolIcon } from '../../core/constants/tool-icons';
 import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
+import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
 import { AddCallbackDialogComponent } from '../add-callback-dialog/add-callback-dialog.component';
 import { AddToolDialogComponent } from '../add-tool-dialog/add-tool-dialog.component';
 import { BuiltInToolDialogComponent } from '../built-in-tool-dialog/built-in-tool-dialog.component';
@@ -91,7 +92,7 @@ export class BuilderTabsComponent {
   @Input() appNameInput: string = '';
   @Output() exitBuilderMode = new EventEmitter<void>();
   @Output() readonly closePanel = new EventEmitter<void>();
-  
+
   readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   readonly isAlwaysOnSidePanelEnabledObs =
       this.featureFlagService.isAlwaysOnSidePanelEnabled();
@@ -652,7 +653,7 @@ export class BuilderTabsComponent {
   saveToolArgs(tool: ToolNode | undefined | null) {
     if (this.jsonEditorComponent && tool) {
       try {
-        const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString());
+        const updatedArgs = JSON.parse(this.jsonEditorComponent.getJsonString()) as { [key: string]: any; } | undefined;
         const skipSummarization = tool.args ? tool.args['skip_summarization'] : false;
         tool.args = updatedArgs;
         tool.args!['skip_summarization'] = skipSummarization;

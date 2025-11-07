@@ -26,6 +26,7 @@ import {of} from 'rxjs';
 import {AppComponent} from './app.component';
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from './components/eval-tab/eval-tab.component';
 import {AGENT_SERVICE} from './core/services/interfaces/agent';
+import {AGENT_BUILDER_SERVICE} from './core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from './core/services/interfaces/artifact';
 import {AUDIO_PLAYING_SERVICE} from './core/services/interfaces/audio-playing';
 import {AUDIO_RECORDING_SERVICE} from './core/services/interfaces/audio-recording';
@@ -40,7 +41,6 @@ import {STRING_TO_COLOR_SERVICE} from './core/services/interfaces/string-to-colo
 import {LOCATION_SERVICE} from './core/services/location.service';
 import {SESSION_SERVICE} from './core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from './core/services/interfaces/stream-chat';
-import {AGENT_BUILDER_SERVICE} from './core/services/agent-builder.service';
 import {MockAgentService} from './core/services/testing/mock-agent.service';
 import {MockArtifactService} from './core/services/testing/mock-artifact.service';
 import {MockAudioPlayingService} from './core/services/testing/mock-audio-playing.service';

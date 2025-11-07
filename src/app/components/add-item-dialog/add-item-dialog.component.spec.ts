@@ -17,6 +17,8 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {initTestBed} from '../../testing/utils';
 
 import {AddItemDialogComponent} from './add-item-dialog.component';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
@@ -25,6 +27,7 @@ describe('AddItemDialogComponent', () => {
   let component: AddItemDialogComponent;
   let fixture: ComponentFixture<AddItemDialogComponent>;
 
+  initTestBed();  // required for 1p compat
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AddItemDialogComponent],

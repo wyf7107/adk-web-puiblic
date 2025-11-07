@@ -47,6 +47,10 @@ export class MockAgentService implements Partial<AgentService> {
   getAgentBuilderTmp = jasmine.createSpy('getAgentBuilderTmp')
                            .and.returnValue(this.getAgentBuilderTmpResponse);
 
+  getSubAgentBuilderResponse = new ReplaySubject<string>(1);
+  getSubAgentBuilder = jasmine.createSpy('getSubAgentBuilder')
+                           .and.returnValue(this.getSubAgentBuilderResponse);
+
   agentBuildTmp = jasmine.createSpy('agentBuildTmp').and.returnValue(of(true));
   agentBuild = jasmine.createSpy('agentBuild').and.returnValue(of(true));
   agentChangeCancel = jasmine.createSpy('agentChangeCancel').and.returnValue(of(true));

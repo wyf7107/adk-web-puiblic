@@ -36,8 +36,8 @@
 
 .breadcrumb-chip {
   background-color: transparent;
-  color: #5C5F5E;
-  font-family: "Google Sans";
+  color: #5c5f5e;
+  font-family: 'Google Sans';
   font-size: 16px;
   font-weight: 500;
   border: none;
@@ -53,7 +53,7 @@
   }
 
   &.current-agent {
-    color: #DADCE0;
+    color: #dadce0;
     font-weight: 500;
   }
 }
@@ -78,12 +78,14 @@
     line-height: 1.5;
   }
 
-  @include mat.form-field-overrides((
-    filled-container-color: #333537,
-    filled-focus-active-indicator-color: #333537,
-    filled-active-indicator-color:#333537,
-    filled-hover-active-indicator-color: #333537
-  ));
+  @include mat.form-field-overrides(
+    (
+      filled-container-color: #333537,
+      filled-focus-active-indicator-color: #333537,
+      filled-active-indicator-color: #333537,
+      filled-hover-active-indicator-color: #333537,
+    )
+  );
 }
 
 :host ::ng-deep .mat-mdc-text-field-wrapper {
@@ -103,7 +105,6 @@
     letter-spacing: 0.5px;
   }
 }
-
 
 // Configuration form
 .config-form {
@@ -172,21 +173,21 @@
 .sub-agent-list-row {
   display: flex;
   margin-top: 10px;
-  margin-left:16px;
+  margin-left: 16px;
 }
 
-.tree-view mat-tree{
+.tree-view mat-tree {
   background-color: inherit !important;
 }
 
-.tree-view expand-button{
+.tree-view expand-button {
   background-color: transparent;
   border: 0;
 }
 
 .node-item {
   display: flex;
-  align-items: center
+  align-items: center;
 }
 
 .node-icon {
@@ -196,7 +197,7 @@
 .node-name {
   margin-top: 2px;
   display: flex;
-  align-items: center
+  align-items: center;
 }
 
 .no-tools-message {
@@ -375,7 +376,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
 }
 
 .tools-chips-container {
@@ -483,7 +483,7 @@
     background-color: #8ab4f8;
     color: #202124;
     font-weight: 500;
-    
+
     &:hover {
       background-color: #aecbfa;
     }
@@ -579,7 +579,7 @@
 
 .add-callback-icon {
   color: #8ab4f8;
-  
+
   &:hover {
     background-color: rgba(138, 180, 248, 0.1);
   }
@@ -666,7 +666,7 @@ mat-tab-group {
     background-color: #8ab4f8;
     color: #202124;
     font-weight: 500;
-    
+
     &:hover {
       background-color: #aecbfa;
     }
@@ -675,7 +675,7 @@ mat-tab-group {
   .cancel-button {
     color: #9aa0a6;
     border: 1px solid rgba(154, 160, 166, 0.3);
-    
+
     &:hover {
       background-color: rgba(154, 160, 166, 0.1);
       color: #e8eaed;
@@ -692,8 +692,8 @@ mat-tab-group {
 }
 
 .panel-title {
-  color: #C4C7C5;
-  font-family: "Google Sans";
+  color: #c4c7c5;
+  font-family: 'Google Sans';
   font-size: 16px;
   font-style: normal;
   font-weight: 500;

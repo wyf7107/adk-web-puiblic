@@ -18,7 +18,7 @@
 import {ComponentFixture, TestBed,} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-// 1p-ONLY-IMPORTS: import {beforeEach, describe, it, }
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, it}
 import {of} from 'rxjs';
 
 import {SESSION_SERVICE, SessionService,} from '../../core/services/interfaces/session';

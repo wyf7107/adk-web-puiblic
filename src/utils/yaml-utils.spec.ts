@@ -17,7 +17,7 @@
 
 import { YamlUtils } from './yaml-utils';
 import { AgentNode, CallbackNode, ToolNode } from '../app/core/models/AgentBuilder';
-import * as YAML from 'yaml';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 
 describe('YamlUtils - Callback Support', () => {
   let mockAgentNode: AgentNode;
@@ -25,7 +25,7 @@ describe('YamlUtils - Callback Support', () => {
 
   beforeEach(() => {
     mockFormData = new FormData();
-    
+
     mockAgentNode = {
       name: 'test-agent',
       isRoot: true,
@@ -96,7 +96,7 @@ describe('YamlUtils - Callback Support', () => {
     it('should generate YAML file with callbacks when agent has callbacks', () => {
       // Test the YAML generation logic by creating a mock YAML config
       const callbacksConfig = YamlUtils.buildCallbacksConfig(mockAgentNode.callbacks);
-      
+
       expect(callbacksConfig).toEqual({
         before_agent_callbacks: [
           { name: 'callback_1' }
@@ -105,7 +105,7 @@ describe('YamlUtils - Callback Support', () => {
 
       // Verify that generateYamlFile creates a FormData entry
       YamlUtils.generateYamlFile(mockAgentNode, mockFormData, 'test-app', new Map());
-      
+
       expect(mockFormData.getAll('files').length).toBe(1);
       const file = mockFormData.get('files') as File;
       expect(file).toBeTruthy();
@@ -115,14 +115,14 @@ describe('YamlUtils - Callback Support', () => {
     it('should not include callbacks in YAML when agent has no callbacks', () => {
       mockAgentNode.callbacks = undefined;
       const callbacksConfig = YamlUtils.buildCallbacksConfig(mockAgentNode.callbacks);
-      
+
       expect(callbacksConfig).toEqual({});
     });
 
     it('should handle empty callbacks array', () => {
       mockAgentNode.callbacks = [];
       const callbacksConfig = YamlUtils.buildCallbacksConfig(mockAgentNode.callbacks);
-      
+
       expect(callbacksConfig).toEqual({});
     });
   });

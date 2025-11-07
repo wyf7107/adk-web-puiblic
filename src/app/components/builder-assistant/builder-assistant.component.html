@@ -51,7 +51,7 @@ limitations under the License.
               } @else {
                 @if (message.role === 'bot') {
                   <div class="bot-label">Assistant</div>
-                  <markdown class="message-text" [data]="message.text"></markdown>
+                  <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: message.text!, thought: false}"></ng-container>
                 } @else {
                   <div class="message-text">{{message.text}}</div>
                 }
@@ -77,7 +77,7 @@ limitations under the License.
         <button
           mat-icon-button
           (click)="sendMessage(userMessage.trim())"
-          [disabled]="!userMessage?.trim() || isGenerating"
+          [disabled]="!userMessage.trim() || isGenerating"
           class="send-button"
           matTooltip="Send message">
           <mat-icon>send</mat-icon>

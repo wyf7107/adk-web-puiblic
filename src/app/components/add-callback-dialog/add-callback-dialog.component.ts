@@ -33,7 +33,6 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { FormControl } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { CallbackNode } from '../../core/models/AgentBuilder';
-import { MarkdownComponent } from 'ngx-markdown';
 import { TooltipUtil, CallbackInfo } from '../../../utils/tooltip-util';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -58,7 +57,6 @@ export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
     MatInputModule,
     MatError,
     MatSelectModule,
-    MarkdownComponent,
     MatIconModule
   ],
 })

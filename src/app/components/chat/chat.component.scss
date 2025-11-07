@@ -446,7 +446,9 @@ button {
 }
 
 .app-select-container {
-  @include mat.select-overrides((placeholder-text-color: #8ab4f8,
+  @include mat.select-overrides(
+    (
+      placeholder-text-color: #8ab4f8,
       enabled-trigger-text-color: #8ab4f8,
       enabled-arrow-color: #8ab4f8,
     )
@@ -556,7 +558,7 @@ button {
   overflow-x: auto;
   max-width: 100%;
 }
-  
+
 .readonly-badge {
   color: var(--chat-readonly-badge-color);
   background-color: var(--chat-readonly-badge-background-color);
@@ -674,7 +676,7 @@ app-canvas {
     color: #e8eaed;
     font-size: 16px;
     font-weight: 500;
-    font-family: "Google Sans", "Helvetica Neue", sans-serif;
+    font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
   }
 }
 

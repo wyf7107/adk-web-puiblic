@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked, inject, Type} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
@@ -23,12 +23,13 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatCard } from '@angular/material/card';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { MarkdownComponent } from 'ngx-markdown';
 import { SESSION_SERVICE, SessionService } from '../../core/services/interfaces/session';
 import { AGENT_SERVICE, AgentService } from '../../core/services/interfaces/agent';
+import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
 import { AgentRunRequest } from '../../core/models/AgentRunRequest';
-import { AGENT_BUILDER_SERVICE, AgentBuilderService } from '../../core/services/agent-builder.service';
+import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { YamlUtils } from '../../../utils/yaml-utils';
+import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 
 @Component({
   selector: 'app-builder-assistant',
@@ -43,7 +44,6 @@ import { YamlUtils } from '../../../utils/yaml-utils';
     MatTooltip,
     MatCard,
     TextFieldModule,
-    MarkdownComponent,
   ],
 })
 export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
@@ -62,6 +62,9 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
   isGenerating: boolean = false;
 
   @ViewChild('chatMessages') private chatMessages!: ElementRef;
+  readonly markdownComponent: Type<MarkdownComponentInterface> = inject(
+      MARKDOWN_COMPONENT,
+  );
 
   private agentService = inject(AGENT_SERVICE);
   private sessionService = inject(SESSION_SERVICE);

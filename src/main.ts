@@ -43,6 +43,7 @@ import {EventService} from './app/core/services/event.service';
 import {FeatureFlagService} from './app/core/services/feature-flag.service';
 import {GraphService} from './app/core/services/graph.service';
 import {AGENT_SERVICE} from './app/core/services/interfaces/agent';
+import {AGENT_BUILDER_SERVICE} from './app/core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from './app/core/services/interfaces/artifact';
 import {AUDIO_PLAYING_SERVICE} from './app/core/services/interfaces/audio-playing';
 import {AUDIO_RECORDING_SERVICE, AUDIO_WORKLET_MODULE_PATH} from './app/core/services/interfaces/audio-recording';
@@ -71,7 +72,7 @@ import {TraceService} from './app/core/services/trace.service';
 import {VideoService} from './app/core/services/video.service';
 import {WebSocketService} from './app/core/services/websocket.service';
 import {LOGO_COMPONENT} from './app/injection_tokens';
-import {AGENT_BUILDER_SERVICE, AgentBuilderService} from './app/core/services/agent-builder.service';
+import {AgentBuilderService} from './app/core/services/agent-builder.service';
 import {LOCATION_SERVICE} from './app/core/services/location.service';
 import {UiStateService} from './app/core/services/ui-state.service';
 

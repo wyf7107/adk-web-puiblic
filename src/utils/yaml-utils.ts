@@ -44,7 +44,7 @@ export class YamlUtils {
       description: agentNode.description || '',
       instruction: agentNode.instruction,
       sub_agents: subAgents,
-      tools: this.buildToolsConfig(agentNode.tools, allTabAgents)
+      tools: YamlUtils.buildToolsConfig(agentNode.tools, allTabAgents)
     }
 
     if (!agentNode.description || agentNode.description.trim() === '') {
@@ -62,7 +62,7 @@ export class YamlUtils {
     }
 
     // Add callbacks directly to root level if they exist
-    const callbacksConfig = this.buildCallbacksConfig(agentNode.callbacks);
+    const callbacksConfig = YamlUtils.buildCallbacksConfig(agentNode.callbacks);
     if (Object.keys(callbacksConfig).length > 0) {
       Object.assign(yamlConfig, callbacksConfig);
     }
@@ -70,12 +70,12 @@ export class YamlUtils {
     const yamlString = YAML.stringify(yamlConfig);
     const blob = new Blob([yamlString], { type: 'application/x-yaml' });
     const file = new File([blob], folderName, { type: 'application/x-yaml' });
-    
+
     formData.append('files', file);
 
     // Generate YAML files for sub-agents
     for (const subNode of agentNode.sub_agents ?? []) {
-      this.generateYamlFile(subNode, formData, appName, allTabAgents, processedAgents);
+      YamlUtils.generateYamlFile(subNode, formData, appName, allTabAgents, processedAgents);
     }
 
     // Generate YAML files for agent tools
@@ -83,14 +83,14 @@ export class YamlUtils {
       for (const tool of agentNode.tools) {
         if (tool.toolType === 'Agent Tool') {
           const actualAgentName = tool.toolAgentName || tool.name;
-          
+
           if (!actualAgentName || actualAgentName === 'undefined' || actualAgentName.trim() === '') {
             continue;
           }
-          
+
           const agentToolNode = allTabAgents.get(actualAgentName);
           if (agentToolNode) {
-            this.generateYamlFile(agentToolNode, formData, appName, allTabAgents, processedAgents);
+            YamlUtils.generateYamlFile(agentToolNode, formData, appName, allTabAgents, processedAgents);
           }
         }
       }

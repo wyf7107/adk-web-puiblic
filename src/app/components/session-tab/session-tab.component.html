@@ -34,7 +34,10 @@
         <div class="session-date">{{ getDate(session) }}</div>
       </div>
       @if ((sessionService.canEdit(userId, session) | async) === false) {
-      <mat-chip>{{ i18n.readonlyChip }}</mat-chip>
+      <div class="readonly-badge">
+        <mat-icon>visibility</mat-icon>
+        {{ i18n.readonlyChip }}
+      </div>
       }
     </div>
     }

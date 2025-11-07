@@ -81,3 +81,25 @@
   margin-right: auto;
   margin-top: 2em;
 }
+
+
+.readonly-badge {
+  color: var(--chat-readonly-badge-color);
+  background-color: var(--chat-readonly-badge-background-color);
+  border-radius: 4px;
+  padding: 1px 6px;
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  gap: 4px;
+  white-space: nowrap;
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    padding-top: 1px;
+    flex-shrink: 0;
+  }
+}

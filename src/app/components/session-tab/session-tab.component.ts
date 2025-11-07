@@ -18,6 +18,7 @@
 import {AsyncPipe, NgClass} from '@angular/common';
 import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
 import {MatChip} from '@angular/material/chips';
+import {MatIcon} from '@angular/material/icon';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {of, Subject} from 'rxjs';
 import {catchError, debounceTime, map, switchMap, tap} from 'rxjs/operators';
@@ -32,7 +33,7 @@ import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
   selector: 'app-session-tab',
   templateUrl: './session-tab.component.html',
   styleUrl: './session-tab.component.scss',
-  imports: [NgClass, AsyncPipe, MatChip, MatProgressBar],
+  imports: [NgClass, AsyncPipe, MatChip, MatProgressBar, MatIcon],
   standalone: true,
 })
 export class SessionTabComponent implements OnInit {

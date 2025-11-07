@@ -17,7 +17,9 @@
 
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {SimpleChange} from '@angular/core';
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
@@ -29,7 +31,6 @@ import {UI_STATE_SERVICE, UiStateService} from '../../core/services/interfaces/u
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
 import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
 import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
-import {initTestBed} from '../../testing/utils';
 import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 
@@ -58,6 +59,7 @@ describe('ChatPanelComponent', () => {
 
     initTestBed();  // required for 1p compat
 
+    initTestBed();  // required for 1p compat
     await TestBed
         .configureTestingModule({
           imports: [

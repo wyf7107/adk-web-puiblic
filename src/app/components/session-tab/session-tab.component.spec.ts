@@ -18,14 +18,17 @@
 import {ComponentFixture, TestBed,} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {ActivatedRoute} from '@angular/router';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, it}
 import {of} from 'rxjs';
 
+import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE, SessionService,} from '../../core/services/interfaces/session';
 import {UI_STATE_SERVICE,} from '../../core/services/interfaces/ui-state';
+import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
 import {MockSessionService} from '../../core/services/testing/mock-session.service';
 import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
-import {fakeAsync, initTestBed} from '../../testing/utils';
+import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 
 import {SessionTabComponent} from './session-tab.component';
 
@@ -33,13 +36,18 @@ describe('SessionTabComponent', () => {
   let component: SessionTabComponent;
   let fixture: ComponentFixture<SessionTabComponent>;
   let mockUiStateService: MockUiStateService;
+  let mockFeatureFlagService: MockFeatureFlagService;
   let sessionService: MockSessionService;
 
   beforeEach(async () => {
     sessionService = new MockSessionService();
     mockUiStateService = new MockUiStateService();
+    mockFeatureFlagService = new MockFeatureFlagService();
 
-    sessionService.listSessionsResponse.next([]);
+    sessionService.listSessionsResponse.next({
+      items: [],
+      nextPageToken: '',
+    });
     sessionService.canEditResponse.next(true);
 
     initTestBed();  // required for 1p compatibility
@@ -53,6 +61,14 @@ describe('SessionTabComponent', () => {
             },
             {provide: SESSION_SERVICE, useValue: sessionService},
             {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
+            {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
+            {
+              provide: ActivatedRoute,
+              useValue: {
+                snapshot: {queryParams: {}},
+                queryParams: of({}),
+              },
+            },
           ],
         })
         .compileComponents();
@@ -64,6 +80,74 @@ describe('SessionTabComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('sets filter from query param if session id is provided and filtering is enabled',
+     () => {
+       mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
+       (TestBed.inject(ActivatedRoute) as any).snapshot.queryParams = {
+         'session': '123'
+       };
+       const customFixture = TestBed.createComponent(SessionTabComponent);
+       customFixture.detectChanges();
+       expect(customFixture.componentInstance.filterControl.value).toBe('123');
+     });
+
+  describe('when session filtering is enabled', () => {
+    beforeEach(() => {
+      mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
+      sessionService.listSessions.calls.reset();
+    });
+
+    describe('when filter is changed', async () => {
+      beforeEach(fakeAsync(() => {
+        component.filterControl.setValue('abc');
+        tick(300);  // for filterControl.valueChanges debounceTime(300)
+      }));
+
+      it('should call listSessions with filter', fakeAsync(() => {
+        expect(sessionService.listSessions)
+            .toHaveBeenCalledWith(
+                component.userId,
+                component.appName,
+                {
+                  filter: 'abc',
+                  pageToken: '',
+                  pageSize: component.SESSIONS_PAGE_LIMIT,
+                },
+            );
+      }));
+    });
+
+    describe('when "Load more" is clicked', () => {
+      beforeEach(fakeAsync(() => {
+        sessionService.listSessionsResponse.next({
+          items: [{id: 'session1', lastUpdateTime: 1}],
+          nextPageToken: 'nextPage',
+        });
+        fixture = TestBed.createComponent(SessionTabComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+        tick(500);  // for setTimeout in ngOnInit
+        expect(component.pageToken).toBe('nextPage');
+        sessionService.listSessions.calls.reset();
+
+        component.loadMoreSessions();
+      }));
+
+      it('should call listSessions with pageToken', fakeAsync(() => {
+        expect(sessionService.listSessions)
+            .toHaveBeenCalledWith(
+                component.userId,
+                component.appName,
+                {
+                  filter: undefined,
+                  pageToken: 'nextPage',
+                  pageSize: component.SESSIONS_PAGE_LIMIT,
+                },
+            );
+      }));
+    });
   });
 
   describe('when getting a session', () => {

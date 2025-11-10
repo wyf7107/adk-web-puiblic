@@ -107,6 +107,10 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
     return of(false);
   }
 
+  isSessionFilteringEnabled(): Observable<boolean> {
+    return of(false);
+  }
+
   isSessionReloadOnNewMessageEnabled(): Observable<boolean> {
     return of(false);
   }

@@ -605,7 +605,7 @@ button {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #131314;
+  background-color: var(--builder-container-background-color);
 }
 
 .builder-exit-button {
@@ -616,8 +616,8 @@ button {
 }
 
 .builder-mode-action-button {
-  background-color: rgba(0, 0, 0, 0.7);
-  color: #c4c7c5;
+  background-color: var(--builder-secondary-background-color);
+  color: var(--builder-text-tertiary-color);
   border-radius: 50%;
   transition: all 0.2s ease;
   margin-right: 0px !important;
@@ -628,7 +628,7 @@ button {
   }
 
   &.active {
-    background-color: rgba(138, 180, 248, 0.8);
+    background-color: var(--builder-button-primary-background-color);
     color: white;
   }
 
@@ -651,7 +651,7 @@ app-canvas {
   display: flex;
   width: 100%;
   height: 100%;
-  background-color: #131314;
+  background-color: var(--builder-container-background-color);
 }
 
 .build-left-panel,
@@ -659,21 +659,21 @@ app-canvas {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #1b1b1b;
-  border: 1px solid #444746;
+  background-color: var(--builder-tertiary-background-color);
+  border: 1px solid var(--builder-border-color);
   margin: 10px;
   border-radius: 8px;
 }
 
 .build-panel-header {
-  background-color: #2d2d2d;
+  background-color: var(--builder-secondary-background-color);
   padding: 16px 20px;
-  border-bottom: 1px solid #444746;
+  border-bottom: 1px solid var(--builder-border-color);
   border-radius: 8px 8px 0 0;
 
   h3 {
     margin: 0;
-    color: #e8eaed;
+    color: var(--builder-text-primary-color);
     font-size: 16px;
     font-weight: 500;
     font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
@@ -683,7 +683,7 @@ app-canvas {
 .build-panel-content {
   flex: 1;
   padding: 20px;
-  color: #9aa0a6;
+  color: var(--builder-text-secondary-color);
   overflow-y: auto;
 
   p {
@@ -695,7 +695,7 @@ app-canvas {
 
 .app-name-option,
 .app-select {
-  color: #9aa0a6;
+  color: var(--builder-text-secondary-color);
   font-family: 'Google Sans Mono', monospace;
   font-style: normal;
   font-weight: 400;

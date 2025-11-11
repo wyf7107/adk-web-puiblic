@@ -452,6 +452,9 @@ html.dark-theme {
   --builder-item-hover-color: rgba(138, 180, 248, 0.1);
   --builder-chip-background-color: rgba(138, 180, 248, 0.2);
   --builder-accent-color: #00bbea;
+  --builder-tool-item-background-color: rgba(255, 255, 255, 0.05);
+  --builder-tool-item-border-color: rgba(255, 255, 255, 0.1);
+  --builder-tool-item-hover-background-color: rgba(255, 255, 255, 0.1);
 }
 
 // Light theme progress spinner and custom properties
@@ -734,6 +737,9 @@ html.light-theme {
   --builder-item-hover-color: rgba(48, 95, 157, 0.1);
   --builder-chip-background-color: rgba(48, 95, 157, 0.15);
   --builder-accent-color: #305f9d;
+  --builder-tool-item-background-color: #f6f3f3;
+  --builder-tool-item-border-color: #c8c6c6;
+  --builder-tool-item-hover-background-color: #dcd9d9;
 }
 
 // Form field overrides for dark theme

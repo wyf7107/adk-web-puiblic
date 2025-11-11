@@ -67,6 +67,7 @@ import {getMediaTypeFromMimetype, MediaType} from '../artifact-tab/artifact-tab.
 import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 import {CanvasComponent} from '../canvas/canvas.component';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
+import {ThemeToggle} from '../theme-toggle/theme-toggle';
 import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
@@ -144,6 +145,7 @@ const BIDI_STREAMING_RESTART_WARNING =
     SidePanelComponent,
     CanvasComponent,
     BuilderTabsComponent,
+    ThemeToggle,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {

@@ -21,3 +21,22 @@
     opacity: 0.8;
   }
 }
+
+// Builder mode styling - when used with builder-mode-action-button class
+:host.builder-mode-action-button .theme-toggle-button {
+  background-color: var(--builder-secondary-background-color);
+  color: var(--builder-text-tertiary-color);
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  margin-right: 0px !important;
+
+  &:hover {
+    background-color: var(--builder-hover-background-color);
+    color: var(--builder-text-primary-color);
+    opacity: 1;
+  }
+
+  mat-icon {
+    font-size: 20px;
+  }
+}

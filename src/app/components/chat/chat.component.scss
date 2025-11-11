@@ -32,12 +32,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: #89b4f8,
+  @include mat.button-overrides((filled-container-color: #89b4f8,
       filled-label-text-color: black,
-    )
-  );
+    ));
 
   .mat-icon {
     width: 36px;
@@ -71,12 +68,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: #89b4f8,
+  @include mat.button-overrides((filled-container-color: #89b4f8,
       filled-label-text-color: black,
-    )
-  );
+    ));
 
   .mat-icon {
     width: 36px;
@@ -162,12 +156,8 @@
 }
 
 .function-event-button-highlight {
-  background-color: var(
-    --chat-function-event-button-highlight-background-color
-  );
-  border-color: var(
-    --chat-function-event-button-highlight-border-color
-  ) !important;
+  background-color: var(--chat-function-event-button-highlight-background-color);
+  border-color: var(--chat-function-event-button-highlight-border-color) !important;
   color: var(--chat-function-event-button-highlight-color) !important;
 }
 
@@ -198,11 +188,8 @@
 
 .bot-message:focus-within {
   .message-card {
-    background-color: var(
-      --chat-bot-message-focus-within-message-card-background-color
-    );
-    border: 1px solid
-      var(--chat-bot-message-focus-within-message-card-border-color);
+    background-color: var(--chat-bot-message-focus-within-message-card-background-color);
+    border: 1px solid var(--chat-bot-message-focus-within-message-card-border-color);
   }
 }
 
@@ -446,13 +433,10 @@ button {
 }
 
 .app-select-container {
-  @include mat.select-overrides(
-    (
-      placeholder-text-color: #8ab4f8,
+  @include mat.select-overrides((placeholder-text-color: #8ab4f8,
       enabled-trigger-text-color: #8ab4f8,
       enabled-arrow-color: #8ab4f8,
-    )
-  );
+    ));
 }
 
 .adk-checkbox {
@@ -529,27 +513,25 @@ button {
 }
 
 .toolbar-sse-toggle {
-  @include mat.slide-toggle-overrides(
-    (
-      label-text-size: 14px,
+  @include mat.slide-toggle-overrides((label-text-size: 14px,
       label-text-color: var(--chat-toolbar-sse-toggle-label-text-color),
+      unselected-track-color: var(--chat-toolbar-sse-toggle-unselected-track-color),
+      unselected-focus-track-color: var(--chat-toolbar-sse-toggle-unselected-track-color),
+      unselected-hover-track-color: var(--chat-toolbar-sse-toggle-unselected-track-color),
+      unselected-handle-color: var(--chat-toolbar-sse-toggle-unselected-handle-color),
+      unselected-focus-handle-color: var(--chat-toolbar-sse-toggle-unselected-handle-color),
+      unselected-hover-handle-color: var(--chat-toolbar-sse-toggle-unselected-handle-color),
       selected-track-color: var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-focus-track-color:
-        var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-hover-track-color:
-        var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-handle-color:
-        var(--chat-toolbar-sse-toggle-selected-handle-color),
-      selected-focus-handle-color:
-        var(--chat-toolbar-sse-toggle-selected-handle-color),
-      selected-hover-handle-color:
-        var(--chat-toolbar-sse-toggle-selected-handle-color),
+      selected-focus-track-color: var(--chat-toolbar-sse-toggle-selected-track-color),
+      selected-hover-track-color: var(--chat-toolbar-sse-toggle-selected-track-color),
+      selected-handle-color: var(--chat-toolbar-sse-toggle-selected-handle-color),
+      selected-focus-handle-color: var(--chat-toolbar-sse-toggle-selected-handle-color),
+      selected-hover-handle-color: var(--chat-toolbar-sse-toggle-selected-handle-color),
       track-height: 24px,
       track-width: 46px,
       track-outline-color: var(--chat-toolbar-sse-toggle-track-outline-color),
       with-icon-handle-size: 20px,
-    )
-  );
+    ));
 }
 
 :host ::ng-deep pre {
@@ -571,6 +553,7 @@ button {
   line-height: 16px;
   gap: 4px;
   white-space: nowrap;
+
   mat-icon {
     font-size: 14px;
     width: 14px;

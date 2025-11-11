@@ -269,7 +269,9 @@ html.dark-theme {
   --chat-toolbar-session-id-color: #9aa0a6;
   --chat-toolbar-icon-color: #c4c7c5;
   --chat-toolbar-new-session-color: #9aa0a6;
-  --chat-toolbar-sse-toggle-label-text-color: #9aa0a6;
+  --chat-toolbar-sse-toggle-label-text-color: #e8eaed;
+  --chat-toolbar-sse-toggle-unselected-track-color: #5f6368;
+  --chat-toolbar-sse-toggle-unselected-handle-color: #9aa0a6;
   --chat-toolbar-sse-toggle-selected-track-color: #8ab4f9;
   --chat-toolbar-sse-toggle-selected-handle-color: #1b73e8;
   --chat-toolbar-sse-toggle-track-outline-color: #1b73e8;
@@ -554,7 +556,9 @@ html.light-theme {
   --chat-toolbar-session-id-color: #5f5e5e;
   --chat-toolbar-icon-color: #5f5e5e;
   --chat-toolbar-new-session-color: #5f5e5e;
-  --chat-toolbar-sse-toggle-label-text-color: #5f5e5e;
+  --chat-toolbar-sse-toggle-label-text-color: #202124;
+  --chat-toolbar-sse-toggle-unselected-track-color: #c8c6c6;
+  --chat-toolbar-sse-toggle-unselected-handle-color: #5f5e5e;
   --chat-toolbar-sse-toggle-selected-track-color: #82adf0;
   --chat-toolbar-sse-toggle-selected-handle-color: #305f9d;
   --chat-toolbar-sse-toggle-track-outline-color: #305f9d;

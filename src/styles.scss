@@ -47,6 +47,55 @@ markdown p {
   margin-block-end: 0.5em;
 }
 
+// Ensure menus and overlays appear above all other content
+.cdk-overlay-container {
+  z-index: 9999 !important;
+}
+
+.mat-mdc-menu-panel {
+  z-index: 10000 !important;
+}
+
+// Menu styling for both themes
+.mat-mdc-menu-panel,
+.mat-mdc-menu-panel .mat-mdc-menu-content {
+  background-color: var(--mdc-dialog-container-color) !important;
+}
+
+.mat-mdc-menu-item,
+.mat-mdc-menu-item .mdc-list-item__primary-text {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+.mat-mdc-menu-item:hover,
+.mat-mdc-menu-item:focus {
+  background-color: var(--builder-tool-item-hover-background-color) !important;
+}
+
+.mat-mdc-menu-item .mat-icon {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+// Snackbar (notification/warning) styling for both themes
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: var(--mdc-dialog-container-color) !important;
+  --mdc-snackbar-supporting-text-color: var(--mdc-dialog-supporting-text-color) !important;
+  --mat-snack-bar-button-color: var(--builder-text-link-color) !important;
+}
+
+.mdc-snackbar__surface {
+  background-color: var(--mdc-dialog-container-color) !important;
+}
+
+.mdc-snackbar__label,
+.mat-mdc-snack-bar-label {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+.mat-mdc-snack-bar-action {
+  color: var(--builder-text-link-color) !important;
+}
+
 // Dark theme custom properties
 html.dark-theme {
   --mat-sys-primary: black;

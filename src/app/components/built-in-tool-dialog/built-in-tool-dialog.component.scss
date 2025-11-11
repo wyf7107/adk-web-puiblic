@@ -16,7 +16,7 @@
 @use '@angular/material' as mat;
 
 .dialog-title {
-  color: white !important;
+  color: var(--mdc-dialog-subhead-color) !important;
   font-family: 'Google Sans';
   font-size: 24px;
 }
@@ -37,7 +37,7 @@
   font-family: 'Google Sans';
   font-size: 16px;
   font-weight: 500;
-  color: #e8eaed;
+  color: var(--mdc-dialog-supporting-text-color);
   margin: 0 0 12px 0;
   padding-left: 8px;
 }
@@ -79,7 +79,7 @@
   .tool-name {
     font-family: 'Google Sans';
     font-size: 14px;
-    color: #e8eaed;
+    color: var(--mdc-dialog-supporting-text-color) !important;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -94,6 +94,6 @@
   font-family: 'Google Sans';
   font-size: 16px;
   font-weight: 500;
-  color: #e8eaed;
+  color: var(--mdc-dialog-supporting-text-color);
   margin: 0 0 16px 0;
 }

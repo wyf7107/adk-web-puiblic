@@ -49,6 +49,7 @@ describe('ThemeService', () => {
 
   it('should persist theme to localStorage', () => {
     service.setTheme('light');
+    TestBed.flushEffects();
     expect(localStorage.getItem('adk-theme-preference')).toBe('light');
   });
 });

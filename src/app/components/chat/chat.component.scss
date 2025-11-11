@@ -596,27 +596,46 @@ button {
   top: 20px;
   right: 20px;
   z-index: 1000;
+  display: flex;
+  gap: 8px;
 }
 
 .builder-mode-action-button {
-  background-color: var(--builder-secondary-background-color);
-  color: var(--builder-text-tertiary-color);
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  margin-right: 0px !important;
+  background-color: var(--builder-secondary-background-color) !important;
+  color: var(--builder-text-tertiary-color) !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border: 1px solid var(--builder-tool-item-border-color) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
   &:hover {
-    background-color: rgba(234, 67, 53, 0.8);
-    color: white;
+    background-color: var(--builder-tool-item-hover-background-color) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
   }
 
   &.active {
-    background-color: var(--builder-button-primary-background-color);
-    color: white;
+    background-color: var(--builder-button-primary-background-color) !important;
+    color: white !important;
+    border-color: var(--builder-button-primary-background-color) !important;
+  }
+
+  .mat-mdc-button-touch-target {
+    display: none !important;
   }
 
   mat-icon {
     font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 

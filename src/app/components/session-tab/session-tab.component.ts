@@ -21,9 +21,8 @@ import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatChip} from '@angular/material/chips';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
+import {MatIcon, MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
-import {MatIcon} from '@angular/material/icon';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {ActivatedRoute} from '@angular/router';
 import {BehaviorSubject, combineLatest, of, Subject} from 'rxjs';
@@ -45,7 +44,8 @@ import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
     NgClass,
     AsyncPipe,
     MatChip,
-    MatProgressBar, MatIcon,
+    MatProgressBar,
+    MatIcon,
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
@@ -84,6 +84,7 @@ export class SessionTabComponent implements OnInit {
   constructor() {
     this.filterControl.valueChanges.pipe(debounceTime(300)).subscribe(() => {
       this.pageToken = '';
+      this.sessionList = [];
       this.refreshSessionsSubject.next();
     });
 
@@ -111,7 +112,7 @@ export class SessionTabComponent implements OnInit {
                   .pipe(catchError(() => of({items: [], nextPageToken: ''})));
             }),
             tap(({items, nextPageToken}) => {
-              this.sessionList = items.sort(
+              this.sessionList = [...this.sessionList, ...items].sort(
                   (a: any, b: any) =>
                       Number(b.lastUpdateTime) - Number(a.lastUpdateTime),
               );
@@ -169,7 +170,6 @@ export class SessionTabComponent implements OnInit {
               this.sessionReloaded.emit(session);
               this.changeDetectorRef.markForCheck();
             }),
-            debounceTime(300),
             )
         .subscribe();
   }

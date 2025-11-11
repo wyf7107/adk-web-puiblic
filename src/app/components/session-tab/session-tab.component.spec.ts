@@ -17,6 +17,7 @@
 
 import {ComponentFixture, TestBed,} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {ActivatedRoute} from '@angular/router';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, it}
@@ -31,6 +32,11 @@ import {MockUiStateService} from '../../core/services/testing/mock-ui-state.serv
 import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 
 import {SessionTabComponent} from './session-tab.component';
+
+const CSS_SELECTORS = {
+  SESSION_LIST: By.css('.session-tab-container'),
+  PROGRESS_BAR: By.css('mat-progress-bar'),
+};
 
 describe('SessionTabComponent', () => {
   let component: SessionTabComponent;
@@ -82,16 +88,19 @@ describe('SessionTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('sets filter from query param if session id is provided and filtering is enabled',
-     () => {
-       mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
-       (TestBed.inject(ActivatedRoute) as any).snapshot.queryParams = {
-         'session': '123'
-       };
-       const customFixture = TestBed.createComponent(SessionTabComponent);
-       customFixture.detectChanges();
-       expect(customFixture.componentInstance.filterControl.value).toBe('123');
-     });
+  describe('on initialization', () => {
+    it('sets filter from query param if session id is provided and filtering is enabled',
+       () => {
+         mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
+         (TestBed.inject(ActivatedRoute) as any).snapshot.queryParams = {
+           'session': '123'
+         };
+         const customFixture = TestBed.createComponent(SessionTabComponent);
+         customFixture.detectChanges();
+         expect(customFixture.componentInstance.filterControl.value)
+             .toBe('123');
+       });
+  });
 
   describe('when session filtering is enabled', () => {
     beforeEach(() => {
@@ -105,18 +114,66 @@ describe('SessionTabComponent', () => {
         tick(300);  // for filterControl.valueChanges debounceTime(300)
       }));
 
+
+      describe('when list is being loaded', () => {
+        beforeEach(fakeAsync(() => {
+          mockUiStateService.isSessionListLoadingResponse.next(true);
+          fixture.detectChanges();
+        }));
+
+        it('should display progress bar', () => {
+          expect(fixture.debugElement.query(CSS_SELECTORS.PROGRESS_BAR))
+              .toBeTruthy();
+        });
+
+        it('should hide session list', fakeAsync(() => {
+                      expect(fixture.debugElement.query(
+                                 CSS_SELECTORS.SESSION_LIST))
+                          .toBeFalsy();
+                    }));
+      });
+
       it('should call listSessions with filter', fakeAsync(() => {
-        expect(sessionService.listSessions)
-            .toHaveBeenCalledWith(
-                component.userId,
-                component.appName,
-                {
-                  filter: 'abc',
-                  pageToken: '',
-                  pageSize: component.SESSIONS_PAGE_LIMIT,
-                },
-            );
-      }));
+                    expect(sessionService.listSessions)
+                        .toHaveBeenCalledWith(
+                            component.userId,
+                            component.appName,
+                            {
+                              filter: 'abc',
+                              pageToken: '',
+                              pageSize: component.SESSIONS_PAGE_LIMIT,
+                            },
+                        );
+                  }));
+      describe('when list is loaded', () => {
+        beforeEach(fakeAsync(() => {
+          mockUiStateService.isSessionListLoadingResponse.next(false);
+          sessionService.listSessionsResponse.next({
+            items: [
+              {id: 'session2', lastUpdateTime: 2}
+            ],
+            nextPageToken: '',
+          });
+          fixture.detectChanges();
+        }));
+
+        it('should show session list', fakeAsync(() => {
+                      expect(fixture.debugElement.query(
+                                 CSS_SELECTORS.SESSION_LIST))
+                          .toBeTruthy();
+                    }));
+
+        it(
+            'should show the filtered list items only', fakeAsync(() => {
+              expect(fixture.debugElement.query(CSS_SELECTORS.SESSION_LIST)
+                         .children.length)
+                  .toBe(1);
+              expect(fixture.debugElement.query(CSS_SELECTORS.SESSION_LIST)
+                         .children[0]
+                         .nativeElement.innerText)
+                  .toContain('session2');
+            }));
+      });
     });
 
     describe('when "Load more" is clicked', () => {
@@ -136,17 +193,54 @@ describe('SessionTabComponent', () => {
       }));
 
       it('should call listSessions with pageToken', fakeAsync(() => {
-        expect(sessionService.listSessions)
-            .toHaveBeenCalledWith(
-                component.userId,
-                component.appName,
-                {
-                  filter: undefined,
-                  pageToken: 'nextPage',
-                  pageSize: component.SESSIONS_PAGE_LIMIT,
-                },
-            );
-      }));
+                    expect(sessionService.listSessions)
+                        .toHaveBeenCalledWith(
+                            component.userId,
+                            component.appName,
+                            {
+                              filter: undefined,
+                              pageToken: 'nextPage',
+                              pageSize: component.SESSIONS_PAGE_LIMIT,
+                            },
+                        );
+                  }));
+
+      describe('when list is being loaded', () => {
+        beforeEach(fakeAsync(() => {
+          mockUiStateService.isSessionListLoadingResponse.next(true);
+          fixture.detectChanges();
+        }));
+
+        it('should display progress bar', () => {
+          expect(fixture.debugElement.query(CSS_SELECTORS.PROGRESS_BAR))
+              .toBeTruthy();
+        });
+
+        describe('when list is loaded', () => {
+          beforeEach(fakeAsync(() => {
+            mockUiStateService.isSessionListLoadingResponse.next(false);
+            fixture.detectChanges();
+            ;
+          }));
+
+          it(
+              'should hide progress bar', fakeAsync(() => {
+                expect(fixture.debugElement.query(CSS_SELECTORS.PROGRESS_BAR))
+                    .toBeFalsy();
+              }));
+
+          it('should show session list', fakeAsync(() => {
+                        expect(fixture.debugElement.query(
+                                   CSS_SELECTORS.SESSION_LIST))
+                            .toBeTruthy();
+                      }));
+          it('should extend list with new sessions', () => {
+            expect(fixture.debugElement.query(CSS_SELECTORS.SESSION_LIST)
+                       .children.length)
+                .toBe(2);
+          });
+        });
+      });
     });
   });
 

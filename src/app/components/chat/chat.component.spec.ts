@@ -17,7 +17,7 @@
 
 import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {Component} from '@angular/core';
+import {Component, ErrorHandler} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -30,6 +30,7 @@ import {BehaviorSubject, NEVER, of, ReplaySubject, Subject, throwError} from 'rx
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {AGENT_SERVICE, AgentService} from '../../core/services/interfaces/agent';
+import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE, ArtifactService,} from '../../core/services/interfaces/artifact';
 import {DOWNLOAD_SERVICE, DownloadService,} from '../../core/services/interfaces/download';
 import {EVAL_SERVICE, EvalService} from '../../core/services/interfaces/eval';
@@ -108,9 +109,6 @@ const EVENT_1_ID = 'event1';
 const OK_BUTTON_TEXT = 'OK';
 const APP_QUERY_PARAM = 'app';
 const SESSION_QUERY_PARAM = 'session';
-const SSE_ERROR_RESPONSE = '{"error": "SSE error"}';
-const CALL_FUNCTION_USER_INPUT = 'call a function';
-const FUNC1_NAME = 'func1';
 const STATE_KEY = 'key';
 const STATE_VALUE = 'value';
 const TEST_MESSAGE = 'test message';
@@ -142,6 +140,8 @@ describe('ChatComponent', () => {
   let mockLocation: jasmine.SpyObj<Location>;
   let graphService: MockGraphService;
   let mockUiStateService: MockUiStateService;
+  let mockErrorHandler: jasmine.SpyObj<ErrorHandler>;
+  let mockAgentBuilderService: jasmine.SpyObj<any>;
 
   beforeEach(async () => {
     mockSessionService = new MockSessionService();
@@ -159,6 +159,7 @@ describe('ChatComponent', () => {
     mockSafeValuesService = new MockSafeValuesService();
     mockLocalFileService = new MockLocalFileService();
     mockUiStateService = new MockUiStateService();
+    mockErrorHandler = jasmine.createSpyObj('ErrorHandler', ['handleError']);
     mockSessionService.canEdit =
         jasmine.createSpy('canEdit').and.returnValue(of(true));
     mockStringToColorService.stc.and.returnValue('#8c8526ff');
@@ -181,6 +182,7 @@ describe('ChatComponent', () => {
       events: of(new NavigationEnd(1, '', '')),
     });
     mockLocation = jasmine.createSpyObj('Location', ['replaceState']);
+    mockAgentBuilderService = jasmine.createSpyObj('AgentBuilderService', ['clear', 'setLoadedAgentData']);
 
     mockActivatedRoute = {
       snapshot: {
@@ -197,6 +199,8 @@ describe('ChatComponent', () => {
       return appName;
     });
     mockAgentService.getLoadingStateResponse.next(false);
+    mockAgentService.getAgentBuilderResponse.next('');
+    mockAgentService.getAgentBuilderTmpResponse.next('');
     mockRouter.createUrlTree.and.returnValue({
       toString: () => '/?session=session-id',
     } as any);
@@ -243,7 +247,9 @@ describe('ChatComponent', () => {
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: LOCATION_SERVICE, useValue: mockLocation},
             {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
-            {provide: UI_STATE_SERVICE, useValue: mockUiStateService}
+            {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
+            {provide: ErrorHandler, useValue: mockErrorHandler},
+            {provide: AGENT_BUILDER_SERVICE, useValue: mockAgentBuilderService},
           ],
         })
         .compileComponents();
@@ -251,6 +257,7 @@ describe('ChatComponent', () => {
     fixture = TestBed.createComponent(ChatComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   describe('Component Initialization', () => {
@@ -628,6 +635,19 @@ describe('ChatComponent', () => {
                 expect(component.chatPanel()?.canEditSession()).toBe(true);
               });
             });
+
+            describe('when canEdit throws an error', () => {
+              beforeEach(() => {
+                mockSessionService.canEditResponse.error(
+                    new Error('error'));
+                mockEventService.getTraceResponse.next([]);
+                component['updateWithSelectedSession'](mockSession as any);
+                fixture.detectChanges();
+              });
+              it('should set canEditSession to true', () => {
+                expect(component.chatPanel()?.canEditSession()).toBe(true);
+              });
+            });
           });
         });
   });
@@ -654,6 +674,7 @@ describe('ChatComponent', () => {
           expect(component.showSidePanel).toBe(false);
         });
       });
+
       describe('when panel is closed', () => {
         beforeEach(() => {
           component.showSidePanel = false;
@@ -883,6 +904,26 @@ describe('ChatComponent', () => {
                   .toEqual({name: 'foo', args: {}});
               expect(botMessages[2].text).toBe('World!');
             });
+      });
+
+      describe('when getTrace fails in sendMessage', () => {
+        beforeEach(async () => {
+          mockEventService.getTraceResponse.error(new Error('trace error'));
+          component.messages.set([]);
+          component.userInput = 'test message';
+          await component.sendMessage(
+              new KeyboardEvent('keydown', {key: 'Enter'}));
+          mockAgentService.runSseResponse.complete();
+          fixture.detectChanges();
+        });
+
+        it('sets trace data to empty array', () => {
+          expect(component.traceData).toEqual([]);
+        });
+
+        it('should not call error handler', () => {
+          expect(mockErrorHandler.handleError).not.toHaveBeenCalled();
+        });
       });
     });
 

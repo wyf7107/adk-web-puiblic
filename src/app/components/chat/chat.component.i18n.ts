@@ -44,7 +44,7 @@ export const CHAT_MESSAGES = {
   noAgentsFoundWarning: 'Warning: No agents found in current folder.',
   cannotEditSessionMessage:
       'Chat is disabled to prevent changes to the end user\'s session.',
-  readOnlyBadgeLabel: 'Read only',
+  readOnlyBadgeLabel: 'Read-only',
 };
 
 /**

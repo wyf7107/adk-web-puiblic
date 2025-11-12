@@ -82,7 +82,8 @@ Go to `localhost:4200` and start developing!
 
 ### Evaluations
 
-<img width="2523" height="1170" alt="adk-web-eval" src="https://github.com/user-attachments/assets/998f2d4d-bde7-462c-ad6e-19972dbcf991" />
+
+<img width="2536" height="777" alt="adk-web-eval-2" src="https://github.com/user-attachments/assets/fb5f97e7-8bcc-4512-8b8e-a1123ee78c8e" />
 
 ### Agent builder & assistant
 

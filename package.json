@@ -13,151 +13,43 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/animations": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/cdk": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/common": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/compiler": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/core": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/forms": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/material": {
-      "version": "19.1.4",
-      "peer": true
-    },
-    "@angular/platform-browser": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/platform-browser-dynamic": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@angular/router": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@codemirror/lang-python": {
-      "version": "^6.2.1",
-      "peer": true
-    },
-    "@codemirror/lint": {
-      "version": "^6.8.5",
-      "peer": true
-    },
-    "@viz-js/viz": {
-      "version": "^3.12.0",
-      "peer": true
-    },
-    "codemirror": {
-      "version": "^6.0.2",
-      "peer": true
-    },
-    "ngx-json-viewer": {
-      "version": "^3.2.1",
-      "peer": true
-    },
-    "ngx-markdown": {
-      "version": "^19.1.1",
-      "peer": true
-    },
-    "ngx-vflow": {
-      "version": "^1.11.1",
-      "peer": true
-    },
-    "rxjs": {
-      "version": "~7.8.0",
-      "peer": true
-    },
-    "safevalues": {
-      "version": "^1.2.0",
-      "peer": true
-    },
-    "string-to-color": {
-      "version": "2.2.2",
-      "peer": true
-    },
-    "tslib": {
-      "version": "^2.3.0",
-      "peer": true
-    },
-    "uuidv7": {
-      "version": "^1.0.2",
-      "peer": true
-    },
-    "vanilla-jsoneditor": {
-      "version": "^3.6.0",
-      "peer": true
-    },
-    "yaml": {
-      "version": "^2.8.0",
-      "peer": true
-    },
-    "zone.js": {
-      "version": "~0.15.0",
-      "peer": true
-    }
+    "@angular/animations": "^19.1.0",
+    "@angular/cdk": "^19.1.0",
+    "@angular/common": "^19.1.0",
+    "@angular/compiler": "^19.1.0",
+    "@angular/core": "^19.1.0",
+    "@angular/forms": "^19.1.0",
+    "@angular/material": "19.1.4",
+    "@angular/platform-browser": "^19.1.0",
+    "@angular/platform-browser-dynamic": "^19.1.0",
+    "@angular/router": "^19.1.0",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/lint": "^6.8.5",
+    "@viz-js/viz": "^3.12.0",
+    "codemirror": "^6.0.2",
+    "ngx-json-viewer": "^3.2.1",
+    "ngx-markdown": "^19.1.1",
+    "ngx-vflow": "^1.11.1",
+    "rxjs": "~7.8.0",
+    "safevalues": "^1.2.0",
+    "string-to-color": "2.2.2",
+    "tslib": "^2.3.0",
+    "uuidv7": "^1.0.2",
+    "vanilla-jsoneditor": "^3.6.0",
+    "yaml": "^2.8.0",
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": {
-      "version": "^19.1.7",
-      "peer": true
-    },
-    "@angular/cli": {
-      "version": "^19.1.7",
-      "peer": true
-    },
-    "@angular/compiler-cli": {
-      "version": "^19.1.0",
-      "peer": true
-    },
-    "@types/jasmine": {
-      "version": "~5.1.0",
-      "peer": true
-    },
-    "jasmine-core": {
-      "version": "~5.5.0",
-      "peer": true
-    },
-    "karma": {
-      "version": "~6.4.0",
-      "peer": true
-    },
-    "karma-chrome-launcher": {
-      "version": "~3.2.0",
-      "peer": true
-    },
-    "karma-coverage": {
-      "version": "~2.2.0",
-      "peer": true
-    },
-    "karma-jasmine": {
-      "version": "~5.1.0",
-      "peer": true
-    },
-    "karma-jasmine-html-reporter": {
-      "version": "~2.1.0",
-      "peer": true
-    },
-    "typescript": {
-      "version": "~5.7.2",
-      "peer": true
-    }
+    "@angular-devkit/build-angular": "^19.1.7",
+    "@angular/cli": "^19.1.7",
+    "@angular/compiler-cli": "^19.1.0",
+    "@types/jasmine": "~5.1.0",
+    "jasmine-core": "~5.5.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~5.7.2"
   }
 }

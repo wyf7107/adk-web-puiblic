@@ -49,4 +49,5 @@ export declare abstract class FeatureFlagService {
   abstract isSessionsTabReorderingEnabled(): Observable<boolean>;
   abstract isSessionFilteringEnabled(): Observable<boolean>;
   abstract isSessionReloadOnNewMessageEnabled(): Observable<boolean>;
+  abstract isUserIdOnToolbarEnabled(): Observable<boolean>;
 }

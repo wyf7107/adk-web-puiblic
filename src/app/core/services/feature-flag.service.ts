@@ -114,4 +114,8 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
   isSessionReloadOnNewMessageEnabled(): Observable<boolean> {
     return of(false);
   }
+
+  isUserIdOnToolbarEnabled(): Observable<boolean> {
+    return of(true);
+  }
 }

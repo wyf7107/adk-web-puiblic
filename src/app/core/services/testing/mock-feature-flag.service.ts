@@ -98,4 +98,8 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isSessionReloadOnNewMessageEnabled =
       jasmine.createSpy('isSessionReloadOnNewMessageEnabled')
           .and.returnValue(this.isSessionReloadOnNewMessageEnabledResponse);
+  isUserIdOnToolbarEnabledResponse = new ReplaySubject<boolean>(1);
+  isUserIdOnToolbarEnabled =
+      jasmine.createSpy('isUserIdOnToolbarEnabled')
+          .and.returnValue(this.isUserIdOnToolbarEnabledResponse);
 }

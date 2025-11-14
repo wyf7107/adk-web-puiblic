@@ -126,11 +126,11 @@ describe('SessionTabComponent', () => {
               .toBeTruthy();
         });
 
-        it('should hide session list', fakeAsync(() => {
-                      expect(fixture.debugElement.query(
-                                 CSS_SELECTORS.SESSION_LIST))
-                          .toBeFalsy();
-                    }));
+        it(
+            'should hide session list', fakeAsync(() => {
+              expect(fixture.debugElement.query(CSS_SELECTORS.SESSION_LIST))
+                  .toBeFalsy();
+            }));
       });
 
       it('should call listSessions with filter', fakeAsync(() => {
@@ -149,19 +149,17 @@ describe('SessionTabComponent', () => {
         beforeEach(fakeAsync(() => {
           mockUiStateService.isSessionListLoadingResponse.next(false);
           sessionService.listSessionsResponse.next({
-            items: [
-              {id: 'session2', lastUpdateTime: 2}
-            ],
+            items: [{id: 'session2', lastUpdateTime: 2}],
             nextPageToken: '',
           });
           fixture.detectChanges();
         }));
 
-        it('should show session list', fakeAsync(() => {
-                      expect(fixture.debugElement.query(
-                                 CSS_SELECTORS.SESSION_LIST))
-                          .toBeTruthy();
-                    }));
+        it(
+            'should show session list', fakeAsync(() => {
+              expect(fixture.debugElement.query(CSS_SELECTORS.SESSION_LIST))
+                  .toBeTruthy();
+            }));
 
         it(
             'should show the filtered list items only', fakeAsync(() => {
@@ -179,7 +177,11 @@ describe('SessionTabComponent', () => {
     describe('when "Load more" is clicked', () => {
       beforeEach(fakeAsync(() => {
         sessionService.listSessionsResponse.next({
-          items: [{id: 'session1', lastUpdateTime: 1}],
+          items: [
+            {id: 'session1', lastUpdateTime: 1},
+            {id: 'session1', lastUpdateTime: 1},
+            {id: 'session3', lastUpdateTime: 1}
+          ],
           nextPageToken: 'nextPage',
         });
         fixture = TestBed.createComponent(SessionTabComponent);
@@ -229,11 +231,11 @@ describe('SessionTabComponent', () => {
                     .toBeFalsy();
               }));
 
-          it('should show session list', fakeAsync(() => {
-                        expect(fixture.debugElement.query(
-                                   CSS_SELECTORS.SESSION_LIST))
-                            .toBeTruthy();
-                      }));
+          it(
+              'should show session list', fakeAsync(() => {
+                expect(fixture.debugElement.query(CSS_SELECTORS.SESSION_LIST))
+                    .toBeTruthy();
+              }));
           it('should extend list with new sessions', () => {
             expect(fixture.debugElement.query(CSS_SELECTORS.SESSION_LIST)
                        .children.length)

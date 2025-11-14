@@ -112,9 +112,16 @@ export class SessionTabComponent implements OnInit {
                   .pipe(catchError(() => of({items: [], nextPageToken: ''})));
             }),
             tap(({items, nextPageToken}) => {
-              this.sessionList = [...this.sessionList, ...items].sort(
-                  (a: any, b: any) =>
-                      Number(b.lastUpdateTime) - Number(a.lastUpdateTime),
+              this.sessionList = Array.from(
+                new Map(
+                  [...this.sessionList, ...items].map((session) => [
+                    session.id,
+                    session,
+                  ]),
+                ).values(),
+              ).sort(
+                (a: any, b: any) =>
+                  Number(b.lastUpdateTime) - Number(a.lastUpdateTime),
               );
               this.pageToken = nextPageToken ?? '';
               this.canLoadMoreSessions = !!nextPageToken;

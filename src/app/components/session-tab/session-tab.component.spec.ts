@@ -141,10 +141,35 @@ describe('SessionTabComponent', () => {
                             {
                               filter: 'abc',
                               pageToken: '',
-                              pageSize: component.SESSIONS_PAGE_LIMIT,
+                              pageSize: 100,
                             },
                         );
                   }));
+
+      describe('on refresh', () => {
+        beforeEach((fakeAsync(() => {
+          component.refreshSession();
+          tick(300);  // for debounceTime
+        })));
+
+        it('should reset session list', fakeAsync(() => {
+                      expect(component.sessionList).toEqual([]);
+                    }));
+
+        it('should reset page token and filter', fakeAsync(() => {
+                      expect(sessionService.listSessions)
+                          .toHaveBeenCalledWith(
+                              component.userId,
+                              component.appName,
+                              {
+                                filter: undefined,
+                                pageToken: '',
+                                pageSize: 100,
+                              },
+                          );
+                    }));
+      });
+
       describe('when list is loaded', () => {
         beforeEach(fakeAsync(() => {
           mockUiStateService.isSessionListLoadingResponse.next(false);
@@ -202,7 +227,7 @@ describe('SessionTabComponent', () => {
                             {
                               filter: undefined,
                               pageToken: 'nextPage',
-                              pageSize: component.SESSIONS_PAGE_LIMIT,
+                              pageSize: 100,
                             },
                         );
                   }));
@@ -344,5 +369,37 @@ describe('SessionTabComponent', () => {
         });
       });
     });
+  });
+
+  describe('on refresh', () => {
+    beforeEach(fakeAsync(() => {
+      mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
+      sessionService.listSessionsResponse.next({
+        items: [{id: 'session1', lastUpdateTime: 1}],
+        nextPageToken: 'nextPage',
+      });
+      fixture = TestBed.createComponent(SessionTabComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      tick(500);  // for setTimeout in ngOnInit
+      expect(component.pageToken).toBe('nextPage');
+      expect(component.sessionList.length).toBe(1);
+      sessionService.listSessions.calls.reset();
+      component.refreshSession();
+      tick(300);  // for debounceTime
+    }));
+
+    it('should reset page token and session list', fakeAsync(() => {
+         expect(sessionService.listSessions)
+             .toHaveBeenCalledWith(
+                 component.userId,
+                 component.appName,
+                 {
+                   filter: undefined,
+                   pageToken: '',
+                   pageSize: 100,
+                 },
+             );
+       }));
   });
 });

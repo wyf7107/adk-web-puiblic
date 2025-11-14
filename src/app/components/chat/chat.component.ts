@@ -67,7 +67,6 @@ import {getMediaTypeFromMimetype, MediaType} from '../artifact-tab/artifact-tab.
 import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 import {CanvasComponent} from '../canvas/canvas.component';
 import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
-import {ThemeToggle} from '../theme-toggle/theme-toggle';
 import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 import {EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {PendingEventDialogComponent} from '../pending-event-dialog/pending-event-dialog.component';
@@ -75,6 +74,7 @@ import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
+import {ThemeToggle} from '../theme-toggle/theme-toggle';
 import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
 import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
 
@@ -433,8 +433,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sessionService.createSession(this.userId, this.appName)
         .subscribe(
             (res) => {
-              this.uiStateService.setIsSessionListLoading(false);
-
               this.currentSessionState = res.state;
               this.sessionId = res.id ?? '';
               this.sessionTab?.refreshSession();
@@ -523,8 +521,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.updatedSessionState.set(null);
         }
         this.streamingTextMessage = null;
-        this.featureFlagService.isSessionReloadOnNewMessageEnabled().pipe(first()).subscribe(
-            (enabled) => {
+        this.featureFlagService.isSessionReloadOnNewMessageEnabled()
+            .pipe(first())
+            .subscribe((enabled) => {
               if (enabled) {
                 this.sessionTab?.reloadSession(this.sessionId);
               }

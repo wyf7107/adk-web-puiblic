@@ -24,7 +24,7 @@
     </mat-form-field>
   </div>
   } @let isSessionListLoading = uiStateService.isSessionListLoading() | async; @if
-  (isSessionListLoading && sessionList.length === 0) {
+  (isSessionListLoading && !isLoadingMoreInProgress()) {
   <div class="loading-spinner-container">
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </div>

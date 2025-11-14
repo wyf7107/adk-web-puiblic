@@ -81,6 +81,8 @@ export class SessionTabComponent implements OnInit {
   isSessionFilteringEnabled =
       this.featureFlagService.isSessionFilteringEnabled();
 
+  isLoadingMoreInProgress = signal(false);
+
   constructor() {
     this.filterControl.valueChanges.pipe(debounceTime(300)).subscribe(() => {
       this.pageToken = '';
@@ -112,28 +114,34 @@ export class SessionTabComponent implements OnInit {
                   .pipe(catchError(() => of({items: [], nextPageToken: ''})));
             }),
             tap(({items, nextPageToken}) => {
-              this.sessionList = Array.from(
-                new Map(
-                  [...this.sessionList, ...items].map((session) => [
-                    session.id,
-                    session,
-                  ]),
-                ).values(),
-              ).sort(
-                (a: any, b: any) =>
-                  Number(b.lastUpdateTime) - Number(a.lastUpdateTime),
-              );
+              this.sessionList =
+                  Array
+                      .from(
+                          new Map(
+                              [...this.sessionList, ...items].map(
+                                  (session) =>
+                                      [session.id,
+                                       session,
+              ]),
+                              )
+                              .values(),
+                          )
+                      .sort(
+                          (a: any, b: any) => Number(b.lastUpdateTime) -
+                              Number(a.lastUpdateTime),
+                      );
               this.pageToken = nextPageToken ?? '';
               this.canLoadMoreSessions = !!nextPageToken;
               this.changeDetectorRef.markForCheck();
-            }),
-            debounceTime(300),
+            })
             )
         .subscribe(
             () => {
+              this.isLoadingMoreInProgress.set(false);
               this.uiStateService.setIsSessionListLoading(false);
             },
             () => {
+              this.isLoadingMoreInProgress.set(false);
               this.uiStateService.setIsSessionListLoading(false);
             },
         );
@@ -203,6 +211,7 @@ export class SessionTabComponent implements OnInit {
   }
 
   loadMoreSessions() {
+    this.isLoadingMoreInProgress.set(true);
     this.refreshSessionsSubject.next();
   }
 
@@ -229,15 +238,23 @@ export class SessionTabComponent implements OnInit {
   }
 
   refreshSession(session?: string) {
-    this.refreshSessionsSubject.next();
-    if (this.sessionList.length <= 1) {
-      return undefined;
-    } else {
+    let nextSession = null;
+
+    if (this.sessionList.length > 0) {
       let index = this.sessionList.findIndex((s) => s.id == session);
       if (index == this.sessionList.length - 1) {
         index = -1;
       }
-      return this.sessionList[index + 1];
+      nextSession = this.sessionList[index + 1];
     }
+
+    if (this.isSessionFilteringEnabled) {
+      this.filterControl.setValue('');
+    } else {
+      this.sessionList = [];
+      this.refreshSessionsSubject.next();
+    }
+
+    return nextSession;
   }
 }

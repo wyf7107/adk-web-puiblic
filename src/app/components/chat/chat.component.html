@@ -162,6 +162,10 @@
         false) {
         <div class="toolbar-session-text">{{ i18n.sessionIdLabel }}</div>
         <div class="toolbar-session-id">{{ sessionId }}</div>
+        <div class="toolbar-session-text" style="margin-left: 16px">
+          {{ i18n.userIdLabel }}
+        </div>
+        <div class="toolbar-session-id">{{ userId }}</div>
         @if (!canEditSession()) {
           <div class="readonly-badge">
             <mat-icon>visibility</mat-icon>

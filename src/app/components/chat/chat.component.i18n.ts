@@ -28,6 +28,7 @@ export const CHAT_MESSAGES = {
   editEvalCaseTooltip: 'Edit current eval case',
   deleteEvalCaseTooltip: 'Delete current eval case',
   sessionIdLabel: 'Session ID',
+  userIdLabel: 'User ID',
   loadingSessionLabel: 'Loading session...',
   tokenStreamingLabel: 'Token Streaming',
   createNewSessionTooltip: 'Create a new Session',

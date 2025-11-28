@@ -20,22 +20,18 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, in
 import { FormsModule } from '@angular/forms';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { MatCardActions, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
-import { MatTab, MatTabGroup, MatTabLabel } from '@angular/material/tabs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AgentNode, ToolNode, CallbackNode } from '../../core/models/AgentBuilder';
-import { AgentBuilderService } from '../../core/services/agent-builder.service';
 import { getToolIcon } from '../../core/constants/tool-icons';
 import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
 import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
@@ -57,14 +53,9 @@ import { ThemeToggle } from '../theme-toggle/theme-toggle';
   imports: [
     CommonModule,
     FormsModule,
-    JsonEditorComponent,
-    MatButton,
     MatButton,
     MatCheckbox,
     MatExpansionModule,
-    MatExpansionPanel,
-    MatExpansionPanelHeader,
-    MatExpansionPanelTitle,
     MatFormField,
     MatIcon,
     MatInput,
@@ -72,9 +63,6 @@ import { ThemeToggle } from '../theme-toggle/theme-toggle';
     MatLabel,
     MatOption,
     MatSelect,
-    MatTab,
-    MatTabGroup,
-    MatTabLabel,
     MatTooltip,
     MatMenu,
     MatMenuTrigger,

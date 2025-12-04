@@ -50,5 +50,6 @@ export declare abstract class FeatureFlagService {
   abstract isSessionFilteringEnabled(): Observable<boolean>;
   abstract isSessionReloadOnNewMessageEnabled(): Observable<boolean>;
   abstract isUserIdOnToolbarEnabled(): Observable<boolean>;
+  abstract isDeveloperUiDisclaimerEnabled(): Observable<boolean>;
   abstract isFeedbackServiceEnabled(): Observable<boolean>;
 }

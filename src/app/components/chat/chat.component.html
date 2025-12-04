@@ -331,6 +331,16 @@
       ></app-trace-event>
     </div>
     }
+    @if (isDeveloperUiDisclaimerEnabledObs | async) {
+    <div
+      class="adk-web-developer-ui-disclaimer"
+      [matTooltip]="i18n.disclosureTooltip"
+      matTooltipPosition="left"
+      style="align-self: flex-end"
+    >
+      {{i18n.adkWebDeveloperUiMessage}}
+    </div>
+    }
   </div>
   }
 </mat-drawer-container>

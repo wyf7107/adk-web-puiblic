@@ -45,6 +45,9 @@ export const CHAT_MESSAGES = {
   cannotEditSessionMessage:
       'Chat is disabled to prevent changes to the end user\'s session.',
   readOnlyBadgeLabel: 'Read-only',
+  disclosureTooltip:
+      'ADK Web is for development purposes. It has access to all the data and should not be used in production.',
+  adkWebDeveloperUiMessage: 'ADK Web Developer UI',
 };
 
 /**

@@ -132,6 +132,7 @@ html.dark-theme {
   // Expansion panel text color for dark theme
   --mat-expansion-container-text-color: #e8eaed;
   --mat-expansion-header-text-color: #e8eaed;
+  --adk-web-text-color-light-gray: #c4c7c5;
 }
 
 // Light theme custom properties
@@ -170,6 +171,7 @@ html.light-theme {
   // Expansion panel text color for light theme
   --mat-expansion-container-text-color: #202124;
   --mat-expansion-header-text-color: #202124;
+  --adk-web-text-color-light-gray: #c4c7c5;
 }
 
 // Dark theme dialog overrides
@@ -842,7 +844,6 @@ html.light-theme {
 // Tooltip styling to prevent overlap
 .mat-mdc-tooltip {
   z-index: 10000 !important;
-  white-space: nowrap;
   max-width: 300px;
 }
 

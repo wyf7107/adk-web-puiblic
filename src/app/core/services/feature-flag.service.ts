@@ -119,6 +119,10 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
     return of(true);
   }
 
+  isDeveloperUiDisclaimerEnabled(): Observable<boolean> {
+    return of(true);
+  }
+
   isFeedbackServiceEnabled(): Observable<boolean> {
     return of(false);
   }

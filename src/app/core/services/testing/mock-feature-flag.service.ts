@@ -102,6 +102,10 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isUserIdOnToolbarEnabled =
       jasmine.createSpy('isUserIdOnToolbarEnabled')
           .and.returnValue(this.isUserIdOnToolbarEnabledResponse);
+  isDeveloperUiDisclaimerEnabledResponse = new ReplaySubject<boolean>(1);
+  isDeveloperUiDisclaimerEnabled =
+      jasmine.createSpy('isDeveloperUiDisclaimerEnabled')
+          .and.returnValue(this.isDeveloperUiDisclaimerEnabledResponse);
   isFeedbackServiceEnabledResponse = new ReplaySubject<boolean>(1);
   isFeedbackServiceEnabled =
       jasmine.createSpy('isFeedbackServiceEnabled')

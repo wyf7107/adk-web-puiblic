@@ -23,21 +23,25 @@ import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {of} from 'rxjs';
 
+import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
-import {UI_STATE_SERVICE, UiStateService} from '../../core/services/interfaces/ui-state';
-import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
-import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
-import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
+import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
+import {
+  MockFeatureFlagService
+} from '../../core/services/testing/mock-feature-flag.service';
+import {
+  MockStringToColorService
+} from '../../core/services/testing/mock-string-to-color.service';
+import {
+  MockUiStateService
+} from '../../core/services/testing/mock-ui-state.service';
 import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 
 import {ChatPanelComponent} from './chat-panel.component';
-
-const USER_ID = 'user';
-const FUNC1_NAME = 'func1';
+import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 
 describe('ChatPanelComponent', () => {
   let component: ChatPanelComponent;
@@ -45,19 +49,22 @@ describe('ChatPanelComponent', () => {
   let mockFeatureFlagService: MockFeatureFlagService;
   let mockUiStateService: MockUiStateService;
   let mockStringToColorService: MockStringToColorService;
+  let mockAgentService: MockAgentService;
 
   beforeEach(async () => {
     mockFeatureFlagService = new MockFeatureFlagService();
     mockUiStateService = new MockUiStateService();
+    mockAgentService = new MockAgentService();
 
     mockFeatureFlagService.isMessageFileUploadEnabledResponse.next(true);
     mockFeatureFlagService.isManualStateUpdateEnabledResponse.next(true);
     mockFeatureFlagService.isBidiStreamingEnabledResponse.next(true);
+    mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(true);
 
     mockStringToColorService = new MockStringToColorService();
     mockStringToColorService.stc.and.returnValue('rgb(255, 0, 0)');
 
-    initTestBed();  // required for 1p compat
+    mockAgentService.getLoadingStateResponse.next(false);
 
     initTestBed();  // required for 1p compat
     await TestBed
@@ -76,6 +83,7 @@ describe('ChatPanelComponent', () => {
             {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
             {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
             {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
+            {provide: AGENT_SERVICE, useValue: mockAgentService},
           ],
         })
         .compileComponents();
@@ -474,6 +482,74 @@ describe('ChatPanelComponent', () => {
       expect(chatMessages).toBeTruthy();
       expect(chatInput).toBeTruthy();
     });
+    });
+  });
+
+  describe('Feedback UI', () => {
+    it('should show when feature flag is on', () => {
+      component.messages = [{role: 'bot', text: 'message'}];
+
+      mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(true);
+      fixture.detectChanges();
+
+      let feedbackButtons = fixture.debugElement.query(By.css('.feedback-buttons'));
+      expect(feedbackButtons).toBeTruthy();
+    });
+
+    it('should hide when feature flag is off', () => {
+      component.messages = [{role: 'bot', text: 'message'}];
+
+      mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(false);
+      fixture.detectChanges();
+
+      let feedbackButtons = fixture.debugElement.query(By.css('.feedback-buttons'));
+      expect(feedbackButtons).toBeFalsy();
+    });
+
+    it('should hide when agent response is loading', () => {
+      component.messages = [{role: 'bot', text: 'message'}];
+
+      mockAgentService.getLoadingStateResponse.next(true);
+      fixture.detectChanges();
+
+      const feedbackButtons = fixture.debugElement.query(By.css('.feedback-buttons'));
+      expect(feedbackButtons).toBeFalsy();
+    });
+
+    it('should show after each bot message', () => {
+      component.messages = [
+        {role: 'bot', text: 'message 1'},
+        {role: 'bot', text: 'message 1'},
+        {role: 'user', text: 'message 2'},
+        {role: 'bot', text: 'message 1'},
+        {role: 'bot', text: 'message 1'},
+      ];
+      fixture.detectChanges();
+
+      let feedbackButtons = fixture.debugElement.queryAll(By.css('.feedback-buttons'));
+      expect(feedbackButtons.length).toBe(4);
+    });
+
+    it(`component should emit 'up' on up click`, () => {
+      spyOn(component.feedback, 'emit');
+      component.messages = [{role: 'bot', text: 'message'}];
+      fixture.detectChanges();
+
+      const upButton = fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0];
+      upButton.nativeElement.click();
+
+      expect(component.feedback.emit).toHaveBeenCalledWith({direction: 'up'});
+    });
+
+    it(`component should emit 'down' on down click`, () => {
+      spyOn(component.feedback, 'emit');
+      component.messages = [{role: 'bot', text: 'message'}];
+      fixture.detectChanges();
+
+      const downButton = fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1];
+      downButton.nativeElement.click();
+
+      expect(component.feedback.emit).toHaveBeenCalledWith({direction: 'down'});
     });
   });
 });

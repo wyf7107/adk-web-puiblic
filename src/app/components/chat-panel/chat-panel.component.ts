@@ -40,6 +40,8 @@ import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 
 import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
+import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {toSignal} from '@angular/core/rxjs-interop';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -107,6 +109,9 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly updateState = new EventEmitter<void>();
   @Output() readonly toggleAudioRecording = new EventEmitter<void>();
   @Output() readonly toggleVideoRecording = new EventEmitter<void>();
+  @Output()
+  readonly feedback =
+      new EventEmitter<{direction: 'up'|'down'}>();
 
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;
@@ -120,6 +125,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       MARKDOWN_COMPONENT,
   );
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  private readonly agentService = inject(AGENT_SERVICE);
   readonly MediaType = MediaType;
 
   readonly isMessageFileUploadEnabledObs =
@@ -129,6 +135,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled();
   readonly canEditSession = signal(true);
+  readonly isUserFeedbackEnabled = toSignal(this.featureFlagService.isFeedbackServiceEnabled());
+  readonly isLoadingAgentResponse = toSignal(this.agentService.getLoadingState());
 
   constructor(private sanitizer: DomSanitizer) {}
 
@@ -188,5 +196,9 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   renderGooglerSearch(content: string) {
     return this.sanitizer.bypassSecurityTrustHtml(content);
+  }
+
+  emitFeedback(direction: 'up'|'down') {
+    this.feedback.emit({direction});
   }
 }

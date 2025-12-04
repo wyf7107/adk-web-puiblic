@@ -45,7 +45,9 @@
   position: relative;
   display: inline-block;
   &.message-card--highlighted {
-    background-color: var(--chat-panel-function-event-button-highlight-background-color);
+    background-color: var(
+      --chat-panel-function-event-button-highlight-background-color
+    );
   }
 }
 
@@ -55,9 +57,19 @@
 }
 
 .function-event-button-highlight {
-  background-color: var(--chat-panel-function-event-button-highlight-background-color);
-  border-color: var(--chat-panel-function-event-button-highlight-border-color) !important;
+  background-color: var(
+    --chat-panel-function-event-button-highlight-background-color
+  );
+  border-color: var(
+    --chat-panel-function-event-button-highlight-border-color
+  ) !important;
   color: var(--chat-panel-function-event-button-highlight-color) !important;
+}
+
+// Enables messages to have columns
+.message-column-container {
+  display: flex;
+  flex-direction: column;
 }
 
 .user-message {
@@ -65,7 +77,9 @@
   justify-content: flex-end;
   align-items: center;
   .message-card {
-    background-color: var(--chat-panel-user-message-message-card-background-color);
+    background-color: var(
+      --chat-panel-user-message-message-card-background-color
+    );
     align-self: flex-end;
     color: var(--chat-panel-user-message-message-card-color);
     box-shadow: none;
@@ -76,7 +90,9 @@
   display: flex;
   align-items: center;
   .message-card {
-    background-color: var(--chat-panel-bot-message-message-card-background-color);
+    background-color: var(
+      --chat-panel-bot-message-message-card-background-color
+    );
     align-self: flex-start;
     color: var(--chat-panel-bot-message-message-card-color);
     box-shadow: none;
@@ -85,8 +101,11 @@
 
 .bot-message:focus-within {
   .message-card {
-    background-color: var(--chat-panel-bot-message-focus-within-message-card-background-color);
-    border: 1px solid var(--chat-panel-bot-message-focus-within-message-card-border-color);
+    background-color: var(
+      --chat-panel-bot-message-focus-within-message-card-background-color
+    );
+    border: 1px solid
+      var(--chat-panel-bot-message-focus-within-message-card-border-color);
   }
 }
 
@@ -153,7 +172,8 @@
 
 .eval-response-header {
   padding-bottom: 5px;
-  border-bottom: 2px solid var(--chat-panel-eval-response-header-border-bottom-color);
+  border-bottom: 2px solid
+    var(--chat-panel-eval-response-header-border-bottom-color);
   font-style: italic;
   font-weight: 700;
 }
@@ -278,7 +298,8 @@
 }
 
 :host ::ng-deep .input-field .mat-mdc-text-field-wrapper {
-  border: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
+  border: 1px solid
+    var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
   border-radius: 16px;
 }
 
@@ -395,4 +416,23 @@ button.video-rec-btn {
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+.feedback-buttons {
+  // Default touch target is fixed at 48px, which is too large
+  --mat-icon-button-touch-target-display: none;
+  margin-left: 50px;
+
+  button {
+    padding: 0;
+    height: 24px;
+    width: 24px;
+    min-height: 24px;
+    min-width: 24px;
+  }
+  mat-icon {
+    font-size: 12px;
+    height: 12px;
+    width: 12px;
+  }
 }

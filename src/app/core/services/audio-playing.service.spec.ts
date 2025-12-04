@@ -54,6 +54,11 @@ describe('AudioPlayingService', () => {
     expect(service).toBeTruthy();
   });
 
+  function createMockSource() {
+    return jasmine.createSpyObj(
+        'AudioBufferSourceNode', ['stop', 'start', 'connect']);
+  }
+
   describe('playAudio', () => {
     it('should not play audio if the buffer is empty', () => {
       spyOn<any>(service, 'playPCM').and.callThrough();
@@ -74,6 +79,80 @@ describe('AudioPlayingService', () => {
       const combinedBuffer = new Uint8Array([1, 2, 3, 4]);
       service.playAudio(buffer);
       expect((service as any).playPCM).toHaveBeenCalledWith(combinedBuffer);
+    });
+
+    it('should schedule audio sources correctly', () => {
+      const buffer = [new Uint8Array([1, 2])];
+      const mockSource = createMockSource();
+      mockAudioContext.createBufferSource.and.returnValue(mockSource);
+
+      service.playAudio(buffer);
+
+      expect(mockAudioContext.createBufferSource).toHaveBeenCalled();
+      expect(mockSource.start).toHaveBeenCalled();
+    });
+
+    it('removes source from schedule after playback finishes', () => {
+      const mockSource = createMockSource();
+      mockAudioContext.createBufferSource.and.returnValue(mockSource);
+      const scheduledAudioSources =
+          (service as any).scheduledAudioSources as Set<any>;
+
+      service.playAudio([new Uint8Array([1])]);
+
+      // Assert that the source was added and the onended handler was attached.
+      expect(scheduledAudioSources.has(mockSource)).toBeTrue();
+      expect((mockSource as any).onended).toEqual(jasmine.any(Function));
+
+      // Simulate the audio finishing by calling the onended handler.
+      if ((mockSource as any).onended) {
+        (mockSource as any).onended();
+      }
+
+      // Assert that the source was removed from the set.
+      expect(scheduledAudioSources.has(mockSource)).toBeFalse();
+    });
+  });
+
+  describe('stopAudio', () => {
+    it('should stop all scheduled sources', () => {
+      const mockSource1 = createMockSource();
+      const mockSource2 = createMockSource();
+
+      mockAudioContext.createBufferSource.and.returnValues(
+          mockSource1, mockSource2);
+
+      // Play two audio clips
+      service.playAudio([new Uint8Array([1])]);
+      service.playAudio([new Uint8Array([2])]);
+
+      service.stopAudio();
+
+      expect(mockSource1.stop).toHaveBeenCalled();
+      expect(mockSource2.stop).toHaveBeenCalled();
+    });
+
+    it('should reset scheduling time so next audio plays immediately', () => {
+      const mockSource1 = createMockSource();
+      const mockSource2 = createMockSource();
+      mockAudioContext.createBufferSource.and.returnValues(
+          mockSource1, mockSource2);
+
+      // Play a long audio clip (duration 1s from mock)
+      service.playAudio([new Uint8Array([1])]);
+
+      // Advance time slightly
+      mockAudioContext.currentTime = 0.5;
+
+      // Stop audio
+      service.stopAudio();
+
+      // Play another clip
+      service.playAudio([new Uint8Array([2])]);
+
+      // The second clip should start at current time (0.5), not after the first
+      // clip (1.0)
+      expect(mockSource2.start).toHaveBeenCalledWith(0.5);
     });
   });
 });

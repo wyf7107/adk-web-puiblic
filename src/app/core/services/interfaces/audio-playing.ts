@@ -25,4 +25,5 @@ export const AUDIO_PLAYING_SERVICE =
  */
 export declare abstract class AudioPlayingService {
   abstract playAudio(buffer: Uint8Array[]): void;
+  abstract stopAudio(): void;
 }

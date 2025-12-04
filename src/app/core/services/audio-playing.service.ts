@@ -24,12 +24,25 @@ import {AudioPlayingService as AudioPlayingServiceInterface} from './interfaces/
 export class AudioPlayingService implements AudioPlayingServiceInterface {
   private audioContext = new AudioContext({sampleRate: 22000});
   private lastAudioTime = 0;
+  private scheduledAudioSources = new Set<AudioBufferSourceNode>();
 
   playAudio(buffer: Uint8Array[]) {
     const pcmBytes = this.combineAudioBuffer(buffer);
     if (!pcmBytes) return;
 
     this.playPCM(pcmBytes);
+  }
+
+  stopAudio() {
+    for (const source of this.scheduledAudioSources) {
+      source.onended = null;
+      source.stop();
+    }
+
+    this.scheduledAudioSources.clear();
+    // Reset lastAudioTime to the current time so that any new audio played
+    // after stopping will start immediately.
+    this.lastAudioTime = this.audioContext.currentTime;
   }
 
   private combineAudioBuffer(buffer: Uint8Array[]) {
@@ -68,11 +81,17 @@ export class AudioPlayingService implements AudioPlayingServiceInterface {
     const source = this.audioContext.createBufferSource();
     source.buffer = buffer;
     source.connect(this.audioContext.destination);
+    source.onended = () => {
+      this.scheduledAudioSources.delete(source);
+    };
+    this.scheduledAudioSources.add(source);
 
     const currentTime = this.audioContext.currentTime;
     const startTime = Math.max(this.lastAudioTime, currentTime);
     source.start(startTime);
 
+    // Update lastAudioTime to the end time of the current buffer to ensure
+    // subsequent audio starts after this one finishes.
     this.lastAudioTime = startTime + buffer.duration;
   }
 }

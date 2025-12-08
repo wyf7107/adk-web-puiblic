@@ -19,7 +19,7 @@ import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ThemeService } from '../../core/services/theme.service';
+import { THEME_SERVICE } from '../../core/services/interfaces/theme';
 
 @Component({
   selector: 'app-theme-toggle',
@@ -28,7 +28,7 @@ import { ThemeService } from '../../core/services/theme.service';
   styleUrl: './theme-toggle.scss',
 })
 export class ThemeToggle {
-  readonly themeService = inject(ThemeService);
+  readonly themeService = inject(THEME_SERVICE);
 
   get currentTheme() {
     return this.themeService.currentTheme();

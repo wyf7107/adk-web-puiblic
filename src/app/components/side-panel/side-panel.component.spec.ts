@@ -43,6 +43,7 @@ import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {SessionService} from '../../core/services/session.service';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
 import {MockSafeValuesService} from '../../core/services/testing/mock-safevalues.service';
+import {MockThemeService} from '../../core/services/testing/mock-theme.service';
 import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
 import {TraceService} from '../../core/services/trace.service';
 import {VideoService} from '../../core/services/video.service';
@@ -55,6 +56,7 @@ import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
 import {EVENT_SERVICE} from '../../core/services/interfaces/event';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
+import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 import {UI_STATE_SERVICE, UiStateService as UiStateServiceInterface} from '../../core/services/interfaces/ui-state';
 import {VIDEO_SERVICE} from '../../core/services/interfaces/video';
@@ -214,6 +216,7 @@ describe('SidePanelComponent', () => {
             {provide: ActivatedRoute, useValue: mockActivatedRoute},
             {provide: Location, useValue: mockLocation},
             {provide: SAFE_VALUES_SERVICE, useClass: MockSafeValuesService},
+            {provide: THEME_SERVICE, useClass: MockThemeService}
           ],
         });
 

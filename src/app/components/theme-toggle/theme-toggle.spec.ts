@@ -19,23 +19,29 @@
 import {initTestBed} from '../../testing/utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ThemeToggle } from './theme-toggle';
+import {THEME_SERVICE} from '../../core/services/interfaces/theme';
+import {MockThemeService} from '../../core/services/testing/mock-theme.service';
 import { ThemeService } from '../../core/services/theme.service';
 
 describe('ThemeToggle', () => {
   let component: ThemeToggle;
   let fixture: ComponentFixture<ThemeToggle>;
-  let themeService: ThemeService;
+  let themeService: MockThemeService;
 
   beforeEach(async () => {
+    themeService = new MockThemeService();
+
     initTestBed();  // required for 1p compat
     await TestBed.configureTestingModule({
-      imports: [ThemeToggle]
+      imports: [ThemeToggle],
+      providers: [
+        {provide: THEME_SERVICE, useValue: themeService},
+      ]
     })
     .compileComponents();
 
     fixture = TestBed.createComponent(ThemeToggle);
     component = fixture.componentInstance;
-    themeService = TestBed.inject(ThemeService);
     fixture.detectChanges();
   });
 
@@ -44,18 +50,17 @@ describe('ThemeToggle', () => {
   });
 
   it('should toggle theme when clicked', () => {
-    const initialTheme = themeService.currentTheme();
     component.toggleTheme();
-    expect(themeService.currentTheme()).not.toBe(initialTheme);
+    expect(themeService.toggleTheme).toHaveBeenCalled();
   });
 
   it('should show correct icon for dark theme', () => {
-    themeService.setTheme('dark');
+    themeService.currentTheme.set('dark');
     expect(component.themeIcon).toBe('light_mode');
   });
 
   it('should show correct icon for light theme', () => {
-    themeService.setTheme('light');
+    themeService.currentTheme.set('light');
     expect(component.themeIcon).toBe('dark_mode');
   });
 });

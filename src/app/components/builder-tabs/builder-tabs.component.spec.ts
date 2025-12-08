@@ -23,7 +23,9 @@ import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builde
 import {CallbackNode} from '../../core/models/AgentBuilder';
 import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
+import {MockThemeService} from '../../core/services/testing/mock-theme.service';
 import {MatDialog} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -55,6 +57,7 @@ describe('BuilderTabsComponent - Callback Support', () => {
         {provide: MatSnackBar, useValue: mockSnackBar},
         {provide: Router, useValue: mockRouter},
         provideNoopAnimations(),
+        {provide: THEME_SERVICE, useClass: MockThemeService},
       ],
     }).compileComponents();
 

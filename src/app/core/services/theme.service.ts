@@ -16,13 +16,12 @@
  */
 
 import { Injectable, signal, effect } from '@angular/core';
-
-export type Theme = 'light' | 'dark';
+import { ThemeServiceInterface, Theme } from './interfaces/theme';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ThemeService {
+export class ThemeService implements ThemeServiceInterface {
   private readonly THEME_STORAGE_KEY = 'adk-theme-preference';
 
   // Signal to track current theme

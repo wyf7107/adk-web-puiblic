@@ -140,7 +140,7 @@
 }
 
 .app-select-container {
-  width: 35%;
+  width: 60%;
   margin-top: 12px;
   background-color: var(--side-panel-app-select-container-background-color);
   margin-left: 10px;
@@ -228,4 +228,17 @@
   max-width: 250px;
   white-space: wrap;
   font-size: 11px;
+}
+
+:host ::ng-deep .wide-agent-dropdown-panel {
+  min-width: 300px;
+  max-width: 600px;
+
+  .mat-mdc-option {
+    white-space: normal;
+    line-height: 1.4;
+    height: auto;
+    min-height: 48px;
+    padding: 8px 16px;
+  }
 }

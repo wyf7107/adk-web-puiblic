@@ -35,9 +35,10 @@ export class TraceTreeComponent {
   traceLabelIconMap = new Map<string, string>([
     ['Invocation', 'start'],
     // TODO: Remove agent_run mapping once all ADKs span names follow OTLP GenAI semconv.
-    ['agent_run', 'directions_run'],
-    ['invoke_agent', 'directions_run'],
+    ['agent_run', 'robot'],
+    ['invoke_agent', 'robot_2'],
     ['tool', 'build'],
+    ['execute_tool', 'build'],
     ['call_llm', 'chat'],
   ]);
   selectedRow: Span|undefined = undefined;

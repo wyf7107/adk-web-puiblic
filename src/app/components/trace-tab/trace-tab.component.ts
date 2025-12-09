@@ -70,19 +70,28 @@ export class TraceTabComponent implements OnInit, OnChanges {
   }
 
   findUserMsgFromInvocGroup(group: any[]) {
+    // Find a span that has both invocation_id and llm_request
+    // The invocation_id is present on multiple spans, but llm_request
+    // is only on the call_llm span
     const eventItem = group?.find(
         item => item.attributes !== undefined &&
-            'gcp.vertex.agent.invocation_id' in item.attributes)
+            'gcp.vertex.agent.invocation_id' in item.attributes &&
+            'gcp.vertex.agent.llm_request' in item.attributes)
 
     if (!eventItem) {
       return '[no invocation id found]';
     }
 
-    const requestJson =
-        JSON.parse(eventItem.attributes['gcp.vertex.agent.llm_request']) as LlmRequest
-    const userContent =
-        requestJson.contents.filter((c: any) => c.role == 'user').at(-1)
-    return userContent?.parts[0]?.text ?? '[attachment]';
+    try {
+      const requestJson =
+          JSON.parse(eventItem.attributes['gcp.vertex.agent.llm_request']) as
+          LlmRequest
+      const userContent =
+          requestJson.contents.filter((c: any) => c.role == 'user').at(-1)
+      return userContent?.parts[0]?.text ?? '[attachment]';
+    } catch {
+      return '[error parsing request]';
+    }
   }
 
   findInvocIdFromTraceId(traceId: string) {

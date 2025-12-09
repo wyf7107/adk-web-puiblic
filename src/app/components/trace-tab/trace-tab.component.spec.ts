@@ -146,4 +146,76 @@ describe('TraceTabComponent', () => {
       // mocking TraceTreeComponent
     });
   });
+
+  describe('findUserMsgFromInvocGroup', () => {
+    it('should find user message from span with both invocation_id and llm_request',
+       () => {
+         // First span has only invocation_id, second span has both
+         const group: Span[] = [
+           {
+             name: 'invocation',
+             start_time: 1733084700000000000,
+             end_time: 1733084760000000000,
+             span_id: 'span-1',
+             trace_id: 'trace-1',
+             attributes: {
+               'gcp.vertex.agent.invocation_id': 'invoc-1',
+             },
+           },
+           {
+             name: 'call_llm',
+             start_time: 1733084710000000000,
+             end_time: 1733084750000000000,
+             span_id: 'span-2',
+             parent_span_id: 'span-1',
+             trace_id: 'trace-1',
+             attributes: {
+               'gcp.vertex.agent.invocation_id': 'invoc-1',
+               'gcp.vertex.agent.llm_request':
+                   '{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}',
+             },
+           },
+         ];
+
+         const result = component.findUserMsgFromInvocGroup(group);
+         expect(result).toBe('hi');
+       });
+
+    it('should return fallback when no span has llm_request', () => {
+      const group: Span[] = [
+        {
+          name: 'invocation',
+          start_time: 1733084700000000000,
+          end_time: 1733084760000000000,
+          span_id: 'span-1',
+          trace_id: 'trace-1',
+          attributes: {
+            'gcp.vertex.agent.invocation_id': 'invoc-1',
+          },
+        },
+      ];
+
+      const result = component.findUserMsgFromInvocGroup(group);
+      expect(result).toBe('[no invocation id found]');
+    });
+
+    it('should return error message on invalid JSON', () => {
+      const group: Span[] = [
+        {
+          name: 'call_llm',
+          start_time: 1733084700000000000,
+          end_time: 1733084760000000000,
+          span_id: 'span-1',
+          trace_id: 'trace-1',
+          attributes: {
+            'gcp.vertex.agent.invocation_id': 'invoc-1',
+            'gcp.vertex.agent.llm_request': 'invalid json{',
+          },
+        },
+      ];
+
+      const result = component.findUserMsgFromInvocGroup(group);
+      expect(result).toBe('[error parsing request]');
+    });
+  });
 });

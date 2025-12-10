@@ -80,6 +80,7 @@ export declare interface LlmResponse {
 export declare interface EventActions {
   message?: string;
   artifactDelta?: any;
+  stateDelta?: any;
   functionCall?: FunctionCall;
   functionResponse?: FunctionResponse;
   finishReason?: string;

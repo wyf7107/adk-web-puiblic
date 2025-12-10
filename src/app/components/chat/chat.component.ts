@@ -505,8 +505,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         } else if (chunkJson.errorMessage) {
           this.processErrorMessage(chunkJson)
-        } else if (chunkJson.actions) {
+        }
+        if (chunkJson.actions) {
           this.processActionArtifact(chunkJson)
+          this.processActionStateDelta(chunkJson)
         }
         this.changeDetectorRef.detectChanges();
       },
@@ -630,9 +632,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private processActionArtifact(e: AdkEvent) {
-    if (e.actions && e.actions.artifactDelta) {
+    if (e.actions && e.actions.artifactDelta && Object.keys(e.actions.artifactDelta).length > 0) {
       this.storeEvents(null, e);
       this.storeMessage(null, e, 'bot');
+    }
+  }
+
+  private processActionStateDelta(e: AdkEvent) {
+    if (e.actions && e.actions.stateDelta && Object.keys(e.actions.stateDelta).length > 0) {
+      this.currentSessionState = e.actions.stateDelta;
     }
   }
 

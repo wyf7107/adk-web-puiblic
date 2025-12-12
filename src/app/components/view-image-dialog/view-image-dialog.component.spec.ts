@@ -19,7 +19,8 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 
-
+import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
+import {MockSafeValuesService} from '../../core/services/testing/mock-safevalues.service';
 import {ViewImageDialogComponent, ViewImageDialogData} from './view-image-dialog.component';
 
 describe('ViewImageDialogComponent', () => {
@@ -28,15 +29,20 @@ describe('ViewImageDialogComponent', () => {
   let mockDialogRef: MatDialogRef<ViewImageDialogComponent>;
   let mockDialogData: ViewImageDialogData;
 
+  let mockSafeValuesService: MockSafeValuesService;
+
   beforeEach(async () => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     mockDialogData = {imageData: null};
 
     await TestBed.configureTestingModule({
-      imports: [MatDialogModule, ViewImageDialogComponent],
+      imports: [
+        MatDialogModule, ViewImageDialogComponent
+      ],
       providers: [
         {provide: MatDialogRef, useValue: mockDialogRef},
         {provide: MAT_DIALOG_DATA, useValue: mockDialogData},
+        {provide: SAFE_VALUES_SERVICE, useClass: MockSafeValuesService},
       ],
     }).compileComponents();
   });
@@ -44,7 +50,9 @@ describe('ViewImageDialogComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ViewImageDialogComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();  // Initial change detection
+    mockSafeValuesService =
+        TestBed.inject(SAFE_VALUES_SERVICE) as MockSafeValuesService;
+    fixture.detectChanges();    // Initial change detection
   });
 
   it('should create', () => {
@@ -56,14 +64,19 @@ describe('ViewImageDialogComponent', () => {
     const base64Image =
         'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
     mockDialogData.imageData = base64Image;
-    component.ngOnInit();  // Manually call ngOnInit as it's not triggered by
-                           // fixture.detectChanges for @Input changes
+    mockSafeValuesService.bypassSecurityTrustUrl.and.returnValue(
+        'data:image/png;base64,' + base64Image);
+
+    component.ngOnInit();    // Manually call ngOnInit as it's not triggered by
+                             // fixture.detectChanges for @Input changes
     fixture.detectChanges();
 
     const imgElement = fixture.debugElement.query(By.css('.image-wrapper img'));
     expect(imgElement).not.toBeNull();
-    expect(imgElement.nativeElement.src)
-        .toContain('data:image/png;base64,' + base64Image);
+    expect(mockSafeValuesService.bypassSecurityTrustUrl)
+        .toHaveBeenCalledWith('data:image/png;base64,' + base64Image);
+    expect(imgElement.nativeElement.src).toEqual(
+        'data:image/png;base64,' + base64Image);
     expect(component.isSvgContent).toBeFalse();
   });
 

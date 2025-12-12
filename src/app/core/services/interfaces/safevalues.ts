@@ -16,8 +16,7 @@
  */
 
 import {InjectionToken} from '@angular/core';
-import {SafeHtml} from '@angular/platform-browser';
-// 1p-ONLY-IMPORT
+import {SafeHtml, SafeUrl} from '@angular/platform-browser';
 
 export const SAFE_VALUES_SERVICE = new InjectionToken<SafeValuesService>(
   'SafeValuesService',
@@ -37,6 +36,7 @@ declare interface SafeValuesServiceInterface {
   openBlobUrl(blob: Blob): Window | null;
   setAnchorHref(a: HTMLAnchorElement, url: string): void;
   bypassSecurityTrustHtml(value: string): SafeHtml;
+  bypassSecurityTrustUrl(url: string): SafeUrl;
   openBase64InNewTab(dataUrl: string, mimeType: string): void;
 }
 
@@ -57,6 +57,8 @@ export abstract class SafeValuesService implements SafeValuesServiceInterface {
   abstract setAnchorHref(a: HTMLAnchorElement, url: string): void;
 
   abstract bypassSecurityTrustHtml(value: string): SafeHtml;
+
+  abstract bypassSecurityTrustUrl(url: string): SafeUrl;
 
   openBase64InNewTab(dataUrl: string, mimeType: string) {
     try {

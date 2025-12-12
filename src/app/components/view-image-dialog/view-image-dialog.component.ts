@@ -15,10 +15,10 @@
  * limitations under the License.
  */
 
-
-import {Component, Inject, OnInit} from '@angular/core';
+import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
+import {Component, inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {DomSanitizer, SafeHtml, SafeUrl} from '@angular/platform-browser';
+import {SafeHtml, SafeUrl} from '@angular/platform-browser';
 
 export interface ViewImageDialogData {
   imageData: string|null;
@@ -35,10 +35,9 @@ export class ViewImageDialogComponent implements OnInit {
   // Flag to determine if the content is SVG
   isSvgContent: boolean = false;
 
-  constructor(
-      public dialogRef: MatDialogRef<ViewImageDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) public data: ViewImageDialogData,
-      private sanitizer: DomSanitizer) {}
+  readonly dialogRef = inject(MatDialogRef<ViewImageDialogComponent>);
+  readonly data = inject<ViewImageDialogData>(MAT_DIALOG_DATA);
+  private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
 
   /**
    * Lifecycle hook to initialize the component.
@@ -64,7 +63,7 @@ export class ViewImageDialogComponent implements OnInit {
     // Check if the data looks like SVG
     if (imageData.trim().includes('<svg')) {
       this.isSvgContent = true;
-      this.displayContent = this.sanitizer.bypassSecurityTrustHtml(imageData);
+      this.displayContent = this.safeValuesService.bypassSecurityTrustHtml(imageData);
     } else {
       // Assume it's base64 data if not SVG.
       // Ensure it has the correct data URI prefix.
@@ -72,7 +71,7 @@ export class ViewImageDialogComponent implements OnInit {
           imageData.startsWith('data:image/') ? '' : 'data:image/png;base64,';
       this.isSvgContent = false;
       this.displayContent =
-          this.sanitizer.bypassSecurityTrustUrl(prefix + imageData);
+          this.safeValuesService.bypassSecurityTrustUrl(prefix + imageData);
     }
   }
 

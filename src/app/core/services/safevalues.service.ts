@@ -16,7 +16,7 @@
  */
 
 import {inject, Injectable} from '@angular/core';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {DomSanitizer, SafeHtml, SafeUrl} from '@angular/platform-browser';
 
 import {SafeValuesService} from './interfaces/safevalues';
 
@@ -53,5 +53,9 @@ export class SafeValuesServiceImpl extends SafeValuesService {
 
   bypassSecurityTrustHtml(content: string): SafeHtml {
     return this.sanitizer.bypassSecurityTrustHtml(content);
+  }
+
+  bypassSecurityTrustUrl(url: string): SafeUrl {
+    return this.sanitizer.bypassSecurityTrustUrl(url);
   }
 }

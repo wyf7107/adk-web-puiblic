@@ -20,11 +20,12 @@ import {SafeValuesService} from '../interfaces/safevalues';
 
 /** Mock implementation of SafeValuesService. */
 @Injectable()
-export class MockSafeValuesService implements Partial<SafeValuesService> {
+export class MockSafeValuesService implements SafeValuesService {
   windowOpen = jasmine.createSpy('windowOpen');
   createObjectUrl = jasmine.createSpy('createObjectUrl');
   openBlobUrl = jasmine.createSpy('openBlobUrl');
   setAnchorHref = jasmine.createSpy('setAnchorHref');
   openBase64InNewTab = jasmine.createSpy('openBase64InNewTab');
   bypassSecurityTrustHtml = jasmine.createSpy('bypassSecurityTrustHtml');
+  bypassSecurityTrustUrl = jasmine.createSpy('bypassSecurityTrustUrl');
 }

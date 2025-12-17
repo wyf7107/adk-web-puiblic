@@ -118,9 +118,7 @@ export class AgentBuilderService implements AgentBuilderServiceInterface {
   }
 
   setSelectedNode(node: AgentNode | undefined) {
-    // Create a shallow copy to ensure change detection triggers
-    const nodeCopy = node ? { ...node } : undefined;
-    this.selectedNodeSubject.next(nodeCopy);
+    this.selectedNodeSubject.next(node);
   }
 
   getSelectedTool(): Observable<ToolNode|undefined> {

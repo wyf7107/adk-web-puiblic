@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 <div class="wrapper">
-  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [selectedIndex]="selectedTabIndex">
     <mat-tab label="Event">
       <div class="json-viewer-container">
         <ngx-json-viewer [json]="getEventDetails()"></ngx-json-viewer>

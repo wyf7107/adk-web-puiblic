@@ -112,6 +112,9 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output()
   readonly feedback =
       new EventEmitter<{direction: 'up'|'down'}>();
+  @Output()
+  readonly openBottomPanel =
+      new EventEmitter<{messageIndex: number, tabIndex: number}>();
 
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;
@@ -200,5 +203,29 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   emitFeedback(direction: 'up'|'down') {
     this.feedback.emit({direction});
+  }
+
+  hasStateDelta(eventId: string): boolean {
+    const event = this.eventData.get(eventId);
+    return event?.actions?.stateDelta &&
+           Object.keys(event.actions.stateDelta).length > 0;
+  }
+
+  hasArtifactDelta(eventId: string): boolean {
+    const event = this.eventData.get(eventId);
+    return event?.actions?.artifactDelta &&
+           Object.keys(event.actions.artifactDelta).length > 0;
+  }
+
+  hasRequestedAuthConfigs(eventId: string): boolean {
+    const event = this.eventData.get(eventId);
+    return event?.actions?.requestedAuthConfigs &&
+           Object.keys(event.actions.requestedAuthConfigs).length > 0;
+  }
+
+  hasRequestedToolConfirmations(eventId: string): boolean {
+    const event = this.eventData.get(eventId);
+    return event?.actions?.requestedToolConfirmations &&
+           Object.keys(event.actions.requestedToolConfirmations).length > 0;
   }
 }

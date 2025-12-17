@@ -289,6 +289,51 @@
     </button>
     }
   </div>
+  <!-- Message chips for bot responses -->
+  @if (message.role === "bot" && message.eventId && !message.isLoading) {
+  <div class="message-chips">
+    <button mat-button class="message-chip" (click)="openBottomPanel.emit({messageIndex: i, tabIndex: 0})">
+      <mat-icon>event</mat-icon>
+      Event
+    </button>
+    <button mat-button class="message-chip" (click)="openBottomPanel.emit({messageIndex: i, tabIndex: 1})">
+      <mat-icon>upload</mat-icon>
+      Request
+    </button>
+    <button mat-button class="message-chip" (click)="openBottomPanel.emit({messageIndex: i, tabIndex: 2})">
+      <mat-icon>download</mat-icon>
+      Response
+    </button>
+    <button mat-button class="message-chip" (click)="openBottomPanel.emit({messageIndex: i, tabIndex: 3})">
+      <mat-icon>account_tree</mat-icon>
+      Graph
+    </button>
+    @if (hasStateDelta(message.eventId)) {
+    <button mat-button class="message-chip message-chip-delta" disabled>
+      <mat-icon>sync_alt</mat-icon>
+      State Delta
+    </button>
+    }
+    @if (hasArtifactDelta(message.eventId)) {
+    <button mat-button class="message-chip message-chip-delta" disabled>
+      <mat-icon>image</mat-icon>
+      Artifact Delta
+    </button>
+    }
+    @if (hasRequestedAuthConfigs(message.eventId)) {
+    <button mat-button class="message-chip message-chip-delta" disabled>
+      <mat-icon>key</mat-icon>
+      Auth Configs
+    </button>
+    }
+    @if (hasRequestedToolConfirmations(message.eventId)) {
+    <button mat-button class="message-chip message-chip-delta" disabled>
+      <mat-icon>check_circle</mat-icon>
+      Tool Confirmations
+    </button>
+    }
+  </div>
+  }
   <!-- Feedback UI -->
   @if(isUserFeedbackEnabled() && !isLoadingAgentResponse() && message.role === "bot") {
   <div class="feedback-buttons">

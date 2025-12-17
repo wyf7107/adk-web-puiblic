@@ -316,6 +316,7 @@
         (updateState)="updateState()"
         (toggleAudioRecording)="toggleAudioRecording()"
         (toggleVideoRecording)="toggleVideoRecording()"
+        (openBottomPanel)="handleOpenBottomPanel($event)"
       ></app-chat-panel>
       }
     </mat-card>
@@ -327,6 +328,7 @@
         [userId]="userId"
         [appName]="appName"
         [sessionId]="sessionId"
+        [selectedTabIndex]="selectedTabIndex"
         (panelClosed)="closeTraceEventDetailPanel()"
       ></app-trace-event>
     </div>

@@ -295,6 +295,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // Trace detail
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
+  selectedTabIndex = 0;
 
   // Builder
   disableBuilderSwitch = false;
@@ -1034,6 +1035,46 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showSidePanel = true;
 
     this.selectEvent(key);
+  }
+
+  handleOpenBottomPanel(event: {messageIndex: number, tabIndex: number}) {
+    const eventId = this.messages()[event.messageIndex].eventId;
+
+    // Find the corresponding span in traceData
+    const span = this.findSpanByEventId(eventId);
+
+    if (span) {
+      // Set the selected tab index before triggering the row selection
+      this.selectedTabIndex = event.tabIndex;
+
+      // Use the trace service to select the row, which will trigger data loading
+      this.traceService.selectedRow(span);
+
+      // The bottomPanelVisible will be set by the subscription in ngOnInit
+    } else {
+      // Fallback: if no span found, just select the event
+      this.selectEvent(eventId);
+      this.bottomPanelVisible = true;
+      this.selectedTabIndex = event.tabIndex;
+    }
+
+    this.changeDetectorRef.detectChanges();
+  }
+
+  private findSpanByEventId(eventId: string): any {
+    if (!this.traceData || this.traceData.length === 0) {
+      return undefined;
+    }
+
+    // Search through all spans to find one with matching eventId
+    for (const span of this.traceData) {
+      if (span.attributes &&
+          span.attributes['gcp.vertex.agent.event_id'] === eventId) {
+        return span;
+      }
+    }
+
+    return undefined;
   }
 
   ngOnDestroy(): void {

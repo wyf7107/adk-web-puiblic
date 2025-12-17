@@ -47,6 +47,7 @@ export class TraceEventComponent implements OnInit {
   @Input() userId: string = '';
   @Input() sessionId: string = '';
   @Input() appName: string = '';
+  @Input() selectedTabIndex: number = 0;
   @Output() panelClosed = new EventEmitter<boolean>;
 
   renderedEventGraph: SafeHtml|undefined;

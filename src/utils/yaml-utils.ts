@@ -52,6 +52,7 @@ export class YamlUtils {
     }
 
     if (agentNode.agent_class != "LlmAgent") {
+      delete yamlConfig.model;
       delete yamlConfig.instruction;
       delete yamlConfig.tools;
     }

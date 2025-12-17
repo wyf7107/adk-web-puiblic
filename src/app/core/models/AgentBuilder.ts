@@ -48,7 +48,7 @@ export interface CallbackNode {
 
 export interface YamlConfig {
   name: string;
-  model: string;
+  model?: string;
   agent_class: string;
   description?: string;
   instruction?: string;

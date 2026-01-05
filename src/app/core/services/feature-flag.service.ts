@@ -126,4 +126,8 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
   isFeedbackServiceEnabled(): Observable<boolean> {
     return of(false);
   }
+
+  isInfinityMessageScrollingEnabled(): Observable<boolean> {
+    return of(false);
+  }
 }

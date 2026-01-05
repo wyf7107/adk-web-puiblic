@@ -16,10 +16,14 @@
  */
 
 import {inject, Injectable, signal} from '@angular/core';
-import {BehaviorSubject, Observable, of as observableOf} from 'rxjs';
+import {BehaviorSubject, Observable, of as observableOf, Subject} from 'rxjs';
 import {map, shareReplay, withLatestFrom} from 'rxjs/operators';
 
+import {Event} from '../models/types';
+
 import {FEATURE_FLAG_SERVICE} from './interfaces/feature-flag';
+import {SESSION_SERVICE} from './interfaces/session';
+import {ListParams, ListResponse} from './interfaces/types';
 import {UiStateService as UiStateServiceInterface} from './interfaces/ui-state';
 
 /**
@@ -33,6 +37,11 @@ export class UiStateService implements UiStateServiceInterface {
   private readonly _isSessionListLoading = new BehaviorSubject<boolean>(false);
   private readonly _isEventRequestResponseLoading =
       new BehaviorSubject<boolean>(false);
+  private readonly _isMessagesLoading = new BehaviorSubject<boolean>(false);
+  protected readonly _newMessagesLoadedResponse =
+      new Subject<ListResponse<any>>();
+  protected readonly _newMessagesLoadingFailedResponse =
+      new Subject<{message: string}>();
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
 
   isSessionLoading(): Observable<boolean> {
@@ -72,5 +81,31 @@ export class UiStateService implements UiStateServiceInterface {
 
   setIsEventRequestResponseLoading(isLoading: boolean) {
     this._isEventRequestResponseLoading.next(isLoading);
+  }
+
+  setIsMessagesLoading(isLoading: boolean) {
+    this._isMessagesLoading.next(isLoading);
+  }
+
+  isMessagesLoading(): Observable<boolean> {
+    return this._isMessagesLoading.pipe(
+        withLatestFrom(this.featureFlagService.isLoadingAnimationsEnabled()),
+        map(([isLoading, areAnimationsEnabled]) =>
+                isLoading && areAnimationsEnabled),
+        shareReplay({bufferSize: 1, refCount: true}),
+    );
+  }
+
+  lazyLoadMessages(sessionName: string, listParams?: ListParams):
+      Observable<void> {
+    throw new Error('Not implemented');
+  }
+
+  onNewMessagesLoaded(): Observable<ListResponse<any>> {
+    return this._newMessagesLoadedResponse;
+  }
+
+  onNewMessagesLoadingFailed(): Observable<{message: string}> {
+    return this._newMessagesLoadingFailedResponse;
   }
 }

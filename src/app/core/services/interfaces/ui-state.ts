@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
+
+import {ListParams, ListResponse} from './types';
 
 // Injection token for the UI state service.
 export const UI_STATE_SERVICE =
@@ -32,4 +33,11 @@ export declare abstract class UiStateService {
   abstract setIsSessionListLoading(isLoading: boolean): void;
   abstract isEventRequestResponseLoading(): Observable<boolean>;
   abstract setIsEventRequestResponseLoading(isLoading: boolean): void;
+
+  abstract lazyLoadMessages(sessionName: string, listParams: ListParams):
+      Observable<void>;
+  abstract onNewMessagesLoaded(): Observable<ListResponse<any>>;
+  abstract onNewMessagesLoadingFailed(): Observable<{message: string}>;
+  abstract setIsMessagesLoading(isLoading: boolean): void;
+  abstract isMessagesLoading(): Observable<boolean>;
 }

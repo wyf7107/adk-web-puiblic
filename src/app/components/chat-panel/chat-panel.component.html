@@ -16,7 +16,12 @@
 
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
-<div #autoScroll class="chat-messages">
+<div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
+  @if(uiStateService.isMessagesLoading() | async) {
+    <div class="messages-loading-container">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+  }
   <div #videoContainer></div>
   @for (message of messages; track message; let i = $index) {
   <div class="message-column-container">

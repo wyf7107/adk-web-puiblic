@@ -313,6 +313,62 @@ describe('ChatComponent', () => {
             );
       });
     });
+
+    describe('when infinity scrolling is enabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+            true);
+        fixture = TestBed.createComponent(ChatComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+      });
+
+      describe('when loading new messages fails', () => {
+        beforeEach(async () => {
+          mockUiStateService.newMessagesLoadingFailedResponse.next(
+              {message: 'Failed to load messages'});
+        });
+
+        it('should show snackbar', () => {
+          expect(mockSnackBar.open)
+              .toHaveBeenCalledWith('Failed to load messages', 'OK');
+        });
+      });
+
+      describe('when loading new messages succeeds', () => {
+        const events = [
+          {
+            id: 'event-2',
+            author: 'bot',
+            content: {parts: [{text: 'bot response'}]},
+          },
+          {
+            id: 'event-1',
+            author: 'user',
+            content: {parts: [{text: 'user message'}]},
+          },
+        ];
+
+        beforeEach(async () => {
+          mockUiStateService.newMessagesLoadedResponse.next({
+            items: events,
+            nextPageToken: '',
+          });
+        });
+
+        it('should add messages to the chat', () => {
+          const messages = component.messages();
+          expect(messages.length).toBe(2);
+          expect(messages[0].text).toBe('user message');
+          expect(messages[1].text).toBe('bot response');
+        });
+
+        it('should store events', () => {
+          expect(component.eventData.has('event-1')).toBeFalse();
+          expect(component.eventData.has('event-2')).toBeTrue();
+        });
+      });
+    });
   });
 
   describe('Session Management', () => {
@@ -1207,35 +1263,37 @@ describe('ChatComponent', () => {
 
   describe('Artifacts', () => {
     it(
-      'should only fetch artifact version once for the same artifactId and versionId',
-      async () => {
-        mockArtifactService.getArtifactVersion.and.returnValue(
-          of({
-            inlineData: {
-              mimeType: 'image/png',
-              data: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+        'should only fetch artifact version once for the same artifactId and versionId',
+        async () => {
+          mockArtifactService.getArtifactVersion.and.returnValue(
+              of({
+                inlineData: {
+                  mimeType: 'image/png',
+                  data:
+                      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+                },
+              }),
+          );
+          const sseEvent = {
+            id: 'event-1',
+            author: 'bot',
+            content: {role: 'bot', parts: []},
+            actions: {
+              artifactDelta: {'artifact-1': 'version-1'},
             },
-          }),
-        );
-        const sseEvent = {
-          id: 'event-1',
-          author: 'bot',
-          content: {role: 'bot', parts: []},
-          actions: {
-            artifactDelta: {'artifact-1': 'version-1'},
-          },
-        };
-        component.userInput = 'test message';
+          };
+          component.userInput = 'test message';
 
-        await component.sendMessage(
-          new KeyboardEvent('keydown', {key: 'Enter'}),
-        );
-        mockAgentService.runSseResponse.next(sseEvent);
-        mockAgentService.runSseResponse.next(sseEvent);
-        fixture.detectChanges();
+          await component.sendMessage(
+              new KeyboardEvent('keydown', {key: 'Enter'}),
+          );
+          mockAgentService.runSseResponse.next(sseEvent);
+          mockAgentService.runSseResponse.next(sseEvent);
+          fixture.detectChanges();
 
-        expect(mockArtifactService.getArtifactVersion).toHaveBeenCalledTimes(1);
-      },
+          expect(mockArtifactService.getArtifactVersion)
+              .toHaveBeenCalledTimes(1);
+        },
     );
   });
 });

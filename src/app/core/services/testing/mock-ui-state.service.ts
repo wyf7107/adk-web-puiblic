@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import {BehaviorSubject} from 'rxjs';
+import {BehaviorSubject, of, Subject} from 'rxjs';
 
+import {ListResponse} from '../interfaces/types';
 import {UI_STATE_SERVICE, UiStateService as UiStateServiceInterface} from '../interfaces/ui-state';
 
 /**
@@ -28,6 +29,7 @@ export class MockUiStateService implements UiStateServiceInterface {
   readonly isEventRequestResponseLoadingResponse = new BehaviorSubject<boolean>(
       false,
   );
+  readonly isMessagesLoadingResponse = new BehaviorSubject<boolean>(false);
 
   readonly isSessionLoading =
       jasmine.createSpy('isSessionLoading')
@@ -38,12 +40,30 @@ export class MockUiStateService implements UiStateServiceInterface {
   readonly isEventRequestResponseLoading =
       jasmine.createSpy('isEventRequestResponseLoading')
           .and.returnValue(this.isEventRequestResponseLoadingResponse);
+  readonly isMessagesLoading =
+      jasmine.createSpy('isMessagesLoading')
+          .and.returnValue(this.isMessagesLoadingResponse);
 
   readonly setIsSessionLoading = jasmine.createSpy('setIsSessionLoading');
   readonly setIsSessionListLoading =
       jasmine.createSpy('setIsSessionListLoading');
   readonly setIsEventRequestResponseLoading =
       jasmine.createSpy('setIsEventRequestResponseLoading');
+  readonly setIsMessagesLoading = jasmine.createSpy('setIsMessagesLoading');
+
+  readonly lazyLoadMessagesResponse = new Subject<void>();
+  readonly lazyLoadMessages =
+      jasmine.createSpy('lazyLoadMessages')
+          .and.returnValue(this.lazyLoadMessagesResponse);
+
+  readonly newMessagesLoadedResponse = new Subject<ListResponse<any>>();
+  readonly onNewMessagesLoaded =
+      jasmine.createSpy('onNewMessagesLoaded')
+          .and.returnValue(this.newMessagesLoadedResponse);
+  readonly newMessagesLoadingFailedResponse = new Subject<{message: string}>();
+  readonly onNewMessagesLoadingFailed =
+      jasmine.createSpy('onNewMessagesLoadingFailed')
+          .and.returnValue(this.newMessagesLoadingFailedResponse);
 }
 
 /**

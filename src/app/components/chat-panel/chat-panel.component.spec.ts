@@ -19,6 +19,7 @@ import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {SimpleChange} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {of} from 'rxjs';
 import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
@@ -26,11 +27,15 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {
   MockFeatureFlagService
 } from '../../core/services/testing/mock-feature-flag.service';
+import {
+  MockSessionService
+} from '../../core/services/testing/mock-session.service';
 import {
   MockStringToColorService
 } from '../../core/services/testing/mock-string-to-color.service';
@@ -50,16 +55,19 @@ describe('ChatPanelComponent', () => {
   let mockUiStateService: MockUiStateService;
   let mockStringToColorService: MockStringToColorService;
   let mockAgentService: MockAgentService;
+  let mockSessionService: MockSessionService;
 
   beforeEach(async () => {
     mockFeatureFlagService = new MockFeatureFlagService();
     mockUiStateService = new MockUiStateService();
     mockAgentService = new MockAgentService();
+    mockSessionService = new MockSessionService();
 
     mockFeatureFlagService.isMessageFileUploadEnabledResponse.next(true);
     mockFeatureFlagService.isManualStateUpdateEnabledResponse.next(true);
     mockFeatureFlagService.isBidiStreamingEnabledResponse.next(true);
     mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(true);
+    mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(true);
 
     mockStringToColorService = new MockStringToColorService();
     mockStringToColorService.stc.and.returnValue('rgb(255, 0, 0)');
@@ -84,6 +92,7 @@ describe('ChatPanelComponent', () => {
             {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
             {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
             {provide: AGENT_SERVICE, useValue: mockAgentService},
+            {provide: SESSION_SERVICE, useValue: mockSessionService},
           ],
         })
         .compileComponents();
@@ -364,6 +373,54 @@ describe('ChatPanelComponent', () => {
          expect(component.scrollInterrupted).toBeFalse();
          expect(scrollContainerElement.scrollTo).toHaveBeenCalled();
        }));
+
+    it(
+        'should call uiStateService.lazyLoadMessages when scrolled to top',
+        fakeAsync(() => {
+          // Given
+          const initialMessageCount = 50;
+          const initialMessages = Array.from(
+              {length: initialMessageCount},
+              (_, i) => ({role: 'bot', text: `message ${i}`}));
+          component.messages = initialMessages;
+          fixture.detectChanges();
+
+          const scrollContainerElement = component.scrollContainer.nativeElement;
+          // Make sure the scroll height is greater than the client height
+          scrollContainerElement.style.height = '100px';
+          scrollContainerElement.style.overflow = 'auto';
+          scrollContainerElement.scrollTop = 100;
+          fixture.detectChanges();
+
+          // Initialize nextPageToken to allow loading more messages
+          mockUiStateService.newMessagesLoadedResponse.next(
+              {items: [], nextPageToken: 'initial-token'});
+          tick();
+
+          // When
+          scrollContainerElement.scrollTop = 0;
+          scrollContainerElement.dispatchEvent(new Event('scroll'));
+          tick(200);  // Wait for debounce
+
+          // Then
+          expect(mockUiStateService.lazyLoadMessages).toHaveBeenCalled();
+
+          mockUiStateService.lazyLoadMessagesResponse.next();
+
+          // When more messages are loaded
+          const newMessages =
+              Array.from({length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`}));
+          component.messages = [...newMessages, ...component.messages];
+          mockUiStateService.newMessagesLoadedResponse.next(
+              {items: newMessages, nextPageToken: 'next'});
+          tick();
+          fixture.detectChanges();
+
+          // Then
+          expect(component.messages.length)
+              .toBe(initialMessageCount + newMessages.length);
+          expect(component.messages[0]).toEqual(newMessages[0]);
+        }));
   });
 
   describe('disabled features', () => {

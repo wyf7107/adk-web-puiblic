@@ -55,6 +55,7 @@ import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from '../../core/services/interfaces/stream-chat';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {ListResponse} from '../../core/services/interfaces/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {LOCATION_SERVICE} from '../../core/services/location.service';
 import {ResizableBottomDirective} from '../../directives/resizable-bottom.directive';
@@ -360,6 +361,28 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.traceService.hoveredMessageIndices$.subscribe(
         i => this.hoveredEventMessageIndices = i);
+
+    if (this.featureFlagService.isInfinityMessageScrollingEnabled()) {
+      this.uiStateService.onNewMessagesLoaded().subscribe(
+          (response: ListResponse<any>) => {
+            response.items.forEach((event: any) => {
+              const parts = event.content?.parts || [];
+              [...parts].reverse().forEach((part: any) => {
+                this.storeMessage(
+                    part, event, event.author === 'user' ? 'user' : 'bot',
+                    undefined, undefined, true);
+                if (event.author && event.author !== 'user') {
+                  this.storeEvents(part, event);
+                }
+              });
+            });
+          });
+
+      this.uiStateService.onNewMessagesLoadingFailed().subscribe(
+          (error: {message: string}) => {
+            this.openSnackBar(error.message, 'OK');
+          });
+    }
   }
 
   get sessionTab() {
@@ -504,11 +527,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             this.traceService.setEventData(this.eventData);
           }
         } else if (chunkJson.errorMessage) {
-          this.processErrorMessage(chunkJson)
+          this.processErrorMessage(chunkJson);
         }
         if (chunkJson.actions) {
-          this.processActionArtifact(chunkJson)
-          this.processActionStateDelta(chunkJson)
+          this.processActionArtifact(chunkJson);
+          this.processActionStateDelta(chunkJson);
         }
         this.changeDetectorRef.detectChanges();
       },
@@ -632,14 +655,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private processActionArtifact(e: AdkEvent) {
-    if (e.actions && e.actions.artifactDelta && Object.keys(e.actions.artifactDelta).length > 0) {
+    if (e.actions && e.actions.artifactDelta &&
+        Object.keys(e.actions.artifactDelta).length > 0) {
       this.storeEvents(null, e);
       this.storeMessage(null, e, 'bot');
     }
   }
 
   private processActionStateDelta(e: AdkEvent) {
-    if (e.actions && e.actions.stateDelta && Object.keys(e.actions.stateDelta).length > 0) {
+    if (e.actions && e.actions.stateDelta &&
+        Object.keys(e.actions.stateDelta).length > 0) {
       this.currentSessionState = e.actions.stateDelta;
     }
   }
@@ -683,7 +708,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private storeMessage(
       part: any, e: any, role: string, invocationIndex?: number,
-      additionalIndices?: any) {
+      additionalIndices?: any, prepend: boolean = false) {
     if (e?.author) {
       this.createAgentIconColorClass(e.author);
     }
@@ -717,7 +742,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (e?.actions && e.actions.artifactDelta) {
       for (const key in e.actions.artifactDelta) {
         if (e.actions.artifactDelta.hasOwnProperty(key)) {
-          this.renderArtifact(key, e.actions.artifactDelta[key]);
+          this.renderArtifact(key, e.actions.artifactDelta[key], prepend);
         }
       }
     }
@@ -777,7 +802,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (e.actions && e.actions.artifact_delta) {
           for (const key in e.actions.artifact_delta) {
             if (e.actions.artifact_delta.hasOwnProperty(key)) {
-              this.renderArtifact(key, e.actions.artifact_delta[key]);
+              this.renderArtifact(key, e.actions.artifact_delta[key], prepend);
             }
           }
         }
@@ -785,7 +810,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (part && Object.keys(part).length > 0) {
-      this.insertMessageBeforeLoadingMessage(message);
+      if (prepend) {
+        this.messages.update((messages) => [message, ...messages]);
+      } else {
+        this.insertMessageBeforeLoadingMessage(message);
+      }
     }
   }
 
@@ -806,23 +835,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private handleArtifactFetchFailure(
-      placeholderIndex: number, artifactId: string, versionId: string) {
+      message: any, artifactId: string, versionId: string) {
     this.openSnackBar(
         'Failed to fetch artifact data',
         'OK',
     );
     // Remove placeholder message and artifact on failure
-    this.messages.update(
-        messages => messages.filter((m, i) => i !== placeholderIndex));
+    this.messages.update(messages => messages.filter((m) => m !== message));
     this.artifacts = this.artifacts.filter(
         a => a.id !== artifactId || a.versionId !== versionId);
   }
 
-  private renderArtifact(artifactId: string, versionId: string) {
+  private renderArtifact(
+      artifactId: string, versionId: string, prepend: boolean = false) {
     // If artifact/version already exists, do nothing.
     const artifactExists = this.artifacts.some(
-      (artifact) =>
-        artifact.id === artifactId && artifact.versionId === versionId,
+        (artifact) =>
+            artifact.id === artifactId && artifact.versionId === versionId,
     );
     if (artifactExists) {
       return;
@@ -837,13 +866,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         mimeType: 'image/png',
       },
     };
-    this.insertMessageBeforeLoadingMessage(message);
-
-    const currentMessages = this.messages();
-    const lastMessage = currentMessages[currentMessages.length - 1];
-    const placeholderIndex = lastMessage?.isLoading ?
-        currentMessages.length - 2 :
-        currentMessages.length - 1;
+    if (prepend) {
+      this.messages.update((messages) => [message, ...messages]);
+    } else {
+      this.insertMessageBeforeLoadingMessage(message);
+    }
 
     // Add placeholder artifact.
     const placeholderArtifact = {
@@ -867,12 +894,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           next: (res) => {
             const {mimeType, data} = res.inlineData ?? {};
             if (!mimeType || !data) {
-              this.handleArtifactFetchFailure(
-                  placeholderIndex, artifactId, versionId);
+              this.handleArtifactFetchFailure(message, artifactId, versionId);
               return;
             }
-            const base64Data =
-                this.formatBase64Data(data, mimeType);
+            const base64Data = this.formatBase64Data(data, mimeType);
 
             const mediaType = getMediaTypeFromMimetype(mimeType);
 
@@ -884,17 +909,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             };
 
             this.messages.update(messages => {
-              const newMessages = [...messages];
-              newMessages[placeholderIndex] = {
-                role: 'bot',
-                inlineData,
-              };
-              return newMessages;
+              return messages.map(m => {
+                if (m === message) {
+                  return {
+                    role: 'bot',
+                    inlineData,
+                  };
+                }
+                return m;
+              });
             });
 
             // Update placeholder artifact with fetched data.
             this.artifacts = this.artifacts.map(artifact => {
-              if (artifact.id === artifactId && artifact.versionId === versionId) {
+              if (artifact.id === artifactId &&
+                  artifact.versionId === versionId) {
                 return {
                   id: artifactId,
                   versionId,
@@ -907,8 +936,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             });
           },
           error: (err) => {
-            this.handleArtifactFetchFailure(
-                placeholderIndex, artifactId, versionId);
+            this.handleArtifactFetchFailure(message, artifactId, versionId);
           }
         });
   }

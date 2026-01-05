@@ -17,7 +17,8 @@
 
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {CommonModule, NgClass} from '@angular/common';
-import {AfterViewInit, Component, ElementRef, EventEmitter, inject, Input, OnChanges, Output, signal, SimpleChanges, Type, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, DestroyRef, effect, ElementRef, EventEmitter, inject, input, Input, OnChanges, Output, signal, SimpleChanges, Type, ViewChild} from '@angular/core';
+import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -30,18 +31,21 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {EMPTY, NEVER, of, Subject} from 'rxjs';
+import {catchError, first, switchMap, tap} from 'rxjs/operators';
 
 import type {EvalCase} from '../../core/models/Eval';
+import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
+import {ListResponse} from '../../core/services/interfaces/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 
 import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
-import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
-import {toSignal} from '@angular/core/rxjs-interop';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -70,6 +74,7 @@ const ROOT_AGENT = 'root_agent';
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() appName: string = '';
+  sessionName = input<string>('');
   @Input() messages: any[] = [];
   @Input() isChatMode: boolean = true;
   @Input() evalCase: EvalCase|null = null;
@@ -109,15 +114,14 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly updateState = new EventEmitter<void>();
   @Output() readonly toggleAudioRecording = new EventEmitter<void>();
   @Output() readonly toggleVideoRecording = new EventEmitter<void>();
-  @Output()
-  readonly feedback =
-      new EventEmitter<{direction: 'up'|'down'}>();
+  @Output() readonly feedback = new EventEmitter<{direction: 'up' | 'down'}>();
 
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;
   @ViewChild('messageTextarea') public textarea: ElementRef|undefined;
   scrollInterrupted = false;
   private previousMessageCount = 0;
+  private nextPageToken = '';
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
@@ -126,6 +130,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   );
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   private readonly agentService = inject(AGENT_SERVICE);
+  private readonly sessionService = inject(SESSION_SERVICE);
+  private readonly destroyRef = inject(DestroyRef);
   readonly MediaType = MediaType;
 
   readonly isMessageFileUploadEnabledObs =
@@ -135,10 +141,73 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled();
   readonly canEditSession = signal(true);
-  readonly isUserFeedbackEnabled = toSignal(this.featureFlagService.isFeedbackServiceEnabled());
-  readonly isLoadingAgentResponse = toSignal(this.agentService.getLoadingState());
+  readonly isUserFeedbackEnabled =
+      toSignal(this.featureFlagService.isFeedbackServiceEnabled());
+  readonly isLoadingAgentResponse =
+      toSignal(this.agentService.getLoadingState());
 
-  constructor(private sanitizer: DomSanitizer) {}
+  protected readonly onScroll = new Subject<Event>();
+
+  constructor(private sanitizer: DomSanitizer) {
+    effect(() => {
+      const sessionName = this.sessionName();
+      if (sessionName) {
+        this.nextPageToken = '';
+        this.uiStateService
+            .lazyLoadMessages(sessionName, {
+              pageSize: 100,
+              pageToken: this.nextPageToken,
+            })
+            .pipe(first())
+            .subscribe();
+      }
+    });
+  }
+
+  ngOnInit() {
+    if (this.featureFlagService.isInfinityMessageScrollingEnabled()) {
+      this.uiStateService.onNewMessagesLoaded()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((response: ListResponse<any>) => {
+            this.nextPageToken = response.nextPageToken ?? '';
+            // Scroll to the last unseen message after the new messages are
+            // loaded.
+            if (this.scrollContainer?.nativeElement) {
+              const oldScrollHeight =
+                  this.scrollContainer.nativeElement.scrollHeight;
+              setTimeout(() => {
+                const newScrollHeight =
+                    this.scrollContainer.nativeElement.scrollHeight;
+                this.scrollContainer.nativeElement.scrollTop =
+                    newScrollHeight - oldScrollHeight;
+              });
+            }
+          });
+
+      this.onScroll
+          .pipe(
+              takeUntilDestroyed(this.destroyRef),
+              switchMap((event: Event) => {
+                const element = event.target as HTMLElement;
+                if (element.scrollTop !== 0) {
+                  return EMPTY;
+                }
+
+                if (!this.nextPageToken) {
+                  return EMPTY;
+                }
+
+                return this.uiStateService
+                    .lazyLoadMessages(this.sessionName(), {
+                      pageSize: 100,
+                      pageToken: this.nextPageToken,
+                    })
+                    .pipe(first(), catchError(() => NEVER));
+              }),
+              )
+          .subscribe();
+    }
+  }
 
   ngAfterViewInit() {
     if (this.scrollContainer?.nativeElement) {

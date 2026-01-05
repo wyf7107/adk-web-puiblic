@@ -17,26 +17,15 @@
 
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
+
 import {Session} from '../../models/Session';
 
-export const SESSION_SERVICE = new InjectionToken<SessionService>('SessionService');
+export const SESSION_SERVICE =
+    new InjectionToken<SessionService>('SessionService');
+import {type ListParams, type ListResponse} from './types';
+export {type ListParams, type ListResponse} from './types';
 
-/**
- * Parameters for list sessions request.
- */
-export interface ListParams {
-  pageSize?: number;
-  pageToken?: string;
-  filter?: string;
-}
 
-/**
- * Response for list sessions request.
- */
-export interface ListResponse<T> {
-  items: T[];
-  nextPageToken?: string;
-}
 
 /**
  * Service to provide methods to handle sessions.
@@ -44,24 +33,25 @@ export interface ListResponse<T> {
 export declare abstract class SessionService {
   abstract createSession(userId: string, appName: string): Observable<Session>;
   abstract listSessions(
-    userId: string,
-    appName: string,
-    listParams?: ListParams,
-  ): Observable<ListResponse<Session>>;
+      userId: string,
+      appName: string,
+      listParams?: ListParams,
+      ): Observable<ListResponse<Session>>;
   abstract deleteSession(
-    userId: string,
-    appName: string,
-    sessionId: string,
-  ): Observable<any>;
+      userId: string,
+      appName: string,
+      sessionId: string,
+      ): Observable<any>;
   abstract getSession(
-    userId: string,
-    appName: string,
-    sessionId: string,
-  ): Observable<Session>;
+      userId: string,
+      appName: string,
+      sessionId: string,
+      eventParams?: ListParams,
+      ): Observable<Session>;
   abstract importSession(
-    userId: string,
-    appName: string,
-    events: any[],
-  ): Observable<Session>;
+      userId: string,
+      appName: string,
+      events: any[],
+      ): Observable<Session>;
   abstract canEdit(userId: string, session: Session): Observable<boolean>;
 }

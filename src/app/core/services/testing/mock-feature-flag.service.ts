@@ -111,4 +111,8 @@ export class MockFeatureFlagService implements FeatureFlagService {
       jasmine.createSpy('isFeedbackServiceEnabled')
           .and.returnValue(this.isFeedbackServiceEnabledResponse);
 
+  isInfinityMessageScrollingEnabledResponse = new ReplaySubject<boolean>(1);
+  isInfinityMessageScrollingEnabled =
+      jasmine.createSpy('isInfinityMessageScrollingEnabled')
+          .and.returnValue(this.isInfinityMessageScrollingEnabledResponse);
 }

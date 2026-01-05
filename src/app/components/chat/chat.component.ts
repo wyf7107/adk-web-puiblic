@@ -362,27 +362,31 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.traceService.hoveredMessageIndices$.subscribe(
         i => this.hoveredEventMessageIndices = i);
 
-    if (this.featureFlagService.isInfinityMessageScrollingEnabled()) {
-      this.uiStateService.onNewMessagesLoaded().subscribe(
-          (response: ListResponse<any>) => {
-            response.items.forEach((event: any) => {
-              const parts = event.content?.parts || [];
-              [...parts].reverse().forEach((part: any) => {
-                this.storeMessage(
-                    part, event, event.author === 'user' ? 'user' : 'bot',
-                    undefined, undefined, true);
-                if (event.author && event.author !== 'user') {
-                  this.storeEvents(part, event);
-                }
-              });
-            });
-          });
+    this.featureFlagService.isInfinityMessageScrollingEnabled()
+        .pipe(first())
+        .subscribe((enabled) => {
+          if (enabled) {
+            this.uiStateService.onNewMessagesLoaded().subscribe(
+                (response: ListResponse<any>) => {
+                  response.items.forEach((event: any) => {
+                    const parts = event.content?.parts || [];
+                    [...parts].reverse().forEach((part: any) => {
+                      this.storeMessage(
+                          part, event, event.author === 'user' ? 'user' : 'bot',
+                          undefined, undefined, true);
+                      if (event.author && event.author !== 'user') {
+                        this.storeEvents(part, event);
+                      }
+                    });
+                  });
+                });
 
-      this.uiStateService.onNewMessagesLoadingFailed().subscribe(
-          (error: {message: string}) => {
-            this.openSnackBar(error.message, 'OK');
-          });
-    }
+            this.uiStateService.onNewMessagesLoadingFailed().subscribe(
+                (error: {message: string}) => {
+                  this.openSnackBar(error.message, 'OK');
+                });
+          }
+        });
   }
 
   get sessionTab() {

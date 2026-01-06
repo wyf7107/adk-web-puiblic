@@ -885,3 +885,32 @@ html.dark-theme {
     border-bottom: none !important;
   }
 }
+
+.wide-agent-dropdown-panel {
+  padding: 0 !important;
+
+  .search-option {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    opacity: 1 !important;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  span {
+    width: 100%;
+  }
+}
+
+html.dark-theme .wide-agent-dropdown-panel .search-option {
+  background-color: #2b2b2f !important;
+
+  input {
+    caret-color: white !important;
+  }
+}
+
+html.light-theme .wide-agent-dropdown-panel .search-option {
+  background-color: #ffffff !important;
+}

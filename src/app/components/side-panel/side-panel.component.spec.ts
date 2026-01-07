@@ -253,7 +253,9 @@ describe('SidePanelComponent', () => {
     it('shows all apps in selector', () => {
       const appSelect = fixture.debugElement.query(APP_SELECT_SELECTOR);
       const options = appSelect.componentInstance.options;
-      expect(options.map((option: MatOption) => option.value)).toEqual([
+      // Filter out the search option (which has value=null)
+      const appOptions = options.filter((option: MatOption) => option.value !== null);
+      expect(appOptions.map((option: MatOption) => option.value)).toEqual([
         'app1',
         'app2',
       ]);

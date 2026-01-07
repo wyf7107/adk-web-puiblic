@@ -33,22 +33,10 @@
         class="app-select"
         panelClass="wide-agent-dropdown-panel"
         (selectionChange)="appSelectionChange.emit($event)"
-        (openedChange)="agentSearchControl.setValue('')"
         [placeholder]="isLoadingApps()() ? 'Loading...' : 'Select an agent'"
         [formControl]="selectedAppControl()"
       >
-        <mat-option class="search-option" (click)="$event.stopPropagation()" [value]="null">
-          <mat-form-field class="agent-search-field" subscriptSizing="dynamic" (click)="$event.stopPropagation()">
-            <input
-              matInput
-              placeholder="Search agents..."
-              [formControl]="agentSearchControl"
-              (click)="$event.stopPropagation()"
-              (keydown)="$event.stopPropagation()"
-            />
-          </mat-form-field>
-        </mat-option>
-        @if (filteredApps$ | async; as availableApps) {
+        @if (apps$() | async; as availableApps) {
           @for (appName of availableApps; track appName) {
             <mat-option class="app-name-option" [value]="appName">{{ appName }}</mat-option>
           }

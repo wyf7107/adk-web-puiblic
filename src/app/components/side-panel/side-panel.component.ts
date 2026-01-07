@@ -17,12 +17,9 @@
 
 import {AsyncPipe, NgComponentOutlet, NgTemplateOutlet} from '@angular/common';
 import {AfterViewInit, Component, DestroyRef, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef, type WritableSignal} from '@angular/core';
-import {toObservable} from '@angular/core/rxjs-interop';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatMiniFabButton} from '@angular/material/button';
 import {MatOption} from '@angular/material/core';
-import {MatFormField} from '@angular/material/form-field';
-import {MatInput} from '@angular/material/input';
 import {MatIcon} from '@angular/material/icon';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
@@ -32,7 +29,7 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {combineLatest, Observable, of} from 'rxjs';
-import {first, map, startWith, switchMap} from 'rxjs/operators';
+import {first, map} from 'rxjs/operators';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
@@ -80,8 +77,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatSelect,
     ReactiveFormsModule,
     MatProgressSpinner,
-    MatFormField,
-    MatInput,
   ],
 })
 export class SidePanelComponent implements AfterViewInit {
@@ -158,27 +153,6 @@ export class SidePanelComponent implements AfterViewInit {
       this.featureFlagService.isBidiStreamingEnabled;
   protected readonly isSessionsTabReorderingEnabledObs =
       this.featureFlagService.isSessionsTabReorderingEnabled();
-
-  // Agent search
-  readonly agentSearchControl = new FormControl('', { nonNullable: true });
-  readonly filteredApps$: Observable<string[] | undefined> = toObservable(this.apps$).pipe(
-    switchMap(appsObservable =>
-      combineLatest([
-        appsObservable,
-        this.agentSearchControl.valueChanges.pipe(startWith(''))
-      ])
-    ),
-    map(([apps, searchTerm]) => {
-      if (!apps) {
-        return apps;
-      }
-      if (!searchTerm || searchTerm.trim() === '') {
-        return apps;
-      }
-      const lowerSearch = searchTerm.toLowerCase().trim();
-      return apps.filter(app => app.toLowerCase().startsWith(lowerSearch));
-    })
-  );
 
   ngAfterViewInit() {
     // Wait one tick until the eval tab container is ready.

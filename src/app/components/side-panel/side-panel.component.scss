@@ -233,6 +233,7 @@
 :host ::ng-deep .wide-agent-dropdown-panel {
   min-width: 300px;
   max-width: 600px;
+  max-height: 400px;
 
   .mat-mdc-option {
     white-space: normal;
@@ -240,5 +241,35 @@
     height: auto;
     min-height: 48px;
     padding: 8px 16px;
+  }
+
+  .search-option {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+    background-color: var(--mat-select-panel-background-color, white) !important;
+    padding: 8px 16px !important;
+    border-bottom: 1px solid var(--mat-divider-color, rgba(0, 0, 0, 0.12));
+    min-height: auto !important;
+    height: auto !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 1 !important;
+
+    &:hover {
+      background-color: var(--mat-select-panel-background-color, white) !important;
+    }
+
+    &.mat-mdc-option.mat-mdc-option-active {
+      background-color: var(--mat-select-panel-background-color, white) !important;
+    }
+  }
+}
+
+
+.agent-search-field {
+  width: 100%;
+
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
   }
 }

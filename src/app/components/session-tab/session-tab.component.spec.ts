@@ -49,6 +49,7 @@ describe('SessionTabComponent', () => {
     sessionService = new MockSessionService();
     mockUiStateService = new MockUiStateService();
     mockFeatureFlagService = new MockFeatureFlagService();
+    mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(false);
 
     sessionService.listSessionsResponse.next({
       items: [],
@@ -367,6 +368,37 @@ describe('SessionTabComponent', () => {
         it('fetches session again', () => {
           expect(sessionService.getSession).toHaveBeenCalled();
         });
+      });
+    });
+
+    describe('when infinity scrolling is enabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+            true);
+        sessionService.getSessionResponse.next({} as any);
+        component.reloadSession('session1');
+      });
+
+      it('fetches session with pagination params', () => {
+        expect(sessionService.getSession)
+            .toHaveBeenCalledWith(
+                component.userId, component.appName, 'session1',
+                {pageSize: 100, pageToken: ''});
+      });
+    });
+
+    describe('when infinity scrolling is disabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+            false);
+        sessionService.getSessionResponse.next({} as any);
+        component.reloadSession('session1');
+      });
+
+      it('fetches session without pagination params', () => {
+        expect(sessionService.getSession)
+            .toHaveBeenCalledWith(
+                component.userId, component.appName, 'session1', undefined);
       });
     });
   });

@@ -25,7 +25,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {ActivatedRoute} from '@angular/router';
 import {of, Subject} from 'rxjs';
-import {catchError, debounceTime, map, switchMap, tap,} from 'rxjs/operators';
+import {catchError, debounceTime, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 
 import {Session} from '../../core/models/Session';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
@@ -171,10 +171,16 @@ export class SessionTabComponent implements OnInit {
 
     this.reloadSessionSubject
         .pipe(
+            withLatestFrom(
+                this.featureFlagService.isInfinityMessageScrollingEnabled()),
             switchMap(
-                (sessionId) =>
+                ([sessionId, isInfinityScrollingEnabled]) =>
                     this.sessionService
-                        .getSession(this.userId, this.appName, sessionId)
+                        .getSession(
+                            this.userId, this.appName, sessionId,
+                            isInfinityScrollingEnabled ?
+                                {pageSize: 100, pageToken: ''} :
+                                undefined)
                         .pipe(catchError(() => of(null)))),
             tap((res) => {
               if (!res) return;

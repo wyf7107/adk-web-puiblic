@@ -175,6 +175,7 @@ describe('ChatComponent', () => {
     mockFeatureFlagService.isTokenStreamingEnabledResponse.next(true);
     mockFeatureFlagService.isEventFilteringEnabledResponse.next(true);
     mockFeatureFlagService.isDeleteSessionEnabledResponse.next(true);
+    mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(false);
 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -498,6 +499,7 @@ describe('ChatComponent', () => {
                 USER_ID,
                 TEST_APP_1_NAME,
                 SESSION_1_ID,
+                undefined,
             );
       });
     });

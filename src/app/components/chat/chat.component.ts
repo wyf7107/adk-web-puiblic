@@ -76,6 +76,8 @@ import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.c
 import {ChatMessagesInjectionToken} from './chat.component.i18n';
 
 const ROOT_AGENT = 'root_agent';
+/** Query parameter for pre-filling user input. */
+export const INITIAL_USER_INPUT_QUERY_PARAM = 'q';
 
 function fixBase64String(base64: string): string {
   // Replace URL-safe characters if they exist
@@ -305,6 +307,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.syncSelectedAppFromUrl();
     this.updateSelectedAppUrl();
+
+    combineLatest([
+      this.agentService.getApp(),
+      this.activatedRoute.queryParams,
+    ])
+        .pipe(
+            filter(
+                ([app, params]) =>
+                    !!app && !!params[INITIAL_USER_INPUT_QUERY_PARAM],
+                ),
+            first(),
+            map(([, params]) => params[INITIAL_USER_INPUT_QUERY_PARAM]))
+        .subscribe((initialUserInput) => {
+          // Use `setTimeout` to ensure the userInput is set after the current
+          // change detection cycle is complete.
+          setTimeout(() => {
+            this.userInput = initialUserInput;
+          });
+        });
 
     this.streamChatService.onStreamClose().subscribe((closeReason) => {
       const error =
@@ -570,6 +591,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
     // Clear input
     this.userInput = '';
+    // Clear the query param for the initial user input once it is sent.
+    const updatedUrl = this.router.parseUrl(this.location.path());
+    delete updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM];
+    await this.router.navigateByUrl(updatedUrl);
     this.changeDetectorRef.detectChanges();
   }
 

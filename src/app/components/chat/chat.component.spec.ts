@@ -70,7 +70,7 @@ import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 
-import {ChatComponent} from './chat.component';
+import {ChatComponent, INITIAL_USER_INPUT_QUERY_PARAM} from './chat.component';
 
 // Mock EvalTabComponent to satisfy the required viewChild in ChatComponent
 @Component({
@@ -179,10 +179,13 @@ describe('ChatComponent', () => {
 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree'], {
-      events: of(new NavigationEnd(1, '', '')),
-    });
-    mockLocation = jasmine.createSpyObj('Location', ['replaceState']);
+    mockRouter = jasmine.createSpyObj(
+        'Router',
+        ['navigate', 'createUrlTree', 'parseUrl', 'navigateByUrl'],
+        {events: of(new NavigationEnd(1, '', ''))},
+    );
+    mockRouter.parseUrl.and.returnValue({queryParams: {}} as any);
+    mockLocation = jasmine.createSpyObj('Location', ['replaceState', 'path']);
     mockAgentBuilderService = jasmine.createSpyObj(
         'AgentBuilderService', ['clear', 'setLoadedAgentData']);
 
@@ -266,6 +269,25 @@ describe('ChatComponent', () => {
     it('should create', () => {
       expect(component).toBeTruthy();
     });
+
+    it(
+        'should pre-fill user input from "q" query param only when app is selected',
+        fakeAsync(() => {
+          mockAgentService.setApp('');  // Initially no app
+          mockActivatedRoute.snapshot!
+              .queryParams = {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'};
+          mockActivatedRoute.queryParams =
+              of({[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'});
+          fixture = TestBed.createComponent(ChatComponent);
+          component = fixture.componentInstance;
+          fixture.detectChanges();
+          expect(component.userInput).toBe('');  // Should be empty initially
+
+          mockAgentService.setApp(TEST_APP_1_NAME);
+          tick();
+
+          expect(component.userInput).toBe('hello');  // Should be set now
+        }));
 
     it(
         'should project content into adk-web-chat-container-top', () => {
@@ -911,6 +933,35 @@ describe('ChatComponent', () => {
         expect(messageCards[0].nativeElement.textContent)
             .toContain(TEST_MESSAGE);
       });
+
+      it(
+          'should clear "q" query param when message is sent',
+          fakeAsync(() => {
+            mockAgentService.setApp('');  // Initially no app
+            mockActivatedRoute.snapshot!
+                .queryParams = {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'};
+            mockActivatedRoute.queryParams =
+                of({[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'});
+            const urlTree = {
+              queryParams: {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'},
+            };
+            mockRouter.parseUrl.and.returnValue(urlTree as any);
+            mockLocation.path.and.returnValue('/?q=hello');
+            fixture = TestBed.createComponent(ChatComponent);
+            component = fixture.componentInstance;
+            fixture.detectChanges();
+            mockAgentService.setApp(TEST_APP_1_NAME);
+            tick();
+
+            component.sendMessage(new KeyboardEvent('keydown', {key: 'Enter'}));
+            tick();
+
+            expect(mockLocation.path).toHaveBeenCalled();
+            expect(mockRouter.parseUrl).toHaveBeenCalledWith('/?q=hello');
+            expect(urlTree.queryParams).toEqual({} as any);  // q param should be
+                                                      // deleted.
+            expect(mockRouter.navigateByUrl).toHaveBeenCalledWith(urlTree as any);
+          }));
 
       describe('when event contains multiple text parts', () => {
         it(

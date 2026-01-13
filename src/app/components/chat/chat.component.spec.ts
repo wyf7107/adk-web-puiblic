@@ -175,7 +175,8 @@ describe('ChatComponent', () => {
     mockFeatureFlagService.isTokenStreamingEnabledResponse.next(true);
     mockFeatureFlagService.isEventFilteringEnabledResponse.next(true);
     mockFeatureFlagService.isDeleteSessionEnabledResponse.next(true);
-    mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(false);
+    mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+        false);
 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
@@ -934,24 +935,51 @@ describe('ChatComponent', () => {
             .toContain(TEST_MESSAGE);
       });
 
-      it(
-          'should clear "q" query param when message is sent', fakeAsync(() => {
-            const urlTree = new UrlTree();
-            urlTree.queryParams = {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'};
-            mockRouter.parseUrl.and.returnValue(urlTree as any);
-            mockLocation.path.and.returnValue('/?q=hello');
+      describe('Query Param Handling', () => {
+        let urlTree: UrlTree;
 
-            fixture = TestBed.createComponent(ChatComponent);
-            component = fixture.componentInstance;
-            component.userInput = 'hello';
-            component.sendMessage(new KeyboardEvent('keydown', {key: 'Enter'}));
-            tick();
+        beforeEach(() => {
+          urlTree = new UrlTree();
+          fixture = TestBed.createComponent(ChatComponent);
+          component = fixture.componentInstance;
+          component.userInput = 'hello';
+        });
 
-            expect(mockLocation.path).toHaveBeenCalled();
-            expect(mockRouter.parseUrl).toHaveBeenCalledWith('/?q=hello');
-            // The query param should be removed from the URL.
-            expect(mockLocation.replaceState).toHaveBeenCalledWith('/');
-          }));
+        it(
+            'should clear "q" param on send',
+            fakeAsync(() => {
+              urlTree.queryParams = {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'};
+              mockRouter.parseUrl.and.returnValue(urlTree as any);
+              mockLocation.path.and.returnValue('/?q=hello');
+
+              component.sendMessage(
+                  new KeyboardEvent('keydown', {key: 'Enter'}));
+              tick();
+
+              expect(mockLocation.path).toHaveBeenCalled();
+              expect(mockRouter.parseUrl).toHaveBeenCalledWith('/?q=hello');
+              // The query param should be removed from the URL.
+              expect(mockLocation.replaceState).toHaveBeenCalledWith('/');
+            }));
+
+        it(
+            'should not update URL if "q" param is missing',
+            fakeAsync(() => {
+              urlTree.queryParams = {};
+              mockRouter.parseUrl.and.returnValue(urlTree as any);
+              mockLocation.path.and.returnValue('/?');
+
+              component.sendMessage(
+                  new KeyboardEvent('keydown', {key: 'Enter'}));
+              tick();
+
+              expect(mockLocation.path).toHaveBeenCalled();
+              expect(mockRouter.parseUrl).toHaveBeenCalledWith('/?');
+              // The query param should be removed from the URL.
+              expect(mockLocation.replaceState).not.toHaveBeenCalled();
+            }));
+      });
+
 
       describe('when event contains multiple text parts', () => {
         it(

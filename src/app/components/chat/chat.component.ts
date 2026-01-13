@@ -594,7 +594,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Clear the query param for the initial user input once it is sent.
     const updatedUrl = this.router.parseUrl(this.location.path());
     delete updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM];
-    await this.router.navigateByUrl(updatedUrl);
+    this.location.replaceState(updatedUrl.toString());
     this.changeDetectorRef.detectChanges();
   }
 

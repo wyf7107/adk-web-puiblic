@@ -23,7 +23,7 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Router, UrlTree} from '@angular/router';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {BehaviorSubject, NEVER, of, ReplaySubject, Subject, throwError} from 'rxjs';
 
@@ -935,32 +935,22 @@ describe('ChatComponent', () => {
       });
 
       it(
-          'should clear "q" query param when message is sent',
-          fakeAsync(() => {
-            mockAgentService.setApp('');  // Initially no app
-            mockActivatedRoute.snapshot!
-                .queryParams = {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'};
-            mockActivatedRoute.queryParams =
-                of({[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'});
-            const urlTree = {
-              queryParams: {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'},
-            };
+          'should clear "q" query param when message is sent', fakeAsync(() => {
+            const urlTree = new UrlTree();
+            urlTree.queryParams = {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'};
             mockRouter.parseUrl.and.returnValue(urlTree as any);
             mockLocation.path.and.returnValue('/?q=hello');
+
             fixture = TestBed.createComponent(ChatComponent);
             component = fixture.componentInstance;
-            fixture.detectChanges();
-            mockAgentService.setApp(TEST_APP_1_NAME);
-            tick();
-
+            component.userInput = 'hello';
             component.sendMessage(new KeyboardEvent('keydown', {key: 'Enter'}));
             tick();
 
             expect(mockLocation.path).toHaveBeenCalled();
             expect(mockRouter.parseUrl).toHaveBeenCalledWith('/?q=hello');
-            expect(urlTree.queryParams).toEqual({} as any);  // q param should be
-                                                      // deleted.
-            expect(mockRouter.navigateByUrl).toHaveBeenCalledWith(urlTree as any);
+            // The query param should be removed from the URL.
+            expect(mockLocation.replaceState).toHaveBeenCalledWith('/');
           }));
 
       describe('when event contains multiple text parts', () => {

@@ -18,35 +18,27 @@
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {SimpleChange} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
-import {of} from 'rxjs';
-import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 import {MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {of} from 'rxjs';
 
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
-import {
-  MockFeatureFlagService
-} from '../../core/services/testing/mock-feature-flag.service';
-import {
-  MockSessionService
-} from '../../core/services/testing/mock-session.service';
-import {
-  MockStringToColorService
-} from '../../core/services/testing/mock-string-to-color.service';
-import {
-  MockUiStateService
-} from '../../core/services/testing/mock-ui-state.service';
+import {MockAgentService} from '../../core/services/testing/mock-agent.service';
+import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
+import {MockSessionService} from '../../core/services/testing/mock-session.service';
+import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
+import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
+import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 
 import {ChatPanelComponent} from './chat-panel.component';
-import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 
 describe('ChatPanelComponent', () => {
   let component: ChatPanelComponent;
@@ -189,24 +181,26 @@ describe('ChatPanelComponent', () => {
   });
 
   describe('Eval Edit Mode', () => {
-    it('should show edit/delete buttons for text messages', async () => {
-      component.evalCase = {
-        evalId: '1',
-        conversation: [],
-        sessionInput: {},
-        creationTimestamp: 123,
-      };
-      component.isEvalEditMode = true;
-      component.messages = [{role: 'bot', text: 'eval message', eventId: '1'}];
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-      const buttons =
-          fixture.debugElement.queryAll(By.css('.eval-case-edit-button'));
-      expect(buttons.length).toBe(2);
-      expect(buttons[0].nativeElement.textContent).toContain('edit');
-      expect(buttons[1].nativeElement.textContent).toContain('delete');
-    });
+    it(
+        'should show edit/delete buttons for text messages', async () => {
+          component.evalCase = {
+            evalId: '1',
+            conversation: [],
+            sessionInput: {},
+            creationTimestamp: 123,
+          };
+          component.isEvalEditMode = true;
+          component.messages =
+              [{role: 'bot', text: 'eval message', eventId: '1'}];
+          fixture.detectChanges();
+          await fixture.whenStable();
+          fixture.detectChanges();
+          const buttons =
+              fixture.debugElement.queryAll(By.css('.eval-case-edit-button'));
+          expect(buttons.length).toBe(2);
+          expect(buttons[0].nativeElement.textContent).toContain('edit');
+          expect(buttons[1].nativeElement.textContent).toContain('delete');
+        });
 
     it('should show edit button for function calls', async () => {
       component.evalCase = {
@@ -228,72 +222,77 @@ describe('ChatPanelComponent', () => {
       expect(buttons[0].nativeElement.textContent).toContain('edit');
     });
 
-    it('should emit editEvalCaseMessage when edit is clicked', async () => {
-      component.evalCase = {
-        evalId: '1',
-        conversation: [],
-        sessionInput: {},
-        creationTimestamp: 123,
-      };
-      component.isEvalEditMode = true;
-      const message = {role: 'bot', text: 'eval message', eventId: '1'};
-      component.messages = [message];
-      spyOn(component.editEvalCaseMessage, 'emit');
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-      const editButton =
-          fixture.debugElement.queryAll(By.css('.eval-case-edit-button'))[0];
-      editButton.nativeElement.click();
-      expect(component.editEvalCaseMessage.emit).toHaveBeenCalledWith(message);
-    });
+    it(
+        'should emit editEvalCaseMessage when edit is clicked', async () => {
+          component.evalCase = {
+            evalId: '1',
+            conversation: [],
+            sessionInput: {},
+            creationTimestamp: 123,
+          };
+          component.isEvalEditMode = true;
+          const message = {role: 'bot', text: 'eval message', eventId: '1'};
+          component.messages = [message];
+          spyOn(component.editEvalCaseMessage, 'emit');
+          fixture.detectChanges();
+          await fixture.whenStable();
+          fixture.detectChanges();
+          const editButton = fixture.debugElement.queryAll(
+              By.css('.eval-case-edit-button'))[0];
+          editButton.nativeElement.click();
+          expect(component.editEvalCaseMessage.emit)
+              .toHaveBeenCalledWith(message);
+        });
 
-    it('should emit deleteEvalCaseMessage when delete is clicked', async () => {
-      component.evalCase = {
-        evalId: '1',
-        conversation: [],
-        sessionInput: {},
-        creationTimestamp: 123,
-      };
-      component.isEvalEditMode = true;
-      const message = {role: 'bot', text: 'eval message', eventId: '1'};
-      component.messages = [message];
-      spyOn(component.deleteEvalCaseMessage, 'emit');
-      fixture.detectChanges();
-      await fixture.whenStable();
-      fixture.detectChanges();
-      const deleteButton =
-          fixture.debugElement.queryAll(By.css('.eval-case-edit-button'))[1];
-      deleteButton.nativeElement.click();
-      expect(component.deleteEvalCaseMessage.emit)
-          .toHaveBeenCalledWith({message, index: 0});
-    });
+    it(
+        'should emit deleteEvalCaseMessage when delete is clicked',
+        async () => {
+          component.evalCase = {
+            evalId: '1',
+            conversation: [],
+            sessionInput: {},
+            creationTimestamp: 123,
+          };
+          component.isEvalEditMode = true;
+          const message = {role: 'bot', text: 'eval message', eventId: '1'};
+          component.messages = [message];
+          spyOn(component.deleteEvalCaseMessage, 'emit');
+          fixture.detectChanges();
+          await fixture.whenStable();
+          fixture.detectChanges();
+          const deleteButton = fixture.debugElement.queryAll(
+              By.css('.eval-case-edit-button'))[1];
+          deleteButton.nativeElement.click();
+          expect(component.deleteEvalCaseMessage.emit)
+              .toHaveBeenCalledWith({message, index: 0});
+        });
 
-    it('should emit editFunctionArgs when edit on function call is clicked',
-       async () => {
-         component.evalCase = {
-           evalId: '1',
-           conversation: [],
-           sessionInput: {},
-           creationTimestamp: 123,
-         };
-         component.isEvalEditMode = true;
-         const message = {
-           role: 'bot',
-           functionCall: {name: 'func1'},
-           eventId: '1'
-         };
-         component.messages = [message];
-         component.isEditFunctionArgsEnabled = true;
-         spyOn(component.editFunctionArgs, 'emit');
-         fixture.detectChanges();
-         await fixture.whenStable();
-         fixture.detectChanges();
-         const editButton =
-             fixture.debugElement.query(By.css('.eval-case-edit-button'));
-         editButton.nativeElement.click();
-         expect(component.editFunctionArgs.emit).toHaveBeenCalledWith(message);
-       });
+    it(
+        'should emit editFunctionArgs when edit on function call is clicked',
+        async () => {
+          component.evalCase = {
+            evalId: '1',
+            conversation: [],
+            sessionInput: {},
+            creationTimestamp: 123,
+          };
+          component.isEvalEditMode = true;
+          const message = {
+            role: 'bot',
+            functionCall: {name: 'func1'},
+            eventId: '1'
+          };
+          component.messages = [message];
+          component.isEditFunctionArgsEnabled = true;
+          spyOn(component.editFunctionArgs, 'emit');
+          fixture.detectChanges();
+          await fixture.whenStable();
+          fixture.detectChanges();
+          const editButton =
+              fixture.debugElement.query(By.css('.eval-case-edit-button'));
+          editButton.nativeElement.click();
+          expect(component.editFunctionArgs.emit).toHaveBeenCalledWith(message);
+        });
   });
 
   describe('Events', () => {
@@ -316,63 +315,67 @@ describe('ChatPanelComponent', () => {
       expect(botIcon.nativeElement.disabled).toBeTrue();
     });
 
-    it('should emit clickEvent when function call button is clicked', () => {
-      component.messages =
-          [{role: 'bot', functionCall: {name: 'func1'}, eventId: '1'}];
-      component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
-      spyOn(component.clickEvent, 'emit');
-      fixture.detectChanges();
-      const funcButton =
-          fixture.debugElement.query(By.css('.function-event-button'));
-      funcButton.nativeElement.click();
-      expect(component.clickEvent.emit).toHaveBeenCalledWith(0);
-    });
+    it(
+        'should emit clickEvent when function call button is clicked', () => {
+          component.messages =
+              [{role: 'bot', functionCall: {name: 'func1'}, eventId: '1'}];
+          component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
+          spyOn(component.clickEvent, 'emit');
+          fixture.detectChanges();
+          const funcButton =
+              fixture.debugElement.query(By.css('.function-event-button'));
+          funcButton.nativeElement.click();
+          expect(component.clickEvent.emit).toHaveBeenCalledWith(0);
+        });
   });
 
   describe('State Updates', () => {
-    it('should show updated state chip and emit removeStateUpdate',
-       async () => {
-         component.updatedSessionState = {key: 'value'};
-         fixture.detectChanges();
-         await fixture.whenStable();
-         fixture.detectChanges();
+    it(
+        'should show updated state chip and emit removeStateUpdate',
+        async () => {
+          component.updatedSessionState = {key: 'value'};
+          fixture.detectChanges();
+          await fixture.whenStable();
+          fixture.detectChanges();
 
-         const chip = fixture.debugElement.query(By.css('.file-info span'));
-         expect(chip.nativeElement.textContent)
-             .toContain('Updated session state');
+          const chip = fixture.debugElement.query(By.css('.file-info span'));
+          expect(chip.nativeElement.textContent)
+              .toContain('Updated session state');
 
-         spyOn(component.removeStateUpdate, 'emit');
-         const deleteButton =
-             fixture.debugElement.query(By.css('.delete-button'));
-         deleteButton.nativeElement.click();
-         expect(component.removeStateUpdate.emit).toHaveBeenCalled();
-       });
+          spyOn(component.removeStateUpdate, 'emit');
+          const deleteButton =
+              fixture.debugElement.query(By.css('.delete-button'));
+          deleteButton.nativeElement.click();
+          expect(component.removeStateUpdate.emit).toHaveBeenCalled();
+        });
   });
 
   describe('Scrolling', () => {
-    it('should scroll to bottom when user sends a message, even if scroll was interrupted',
-       fakeAsync(() => {
-         // Given
-         component.messages = [{role: 'bot', text: 'Bot message'}];
-         fixture.detectChanges();
-         const scrollContainerElement = component.scrollContainer.nativeElement;
-         spyOn(scrollContainerElement, 'scrollTo');
-         scrollContainerElement.dispatchEvent(new WheelEvent('wheel'));
-         expect(component.scrollInterrupted).toBeTrue();
+    it(
+        'should scroll to bottom when user sends a message, even if scroll was interrupted',
+        fakeAsync(() => {
+          // Given
+          component.messages = [{role: 'bot', text: 'Bot message'}];
+          fixture.detectChanges();
+          const scrollContainerElement =
+              component.scrollContainer.nativeElement;
+          spyOn(scrollContainerElement, 'scrollTo');
+          scrollContainerElement.dispatchEvent(new WheelEvent('wheel'));
+          expect(component.scrollInterrupted).toBeTrue();
 
-         // When
-         const oldMessages = component.messages;
-         component.messages = [...oldMessages, {role: 'user', text: 'User'}];
-         component.ngOnChanges({
-           'messages': new SimpleChange(oldMessages, component.messages, false)
-         });
-         fixture.detectChanges();
-         tick(50);
+          // When
+          const oldMessages = component.messages;
+          component.messages = [...oldMessages, {role: 'user', text: 'User'}];
+          component.ngOnChanges({
+            'messages': new SimpleChange(oldMessages, component.messages, false)
+          });
+          fixture.detectChanges();
+          tick(50);
 
-         // Then
-         expect(component.scrollInterrupted).toBeFalse();
-         expect(scrollContainerElement.scrollTo).toHaveBeenCalled();
-       }));
+          // Then
+          expect(component.scrollInterrupted).toBeFalse();
+          expect(scrollContainerElement.scrollTo).toHaveBeenCalled();
+        }));
 
     it(
         'should call uiStateService.lazyLoadMessages when scrolled to top',
@@ -385,7 +388,8 @@ describe('ChatPanelComponent', () => {
           component.messages = initialMessages;
           fixture.detectChanges();
 
-          const scrollContainerElement = component.scrollContainer.nativeElement;
+          const scrollContainerElement =
+              component.scrollContainer.nativeElement;
           // Make sure the scroll height is greater than the client height
           scrollContainerElement.style.height = '100px';
           scrollContainerElement.style.overflow = 'auto';
@@ -408,8 +412,8 @@ describe('ChatPanelComponent', () => {
           mockUiStateService.lazyLoadMessagesResponse.next();
 
           // When more messages are loaded
-          const newMessages =
-              Array.from({length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`}));
+          const newMessages = Array.from(
+              {length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`}));
           component.messages = [...newMessages, ...component.messages];
           mockUiStateService.newMessagesLoadedResponse.next(
               {items: newMessages, nextPageToken: 'next'});
@@ -530,15 +534,16 @@ describe('ChatPanelComponent', () => {
       });
 
 
-    it('should show chat content', () => {
-      const spinner =
-          fixture.debugElement.query(By.css('mat-progress-spinner'));
-      const chatMessages = fixture.debugElement.query(By.css('.chat-messages'));
-      const chatInput = fixture.debugElement.query(By.css('.chat-input'));
-      expect(spinner).toBeFalsy();
-      expect(chatMessages).toBeTruthy();
-      expect(chatInput).toBeTruthy();
-    });
+      it('should show chat content', () => {
+        const spinner =
+            fixture.debugElement.query(By.css('mat-progress-spinner'));
+        const chatMessages =
+            fixture.debugElement.query(By.css('.chat-messages'));
+        const chatInput = fixture.debugElement.query(By.css('.chat-input'));
+        expect(spinner).toBeFalsy();
+        expect(chatMessages).toBeTruthy();
+        expect(chatInput).toBeTruthy();
+      });
     });
   });
 
@@ -549,7 +554,8 @@ describe('ChatPanelComponent', () => {
       mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(true);
       fixture.detectChanges();
 
-      let feedbackButtons = fixture.debugElement.query(By.css('.feedback-buttons'));
+      let feedbackButtons =
+          fixture.debugElement.query(By.css('.feedback-buttons'));
       expect(feedbackButtons).toBeTruthy();
     });
 
@@ -559,7 +565,8 @@ describe('ChatPanelComponent', () => {
       mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(false);
       fixture.detectChanges();
 
-      let feedbackButtons = fixture.debugElement.query(By.css('.feedback-buttons'));
+      let feedbackButtons =
+          fixture.debugElement.query(By.css('.feedback-buttons'));
       expect(feedbackButtons).toBeFalsy();
     });
 
@@ -569,7 +576,8 @@ describe('ChatPanelComponent', () => {
       mockAgentService.getLoadingStateResponse.next(true);
       fixture.detectChanges();
 
-      const feedbackButtons = fixture.debugElement.query(By.css('.feedback-buttons'));
+      const feedbackButtons =
+          fixture.debugElement.query(By.css('.feedback-buttons'));
       expect(feedbackButtons).toBeFalsy();
     });
 
@@ -583,7 +591,8 @@ describe('ChatPanelComponent', () => {
       ];
       fixture.detectChanges();
 
-      let feedbackButtons = fixture.debugElement.queryAll(By.css('.feedback-buttons'));
+      let feedbackButtons =
+          fixture.debugElement.queryAll(By.css('.feedback-buttons'));
       expect(feedbackButtons.length).toBe(4);
     });
 
@@ -592,7 +601,8 @@ describe('ChatPanelComponent', () => {
       component.messages = [{role: 'bot', text: 'message'}];
       fixture.detectChanges();
 
-      const upButton = fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0];
+      const upButton =
+          fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0];
       upButton.nativeElement.click();
 
       expect(component.feedback.emit).toHaveBeenCalledWith({direction: 'up'});
@@ -603,10 +613,83 @@ describe('ChatPanelComponent', () => {
       component.messages = [{role: 'bot', text: 'message'}];
       fixture.detectChanges();
 
-      const downButton = fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1];
+      const downButton =
+          fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1];
       downButton.nativeElement.click();
 
       expect(component.feedback.emit).toHaveBeenCalledWith({direction: 'down'});
     });
+  });
+  describe('Computer Use', () => {
+    it(
+        'isComputerUseResponse should return true when image data and url are present',
+        () => {
+          const message = {
+            functionResponse: {
+              name: 'computer_use',
+              response: {
+                image: {data: 'base64data', mimetype: 'image/png'},
+                url: 'http://example.com'
+              }
+            }
+          };
+          expect(component.isComputerUseResponse(message)).toBeTrue();
+        });
+
+    it(
+        'isComputerUseResponse should return false when image data is missing',
+        () => {
+          const message = {
+            functionResponse: {
+              name: 'computer_use',
+              response: {image: null, url: 'http://example.com'}
+            }
+          };
+          expect(component.isComputerUseResponse(message)).toBeFalse();
+        });
+
+    it(
+        'isComputerUseResponse should return false when url is missing', () => {
+          const message = {
+            functionResponse: {
+              name: 'computer_use',
+              response:
+                  {image: {data: 'base64data', mimetype: 'image/png'}, url: ''}
+            }
+          };
+          expect(component.isComputerUseResponse(message)).toBeFalse();
+        });
+
+    it(
+        'should render computer use container and screenshot', async () => {
+          component.messages = [{
+            role: 'bot',
+            functionResponse: {
+              name: 'computer',
+              response: {
+                image: {data: 'base64data', mimetype: 'image/png'},
+                url: 'http://google.com'
+              }
+            }
+          }];
+          fixture.detectChanges();
+          await fixture.whenStable();
+
+          const container =
+              fixture.debugElement.query(By.css('.computer-use-container'));
+          expect(container).toBeTruthy();
+
+          const img =
+              fixture.debugElement.query(By.css('.computer-use-screenshot'));
+          expect(img.nativeElement.src)
+              .toContain('data:image/png;base64,base64data');
+
+          const url = fixture.debugElement.query(By.css('.url-text'));
+          expect(url.nativeElement.textContent).toContain('http://google.com');
+
+          const toolName =
+              fixture.debugElement.query(By.css('.computer-use-tool-name'));
+          expect(toolName.nativeElement.textContent).toContain('computer');
+        });
   });
 });

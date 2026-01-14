@@ -35,6 +35,7 @@ import {EMPTY, NEVER, of, Subject} from 'rxjs';
 import {catchError, first, switchMap, tap} from 'rxjs/operators';
 
 import type {EvalCase} from '../../core/models/Eval';
+import {ComputerUsePayload, FunctionResponse} from '../../core/models/types';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
@@ -269,5 +270,30 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   emitFeedback(direction: 'up'|'down') {
     this.feedback.emit({direction});
+  }
+
+  isComputerUseResponse(message: {functionResponse?: FunctionResponse}):
+      boolean {
+    const response = message.functionResponse?.response as ComputerUsePayload;
+    return !!(response?.image?.data && response?.url);
+  }
+
+  getComputerUseScreenshot(message: {functionResponse?: FunctionResponse}):
+      string {
+    const response = message.functionResponse?.response as ComputerUsePayload;
+    const imageInfo = response?.image;
+
+    if (!imageInfo?.data) return '';
+
+    const screenshot = imageInfo.data;
+    if (screenshot.startsWith('data:')) return screenshot;
+
+    const mimeType = imageInfo.mimetype || 'image/png';
+    return `data:${mimeType};base64,${screenshot}`;
+  }
+
+  getComputerUseUrl(message: {functionResponse?: FunctionResponse}): string {
+    const response = message.functionResponse?.response as ComputerUsePayload;
+    return response?.url || '';
   }
 }

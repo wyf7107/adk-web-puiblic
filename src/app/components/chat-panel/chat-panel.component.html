@@ -234,15 +234,24 @@
       {{ message.functionCall.name }}
     </button>
     } @if (message.functionResponse) {
-    <button
-      mat-stroked-button
-      [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-      class="function-event-button"
-      (click)="clickEvent.emit(i)"
-    >
-      <mat-icon>check</mat-icon>
-      {{ message.functionResponse.name }}
-    </button>
+      @if (isComputerUseResponse(message)) {
+      <div class="computer-use-container" (click)="clickEvent.emit(i)">
+        <div class="computer-use-header">
+          <span class="computer-use-tool-name">{{ message.functionResponse.name }}</span>
+        </div>
+        <img [src]="getComputerUseScreenshot(message)" class="computer-use-screenshot" alt="Computer Use Screenshot" />
+        <div class="computer-use-footprint">
+          <mat-icon class="computer-icon">computer</mat-icon>
+          <span class="url-text">{{ getComputerUseUrl(message) }}</span>
+        </div>
+      </div>
+      } @else {
+        <button mat-stroked-button [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+          class="function-event-button" (click)="clickEvent.emit(i)">
+          <mat-icon>check</mat-icon>
+          {{ message.functionResponse.name }}
+        </button>
+      }
     }
     <div
       [ngClass]="{

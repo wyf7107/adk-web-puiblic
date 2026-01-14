@@ -373,7 +373,15 @@ button {
 }
 
 :host ::ng-deep .mdc-linear-progress__buffer-dots {
-  background: var(--chat-mdc-linear-progress-buffer-dots-background-color);
+  background-image: radial-gradient(
+    circle,
+    var(
+        --chat-mdc-linear-progress-buffer-dots-background-color,
+        var(--mat-sys-surface-variant)
+      )
+      calc(var(--mat-progress-bar-track-height, 4px) / 2),
+    transparent 0
+  );
 }
 
 :host ::ng-deep .mat-mdc-select-arrow-wrapper {

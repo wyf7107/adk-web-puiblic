@@ -153,4 +153,8 @@ export class StreamChatService implements StreamChatServiceInterface {
   closeStream() {
     this.webSocketService.closeConnection();
   }
+
+  onLongRunningEvent() {
+    return this.webSocketService.onLongRunningEvent();
+  }
 }

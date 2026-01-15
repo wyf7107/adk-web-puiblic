@@ -333,6 +333,36 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.openSnackBar(error, 'OK');
     });
 
+    this.streamChatService.onLongRunningEvent().subscribe((event) => {
+      if (event?.longRunningToolIds && event.longRunningToolIds.length > 0) {
+        this.getAsyncFunctionsFromParts(
+            event.longRunningToolIds, event.content.parts, event.invocationId ?? '');
+        const func = this.longRunningEvents[0].function;
+        if (func.args.authConfig &&
+            func.args.authConfig.exchangedAuthCredential &&
+            func.args.authConfig.exchangedAuthCredential.oauth2) {
+          // for OAuth
+          const authUri =
+              func.args.authConfig.exchangedAuthCredential.oauth2.authUri;
+          const updatedAuthUri = this.updateRedirectUri(
+              authUri,
+              this.redirectUri,
+          );
+          this.openOAuthPopup(updatedAuthUri)
+              .then((authResponseUrl) => {
+                this.functionCallEventId = event.id ?? '';
+                this.sendOAuthResponse(func, authResponseUrl, this.redirectUri);
+              })
+              .catch((error) => {
+                console.error('OAuth Error:', error);
+              });
+        } else {
+          this.functionCallEventId = event.id ?? '';
+        }
+        this.changeDetectorRef.detectChanges();
+      }
+    });
+
     // OAuth HACK: Opens oauth poup in a new window. If the oauth callback
     // is successful, the new window acquires the auth token, state and
     // optionally the scope. Send this back to the main window.

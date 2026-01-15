@@ -18,6 +18,7 @@
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 import {LiveRequest} from '../../models/LiveRequest';
+import {Event} from '../../models/types';
 
 export const WEBSOCKET_SERVICE =
     new InjectionToken<WebSocketService>('WebSocketService');
@@ -33,4 +34,5 @@ export declare abstract class WebSocketService {
   abstract urlSafeBase64ToBase64(urlSafeBase64: string): string;
   abstract emitWsCloseReason(reason: string): void;
   abstract onCloseReason(): Observable<string>;
+  abstract onLongRunningEvent(): Observable<Event>;
 }

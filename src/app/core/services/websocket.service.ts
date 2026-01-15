@@ -36,6 +36,7 @@ export class WebSocketService implements WebSocketServiceInterface {
   private audioBuffer: Uint8Array[] = [];
   private audioIntervalId: any = null;
   private closeReasonSubject = new Subject<string>();
+  private longRunningEventSubject = new Subject<Event>();
 
   connect(serverUrl: string) {
     this.socket$ = new WebSocketSubject({
@@ -98,6 +99,12 @@ export class WebSocketService implements WebSocketServiceInterface {
 
   private handleIncomingAudio(message: any) {
     const msg = JSON.parse(message) as Event;
+
+    if (msg['longRunningToolIds'] && msg['longRunningToolIds'].length > 0) {
+      console.log('long running')
+      this.longRunningEventSubject.next(msg);
+    }
+
     if (
       msg['content'] &&
       msg['content']['parts'] &&
@@ -137,5 +144,9 @@ export class WebSocketService implements WebSocketServiceInterface {
 
   onCloseReason() {
     return this.closeReasonSubject.asObservable();
+  }
+
+  onLongRunningEvent() {
+    return this.longRunningEventSubject.asObservable();
   }
 }

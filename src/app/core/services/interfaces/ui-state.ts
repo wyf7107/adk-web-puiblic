@@ -34,8 +34,9 @@ export declare abstract class UiStateService {
   abstract isEventRequestResponseLoading(): Observable<boolean>;
   abstract setIsEventRequestResponseLoading(isLoading: boolean): void;
 
-  abstract lazyLoadMessages(sessionName: string, listParams: ListParams):
-      Observable<void>;
+  abstract lazyLoadMessages(
+      sessionName: string, listParams: ListParams,
+      isBackground?: boolean): Observable<void>;
   abstract onNewMessagesLoaded(): Observable<ListResponse<any>>;
   abstract onNewMessagesLoadingFailed(): Observable<{message: string}>;
   abstract setIsMessagesLoading(isLoading: boolean): void;

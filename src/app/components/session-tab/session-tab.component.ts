@@ -25,7 +25,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {ActivatedRoute} from '@angular/router';
 import {of, Subject} from 'rxjs';
-import {catchError, debounceTime, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {catchError, debounceTime, first, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
 
 import {Session} from '../../core/models/Session';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
@@ -130,8 +130,7 @@ export class SessionTabComponent implements OnInit {
               this.pageToken = nextPageToken ?? '';
               this.canLoadMoreSessions = !!nextPageToken;
               this.changeDetectorRef.markForCheck();
-            })
-            )
+            }))
         .subscribe(
             () => {
               this.isLoadingMoreInProgress.set(false);
@@ -148,14 +147,28 @@ export class SessionTabComponent implements OnInit {
             tap(() => {
               this.uiStateService.setIsSessionLoading(true);
             }),
-            switchMap((sessionId) => {
-              return this.sessionService
-                  .getSession(this.userId, this.appName, sessionId)
-                  .pipe(catchError(() => of(null)));
-            }),
+            withLatestFrom(
+                this.featureFlagService.isInfinityMessageScrollingEnabled()),
+            switchMap(
+                ([sessionId, isInfinityScrollingEnabled]) =>
+                    this.sessionService
+                        .getSession(this.userId, this.appName, sessionId)
+                        .pipe(
+                            map(response =>
+                                    ({response, isInfinityScrollingEnabled})))
+                        .pipe(catchError(() => of(null)))),
             tap((res) => {
               if (!res) return;
-              const session = this.fromApiResultToSession(res);
+              const session = this.fromApiResultToSession(res.response);
+              if (res.isInfinityScrollingEnabled && session.id) {
+                this.uiStateService
+                    .lazyLoadMessages(session.id, {
+                      pageSize: 100,
+                      pageToken: '',
+                    })
+                    .pipe(first())
+                    .subscribe();
+              }
               this.sessionSelected.emit(session);
               this.changeDetectorRef.markForCheck();
             }),
@@ -177,14 +190,28 @@ export class SessionTabComponent implements OnInit {
                 ([sessionId, isInfinityScrollingEnabled]) =>
                     this.sessionService
                         .getSession(
-                            this.userId, this.appName, sessionId,
-                            isInfinityScrollingEnabled ?
-                                {pageSize: 100, pageToken: ''} :
-                                undefined)
+                            this.userId,
+                            this.appName,
+                            sessionId,
+                            )
+                        .pipe(
+                            map(response =>
+                                    ({response, isInfinityScrollingEnabled})))
                         .pipe(catchError(() => of(null)))),
             tap((res) => {
               if (!res) return;
-              const session = this.fromApiResultToSession(res);
+              const session = this.fromApiResultToSession(res.response);
+              if (res.isInfinityScrollingEnabled && session.id) {
+                this.uiStateService
+                    .lazyLoadMessages(
+                        session.id, {
+                          pageSize: 100,
+                          pageToken: '',
+                        },
+                        /**isBackground= */ true)
+                    .pipe(first())
+                    .subscribe();
+              }
               this.sessionReloaded.emit(session);
               this.changeDetectorRef.markForCheck();
             }),

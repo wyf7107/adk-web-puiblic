@@ -46,7 +46,6 @@ export declare abstract class SessionService {
       userId: string,
       appName: string,
       sessionId: string,
-      eventParams?: ListParams,
       ): Observable<Session>;
   abstract importSession(
       userId: string,

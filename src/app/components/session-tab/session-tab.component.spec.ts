@@ -49,7 +49,8 @@ describe('SessionTabComponent', () => {
     sessionService = new MockSessionService();
     mockUiStateService = new MockUiStateService();
     mockFeatureFlagService = new MockFeatureFlagService();
-    mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(false);
+    mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+        false);
 
     sessionService.listSessionsResponse.next({
       items: [],
@@ -90,17 +91,18 @@ describe('SessionTabComponent', () => {
   });
 
   describe('on initialization', () => {
-    it('sets filter from query param if session id is provided and filtering is enabled',
-       () => {
-         mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
-         (TestBed.inject(ActivatedRoute) as any).snapshot.queryParams = {
-           'session': '123'
-         };
-         const customFixture = TestBed.createComponent(SessionTabComponent);
-         customFixture.detectChanges();
-         expect(customFixture.componentInstance.filterControl.value)
-             .toBe('123');
-       });
+    it(
+        'sets filter from query param if session id is provided and filtering is enabled',
+        () => {
+          mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
+          (TestBed.inject(ActivatedRoute) as any).snapshot.queryParams = {
+            'session': '123'
+          };
+          const customFixture = TestBed.createComponent(SessionTabComponent);
+          customFixture.detectChanges();
+          expect(customFixture.componentInstance.filterControl.value)
+              .toBe('123');
+        });
   });
 
   describe('when session filtering is enabled', () => {
@@ -300,6 +302,25 @@ describe('SessionTabComponent', () => {
                   }));
     });
 
+    describe('when infinity scrolling is enabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+            true);
+        (mockUiStateService.lazyLoadMessages as unknown as jasmine.Spy)
+            .and.returnValue(of(null));
+        sessionService.getSessionResponse.next({id: 'session1'} as any);
+        component.getSession('session1');
+      });
+
+      it('lazy loads messages', () => {
+        expect(mockUiStateService.lazyLoadMessages)
+            .toHaveBeenCalledWith('session1', {
+              pageSize: 100,
+              pageToken: '',
+            });
+      });
+    });
+
     describe('when getting a session throws error', () => {
       beforeEach(() => {
         sessionService.getSessionResponse.error(new Error('error'));
@@ -375,15 +396,26 @@ describe('SessionTabComponent', () => {
       beforeEach(() => {
         mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
             true);
-        sessionService.getSessionResponse.next({} as any);
+        (mockUiStateService.lazyLoadMessages as unknown as jasmine.Spy)
+            .and.returnValue(of(null));
+        sessionService.getSessionResponse.next({id: 'session1'} as any);
         component.reloadSession('session1');
       });
 
-      it('fetches session with pagination params', () => {
+      it('fetches session', () => {
         expect(sessionService.getSession)
             .toHaveBeenCalledWith(
-                component.userId, component.appName, 'session1',
-                {pageSize: 100, pageToken: ''});
+                component.userId, component.appName, 'session1');
+      });
+
+      it('lazy loads messages in background', () => {
+        expect(mockUiStateService.lazyLoadMessages)
+            .toHaveBeenCalledWith(
+                'session1', {
+                  pageSize: 100,
+                  pageToken: '',
+                },
+                true);
       });
     });
 
@@ -398,7 +430,7 @@ describe('SessionTabComponent', () => {
       it('fetches session without pagination params', () => {
         expect(sessionService.getSession)
             .toHaveBeenCalledWith(
-                component.userId, component.appName, 'session1', undefined);
+                component.userId, component.appName, 'session1');
       });
     });
   });

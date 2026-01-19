@@ -31,8 +31,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {EMPTY, NEVER, of, Subject} from 'rxjs';
-import {catchError, first, switchMap, tap} from 'rxjs/operators';
+import {EMPTY, merge, NEVER, of, Subject} from 'rxjs';
+import {catchError, filter, first, switchMap, tap} from 'rxjs/operators';
 
 import type {EvalCase} from '../../core/models/Eval';
 import {ComputerUsePayload, FunctionResponse} from '../../core/models/types';
@@ -121,7 +121,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @ViewChild('autoScroll') scrollContainer!: ElementRef;
   @ViewChild('messageTextarea') public textarea: ElementRef|undefined;
   scrollInterrupted = false;
-  private previousMessageCount = 0;
+  private lastMessageRef: any = null;
   private nextPageToken = '';
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
@@ -129,7 +129,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   readonly markdownComponent: Type<MarkdownComponentInterface> = inject(
       MARKDOWN_COMPONENT,
   );
-  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  protected readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   private readonly agentService = inject(AGENT_SERVICE);
   private readonly sessionService = inject(SESSION_SERVICE);
   private readonly destroyRef = inject(DestroyRef);
@@ -166,48 +166,37 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnInit() {
-    if (this.featureFlagService.isInfinityMessageScrollingEnabled()) {
-      this.uiStateService.onNewMessagesLoaded()
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe((response: ListResponse<any>) => {
-            this.nextPageToken = response.nextPageToken ?? '';
-            // Scroll to the last unseen message after the new messages are
-            // loaded.
-            if (this.scrollContainer?.nativeElement) {
-              const oldScrollHeight =
-                  this.scrollContainer.nativeElement.scrollHeight;
-              setTimeout(() => {
-                const newScrollHeight =
-                    this.scrollContainer.nativeElement.scrollHeight;
-                this.scrollContainer.nativeElement.scrollTop =
-                    newScrollHeight - oldScrollHeight;
-              });
-            }
-          });
+    this.featureFlagService.isInfinityMessageScrollingEnabled()
+        .pipe(
+            first(),
+            filter((enabled) => enabled),
+            switchMap(
+                () => merge(
+                    this.uiStateService.onNewMessagesLoaded().pipe(
+                        tap((response: ListResponse<any>) => {
+                          this.nextPageToken = response.nextPageToken ?? '';
+                          this.restoreScrollPosition();
+                        })),
+                    this.onScroll.pipe(switchMap((event: Event) => {
+                      const element = event.target as HTMLElement;
+                      if (element.scrollTop !== 0) {
+                        return EMPTY;
+                      }
 
-      this.onScroll
-          .pipe(
-              takeUntilDestroyed(this.destroyRef),
-              switchMap((event: Event) => {
-                const element = event.target as HTMLElement;
-                if (element.scrollTop !== 0) {
-                  return EMPTY;
-                }
+                      if (!this.nextPageToken) {
+                        return EMPTY;
+                      }
 
-                if (!this.nextPageToken) {
-                  return EMPTY;
-                }
-
-                return this.uiStateService
-                    .lazyLoadMessages(this.sessionName(), {
-                      pageSize: 100,
-                      pageToken: this.nextPageToken,
-                    })
-                    .pipe(first(), catchError(() => NEVER));
-              }),
-              )
-          .subscribe();
-    }
+                      return this.uiStateService
+                          .lazyLoadMessages(this.sessionName(), {
+                            pageSize: 100,
+                            pageToken: this.nextPageToken,
+                          })
+                          .pipe(first(), catchError(() => NEVER));
+                    })))),
+            takeUntilDestroyed(this.destroyRef),
+            )
+        .subscribe();
   }
 
   ngAfterViewInit() {
@@ -223,21 +212,24 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['messages']) {
-      if (this.messages.length > this.previousMessageCount) {
-        const newMessages = this.messages.slice(this.previousMessageCount);
-        if (newMessages.some(m => m.role === 'user')) {
+      const currentLastMessage = this.messages[this.messages.length - 1];
+      const isNewMessageAppended = currentLastMessage !== this.lastMessageRef;
+
+      if (isNewMessageAppended) {
+        if (currentLastMessage?.role === 'user' ||
+            currentLastMessage?.isLoading === true) {
           this.scrollInterrupted = false;
         }
         this.scrollToBottom();
       }
-      this.previousMessageCount = this.messages.length;
+      this.lastMessageRef = currentLastMessage;
     }
   }
 
   scrollToBottom() {
-    if (!this.scrollInterrupted && this.scrollContainer?.nativeElement) {
+    if (!this.scrollInterrupted) {
       setTimeout(() => {
-        this.scrollContainer.nativeElement.scrollTo({
+        this.scrollContainer?.nativeElement.scrollTo({
           top: this.scrollContainer.nativeElement.scrollHeight,
           behavior: 'auto',
         });
@@ -270,6 +262,18 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   emitFeedback(direction: 'up'|'down') {
     this.feedback.emit({direction});
+  }
+
+  private restoreScrollPosition() {
+    // Scroll to the last unseen message after the new messages are loaded.
+    if (this.scrollContainer?.nativeElement) {
+      const oldScrollHeight = this.scrollContainer.nativeElement.scrollHeight;
+      setTimeout(() => {
+        const newScrollHeight = this.scrollContainer.nativeElement.scrollHeight;
+        this.scrollContainer.nativeElement.scrollTop =
+            newScrollHeight - oldScrollHeight;
+      });
+    }
   }
 
   isComputerUseResponse(message: {functionResponse?: FunctionResponse}):

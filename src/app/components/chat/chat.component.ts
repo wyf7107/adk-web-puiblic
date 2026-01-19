@@ -389,17 +389,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           if (enabled) {
             this.uiStateService.onNewMessagesLoaded().subscribe(
                 (response: ListResponse<any>) => {
-                  response.items.forEach((event: any) => {
-                    const parts = event.content?.parts || [];
-                    [...parts].reverse().forEach((part: any) => {
-                      this.storeMessage(
-                          part, event, event.author === 'user' ? 'user' : 'bot',
-                          undefined, undefined, true);
-                      if (event.author && event.author !== 'user') {
-                        this.storeEvents(part, event);
-                      }
-                    });
-                  });
+                  this.populateMessages(response.items, true);
+                  this.loadTraceData();
                 });
 
             this.uiStateService.onNewMessagesLoadingFailed().subscribe(
@@ -1252,6 +1243,35 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.artifacts = [];
   }
 
+  private loadTraceData() {
+    this.eventService.getTrace(this.sessionId)
+        .pipe(first(), catchError(() => of([])))
+        .subscribe(res => {
+          this.traceData = res;
+          this.traceService.setEventData(this.eventData);
+          this.traceService.setMessages(this.messages());
+        });
+    this.bottomPanelVisible = false;
+    this.changeDetectorRef.detectChanges();
+  }
+
+  private populateMessages(events: any[], reverse: boolean = false) {
+    this.resetEventsAndMessages();
+
+    events.forEach((event: any) => {
+      const parts = event.content?.parts || [];
+      const partsToProcess = reverse ? [...parts].reverse() : parts;
+      partsToProcess.forEach((part: any) => {
+        this.storeMessage(
+            part, event, event.author === 'user' ? 'user' : 'bot', undefined,
+            undefined, reverse);
+        if (event.author && event.author !== 'user') {
+          this.storeEvents(part, event);
+        }
+      });
+    });
+  }
+
   protected updateWithSelectedSession(session: Session) {
     if (!session || !session.id || !session.events || !session.state) {
       return;
@@ -1268,34 +1288,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    this.resetEventsAndMessages();
-
-    session.events.forEach((event: any) => {
-      event.content?.parts?.forEach((part: any) => {
-        this.storeMessage(
-            part, event, event.author === 'user' ? 'user' : 'bot');
-        if (event.author && event.author !== 'user') {
-          this.storeEvents(part, event);
-        }
-      });
-    });
-
-    this.eventService.getTrace(this.sessionId)
-        .pipe(first(), catchError(() => of([])))
-        .subscribe(res => {
-          this.traceData = res;
-          this.traceService.setEventData(this.eventData);
-          this.traceService.setMessages(this.messages());
-        });
-
     this.sessionService.canEdit(this.userId, session)
         .pipe(first(), catchError(() => of(true)))
         .subscribe((canEdit) => {
           this.chatPanel()?.canEditSession.set(canEdit);
           this.canEditSession.set(canEdit);
         });
-    this.bottomPanelVisible = false;
-    this.changeDetectorRef.detectChanges();
+
+    this.featureFlagService.isInfinityMessageScrollingEnabled()
+        .pipe(first())
+        .subscribe((isInfinityMessageScrollingEnabled) => {
+          if (!isInfinityMessageScrollingEnabled) {
+            this.populateMessages(session.events || []);
+          }
+          this.loadTraceData();
+        });
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {

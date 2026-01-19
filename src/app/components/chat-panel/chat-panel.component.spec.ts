@@ -181,15 +181,18 @@ describe('ChatPanelComponent', () => {
   });
 
   describe('Eval Edit Mode', () => {
+    beforeEach(() => {
+      component.evalCase = {
+        evalId: '1',
+        conversation: [],
+        sessionInput: {},
+        creationTimestamp: 123,
+      };
+      component.isEvalEditMode = true;
+    });
+
     it(
         'should show edit/delete buttons for text messages', async () => {
-          component.evalCase = {
-            evalId: '1',
-            conversation: [],
-            sessionInput: {},
-            creationTimestamp: 123,
-          };
-          component.isEvalEditMode = true;
           component.messages =
               [{role: 'bot', text: 'eval message', eventId: '1'}];
           fixture.detectChanges();
@@ -203,13 +206,6 @@ describe('ChatPanelComponent', () => {
         });
 
     it('should show edit button for function calls', async () => {
-      component.evalCase = {
-        evalId: '1',
-        conversation: [],
-        sessionInput: {},
-        creationTimestamp: 123,
-      };
-      component.isEvalEditMode = true;
       component.messages =
           [{role: 'bot', functionCall: {name: 'func1'}, eventId: '1'}];
       component.isEditFunctionArgsEnabled = true;
@@ -224,13 +220,6 @@ describe('ChatPanelComponent', () => {
 
     it(
         'should emit editEvalCaseMessage when edit is clicked', async () => {
-          component.evalCase = {
-            evalId: '1',
-            conversation: [],
-            sessionInput: {},
-            creationTimestamp: 123,
-          };
-          component.isEvalEditMode = true;
           const message = {role: 'bot', text: 'eval message', eventId: '1'};
           component.messages = [message];
           spyOn(component.editEvalCaseMessage, 'emit');
@@ -247,13 +236,6 @@ describe('ChatPanelComponent', () => {
     it(
         'should emit deleteEvalCaseMessage when delete is clicked',
         async () => {
-          component.evalCase = {
-            evalId: '1',
-            conversation: [],
-            sessionInput: {},
-            creationTimestamp: 123,
-          };
-          component.isEvalEditMode = true;
           const message = {role: 'bot', text: 'eval message', eventId: '1'};
           component.messages = [message];
           spyOn(component.deleteEvalCaseMessage, 'emit');
@@ -270,13 +252,6 @@ describe('ChatPanelComponent', () => {
     it(
         'should emit editFunctionArgs when edit on function call is clicked',
         async () => {
-          component.evalCase = {
-            evalId: '1',
-            conversation: [],
-            sessionInput: {},
-            creationTimestamp: 123,
-          };
-          component.isEvalEditMode = true;
           const message = {
             role: 'bot',
             functionCall: {name: 'func1'},
@@ -351,80 +326,180 @@ describe('ChatPanelComponent', () => {
   });
 
   describe('Scrolling', () => {
-    it(
-        'should scroll to bottom when user sends a message, even if scroll was interrupted',
-        fakeAsync(() => {
-          // Given
-          component.messages = [{role: 'bot', text: 'Bot message'}];
-          fixture.detectChanges();
-          const scrollContainerElement =
-              component.scrollContainer.nativeElement;
-          spyOn(scrollContainerElement, 'scrollTo');
-          scrollContainerElement.dispatchEvent(new WheelEvent('wheel'));
-          expect(component.scrollInterrupted).toBeTrue();
+    describe('basic scrolling behavior', () => {
+      let scrollContainerElement: HTMLElement;
 
-          // When
-          const oldMessages = component.messages;
-          component.messages = [...oldMessages, {role: 'user', text: 'User'}];
-          component.ngOnChanges({
-            'messages': new SimpleChange(oldMessages, component.messages, false)
+      beforeEach(() => {
+        component.messages = [{role: 'bot', text: 'Bot message'}];
+        fixture.detectChanges();
+        scrollContainerElement = component.scrollContainer.nativeElement;
+      });
+
+      it(
+          'should scroll to bottom when user sends a message, even if scroll was interrupted',
+          fakeAsync(() => {
+            spyOn(scrollContainerElement, 'scrollTo');
+            scrollContainerElement.dispatchEvent(new WheelEvent('wheel'));
+            expect(component.scrollInterrupted).toBeTrue();
+
+            const oldMessages = component.messages;
+            component.messages = [...oldMessages, {role: 'user', text: 'User'}];
+            component.ngOnChanges({
+              'messages':
+                  new SimpleChange(oldMessages, component.messages, false)
+            });
+            fixture.detectChanges();
+            tick(50);
+
+            expect(component.scrollInterrupted).toBeFalse();
+            expect(scrollContainerElement.scrollTo).toHaveBeenCalled();
+          }));
+
+      it(
+          'should call uiStateService.lazyLoadMessages when scrolled to top',
+          fakeAsync(() => {
+            const initialMessageCount = 50;
+            const initialMessages = Array.from(
+                {length: initialMessageCount},
+                (_, i) => ({role: 'bot', text: `message ${i}`}));
+            component.messages = initialMessages;
+            fixture.detectChanges();
+
+            scrollContainerElement.style.height = '100px';
+            scrollContainerElement.style.overflow = 'auto';
+            scrollContainerElement.scrollTop = 100;
+            fixture.detectChanges();
+
+            mockUiStateService.newMessagesLoadedResponse.next(
+                {items: [], nextPageToken: 'initial-token'});
+            tick();
+
+            scrollContainerElement.scrollTop = 0;
+            scrollContainerElement.dispatchEvent(new Event('scroll'));
+            tick(200);
+
+            expect(mockUiStateService.lazyLoadMessages).toHaveBeenCalled();
+
+            mockUiStateService.lazyLoadMessagesResponse.next();
+
+            const newMessages = Array.from(
+                {length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`}));
+            component.messages = [...newMessages, ...component.messages];
+            mockUiStateService.newMessagesLoadedResponse.next(
+                {items: newMessages, nextPageToken: 'next'});
+            tick();
+            fixture.detectChanges();
+
+            expect(component.messages.length)
+                .toBe(initialMessageCount + newMessages.length);
+            expect(component.messages[0]).toEqual(newMessages[0]);
+          }));
+    });
+
+    describe('when infinity scrolling is enabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+            true);
+      });
+
+      it('should lazy load messages when session name changes', () => {
+        mockUiStateService.lazyLoadMessages.calls.reset();
+
+        fixture.componentRef.setInput('sessionName', 'new-session-id');
+        fixture.detectChanges();
+
+        expect(mockUiStateService.lazyLoadMessages)
+            .toHaveBeenCalledWith('new-session-id', {
+              pageSize: 100,
+              pageToken: '',
+            });
+      });
+
+      describe('when new messages are loaded', () => {
+        let scrollContainer: HTMLElement;
+        const nextToken = 'updated-token-123';
+
+        beforeEach(fakeAsync(() => {
+          scrollContainer = component.scrollContainer.nativeElement;
+
+          // Define scrollHeight and scrollTop as simple data properties to
+          // bypass browser layout constraint logic.
+          Object.defineProperty(scrollContainer, 'scrollHeight', {
+            value: 1000,
+            configurable: true,
           });
-          fixture.detectChanges();
-          tick(50);
+          Object.defineProperty(scrollContainer, 'scrollTop', {
+            value: 0,
+            writable: true,
+            configurable: true,
+          });
 
-          // Then
-          expect(component.scrollInterrupted).toBeFalse();
-          expect(scrollContainerElement.scrollTo).toHaveBeenCalled();
+          mockUiStateService.newMessagesLoadedResponse.next(
+              {items: [], nextPageToken: nextToken});
         }));
 
-    it(
-        'should call uiStateService.lazyLoadMessages when scrolled to top',
-        fakeAsync(() => {
-          // Given
-          const initialMessageCount = 50;
-          const initialMessages = Array.from(
-              {length: initialMessageCount},
-              (_, i) => ({role: 'bot', text: `message ${i}`}));
-          component.messages = initialMessages;
-          fixture.detectChanges();
+        it(
+            'should update nextPageToken and fetch on scroll', fakeAsync(() => {
+              component['onScroll'].next(
+                  {target: scrollContainer} as unknown as Event);
+              tick();
 
-          const scrollContainerElement =
-              component.scrollContainer.nativeElement;
-          // Make sure the scroll height is greater than the client height
-          scrollContainerElement.style.height = '100px';
-          scrollContainerElement.style.overflow = 'auto';
-          scrollContainerElement.scrollTop = 100;
-          fixture.detectChanges();
+              expect(mockUiStateService.lazyLoadMessages)
+                  .toHaveBeenCalledWith(
+                      jasmine.anything(),
+                      jasmine.objectContaining({pageToken: nextToken}));
+            }));
 
-          // Initialize nextPageToken to allow loading more messages
-          mockUiStateService.newMessagesLoadedResponse.next(
-              {items: [], nextPageToken: 'initial-token'});
-          tick();
+        it('should restore scroll position', fakeAsync(() => {
+                      mockUiStateService.newMessagesLoadedResponse.next({
+                        items: [{role: 'bot', text: 'message 1'}],
+                        nextPageToken: nextToken
+                      });
+                      Object.defineProperty(
+                          scrollContainer, 'scrollHeight',
+                          {value: 1500, configurable: true});
 
-          // When
-          scrollContainerElement.scrollTop = 0;
-          scrollContainerElement.dispatchEvent(new Event('scroll'));
-          tick(200);  // Wait for debounce
+                      tick(50);
 
-          // Then
-          expect(mockUiStateService.lazyLoadMessages).toHaveBeenCalled();
+                      expect(scrollContainer.scrollTop).toBe(500);
+                    }));
+      });
+    });
 
-          mockUiStateService.lazyLoadMessagesResponse.next();
+    describe('when infinity scrolling is disabled', () => {
+      beforeEach(() => {
+        mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
+            false);
+      });
 
-          // When more messages are loaded
-          const newMessages = Array.from(
-              {length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`}));
-          component.messages = [...newMessages, ...component.messages];
-          mockUiStateService.newMessagesLoadedResponse.next(
-              {items: newMessages, nextPageToken: 'next'});
-          tick();
-          fixture.detectChanges();
+      it(
+          'should not lazy load messages when scrolled to top',
+          fakeAsync(() => {
+            mockUiStateService.lazyLoadMessages.calls.reset();
 
-          // Then
-          expect(component.messages.length)
-              .toBe(initialMessageCount + newMessages.length);
-          expect(component.messages[0]).toEqual(newMessages[0]);
-        }));
+            component.scrollContainer.nativeElement.scrollTop = 0;
+            component['onScroll'].next(
+                {target: component.scrollContainer.nativeElement} as unknown as
+                Event);
+            tick();
+
+            expect(mockUiStateService.lazyLoadMessages).not.toHaveBeenCalled();
+          }));
+
+      it(
+          'should not restore scroll position after loading new messages',
+          fakeAsync(() => {
+            const scrollContainer = component.scrollContainer.nativeElement;
+            scrollContainer.scrollTop = 0;
+            const originalScrollTop = scrollContainer.scrollTop;
+
+            mockUiStateService.newMessagesLoadedResponse.next(
+                {items: [], nextPageToken: ''});
+            tick();
+
+            expect(scrollContainer.scrollTop).toBe(originalScrollTop);
+          }));
+    });
   });
 
   describe('disabled features', () => {

@@ -17,7 +17,7 @@
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
 <div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
-  @if(uiStateService.isMessagesLoading() | async) {
+  @if((uiStateService.isMessagesLoading() | async) && (featureFlagService.isInfinityMessageScrollingEnabled() | async)) {
     <div class="messages-loading-container">
       <mat-progress-bar mode="indeterminate"></mat-progress-bar>
     </div>

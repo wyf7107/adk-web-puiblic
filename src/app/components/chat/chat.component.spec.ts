@@ -522,7 +522,6 @@ describe('ChatComponent', () => {
                 USER_ID,
                 TEST_APP_1_NAME,
                 SESSION_1_ID,
-                undefined,
             );
       });
     });

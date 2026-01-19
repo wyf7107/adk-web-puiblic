@@ -96,7 +96,7 @@ export class UiStateService implements UiStateServiceInterface {
     );
   }
 
-  lazyLoadMessages(sessionName: string, listParams?: ListParams):
+  lazyLoadMessages(sessionName: string, listParams?: ListParams, isBackground?: boolean):
       Observable<void> {
     throw new Error('Not implemented');
   }

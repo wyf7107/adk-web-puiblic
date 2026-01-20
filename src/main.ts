@@ -44,6 +44,7 @@ import {EventService} from './app/core/services/event.service';
 import {FeatureFlagService} from './app/core/services/feature-flag.service';
 import {GraphService} from './app/core/services/graph.service';
 import {AGENT_SERVICE} from './app/core/services/interfaces/agent';
+import {FeedbackService} from './app/core/services/feedback.service';
 import {AGENT_BUILDER_SERVICE} from './app/core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from './app/core/services/interfaces/artifact';
 import {AUDIO_PLAYING_SERVICE} from './app/core/services/interfaces/audio-playing';
@@ -51,6 +52,7 @@ import {AUDIO_RECORDING_SERVICE, AUDIO_WORKLET_MODULE_PATH} from './app/core/ser
 import {DOWNLOAD_SERVICE} from './app/core/services/interfaces/download';
 import {EVAL_SERVICE} from './app/core/services/interfaces/eval';
 import {EVENT_SERVICE} from './app/core/services/interfaces/event';
+import {FEEDBACK_SERVICE} from './app/core/services/interfaces/feedback';
 import {FEATURE_FLAG_SERVICE} from './app/core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE} from './app/core/services/interfaces/graph';
 import {LOCAL_FILE_SERVICE} from './app/core/services/interfaces/localfile';
@@ -90,6 +92,7 @@ fetch('./assets/config/runtime-config.json')
               MatInputModule, MatFormFieldModule, MatButtonModule),
           {provide: SESSION_SERVICE, useClass: SessionService},
           {provide: AGENT_SERVICE, useClass: AgentService},
+          {provide: FEEDBACK_SERVICE, useClass: FeedbackService},
           {provide: WEBSOCKET_SERVICE, useClass: WebSocketService},
           {
             provide: AUDIO_WORKLET_MODULE_PATH,

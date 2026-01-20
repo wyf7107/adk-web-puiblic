@@ -122,6 +122,25 @@ describe('TraceService', () => {
          const indices = await firstValueFrom(service.hoveredMessageIndices$);
          expect(indices).toEqual([1]);
        });
+
+    it(
+        'should safely handle messages with missing event data', async () => {
+          const messages = [
+            {role: 'bot', eventId: 'e1'},
+            {role: 'bot', eventId: 'e2'},  // e2 is missing in eventData
+          ];
+          const eventData = new Map<string, any>([
+            ['e1', {invocationId: 'inv1'}],
+          ]);
+          const span: Partial<Span> = {
+            attributes: {'gcp.vertex.agent.event_id': 'e1'},
+          };
+          service.setMessages(messages);
+          service.setEventData(eventData);
+          service.setHoveredMessages(span as Span, 'inv1');
+          const indices = await firstValueFrom(service.hoveredMessageIndices$);
+          expect(indices).toEqual([0]);
+        });
   });
 
   describe('resetTraceService', () => {

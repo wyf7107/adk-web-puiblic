@@ -23,7 +23,7 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, NavigationEnd, Router, UrlTree} from '@angular/router';
+import {ActivatedRoute, NavigationEnd, Params, Router, UrlTree} from '@angular/router';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {BehaviorSubject, NEVER, of, ReplaySubject, Subject, throwError} from 'rxjs';
 
@@ -190,11 +190,12 @@ describe('ChatComponent', () => {
     mockAgentBuilderService = jasmine.createSpyObj(
         'AgentBuilderService', ['clear', 'setLoadedAgentData']);
 
+    const queryParamsSubject = new BehaviorSubject<Params>({});
     mockActivatedRoute = {
       snapshot: {
         queryParams: {},
       } as any,
-      queryParams: of({}),
+      queryParams: queryParamsSubject,
     };
 
     const appName = new BehaviorSubject<string>(TEST_APP_1_NAME);
@@ -320,9 +321,9 @@ describe('ChatComponent', () => {
         mockAgentService.listAppsResponse.next(
             [TEST_APP_1_NAME, TEST_APP_2_NAME]);
 
-        mockActivatedRoute.snapshot!.queryParams = {
-          [APP_QUERY_PARAM]: INVALID_APP_NAME,
-        };
+        const params = {[APP_QUERY_PARAM]: INVALID_APP_NAME};
+        mockActivatedRoute.snapshot!.queryParams = params;
+        (mockActivatedRoute.queryParams as Subject<Params>).next(params);
         mockAgentService.listAppsResponse.next([TEST_APP_1_NAME]);
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
@@ -401,9 +402,11 @@ describe('ChatComponent', () => {
         mockAgentService.listAppsResponse.next(
             [TEST_APP_1_NAME, TEST_APP_2_NAME]);
 
-        mockActivatedRoute.snapshot!.queryParams = {
+        const params = {
           [APP_QUERY_PARAM]: TEST_APP_2_NAME,
         };
+        mockActivatedRoute.snapshot!.queryParams = params;
+        (mockActivatedRoute.queryParams as Subject<Params>).next(params);
         component.ngOnInit();
       });
       it('should create new session on init', () => {
@@ -420,10 +423,12 @@ describe('ChatComponent', () => {
       beforeEach(() => {
         mockAgentService.listAppsResponse.next([TEST_APP_1_NAME]);
         mockFeatureFlagService.isSessionUrlEnabledResponse.next(true);
-        mockActivatedRoute.snapshot!.queryParams = {
+        const params = {
           [APP_QUERY_PARAM]: TEST_APP_1_NAME,
           [SESSION_QUERY_PARAM]: SESSION_2_ID,
         };
+        mockActivatedRoute.snapshot!.queryParams = params;
+        (mockActivatedRoute.queryParams as Subject<Params>).next(params);
         mockSessionService.getSessionResponse.next(
             {id: SESSION_2_ID, state: {}, events: []});
       });
@@ -471,10 +476,12 @@ describe('ChatComponent', () => {
 
     describe('when session in URL is not found', () => {
       beforeEach(async () => {
-        mockActivatedRoute.snapshot!.queryParams = {
+        const params = {
           [APP_QUERY_PARAM]: TEST_APP_1_NAME,
           [SESSION_QUERY_PARAM]: SESSION_2_ID,
         };
+        mockActivatedRoute.snapshot!.queryParams = params;
+        (mockActivatedRoute.queryParams as Subject<Params>).next(params);
         mockSessionService.getSession.and.callFake(
             (userId: string, app: string, sessionId: string) => {
               if (sessionId === SESSION_2_ID) {

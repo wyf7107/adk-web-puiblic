@@ -265,6 +265,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.router.navigate([], {
             relativeTo: this.activatedRoute,
             queryParams: {app: app[0]},
+            replaceUrl: true,
           });
         }
       }),
@@ -1657,10 +1658,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private syncSelectedAppFromUrl() {
     combineLatest([
-      this.router.events.pipe(
-          filter((e) => e instanceof NavigationEnd),
-          map(() => this.activatedRoute.snapshot.queryParams),
-          ),
+      this.activatedRoute.queryParams,
       this.apps$
     ]).subscribe(([params, apps]) => {
       if (apps && apps.length) {

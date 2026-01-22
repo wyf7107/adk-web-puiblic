@@ -113,6 +113,13 @@
           <div [innerHTML]="renderGooglerSearch(message.renderedContent)"></div>
         </div>
         }
+        @if (message.a2uiData) {
+        <app-a2ui-canvas
+          [beginRendering]="message.a2uiData.beginRendering"
+          [surfaceUpdate]="message.a2uiData.surfaceUpdate"
+          [dataModelUpdate]="message.a2uiData.dataModelUpdate">
+        </app-a2ui-canvas>
+        }
       </div>
       @if (message.executableCode) {
       <code> {{ message.executableCode.code }} </code>

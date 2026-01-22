@@ -32,6 +32,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTooltip} from '@angular/material/tooltip';
 import {SafeHtml} from '@angular/platform-browser';
 import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {catchError, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
@@ -78,6 +79,11 @@ import {ChatMessagesInjectionToken} from './chat.component.i18n';
 const ROOT_AGENT = 'root_agent';
 /** Query parameter for pre-filling user input. */
 export const INITIAL_USER_INPUT_QUERY_PARAM = 'q';
+
+/** A2A data part markers */
+const A2A_DATA_PART_START_TAG = '<a2a_datapart_json>';
+const A2A_DATA_PART_END_TAG = '</a2a_datapart_json>';
+const A2UI_MIME_TYPE = 'application/json+a2ui';
 
 function fixBase64String(base64: string): string {
   // Replace URL-safe characters if they exist
@@ -540,7 +546,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
         if (chunkJson.content) {
-          for (let part of this.combineTextParts(chunkJson.content.parts)) {
+          let parts = this.combineTextParts(chunkJson.content.parts);
+          if (this.isEventA2aResponse(chunkJson)) {
+            parts = this.combineA2uiDataParts(parts);
+          }
+
+          for (let part of parts) {
             this.processPart(chunkJson, part);
             this.traceService.setEventData(this.eventData);
           }
@@ -651,8 +662,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
         this.streamingTextMessage.text += newChunk;
-      }
+      }    
     } else if (!part.thought) {
+      // If the part is an A2A DataPart, display it as a message (e.g., A2UI or Json)
+      if (this.isA2aDataPart(part)) {
+        const parsedObject = this.extractA2aDataPartJson(part);
+        const isA2uiDataPart = parsedObject && parsedObject.kind === 'data' &&
+            parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
+        const displayPart = isA2uiDataPart ? {a2ui: parsedObject.data} : {text: parsedObject};
+        this.isModelThinkingSubject.next(false);
+        this.storeEvents(part, chunkJson);
+        this.storeMessage(
+            displayPart, chunkJson, chunkJson.author === 'user' ? 'user' : 'bot');
+            return;
+      }
+
       this.isModelThinkingSubject.next(false);
       this.storeEvents(part, chunkJson);
       this.storeMessage(
@@ -713,6 +737,80 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         combinedTextPart = undefined;
         result.push(part);
       }
+    }
+
+    return result;
+  }
+
+  // Returns true if the event is an A2A response.
+  private isEventA2aResponse(event: any) {
+    return !!event?.customMetadata?.['a2a:response'];
+  }
+
+  private isA2aDataPart(part: Part) {
+    if (!part.inlineData || part.inlineData.mimeType !== 'text/plain') {
+      return false;
+    }
+
+    const dataPartText = atob(fixBase64String(part.inlineData.data));
+    return dataPartText.startsWith(A2A_DATA_PART_START_TAG) &&
+        dataPartText.endsWith(A2A_DATA_PART_END_TAG);
+  }
+
+  private isA2uiDataPart(part: Part) {
+    const parsedObject = this.extractA2aDataPartJson(part);
+    return parsedObject && parsedObject.kind === 'data' &&
+        parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
+  }
+
+  private extractA2aDataPartJson(part: Part) {
+    if (!this.isA2aDataPart(part)) {
+      return null;
+    }
+
+    const dataPartText = atob(fixBase64String(part.inlineData!.data));
+    const jsonContent = dataPartText.substring(
+        A2A_DATA_PART_START_TAG.length,
+        dataPartText.length - A2A_DATA_PART_END_TAG.length);
+    let parsedObject: any;
+    try {
+      parsedObject = JSON.parse(jsonContent);
+    } catch (e) {
+      return null;
+    }
+    return parsedObject;
+  }
+
+  // Combine A2UI data parts into a single part so that A2UI message that consists of 3 A2A DataParts can be displayed as a single message bubble.
+  private combineA2uiDataParts(parts: Part[]): Part[] {
+    const result: Part[] = [];
+    const combinedA2uiJson: any[] = [];
+    let combinedDataPart: Part|undefined;
+
+    for (const part of parts) {
+      if (this.isA2uiDataPart(part)) {
+        combinedA2uiJson.push(this.extractA2aDataPartJson(part));
+        // Insert the combined data part into the result array here so that the order of the a2ui components is preserved.
+        if (!combinedDataPart) {
+          combinedDataPart = {inlineData: {mimeType: 'text/plain', data: part.inlineData!.data}};
+          result.push(combinedDataPart);
+        }
+      } else {
+        result.push(part);
+      }
+    }
+
+    // If there are any A2UI data parts, reconstruct the combined data part into a valid A2A DataPart.
+    if (combinedDataPart?.inlineData) {
+      const a2aDataPartJson = {
+        kind: 'data',
+        metadata: {
+          mimeType: A2UI_MIME_TYPE,
+        },
+        data: combinedA2uiJson,
+      };
+      const inlineData = A2A_DATA_PART_START_TAG + JSON.stringify(a2aDataPartJson) + A2A_DATA_PART_END_TAG;
+      combinedDataPart.inlineData.data = btoa(inlineData);
     }
 
     return result;
@@ -804,6 +902,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           data: base64Data,
           mimeType: part.inlineData.mimeType,
         };
+      } else if (part.a2ui) {
+        const a2uiData: any = {};
+        part.a2ui.forEach((dataPart: any) => {
+          if (dataPart.data.beginRendering) {
+            a2uiData.beginRendering = dataPart.data;
+          } else if (dataPart.data.surfaceUpdate) {
+            a2uiData.surfaceUpdate = dataPart.data;
+          } else if (dataPart.data.dataModelUpdate) {
+            a2uiData.dataModelUpdate = dataPart.data;
+          }
+        });
+        message.a2uiData = a2uiData;
       } else if (part.text) {
         message.text = part.text;
         message.thought = part.thought ? true : false;
@@ -982,6 +1092,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         title += 'codeExecutionResult:' + part.codeExecutionResult.outcome;
       } else if (part.errorMessage) {
         title += 'errorMessage:' + part.errorMessage
+      } else if (part.a2ui) {
+        title += 'a2ui:' + part.a2ui;
       }
     }
 
@@ -1269,9 +1381,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     events.forEach((event: any) => {
-      const parts = event.content?.parts || [];
+      const isA2aResponse = this.isEventA2aResponse(event);
+      const parts = isA2aResponse ? this.combineA2uiDataParts(event.content?.parts) : event.content?.parts || [];
       const partsToProcess = reverseOrder ? [...parts].reverse() : parts;
       partsToProcess.forEach((part: any) => {
+        if (isA2aResponse && this.isA2uiDataPart(part)) {
+          part = {a2ui: this.extractA2aDataPartJson(part).data};
+        }
         this.storeMessage(
             part, event, event.author === 'user' ? 'user' : 'bot', undefined,
             undefined, reverseOrder);

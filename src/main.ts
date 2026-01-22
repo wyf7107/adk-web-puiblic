@@ -17,6 +17,7 @@
 
 
 import {Location} from '@angular/common';
+import {Catalog, Theme, DEFAULT_CATALOG} from '@a2ui/angular';
 import {HttpClientModule} from '@angular/common/http';
 import {importProvidersFrom} from '@angular/core';
 import {FormsModule} from '@angular/forms';
@@ -33,6 +34,7 @@ import {CustomLogoComponent} from './app/components/custom-logo/custom-logo.comp
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from './app/components/eval-tab/eval-tab.component';
 import {MarkdownComponent} from './app/components/markdown/markdown.component';
 import {MARKDOWN_COMPONENT} from './app/components/markdown/markdown.component.interface';
+import {A2UI_THEME} from './app/core/constants/a2ui-theme';
 import {AgentBuilderService} from './app/core/services/agent-builder.service';
 import {AgentService} from './app/core/services/agent.service';
 import {ArtifactService} from './app/core/services/artifact.service';
@@ -115,6 +117,8 @@ fetch('./assets/config/runtime-config.json')
           },
           {provide: SAFE_VALUES_SERVICE, useClass: SafeValuesServiceImpl},
           {provide: LOCAL_FILE_SERVICE, useClass: LocalFileServiceImpl},
+          {provide: Catalog, useValue: DEFAULT_CATALOG},
+          {provide: Theme, useValue: A2UI_THEME},
           {provide: PENDING_EVENT_SERVICE, useClass: PendingEventServiceImpl},
           {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
           ...(config.logo ?

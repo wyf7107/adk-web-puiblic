@@ -43,6 +43,7 @@ import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-
 import {ListResponse} from '../../core/services/interfaces/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
+import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
@@ -70,6 +71,7 @@ const ROOT_AGENT = 'root_agent';
     MatMenuModule,
     MatProgressSpinnerModule,
     NgxJsonViewerModule,
+    A2uiCanvasComponent,
     AudioPlayerComponent,
     MessageFeedbackComponent,
     MatTooltipModule,

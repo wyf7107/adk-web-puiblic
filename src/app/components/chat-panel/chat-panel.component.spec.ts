@@ -166,6 +166,15 @@ describe('ChatPanelComponent', () => {
       deleteButton.nativeElement.click();
       expect(component.removeFile.emit).toHaveBeenCalledWith(0);
     });
+
+    it('should display A2UI canvas', () => {
+      component.messages = [
+        {role: 'bot', a2uiData: {beginRendering: true, surfaceUpdate: {}, dataModelUpdate: {}}},
+      ];
+      fixture.detectChanges();
+      const canvas = fixture.debugElement.query(By.css('app-a2ui-canvas'));
+      expect(canvas).toBeTruthy();
+    });
   });
 
   it('should display loading bar if message isLoading', async () => {

@@ -27,10 +27,14 @@ import {of} from 'rxjs';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
+import {FEEDBACK_SERVICE} from '../../core/services/interfaces/feedback';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
+import {
+  MockFeedbackService
+} from '../../core/services/testing/mock-feedback.service';
 import {MockSessionService} from '../../core/services/testing/mock-session.service';
 import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
 import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
@@ -48,12 +52,14 @@ describe('ChatPanelComponent', () => {
   let mockStringToColorService: MockStringToColorService;
   let mockAgentService: MockAgentService;
   let mockSessionService: MockSessionService;
+  let mockFeedbackService: MockFeedbackService;
 
   beforeEach(async () => {
     mockFeatureFlagService = new MockFeatureFlagService();
     mockUiStateService = new MockUiStateService();
     mockAgentService = new MockAgentService();
     mockSessionService = new MockSessionService();
+    mockFeedbackService = new MockFeedbackService();
 
     mockFeatureFlagService.isMessageFileUploadEnabledResponse.next(true);
     mockFeatureFlagService.isManualStateUpdateEnabledResponse.next(true);
@@ -85,6 +91,7 @@ describe('ChatPanelComponent', () => {
             {provide: UI_STATE_SERVICE, useValue: mockUiStateService},
             {provide: AGENT_SERVICE, useValue: mockAgentService},
             {provide: SESSION_SERVICE, useValue: mockSessionService},
+            {provide: FEEDBACK_SERVICE, useValue: mockFeedbackService},
           ],
         })
         .compileComponents();
@@ -630,7 +637,7 @@ describe('ChatPanelComponent', () => {
       fixture.detectChanges();
 
       let feedbackButtons =
-          fixture.debugElement.query(By.css('.feedback-buttons'));
+          fixture.debugElement.query(By.css('app-message-feedback'));
       expect(feedbackButtons).toBeTruthy();
     });
 
@@ -641,7 +648,7 @@ describe('ChatPanelComponent', () => {
       fixture.detectChanges();
 
       let feedbackButtons =
-          fixture.debugElement.query(By.css('.feedback-buttons'));
+          fixture.debugElement.query(By.css('app-message-feedback'));
       expect(feedbackButtons).toBeFalsy();
     });
 
@@ -652,7 +659,7 @@ describe('ChatPanelComponent', () => {
       fixture.detectChanges();
 
       const feedbackButtons =
-          fixture.debugElement.query(By.css('.feedback-buttons'));
+          fixture.debugElement.query(By.css('app-message-feedback'));
       expect(feedbackButtons).toBeFalsy();
     });
 
@@ -667,35 +674,11 @@ describe('ChatPanelComponent', () => {
       fixture.detectChanges();
 
       let feedbackButtons =
-          fixture.debugElement.queryAll(By.css('.feedback-buttons'));
+          fixture.debugElement.queryAll(By.css('app-message-feedback'));
       expect(feedbackButtons.length).toBe(4);
     });
-
-    it(`component should emit 'up' on up click`, () => {
-      spyOn(component.feedback, 'emit');
-      component.messages = [{role: 'bot', text: 'message'}];
-      fixture.detectChanges();
-
-      const upButton =
-          fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0];
-      upButton.nativeElement.click();
-
-      expect(component.feedback.emit).toHaveBeenCalledWith({direction: 'up'});
-    });
-
-    it(`component should emit 'down' on down click`, () => {
-      spyOn(component.feedback, 'emit');
-      component.messages = [{role: 'bot', text: 'message'}];
-      fixture.detectChanges();
-
-      const downButton =
-          fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1];
-      downButton.nativeElement.click();
-
-      expect(component.feedback.emit).toHaveBeenCalledWith({direction: 'down'});
-    });
   });
-  
+
   describe('Computer Use', () => {
     it(
         'isComputerUseResponse should return true when image data and url are present',

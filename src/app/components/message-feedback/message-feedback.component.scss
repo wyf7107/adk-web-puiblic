@@ -1,0 +1,74 @@
+.message-feedback-container {
+  display: block;
+}
+
+.feedback-buttons {
+  --mat-icon-button-touch-target-size: 32px;
+  --button-size: 32px;
+  --icon-size: 12px;
+
+  margin-left: 54px;
+  display: flex;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--button-size);
+    height: var(--button-size);
+    transition: all 0.2s ease;
+
+    mat-icon {
+      font-size: var(--icon-size);
+      height: var(--icon-size);
+      width: var(--icon-size);
+      transition: all 0.2s ease;
+    }
+  }
+}
+
+.feedback-details-container {
+  margin-left: 54px;
+  max-width: 500px;
+  padding: 16px;
+  background-color: var(--builder-card-background-color);
+  border-radius: 8px;
+  margin-top: 8px;
+  border: 1px solid var(--builder-border-color);
+
+  .additional-feedback {
+    h3 {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      margin-top: 0;
+      color: var(--builder-text-secondary-color);
+    }
+
+    mat-form-field {
+      width: 100%;
+
+      textarea {
+        min-height: 60px;
+        resize: vertical;
+        font-size: 13px;
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+
+    button {
+      border-radius: 18px;
+      padding: 0 16px;
+      height: 32px;
+      line-height: 32px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+}

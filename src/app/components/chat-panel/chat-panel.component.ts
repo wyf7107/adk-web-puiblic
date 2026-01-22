@@ -45,6 +45,7 @@ import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
+import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
 import {ComputerActionComponent} from '../computer-action/computer-action.component';
 import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
@@ -70,6 +71,7 @@ const ROOT_AGENT = 'root_agent';
     MatProgressSpinnerModule,
     NgxJsonViewerModule,
     AudioPlayerComponent,
+    MessageFeedbackComponent,
     MatTooltipModule,
     NgClass,
     ComputerActionComponent,
@@ -117,7 +119,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly updateState = new EventEmitter<void>();
   @Output() readonly toggleAudioRecording = new EventEmitter<void>();
   @Output() readonly toggleVideoRecording = new EventEmitter<void>();
-  @Output() readonly feedback = new EventEmitter<{direction: 'up' | 'down'}>();
 
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;
@@ -260,10 +261,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   renderGooglerSearch(content: string) {
     return this.sanitizer.bypassSecurityTrustHtml(content);
-  }
-
-  emitFeedback(direction: 'up'|'down') {
-    this.feedback.emit({direction});
   }
 
   private restoreScrollPosition() {

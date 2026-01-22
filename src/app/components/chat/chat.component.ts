@@ -1657,29 +1657,28 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private syncSelectedAppFromUrl() {
     combineLatest([
-      this.router.events.pipe(
-          filter((e) => e instanceof NavigationEnd),
-          map(() => this.activatedRoute.snapshot.queryParams),
-          ),
-      this.apps$
+      this.activatedRoute.queryParams, this.apps$
     ]).subscribe(([params, apps]) => {
-      if (apps && apps.length) {
-        const app = params['app'];
-        if (app && apps.includes(app)) {
-          this.selectedAppControl.setValue(app);
-          this.agentService.getAgentBuilder(app).subscribe((res: any) => {
-            if (!res || res == '') {
-              this.disableBuilderSwitch = true;
-              this.agentBuilderService.setLoadedAgentData(undefined);
-            } else {
-              this.disableBuilderSwitch = false;
-              this.agentBuilderService.setLoadedAgentData(res);
-            }
-          });
-          this.isBuilderMode.set(false);
-        } else if (app) {
+      const app = params['app'];
+      if (apps && apps.length && app) {
+        if (!apps.includes(app)) {
           this.openSnackBar(`Agent '${app}' not found`, 'OK');
+          return;
         }
+
+        this.selectedAppControl.setValue(app, {emitEvent: false});
+        this.selectApp(app);
+
+        this.agentService.getAgentBuilder(app).subscribe((res: any) => {
+          if (!res || res == '') {
+            this.disableBuilderSwitch = true;
+            this.agentBuilderService.setLoadedAgentData(undefined);
+          } else {
+            this.disableBuilderSwitch = false;
+            this.agentBuilderService.setLoadedAgentData(res);
+          }
+        });
+        this.isBuilderMode.set(false);
       }
       if (params['mode'] === 'builder') {
         this.enterBuilderMode();

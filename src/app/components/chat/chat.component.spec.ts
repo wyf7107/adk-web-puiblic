@@ -323,6 +323,9 @@ describe('ChatComponent', () => {
         mockActivatedRoute.snapshot!.queryParams = {
           [APP_QUERY_PARAM]: INVALID_APP_NAME,
         };
+        mockActivatedRoute.queryParams = of({
+          [APP_QUERY_PARAM]: INVALID_APP_NAME,
+        });
         mockAgentService.listAppsResponse.next([TEST_APP_1_NAME]);
         fixture = TestBed.createComponent(ChatComponent);
         component = fixture.componentInstance;
@@ -404,6 +407,9 @@ describe('ChatComponent', () => {
         mockActivatedRoute.snapshot!.queryParams = {
           [APP_QUERY_PARAM]: TEST_APP_2_NAME,
         };
+        mockActivatedRoute.queryParams = of({
+          [APP_QUERY_PARAM]: TEST_APP_2_NAME,
+        });
         component.ngOnInit();
       });
       it('should create new session on init', () => {

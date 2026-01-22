@@ -377,6 +377,8 @@ describe('ChatComponent', () => {
         ];
 
         beforeEach(async () => {
+          component.messages.set([]);
+          component.eventData = new Map();
           mockUiStateService.newMessagesLoadedResponse.next({
             items: events,
             nextPageToken: '',
@@ -389,6 +391,42 @@ describe('ChatComponent', () => {
           expect(messages[0].text).toBe('user message');
           expect(messages[1].text).toBe('bot response');
         });
+
+        it(
+            'should not clear existing messages when new messages are loaded',
+            fakeAsync(() => {
+              component.messages.set([
+                {role: 'user', text: 'existing message'},
+              ]);
+              mockUiStateService.newMessagesLoadedResponse.next({
+                items: events,
+                nextPageToken: '',
+              });
+              tick();
+              const messages = component.messages();
+              expect(messages.length).toBe(3);
+              expect(messages[0].text).toBe('user message');
+              expect(messages[1].text).toBe('bot response');
+              expect(messages[2].text).toBe('existing message');
+            }));
+
+        it(
+            'should clear existing messages when new messages are loaded for a different session',
+            fakeAsync(() => {
+              component.messages.set([
+                {role: 'user', text: 'existing message'},
+              ]);
+              component.sessionId = 'session-2'; // change session
+              mockUiStateService.newMessagesLoadedResponse.next({
+                items: events,
+                nextPageToken: '',
+              });
+              tick();
+              const messages = component.messages();
+              expect(messages.length).toBe(2);
+              expect(messages[0].text).toBe('user message');
+              expect(messages[1].text).toBe('bot response');
+            }));
 
         it('should store events', () => {
           expect(component.eventData.has('event-1')).toBeFalse();

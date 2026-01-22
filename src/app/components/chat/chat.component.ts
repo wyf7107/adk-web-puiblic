@@ -194,6 +194,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   userId = 'user';
   appName = '';
   sessionId = ``;
+  sessionIdOfLoadedMessages = '';
   evalCase: EvalCase|null = null;
   updatedEvalCase: EvalCase|null = null;
   evalSetId = '';
@@ -388,8 +389,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         .subscribe((enabled) => {
           if (enabled) {
             this.uiStateService.onNewMessagesLoaded().subscribe(
-                (response: ListResponse<any>) => {
-                  this.populateMessages(response.items, true);
+                (response: ListResponse<any> & {isBackground?: boolean}) => {
+                  this.populateMessages(
+                      response.items, true, !response.isBackground);
                   this.loadTraceData();
                 });
 
@@ -1237,9 +1239,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private resetEventsAndMessages() {
+  private resetEventsAndMessages({keepMessages}: {keepMessages?:
+                                                      boolean} = {}) {
     this.eventData.clear();
-    this.messages.set([]);
+    if (!keepMessages) {
+      this.messages.set([]);
+    }
     this.artifacts = [];
   }
 
@@ -1255,21 +1260,28 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.changeDetectorRef.detectChanges();
   }
 
-  private populateMessages(events: any[], reverse: boolean = false) {
-    this.resetEventsAndMessages();
+  private populateMessages(
+      events: any[], reverseOrder: boolean = false,
+      keepOldMessages: boolean = false) {
+    this.resetEventsAndMessages({
+      keepMessages:
+          keepOldMessages && this.sessionIdOfLoadedMessages === this.sessionId
+    });
 
     events.forEach((event: any) => {
       const parts = event.content?.parts || [];
-      const partsToProcess = reverse ? [...parts].reverse() : parts;
+      const partsToProcess = reverseOrder ? [...parts].reverse() : parts;
       partsToProcess.forEach((part: any) => {
         this.storeMessage(
             part, event, event.author === 'user' ? 'user' : 'bot', undefined,
-            undefined, reverse);
+            undefined, reverseOrder);
         if (event.author && event.author !== 'user') {
           this.storeEvents(part, event);
         }
       });
     });
+
+    this.sessionIdOfLoadedMessages = this.sessionId;
   }
 
   protected updateWithSelectedSession(session: Session) {

@@ -39,7 +39,7 @@ export class UiStateService implements UiStateServiceInterface {
       new BehaviorSubject<boolean>(false);
   private readonly _isMessagesLoading = new BehaviorSubject<boolean>(false);
   protected readonly _newMessagesLoadedResponse =
-      new Subject<ListResponse<any>>();
+      new Subject<ListResponse<any>&{isBackground?: boolean}>();
   protected readonly _newMessagesLoadingFailedResponse =
       new Subject<{message: string}>();
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
@@ -96,8 +96,9 @@ export class UiStateService implements UiStateServiceInterface {
     );
   }
 
-  lazyLoadMessages(sessionName: string, listParams?: ListParams, isBackground?: boolean):
-      Observable<void> {
+  lazyLoadMessages(
+      sessionName: string, listParams?: ListParams,
+      isBackground?: boolean): Observable<void> {
     throw new Error('Not implemented');
   }
 

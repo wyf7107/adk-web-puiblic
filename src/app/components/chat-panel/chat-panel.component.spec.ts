@@ -458,13 +458,17 @@ describe('ChatPanelComponent', () => {
             }));
 
         it('should restore scroll position', fakeAsync(() => {
+                      component['onScroll'].next(
+                          {target: scrollContainer} as unknown as Event);
+                      tick();
+
+                      Object.defineProperty(
+                          scrollContainer, 'scrollHeight',
+                          {value: 1500, configurable: true});
                       mockUiStateService.newMessagesLoadedResponse.next({
                         items: [{role: 'bot', text: 'message 1'}],
                         nextPageToken: nextToken
                       });
-                      Object.defineProperty(
-                          scrollContainer, 'scrollHeight',
-                          {value: 1500, configurable: true});
 
                       tick(50);
 

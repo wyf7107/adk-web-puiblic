@@ -124,6 +124,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @ViewChild('autoScroll') scrollContainer!: ElementRef;
   @ViewChild('messageTextarea') public textarea: ElementRef|undefined;
   scrollInterrupted = false;
+  private scrollHeight = 0;
   private lastMessageRef: any = null;
   private nextPageToken = '';
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
@@ -176,9 +177,12 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
             switchMap(
                 () => merge(
                     this.uiStateService.onNewMessagesLoaded().pipe(
-                        tap((response: ListResponse<any>) => {
+                        tap((response: ListResponse<any>&
+                             {isBackground?: boolean}) => {
                           this.nextPageToken = response.nextPageToken ?? '';
-                          this.restoreScrollPosition();
+                          if (!response.isBackground) {
+                            this.restoreScrollPosition();
+                          }
                         })),
                     this.onScroll.pipe(switchMap((event: Event) => {
                       const element = event.target as HTMLElement;
@@ -190,6 +194,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
                         return EMPTY;
                       }
 
+                      this.scrollHeight = element.scrollHeight;
                       return this.uiStateService
                           .lazyLoadMessages(this.sessionName(), {
                             pageSize: 100,
@@ -264,14 +269,16 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   private restoreScrollPosition() {
-    // Scroll to the last unseen message after the new messages are loaded.
-    if (this.scrollContainer?.nativeElement) {
-      const oldScrollHeight = this.scrollContainer.nativeElement.scrollHeight;
-      setTimeout(() => {
-        const newScrollHeight = this.scrollContainer.nativeElement.scrollHeight;
-        this.scrollContainer.nativeElement.scrollTop =
-            newScrollHeight - oldScrollHeight;
-      });
+    if (!this.scrollHeight) {
+      this.scrollInterrupted = false;
+      this.scrollToBottom();
+      return;
+    }
+    const scrollContainer = this.scrollContainer?.nativeElement;
+    if (scrollContainer) {
+      scrollContainer.scrollTop =
+          scrollContainer.scrollHeight - this.scrollHeight;
+      this.scrollHeight = 0;
     }
   }
 

@@ -396,11 +396,12 @@ describe('ChatComponent', () => {
         });
 
         it(
-            'should not clear existing messages when new messages are loaded',
+            'should not clear existing messages or events when new messages are loaded',
             fakeAsync(() => {
               component.messages.set([
                 {role: 'user', text: 'existing message'},
               ]);
+              component.eventData.set('event-old', {id: 'event-old'} as any);
               mockUiStateService.newMessagesLoadedResponse.next({
                 items: events,
                 nextPageToken: '',
@@ -411,15 +412,17 @@ describe('ChatComponent', () => {
               expect(messages[0].text).toBe('user message');
               expect(messages[1].text).toBe('bot response');
               expect(messages[2].text).toBe('existing message');
+              expect(component.eventData.has('event-old')).toBeTrue();
             }));
 
         it(
-            'should clear existing messages when new messages are loaded for a different session',
+            'should clear existing messages and events when new messages are loaded for a different session',
             fakeAsync(() => {
               component.messages.set([
                 {role: 'user', text: 'existing message'},
               ]);
-              component.sessionId = 'session-2'; // change session
+              component.eventData.set('event-old', {id: 'event-old'} as any);
+              component.sessionId = 'session-2';  // change session
               mockUiStateService.newMessagesLoadedResponse.next({
                 items: events,
                 nextPageToken: '',
@@ -429,6 +432,7 @@ describe('ChatComponent', () => {
               expect(messages.length).toBe(2);
               expect(messages[0].text).toBe('user message');
               expect(messages[1].text).toBe('bot response');
+              expect(component.eventData.has('event-old')).toBeFalse();
             }));
 
         it('should store events', () => {
@@ -992,8 +996,7 @@ describe('ChatComponent', () => {
         });
 
         it(
-            'should clear "q" param on send',
-            fakeAsync(() => {
+            'should clear "q" param on send', fakeAsync(() => {
               urlTree.queryParams = {[INITIAL_USER_INPUT_QUERY_PARAM]: 'hello'};
               mockRouter.parseUrl.and.returnValue(urlTree as any);
               mockLocation.path.and.returnValue('/?q=hello');
@@ -1009,8 +1012,7 @@ describe('ChatComponent', () => {
             }));
 
         it(
-            'should not update URL if "q" param is missing',
-            fakeAsync(() => {
+            'should not update URL if "q" param is missing', fakeAsync(() => {
               urlTree.queryParams = {};
               mockRouter.parseUrl.and.returnValue(urlTree as any);
               mockLocation.path.and.returnValue('/?');
@@ -1027,57 +1029,61 @@ describe('ChatComponent', () => {
       });
 
       describe('when event is an A2A response', () => {
-        it('should combine all A2UI data parts into a single message', async () => {
+        it(
+            'should combine all A2UI data parts into a single message',
+            async () => {
+              const createA2uiPart = (content: any) => {
+                const json = JSON.stringify({
+                  kind: 'data',
+                  metadata: {mimeType: A2UI_MIME_TYPE},
+                  data: content
+                });
+                return {
+                  inlineData: {
+                    mimeType: 'text/plain',
+                    data: btoa(`${A2A_DATA_PART_TAG_START}${json}${
+                        A2A_DATA_PART_TAG_END}`)
+                  }
+                };
+              };
 
-          const createA2uiPart = (content: any) => {
-             const json = JSON.stringify({
-              kind: 'data',
-              metadata: {mimeType: A2UI_MIME_TYPE},
-              data: content
+              const sseEvent = {
+                id: 'event-1',
+                author: 'bot',
+                customMetadata: {'a2a:response': 'true'},
+                content: {
+                  role: 'bot',
+                  parts: [
+                    {text: 'Prefix'},
+                    createA2uiPart({beginRendering: {id: '1'}}),
+                    {text: 'Interim'},
+                    createA2uiPart({surfaceUpdate: {components: []}}),
+                    {text: 'Suffix'}
+                  ]
+                },
+              };
+
+              component.messages.set([]);
+              component.userInput = 'test message';
+              await component.sendMessage(
+                  new KeyboardEvent('keydown', {key: 'Enter'}));
+              mockAgentService.runSseResponse.next(sseEvent);
+              fixture.detectChanges();
+
+              const botMessages =
+                  component.messages().filter(m => m.role === 'bot');
+              // Expectation: Prefix, Combined A2UI (at first A2UI pos),
+              // Interim, Suffix
+              expect(botMessages.length).toBe(4);
+              expect(botMessages[0].text).toBe('Prefix');
+              // The combined A2UI message
+              expect(botMessages[1].a2uiData).toEqual({
+                beginRendering: {beginRendering: {id: '1'}},
+                surfaceUpdate: {surfaceUpdate: {components: []}}
+              });
+              expect(botMessages[2].text).toBe('Interim');
+              expect(botMessages[3].text).toBe('Suffix');
             });
-            return {
-              inlineData: {
-                mimeType: 'text/plain',
-                data: btoa(`${A2A_DATA_PART_TAG_START}${json}${A2A_DATA_PART_TAG_END}`)
-              }
-            };
-          };
-
-          const sseEvent = {
-            id: 'event-1',
-            author: 'bot',
-            customMetadata: {'a2a:response': 'true'},
-            content: {
-              role: 'bot',
-              parts: [
-                {text: 'Prefix'},
-                createA2uiPart({beginRendering: {id: '1'}}),
-                {text: 'Interim'},
-                createA2uiPart({surfaceUpdate: {components: []}}),
-                {text: 'Suffix'}
-              ]
-            },
-          };
-
-          component.messages.set([]);
-          component.userInput = 'test message';
-          await component.sendMessage(
-              new KeyboardEvent('keydown', {key: 'Enter'}));
-          mockAgentService.runSseResponse.next(sseEvent);
-          fixture.detectChanges();
-
-          const botMessages = component.messages().filter(m => m.role === 'bot');
-          // Expectation: Prefix, Combined A2UI (at first A2UI pos), Interim, Suffix
-          expect(botMessages.length).toBe(4);
-          expect(botMessages[0].text).toBe('Prefix');
-          // The combined A2UI message
-          expect(botMessages[1].a2uiData).toEqual({
-            beginRendering: {beginRendering: {id: '1'}},
-            surfaceUpdate: {surfaceUpdate: {components: []}}
-          });
-          expect(botMessages[2].text).toBe('Interim');
-          expect(botMessages[3].text).toBe('Suffix');
-        });
       });
 
 
@@ -1494,12 +1500,12 @@ describe('ChatComponent', () => {
   });
 
   describe('isA2aDataPart', () => {
-
     it('should return true for valid A2A data part', () => {
       const part = {
         inlineData: {
           mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}{"test": true}${A2A_DATA_PART_TAG_END}`)
+          data: btoa(`${A2A_DATA_PART_TAG_START}{"test": true}${
+              A2A_DATA_PART_TAG_END}`)
         }
       };
       expect((component as any).isA2aDataPart(part)).toBeTrue();
@@ -1522,23 +1528,20 @@ describe('ChatComponent', () => {
 
     it('should return false when tags are missing', () => {
       const part = {
-        inlineData: {
-          mimeType: 'text/plain',
-          data: btoa('some random text')
-        }
+        inlineData: {mimeType: 'text/plain', data: btoa('some random text')}
       };
       expect((component as any).isA2aDataPart(part)).toBeFalse();
     });
   });
 
   describe('extractA2aDataPartJson', () => {
-
     it('should return parsed JSON for valid A2A data part', () => {
       const data = {key: 'value'};
       const part = {
         inlineData: {
           mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(data)}${A2A_DATA_PART_TAG_END}`)
+          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(data)}${
+              A2A_DATA_PART_TAG_END}`)
         }
       };
       expect((component as any).extractA2aDataPartJson(part)).toEqual(data);
@@ -1546,10 +1549,7 @@ describe('ChatComponent', () => {
 
     it('should return null for non-A2A data part', () => {
       const part = {
-        inlineData: {
-          mimeType: 'application/json',
-          data: btoa('{}')
-        }
+        inlineData: {mimeType: 'application/json', data: btoa('{}')}
       };
       expect((component as any).extractA2aDataPartJson(part)).toBeNull();
     });
@@ -1558,7 +1558,8 @@ describe('ChatComponent', () => {
       const part = {
         inlineData: {
           mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}{invalid-json${A2A_DATA_PART_TAG_END}`)
+          data: btoa(
+              `${A2A_DATA_PART_TAG_START}{invalid-json${A2A_DATA_PART_TAG_END}`)
         }
       };
       expect((component as any).extractA2aDataPartJson(part)).toBeNull();
@@ -1566,15 +1567,15 @@ describe('ChatComponent', () => {
   });
 
   describe('combineA2uiDataParts', () => {
-
     it('should return empty array for empty input', () => {
       expect((component as any).combineA2uiDataParts([])).toEqual([]);
     });
 
-    it('should return original parts if no A2UI parts are present', () => {
-      const parts = [{text: 'hello'}, {text: 'world'}];
-      expect((component as any).combineA2uiDataParts(parts)).toEqual(parts);
-    });
+    it(
+        'should return original parts if no A2UI parts are present', () => {
+          const parts = [{text: 'hello'}, {text: 'world'}];
+          expect((component as any).combineA2uiDataParts(parts)).toEqual(parts);
+        });
 
     it('should combine multiple A2UI parts into the first one', () => {
       const a2ui1 = {
@@ -1591,13 +1592,15 @@ describe('ChatComponent', () => {
       const part1 = {
         inlineData: {
           mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui1)}${A2A_DATA_PART_TAG_END}`)
+          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui1)}${
+              A2A_DATA_PART_TAG_END}`)
         }
       };
       const part2 = {
         inlineData: {
           mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui2)}${A2A_DATA_PART_TAG_END}`)
+          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui2)}${
+              A2A_DATA_PART_TAG_END}`)
         }
       };
 
@@ -1619,54 +1622,65 @@ describe('ChatComponent', () => {
       const partA2UI = {
         inlineData: {
           mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui)}${A2A_DATA_PART_TAG_END}`)
+          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui)}${
+              A2A_DATA_PART_TAG_END}`)
         }
       };
       const partText = {text: 'hello'};
 
-      const result = (component as any).combineA2uiDataParts([partText, partA2UI, partText]);
+      const result = (component as any).combineA2uiDataParts([
+        partText, partA2UI, partText
+      ]);
       expect(result.length).toBe(3);
       expect(result[0]).toBe(partText);
       expect(result[2]).toBe(partText);
-      // The middle one should be the combined one (which is essentially partA2UI but modified/recreated)
+      // The middle one should be the combined one (which is essentially
+      // partA2UI but modified/recreated)
       const combinedJson = (component as any).extractA2aDataPartJson(result[1]);
       expect(combinedJson.data).toEqual([a2ui]);
     });
 
-    it('should handle mixed content (Text + A2UI + Text + A2UI) correctly', () => {
-      const a2ui1 = {
-        kind: 'data',
-        metadata: {mimeType: A2UI_MIME_TYPE},
-        data: {id: 1}
-      };
-      const a2ui2 = {
-        kind: 'data',
-        metadata: {mimeType: A2UI_MIME_TYPE},
-        data: {id: 2}
-      };
+    it(
+        'should handle mixed content (Text + A2UI + Text + A2UI) correctly',
+        () => {
+          const a2ui1 = {
+            kind: 'data',
+            metadata: {mimeType: A2UI_MIME_TYPE},
+            data: {id: 1}
+          };
+          const a2ui2 = {
+            kind: 'data',
+            metadata: {mimeType: A2UI_MIME_TYPE},
+            data: {id: 2}
+          };
 
-      const partA2UI1 = {
-        inlineData: {
-          mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui1)}${A2A_DATA_PART_TAG_END}`)
-        }
-      };
-      const partA2UI2 = {
-        inlineData: {
-          mimeType: 'text/plain',
-          data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui2)}${A2A_DATA_PART_TAG_END}`)
-        }
-      };
-      const partText1 = {text: 'start'};
-      const partText2 = {text: 'middle'};
+          const partA2UI1 = {
+            inlineData: {
+              mimeType: 'text/plain',
+              data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui1)}${
+                  A2A_DATA_PART_TAG_END}`)
+            }
+          };
+          const partA2UI2 = {
+            inlineData: {
+              mimeType: 'text/plain',
+              data: btoa(`${A2A_DATA_PART_TAG_START}${JSON.stringify(a2ui2)}${
+                  A2A_DATA_PART_TAG_END}`)
+            }
+          };
+          const partText1 = {text: 'start'};
+          const partText2 = {text: 'middle'};
 
-      const result = (component as any).combineA2uiDataParts([partText1, partA2UI1, partText2, partA2UI2]);
-      expect(result.length).toBe(3);
-      expect(result[0]).toBe(partText1);
-      expect(result[2]).toBe(partText2);
+          const result = (component as any).combineA2uiDataParts([
+            partText1, partA2UI1, partText2, partA2UI2
+          ]);
+          expect(result.length).toBe(3);
+          expect(result[0]).toBe(partText1);
+          expect(result[2]).toBe(partText2);
 
-      const combinedJson = (component as any).extractA2aDataPartJson(result[1]);
-      expect(combinedJson.data).toEqual([a2ui1, a2ui2]);
-    });
+          const combinedJson =
+              (component as any).extractA2aDataPartJson(result[1]);
+          expect(combinedJson.data).toEqual([a2ui1, a2ui2]);
+        });
   });
 });

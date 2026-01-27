@@ -68,7 +68,6 @@ import {SidePanelComponent} from './side-panel.component';
 const TABS_CONTAINER_SELECTOR = By.css('.tabs-container');
 const DETAILS_PANEL_SELECTOR = By.css('.details-panel-container');
 const TAB_HEADERS_SELECTOR = By.css('[role="tab"]');
-const EVENT_TAB_SELECTOR = By.css('app-event-tab');
 const SESSION_TAB_SELECTOR = By.css('app-session-tab');
 const EVAL_TAB_SELECTOR = By.css('app-eval-tab');
 const DETAILS_PANEL_CLOSE_BUTTON_SELECTOR =
@@ -76,9 +75,8 @@ const DETAILS_PANEL_CLOSE_BUTTON_SELECTOR =
 const EVENT_GRAPH_SELECTOR = By.css('.event-graph-container div');
 const APP_SELECT_SELECTOR = By.css('.app-select');
 
-const EVENTS_TAB_INDEX = 1;
-const SESSIONS_TAB_INDEX = 4;
-const EVAL_TAB_INDEX = 5;
+const SESSIONS_TAB_INDEX = 3;
+const EVAL_TAB_INDEX = 4;
 
 describe('SidePanelComponent', () => {
   let component: SidePanelComponent;

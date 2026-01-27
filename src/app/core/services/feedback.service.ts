@@ -18,6 +18,7 @@
 import {Injectable} from '@angular/core';
 
 import {Feedback, FeedbackService as FeedbackServiceInterface} from './interfaces/feedback';
+import {Observable, of} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class FeedbackService implements FeedbackServiceInterface {
@@ -26,4 +27,9 @@ export class FeedbackService implements FeedbackServiceInterface {
       eventId: string,
       feedback: Partial<Feedback>,
       ): void {}
+
+  getFeedback(sessionId: string, eventId: string):
+      Observable<Feedback|undefined> {
+    return of(undefined);
+  }
 }

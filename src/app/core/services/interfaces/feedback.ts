@@ -16,6 +16,7 @@
  */
 
 import {InjectionToken} from '@angular/core';
+import {Observable} from 'rxjs';
 
 /**
  * Feedback metadata.
@@ -36,6 +37,8 @@ export declare abstract class FeedbackService {
       eventId: string,
       feedback: Partial<Feedback>,
       ): void;
+  abstract getFeedback(sessionId: string, eventId: string):
+      Observable<Feedback|undefined>;
 }
 
 /**

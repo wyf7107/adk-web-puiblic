@@ -16,7 +16,8 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, resource, signal} from '@angular/core';
+import {rxResource, toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -50,11 +51,23 @@ export class MessageFeedbackComponent {
   protected readonly i18n = inject(MessageFeedbackMessagesInjectionToken);
   private readonly feedbackService = inject(FEEDBACK_SERVICE);
 
-  readonly isDetailedFeedbackVisible = signal(false);
-  readonly selectedFeedback =
+  private readonly existingFeedback = rxResource({
+    params: () => ({
+      sessionName: this.sessionName(),
+      eventId: this.eventId(),
+    }),
+    stream: ({params}) =>
+        this.feedbackService.getFeedback(params.sessionName, params.eventId)
+  });
+  private readonly selectedFeedbackDirection =
       signal<Feedback['direction']|undefined>(undefined);
+
+  readonly feedbackDirection = computed(
+      () => this.selectedFeedbackDirection() ??
+          this.existingFeedback.value()?.direction);
+  readonly isDetailedFeedbackVisible = signal(false);
   readonly feedbackPlaceholder = computed(() => {
-    return this.selectedFeedback() === 'up' ?
+    return this.feedbackDirection() === 'up' ?
         this.i18n.feedbackCommentPlaceholderUp :
         this.i18n.feedbackCommentPlaceholderDown;
   });
@@ -62,11 +75,11 @@ export class MessageFeedbackComponent {
 
   sendFeedback(direction: Feedback['direction']) {
     this.isDetailedFeedbackVisible.set(true);
-    this.selectedFeedback.set(direction);
+    this.selectedFeedbackDirection.set(direction);
   }
 
   onDetailedFeedbackSubmitted() {
-    const direction = this.selectedFeedback();
+    const direction = this.feedbackDirection();
     if (!direction) return;
 
     this.feedbackService.sendFeedback(this.sessionName(), this.eventId(), {
@@ -77,7 +90,7 @@ export class MessageFeedbackComponent {
   }
 
   onDetailedFeedbackCancelled() {
-    this.selectedFeedback.set(undefined);
+    this.selectedFeedbackDirection.set(undefined);
     this.resetDetailedFeedback();
   }
 

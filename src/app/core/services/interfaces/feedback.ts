@@ -21,6 +21,7 @@ import {InjectionToken} from '@angular/core';
  * Feedback metadata.
  */
 export interface Feedback {
+  id: string;
   direction: 'up'|'down';
   reasons?: string[];
   comment?: string;
@@ -33,7 +34,7 @@ export declare abstract class FeedbackService {
   abstract sendFeedback(
       sessionId: string,
       eventId: string,
-      feedback: Feedback,
+      feedback: Partial<Feedback>,
       ): void;
 }
 

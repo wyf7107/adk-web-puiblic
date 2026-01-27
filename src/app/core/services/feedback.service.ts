@@ -17,13 +17,13 @@
 
 import {Injectable} from '@angular/core';
 
-import {Feedback, FeedbackService as FeedbackServiceInterface,} from './interfaces/feedback';
+import {Feedback, FeedbackService as FeedbackServiceInterface} from './interfaces/feedback';
 
 @Injectable({providedIn: 'root'})
 export class FeedbackService implements FeedbackServiceInterface {
   sendFeedback(
       sessionId: string,
       eventId: string,
-      feedback: Feedback,
+      feedback: Partial<Feedback>,
       ): void {}
 }

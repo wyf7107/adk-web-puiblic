@@ -272,7 +272,7 @@
             <mat-icon>bolt</mat-icon>
             {{ functionCall.name }}
           </button>
-      }
+        }
       }
     }
     @if (message.functionResponses && message.functionResponses.length > 0) {
@@ -345,7 +345,7 @@
             delete
           </span>
         </div>
-    } @else if (isEditFunctionArgsEnabled && message.functionCall) {
+    } @else if (isEditFunctionArgsEnabled && message.functionCalls && message.functionCalls.length > 0) {
     <div>
       <span
         class="material-symbols-outlined eval-case-edit-button"

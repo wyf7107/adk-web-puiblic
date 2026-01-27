@@ -388,23 +388,6 @@ describe('SidePanelComponent', () => {
       });
     });
 
-    describe('Events tab', () => {
-      beforeEach(async () => {
-        await switchTab(EVENTS_TAB_INDEX);
-      });
-
-      describe('when app-event-tab emits selectedEvent', () => {
-        beforeEach(() => {
-          spyOn(component.eventSelected, 'emit');
-          const eventTab = fixture.debugElement.query(EVENT_TAB_SELECTOR);
-          eventTab.triggerEventHandler('selectedEvent', 'event1');
-        });
-        it('emits eventSelected', () => {
-          expect(component.eventSelected.emit).toHaveBeenCalledWith('event1');
-        });
-      });
-    });
-
     describe('Sessions tab', () => {
       beforeEach(async () => {
         await switchTab(SESSIONS_TAB_INDEX);

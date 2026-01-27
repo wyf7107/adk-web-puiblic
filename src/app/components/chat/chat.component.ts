@@ -976,10 +976,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         message.eventId = e?.id;
       } else if (part.functionCall) {
-        message.functionCall = part.functionCall;
+        message.functionCalls = [part.functionCall];
         message.eventId = e?.id;
       } else if (part.functionResponse) {
-        message.functionResponse = part.functionResponse;
+        message.functionResponses = [part.functionResponse];
         message.eventId = e?.id;
       } else if (part.executableCode) {
         message.executableCode = part.executableCode;
@@ -1510,17 +1510,55 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.combineA2uiDataParts(event.content?.parts) :
           event.content?.parts || [];
       const partsToProcess = reverseOrder ? [...parts].reverse() : parts;
-      partsToProcess.forEach((part: any) => {
-        if (isA2aResponse && this.isA2uiDataPart(part)) {
-          part = {a2ui: this.extractA2aDataPartJson(part).data};
+
+      if (event.author === 'user') {
+        // For user messages, combine all parts into a single message
+        const userMessage: any = {
+          role: 'user',
+          eventId: event.id
+        };
+
+        partsToProcess.forEach((part: any) => {
+          this.processPartIntoMessage(part, event, userMessage);
+        });
+
+        if (reverseOrder) {
+          this.messages.update((messages) => [userMessage, ...messages]);
+        } else {
+          this.messages.update((messages) => [...messages, userMessage]);
         }
-        this.storeMessage(
-            part, event, event.author === 'user' ? 'user' : 'bot', undefined,
-            undefined, reverseOrder);
-        if (event.author && event.author !== 'user') {
-          this.storeEvents(part, event);
+
+        // Store the event in eventData
+        if (!this.eventData.has(event.id)) {
+          this.eventData.set(event.id, event);
+          this.eventData = new Map(this.eventData);
         }
-      });
+      } else {
+        // For bot messages, combine all parts into a single message
+        const botMessage: any = {
+          role: 'bot',
+          eventId: event.id
+        };
+
+        partsToProcess.forEach((part: any) => {
+          if (isA2aResponse && this.isA2uiDataPart(part)) {
+            part = {a2ui: this.extractA2aDataPartJson(part).data};
+          }
+          this.processPartIntoMessage(part, event, botMessage);
+        });
+
+        if (reverseOrder) {
+          this.messages.update((messages) => [botMessage, ...messages]);
+        } else {
+          this.messages.update((messages) => [...messages, botMessage]);
+        }
+
+        // Store the event in eventData
+        if (!this.eventData.has(event.id)) {
+          this.eventData.set(event.id, event);
+          this.eventData = new Map(this.eventData);
+        }
+      }
     });
 
     this.sessionIdOfLoadedMessages = this.sessionId;
@@ -1545,13 +1583,43 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.resetEventsAndMessages();
 
     session.events.forEach((event: any) => {
-      event.content?.parts?.forEach((part: any) => {
-        this.storeMessage(
-            part, event, event.author === 'user' ? 'user' : 'bot');
-        if (event.author && event.author !== 'user') {
-          this.storeEvents(part, event);
+      if (event.author === 'user') {
+        // For user messages, combine all parts into a single message
+        const userMessage: any = {
+          role: 'user',
+          eventId: event.id
+        };
+
+        event.content?.parts?.forEach((part: any) => {
+          this.processPartIntoMessage(part, event, userMessage);
+        });
+
+        this.messages.update((messages) => [...messages, userMessage]);
+
+        // Store the event in eventData
+        if (!this.eventData.has(event.id)) {
+          this.eventData.set(event.id, event);
+          this.eventData = new Map(this.eventData);
         }
-      });
+      } else {
+        // For bot messages, combine all parts into a single message
+        const botMessage: any = {
+          role: 'bot',
+          eventId: event.id
+        };
+
+        event.content?.parts?.forEach((part: any) => {
+          this.processPartIntoMessage(part, event, botMessage);
+        });
+
+        this.messages.update((messages) => [...messages, botMessage]);
+
+        // Store the event in eventData
+        if (!this.eventData.has(event.id)) {
+          this.eventData.set(event.id, event);
+          this.eventData = new Map(this.eventData);
+        }
+      }
     });
 
     this.eventService.getTrace(this.sessionId)

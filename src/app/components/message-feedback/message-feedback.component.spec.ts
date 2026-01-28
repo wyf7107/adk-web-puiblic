@@ -19,19 +19,24 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 
-import {FEEDBACK_SERVICE} from '../../core/services/interfaces/feedback';
+import {Feedback, FEEDBACK_SERVICE} from '../../core/services/interfaces/feedback';
 import {MockFeedbackService} from '../../core/services/testing/mock-feedback.service';
 import {initTestBed} from '../../testing/utils';
 
 import {MessageFeedbackComponent} from './message-feedback.component';
-import {of} from 'rxjs';
+import {BehaviorSubject, NEVER, of} from 'rxjs';
 
 describe('MessageFeedbackComponent', () => {
   let mockFeedbackService: MockFeedbackService;
   let fixture: ComponentFixture<MessageFeedbackComponent>;
+  let getFeedback$: BehaviorSubject<Feedback | undefined>;
 
   beforeEach(async () => {
     mockFeedbackService = new MockFeedbackService();
+    getFeedback$ = new BehaviorSubject<Feedback | undefined>(undefined);
+    mockFeedbackService.getFeedback.and.callFake((sessionId, eventId) => 
+      getFeedback$
+    );
 
     initTestBed();
     await TestBed
@@ -50,15 +55,13 @@ describe('MessageFeedbackComponent', () => {
   });
 
   it('should delete feedback if the same feedback button is clicked', async () => {
-    mockFeedbackService.getFeedback.and.returnValue(
-      of({direction: 'up', comment: ''} as any),
-    );
-    fixture = TestBed.createComponent(MessageFeedbackComponent);
-    fixture.componentRef.setInput('sessionName', 'test-session');
-    fixture.componentRef.setInput('eventId', 'test-event');
+    getFeedback$.next({id: 'f1', direction: 'up', comment: ''});
+    mockFeedbackService.deleteFeedback.and.callFake(() => {
+      getFeedback$.next(undefined);
+      return of(undefined);
+    });
     fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
+
     expect(
       fixture.debugElement
         .queryAll(By.css('.feedback-buttons button mat-icon'))[0]
@@ -290,5 +293,58 @@ describe('MessageFeedbackComponent', () => {
     expect(fixture.debugElement.query(By.css('.additional-feedback h3'))
                .nativeElement.textContent)
         .toContain('(Optional)');
+  });
+
+  it('should disable feedback buttons when deleting feedback', async () => {
+    getFeedback$.next({id: 'f1', direction: 'up', comment: ''});
+    mockFeedbackService.deleteFeedback.and.returnValue(NEVER);
+    fixture.detectChanges();
+
+    fixture.debugElement
+      .queryAll(By.css('.feedback-buttons button'))[0]
+      .nativeElement.click();
+    fixture.detectChanges();
+
+    expect(mockFeedbackService.deleteFeedback).toHaveBeenCalledWith(
+      'test-session',
+      'test-event',
+    );
+    expect(
+      fixture.debugElement
+        .queryAll(By.css('.feedback-buttons button'))[0]
+        .nativeElement.disabled,
+    ).toBeTrue();
+    expect(
+      fixture.debugElement
+        .queryAll(By.css('.feedback-buttons button'))[1]
+        .nativeElement.disabled,
+    ).toBeTrue();
+  });
+
+  it('should disable feedback buttons when submitting feedback', () => {
+    mockFeedbackService.sendFeedback.and.returnValue(NEVER);
+    fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
+        .nativeElement.click();  // Click up
+    fixture.detectChanges();
+
+    fixture.debugElement.queryAll(By.css('.actions button'))[1]
+        .nativeElement.click();  // Submit button
+    fixture.detectChanges();
+
+    expect(mockFeedbackService.sendFeedback)
+        .toHaveBeenCalledWith('test-session', 'test-event', {
+          direction: 'up',
+          comment: '',
+        });
+    expect(
+      fixture.debugElement
+        .queryAll(By.css('.feedback-buttons button'))[0]
+        .nativeElement.disabled,
+    ).toBeTrue();
+    expect(
+      fixture.debugElement
+        .queryAll(By.css('.feedback-buttons button'))[1]
+        .nativeElement.disabled,
+    ).toBeTrue();
   });
 });

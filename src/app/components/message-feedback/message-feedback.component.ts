@@ -71,12 +71,15 @@ export class MessageFeedbackComponent {
         this.i18n.feedbackCommentPlaceholderUp :
         this.i18n.feedbackCommentPlaceholderDown;
   });
+  readonly isLoading = signal(false);
   readonly comment = new FormControl('');
 
   sendFeedback(direction: Feedback['direction']) {
     if (this.feedbackDirection() === direction) {
+      this.isLoading.set(true);
       this.feedbackService.deleteFeedback(this.sessionName(), this.eventId())
           .subscribe(() => {
+            this.isLoading.set(false);
             this.selectedFeedbackDirection.set(undefined);
             this.resetDetailedFeedback();
           });
@@ -90,11 +93,16 @@ export class MessageFeedbackComponent {
     const direction = this.feedbackDirection();
     if (!direction) return;
 
-    this.feedbackService.sendFeedback(this.sessionName(), this.eventId(), {
-      direction,
-      comment: this.comment.value ?? undefined,
-    });
-    this.resetDetailedFeedback();
+    this.isLoading.set(true);
+    this.feedbackService
+        .sendFeedback(this.sessionName(), this.eventId(), {
+          direction,
+          comment: this.comment.value ?? undefined,
+        })
+        .subscribe(() => {
+          this.isLoading.set(false);
+          this.resetDetailedFeedback();
+        });
   }
 
   onDetailedFeedbackCancelled() {

@@ -26,7 +26,9 @@ export class FeedbackService implements FeedbackServiceInterface {
       sessionId: string,
       eventId: string,
       feedback: Partial<Feedback>,
-      ): void {}
+      ): Observable<void> {
+    return of(undefined);
+  }
 
   getFeedback(sessionId: string, eventId: string):
       Observable<Feedback|undefined> {

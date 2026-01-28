@@ -54,6 +54,30 @@ describe('MessageFeedbackComponent', () => {
     fixture.detectChanges();
   });
 
+  it('should show existing UP feedback on load', async () => {
+    getFeedback$.next({id: 'f1', direction: 'up', comment: ''});
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const upButton =
+        fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
+            .nativeElement;
+    const upIcon = upButton.querySelector('mat-icon')!;
+    expect(upIcon.textContent).toContain('thumb_up_filled');
+  });
+
+  it('should show existing DOWN feedback on load', async () => {
+    getFeedback$.next({id: 'f1', direction: 'down', comment: ''});
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const downButton =
+        fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1]
+            .nativeElement;
+    const downIcon = downButton.querySelector('mat-icon')!;
+    expect(downIcon.textContent).toContain('thumb_down_filled');
+  });
+
   it('should delete feedback if the same feedback button is clicked', async () => {
     getFeedback$.next({id: 'f1', direction: 'up', comment: ''});
     mockFeedbackService.deleteFeedback.and.callFake(() => {
@@ -84,20 +108,23 @@ describe('MessageFeedbackComponent', () => {
     ).toContain('thumb_up');
   });
 
-  it('should show detailed feedback panel when "up" button is clicked', () => {
-    expect(fixture.debugElement.query(By.css('.feedback-details-container')))
-        .toBeFalsy();
+  it('should submit "up" feedback and show detailed panel when "up" button is clicked',
+     () => {
+       expect(fixture.debugElement.query(By.css('.feedback-details-container')))
+           .toBeFalsy();
 
-    fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
-        .nativeElement.click();
-    fixture.detectChanges();
+       fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
+           .nativeElement.click();
+       fixture.detectChanges();
 
-    expect(fixture.debugElement.query(By.css('.feedback-details-container')))
-        .toBeTruthy();
-    expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
-  });
+       expect(fixture.debugElement.query(By.css('.feedback-details-container')))
+           .toBeTruthy();
+       expect(mockFeedbackService.sendFeedback)
+           .toHaveBeenCalledWith(
+               'test-session', 'test-event', {direction: 'up'});
+     });
 
-  it('should show detailed feedback panel when "down" button is clicked',
+  it('should submit "down" feedback and show detailed panel when "down" button is clicked',
      () => {
        expect(fixture.debugElement.query(By.css('.feedback-details-container')))
            .toBeFalsy();
@@ -110,7 +137,9 @@ describe('MessageFeedbackComponent', () => {
            .toBeTruthy();
        expect(fixture.debugElement.query(By.css('.feedback-buttons')))
            .toBeTruthy();
-       expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
+       expect(mockFeedbackService.sendFeedback)
+           .toHaveBeenCalledWith(
+               'test-session', 'test-event', {direction: 'down'});
      });
 
   it('should toggle between detailed feedback directions', () => {
@@ -136,6 +165,8 @@ describe('MessageFeedbackComponent', () => {
         .toContain('thumb_down');
     expect(fixture.debugElement.query(By.css('.feedback-details-container')))
         .toBeTruthy();
+    expect(mockFeedbackService.sendFeedback)
+        .toHaveBeenCalledWith('test-session', 'test-event', {direction: 'up'});
   });
 
   it('should call sendFeedback when detailed feedback is submitted', () => {
@@ -202,6 +233,10 @@ describe('MessageFeedbackComponent', () => {
 
     expect(fixture.debugElement.query(By.css('.feedback-details-container')))
         .toBeTruthy();
+    expect(mockFeedbackService.sendFeedback)
+        .toHaveBeenCalledWith(
+            'test-session', 'test-event', {direction: 'down'});
+    mockFeedbackService.sendFeedback.calls.reset();
 
     fixture.debugElement.queryAll(By.css('.actions button'))[0]
         .nativeElement.click();  // Cancel button
@@ -322,7 +357,7 @@ describe('MessageFeedbackComponent', () => {
   });
 
   it('should disable feedback buttons when submitting feedback', () => {
-    mockFeedbackService.sendFeedback.and.returnValue(NEVER);
+    mockFeedbackService.sendFeedback.and.returnValues(of(undefined), NEVER);
     fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
         .nativeElement.click();  // Click up
     fixture.detectChanges();

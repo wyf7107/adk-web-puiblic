@@ -84,8 +84,16 @@ export class MessageFeedbackComponent {
             this.resetDetailedFeedback();
           });
     } else {
-      this.isDetailedFeedbackVisible.set(true);
-      this.selectedFeedbackDirection.set(direction);
+      this.isLoading.set(true);
+      this.feedbackService
+          .sendFeedback(this.sessionName(), this.eventId(), {
+            direction,
+          })
+          .subscribe(() => {
+            this.isLoading.set(false);
+            this.isDetailedFeedbackVisible.set(true);
+            this.selectedFeedbackDirection.set(direction);
+          });
     }
   }
 

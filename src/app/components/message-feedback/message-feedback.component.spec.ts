@@ -24,6 +24,7 @@ import {MockFeedbackService} from '../../core/services/testing/mock-feedback.ser
 import {initTestBed} from '../../testing/utils';
 
 import {MessageFeedbackComponent} from './message-feedback.component';
+import {of} from 'rxjs';
 
 describe('MessageFeedbackComponent', () => {
   let mockFeedbackService: MockFeedbackService;
@@ -46,6 +47,38 @@ describe('MessageFeedbackComponent', () => {
     fixture.componentRef.setInput('sessionName', 'test-session');
     fixture.componentRef.setInput('eventId', 'test-event');
     fixture.detectChanges();
+  });
+
+  it('should delete feedback if the same feedback button is clicked', async () => {
+    mockFeedbackService.getFeedback.and.returnValue(
+      of({direction: 'up', comment: ''} as any),
+    );
+    fixture = TestBed.createComponent(MessageFeedbackComponent);
+    fixture.componentRef.setInput('sessionName', 'test-session');
+    fixture.componentRef.setInput('eventId', 'test-event');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(
+      fixture.debugElement
+        .queryAll(By.css('.feedback-buttons button mat-icon'))[0]
+        .nativeElement.textContent,
+    ).toContain('thumb_up_filled');
+
+    fixture.debugElement
+      .queryAll(By.css('.feedback-buttons button'))[0]
+      .nativeElement.click();
+    fixture.detectChanges();
+
+    expect(mockFeedbackService.deleteFeedback).toHaveBeenCalledWith(
+      'test-session',
+      'test-event',
+    );
+    expect(
+      fixture.debugElement
+        .queryAll(By.css('.feedback-buttons button mat-icon'))[0]
+        .nativeElement.textContent,
+    ).toContain('thumb_up');
   });
 
   it('should show detailed feedback panel when "up" button is clicked', () => {

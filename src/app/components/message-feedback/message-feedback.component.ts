@@ -16,8 +16,8 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {Component, computed, effect, inject, input, resource, signal} from '@angular/core';
-import {rxResource, toSignal} from '@angular/core/rxjs-interop';
+import {Component, computed, inject, input, signal} from '@angular/core';
+import {rxResource} from '@angular/core/rxjs-interop';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -74,8 +74,16 @@ export class MessageFeedbackComponent {
   readonly comment = new FormControl('');
 
   sendFeedback(direction: Feedback['direction']) {
-    this.isDetailedFeedbackVisible.set(true);
-    this.selectedFeedbackDirection.set(direction);
+    if (this.feedbackDirection() === direction) {
+      this.feedbackService.deleteFeedback(this.sessionName(), this.eventId())
+          .subscribe(() => {
+            this.selectedFeedbackDirection.set(undefined);
+            this.resetDetailedFeedback();
+          });
+    } else {
+      this.isDetailedFeedbackVisible.set(true);
+      this.selectedFeedbackDirection.set(direction);
+    }
   }
 
   onDetailedFeedbackSubmitted() {

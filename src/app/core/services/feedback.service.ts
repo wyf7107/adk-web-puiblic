@@ -16,9 +16,9 @@
  */
 
 import {Injectable} from '@angular/core';
+import {Observable, of} from 'rxjs';
 
 import {Feedback, FeedbackService as FeedbackServiceInterface} from './interfaces/feedback';
-import {Observable, of} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class FeedbackService implements FeedbackServiceInterface {
@@ -30,6 +30,10 @@ export class FeedbackService implements FeedbackServiceInterface {
 
   getFeedback(sessionId: string, eventId: string):
       Observable<Feedback|undefined> {
+    return of(undefined);
+  }
+
+  deleteFeedback(sessionId: string, eventId: string): Observable<void> {
     return of(undefined);
   }
 }

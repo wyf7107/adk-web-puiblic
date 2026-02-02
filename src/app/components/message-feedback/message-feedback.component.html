@@ -27,6 +27,15 @@
   </div>
 
   <div class="feedback-details-container" *ngIf="isDetailedFeedbackVisible()">
+    <div class="reasons-chips">
+      <h3>{{ i18n.feedbackDialogTitle }}</h3>
+      <mat-chip-listbox multiple [formControl]="selectedReasons">
+        @for (reason of reasons(); track reason) {
+        <mat-chip-option [value]="reason"> {{ reason }} </mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </div>
+
     <div class="additional-feedback">
       <h3>{{ i18n.feedbackAdditionalLabel }}</h3>
       <mat-form-field appearance="outline">

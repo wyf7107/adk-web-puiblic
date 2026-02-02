@@ -38,4 +38,12 @@ export class FeedbackService implements FeedbackServiceInterface {
   deleteFeedback(sessionId: string, eventId: string): Observable<void> {
     return of(undefined);
   }
+
+  getPositiveFeedbackReasons(): Observable<string[]> {
+    return of([]);
+  }
+
+  getNegativeFeedbackReasons(): Observable<string[]> {
+    return of([]);
+  }
 }

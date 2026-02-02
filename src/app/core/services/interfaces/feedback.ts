@@ -40,6 +40,8 @@ export declare abstract class FeedbackService {
   abstract getFeedback(sessionId: string, eventId: string):
       Observable<Feedback|undefined>;
   abstract deleteFeedback(sessionId: string, eventId: string): Observable<void>;
+  abstract getPositiveFeedbackReasons(): Observable<string[]>;
+  abstract getNegativeFeedbackReasons(): Observable<string[]>;
 }
 
 /**

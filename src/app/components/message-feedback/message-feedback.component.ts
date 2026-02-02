@@ -20,6 +20,7 @@ import {Component, computed, inject, input, signal} from '@angular/core';
 import {rxResource} from '@angular/core/rxjs-interop';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
+import {MatChipsModule} from '@angular/material/chips';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
@@ -38,6 +39,7 @@ import {MessageFeedbackMessagesInjectionToken} from './message-feedback.componen
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
+    MatChipsModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -71,8 +73,20 @@ export class MessageFeedbackComponent {
         this.i18n.feedbackCommentPlaceholderUp :
         this.i18n.feedbackCommentPlaceholderDown;
   });
-  readonly isLoading = signal(false);
+  private readonly positiveReasonsResource = rxResource({
+    stream: () => this.feedbackService.getPositiveFeedbackReasons(),
+  });
+  private readonly negativeReasonsResource = rxResource({
+    stream: () => this.feedbackService.getNegativeFeedbackReasons(),
+  });
+  readonly reasons = computed(() => {
+    return this.feedbackDirection() === 'up' ?
+        this.positiveReasonsResource.value() :
+        this.negativeReasonsResource.value();
+  });
+  readonly selectedReasons = new FormControl<string[]>([]);
   readonly comment = new FormControl('');
+  readonly isLoading = signal(false);
 
   sendFeedback(direction: Feedback['direction']) {
     if (this.feedbackDirection() === direction) {
@@ -84,6 +98,7 @@ export class MessageFeedbackComponent {
             this.resetDetailedFeedback();
           });
     } else {
+      this.selectedReasons.reset();
       this.isLoading.set(true);
       this.feedbackService
           .sendFeedback(this.sessionName(), this.eventId(), {
@@ -105,6 +120,7 @@ export class MessageFeedbackComponent {
     this.feedbackService
         .sendFeedback(this.sessionName(), this.eventId(), {
           direction,
+          reasons: this.selectedReasons.value ?? [],
           comment: this.comment.value ?? undefined,
         })
         .subscribe(() => {
@@ -121,5 +137,6 @@ export class MessageFeedbackComponent {
   private resetDetailedFeedback() {
     this.isDetailedFeedbackVisible.set(false);
     this.comment.reset();
+    this.selectedReasons.reset([]);
   }
 }

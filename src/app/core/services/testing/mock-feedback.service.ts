@@ -28,4 +28,10 @@ export class MockFeedbackService implements Partial<FeedbackService> {
   getFeedback = jasmine.createSpy('getFeedback').and.returnValue(of(undefined));
   deleteFeedback =
       jasmine.createSpy('deleteFeedback').and.returnValue(of(undefined));
+  getPositiveFeedbackReasons =
+      jasmine.createSpy('getPositiveFeedbackReasons')
+          .and.returnValue(of(undefined));
+  getNegativeFeedbackReasons =
+      jasmine.createSpy('getNegativeFeedbackReasons')
+          .and.returnValue(of(undefined));
 }

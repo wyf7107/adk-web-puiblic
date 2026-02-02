@@ -78,6 +78,9 @@ import {ChatMessagesInjectionToken} from './chat.component.i18n';
 const ROOT_AGENT = 'root_agent';
 /** Query parameter for pre-filling user input. */
 export const INITIAL_USER_INPUT_QUERY_PARAM = 'q';
+/** Query parameter for hiding the side panel. */
+export const HIDE_SIDE_PANEL_QUERY_PARAM = 'hideSidePanel';
+
 
 /** A2A data part markers */
 const A2A_DATA_PART_START_TAG = '<a2a_datapart_json>';
@@ -313,6 +316,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.syncSelectedAppFromUrl();
     this.updateSelectedAppUrl();
+    this.hideSidePanelIfNeeded();
 
     combineLatest([
       this.agentService.getApp(),
@@ -413,8 +417,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    this.showSidePanel = true;
-    this.sideDrawer()?.open();
+    if (this.showSidePanel) {
+      this.sideDrawer()?.open();
+    }
 
     if (!this.isApplicationSelectorEnabled()) {
       this.loadSessionByUrlOrReset();
@@ -461,6 +466,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             });
       }
     });
+  }
+
+  private hideSidePanelIfNeeded() {
+    this.activatedRoute.queryParams
+        .pipe(
+            filter((params) => params[HIDE_SIDE_PANEL_QUERY_PARAM] === 'true'),
+            take(1),
+            )
+        .subscribe(() => {
+          this.showSidePanel = false;
+          this.sideDrawer()?.close();
+        });
   }
 
   private createSessionAndReset() {

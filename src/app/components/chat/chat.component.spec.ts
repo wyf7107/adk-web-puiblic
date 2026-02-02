@@ -70,7 +70,7 @@ import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 
-import {ChatComponent, INITIAL_USER_INPUT_QUERY_PARAM} from './chat.component';
+import {ChatComponent, HIDE_SIDE_PANEL_QUERY_PARAM, INITIAL_USER_INPUT_QUERY_PARAM,} from './chat.component';
 
 // Mock EvalTabComponent to satisfy the required viewChild in ChatComponent
 @Component({
@@ -291,6 +291,27 @@ describe('ChatComponent', () => {
           tick();
 
           expect(component.userInput).toBe('hello');  // Should be set now
+        }));
+
+    it(
+        'should hide side panel when hideSidePanel query param is true',
+        fakeAsync(() => {
+          mockAgentService.setApp(TEST_APP_1_NAME);
+          mockActivatedRoute.snapshot!.queryParams = {
+            [INITIAL_USER_INPUT_QUERY_PARAM]: 'hello',
+            [HIDE_SIDE_PANEL_QUERY_PARAM]: 'true'
+          };
+          mockActivatedRoute.queryParams = of({
+            [INITIAL_USER_INPUT_QUERY_PARAM]: 'hello',
+            [HIDE_SIDE_PANEL_QUERY_PARAM]: 'true'
+          });
+
+          fixture = TestBed.createComponent(ChatComponent);
+          component = fixture.componentInstance;
+          fixture.detectChanges();
+          tick();
+
+          expect(component.showSidePanel).toBeFalse();
         }));
 
     it(

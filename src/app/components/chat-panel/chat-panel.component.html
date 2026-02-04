@@ -260,8 +260,9 @@
     } 
     @if (message.functionCalls && message.functionCalls.length > 0) {
       @for (functionCall of message.functionCalls; track functionCall) {
-        @if (isComputerUseClick(message)) {
-          <app-computer-action [message]="message" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+        @if (isComputerUseClick(functionCall)) {
+          <app-computer-action [functionCall]="functionCall" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+
         } @else {
           <button
             mat-stroked-button
@@ -277,8 +278,9 @@
     }
     @if (message.functionResponses && message.functionResponses.length > 0) {
       @for (functionResponse of message.functionResponses; track functionResponse) {
-        @if (isComputerUseResponse(message)) {
-          <app-computer-action [message]="message" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+        @if (isComputerUseResponse(functionResponse)) {
+          <app-computer-action [functionResponse]="functionResponse" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+
         } @else {
           <button mat-stroked-button [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
             class="function-event-button"

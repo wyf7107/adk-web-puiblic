@@ -69,7 +69,7 @@
       <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
     </button>
     } 
-    @if ((!message.functionCalls || message.functionCalls.length === 0) && (!message.functionResponses || message.functionResponses.length === 0)) {
+    @if (shouldShowMessageCard(message)) {
     <mat-card
       class="message-card"
       [ngClass]="{

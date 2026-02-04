@@ -278,6 +278,13 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
            message.eventId === this.selectedEvent.id;
   }
 
+  shouldShowMessageCard(message: any): boolean {
+    return !!(
+        message.text || message.attachments || message.inlineData ||
+        message.executableCode || message.codeExecutionResult ||
+        message.a2uiData || message.renderedContent || message.isLoading ||
+        (message.failedMetric && message.evalStatus === 2));
+  }
 
   getBotEventNumber(messageIndex: number): number {
     const message = this.messages[messageIndex];

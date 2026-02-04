@@ -696,28 +696,24 @@ describe('ChatPanelComponent', () => {
     it(
         'isComputerUseResponse should return true when image data and url are present',
         () => {
-          const message = {
-            functionResponse: {
-              name: 'computer_use',
-              response: {
-                image: {data: 'base64data', mimetype: 'image/png'},
-                url: 'http://example.com'
-              }
+          const response: any = {
+            name: 'computer_use',
+            response: {
+              image: {data: 'base64data', mimetype: 'image/png'},
+              url: 'http://example.com'
             }
           };
-          expect(component.isComputerUseResponse(message)).toBeTrue();
+          expect(component.isComputerUseResponse(response)).toBeTrue();
         });
 
     it(
         'isComputerUseResponse should return false when image data is missing',
         () => {
-          const message = {
-            functionResponse: {
-              name: 'computer_use',
-              response: {image: null, url: 'http://example.com'}
-            }
+          const response: any = {
+            name: 'computer_use',
+            response: {image: null, url: 'http://example.com'}
           };
-          expect(component.isComputerUseResponse(message)).toBeFalse();
+          expect(component.isComputerUseResponse(response)).toBeFalse();
       });
     });
   });

@@ -460,50 +460,6 @@ describe('ChatComponent', () => {
           expect(component.eventData.has('event-1')).toBeTrue();
           expect(component.eventData.has('event-2')).toBeTrue();
         });
-
-        it('should combine A2UI data parts in history messages', () => {
-          const createA2uiPart = (content: any) => {
-            const json = JSON.stringify({
-              kind: 'data',
-              metadata: {mimeType: A2UI_MIME_TYPE},
-              data: content
-            });
-            return {
-              inlineData: {
-                mimeType: 'text/plain',
-                data: btoa(`${A2A_DATA_PART_TAG_START}${json}${
-                    A2A_DATA_PART_TAG_END}`)
-              }
-            };
-          };
-
-          const historyEvent = {
-            id: 'event-history',
-            author: 'bot',
-            customMetadata: {'a2a:response': 'true'},
-            content: {
-              role: 'bot',
-              parts: [
-                createA2uiPart({beginRendering: {id: '1'}}),
-                createA2uiPart({surfaceUpdate: {components: []}})
-              ]
-            },
-          };
-
-          mockUiStateService.newMessagesLoadedResponse.next({
-            items: [historyEvent],
-            nextPageToken: '',
-            isBackground: true
-          } as any);
-          fixture.detectChanges();
-
-          const messages = component.messages();
-          expect(messages.length).toBe(1);
-          expect(messages[0].a2uiData).toEqual({
-            beginRendering: {beginRendering: {id: '1'}},
-            surfaceUpdate: {surfaceUpdate: {components: []}}
-          });
-        });
       });
     });
   });

@@ -883,6 +883,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return result;
   }
 
+  private processA2uiPartIntoMessage(part: any): any {
+    const a2uiData: any = {};
+    part.a2ui.forEach((dataPart: any) => {
+      if (dataPart.data.beginRendering) {
+        a2uiData.beginRendering = dataPart.data;
+      } else if (dataPart.data.surfaceUpdate) {
+        a2uiData.surfaceUpdate = dataPart.data;
+      } else if (dataPart.data.dataModelUpdate) {
+        a2uiData.dataModelUpdate = dataPart.data;
+      }
+    });
+    return a2uiData;
+  }
+
   private updateRedirectUri(urlString: string, newRedirectUri: string): string {
     try {
       const url = new URL(urlString);
@@ -972,17 +986,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           mimeType: part.inlineData.mimeType,
         };
       } else if (part.a2ui) {
-        const a2uiData: any = {};
-        part.a2ui.forEach((dataPart: any) => {
-          if (dataPart.data.beginRendering) {
-            a2uiData.beginRendering = dataPart.data;
-          } else if (dataPart.data.surfaceUpdate) {
-            a2uiData.surfaceUpdate = dataPart.data;
-          } else if (dataPart.data.dataModelUpdate) {
-            a2uiData.dataModelUpdate = dataPart.data;
-          }
-        });
-        message.a2uiData = a2uiData;
+        message.a2uiData = this.processA2uiPartIntoMessage(part);
       } else if (part.text) {
         message.text = part.text;
         message.thought = part.thought ? true : false;
@@ -1082,6 +1086,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       message.executableCode = part.executableCode;
     } else if (part.codeExecutionResult) {
       message.codeExecutionResult = part.codeExecutionResult;
+    } else if (part.a2ui) {
+      message.a2uiData = this.processA2uiPartIntoMessage(part);
     }
   }
 

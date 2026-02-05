@@ -32,3 +32,15 @@
   border: none !important;
   box-shadow: none !important;
 }
+
+h2[mat-dialog-title] {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+mat-dialog-content {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+button[mat-button] {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}

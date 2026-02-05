@@ -408,12 +408,12 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  isComputerUseClick(message: {functionCall?: FunctionCall}): boolean {
-    return isVisibleComputerUseClick(message);
+  isComputerUseClick(input: any): boolean {
+    return isVisibleComputerUseClick(input);
   }
 
-  isComputerUseResponse(message: {functionResponse?: FunctionResponse}): boolean {
-    return isComputerUseResponse(message);
+  isComputerUseResponse(input: any): boolean {
+    return isComputerUseResponse(input);
   }
 
   getFunctionCallArgsTooltip(message: any): string {

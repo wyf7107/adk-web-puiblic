@@ -34,9 +34,12 @@ import {FunctionCall, FunctionResponse} from '../../core/models/types';
   ],
 })
 export class ComputerActionComponent {
-  @Input() functionCall?: FunctionCall;
-  @Input() functionResponse?: FunctionResponse;
-  @Input() allMessages: Array<{functionResponses?: FunctionResponse[]}> = [];
+  @Input()
+  message: {functionCall?: FunctionCall;
+            functionResponse?: FunctionResponse} = {};
+  @Input()
+  allMessages: Array<
+      {functionCall?: FunctionCall; functionResponse?: FunctionResponse}> = [];
   @Input() index: number = 0;
   @Output() readonly clickEvent = new EventEmitter<number>();
   imageDimensions = new Map < number, {
@@ -49,23 +52,29 @@ export class ComputerActionComponent {
   private readonly VIRTUAL_HEIGHT = 1000;
 
   isComputerUseResponse(): this is {
-    functionResponse: FunctionResponse & {response: ComputerUsePayload}
+    message: {
+      functionResponse: FunctionResponse &
+          {
+            response: ComputerUsePayload
+          }
+    }
   } {
-    return !!this.functionResponse && isComputerUseResponse(this.functionResponse);
+    return isComputerUseResponse(this.message);
   }
 
-  isComputerUseClick(): this is {functionCall: ComputerUseClickCall} {
-    return !!this.functionCall && isVisibleComputerUseClick(this.functionCall);
+  isComputerUseClick():
+      this is {message: {functionCall: ComputerUseClickCall}} {
+    return isVisibleComputerUseClick(this.message);
   }
 
   getComputerUseScreenshot(): string {
     return this.getScreenshotFromPayload(
-        this.functionResponse?.response as ComputerUsePayload);
+        this.message.functionResponse?.response as ComputerUsePayload);
   }
 
   getComputerUseUrl(): string {
     if (!this.isComputerUseResponse()) return '';
-    const response = this.functionResponse?.response as ComputerUsePayload;
+    const response = this.message.functionResponse.response;
     return response.url || '';
   }
 
@@ -73,16 +82,7 @@ export class ComputerActionComponent {
     for (let i = this.index - 1; i >= 0; i--) {
       const msg = this.allMessages[i];
       if (this.isMsgComputerUseResponse(msg)) {
-        if (msg.functionResponses && msg.functionResponses.length > 0) {
-          // Iterate backwards through responses in this message to find the latest screenshot
-          for (let j = msg.functionResponses.length - 1; j >= 0; j--) {
-            const resp = msg.functionResponses[j];
-            if (isComputerUseResponse(resp)) {
-               const payload = resp.response as ComputerUsePayload;
-               return this.getScreenshotFromPayload(payload);
-            }
-          }
-        }
+        return this.getMsgComputerUseScreenshot(msg);
       }
     }
     return '';
@@ -90,16 +90,15 @@ export class ComputerActionComponent {
 
   getClickCoordinates(): {x: number; y: number}|null {
     if (!this.isComputerUseClick()) return null;
-    const args = this.functionCall!.args;
-    if (!args) return null;
-    if (args['coordinate']) {
+    const args = this.message.functionCall.args;
+    if (args.coordinate) {
       return {
-        x: Number(args['coordinate'][0]),
-        y: Number(args['coordinate'][1]),
+        x: Number(args.coordinate[0]),
+        y: Number(args.coordinate[1]),
       };
     }
-    if (args['x'] != null && args['y'] != null) {
-      return {x: Number(args['x']), y: Number(args['y'])};
+    if (args.x != null && args.y != null) {
+      return {x: Number(args.x), y: Number(args.y)};
     }
     return null;
   }
@@ -141,11 +140,21 @@ export class ComputerActionComponent {
     }
   }
 
-  private isMsgComputerUseResponse(message: {functionResponses?: FunctionResponse[]}): boolean {
-    if (message.functionResponses && message.functionResponses.length > 0) {
-        return message.functionResponses.some((resp: FunctionResponse) => isComputerUseResponse(resp));
-    }
-    return false;
+  private isMsgComputerUseResponse(message: {
+    functionResponse?: FunctionResponse
+  }): message is {
+    functionResponse: FunctionResponse &
+        {
+          response: ComputerUsePayload
+        }
+  } {
+    return isComputerUseResponse(message);
+  }
+
+  private getMsgComputerUseScreenshot(message: {
+    functionResponse: {response: ComputerUsePayload}
+  }): string {
+    return this.getScreenshotFromPayload(message.functionResponse.response);
   }
 
   private getScreenshotFromPayload(payload: ComputerUsePayload|undefined):

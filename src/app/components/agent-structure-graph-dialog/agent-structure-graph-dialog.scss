@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ h2[mat-dialog-title] {
 
 mat-dialog-content {
   color: var(--mdc-dialog-supporting-text-color) !important;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
 button[mat-button] {
@@ -27,49 +31,126 @@ button[mat-button] {
 }
 
 .dialog-content {
-  min-width: 600px;
-  min-height: 400px;
+  min-width: 700px;
+  min-height: 500px;
+  height: 500px;
   padding: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .graph-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
-.graph-placeholder {
+.agent-info {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+.vflow-container {
+  flex: 1;
+  min-height: 400px;
+  border: 1px solid var(--mdc-dialog-supporting-text-color, rgba(255, 255, 255, 0.2));
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+
+  vflow {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+.loading-container,
+.error-container,
+.no-graph-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 400px;
   padding: 40px;
-  border: 2px dashed var(--mdc-dialog-supporting-text-color);
-  border-radius: 8px;
-  margin-top: 20px;
-  opacity: 0.6;
-  min-height: 300px;
-  width: 100%;
+}
+
+.loading-container p,
+.error-container p,
+.no-graph-container p {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--mdc-dialog-supporting-text-color);
+}
+
+.error-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #f44336;
+}
+
+.error-message {
+  color: #f44336 !important;
 }
 
 .large-icon {
   font-size: 64px;
   width: 64px;
   height: 64px;
-  margin-bottom: 16px;
+  color: var(--mdc-dialog-supporting-text-color);
+  opacity: 0.6;
+}
+
+// Agent node styling
+.agent-node {
+  background-color: var(--mdc-dialog-container-color, #2b2b2f);
+  border: 2px solid rgba(138, 180, 248, 0.5);
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.node-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: rgba(138, 180, 248, 0.9);
+}
+
+.node-label {
+  font-weight: 500;
+  font-size: 14px;
   color: var(--mdc-dialog-supporting-text-color);
 }
 
-.hint {
-  font-size: 0.9em;
-  font-style: italic;
+.node-class {
+  font-size: 12px;
+  color: var(--mdc-dialog-supporting-text-color);
   opacity: 0.7;
+  margin-top: 4px;
 }
 
-.no-agent-message {
-  text-align: center;
-  padding: 40px;
-  font-size: 1.1em;
+// Edge styling
+::ng-deep {
+  .vflow-edge {
+    stroke: rgba(138, 180, 248, 0.6);
+    stroke-width: 2px;
+    fill: none;
+  }
+
+  .vflow-edge-marker {
+    fill: rgba(138, 180, 248, 0.6);
+  }
 }

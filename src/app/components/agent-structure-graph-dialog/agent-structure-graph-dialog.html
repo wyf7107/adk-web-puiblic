@@ -1,5 +1,5 @@
 <!--
- Copyright 2025 Google LLC
+ Copyright 2026 Google LLC
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,15 +18,56 @@
 
 <mat-dialog-content class="dialog-content">
   <div class="graph-container">
-    @if (appName) {
-      <p>Agent: <strong>{{ appName }}</strong></p>
-      <div class="graph-placeholder">
-        <mat-icon class="large-icon">account_tree</mat-icon>
-        <p>Agent structure graph visualization will be displayed here.</p>
-        <p class="hint">This will show the hierarchical structure of your agent.</p>
+    @if (isLoading()) {
+      <div class="loading-container">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Loading agent structure...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="error-container">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <p class="error-message">{{ errorMessage() }}</p>
+      </div>
+    } @else if (nodes().length > 0) {
+      <p class="agent-info">Agent: <strong>{{ appName }}</strong></p>
+      <div class="vflow-container">
+        <vflow
+          view="auto"
+          [nodes]="nodes()"
+          [edges]="edges()"
+          [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }"
+        >
+          <ng-template nodeHtml let-ctx>
+            <div class="agent-node" selectable>
+              <handle type="target" position="top" />
+              <div class="node-header">
+                <mat-icon class="node-icon">smart_toy</mat-icon>
+                <span class="node-label">{{ ctx.node.data().label }}</span>
+              </div>
+              @if (ctx.node.data().agentClass && ctx.node.data().label !== 'START') {
+                <div class="node-class">{{ ctx.node.data().agentClass }}</div>
+              }
+              <handle type="source" position="bottom" />
+            </div>
+          </ng-template>
+
+          <ng-template edge let-ctx>
+            <svg:g customTemplateEdge>
+              <svg:path
+                fill="none"
+                [attr.d]="ctx.path()"
+                stroke="rgba(138, 180, 248, 0.8)"
+                stroke-width="2"
+                [attr.marker-end]="ctx.markerEnd()" />
+            </svg:g>
+          </ng-template>
+        </vflow>
       </div>
     } @else {
-      <p class="no-agent-message">No agent selected.</p>
+      <div class="no-graph-container">
+        <mat-icon class="large-icon">account_tree</mat-icon>
+        <p>No graph structure available for this agent.</p>
+      </div>
     }
   </div>
 </mat-dialog-content>

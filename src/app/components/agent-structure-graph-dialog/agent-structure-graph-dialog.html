@@ -1,0 +1,36 @@
+<!--
+ Copyright 2025 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<h2 mat-dialog-title>Agent Structure Graph</h2>
+
+<mat-dialog-content class="dialog-content">
+  <div class="graph-container">
+    @if (appName) {
+      <p>Agent: <strong>{{ appName }}</strong></p>
+      <div class="graph-placeholder">
+        <mat-icon class="large-icon">account_tree</mat-icon>
+        <p>Agent structure graph visualization will be displayed here.</p>
+        <p class="hint">This will show the hierarchical structure of your agent.</p>
+      </div>
+    } @else {
+      <p class="no-agent-message">No agent selected.</p>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

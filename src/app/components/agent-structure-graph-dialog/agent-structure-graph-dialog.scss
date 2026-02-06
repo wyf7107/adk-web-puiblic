@@ -1,0 +1,75 @@
+/**
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+h2[mat-dialog-title] {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+mat-dialog-content {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+button[mat-button] {
+  color: var(--mdc-dialog-supporting-text-color) !important;
+}
+
+.dialog-content {
+  min-width: 600px;
+  min-height: 400px;
+  padding: 20px;
+}
+
+.graph-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.graph-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  border: 2px dashed var(--mdc-dialog-supporting-text-color);
+  border-radius: 8px;
+  margin-top: 20px;
+  opacity: 0.6;
+  min-height: 300px;
+  width: 100%;
+}
+
+.large-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: var(--mdc-dialog-supporting-text-color);
+}
+
+.hint {
+  font-size: 0.9em;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.no-agent-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1em;
+}

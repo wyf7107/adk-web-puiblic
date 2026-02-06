@@ -175,4 +175,13 @@ export class AgentService implements AgentServiceInterface {
     }
     return new Observable<false>();
   }
+
+  agentInfo(name: string) {
+    if (this.apiServerDomain != undefined) {
+      let url = 
+        this.apiServerDomain + `/get_app_info/${name}`
+      return this.http.get<any>(url);
+    }
+    return new Observable<"">();
+  }
 }

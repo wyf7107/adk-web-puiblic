@@ -31,6 +31,7 @@ export abstract class AgentService {
   abstract getLoadingState(): BehaviorSubject<boolean>;
   abstract runSse(req: AgentRunRequest): Observable<LlmResponse>;
   abstract listApps(): Observable<string[]>;
+  abstract agentInfo(name: string): Observable<any>;
   getAgentBuilderTmp(agentName: string): Observable<string> {
     console.warn('unimplemented');
     return of('');

@@ -68,7 +68,11 @@
           [matTooltip]="disableBuilderIcon() ? 'This agent was not built by builder' : 'Edit in Builder Mode'"
           [style.cursor]="disableBuilderIcon() ? 'not-allowed' : 'pointer'"
           [style.opacity]="disableBuilderIcon() ? '0.5' : '1'"
-          [style.margin-right.px]="32">edit</mat-icon>
+          [style.margin-right.px]="16">edit</mat-icon>
+        <mat-icon (click)="showAgentStructureGraph.emit(true)"
+          matTooltip="View Agent Structure Graph"
+          matTooltipPosition="below"
+          style="cursor: pointer; margin-right: 32px;">account_tree</mat-icon>
         </div>
     }
   </div> 

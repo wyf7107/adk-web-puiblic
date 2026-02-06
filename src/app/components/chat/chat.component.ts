@@ -61,6 +61,7 @@ import {LOCATION_SERVICE} from '../../core/services/location.service';
 import {ResizableBottomDirective} from '../../directives/resizable-bottom.directive';
 import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
 import {AddItemDialogComponent} from '../add-item-dialog/add-item-dialog.component';
+import {AgentStructureGraphDialogComponent} from '../agent-structure-graph-dialog/agent-structure-graph-dialog';
 import {getMediaTypeFromMimetype, MediaType} from '../artifact-tab/artifact-tab.component';
 import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
 import {CanvasComponent} from '../canvas/canvas.component';
@@ -1941,6 +1942,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  openAgentStructureGraphDialog(): void {
+    const dialogRef = this.dialog.open(AgentStructureGraphDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      data: {
+        appName: this.appName,
+      },
+    });
+  }
+
   saveAgentBuilder() {
     this.canvasComponent()?.saveAgent(this.appName);
   }
@@ -2037,7 +2049,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.selectedAppControl.setValue(app, {emitEvent: false});
         this.selectApp(app);
-
+        this.agentService.agentInfo(app).subscribe(info => {
+          console.log(info)
+        })
         this.agentService.getAgentBuilder(app).subscribe((res: any) => {
           if (!res || res == '') {
             this.disableBuilderSwitch = true;

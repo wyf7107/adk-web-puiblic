@@ -122,6 +122,7 @@ export class SidePanelComponent implements AfterViewInit {
   readonly openImageDialog = output<string|null>();
   readonly openAddItemDialog = output<boolean>();
   readonly enterBuilderMode = output<boolean>();
+  readonly showAgentStructureGraph = output<boolean>();
 
   readonly sessionTabComponent = viewChild(SessionTabComponent);
   readonly evalTabComponent = viewChild(EvalTabComponent);

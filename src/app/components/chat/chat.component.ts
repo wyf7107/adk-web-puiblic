@@ -685,6 +685,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.storeEvents(part, chunkJson);
           this.streamingTextMessage = null;
           return;
+        } else {
+          this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
         }
       } else {
         if (renderedContent) {
@@ -693,20 +695,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         if (newChunk == this.streamingTextMessage.text) {
+          // Final chunk arrived - update the existing message's eventId
+          const oldEventId = this.streamingTextMessage.eventId;
+          this.messages.update((messages) => {
+            return messages.map(m => {
+              if (m.eventId === oldEventId && m.role === 'bot') {
+                return {...m, eventId: chunkJson.id};
+              }
+              return m;
+            });
+          });
           this.storeEvents(part, chunkJson);
-          const streamingMessageFinal = {
-            role: 'bot',
-            text: this.processThoughtText(newChunk),
-            thought: part.thought ? true : false,
-            eventId: chunkJson.id,
-          };
-          this.insertMessageBeforeLoadingMessage(streamingMessageFinal);
           this.streamingTextMessage = null;
           return;
         }
+        // Update the streaming text and insert to trigger UI update
         this.streamingTextMessage.text += newChunk;
+        this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
       }
     } else if (!part.thought) {
+      // Skip partial events for non-text parts to avoid duplicates
+      if (this.useSse && chunkJson.partial) {
+        return;
+      }
+
       // If the part is an A2A DataPart, display it as a message (e.g., A2UI or
       // Json)
       if (this.isA2aDataPart(part)) {
@@ -1027,6 +1039,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private insertMessageBeforeLoadingMessage(message: any) {
     this.messages.update((messages) => {
+      // If SSE streaming is enabled and this is a text message with eventId
+      if (this.useSse && message.text && message.eventId &&
+          message.role === 'bot') {
+        // Find existing streaming message with the same eventId
+        const existingIndex = messages.findIndex(
+            m => m.eventId === message.eventId && m.role === 'bot' &&
+                !m.isLoading);
+        if (existingIndex !== -1) {
+          const updatedMessages = [...messages];
+          updatedMessages[existingIndex] = {
+            ...updatedMessages[existingIndex],
+            text: message.text,
+            renderedContent: message.renderedContent ||
+                updatedMessages[existingIndex].renderedContent
+          };
+          return updatedMessages;
+        }
+      }
+
+      // Default behavior: insert new message
       const lastMessage = messages[messages.length - 1];
       if (lastMessage?.isLoading) {
         return [...messages.slice(0, -1), message, lastMessage];

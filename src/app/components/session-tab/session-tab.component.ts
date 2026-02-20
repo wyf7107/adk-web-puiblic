@@ -16,7 +16,7 @@
  */
 
 import {AsyncPipe, NgClass} from '@angular/common';
-import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output, signal,} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -34,6 +34,9 @@ import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 
 import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
 
+/**
+ * Displays a list of sessions and handles session loading and pagination.
+ */
 @Component({
   selector: 'app-session-tab',
   templateUrl: './session-tab.component.html',
@@ -53,15 +56,15 @@ import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
   standalone: true,
 })
 export class SessionTabComponent implements OnInit {
-  @Input() userId: string = '';
-  @Input() appName: string = '';
-  @Input() sessionId: string = '';
+  @Input() userId = '';
+  @Input() appName = '';
+  @Input() sessionId = '';
 
   @Output() readonly sessionSelected = new EventEmitter<Session>();
   @Output() readonly sessionReloaded = new EventEmitter<Session>();
 
   readonly SESSIONS_PAGE_LIMIT = 100;
-  sessionList: any[] = [];
+  sessionList: Session[] = [];
   canLoadMoreSessions = false;
   pageToken = '';
   filterControl = new FormControl('');
@@ -124,7 +127,7 @@ export class SessionTabComponent implements OnInit {
                               .values(),
                           )
                       .sort(
-                          (a: any, b: any) => Number(b.lastUpdateTime) -
+                          (a: Session, b: Session) => Number(b.lastUpdateTime) -
                               Number(a.lastUpdateTime),
                       );
               this.pageToken = nextPageToken ?? '';
@@ -208,7 +211,7 @@ export class SessionTabComponent implements OnInit {
                           pageSize: 100,
                           pageToken: '',
                         },
-                        /**isBackground= */ true)
+                        /** isBackground= */ true)
                     .pipe(first())
                     .subscribe();
               }
@@ -236,8 +239,10 @@ export class SessionTabComponent implements OnInit {
     }, 500);
   }
 
-  getSession(sessionId: string) {
-    this.getSessionSubject.next(sessionId);
+  getSession(sessionId: string|undefined) {
+    if (sessionId) {
+      this.getSessionSubject.next(sessionId);
+    }
   }
 
   loadMoreSessions() {
@@ -245,21 +250,21 @@ export class SessionTabComponent implements OnInit {
     this.refreshSessionsSubject.next();
   }
 
-  protected getDate(session: any): string {
-    let timeStamp = session.lastUpdateTime;
+  protected getDate(session: Session): string {
+    const timeStamp = session.lastUpdateTime || 0;
 
     const date = new Date(timeStamp * 1000);
 
     return date.toLocaleString();
   }
 
-  private fromApiResultToSession(res: any): Session {
+  private fromApiResultToSession(res: Session|Partial<Session>): Session {
     return {
-      id: res?.id ?? '',
-      appName: res?.appName ?? '',
-      userId: res?.userId ?? '',
-      state: res?.state ?? [],
-      events: res?.events ?? [],
+      id: res.id ?? '',
+      appName: res.appName ?? '',
+      userId: res.userId ?? '',
+      state: res.state ?? {},
+      events: res.events ?? [],
     };
   }
 
@@ -271,8 +276,8 @@ export class SessionTabComponent implements OnInit {
     let nextSession = null;
 
     if (this.sessionList.length > 0) {
-      let index = this.sessionList.findIndex((s) => s.id == session);
-      if (index == this.sessionList.length - 1) {
+      let index = this.sessionList.findIndex((s) => s.id === session);
+      if (index === this.sessionList.length - 1) {
         index = -1;
       }
       nextSession = this.sessionList[index + 1];

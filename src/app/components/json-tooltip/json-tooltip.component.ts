@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 
-import {Component, Input} from '@angular/core';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {Component, Input, inject} from '@angular/core';
+import {SafeHtml} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-json-tooltip',
@@ -40,7 +41,7 @@ export class JsonTooltipComponent {
 
   formattedJson: SafeHtml = '';
 
-  constructor(private sanitizer: DomSanitizer) {}
+  readonly sanitizer = inject(SAFE_VALUES_SERVICE);
 
   private syntaxHighlight(json: string): SafeHtml {
     if (!json) return '';

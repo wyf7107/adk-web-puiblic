@@ -26,6 +26,7 @@ import {Span} from '../../../core/models/Trace';
 import {EVENT_SERVICE, EventService} from '../../../core/services/interfaces/event';
 import {FEATURE_FLAG_SERVICE} from '../../../core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE, GraphService} from '../../../core/services/interfaces/graph';
+import {SAFE_VALUES_SERVICE} from '../../../core/services/interfaces/safevalues';
 import {UI_STATE_SERVICE} from '../../../core/services/interfaces/ui-state';
 import {MockEventService} from '../../../core/services/testing/mock-event.service';
 import {MockFeatureFlagService} from '../../../core/services/testing/mock-feature-flag.service';
@@ -106,7 +107,7 @@ describe('TraceEventComponent', () => {
             {provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService},
             {provide: UI_STATE_SERVICE, useValue: uiStateService},
             {
-              provide: DomSanitizer,
+              provide: SAFE_VALUES_SERVICE,
               useValue: domSanitizer,
             },
           ],

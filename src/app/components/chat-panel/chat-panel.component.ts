@@ -29,29 +29,29 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {EMPTY, merge, NEVER, of, Subject} from 'rxjs';
 import {catchError, filter, first, switchMap, tap} from 'rxjs/operators';
 
-import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
-
+import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
 import type {EvalCase} from '../../core/models/Eval';
 import {FunctionCall, FunctionResponse} from '../../core/models/types';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {ListResponse} from '../../core/services/interfaces/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
-import {MediaType,} from '../artifact-tab/artifact-tab.component';
+import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
+import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
+import {ComputerActionComponent} from '../computer-action/computer-action.component';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
-import {ComputerActionComponent} from '../computer-action/computer-action.component';
+
 import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
-import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -159,8 +159,9 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       toSignal(this.agentService.getLoadingState());
 
   protected readonly onScroll = new Subject<Event>();
+  protected readonly sanitizer = inject(SAFE_VALUES_SERVICE);
 
-  constructor(private sanitizer: DomSanitizer) {
+  constructor() {
     effect(() => {
       const sessionName = this.sessionName();
       if (sessionName) {
@@ -273,9 +274,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   isMessageEventSelected(index: number): boolean {
     const message = this.messages[index];
-    return message.eventId &&
-           this.selectedEvent &&
-           message.eventId === this.selectedEvent.id;
+    return message.eventId && this.selectedEvent &&
+        message.eventId === this.selectedEvent.id;
   }
 
   shouldShowMessageCard(message: any): boolean {
@@ -296,7 +296,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     const uniqueBotEventIds: string[] = [];
     for (let i = 0; i <= messageIndex; i++) {
       const msg = this.messages[i];
-      if (msg.role === 'bot' && msg.eventId && !uniqueBotEventIds.includes(msg.eventId)) {
+      if (msg.role === 'bot' && msg.eventId &&
+          !uniqueBotEventIds.includes(msg.eventId)) {
         uniqueBotEventIds.push(msg.eventId);
       }
     }
@@ -307,8 +308,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   getOverallEventNumber(messageIndex: number): number {
     let eventCount = 0;
-    let lastSeenGroupType: 'user' | 'bot' | null = null;
-    let lastBotEventId: string | null = null;
+    let lastSeenGroupType: 'user'|'bot'|null = null;
+    let lastBotEventId: string|null = null;
 
     for (let i = 0; i <= messageIndex; i++) {
       const msg = this.messages[i];
@@ -363,7 +364,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }
 
     if (messageIndex === 0) {
-      return true; // First message overall
+      return true;  // First message overall
     }
 
     const prevMessage = this.messages[messageIndex - 1];
@@ -510,8 +511,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
     // Find current selected event index
     const currentIndex = eventIndices.findIndex(
-      (idx) => this.messages[idx].eventId === this.selectedEvent.id
-    );
+        (idx) => this.messages[idx].eventId === this.selectedEvent.id);
 
     if (currentIndex === -1) return;
 
@@ -520,7 +520,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (event.key === 'ArrowDown') {
       newIndex = currentIndex + 1 >= eventIndices.length ? 0 : currentIndex + 1;
     } else {
-      newIndex = currentIndex - 1 < 0 ? eventIndices.length - 1 : currentIndex - 1;
+      newIndex =
+          currentIndex - 1 < 0 ? eventIndices.length - 1 : currentIndex - 1;
     }
 
     // Emit click event for the new index
@@ -530,13 +531,12 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     setTimeout(() => {
       if (!this.scrollContainer?.nativeElement) return;
 
-      const messageElements = this.scrollContainer.nativeElement.querySelectorAll('.message-column-container');
+      const messageElements =
+          this.scrollContainer.nativeElement.querySelectorAll(
+              '.message-column-container');
       if (messageElements && messageElements[eventIndices[newIndex]]) {
-        messageElements[eventIndices[newIndex]].scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'nearest'
-        });
+        messageElements[eventIndices[newIndex]].scrollIntoView(
+            {behavior: 'smooth', block: 'nearest', inline: 'nearest'});
       }
     }, 0);
   }

@@ -52,7 +52,7 @@ export class A2uiCanvasComponent implements OnChanges {
 
   readonly surfaceId = signal<string | null>(null);
 
-  readonly activeSurface = signal<Types.Surface | null>(null);
+  readonly activeSurface = signal<any>(null);
   readonly surface = computed(() => this.activeSurface());
 
   constructor() {}

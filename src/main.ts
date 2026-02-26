@@ -16,8 +16,8 @@
  */
 
 
+import {Catalog, DEFAULT_CATALOG, Theme} from '@a2ui/angular';
 import {Location} from '@angular/common';
-import {Catalog, Theme, DEFAULT_CATALOG} from '@a2ui/angular';
 import {HttpClientModule} from '@angular/common/http';
 import {importProvidersFrom} from '@angular/core';
 import {FormsModule} from '@angular/forms';
@@ -44,9 +44,9 @@ import {DownloadService} from './app/core/services/download.service';
 import {EvalService} from './app/core/services/eval.service';
 import {EventService} from './app/core/services/event.service';
 import {FeatureFlagService} from './app/core/services/feature-flag.service';
+import {FeedbackService} from './app/core/services/feedback.service';
 import {GraphService} from './app/core/services/graph.service';
 import {AGENT_SERVICE} from './app/core/services/interfaces/agent';
-import {FeedbackService} from './app/core/services/feedback.service';
 import {AGENT_BUILDER_SERVICE} from './app/core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from './app/core/services/interfaces/artifact';
 import {AUDIO_PLAYING_SERVICE} from './app/core/services/interfaces/audio-playing';
@@ -54,11 +54,10 @@ import {AUDIO_RECORDING_SERVICE, AUDIO_WORKLET_MODULE_PATH} from './app/core/ser
 import {DOWNLOAD_SERVICE} from './app/core/services/interfaces/download';
 import {EVAL_SERVICE} from './app/core/services/interfaces/eval';
 import {EVENT_SERVICE} from './app/core/services/interfaces/event';
-import {FEEDBACK_SERVICE} from './app/core/services/interfaces/feedback';
 import {FEATURE_FLAG_SERVICE} from './app/core/services/interfaces/feature-flag';
+import {FEEDBACK_SERVICE} from './app/core/services/interfaces/feedback';
 import {GRAPH_SERVICE} from './app/core/services/interfaces/graph';
 import {LOCAL_FILE_SERVICE} from './app/core/services/interfaces/localfile';
-import {PENDING_EVENT_SERVICE} from './app/core/services/interfaces/pendingevent';
 import {SAFE_VALUES_SERVICE} from './app/core/services/interfaces/safevalues';
 import {SESSION_SERVICE} from './app/core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from './app/core/services/interfaces/stream-chat';
@@ -70,7 +69,6 @@ import {VIDEO_SERVICE} from './app/core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from './app/core/services/interfaces/websocket';
 import {LocalFileServiceImpl} from './app/core/services/local-file.service';
 import {LOCATION_SERVICE} from './app/core/services/location.service';
-import {PendingEventServiceImpl} from './app/core/services/pending-event.service';
 import {SafeValuesServiceImpl} from './app/core/services/safevalues.service';
 import {SessionService} from './app/core/services/session.service';
 import {StreamChatService} from './app/core/services/stream-chat.service';
@@ -119,7 +117,6 @@ fetch('./assets/config/runtime-config.json')
           {provide: LOCAL_FILE_SERVICE, useClass: LocalFileServiceImpl},
           {provide: Catalog, useValue: DEFAULT_CATALOG},
           {provide: Theme, useValue: A2UI_THEME},
-          {provide: PENDING_EVENT_SERVICE, useClass: PendingEventServiceImpl},
           {provide: MARKDOWN_COMPONENT, useValue: MarkdownComponent},
           ...(config.logo ?
                   [{provide: LOGO_COMPONENT, useValue: CustomLogoComponent}] :

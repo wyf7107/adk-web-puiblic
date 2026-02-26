@@ -48,6 +48,7 @@ import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {ComputerActionComponent} from '../computer-action/computer-action.component';
+import {LongRunningResponseComponent} from '../long-running-response/long-running-response';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
 
@@ -80,6 +81,7 @@ const ROOT_AGENT = 'root_agent';
     NgClass,
     JsonTooltipDirective,
     ComputerActionComponent,
+    LongRunningResponseComponent,
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {
@@ -100,6 +102,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() isAudioRecording: boolean = false;
   @Input() isVideoRecording: boolean = false;
   @Input() hoveredEventMessageIndices: number[] = [];
+  @Input() userId: string = '';
+  @Input() sessionId: string = '';
 
   @Output() readonly userInputChange = new EventEmitter<string>();
   @Output() readonly userEditEvalCaseMessageChange = new EventEmitter<string>();
@@ -125,6 +129,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly updateState = new EventEmitter<void>();
   @Output() readonly toggleAudioRecording = new EventEmitter<void>();
   @Output() readonly toggleVideoRecording = new EventEmitter<void>();
+  @Output() readonly longRunningResponseComplete = new EventEmitter<any[]>();
 
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;

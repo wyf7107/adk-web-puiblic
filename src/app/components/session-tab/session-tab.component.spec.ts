@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {ComponentFixture, TestBed,} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {By} from '@angular/platform-browser';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
@@ -23,9 +23,10 @@ import {ActivatedRoute} from '@angular/router';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, it}
 import {of} from 'rxjs';
 
+import {Session} from '../../core/models/Session';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
-import {SESSION_SERVICE, SessionService,} from '../../core/services/interfaces/session';
-import {UI_STATE_SERVICE,} from '../../core/services/interfaces/ui-state';
+import {SESSION_SERVICE} from '../../core/services/interfaces/session';
+import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
 import {MockSessionService} from '../../core/services/testing/mock-session.service';
 import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
@@ -95,9 +96,8 @@ describe('SessionTabComponent', () => {
         'sets filter from query param if session id is provided and filtering is enabled',
         () => {
           mockFeatureFlagService.isSessionFilteringEnabledResponse.next(true);
-          (TestBed.inject(ActivatedRoute) as any).snapshot.queryParams = {
-            'session': '123'
-          };
+          const activatedRoute = TestBed.inject(ActivatedRoute);
+          activatedRoute.snapshot.queryParams = {'session': '123'};
           const customFixture = TestBed.createComponent(SessionTabComponent);
           customFixture.detectChanges();
           expect(customFixture.componentInstance.filterControl.value)
@@ -111,7 +111,7 @@ describe('SessionTabComponent', () => {
       sessionService.listSessions.calls.reset();
     });
 
-    describe('when filter is changed', async () => {
+    describe('when filter is changed', () => {
       beforeEach(fakeAsync(() => {
         component.filterControl.setValue('abc');
         tick(300);  // for filterControl.valueChanges debounceTime(300)
@@ -199,6 +199,14 @@ describe('SessionTabComponent', () => {
                          .nativeElement.innerText)
                   .toContain('session2');
             }));
+
+        it(
+            'should hide loading state on error', fakeAsync(() => {
+              sessionService.listSessionsResponse.error(new Error('error'));
+              fixture.detectChanges();
+              expect(mockUiStateService.setIsSessionListLoading)
+                  .toHaveBeenCalledWith(false);
+            }));
       });
     });
 
@@ -250,7 +258,6 @@ describe('SessionTabComponent', () => {
           beforeEach(fakeAsync(() => {
             mockUiStateService.isSessionListLoadingResponse.next(false);
             fixture.detectChanges();
-            ;
           }));
 
           it(
@@ -284,9 +291,22 @@ describe('SessionTabComponent', () => {
       expect(mockUiStateService.setIsSessionLoading).toHaveBeenCalledWith(true);
     });
 
+    it(
+        'emits sessionSelected with default values for partial data', () => {
+          sessionService.getSessionResponse.next({id: 'session1'} as Session);
+          component.getSession('session1');
+          expect(component.sessionSelected.emit).toHaveBeenCalledWith({
+            id: 'session1',
+            appName: '',
+            userId: '',
+            state: {},
+            events: [],
+          } as Session);
+        });
+
     describe('when getting a session is successful', () => {
       beforeEach(() => {
-        sessionService.getSessionResponse.next({} as any);
+        sessionService.getSessionResponse.next({} as Session);
         component.getSession('session1');
       });
 
@@ -308,7 +328,7 @@ describe('SessionTabComponent', () => {
             true);
         (mockUiStateService.lazyLoadMessages as unknown as jasmine.Spy)
             .and.returnValue(of(null));
-        sessionService.getSessionResponse.next({id: 'session1'} as any);
+        sessionService.getSessionResponse.next({id: 'session1'} as Session);
         component.getSession('session1');
       });
 
@@ -342,7 +362,7 @@ describe('SessionTabComponent', () => {
       describe('on retry', () => {
         beforeEach(() => {
           sessionService.getSession.calls.reset();
-          sessionService.getSessionResponse.next({} as any);
+          sessionService.getSessionResponse.next({} as Session);
           component.getSession('session1');
         });
 
@@ -360,7 +380,7 @@ describe('SessionTabComponent', () => {
 
     describe('when reloading a session is successful', () => {
       beforeEach(() => {
-        sessionService.getSessionResponse.next({} as any);
+        sessionService.getSessionResponse.next({} as Session);
         component.reloadSession('session1');
       });
 
@@ -382,7 +402,7 @@ describe('SessionTabComponent', () => {
       describe('on retry', () => {
         beforeEach(() => {
           sessionService.getSession.calls.reset();
-          sessionService.getSessionResponse.next({} as any);
+          sessionService.getSessionResponse.next({} as Session);
           component.reloadSession('session1');
         });
 
@@ -398,7 +418,7 @@ describe('SessionTabComponent', () => {
             true);
         (mockUiStateService.lazyLoadMessages as unknown as jasmine.Spy)
             .and.returnValue(of(null));
-        sessionService.getSessionResponse.next({id: 'session1'} as any);
+        sessionService.getSessionResponse.next({id: 'session1'} as Session);
         component.reloadSession('session1');
       });
 
@@ -423,7 +443,7 @@ describe('SessionTabComponent', () => {
       beforeEach(() => {
         mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
             false);
-        sessionService.getSessionResponse.next({} as any);
+        sessionService.getSessionResponse.next({} as Session);
         component.reloadSession('session1');
       });
 
@@ -465,5 +485,24 @@ describe('SessionTabComponent', () => {
                  },
              );
        }));
+
+    it('should return next session', fakeAsync(() => {
+                  component.sessionList = [
+                    {id: '1', lastUpdateTime: 1}, {id: '2', lastUpdateTime: 2},
+                    {id: '3', lastUpdateTime: 3}
+                  ];
+                  const nextSession = component.refreshSession('2');
+                  expect(nextSession).toEqual({id: '3', lastUpdateTime: 3});
+                }));
+
+    it(
+        'should return first session if last session', fakeAsync(() => {
+          component.sessionList =
+              [{id: '1', lastUpdateTime: 1}, {id: '2', lastUpdateTime: 2}];
+          const nextSession = component.refreshSession('2');
+          expect(nextSession).toEqual({id: '1', lastUpdateTime: 1});
+        }));
+
+
   });
 });

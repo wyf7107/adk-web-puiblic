@@ -22,7 +22,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatIcon} from '@angular/material/icon';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
-import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {tap} from 'rxjs/operators';
 
@@ -30,6 +30,7 @@ import {Span} from '../../../core/models/Trace';
 import {EVENT_SERVICE} from '../../../core/services/interfaces/event';
 import {FEATURE_FLAG_SERVICE} from '../../../core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE} from '../../../core/services/interfaces/graph';
+import {SAFE_VALUES_SERVICE} from '../../../core/services/interfaces/safevalues';
 import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
 import {UI_STATE_SERVICE} from '../../../core/services/interfaces/ui-state';
 import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialog.component';
@@ -64,7 +65,7 @@ export class TraceEventComponent implements OnInit {
   private readonly eventService = inject(EVENT_SERVICE);
   private readonly graphService = inject(GRAPH_SERVICE);
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
-  private readonly sanitizer = inject(DomSanitizer);
+  private readonly sanitizer = inject(SAFE_VALUES_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
 
   private readonly isEventFilteringEnabled = toSignal(

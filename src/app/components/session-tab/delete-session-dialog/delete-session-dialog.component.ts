@@ -15,11 +15,14 @@
  * limitations under the License.
  */
 
+import {CdkScrollable} from '@angular/cdk/scrolling';
 import {Component, Inject} from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
-import { CdkScrollable } from '@angular/cdk/scrolling';
-import { MatButton } from '@angular/material/button';
+import {MatButton} from '@angular/material/button';
+import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 
+/**
+ * Data for DeleteSessionDialog component.
+ */
 export interface DeleteSessionDialogData {
   title: string;
   message: string;
@@ -27,6 +30,9 @@ export interface DeleteSessionDialogData {
   cancelButtonText: string;
 }
 
+/**
+ * Dialog component to confirm deleting a session.
+ */
 @Component({
     selector: 'app-delete-session-dialog',
     templateUrl: './delete-session-dialog.component.html',

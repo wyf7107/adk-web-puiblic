@@ -56,4 +56,8 @@ export abstract class AgentService {
     console.warn('unimplemented');
     return of(false);
   }
+  getAppInfo(appName: string): Observable<string> {
+    console.warn('unimplemented');
+    return of('');
+  }
 }

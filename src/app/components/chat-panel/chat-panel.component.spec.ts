@@ -26,15 +26,14 @@ import {of} from 'rxjs';
 
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
-import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {FEEDBACK_SERVICE} from '../../core/services/interfaces/feedback';
+import {SAFE_VALUES_SERVICE, SafeValuesService} from '../../core/services/interfaces/safevalues';
+import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MockAgentService} from '../../core/services/testing/mock-agent.service';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
-import {
-  MockFeedbackService
-} from '../../core/services/testing/mock-feedback.service';
+import {MockFeedbackService} from '../../core/services/testing/mock-feedback.service';
 import {MockSessionService} from '../../core/services/testing/mock-session.service';
 import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
 import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
@@ -72,6 +71,11 @@ describe('ChatPanelComponent', () => {
 
     mockAgentService.getLoadingStateResponse.next(false);
 
+    const mockSafeValuesService = jasmine.createSpyObj<SafeValuesService>(
+        'SafeValuesService', ['bypassSecurityTrustHtml']);
+    mockSafeValuesService.bypassSecurityTrustHtml.and.callFake(
+        (value: string) => value);
+
     initTestBed();  // required for 1p compat
     await TestBed
         .configureTestingModule({
@@ -92,6 +96,7 @@ describe('ChatPanelComponent', () => {
             {provide: AGENT_SERVICE, useValue: mockAgentService},
             {provide: SESSION_SERVICE, useValue: mockSessionService},
             {provide: FEEDBACK_SERVICE, useValue: mockFeedbackService},
+            {provide: SAFE_VALUES_SERVICE, useValue: mockSafeValuesService},
           ],
         })
         .compileComponents();
@@ -169,7 +174,11 @@ describe('ChatPanelComponent', () => {
 
     it('should display A2UI canvas', () => {
       component.messages = [
-        {role: 'bot', a2uiData: {beginRendering: true, surfaceUpdate: {}, dataModelUpdate: {}}},
+        {
+          role: 'bot',
+          a2uiData:
+              {beginRendering: true, surfaceUpdate: {}, dataModelUpdate: {}}
+        },
       ];
       fixture.detectChanges();
       const canvas = fixture.debugElement.query(By.css('app-a2ui-canvas'));
@@ -714,6 +723,6 @@ describe('ChatPanelComponent', () => {
             response: {image: null, url: 'http://example.com'}
           };
           expect(component.isComputerUseResponse(response)).toBeFalse();
-      });
-    });
+        });
   });
+});

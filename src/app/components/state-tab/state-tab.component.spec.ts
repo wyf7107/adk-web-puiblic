@@ -16,7 +16,9 @@
  */
 
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 
+import type {SessionState} from '../../core/models/Session';
 
 import {StateTabComponent} from './state-tab.component';
 
@@ -25,9 +27,11 @@ describe('StateTabComponent', () => {
   let fixture: ComponentFixture<StateTabComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-    imports: [StateTabComponent],
-}).compileComponents();
+    await TestBed
+        .configureTestingModule({
+          imports: [StateTabComponent],
+        })
+        .compileComponents();
 
     fixture = TestBed.createComponent(StateTabComponent);
     component = fixture.componentInstance;
@@ -36,5 +40,36 @@ describe('StateTabComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should show empty state message when sessionState is empty', () => {
+    fixture.componentRef.setInput('sessionState', undefined);
+    fixture.detectChanges();
+
+    const emptyState = fixture.debugElement.query(By.css('.empty-state'));
+    expect(emptyState).toBeTruthy();
+    expect(emptyState.nativeElement.textContent).toContain('State is empty');
+  });
+
+  it('should show empty state message when sessionState is an empty object',
+     () => {
+       fixture.componentRef.setInput('sessionState', {});
+       fixture.detectChanges();
+
+       const emptyState = fixture.debugElement.query(By.css('.empty-state'));
+       expect(emptyState).toBeTruthy();
+       expect(emptyState.nativeElement.textContent).toContain('State is empty');
+     });
+
+  it('should render ngx-json-viewer when sessionState is populated', () => {
+    fixture.componentRef.setInput(
+        'sessionState', {foo: 'bar'} as unknown as SessionState);
+    fixture.detectChanges();
+
+    const jsonViewer = fixture.debugElement.query(By.css('ngx-json-viewer'));
+    expect(jsonViewer).toBeTruthy();
+
+    const emptyState = fixture.debugElement.query(By.css('.empty-state'));
+    expect(emptyState).toBeFalsy();
   });
 });

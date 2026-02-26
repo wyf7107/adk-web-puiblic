@@ -2073,7 +2073,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.selectedAppControl.setValue(app, {emitEvent: false});
         this.selectApp(app);
-        this.agentService.agentInfo(app).subscribe(info => {
+        this.agentService.getAppInfo(app).subscribe(info => {
           console.log(info)
         })
         this.agentService.getAgentBuilder(app).subscribe((res: any) => {

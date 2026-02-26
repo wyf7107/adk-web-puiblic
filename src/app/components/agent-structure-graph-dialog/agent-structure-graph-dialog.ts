@@ -72,10 +72,10 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     this.errorMessage.set(null);
 
     // Use agentInfo to get the graph data
-    this.agentService.agentInfo(this.appName).subscribe({
+    this.agentService.getAppInfo(this.appName).subscribe({
       next: (agentData: any) => {
         try {
-          this.buildGraph(agentData);
+          this.buildGraph(agentData.root_agent);
           this.isLoading.set(false);
         } catch (error) {
           console.error('Error building graph:', error);

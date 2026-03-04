@@ -1,0 +1,70 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="workflow-graph-tooltip">
+  <div class="tooltip-header">
+    <span>Workflow Graph</span>
+    @if (isPinned) {
+      <span class="pinned-hint">(Pinned - Click X to close)</span>
+    } @else {
+      <span class="pinned-hint">(Click to pin)</span>
+    }
+    <button mat-icon-button class="close-button" (click)="close()" aria-label="Close" [style.display]="isPinned ? 'block' : 'none'">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="vflow-container">
+    <vflow
+      view="auto"
+      [nodes]="graphNodes()"
+      [edges]="graphEdges()"
+      [background]="{ type: 'dots', color: '#424242', size: 1, gap: 10 }"
+    >
+      <ng-template nodeHtml let-ctx>
+        <div class="workflow-node" [style.border-color]="getStatusColor(ctx.node.data().status)" selectable>
+          <handle type="target" position="top" />
+          <div class="node-header">
+            <mat-icon
+              class="status-icon"
+              [style.color]="getStatusColor(ctx.node.data().status)">
+              {{ getStatusIcon(ctx.node.data().status) }}
+            </mat-icon>
+            <span class="node-label">{{ ctx.node.data().name }}</span>
+          </div>
+          <div class="node-status" [style.color]="getStatusColor(ctx.node.data().status)">
+            {{ getStatusLabel(ctx.node.data().status) }}
+          </div>
+          @if (ctx.node.data().retryCount && ctx.node.data().retryCount > 0) {
+            <div class="node-retry">Retry: {{ ctx.node.data().retryCount }}</div>
+          }
+          <handle type="source" position="bottom" />
+        </div>
+      </ng-template>
+
+      <ng-template edge let-ctx>
+        <svg:g customTemplateEdge>
+          <svg:path
+            fill="none"
+            [attr.d]="ctx.path()"
+            [attr.stroke]="ctx.edge.data?.isActive ? '#42A5F5' : 'rgba(138, 180, 248, 0.8)'"
+            [attr.stroke-width]="ctx.edge.data?.isActive ? '3' : '2'"
+            [attr.class]="ctx.edge.data?.isActive ? 'active-edge' : ''"
+            [attr.marker-end]="ctx.markerEnd()" />
+        </svg:g>
+      </ng-template>
+    </vflow>
+  </div>
+</div>

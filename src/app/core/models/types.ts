@@ -78,6 +78,31 @@ export declare interface LlmResponse {
   longRunningToolIds?: string[];
 }
 
+export enum NodeStatus {
+  INACTIVE = 0,
+  PENDING = 1,
+  RUNNING = 2,
+  COMPLETED = 3,
+  INTERRUPTED = 4,
+  FAILED = 5
+}
+
+export declare interface NodeState {
+  status: NodeStatus;
+  input?: any;
+  triggered_by?: string;
+  retry_count?: number;
+  interrupts?: string[];
+  resume_inputs?: {[key: string]: any};
+  execution_id?: string;
+  parent_execution_id?: string;
+  source_node_name?: string;
+}
+
+export declare interface AgentState {
+  nodes?: {[key: string]: NodeState};
+}
+
 export declare interface EventActions {
   message?: string;
   artifactDelta?: any;
@@ -85,6 +110,8 @@ export declare interface EventActions {
   functionCall?: FunctionCall;
   functionResponse?: FunctionResponse;
   finishReason?: string;
+  agentState?: AgentState;
+  endOfAgent?: boolean;
 }
 
 export declare interface Event extends LlmResponse {
@@ -95,6 +122,8 @@ export declare interface Event extends LlmResponse {
   longRunningToolIds?: string[];
   branch?: string;
   timestamp?: number;
+  nodePath?: any;
+  data?: any;
 }
 
 export interface ComputerUsePayload {

@@ -227,6 +227,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   traceData: any[] = [];
   renderedEventGraph: SafeHtml|undefined;
   rawSvgString: string|null = null;
+  agentGraphData: any = null;
 
   selectedEvent: any = undefined;
   selectedEventIndex: any = undefined;
@@ -594,6 +595,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         } else if (chunkJson.errorMessage) {
           this.processErrorMessage(chunkJson);
+        } else {
+          // Store events without content (so they render like on reload)
+          if (chunkJson.id && !this.eventData.has(chunkJson.id)) {
+            this.eventData.set(chunkJson.id, chunkJson);
+            this.eventData = new Map(this.eventData);
+
+            // Create a message entry for the event
+            const message: any = {
+              role: chunkJson.author === 'user' ? 'user' : 'bot',
+              eventId: chunkJson.id
+            };
+            this.insertMessageBeforeLoadingMessage(message);
+          }
         }
         if (chunkJson.actions) {
           this.processActionArtifact(chunkJson);
@@ -2074,7 +2088,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectedAppControl.setValue(app, {emitEvent: false});
         this.selectApp(app);
         this.agentService.getAppInfo(app).subscribe(info => {
-          console.log(info)
+          this.agentGraphData = info;
         })
         this.agentService.getAgentBuilder(app).subscribe((res: any) => {
           if (!res || res == '') {

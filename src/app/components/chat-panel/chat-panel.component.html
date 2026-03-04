@@ -324,6 +324,40 @@
           Artifact
         </button>
         }
+        @if (message.role === "bot" && hasEventOutputData(i)) {
+        <button
+          mat-stroked-button
+          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+          class="function-event-button"
+          [appJsonTooltip]="getEventOutputDataTooltip(i)"
+        >
+          <mat-icon>output</mat-icon>
+          Output from {{ getEventOutputDataNodePath(i) }}
+        </button>
+        }
+        @if (message.role === "bot" && hasWorkflowNodes(i)) {
+        <button
+          mat-stroked-button
+          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+          class="function-event-button"
+          [appWorkflowGraphTooltip]="getWorkflowNodes(i)"
+          [agentGraphData]="agentGraphData"
+          (click)="handleAgentStateClick($event, i)"
+        >
+          <mat-icon>account_tree</mat-icon>
+          Agent State
+        </button>
+        }
+        @if (message.role === "bot" && hasEndOfAgent(i)) {
+        <button
+          mat-stroked-button
+          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+          class="function-event-button end-of-agent-button"
+        >
+          <mat-icon>check_circle</mat-icon>
+          {{ getEndOfAgentAuthor(i) }} completed!
+        </button>
+        }
         <div
           [ngClass]="{
                 'eval-pass': message.evalStatus === 1,

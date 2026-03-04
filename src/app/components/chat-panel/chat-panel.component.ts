@@ -44,6 +44,7 @@ import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-
 import {ListResponse} from '../../core/services/interfaces/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
+import {WorkflowGraphTooltipDirective} from '../../directives/workflow-graph-tooltip.directive';
 import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
@@ -80,6 +81,7 @@ const ROOT_AGENT = 'root_agent';
     MatTooltipModule,
     NgClass,
     JsonTooltipDirective,
+    WorkflowGraphTooltipDirective,
     ComputerActionComponent,
     LongRunningResponseComponent,
   ],
@@ -92,6 +94,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() evalCase: EvalCase|null = null;
   @Input() isEvalEditMode: boolean = false;
   @Input() isEvalCaseEditing: boolean = false;
+  @Input() agentGraphData: any = null;
   @Input() isEditFunctionArgsEnabled: boolean = false;
   @Input() userInput: string = '';
   @Input() userEditEvalCaseMessage: string = '';
@@ -474,6 +477,97 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       return JSON.stringify(artifactDelta);
     } catch (e) {
       return String(artifactDelta);
+    }
+  }
+
+
+  hasEventOutputData(messageIndex: number): boolean {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return false;
+
+    const event = this.eventData.get(message.eventId);
+    return event?.data !== undefined && event?.data !== null;
+  }
+
+
+  getEventOutputDataTooltip(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    const eventData = event?.data;
+    if (eventData === undefined || eventData === null) return '';
+
+    try {
+      return JSON.stringify(eventData);
+    } catch (e) {
+      return String(eventData);
+    }
+  }
+
+
+  getEventOutputDataNodePath(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    let nodePath = event?.nodePath || '';
+
+    // Strip "root_agent/" from the beginning
+    if (nodePath && nodePath.startsWith('root_agent/')) {
+      nodePath = nodePath.substring('root_agent/'.length);
+    }
+
+    return nodePath;
+  }
+
+
+  hasWorkflowNodes(messageIndex: number): boolean {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return false;
+
+    const event = this.eventData.get(message.eventId);
+    const nodes = event?.actions?.agentState?.nodes;
+    return nodes && Object.keys(nodes).length > 0;
+  }
+
+
+  getWorkflowNodes(messageIndex: number): any {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return null;
+
+    const event = this.eventData.get(message.eventId);
+    return event?.actions?.agentState?.nodes || null;
+  }
+
+
+  hasEndOfAgent(messageIndex: number): boolean {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return false;
+
+    const event = this.eventData.get(message.eventId);
+    return event?.actions?.endOfAgent === true;
+  }
+
+
+  getEndOfAgentAuthor(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    return event?.author || 'Agent';
+  }
+
+
+  handleAgentStateClick(event: Event, messageIndex: number) {
+    event.stopPropagation();
+
+    const message = this.messages[messageIndex];
+    const isAlreadySelected = message.eventId && this.selectedEvent &&
+                               message.eventId === this.selectedEvent.id;
+
+    if (!isAlreadySelected) {
+      this.clickEvent.emit(messageIndex);
     }
   }
 

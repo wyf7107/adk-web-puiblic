@@ -92,7 +92,7 @@ export class SidePanelComponent implements AfterViewInit {
   sessionId = input('');
   traceData = input<SpanNode[]>([]);
   eventData = input(new Map<string, Event>());
-  currentSessionState = input<SessionState>();
+  currentSessionState = input<SessionState|undefined>();
   artifacts = input<Blob[]>([]);
   selectedEvent = input<Event|undefined>();
   selectedEventIndex = input<number|undefined>();

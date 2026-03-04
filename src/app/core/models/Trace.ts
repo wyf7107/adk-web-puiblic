@@ -14,6 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Non-exhaustive union for better autocomplete.
+export declare type LogName = 'gen_ai.user.message' | 'gen_ai.choice' | 'gen_ai.system.message' | (string & {});
+
+export declare interface Log {
+  body: {[key: string]: any} | string;
+  event_name: LogName;
+  trace_id: string;
+  span_id: string;
+}
+
 export declare interface Span {
   name: string;
   start_time: number;
@@ -27,6 +38,17 @@ export declare interface Span {
   // For backward compatibility.
   'gcp.vertex.agent.llm_request'?: string;
   'gcp.vertex.agent.llm_response'?: string;
+
+  // Logs recorded inside this Span.
+  logs?: Log[];
+}
+
+export declare interface EventTelemetry {
+  'gcp.vertex.agent.llm_request'?: string;
+  'gcp.vertex.agent.llm_response'?: string;
+
+  // Logs captured in a `generate_content` or `execute_tool` span with `gcp.vertex.agent.event_id` attribute equal to this event.
+  logs?: Log[];
 }
 
 export declare interface SpanNode extends Span {

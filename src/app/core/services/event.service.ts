@@ -19,6 +19,9 @@ import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {URLUtil} from '../../../utils/url-util';
 import {EventIdentifier, EventService as EventServiceInterface} from './interfaces/event';
+import { EventTelemetry, Span } from '../models/Trace';
+import {map} from 'rxjs/operators';
+import { normalizeEventTelemetry, normalizeSpan } from '../../../utils/trace-utils';
 
 @Injectable({
   providedIn: 'root',
@@ -32,12 +35,18 @@ export class EventService implements EventServiceInterface {
    */
   getEventTrace(event: EventIdentifier) {
     const url = this.apiServerDomain + `/debug/trace/${event.id!}`;
-    return this.http.get<any>(url);
+    const eventTelemetry = this.http.get<EventTelemetry>(url);
+    return eventTelemetry.pipe(
+      map(eventTelemetry => normalizeEventTelemetry(eventTelemetry))
+    );
   }
 
   getTrace(sessionId: string) {
     const url = this.apiServerDomain + `/debug/trace/session/${sessionId}`;
-    return this.http.get<any>(url);
+    const spans = this.http.get<Span[]>(url);
+    return spans.pipe(
+      map(spans => Array.isArray(spans) ? spans.map(normalizeSpan) : spans)
+    );
   }
 
   getEvent(

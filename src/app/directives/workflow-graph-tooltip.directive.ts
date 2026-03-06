@@ -36,6 +36,8 @@ import {NodeState} from '../core/models/types';
 export class WorkflowGraphTooltipDirective implements OnDestroy {
   @Input() appWorkflowGraphTooltip: {[key: string]: NodeState} | null = null;
   @Input() agentGraphData: any = null;
+  @Input() nodePath: string | null = null;
+  @Input() allNodes: {[path: string]: {[nodeName: string]: NodeState}} | null = null;
 
   private overlay = inject(Overlay);
   private overlayPositionBuilder = inject(OverlayPositionBuilder);
@@ -145,6 +147,8 @@ export class WorkflowGraphTooltipDirective implements OnDestroy {
 
     componentRef.instance.nodes = this.appWorkflowGraphTooltip;
     componentRef.instance.agentGraphData = this.agentGraphData;
+    componentRef.instance.nodePath = this.nodePath;
+    componentRef.instance.allNodes = this.allNodes;
     componentRef.instance.isPinned = pinned;
     componentRef.instance.onClose = () => {
       this.isPinned = false;

@@ -48,8 +48,40 @@ button[mat-button] {
 }
 
 .agent-info {
-  margin: 0 0 16px 0;
+  margin: 0 0 8px 0;
   font-size: 14px;
+}
+
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--mdc-dialog-supporting-text-color);
+}
+
+.breadcrumb-item {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  &:hover:not(.active) {
+    background-color: rgba(138, 180, 248, 0.1);
+  }
+
+  &.active {
+    font-weight: 500;
+    cursor: default;
+  }
+}
+
+.breadcrumb-separator {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+  margin: 0 4px;
 }
 
 .vflow-container {
@@ -113,6 +145,17 @@ button[mat-button] {
   padding: 12px 16px;
   min-width: 180px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+
+  &.expandable {
+    cursor: pointer;
+
+    &:hover {
+      border-color: rgba(138, 180, 248, 0.8);
+      box-shadow: 0 4px 12px rgba(138, 180, 248, 0.3);
+      transform: scale(1.02);
+    }
+  }
 }
 
 .node-header {
@@ -129,17 +172,34 @@ button[mat-button] {
   color: rgba(138, 180, 248, 0.9);
 }
 
+.expand-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: rgba(138, 180, 248, 0.9);
+  margin-left: auto;
+}
+
 .node-label {
   font-weight: 500;
   font-size: 14px;
   color: var(--mdc-dialog-supporting-text-color);
 }
 
+.node-type {
+  font-size: 11px;
+  color: rgba(138, 180, 248, 0.8);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
 .node-class {
   font-size: 12px;
   color: var(--mdc-dialog-supporting-text-color);
   opacity: 0.7;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 // Edge styling

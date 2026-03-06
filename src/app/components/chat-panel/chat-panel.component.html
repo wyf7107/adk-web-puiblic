@@ -342,6 +342,8 @@
           class="function-event-button"
           [appWorkflowGraphTooltip]="getWorkflowNodes(i)"
           [agentGraphData]="agentGraphData"
+          [nodePath]="getNodePath(i)"
+          [allNodes]="getAllWorkflowNodes(i)"
           (click)="handleAgentStateClick($event, i)"
         >
           <mat-icon>account_tree</mat-icon>

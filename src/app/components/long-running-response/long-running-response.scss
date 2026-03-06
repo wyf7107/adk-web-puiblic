@@ -15,7 +15,9 @@
  */
 
 .response-chip-container {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 5px;
 }
 
@@ -98,5 +100,35 @@
     background-color: rgba(76, 175, 80, 0.1);
     border-color: rgba(76, 175, 80, 0.3);
     color: #4caf50;
+  }
+}
+
+.user-response-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 16px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  height: 32px;
+  box-sizing: border-box;
+  border: 1px solid;
+  line-height: 32px;
+  background-color: rgba(138, 180, 248, 0.1);
+  border-color: rgba(138, 180, 248, 0.3);
+  color: #8ab4f8;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background-color: rgba(138, 180, 248, 0.15);
+    border-color: rgba(138, 180, 248, 0.4);
   }
 }

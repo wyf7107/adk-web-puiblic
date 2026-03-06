@@ -26,6 +26,21 @@
       <mat-icon>close</mat-icon>
     </button>
   </div>
+  @if (breadcrumbs().length > 1) {
+    <div class="breadcrumb-nav">
+      @for (crumb of breadcrumbs(); track $index) {
+        <span
+          class="breadcrumb-item"
+          [class.active]="$index === breadcrumbs().length - 1"
+          (click)="navigateToLevel($index)">
+          {{ crumb }}
+        </span>
+        @if ($index < breadcrumbs().length - 1) {
+          <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+        }
+      }
+    </div>
+  }
   <div class="vflow-container">
     <vflow
       view="auto"
@@ -34,16 +49,27 @@
       [background]="{ type: 'dots', color: '#424242', size: 1, gap: 10 }"
     >
       <ng-template nodeHtml let-ctx>
-        <div class="workflow-node" [style.border-color]="getStatusColor(ctx.node.data().status)" selectable>
+        <div class="workflow-node"
+             [class.expandable]="ctx.node.data().hasNestedStructure"
+             [style.border-color]="getStatusColor(ctx.node.data().status)"
+             (click)="ctx.node.data().hasNestedStructure ? navigateIntoNode(ctx.node.data().name) : null"
+             selectable>
           <handle type="target" position="top" />
           <div class="node-header">
+            <mat-icon class="node-type-icon">
+              {{ getNodeTypeIcon(ctx.node.data().type) }}
+            </mat-icon>
+            <span class="node-label">{{ ctx.node.data().name }}</span>
+            @if (ctx.node.data().hasNestedStructure) {
+              <mat-icon class="expand-icon">zoom_in</mat-icon>
+            }
             <mat-icon
               class="status-icon"
               [style.color]="getStatusColor(ctx.node.data().status)">
               {{ getStatusIcon(ctx.node.data().status) }}
             </mat-icon>
-            <span class="node-label">{{ ctx.node.data().name }}</span>
           </div>
+          <div class="node-type">{{ getNodeTypeLabel(ctx.node.data().type) }}</div>
           <div class="node-status" [style.color]="getStatusColor(ctx.node.data().status)">
             {{ getStatusLabel(ctx.node.data().status) }}
           </div>

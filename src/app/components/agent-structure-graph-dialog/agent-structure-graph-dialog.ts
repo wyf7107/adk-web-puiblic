@@ -22,6 +22,8 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {Vflow, Edge, HtmlTemplateDynamicNode} from 'ngx-vflow';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {calculateGraphLayout, getNodeName, getNodeTypeIcon, getNodeTypeLabel} from '../../utils/graph-layout.utils';
+import {findNodeInLevel, hasNestedStructure, NavigationStackItem, DEFAULT_LAYOUT_CONFIG} from '../../utils/graph-navigation.utils';
 
 export interface AgentStructureGraphDialogData {
   appName: string;
@@ -30,7 +32,10 @@ export interface AgentStructureGraphDialogData {
 interface NodeData {
   name: string;
   label: string;
+  type: string;
   agentClass?: string;
+  hasNestedStructure?: boolean;
+  nodeData?: any; // Store the full node data for navigation
 }
 
 @Component({
@@ -59,6 +64,12 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   public isLoading = signal<boolean>(true);
   public errorMessage = signal<string | null>(null);
 
+  // Navigation state
+  private fullAgentData: any = null;
+  private navigationStack: NavigationStackItem[] = [];
+  public currentAgentName = signal<string>('');
+  public breadcrumbs = signal<string[]>([]);
+
   get appName(): string {
     return this.data.appName;
   }
@@ -75,6 +86,9 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     this.agentService.getAppInfo(this.appName).subscribe({
       next: (agentData: any) => {
         try {
+          this.fullAgentData = agentData.root_agent;
+          this.navigationStack = [{name: agentData.root_agent.name, data: agentData.root_agent}];
+          this.updateBreadcrumbs();
           this.buildGraph(agentData.root_agent);
           this.isLoading.set(false);
         } catch (error) {
@@ -94,40 +108,54 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   private buildGraph(agentData: any): void {
     const nodes: HtmlTemplateDynamicNode<NodeData>[] = [];
     const edges: Edge[] = [];
-    const ySpacing = 150;
-    const xPosition = 300;
 
-    // Handle graph structure from the data
-    if (agentData.graph && agentData.graph.nodes) {
-      const startY = 100;
+    // Handle LlmAgent/Mesh with nodes field
+    if (agentData.nodes && Array.isArray(agentData.nodes)) {
+      this.buildMeshGraph(agentData.nodes, nodes, edges);
+    }
+    // Handle WorkflowAgent/SingleLlmAgent with graph field
+    else if (agentData.graph && agentData.graph.nodes) {
+      // Calculate layout using utility function
+      const layout = calculateGraphLayout(
+        agentData.graph.nodes,
+        agentData.graph.edges || [],
+        DEFAULT_LAYOUT_CONFIG
+      );
 
+      // Create nodes with calculated positions
       agentData.graph.nodes.forEach((node: any, index: number) => {
-        const nodeName = node.name || node.agent?.name || `node_${index}`;
+        const nodeName = getNodeName(node, `node_${index}`);
         const isStartNode = nodeName === '__START__';
-        console.log('Node ID:', nodeName);
+        const nodeType = node.type || 'agent';
+        const position = layout.positions.get(nodeName) || {x: DEFAULT_LAYOUT_CONFIG.startX, y: DEFAULT_LAYOUT_CONFIG.startY};
+        const hasNested = hasNestedStructure(node);
+
         nodes.push({
           id: nodeName,
           type: 'html-template',
-          point: signal({x: xPosition, y: startY + (index * ySpacing)}),
+          point: signal({x: position.x, y: position.y}),
           width: signal(200),
           height: signal(80),
           data: signal({
             name: nodeName,
             label: isStartNode ? 'START' : nodeName,
-            agentClass: node.agent?.agent_class || 'Agent',
+            type: nodeType,
+            agentClass: node.agent?.agent_class || node.model || undefined,
+            hasNestedStructure: hasNested,
+            nodeData: node,
           }),
         });
       });
 
       // Add edges from graph.edges
       if (agentData.graph.edges) {
-        agentData.graph.edges.forEach((edge: any) => {
-          const fromName = edge.from_node?.name || edge.from_node?.agent?.name;
-          const toName = edge.to_node?.name || edge.to_node?.agent?.name;
+        agentData.graph.edges.forEach((edge: any, index: number) => {
+          const fromName = getNodeName(edge.from_node);
+          const toName = getNodeName(edge.to_node);
 
           if (fromName && toName) {
             edges.push({
-              id: `${fromName}_to_${toName}`,
+              id: `${fromName}_to_${toName}_${index}`,
               source: fromName,
               target: toName,
               type: 'template',
@@ -148,4 +176,131 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     this.nodes.set(nodes);
     this.edges.set(edges);
   }
+
+  private buildMeshGraph(
+    meshNodes: any[],
+    nodes: HtmlTemplateDynamicNode<NodeData>[],
+    edges: Edge[]
+  ): void {
+    // For LlmAgent/Mesh: nodes array contains coordinator + sub-agents
+    // Layout: coordinator in center, sub-agents arranged around it
+    const coordinatorIndex = meshNodes.findIndex(n =>
+      (n.name === meshNodes[0]?.name) || n.type === 'coordinator'
+    );
+
+    const coordinator = coordinatorIndex >= 0 ? meshNodes[coordinatorIndex] : null;
+    const subAgents = meshNodes.filter((_, i) => i !== coordinatorIndex);
+
+    const centerX = 400;
+    const centerY = 300;
+    const radius = 200;
+
+    // Add coordinator node in center
+    if (coordinator) {
+      const hasNested = hasNestedStructure(coordinator);
+      nodes.push({
+        id: coordinator.name,
+        type: 'html-template',
+        point: signal({x: centerX, y: centerY}),
+        width: signal(200),
+        height: signal(80),
+        data: signal({
+          name: coordinator.name,
+          label: coordinator.name,
+          type: 'agent',
+          agentClass: coordinator.model || 'LlmAgent',
+          hasNestedStructure: hasNested,
+          nodeData: coordinator,
+        }),
+      });
+    }
+
+    // Add sub-agent nodes in circle around coordinator
+    subAgents.forEach((node: any, index: number) => {
+      const angle = (index / subAgents.length) * 2 * Math.PI;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+      const hasNested = hasNestedStructure(node);
+
+      nodes.push({
+        id: node.name,
+        type: 'html-template',
+        point: signal({x, y}),
+        width: signal(200),
+        height: signal(80),
+        data: signal({
+          name: node.name,
+          label: node.name,
+          type: 'agent',
+          agentClass: node.model || 'Agent',
+          hasNestedStructure: hasNested,
+          nodeData: node,
+        }),
+      });
+
+      // Add edges: coordinator <-> sub-agent
+      if (coordinator) {
+        // Coordinator to sub-agent
+        edges.push({
+          id: `${coordinator.name}_to_${node.name}`,
+          source: coordinator.name,
+          target: node.name,
+          type: 'template',
+          markers: {
+            end: {
+              type: 'arrow-closed',
+              width: 20,
+              height: 20,
+              color: 'rgba(138, 180, 248, 0.8)',
+            },
+          },
+        });
+
+        // Sub-agent to coordinator (transfer back)
+        edges.push({
+          id: `${node.name}_to_${coordinator.name}`,
+          source: node.name,
+          target: coordinator.name,
+          type: 'template',
+          markers: {
+            end: {
+              type: 'arrow-closed',
+              width: 20,
+              height: 20,
+              color: 'rgba(138, 180, 248, 0.5)',
+            },
+          },
+        });
+      }
+    });
+  }
+
+  private updateBreadcrumbs(): void {
+    this.breadcrumbs.set(this.navigationStack.map(item => item.name));
+    this.currentAgentName.set(this.navigationStack[this.navigationStack.length - 1]?.name || '');
+  }
+
+  navigateIntoNode(nodeName: string): void {
+    const currentData = this.navigationStack[this.navigationStack.length - 1].data;
+    const nodeData = findNodeInLevel(currentData, nodeName);
+
+    if (nodeData && hasNestedStructure(nodeData)) {
+      this.navigationStack.push({name: nodeName, data: nodeData});
+      this.updateBreadcrumbs();
+      this.buildGraph(nodeData);
+    }
+  }
+
+  navigateToLevel(index: number): void {
+    if (index >= 0 && index < this.navigationStack.length) {
+      this.navigationStack = this.navigationStack.slice(0, index + 1);
+      this.updateBreadcrumbs();
+      const currentData = this.navigationStack[this.navigationStack.length - 1].data;
+      this.buildGraph(currentData);
+    }
+  }
+
+  // Expose utility functions for use in template
+  getNodeIcon = getNodeTypeIcon;
+  getNodeTypeLabel = getNodeTypeLabel;
 }

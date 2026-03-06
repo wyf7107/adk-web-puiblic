@@ -59,6 +59,38 @@
   }
 }
 
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--mdc-dialog-supporting-text-color);
+}
+
+.breadcrumb-item {
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+
+  &:hover:not(.active) {
+    background-color: rgba(138, 180, 248, 0.1);
+  }
+
+  &.active {
+    font-weight: 500;
+    cursor: default;
+  }
+}
+
+.breadcrumb-separator {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  opacity: 0.5;
+  margin: 0 2px;
+}
+
 .vflow-container {
   flex: 1;
   min-height: 0;
@@ -81,6 +113,16 @@
   padding: 8px 12px;
   min-width: 160px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+
+  &.expandable {
+    cursor: pointer;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(138, 180, 248, 0.3);
+      transform: scale(1.02);
+    }
+  }
 }
 
 .node-header {
@@ -90,10 +132,18 @@
   margin-bottom: 4px;
 }
 
+.node-type-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: rgba(138, 180, 248, 0.9);
+}
+
 .status-icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
+  margin-left: auto;
 }
 
 .node-label {
@@ -103,6 +153,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+}
+
+.node-type {
+  font-size: 10px;
+  color: rgba(138, 180, 248, 0.8);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
 }
 
 .node-status {

@@ -22,6 +22,7 @@ import {MatIcon} from '@angular/material/icon';
 
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
+import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 
 @Component({
   selector: 'app-long-running-response',
@@ -31,6 +32,7 @@ import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
     FormsModule,
     MatIconButton,
     MatIcon,
+    JsonTooltipDirective,
   ],
 })
 export class LongRunningResponseComponent {
@@ -50,6 +52,9 @@ export class LongRunningResponseComponent {
         !this.functionCall.userResponse.trim()) {
       return;
     }
+
+    // Store the user response before sending
+    this.functionCall.sentUserResponse = this.functionCall.userResponse;
 
     // Update status to sending
     this.functionCall.responseStatus = 'sending';

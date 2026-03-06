@@ -540,6 +540,41 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return event?.actions?.agentState?.nodes || null;
   }
 
+  getAllWorkflowNodes(messageIndex: number): any {
+    // Collect node states from all events, organized by nodePath
+    // Structure: { "order_processing_pipeline": { "__START__": {...}, "validation_stage": {...} }, ... }
+    const nodesByPath: any = {};
+
+    for (let i = 0; i <= messageIndex; i++) {
+      const msg = this.messages[i];
+      if (!msg.eventId) continue;
+
+      const event = this.eventData.get(msg.eventId);
+      const nodes = event?.actions?.agentState?.nodes;
+      const nodePath = event?.nodePath;
+
+      if (nodes && nodePath) {
+        // Initialize path if not exists
+        if (!nodesByPath[nodePath]) {
+          nodesByPath[nodePath] = {};
+        }
+
+        // Merge nodes for this path, later states override earlier ones
+        Object.assign(nodesByPath[nodePath], nodes);
+      }
+    }
+
+    return Object.keys(nodesByPath).length > 0 ? nodesByPath : null;
+  }
+
+  getNodePath(messageIndex: number): string | null {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return null;
+
+    const event = this.eventData.get(message.eventId);
+    return event?.nodePath || null;
+  }
+
 
   hasEndOfAgent(messageIndex: number): boolean {
     const message = this.messages[messageIndex];

@@ -20,6 +20,12 @@
       <mat-icon>check_circle</mat-icon>
       <span>Response sent</span>
     </div>
+    @if (functionCall.sentUserResponse) {
+      <div class="user-response-chip" [appJsonTooltip]="functionCall.sentUserResponse">
+        <mat-icon>person</mat-icon>
+        <span>User input</span>
+      </div>
+    }
   } @else if (functionCall.responseStatus === 'sending') {
     <div class="status-chip sending">
       <mat-icon>hourglass_empty</mat-icon>

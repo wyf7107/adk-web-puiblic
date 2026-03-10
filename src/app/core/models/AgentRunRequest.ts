@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import type {FunctionResponse} from './types';
+
 export declare interface AgentRunRequest {
   appName: string;
   userId: string;
@@ -22,7 +24,7 @@ export declare interface AgentRunRequest {
   newMessage: {
     parts: Array<{
       text?: string,
-      'function_response'?: {id?: string; name?: string; response?: any}
+      functionResponse?: FunctionResponse,
     }>,
     role: string,
   };

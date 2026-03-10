@@ -1297,7 +1297,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     authResponse.functionCallEventId = this.functionCallEventId;
     authResponse.newMessage.parts.push({
-      function_response: {
+      functionResponse: {
         id: func.id,
         name: func.name,
         response: authConfig,

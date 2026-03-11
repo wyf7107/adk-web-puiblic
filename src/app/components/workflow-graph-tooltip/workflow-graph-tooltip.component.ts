@@ -97,7 +97,12 @@ export class WorkflowGraphTooltipComponent implements OnInit {
     const nodes: HtmlTemplateDynamicNode<WorkflowNodeData>[] = [];
     const edges: Edge[] = [];
 
-    if (agentData.graph && agentData.graph.nodes) {
+    // Handle LlmAgent/Mesh with nodes field
+    if (agentData.nodes && Array.isArray(agentData.nodes)) {
+      this.buildMeshGraph(agentData.nodes, nodes, edges);
+    }
+    // Handle WorkflowAgent/SingleLlmAgent with graph field
+    else if (agentData.graph && agentData.graph.nodes) {
       // Calculate layout using utility function
       const layout = calculateGraphLayout(
         agentData.graph.nodes,
@@ -174,6 +179,100 @@ export class WorkflowGraphTooltipComponent implements OnInit {
 
     this.graphNodes.set(nodes);
     this.graphEdges.set(edges);
+  }
+
+  private buildMeshGraph(
+    meshNodes: any[],
+    nodes: HtmlTemplateDynamicNode<WorkflowNodeData>[],
+    edges: Edge[]
+  ): void {
+    // For LlmAgent/Mesh: nodes array contains coordinator + sub-agents
+    // Layout: coordinator at top, sub-agents in row below
+    const coordinatorIndex = meshNodes.findIndex(n =>
+      (n.name === meshNodes[0]?.name) || n.type === 'coordinator'
+    );
+
+    const coordinator = coordinatorIndex >= 0 ? meshNodes[coordinatorIndex] : null;
+    const subAgents = meshNodes.filter((_, i) => i !== coordinatorIndex);
+
+    const startY = 100;
+    const ySpacing = 200;
+    const xSpacing = 300;
+
+    // Calculate center X based on number of sub-agents
+    const totalWidth = (subAgents.length - 1) * xSpacing;
+    const startX = 400 - totalWidth / 2;
+
+    // Add coordinator node at top center
+    if (coordinator) {
+      const hasNested = hasNestedStructure(coordinator);
+      const coordinatorName = getNodeName(coordinator);
+      const status = this.getNodeStatusAtLevel(coordinatorName, coordinator);
+
+      nodes.push({
+        id: coordinatorName,
+        type: 'html-template',
+        point: signal({x: 400, y: startY}),
+        width: signal(180),
+        height: signal(80),
+        data: signal({
+          name: coordinatorName,
+          type: 'agent',
+          status: status,
+          hasNestedStructure: hasNested,
+          nodeData: coordinator,
+        }),
+      });
+    }
+
+    // Add sub-agent nodes in a row below coordinator
+    subAgents.forEach((node: any, index: number) => {
+      const x = startX + (index * xSpacing);
+      const y = startY + ySpacing;
+      const hasNested = hasNestedStructure(node);
+      const nodeName = getNodeName(node);
+      const status = this.getNodeStatusAtLevel(nodeName, node);
+
+      nodes.push({
+        id: nodeName,
+        type: 'html-template',
+        point: signal({x, y}),
+        width: signal(180),
+        height: signal(80),
+        data: signal({
+          name: nodeName,
+          type: 'agent',
+          status: status,
+          hasNestedStructure: hasNested,
+          nodeData: node,
+        }),
+      });
+
+      // Add edge: coordinator -> sub-agent
+      if (coordinator) {
+        const coordinatorName = getNodeName(coordinator);
+        const coordinatorStatus = this.getNodeStatusAtLevel(coordinatorName, coordinator);
+        const isActive = coordinatorStatus === NodeStatus.RUNNING ||
+                       (coordinatorStatus === NodeStatus.COMPLETED &&
+                        (status === NodeStatus.RUNNING || status === NodeStatus.PENDING));
+
+        edges.push({
+          id: `${coordinatorName}_to_${nodeName}`,
+          source: coordinatorName,
+          target: nodeName,
+          type: 'template',
+          data: { isActive },
+          markers: {
+            end: {
+              type: 'arrow-closed',
+              width: 15,
+              height: 15,
+              color: isActive ? '#42A5F5' : 'rgba(138, 180, 248, 0.8)',
+            },
+          },
+        });
+      }
+    });
   }
 
   private buildGraphFromStateOnly(): void {

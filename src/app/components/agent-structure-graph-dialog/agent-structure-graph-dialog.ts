@@ -183,7 +183,7 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     edges: Edge[]
   ): void {
     // For LlmAgent/Mesh: nodes array contains coordinator + sub-agents
-    // Layout: coordinator in center, sub-agents arranged around it
+    // Layout: coordinator at top, sub-agents in row below
     const coordinatorIndex = meshNodes.findIndex(n =>
       (n.name === meshNodes[0]?.name) || n.type === 'coordinator'
     );
@@ -191,17 +191,21 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     const coordinator = coordinatorIndex >= 0 ? meshNodes[coordinatorIndex] : null;
     const subAgents = meshNodes.filter((_, i) => i !== coordinatorIndex);
 
-    const centerX = 400;
-    const centerY = 300;
-    const radius = 200;
+    const startY = 100;
+    const ySpacing = 200;
+    const xSpacing = 300;
 
-    // Add coordinator node in center
+    // Calculate center X based on number of sub-agents
+    const totalWidth = (subAgents.length - 1) * xSpacing;
+    const startX = 400 - totalWidth / 2;
+
+    // Add coordinator node at top center
     if (coordinator) {
       const hasNested = hasNestedStructure(coordinator);
       nodes.push({
         id: coordinator.name,
         type: 'html-template',
-        point: signal({x: centerX, y: centerY}),
+        point: signal({x: 400, y: startY}),
         width: signal(200),
         height: signal(80),
         data: signal({
@@ -215,11 +219,10 @@ export class AgentStructureGraphDialogComponent implements OnInit {
       });
     }
 
-    // Add sub-agent nodes in circle around coordinator
+    // Add sub-agent nodes in a row below coordinator
     subAgents.forEach((node: any, index: number) => {
-      const angle = (index / subAgents.length) * 2 * Math.PI;
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
+      const x = startX + (index * xSpacing);
+      const y = startY + ySpacing;
       const hasNested = hasNestedStructure(node);
 
       nodes.push({
@@ -238,9 +241,8 @@ export class AgentStructureGraphDialogComponent implements OnInit {
         }),
       });
 
-      // Add edges: coordinator <-> sub-agent
+      // Add edge: coordinator -> sub-agent
       if (coordinator) {
-        // Coordinator to sub-agent
         edges.push({
           id: `${coordinator.name}_to_${node.name}`,
           source: coordinator.name,
@@ -252,22 +254,6 @@ export class AgentStructureGraphDialogComponent implements OnInit {
               width: 20,
               height: 20,
               color: 'rgba(138, 180, 248, 0.8)',
-            },
-          },
-        });
-
-        // Sub-agent to coordinator (transfer back)
-        edges.push({
-          id: `${node.name}_to_${coordinator.name}`,
-          source: node.name,
-          target: coordinator.name,
-          type: 'template',
-          markers: {
-            end: {
-              type: 'arrow-closed',
-              width: 20,
-              height: 20,
-              color: 'rgba(138, 180, 248, 0.5)',
             },
           },
         });

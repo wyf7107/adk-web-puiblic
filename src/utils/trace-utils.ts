@@ -25,7 +25,7 @@ const GENERATE_CONTENT = 'generate_content';
 
 const CONTENT = 'content';
 const PARTS = 'parts';
-const FUNCTION_RESPONSE = 'function_response';
+const FUNCTION_RESPONSE = 'functionResponse';
 
 // Normalizes span such that input/output ends up in the same place for:
 // - semconv `generate_content` spans

@@ -85,14 +85,14 @@ describe('trace-utils', () => {
     });
 
     it('should ignore user messages with function responses', () => {
-      const logs: Log[] = [
-        {
-          event_name: 'gen_ai.user.message',
-          body: JSON.stringify({ content: { parts: [{ function_response: { name: 'foo', response: {} } }] } }),
-          trace_id: 't1',
-          span_id: 's1'
-        }
-      ];
+      const logs: Log[] = [{
+        event_name: 'gen_ai.user.message',
+        body: JSON.stringify({
+          content: {parts: [{functionResponse: {name: 'foo', response: {}}}]}
+        }),
+        trace_id: 't1',
+        span_id: 's1'
+      }];
       const span: Span = {
         name: 'generate_content',
         start_time: 0,

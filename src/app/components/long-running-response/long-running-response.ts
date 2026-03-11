@@ -67,7 +67,7 @@ export class LongRunningResponseComponent {
       newMessage: {
         role: 'user',
         parts: [{
-          function_response: {
+          functionResponse: {
             id: this.functionCall.id,
             name: this.functionCall.name,
             response: {'response': this.functionCall.userResponse},

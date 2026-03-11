@@ -1312,7 +1312,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     authResponse.functionCallEventId = this.functionCallEventId;
     authResponse.newMessage.parts.push({
-      function_response: {
+      functionResponse: {
         id: func.id,
         name: func.name,
         response: authConfig,
@@ -1615,6 +1615,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.messages.update((messages) => [...messages, botMessage]);
         }
 
+        if (event.actions?.artifactDelta) {
+          for (const key in event.actions.artifactDelta) {
+            if (event.actions.artifactDelta.hasOwnProperty(key)) {
+              this.renderArtifact(
+                  key, event.actions.artifactDelta[key], reverseOrder);
+            }
+          }
+        }
+
         // Store the event in eventData
         if (!this.eventData.has(event.id)) {
           this.eventData.set(event.id, event);
@@ -1675,6 +1684,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         this.messages.update((messages) => [...messages, botMessage]);
+
+        if (event.actions?.artifactDelta) {
+          for (const key in event.actions.artifactDelta) {
+            if (event.actions.artifactDelta.hasOwnProperty(key)) {
+              this.renderArtifact(key, event.actions.artifactDelta[key]);
+            }
+          }
+        }
 
         // Store the event in eventData
         if (!this.eventData.has(event.id)) {

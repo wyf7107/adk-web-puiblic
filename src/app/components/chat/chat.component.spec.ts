@@ -768,10 +768,19 @@ describe('ChatComponent', () => {
                 id: 'event-2',
                 author: 'bot',
                 content: {parts: [{text: 'bot response'}]},
+                actions: {
+                  artifactDelta: {'test_file.pdf': 0},
+                },
               },
             ],
           };
           beforeEach(() => {
+            mockArtifactService.getArtifactVersion.and.returnValue(of({
+              inlineData: {
+                mimeType: 'application/pdf',
+                data: 'base64data',
+              },
+            }));
             mockEventService.getTraceResponse.next([]);
             component['updateWithSelectedSession'](mockSession as any);
             fixture.detectChanges();
@@ -787,7 +796,7 @@ describe('ChatComponent', () => {
           });
 
           it('should populate messages from session events', () => {
-            expect(component.messages().length).toBe(2);
+            expect(component.messages().length).toBe(3);
             expect(component.messages()[0]).toEqual(jasmine.objectContaining({
               role: 'user',
               text: 'user message'
@@ -796,6 +805,24 @@ describe('ChatComponent', () => {
               role: 'bot',
               text: 'bot response'
             }));
+            expect(component.messages()[2]).toEqual(jasmine.objectContaining({
+              role: 'bot',
+              inlineData: jasmine.objectContaining({
+                data: 'data:application/pdf;base64,base64data==',
+                mimeType: 'application/pdf',
+              }),
+            }));
+          });
+
+          it('should render artifacts', () => {
+            expect(mockArtifactService.getArtifactVersion)
+                .toHaveBeenCalledWith(
+                    USER_ID,
+                    TEST_APP_1_NAME,
+                    SESSION_1_ID,
+                    'test_file.pdf',
+                    0,
+                );
           });
 
           it('should call getTrace', () => {

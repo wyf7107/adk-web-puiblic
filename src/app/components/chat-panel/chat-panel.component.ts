@@ -499,7 +499,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
-    return event?.data !== undefined && event?.data !== null;
+    return event?.output !== undefined && event?.output !== null;
   }
 
 
@@ -508,13 +508,23 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
-    const eventData = event?.data;
+    const eventData = event?.output;
     if (eventData === undefined || eventData === null) return '';
 
+    const maxLength = 500;
+
     try {
-      return JSON.stringify(eventData);
+      const jsonString = JSON.stringify(eventData, null, 2);
+      if (jsonString.length > maxLength) {
+        return jsonString.substring(0, maxLength) + '...';
+      }
+      return jsonString;
     } catch (e) {
-      return String(eventData);
+      const stringValue = String(eventData);
+      if (stringValue.length > maxLength) {
+        return stringValue.substring(0, maxLength) + '...';
+      }
+      return stringValue;
     }
   }
 
@@ -524,14 +534,36 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
-    let nodePath = event?.nodeInfo?.nodePath || '';
+    let nodePath = event?.nodeInfo?.path || '';
 
-    // Strip "root_agent/" from the beginning
+    if (nodePath === 'root_agent') {
+      return nodePath;
+    }
+
     if (nodePath && nodePath.startsWith('root_agent/')) {
       nodePath = nodePath.substring('root_agent/'.length);
     }
 
     return nodePath;
+  }
+
+  getEventOutputResultText(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    const result = event?.output;
+    if (result === undefined || result === null) return '';
+
+    if (typeof result === 'string') {
+      return result;
+    }
+
+    try {
+      return JSON.stringify(result);
+    } catch (e) {
+      return String(result);
+    }
   }
 
 

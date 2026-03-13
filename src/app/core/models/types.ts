@@ -124,6 +124,7 @@ export declare interface Event extends LlmResponse {
   timestamp?: number;
   nodeInfo?: { path?: string;[key: string]: any; };
   data?: any;
+  output?: { result?: any; };
 }
 
 export interface ComputerUsePayload {

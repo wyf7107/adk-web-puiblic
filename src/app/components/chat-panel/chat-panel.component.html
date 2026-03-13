@@ -325,15 +325,10 @@
         </button>
         }
         @if (message.role === "bot" && hasEventOutputData(i)) {
-        <button
-          mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button"
-          [appJsonTooltip]="getEventOutputDataTooltip(i)"
-        >
+        <div class="output-chip" [appJsonTooltip]="getEventOutputDataTooltip(i)">
           <mat-icon>output</mat-icon>
-          Output from {{ getEventOutputDataNodePath(i) }}
-        </button>
+          <span>{{ getEventOutputDataNodePath(i) }}: {{ getEventOutputResultText(i) }}</span>
+        </div>
         }
         @if (message.role === "bot" && hasWorkflowNodes(i)) {
         <button

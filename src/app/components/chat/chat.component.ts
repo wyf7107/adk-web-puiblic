@@ -937,11 +937,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private storeMessage(
       part: any, e: any, role: string, invocationIndex?: number,
-      additionalIndices?: any, prepend: boolean = false) {
-    if (e?.author) {
-      this.createAgentIconColorClass(e.author);
-    }
-
+    additionalIndices?: any, prepend: boolean = false) {
     if (e?.longRunningToolIds && e.longRunningToolIds.length > 0) {
       const startIndex = this.longRunningEvents.length;
       this.getAsyncFunctionsFromParts(
@@ -1339,17 +1335,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
-  }
-
-
-  createAgentIconColorClass(agentName: string) {
-    const agentIconColor = this.stringToColorService.stc(agentName);
-
-    const agentIconColorClass =
-        `custom-icon-color-${agentIconColor.replace('#', '')}`;
-
-    // Inject the style for this unique class
-    this.injectCustomIconColorStyle(agentIconColorClass, agentIconColor);
   }
 
   clickEvent(i: number) {
@@ -2336,29 +2321,5 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     input.click();
-  }
-
-  // Helper method to dynamically inject the style
-  private injectCustomIconColorStyle(className: string, color: string): void {
-    // Check if the style already exists to prevent duplicates
-    if (this.document.getElementById(className)) {
-      return;
-    }
-
-    const style = this.renderer.createElement('style');
-    this.renderer.setAttribute(
-        style, 'id', className);  // Set an ID to check for existence later
-    this.renderer.setAttribute(style, 'type', 'text/css');
-
-    // Define the CSS
-    const css = `
-      .${className} {
-        background-color: ${color} !important;
-      }
-    `;
-
-    this.renderer.appendChild(style, this.renderer.createText(css));
-    this.renderer.appendChild(
-        this.document.head, style);  // Append to the head of the document
   }
 }

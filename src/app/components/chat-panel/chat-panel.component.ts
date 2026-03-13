@@ -268,12 +268,25 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return selectedEvent?.author ?? ROOT_AGENT;
   }
 
-  customIconColorClass(i: number) {
-    const agentName = this.getAgentNameFromEvent(i);
-    return agentName !== ROOT_AGENT ?
-        `custom-icon-color-${
-            this.stringToColorService.stc(agentName).replace('#', '')}` :
-        '';
+  isEventContent(messageIndex: number): boolean {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return false;
+    const event = this.eventData.get(message.eventId);
+    return !!event?.content;
+  }
+
+  getEventNodePath(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+    const event = this.eventData.get(message.eventId);
+    let nodePath = event?.nodeInfo?.path || event?.nodeInfo?.nodePath || '';
+
+    return nodePath;
+  }
+
+  getNodePathColor(messageIndex: number): string {
+    const nodePath = this.getEventNodePath(messageIndex);
+    return this.stringToColorService.stc(nodePath);
   }
 
   shouldMessageHighlighted(index: number) {
@@ -511,7 +524,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
-    let nodePath = event?.nodePath || '';
+    let nodePath = event?.nodeInfo?.nodePath || '';
 
     // Strip "root_agent/" from the beginning
     if (nodePath && nodePath.startsWith('root_agent/')) {
@@ -551,7 +564,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
       const event = this.eventData.get(msg.eventId);
       const nodes = event?.actions?.agentState?.nodes;
-      const nodePath = event?.nodePath;
+      const nodePath = event?.nodeInfo?.path;
 
       if (nodes && nodePath) {
         // Initialize path if not exists
@@ -572,7 +585,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (!message.eventId) return null;
 
     const event = this.eventData.get(message.eventId);
-    return event?.nodePath || null;
+    return event?.nodeInfo?.path || null;
   }
 
 

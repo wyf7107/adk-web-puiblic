@@ -60,15 +60,15 @@
           </div>
         }
         @if (message.role === "bot") {
-        <button
-          mat-mini-fab
-          [disabled]="!message.eventId"
-          [matTooltip]="getAgentNameFromEvent(i)"
-          [class]="customIconColorClass(i)"
-          [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}"
-        >
-          <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-        </button>
+          @if (isEventContent(i) || message.isLoading) {
+          <button mat-mini-fab [disabled]="!message.eventId" [appJsonTooltip]="getAgentNameFromEvent(i)"
+            [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}">
+            <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+          </button>
+          } @else {
+          <div class="node-circle-icon" [style.background-color]="getNodePathColor(i)"
+            [appJsonTooltip]="getNodePath(i) || getEventNodePath(i)" [ngClass]="{'hidden': !getAgentNameFromEvent(i)}"></div>
+          }
         } 
         @if (shouldShowMessageCard(message)) {
         <mat-card

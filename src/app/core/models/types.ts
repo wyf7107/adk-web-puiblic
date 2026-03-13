@@ -122,7 +122,7 @@ export declare interface Event extends LlmResponse {
   longRunningToolIds?: string[];
   branch?: string;
   timestamp?: number;
-  nodePath?: any;
+  nodeInfo?: { path?: string;[key: string]: any; };
   data?: any;
 }
 

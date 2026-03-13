@@ -323,6 +323,7 @@
 
 :host ::ng-deep .mat-mdc-mini-fab {
   background-color: var(--chat-panel-mat-mdc-mini-fab-background-color, #4285f4);
+  margin-right: 15px;
   mat-icon {
     color: var(--chat-panel-mat-mdc-mini-fab-mat-icon-color, white);
   }
@@ -501,4 +502,16 @@ button.video-rec-btn {
 .messages-loading-container {
   margin-top: 1em;
   margin-bottom: 1em;
+}
+
+.node-circle-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 14px;
+  margin-left: 12px;
+  margin-right: 28px;
+  flex-shrink: 0;
+  display: inline-block;
+  align-self: flex-start;
 }

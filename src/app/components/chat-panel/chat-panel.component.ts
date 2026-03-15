@@ -236,6 +236,11 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    // Scroll to top when switching apps or when messages become empty (new session with README)
+    if ((changes['appName'] || changes['messages']) && this.messages.length === 0 && this.agentReadme) {
+      setTimeout(() => this.scrollToTop(), 0);
+    }
+
     if (changes['messages']) {
       const currentLastMessage = this.messages[this.messages.length - 1];
       const isNewMessageAppended = currentLastMessage !== this.lastMessageRef;
@@ -260,6 +265,15 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
         });
       }, 50);
     }
+  }
+
+  scrollToTop() {
+    setTimeout(() => {
+      this.scrollContainer?.nativeElement.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    }, 50);
   }
 
   getAgentNameFromEvent(i: number) {

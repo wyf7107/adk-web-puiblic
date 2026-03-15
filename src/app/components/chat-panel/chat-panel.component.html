@@ -330,6 +330,17 @@
           <span>{{ getEventOutputDataNodePath(i) }}: {{ getEventOutputResultText(i) }}</span>
         </div>
         }
+        @if (message.role === "bot" && hasEventRoute(i)) {
+        <button
+          mat-stroked-button
+          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+          class="function-event-button"
+          [appJsonTooltip]="getEventRouteTooltip(i)"
+        >
+          <mat-icon>route</mat-icon>
+          {{ getEventRouteText(i) }}
+        </button>
+        }
         @if (message.role === "bot" && hasWorkflowNodes(i)) {
         <button
           mat-stroked-button

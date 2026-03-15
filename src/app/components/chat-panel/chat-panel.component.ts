@@ -566,6 +566,57 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }
   }
 
+  hasEventRoute(messageIndex: number): boolean {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return false;
+
+    const event = this.eventData.get(message.eventId);
+    return event?.actions?.route !== undefined && event?.actions?.route !== null;
+  }
+
+  getEventRouteText(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    const route = event?.actions?.route;
+    if (route === undefined || route === null) return '';
+
+    return `route: ${String(route)}`;
+  }
+
+  getEventRouteTooltip(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    const route = event?.actions?.route;
+    if (route === undefined || route === null) return '';
+
+    const maxLength = 500;
+
+    if (typeof route === 'string') {
+      if (route.length > maxLength) {
+        return route.substring(0, maxLength) + '...';
+      }
+      return route;
+    }
+
+    try {
+      const jsonString = JSON.stringify(route, null, 2);
+      if (jsonString.length > maxLength) {
+        return jsonString.substring(0, maxLength) + '...';
+      }
+      return jsonString;
+    } catch (e) {
+      const stringValue = String(route);
+      if (stringValue.length > maxLength) {
+        return stringValue.substring(0, maxLength) + '...';
+      }
+      return stringValue;
+    }
+  }
+
 
   hasWorkflowNodes(messageIndex: number): boolean {
     const message = this.messages[messageIndex];

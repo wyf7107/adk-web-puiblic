@@ -88,6 +88,7 @@ const ROOT_AGENT = 'root_agent';
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() appName: string = '';
+  @Input() agentReadme: string = '';
   sessionName = input<string>('');
   @Input() messages: any[] = [];
   @Input() isChatMode: boolean = true;

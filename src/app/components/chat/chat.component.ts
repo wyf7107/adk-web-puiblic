@@ -228,6 +228,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   renderedEventGraph: SafeHtml | undefined;
   rawSvgString: string | null = null;
   agentGraphData: any = null;
+  agentReadme: string = '';
 
   selectedEvent: any = undefined;
   selectedEventIndex: any = undefined;
@@ -2093,6 +2094,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectApp(app);
         this.agentService.getAppInfo(app).subscribe(info => {
           this.agentGraphData = info;
+          this.agentReadme = info?.readme || '';
         })
         this.agentService.getAgentBuilder(app).subscribe((res: any) => {
           if (!res || res == '') {

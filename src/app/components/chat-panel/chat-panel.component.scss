@@ -44,10 +44,13 @@
   font-weight: 400;
   position: relative;
   display: inline-block;
+
   &.message-card--highlighted {
-    background-color: var(
-      --chat-panel-function-event-button-highlight-background-color
-    );
+    background-color: var(--chat-panel-function-event-button-highlight-background-color);
+  }
+
+  &:empty {
+    display: none;
   }
 }
 
@@ -78,43 +81,39 @@
 }
 
 .function-event-button-highlight {
-  background-color: var(
-    --chat-panel-function-event-button-highlight-background-color
-  );
-  border-color: var(
-    --chat-panel-function-event-button-highlight-border-color
-  ) !important;
+  background-color: var(--chat-panel-function-event-button-highlight-background-color);
+  border-color: var(--chat-panel-function-event-button-highlight-border-color) !important;
   color: var(--chat-panel-function-event-button-highlight-color) !important;
 }
 
 .output-chip {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 11px;
-  height: 24px;
-  min-height: 24px;
-  box-sizing: border-box;
-  background-color: var(--chat-panel-function-event-button-background-color);
-  border: 1px solid var(--mat-standard-button-toggle-divider-color);
-  cursor: pointer;
-  margin: 5px;
-  max-width: 400px;
-  font-family: 'Roboto Mono', monospace;
+  max-width: 400px !important;
 
-  mat-icon {
-    font-size: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
-    flex-shrink: 0;
-    margin-right: 6px;
+  :host ::ng-deep .mdc-button__label {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 350px !important;
   }
+}
 
-  span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+:host ::ng-deep .output-chip .mdc-button__label {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 350px !important;
+}
+
+.event-chips-container {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  &.has-content-above {
+    display: flex;
+    width: 100%;
+    margin-top: 4px;
+    margin-left: 90px;
   }
 }
 
@@ -154,13 +153,18 @@
   justify-content: flex-end;
   align-items: center;
   flex-grow: 1;
+  gap: 15px;
+
   .message-card {
-    background-color: var(
-      --chat-panel-user-message-message-card-background-color
-    );
-    align-self: flex-end;
+    background-color: var(--chat-panel-user-message-message-card-background-color);
+    align-self: flex-start;
     color: var(--chat-panel-user-message-message-card-color);
     box-shadow: none;
+    order: 1;
+  }
+
+  button {
+    order: 2;
   }
 }
 
@@ -169,10 +173,9 @@
   flex-wrap: wrap;
   align-items: center;
   flex-grow: 1;
+
   .message-card {
-    background-color: var(
-      --chat-panel-bot-message-message-card-background-color
-    );
+    background-color: var(--chat-panel-bot-message-message-card-background-color);
     align-self: flex-start;
     color: var(--chat-panel-bot-message-message-card-color);
     box-shadow: none;
@@ -181,11 +184,8 @@
 
 .bot-message:focus-within {
   .message-card {
-    background-color: var(
-      --chat-panel-bot-message-focus-within-message-card-background-color
-    );
-    border: 1px solid
-      var(--chat-panel-bot-message-focus-within-message-card-border-color);
+    background-color: var(--chat-panel-bot-message-focus-within-message-card-background-color);
+    border: 1px solid var(--chat-panel-bot-message-focus-within-message-card-border-color);
   }
 }
 
@@ -252,8 +252,7 @@
 
 .eval-response-header {
   padding-bottom: 5px;
-  border-bottom: 2px solid
-    var(--chat-panel-eval-response-header-border-bottom-color);
+  border-bottom: 2px solid var(--chat-panel-eval-response-header-border-bottom-color);
   font-style: italic;
   font-weight: 700;
 }
@@ -358,12 +357,14 @@
 :host ::ng-deep .mat-mdc-mini-fab {
   background-color: var(--chat-panel-mat-mdc-mini-fab-background-color, #4285f4);
   margin-right: 15px;
+
   mat-icon {
     color: var(--chat-panel-mat-mdc-mini-fab-mat-icon-color, white);
   }
 
   &.mat-mdc-button-disabled {
     background-color: rgba(255, 255, 255, 0.2) !important;
+
     mat-icon {
       color: rgba(255, 255, 255, 0.6) !important;
     }
@@ -379,8 +380,7 @@
 }
 
 :host ::ng-deep .input-field .mat-mdc-text-field-wrapper {
-  border: 1px solid
-    var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
+  border: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
   border-radius: 16px;
 }
 
@@ -519,6 +519,7 @@
 button.audio-rec-btn,
 button.video-rec-btn {
   background-color: var(--chat-card-background-color);
+
   &.recording {
     background-color: var(--chat-panel-eval-fail-color);
   }

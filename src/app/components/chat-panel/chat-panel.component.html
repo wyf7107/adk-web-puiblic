@@ -98,6 +98,7 @@
             }
           </div>
           }
+          @if (message.thought || message.text || message.renderedContent || message.a2uiData) {
           <div>
             @if (message.thought) {
             <div class="thought-chip">{{ i18n.thoughtChipLabel }}</div>
@@ -149,6 +150,7 @@
             </app-a2ui-canvas>
             }
           </div>
+          }
           @if (message.executableCode) {
           <code> {{ message.executableCode.code }} </code>
           } @if (message.codeExecutionResult) {
@@ -258,7 +260,8 @@
           </div>
           }
         </mat-card>
-        } 
+        }
+        <div class="event-chips-container" [ngClass]="{'has-content-above': shouldShowMessageCard(message)}">
         @if (message.functionCalls && message.functionCalls.length > 0) {
           @for (functionCall of message.functionCalls; track functionCall) {
             @if (isComputerUseClick(functionCall)) {
@@ -325,10 +328,15 @@
         </button>
         }
         @if (message.role === "bot" && hasEventOutputData(i)) {
-        <div class="output-chip" [appJsonTooltip]="getEventOutputDataTooltip(i)">
+        <button
+          mat-stroked-button
+          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
+          class="function-event-button output-chip"
+          [appJsonTooltip]="getEventOutputDataTooltip(i)"
+        >
           <mat-icon>output</mat-icon>
-          <span>{{ getEventOutputDataNodePath(i) }}: {{ getEventOutputResultText(i) }}</span>
-        </div>
+          {{ getEventOutputDataNodePath(i) }}: {{ getEventOutputResultText(i) }}
+        </button>
         }
         @if (message.role === "bot" && hasEventRoute(i)) {
         <button
@@ -366,6 +374,8 @@
           {{ getEndOfAgentAuthor(i) }} completed!
         </button>
         }
+        </div>
+        @if (message.evalStatus === 1 || message.evalStatus === 2) {
         <div
           [ngClass]="{
                 'eval-pass': message.evalStatus === 1,
@@ -380,6 +390,7 @@
             i18n.evalFailLabel : "" }}</span
           >
         </div>
+        }
         @if (evalCase && message.role === "bot" && isEvalEditMode) { 
           @if (message.text) {
             <div>
@@ -483,7 +494,7 @@
           <button
             mat-icon-button
             (click)="fileInput.click()"
-            class="function-event-button"
+            class="chat-action-button"
             [matTooltip]="i18n.uploadFileTooltip"
             [disabled]="!(isMessageFileUploadEnabledObs | async)"
           >
@@ -492,7 +503,7 @@
           <button
             mat-icon-button
             [matMenuTriggerFor]="moreMenu"
-            class="function-event-button"
+            class="chat-action-button"
             [matTooltip]="i18n.moreOptionsTooltip"
             [disabled]="!(isManualStateUpdateEnabledObs | async)"
           >

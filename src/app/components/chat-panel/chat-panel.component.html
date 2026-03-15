@@ -310,7 +310,7 @@
           [appJsonTooltip]="getStateDeltaTooltip(i)"
         >
           <mat-icon>data_object</mat-icon>
-          State
+          State: {{ getStateDeltaKeys(i) }}
         </button>
         }
         @if (message.role === "bot" && hasArtifactDelta(i)) {

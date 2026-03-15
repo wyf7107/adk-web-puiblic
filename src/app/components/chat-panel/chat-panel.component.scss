@@ -54,15 +54,18 @@
 .function-event-button {
   background-color: var(--chat-panel-function-event-button-background-color);
   margin: 5px 5px 5px;
-  font-size: 13px !important;
+  font-size: 11px !important;
   padding: 6px 12px !important;
-  min-height: 32px !important;
-  height: 32px !important;
+  min-height: 24px !important;
+  height: 24px !important;
+  border-radius: 6px !important;
+  font-family: 'Roboto Mono', monospace !important;
 
   mat-icon {
     font-size: 18px !important;
     width: 18px !important;
     height: 18px !important;
+    margin-right: 6px !important;
   }
 }
 
@@ -87,39 +90,31 @@
 .output-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  border-radius: 16px;
-  padding: 0 12px;
-  font-size: 13px;
-  font-weight: 500;
-  height: 32px;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  height: 24px;
+  min-height: 24px;
   box-sizing: border-box;
-  border: 1px solid;
-  line-height: 32px;
-  background-color: rgba(138, 180, 248, 0.1);
-  border-color: rgba(138, 180, 248, 0.3);
-  color: #8ab4f8;
+  background-color: var(--chat-panel-function-event-button-background-color);
+  border: 1px solid var(--mat-standard-button-toggle-divider-color);
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
   margin: 5px;
   max-width: 400px;
+  font-family: 'Roboto Mono', monospace;
 
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
     flex-shrink: 0;
+    margin-right: 6px;
   }
 
   span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  &:hover {
-    background-color: rgba(138, 180, 248, 0.15);
-    border-color: rgba(138, 180, 248, 0.4);
   }
 }
 

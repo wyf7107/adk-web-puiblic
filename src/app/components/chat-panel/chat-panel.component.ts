@@ -462,6 +462,18 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
+  getStateDeltaKeys(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    const stateDelta = event?.actions?.stateDelta;
+    if (!stateDelta) return '';
+
+    const keys = Object.keys(stateDelta);
+    return keys.join(', ');
+  }
+
   getStateDeltaTooltip(messageIndex: number): string {
     const message = this.messages[messageIndex];
     if (!message.eventId) return '';

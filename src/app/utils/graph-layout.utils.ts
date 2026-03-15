@@ -55,10 +55,10 @@ export function calculateGraphLayout(
   config: LayoutConfig = {}
 ): LayoutResult {
   const {
-    ySpacing = 150,
-    xSpacing = 250,
-    startX = 200,
-    startY = 50,
+    ySpacing = 200,
+    xSpacing = 350,
+    startX = 400,
+    startY = 100,
   } = config;
 
   // Extract node names

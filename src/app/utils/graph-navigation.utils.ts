@@ -25,10 +25,10 @@ export interface NavigationStackItem {
  * Default layout configuration for graph visualization
  */
 export const DEFAULT_LAYOUT_CONFIG = {
-  ySpacing: 150,
-  xSpacing: 250,
-  startX: 250,
-  startY: 75,
+  ySpacing: 200,
+  xSpacing: 350,
+  startX: 400,
+  startY: 100,
 };
 
 /**

@@ -15,65 +15,65 @@
  * limitations under the License.
  */
 
-import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
-import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatButton, MatFabButton} from '@angular/material/button';
-import {MatCard} from '@angular/material/card';
-import {MatDialog} from '@angular/material/dialog';
-import {MatDivider} from '@angular/material/divider';
-import {MatIcon} from '@angular/material/icon';
-import {MatPaginatorIntl} from '@angular/material/paginator';
-import {MatDrawer, MatDrawerContainer} from '@angular/material/sidenav';
-import {MatSlideToggle} from '@angular/material/slide-toggle';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatTooltip} from '@angular/material/tooltip';
-import {SafeHtml} from '@angular/platform-browser';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
-import {catchError, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
+import { AsyncPipe, DOCUMENT, NgClass } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatButton, MatFabButton } from '@angular/material/button';
+import { MatCard } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDivider } from '@angular/material/divider';
+import { MatIcon } from '@angular/material/icon';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { MatDrawer, MatDrawerContainer } from '@angular/material/sidenav';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltip } from '@angular/material/tooltip';
+import { SafeHtml } from '@angular/platform-browser';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { catchError, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 
-import {URLUtil} from '../../../utils/url-util';
-import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-import {EvalCase} from '../../core/models/Eval';
-import {Session, SessionState} from '../../core/models/Session';
-import {Event as AdkEvent, Part} from '../../core/models/types';
-import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
-import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
-import {ARTIFACT_SERVICE} from '../../core/services/interfaces/artifact';
-import {DOWNLOAD_SERVICE} from '../../core/services/interfaces/download';
-import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
-import {EVENT_SERVICE} from '../../core/services/interfaces/event';
-import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
-import {GRAPH_SERVICE} from '../../core/services/interfaces/graph';
-import {LOCAL_FILE_SERVICE} from '../../core/services/interfaces/localfile';
-import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {SESSION_SERVICE} from '../../core/services/interfaces/session';
-import {STREAM_CHAT_SERVICE} from '../../core/services/interfaces/stream-chat';
-import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
-import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
-import {ListResponse} from '../../core/services/interfaces/types';
-import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
-import {LOCATION_SERVICE} from '../../core/services/location.service';
-import {ResizableBottomDirective} from '../../directives/resizable-bottom.directive';
-import {ResizableDrawerDirective} from '../../directives/resizable-drawer.directive';
-import {AddItemDialogComponent} from '../add-item-dialog/add-item-dialog.component';
-import {AgentStructureGraphDialogComponent} from '../agent-structure-graph-dialog/agent-structure-graph-dialog';
-import {getMediaTypeFromMimetype, MediaType} from '../artifact-tab/artifact-tab.component';
-import {BuilderTabsComponent} from '../builder-tabs/builder-tabs.component';
-import {CanvasComponent} from '../canvas/canvas.component';
-import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
-import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
-import {EvalTabComponent} from '../eval-tab/eval-tab.component';
-import {DeleteSessionDialogComponent, DeleteSessionDialogData,} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
-import {SidePanelComponent} from '../side-panel/side-panel.component';
-import {TraceEventComponent} from '../trace-tab/trace-event/trace-event.component';
-import {ViewImageDialogComponent} from '../view-image-dialog/view-image-dialog.component';
+import { URLUtil } from '../../../utils/url-util';
+import { AgentRunRequest } from '../../core/models/AgentRunRequest';
+import { EvalCase } from '../../core/models/Eval';
+import { Session, SessionState } from '../../core/models/Session';
+import { Event as AdkEvent, Part } from '../../core/models/types';
+import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
+import { AGENT_BUILDER_SERVICE } from '../../core/services/interfaces/agent-builder';
+import { ARTIFACT_SERVICE } from '../../core/services/interfaces/artifact';
+import { DOWNLOAD_SERVICE } from '../../core/services/interfaces/download';
+import { EVAL_SERVICE } from '../../core/services/interfaces/eval';
+import { EVENT_SERVICE } from '../../core/services/interfaces/event';
+import { FEATURE_FLAG_SERVICE } from '../../core/services/interfaces/feature-flag';
+import { GRAPH_SERVICE } from '../../core/services/interfaces/graph';
+import { LOCAL_FILE_SERVICE } from '../../core/services/interfaces/localfile';
+import { SAFE_VALUES_SERVICE } from '../../core/services/interfaces/safevalues';
+import { SESSION_SERVICE } from '../../core/services/interfaces/session';
+import { STREAM_CHAT_SERVICE } from '../../core/services/interfaces/stream-chat';
+import { STRING_TO_COLOR_SERVICE } from '../../core/services/interfaces/string-to-color';
+import { TRACE_SERVICE } from '../../core/services/interfaces/trace';
+import { ListResponse } from '../../core/services/interfaces/types';
+import { UI_STATE_SERVICE } from '../../core/services/interfaces/ui-state';
+import { LOCATION_SERVICE } from '../../core/services/location.service';
+import { ResizableBottomDirective } from '../../directives/resizable-bottom.directive';
+import { ResizableDrawerDirective } from '../../directives/resizable-drawer.directive';
+import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
+import { AgentStructureGraphDialogComponent } from '../agent-structure-graph-dialog/agent-structure-graph-dialog';
+import { getMediaTypeFromMimetype, MediaType } from '../artifact-tab/artifact-tab.component';
+import { BuilderTabsComponent } from '../builder-tabs/builder-tabs.component';
+import { CanvasComponent } from '../canvas/canvas.component';
+import { ChatPanelComponent } from '../chat-panel/chat-panel.component';
+import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
+import { EvalTabComponent } from '../eval-tab/eval-tab.component';
+import { DeleteSessionDialogComponent, DeleteSessionDialogData, } from '../session-tab/delete-session-dialog/delete-session-dialog.component';
+import { SidePanelComponent } from '../side-panel/side-panel.component';
+import { TraceEventComponent } from '../trace-tab/trace-event/trace-event.component';
+import { ViewImageDialogComponent } from '../view-image-dialog/view-image-dialog.component';
 
-import {ChatMessagesInjectionToken} from './chat.component.i18n';
+import { ChatMessagesInjectionToken } from './chat.component.i18n';
 
 const ROOT_AGENT = 'root_agent';
 /** Query parameter for pre-filling user input. */
@@ -119,14 +119,14 @@ class CustomPaginatorIntl extends MatPaginatorIntl {
 }
 
 const BIDI_STREAMING_RESTART_WARNING =
-    'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.';
+  'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
   providers: [
-    {provide: MatPaginatorIntl, useClass: CustomPaginatorIntl},
+    { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl },
   ],
   imports: [
     MatDrawerContainer,
@@ -194,7 +194,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   currentMessage = '';
   messages = signal<any[]>([]);
   lastTextChunk: string = '';
-  streamingTextMessage: any|null = null;
+  streamingTextMessage: any | null = null;
   latestThought: string = '';
   artifacts: any[] = [];
   userInput: string = '';
@@ -203,8 +203,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   appName = '';
   sessionId = ``;
   sessionIdOfLoadedMessages = '';
-  evalCase: EvalCase|null = null;
-  updatedEvalCase: EvalCase|null = null;
+  evalCase: EvalCase | null = null;
+  updatedEvalCase: EvalCase | null = null;
   evalSetId = '';
   isAudioRecording = false;
   isVideoRecording = false;
@@ -214,7 +214,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   showSidePanel = true;
   showBuilderAssistant = true;
   useSse = false;
-  currentSessionState: SessionState|undefined = {};
+  currentSessionState: SessionState | undefined = {};
   root_agent = ROOT_AGENT;
   updatedSessionState: WritableSignal<any> = signal(null);
   private readonly isModelThinkingSubject = new BehaviorSubject(false);
@@ -225,8 +225,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   eventData = new Map<string, any>();
   traceData: any[] = [];
-  renderedEventGraph: SafeHtml|undefined;
-  rawSvgString: string|null = null;
+  renderedEventGraph: SafeHtml | undefined;
+  rawSvgString: string | null = null;
   agentGraphData: any = null;
 
   selectedEvent: any = undefined;
@@ -238,7 +238,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getMediaTypeFromMimetype = getMediaTypeFromMimetype;
 
-  selectedFiles: {file: File; url: string}[] = [];
+  selectedFiles: { file: File; url: string }[] = [];
 
   protected MediaType = MediaType;
 
@@ -254,56 +254,56 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // Load apps
   protected isLoadingApps: WritableSignal<boolean> = signal(false);
   loadingError: WritableSignal<string> = signal('');
-  protected readonly apps$: Observable<string[]|undefined> = of([]).pipe(
-      tap(() => {
-        this.isLoadingApps.set(true);
-        this.selectedAppControl.disable();
-      }),
-      switchMap(
-          () => this.agentService.listApps().pipe(
-              catchError((err: HttpErrorResponse) => {
-                this.loadingError.set(err.message);
-                return of(undefined);
-              }),
-              ),
-          ),
-      take(1),
-      tap((app) => {
-        this.isLoadingApps.set(false);
-        this.selectedAppControl.enable();
-        if (app?.length == 1) {
-          this.router.navigate([], {
-            relativeTo: this.activatedRoute,
-            queryParams: {app: app[0]},
-          });
-        }
-      }),
-      shareReplay(),
+  protected readonly apps$: Observable<string[] | undefined> = of([]).pipe(
+    tap(() => {
+      this.isLoadingApps.set(true);
+      this.selectedAppControl.disable();
+    }),
+    switchMap(
+      () => this.agentService.listApps().pipe(
+        catchError((err: HttpErrorResponse) => {
+          this.loadingError.set(err.message);
+          return of(undefined);
+        }),
+      ),
+    ),
+    take(1),
+    tap((app) => {
+      this.isLoadingApps.set(false);
+      this.selectedAppControl.enable();
+      if (app?.length == 1) {
+        this.router.navigate([], {
+          relativeTo: this.activatedRoute,
+          queryParams: { app: app[0] },
+        });
+      }
+    }),
+    shareReplay(),
   );
 
   // Feature flag references for use in template.
   readonly importSessionEnabledObs: Observable<boolean> =
-      this.featureFlagService.isImportSessionEnabled();
+    this.featureFlagService.isImportSessionEnabled();
   readonly isEditFunctionArgsEnabledObs: Observable<boolean> =
-      this.featureFlagService.isEditFunctionArgsEnabled();
+    this.featureFlagService.isEditFunctionArgsEnabled();
   readonly isSessionUrlEnabledObs: Observable<boolean> =
-      this.featureFlagService.isSessionUrlEnabled();
+    this.featureFlagService.isSessionUrlEnabled();
   readonly isApplicationSelectorEnabledObs: Observable<boolean> =
-      this.featureFlagService.isApplicationSelectorEnabled();
+    this.featureFlagService.isApplicationSelectorEnabled();
   readonly isTokenStreamingEnabledObs: Observable<boolean> =
-      this.featureFlagService.isTokenStreamingEnabled();
+    this.featureFlagService.isTokenStreamingEnabled();
   readonly isExportSessionEnabledObs: Observable<boolean> =
-      this.featureFlagService.isExportSessionEnabled();
+    this.featureFlagService.isExportSessionEnabled();
   readonly isEventFilteringEnabled =
-      toSignal(this.featureFlagService.isEventFilteringEnabled());
+    toSignal(this.featureFlagService.isEventFilteringEnabled());
   readonly isApplicationSelectorEnabled =
-      toSignal(this.featureFlagService.isApplicationSelectorEnabled());
+    toSignal(this.featureFlagService.isApplicationSelectorEnabled());
   readonly isDeleteSessionEnabledObs: Observable<boolean> =
-      this.featureFlagService.isDeleteSessionEnabled();
+    this.featureFlagService.isDeleteSessionEnabled();
   readonly isUserIdOnToolbarEnabledObs: Observable<boolean> =
-      this.featureFlagService.isUserIdOnToolbarEnabled();
+    this.featureFlagService.isUserIdOnToolbarEnabled();
   readonly isDeveloperUiDisclaimerEnabledObs: Observable<boolean> =
-      this.featureFlagService.isDeveloperUiDisclaimerEnabled();
+    this.featureFlagService.isDeveloperUiDisclaimerEnabled();
 
   // Trace detail
   bottomPanelVisible = false;
@@ -312,7 +312,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // Builder
   disableBuilderSwitch = false;
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit(): void {
     this.syncSelectedAppFromUrl();
@@ -323,24 +323,24 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.agentService.getApp(),
       this.activatedRoute.queryParams,
     ])
-        .pipe(
-            filter(
-                ([app, params]) =>
-                    !!app && !!params[INITIAL_USER_INPUT_QUERY_PARAM],
-                ),
-            first(),
-            map(([, params]) => params[INITIAL_USER_INPUT_QUERY_PARAM]))
-        .subscribe((initialUserInput) => {
-          // Use `setTimeout` to ensure the userInput is set after the current
-          // change detection cycle is complete.
-          setTimeout(() => {
-            this.userInput = initialUserInput;
-          });
+      .pipe(
+        filter(
+          ([app, params]) =>
+            !!app && !!params[INITIAL_USER_INPUT_QUERY_PARAM],
+        ),
+        first(),
+        map(([, params]) => params[INITIAL_USER_INPUT_QUERY_PARAM]))
+      .subscribe((initialUserInput) => {
+        // Use `setTimeout` to ensure the userInput is set after the current
+        // change detection cycle is complete.
+        setTimeout(() => {
+          this.userInput = initialUserInput;
         });
+      });
 
     this.streamChatService.onStreamClose().subscribe((closeReason) => {
       const error =
-          'Please check server log for full details: \n' + closeReason;
+        'Please check server log for full details: \n' + closeReason;
       this.openSnackBar(error, 'OK');
     });
 
@@ -352,7 +352,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (searchParams.has('code')) {
       const authResponseUrl = window.location.href;
       // Send token to the main window
-      window.opener?.postMessage({authResponseUrl}, window.origin);
+      window.opener?.postMessage({ authResponseUrl }, window.origin);
       // Close the popup
       window.close();
     }
@@ -370,10 +370,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (isLoading) {
         if (!lastMessage?.isLoading && !this.streamingTextMessage) {
           this.messages.update(
-              (messages) =>
-                  [...messages,
-                   {role: 'bot', isLoading: true},
-          ]);
+            (messages) =>
+              [...messages,
+              { role: 'bot', isLoading: true },
+              ]);
         }
       } else if (lastMessage?.isLoading && !isModelThinking) {
         this.messages.update((messages) => messages.slice(0, -1));
@@ -392,25 +392,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.traceService.hoveredMessageIndices$.subscribe(
-        i => this.hoveredEventMessageIndices = i);
+      i => this.hoveredEventMessageIndices = i);
 
     this.featureFlagService.isInfinityMessageScrollingEnabled()
-        .pipe(first())
-        .subscribe((enabled) => {
-          if (enabled) {
-            this.uiStateService.onNewMessagesLoaded().subscribe(
-                (response: ListResponse<any>&{isBackground?: boolean}) => {
-                  this.populateMessages(
-                      response.items, true, !response.isBackground);
-                  this.loadTraceData();
-                });
+      .pipe(first())
+      .subscribe((enabled) => {
+        if (enabled) {
+          this.uiStateService.onNewMessagesLoaded().subscribe(
+            (response: ListResponse<any> & { isBackground?: boolean }) => {
+              this.populateMessages(
+                response.items, true, !response.isBackground);
+              this.loadTraceData();
+            });
 
-            this.uiStateService.onNewMessagesLoadingFailed().subscribe(
-                (error: {message: string}) => {
-                  this.openSnackBar(error.message, 'OK');
-                });
-          }
-        });
+          this.uiStateService.onNewMessagesLoadingFailed().subscribe(
+            (error: { message: string }) => {
+              this.openSnackBar(error.message, 'OK');
+            });
+        }
+      });
   }
 
   get sessionTab() {
@@ -453,32 +453,32 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (sessionUrl) {
         this.sessionService.getSession(this.userId, this.appName, sessionUrl)
-            .pipe(take(1), catchError((error) => {
-                    this.openSnackBar(
-                        'Cannot find specified session. Creating a new one.',
-                        'OK');
-                    this.createSessionAndReset();
-                    return of(null);
-                  }))
-            .subscribe((session) => {
-              if (session) {
-                this.updateWithSelectedSession(session);
-              }
-            });
+          .pipe(take(1), catchError((error) => {
+            this.openSnackBar(
+              'Cannot find specified session. Creating a new one.',
+              'OK');
+            this.createSessionAndReset();
+            return of(null);
+          }))
+          .subscribe((session) => {
+            if (session) {
+              this.updateWithSelectedSession(session);
+            }
+          });
       }
     });
   }
 
   private hideSidePanelIfNeeded() {
     this.activatedRoute.queryParams
-        .pipe(
-            filter((params) => params[HIDE_SIDE_PANEL_QUERY_PARAM] === 'true'),
-            take(1),
-            )
-        .subscribe(() => {
-          this.showSidePanel = false;
-          this.sideDrawer()?.close();
-        });
+      .pipe(
+        filter((params) => params[HIDE_SIDE_PANEL_QUERY_PARAM] === 'true'),
+        take(1),
+      )
+      .subscribe(() => {
+        this.showSidePanel = false;
+        this.sideDrawer()?.close();
+      });
   }
 
   private createSessionAndReset() {
@@ -494,22 +494,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.uiStateService.setIsSessionListLoading(true);
 
     this.sessionService.createSession(this.userId, this.appName)
-        .subscribe(
-            (res) => {
-              this.currentSessionState = res.state;
-              this.sessionId = res.id ?? '';
-              this.sessionTab?.refreshSession();
-              this.sessionTab?.reloadSession(this.sessionId);
+      .subscribe(
+        (res) => {
+          this.currentSessionState = res.state;
+          this.sessionId = res.id ?? '';
+          this.sessionTab?.refreshSession();
+          this.sessionTab?.reloadSession(this.sessionId);
 
-              this.isSessionUrlEnabledObs.subscribe((enabled) => {
-                if (enabled) {
-                  this.updateSelectedSessionUrl();
-                }
-              });
-            },
-            () => {
-              this.uiStateService.setIsSessionListLoading(false);
-            });
+          this.isSessionUrlEnabledObs.subscribe((enabled) => {
+            if (enabled) {
+              this.updateSelectedSessionUrl();
+            }
+          });
+        },
+        () => {
+          this.uiStateService.setIsSessionListLoading(false);
+        });
   }
 
   async sendMessage(event: Event) {
@@ -541,9 +541,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Add user message attachments
     if (this.selectedFiles.length > 0) {
       const messageAttachments = this.selectedFiles.map((file) => ({
-                                                          file: file.file,
-                                                          url: file.url,
-                                                        }));
+        file: file.file,
+        url: file.url,
+      }));
 
       for (const file of this.selectedFiles) {
         const part = await this.localFileService.createMessagePartFromFile(file.file);
@@ -626,20 +626,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.streamingTextMessage = null;
         this.featureFlagService.isSessionReloadOnNewMessageEnabled()
-            .pipe(first())
-            .subscribe((enabled) => {
-              if (enabled) {
-                this.sessionTab?.reloadSession(this.sessionId);
-              }
-            });
+          .pipe(first())
+          .subscribe((enabled) => {
+            if (enabled) {
+              this.sessionTab?.reloadSession(this.sessionId);
+            }
+          });
         this.eventService.getTrace(this.sessionId)
-            .pipe(first(), catchError((error) => {
-                    return of([]);
-                  }))
-            .subscribe((res) => {
-              this.traceData = res;
-              this.changeDetectorRef.detectChanges();
-            });
+          .pipe(first(), catchError((error) => {
+            return of([]);
+          }))
+          .subscribe((res) => {
+            this.traceData = res;
+            this.changeDetectorRef.detectChanges();
+          });
         this.traceService.setMessages(this.messages());
         this.changeDetectorRef.detectChanges();
       },
@@ -658,12 +658,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private processErrorMessage(chunkJson: any) {
     this.storeEvents(chunkJson, chunkJson);
     this.insertMessageBeforeLoadingMessage(
-        {text: chunkJson.errorMessage, role: 'bot'})
+      { text: chunkJson.errorMessage, role: 'bot' })
   }
 
   private processPart(chunkJson: any, part: any) {
     const renderedContent =
-        chunkJson.groundingMetadata?.searchEntryPoint?.renderedContent;
+      chunkJson.groundingMetadata?.searchEntryPoint?.renderedContent;
 
     if (part.text) {
       this.isModelThinkingSubject.next(false);
@@ -691,7 +691,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (renderedContent) {
           this.streamingTextMessage.renderedContent =
-              chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
+            chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
         }
 
         if (!this.useSse) {
@@ -705,7 +705,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         if (renderedContent) {
           this.streamingTextMessage.renderedContent =
-              chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
+            chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
         }
 
         if (newChunk == this.streamingTextMessage.text) {
@@ -714,7 +714,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.messages.update((messages) => {
             return messages.map(m => {
               if (m.eventId === oldEventId && m.role === 'bot') {
-                return {...m, eventId: chunkJson.id};
+                return { ...m, eventId: chunkJson.id };
               }
               return m;
             });
@@ -738,14 +738,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.isA2aDataPart(part)) {
         const parsedObject = this.extractA2aDataPartJson(part);
         const isA2uiDataPart = parsedObject && parsedObject.kind === 'data' &&
-            parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
+          parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
         const displayPart =
-            isA2uiDataPart ? {a2ui: parsedObject.data} : {text: parsedObject};
+          isA2uiDataPart ? { a2ui: parsedObject.data } : { text: parsedObject };
         this.isModelThinkingSubject.next(false);
         this.storeEvents(part, chunkJson);
         this.storeMessage(
-            displayPart, chunkJson,
-            chunkJson.author === 'user' ? 'user' : 'bot');
+          displayPart, chunkJson,
+          chunkJson.author === 'user' ? 'user' : 'bot');
         return;
       }
 
@@ -766,7 +766,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       } else {
         this.storeMessage(
-            part, chunkJson, chunkJson.author === 'user' ? 'user' : 'bot');
+          part, chunkJson, chunkJson.author === 'user' ? 'user' : 'bot');
       }
     } else {
       this.isModelThinkingSubject.next(true);
@@ -777,13 +777,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let parts: any = [];
 
     if (!!this.userInput.trim()) {
-      parts.push({text: `${this.userInput}`});
+      parts.push({ text: `${this.userInput}` });
     }
 
     if (this.selectedFiles.length > 0) {
       for (const file of this.selectedFiles) {
         parts.push(
-            await this.localFileService.createMessagePartFromFile(file.file));
+          await this.localFileService.createMessagePartFromFile(file.file));
       }
     }
     return parts;
@@ -791,7 +791,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private processActionArtifact(e: AdkEvent) {
     if (e.actions && e.actions.artifactDelta &&
-        Object.keys(e.actions.artifactDelta).length > 0) {
+      Object.keys(e.actions.artifactDelta).length > 0) {
       this.storeEvents(null, e);
       this.storeMessage(null, e, 'bot');
     }
@@ -799,7 +799,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private processActionStateDelta(e: AdkEvent) {
     if (e.actions && e.actions.stateDelta &&
-        Object.keys(e.actions.stateDelta).length > 0) {
+      Object.keys(e.actions.stateDelta).length > 0) {
       this.currentSessionState = e.actions.stateDelta;
     }
   }
@@ -810,12 +810,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private combineTextParts(parts: Part[]) {
     const result: Part[] = [];
-    let combinedTextPart: Part|undefined;
+    let combinedTextPart: Part | undefined;
 
     for (const part of parts) {
       if (part.text && !part.thought) {
         if (!combinedTextPart) {
-          combinedTextPart = {text: part.text};
+          combinedTextPart = { text: part.text };
           result.push(combinedTextPart);
         } else {
           combinedTextPart.text += part.text;
@@ -841,13 +841,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const dataPartText = atob(fixBase64String(part.inlineData.data));
     return dataPartText.startsWith(A2A_DATA_PART_START_TAG) &&
-        dataPartText.endsWith(A2A_DATA_PART_END_TAG);
+      dataPartText.endsWith(A2A_DATA_PART_END_TAG);
   }
 
   private isA2uiDataPart(part: Part) {
     const parsedObject = this.extractA2aDataPartJson(part);
     return parsedObject && parsedObject.kind === 'data' &&
-        parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
+      parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
   }
 
   private extractA2aDataPartJson(part: Part) {
@@ -857,8 +857,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const dataPartText = atob(fixBase64String(part.inlineData!.data));
     const jsonContent = dataPartText.substring(
-        A2A_DATA_PART_START_TAG.length,
-        dataPartText.length - A2A_DATA_PART_END_TAG.length);
+      A2A_DATA_PART_START_TAG.length,
+      dataPartText.length - A2A_DATA_PART_END_TAG.length);
     let parsedObject: any;
     try {
       parsedObject = JSON.parse(jsonContent);
@@ -873,7 +873,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private combineA2uiDataParts(parts: Part[]): Part[] {
     const result: Part[] = [];
     const combinedA2uiJson: any[] = [];
-    let combinedDataPart: Part|undefined;
+    let combinedDataPart: Part | undefined;
 
     for (const part of parts) {
       if (this.isA2uiDataPart(part)) {
@@ -882,7 +882,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         // order of the a2ui components is preserved.
         if (!combinedDataPart) {
           combinedDataPart = {
-            inlineData: {mimeType: 'text/plain', data: part.inlineData!.data}
+            inlineData: { mimeType: 'text/plain', data: part.inlineData!.data }
           };
           result.push(combinedDataPart);
         }
@@ -902,7 +902,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         data: combinedA2uiJson,
       };
       const inlineData = A2A_DATA_PART_START_TAG +
-          JSON.stringify(a2aDataPartJson) + A2A_DATA_PART_END_TAG;
+        JSON.stringify(a2aDataPartJson) + A2A_DATA_PART_END_TAG;
       combinedDataPart.inlineData.data = btoa(inlineData);
     }
 
@@ -936,12 +936,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private storeMessage(
-      part: any, e: any, role: string, invocationIndex?: number,
+    part: any, e: any, role: string, invocationIndex?: number,
     additionalIndices?: any, prepend: boolean = false) {
     if (e?.longRunningToolIds && e.longRunningToolIds.length > 0) {
       const startIndex = this.longRunningEvents.length;
       this.getAsyncFunctionsFromParts(
-          e.longRunningToolIds, e.content.parts, e.invocationId);
+        e.longRunningToolIds, e.content.parts, e.invocationId);
 
       // Store event ID for later reference
       this.functionCallEventId = e.id;
@@ -950,22 +950,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       for (let i = startIndex; i < this.longRunningEvents.length; i++) {
         const func = this.longRunningEvents[i].function;
         if (func.args.authConfig &&
-            func.args.authConfig.exchangedAuthCredential &&
-            func.args.authConfig.exchangedAuthCredential.oauth2) {
+          func.args.authConfig.exchangedAuthCredential &&
+          func.args.authConfig.exchangedAuthCredential.oauth2) {
           // for OAuth
           const authUri =
-              func.args.authConfig.exchangedAuthCredential.oauth2.authUri;
+            func.args.authConfig.exchangedAuthCredential.oauth2.authUri;
           const updatedAuthUri = this.updateRedirectUri(
-              authUri,
-              this.redirectUri,
+            authUri,
+            this.redirectUri,
           );
           this.openOAuthPopup(updatedAuthUri)
-              .then((authResponseUrl) => {
-                this.sendOAuthResponse(func, authResponseUrl, this.redirectUri);
-              })
-              .catch((error) => {
-                console.error('OAuth Error:', error);
-              });
+            .then((authResponseUrl) => {
+              this.sendOAuthResponse(func, authResponseUrl, this.redirectUri);
+            })
+            .catch((error) => {
+              console.error('OAuth Error:', error);
+            });
           break;  // Handle one OAuth at a time
         }
       }
@@ -993,21 +993,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       actualFinalResponse: e?.actualFinalResponse,
       expectedFinalResponse: e?.expectedFinalResponse,
       invocationIndex: invocationIndex !== undefined ? invocationIndex :
-                                                       undefined,
+        undefined,
       finalResponsePartIndex:
-          additionalIndices?.finalResponsePartIndex !== undefined ?
+        additionalIndices?.finalResponsePartIndex !== undefined ?
           additionalIndices.finalResponsePartIndex :
           undefined,
       toolUseIndex: additionalIndices?.toolUseIndex !== undefined ?
-          additionalIndices.toolUseIndex :
-          undefined,
+        additionalIndices.toolUseIndex :
+        undefined,
     };
 
     // Process the part and add its content to the message
     if (part) {
       if (part.inlineData) {
         const base64Data = this.formatBase64Data(
-            part.inlineData.data, part.inlineData.mimeType);
+          part.inlineData.data, part.inlineData.mimeType);
         message.inlineData = {
           displayName: part.inlineData.displayName,
           data: base64Data,
@@ -1019,15 +1019,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         message.text = part.text;
         message.thought = part.thought ? true : false;
         if (e?.groundingMetadata && e.groundingMetadata.searchEntryPoint &&
-            e.groundingMetadata.searchEntryPoint.renderedContent) {
+          e.groundingMetadata.searchEntryPoint.renderedContent) {
           message.renderedContent =
-              e.groundingMetadata.searchEntryPoint.renderedContent;
+            e.groundingMetadata.searchEntryPoint.renderedContent;
         }
         message.eventId = e?.id;
       } else if (part.functionCall) {
         // Enrich function call with long-running metadata if applicable
         const isLongRunning =
-            e?.longRunningToolIds?.includes(part.functionCall.id);
+          e?.longRunningToolIds?.includes(part.functionCall.id);
         const enrichedFunctionCall = {
           ...part.functionCall,
           ...(isLongRunning && {
@@ -1071,18 +1071,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.messages.update((messages) => {
       // If SSE streaming is enabled and this is a text message with eventId
       if (this.useSse && message.text && message.eventId &&
-          message.role === 'bot') {
+        message.role === 'bot') {
         // Find existing streaming message with the same eventId
         const existingIndex = messages.findIndex(
-            m => m.eventId === message.eventId && m.role === 'bot' &&
-                !m.isLoading);
+          m => m.eventId === message.eventId && m.role === 'bot' &&
+            !m.isLoading);
         if (existingIndex !== -1) {
           const updatedMessages = [...messages];
           updatedMessages[existingIndex] = {
             ...updatedMessages[existingIndex],
             text: message.text,
             renderedContent: message.renderedContent ||
-                updatedMessages[existingIndex].renderedContent
+              updatedMessages[existingIndex].renderedContent
           };
           return updatedMessages;
         }
@@ -1110,16 +1110,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       message.text = part.text;
       message.thought = part.thought ? true : false;
       if (event?.groundingMetadata && event.groundingMetadata.searchEntryPoint &&
-          event.groundingMetadata.searchEntryPoint.renderedContent) {
+        event.groundingMetadata.searchEntryPoint.renderedContent) {
         message.renderedContent =
-            event.groundingMetadata.searchEntryPoint.renderedContent;
+          event.groundingMetadata.searchEntryPoint.renderedContent;
       }
       if (event?.id) {
         message.eventId = event.id;
       }
     } else if (part.inlineData) {
       const base64Data = this.formatBase64Data(
-          part.inlineData.data, part.inlineData.mimeType);
+        part.inlineData.data, part.inlineData.mimeType);
       message.inlineData = {
         displayName: part.inlineData.displayName,
         data: base64Data,
@@ -1154,23 +1154,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private handleArtifactFetchFailure(
-      message: any, artifactId: string, versionId: string) {
+    message: any, artifactId: string, versionId: string) {
     this.openSnackBar(
-        'Failed to fetch artifact data',
-        'OK',
+      'Failed to fetch artifact data',
+      'OK',
     );
     // Remove placeholder message and artifact on failure
     this.messages.update(messages => messages.filter((m) => m !== message));
     this.artifacts = this.artifacts.filter(
-        a => a.id !== artifactId || a.versionId !== versionId);
+      a => a.id !== artifactId || a.versionId !== versionId);
   }
 
   private renderArtifact(
-      artifactId: string, versionId: string, prepend: boolean = false) {
+    artifactId: string, versionId: string, prepend: boolean = false) {
     // If artifact/version already exists, do nothing.
     const artifactExists = this.artifacts.some(
-        (artifact) =>
-            artifact.id === artifactId && artifact.versionId === versionId,
+      (artifact) =>
+        artifact.id === artifactId && artifact.versionId === versionId,
     );
     if (artifactExists) {
       return;
@@ -1202,62 +1202,62 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.artifacts = [...this.artifacts, placeholderArtifact];
 
     this.artifactService
-        .getArtifactVersion(
-            this.userId,
-            this.appName,
-            this.sessionId,
-            artifactId,
-            versionId,
-            )
-        .subscribe({
-          next: (res) => {
-            const {mimeType, data} = res.inlineData ?? {};
-            if (!mimeType || !data) {
-              this.handleArtifactFetchFailure(message, artifactId, versionId);
-              return;
-            }
-            const base64Data = this.formatBase64Data(data, mimeType);
+      .getArtifactVersion(
+        this.userId,
+        this.appName,
+        this.sessionId,
+        artifactId,
+        versionId,
+      )
+      .subscribe({
+        next: (res) => {
+          const { mimeType, data } = res.inlineData ?? {};
+          if (!mimeType || !data) {
+            this.handleArtifactFetchFailure(message, artifactId, versionId);
+            return;
+          }
+          const base64Data = this.formatBase64Data(data, mimeType);
 
-            const mediaType = getMediaTypeFromMimetype(mimeType);
+          const mediaType = getMediaTypeFromMimetype(mimeType);
 
-            const inlineData = {
-              name: this.createDefaultArtifactName(mimeType),
-              data: base64Data,
-              mimeType: mimeType,
-              mediaType,
-            };
+          const inlineData = {
+            name: this.createDefaultArtifactName(mimeType),
+            data: base64Data,
+            mimeType: mimeType,
+            mediaType,
+          };
 
-            this.messages.update(messages => {
-              return messages.map(m => {
-                if (m === message) {
-                  return {
-                    role: 'bot',
-                    inlineData,
-                  };
-                }
-                return m;
-              });
-            });
-
-            // Update placeholder artifact with fetched data.
-            this.artifacts = this.artifacts.map(artifact => {
-              if (artifact.id === artifactId &&
-                  artifact.versionId === versionId) {
+          this.messages.update(messages => {
+            return messages.map(m => {
+              if (m === message) {
                 return {
-                  id: artifactId,
-                  versionId,
-                  data: base64Data,
-                  mimeType,
-                  mediaType,
+                  role: 'bot',
+                  inlineData,
                 };
               }
-              return artifact;
+              return m;
             });
-          },
-          error: (err) => {
-            this.handleArtifactFetchFailure(message, artifactId, versionId);
-          }
-        });
+          });
+
+          // Update placeholder artifact with fetched data.
+          this.artifacts = this.artifacts.map(artifact => {
+            if (artifact.id === artifactId &&
+              artifact.versionId === versionId) {
+              return {
+                id: artifactId,
+                versionId,
+                data: base64Data,
+                mimeType,
+                mediaType,
+              };
+            }
+            return artifact;
+          });
+        },
+        error: (err) => {
+          this.handleArtifactFetchFailure(message, artifactId, versionId);
+        }
+      });
   }
 
   private storeEvents(part: any, e: any) {
@@ -1287,9 +1287,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private sendOAuthResponse(
-      func: any,
-      authResponseUrl: string,
-      redirectUri: string,
+    func: any,
+    authResponseUrl: string,
+    redirectUri: string,
   ) {
     this.longRunningEvents.pop();
     const authResponse: AgentRunRequest = {
@@ -1388,7 +1388,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleAudioRecording() {
     this.isAudioRecording ? this.stopAudioRecording() :
-                            this.startAudioRecording();
+      this.startAudioRecording();
   }
 
   startAudioRecording() {
@@ -1404,11 +1404,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       sessionId: this.sessionId,
     });
     this.messages.update(
-        messages =>
-            [...messages,
-             {role: 'user', text: 'Speaking...'},
-             {role: 'bot', text: 'Speaking...'},
-    ]);
+      messages =>
+        [...messages,
+        { role: 'user', text: 'Speaking...' },
+        { role: 'bot', text: 'Speaking...' },
+        ]);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
 
@@ -1419,7 +1419,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleVideoRecording() {
     this.isVideoRecording ? this.stopVideoRecording() :
-                            this.startVideoRecording();
+      this.startVideoRecording();
   }
 
   startVideoRecording() {
@@ -1439,7 +1439,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       videoContainer,
     });
     this.messages.update(
-        messages => [...messages, {role: 'user', text: 'Speaking...'}]);
+      messages => [...messages, { role: 'user', text: 'Speaking...' }]);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
 
@@ -1453,11 +1453,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getAsyncFunctionsFromParts(
-      pendingIds: any[], parts: any[], invocationId: string) {
+    pendingIds: any[], parts: any[], invocationId: string) {
     for (const part of parts) {
       if (part.functionCall && pendingIds.includes(part.functionCall.id)) {
         this.longRunningEvents.push(
-            {function: part.functionCall, invocationId: invocationId});
+          { function: part.functionCall, invocationId: invocationId });
       }
     }
   }
@@ -1466,7 +1466,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return new Promise((resolve, reject) => {
       // Open OAuth popup
       const popup = this.safeValuesService.windowOpen(
-          window, url, 'oauthPopup', 'width=600,height=700');
+        window, url, 'oauthPopup', 'width=600,height=700');
 
       if (!popup) {
         reject('Popup blocked!');
@@ -1478,7 +1478,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (event.origin !== window.location.origin) {
           return;  // Ignore messages from unknown sources
         }
-        const {authResponseUrl} = event.data;
+        const { authResponseUrl } = event.data;
         if (authResponseUrl) {
           resolve(authResponseUrl);
           window.removeEventListener('message', listener);
@@ -1522,8 +1522,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private resetEventsAndMessages({keepMessages}: {keepMessages?:
-                                                      boolean} = {}) {
+  private resetEventsAndMessages({ keepMessages }: {
+    keepMessages?:
+    boolean
+  } = {}) {
     if (!keepMessages) {
       this.eventData.clear();
       this.messages.set([]);
@@ -1533,29 +1535,29 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadTraceData() {
     this.eventService.getTrace(this.sessionId)
-        .pipe(first(), catchError(() => of([])))
-        .subscribe(res => {
-          this.traceData = res;
-          this.traceService.setEventData(this.eventData);
-          this.traceService.setMessages(this.messages());
-        });
+      .pipe(first(), catchError(() => of([])))
+      .subscribe(res => {
+        this.traceData = res;
+        this.traceService.setEventData(this.eventData);
+        this.traceService.setMessages(this.messages());
+      });
     this.bottomPanelVisible = false;
     this.changeDetectorRef.detectChanges();
   }
 
   private populateMessages(
-      events: any[], reverseOrder: boolean = false,
-      keepOldMessages: boolean = false) {
+    events: any[], reverseOrder: boolean = false,
+    keepOldMessages: boolean = false) {
     this.resetEventsAndMessages({
       keepMessages:
-          keepOldMessages && this.sessionIdOfLoadedMessages === this.sessionId
+        keepOldMessages && this.sessionIdOfLoadedMessages === this.sessionId
     });
 
     events.forEach((event: any) => {
       const isA2aResponse = this.isEventA2aResponse(event);
       const parts = isA2aResponse ?
-          this.combineA2uiDataParts(event.content?.parts) :
-          event.content?.parts || [];
+        this.combineA2uiDataParts(event.content?.parts) :
+        event.content?.parts || [];
       const partsToProcess = reverseOrder ? [...parts].reverse() : parts;
 
       if (event.author === 'user') {
@@ -1589,7 +1591,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         partsToProcess.forEach((part: any) => {
           if (isA2aResponse && this.isA2uiDataPart(part)) {
-            part = {a2ui: this.extractA2aDataPartJson(part).data};
+            part = { a2ui: this.extractA2aDataPartJson(part).data };
           }
           this.processPartIntoMessage(part, event, botMessage);
         });
@@ -1604,7 +1606,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           for (const key in event.actions.artifactDelta) {
             if (event.actions.artifactDelta.hasOwnProperty(key)) {
               this.renderArtifact(
-                  key, event.actions.artifactDelta[key], reverseOrder);
+                key, event.actions.artifactDelta[key], reverseOrder);
             }
           }
         }
@@ -1687,28 +1689,28 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.eventService.getTrace(this.sessionId)
-        .pipe(first(), catchError(() => of([])))
-        .subscribe(res => {
-          this.traceData = res;
-          this.traceService.setEventData(this.eventData);
-          this.traceService.setMessages(this.messages());
-        });
+      .pipe(first(), catchError(() => of([])))
+      .subscribe(res => {
+        this.traceData = res;
+        this.traceService.setEventData(this.eventData);
+        this.traceService.setMessages(this.messages());
+      });
 
     this.sessionService.canEdit(this.userId, session)
-        .pipe(first(), catchError(() => of(true)))
-        .subscribe((canEdit) => {
-          this.chatPanel()?.canEditSession.set(canEdit);
-          this.canEditSession.set(canEdit);
-        });
+      .pipe(first(), catchError(() => of(true)))
+      .subscribe((canEdit) => {
+        this.chatPanel()?.canEditSession.set(canEdit);
+        this.canEditSession.set(canEdit);
+      });
 
     this.featureFlagService.isInfinityMessageScrollingEnabled()
-        .pipe(first())
-        .subscribe((isInfinityMessageScrollingEnabled) => {
-          if (!isInfinityMessageScrollingEnabled) {
-            this.populateMessages(session.events || []);
-          }
-          this.loadTraceData();
-        });
+      .pipe(first())
+      .subscribe((isInfinityMessageScrollingEnabled) => {
+        if (!isInfinityMessageScrollingEnabled) {
+          this.populateMessages(session.events || []);
+        }
+        this.loadTraceData();
+      });
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {
@@ -1729,13 +1731,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         let toolUseIndex = 0;
         for (const toolUse of invocation.intermediateData.toolUses) {
           const functionCallPart = {
-            functionCall: {name: toolUse.name, args: toolUse.args},
+            functionCall: { name: toolUse.name, args: toolUse.args },
           };
           this.storeMessage(
-              functionCallPart, null, 'bot', invocationIndex, {toolUseIndex});
+            functionCallPart, null, 'bot', invocationIndex, { toolUseIndex });
           toolUseIndex++;
 
-          const functionResponsePart = {functionResponse: {name: toolUse.name}};
+          const functionResponsePart = { functionResponse: { name: toolUse.name } };
           this.storeMessage(functionResponsePart, null, 'bot');
         }
       }
@@ -1744,7 +1746,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         let finalResponsePartIndex = 0;
         for (const part of invocation.finalResponse.parts) {
           this.storeMessage(
-              part, null, 'bot', invocationIndex, {finalResponsePartIndex});
+            part, null, 'bot', invocationIndex, { finalResponsePartIndex });
           finalResponsePartIndex++;
         }
       }
@@ -1794,21 +1796,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.updatedEvalCase = structuredClone(this.evalCase!);
         this.updatedEvalCase!.conversation[message.invocationIndex]
-            .intermediateData!.toolUses![message.toolUseIndex]
-            .args = result;
+          .intermediateData!.toolUses![message.toolUseIndex]
+          .args = result;
       }
     });
   }
 
   protected saveEvalCase() {
     this.evalService
-        .updateEvalCase(
-            this.appName, this.evalSetId, this.updatedEvalCase!.evalId,
-            this.updatedEvalCase!)
-        .subscribe((res) => {
-          this.openSnackBar('Eval case updated', 'OK');
-          this.resetEditEvalCaseVars();
-        });
+      .updateEvalCase(
+        this.appName, this.evalSetId, this.updatedEvalCase!.evalId,
+        this.updatedEvalCase!)
+      .subscribe((res) => {
+        this.openSnackBar('Eval case updated', 'OK');
+        this.resetEditEvalCaseVars();
+      });
   }
 
   protected cancelEditEvalCase() {
@@ -1833,11 +1835,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isEvalCaseEditing.set(false);
     message.isEditing = false;
     message.text =
-        this.userEditEvalCaseMessage ? this.userEditEvalCaseMessage : ' ';
+      this.userEditEvalCaseMessage ? this.userEditEvalCaseMessage : ' ';
 
     this.updatedEvalCase = structuredClone(this.evalCase!);
     this.updatedEvalCase!.conversation[message.invocationIndex]
-        .finalResponse!.parts![message.finalResponsePartIndex] = {
+      .finalResponse!.parts![message.finalResponsePartIndex] = {
       text: this.userEditEvalCaseMessage
     };
 
@@ -1859,7 +1861,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.updatedEvalCase = structuredClone(this.evalCase!);
     this.updatedEvalCase!.conversation[message.invocationIndex]
-        .finalResponse!.parts!.splice(message.finalResponsePartIndex, 1);
+      .finalResponse!.parts!.splice(message.finalResponsePartIndex, 1);
   }
 
   protected editEvalCase() {
@@ -1911,7 +1913,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       for (let i = 0; i < input.files.length; i++) {
         const file = input.files[i];
         const url = this.safeValuesService.createObjectUrl(file);
-        this.selectedFiles.push({file, url});
+        this.selectedFiles.push({ file, url });
       }
     }
     input.value = '';
@@ -1928,11 +1930,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   enterBuilderMode() {
     const url = this.router
-                    .createUrlTree([], {
-                      queryParams: {mode: 'builder'},
-                      queryParamsHandling: 'merge',
-                    })
-                    .toString();
+      .createUrlTree([], {
+        queryParams: { mode: 'builder' },
+        queryParamsHandling: 'merge',
+      })
+      .toString();
     this.location.replaceState(url);
     this.isBuilderMode.set(true);
 
@@ -1959,11 +1961,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected exitBuilderMode() {
     const url = this.router
-                    .createUrlTree([], {
-                      queryParams: {mode: null},
-                      queryParamsHandling: 'merge',
-                    })
-                    .toString();
+      .createUrlTree([], {
+        queryParams: { mode: null },
+        queryParamsHandling: 'merge',
+      })
+      .toString();
     this.location.replaceState(url);
     this.isBuilderMode.set(false);
     this.agentBuilderService.clear();
@@ -1977,14 +1979,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.apps$.pipe(take(1)).subscribe((apps) => {
       const dialogRef = this.dialog.open(AddItemDialogComponent, {
         width: '600px',
-        data: {existingAppNames: apps ?? []},
+        data: { existingAppNames: apps ?? [] },
       });
     });
   }
 
   openAgentStructureGraphDialog(): void {
     const dialogRef = this.dialog.open(AgentStructureGraphDialogComponent, {
-      width: '800px',
+      width: '1000px',
       maxWidth: '90vw',
       maxHeight: '90vh',
       data: {
@@ -2003,55 +2005,55 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let filter = undefined;
     if (this.isEventFilteringEnabled() && this.selectedEvent.invocationId &&
-        (this.selectedEvent.timestamp ||
-         this.selectedEvent.timestampInMillis)) {
+      (this.selectedEvent.timestamp ||
+        this.selectedEvent.timestampInMillis)) {
       filter = {
         invocationId: this.selectedEvent.invocationId,
         timestamp:
-            this.selectedEvent.timestamp ?? this.selectedEvent.timestampInMillis
+          this.selectedEvent.timestamp ?? this.selectedEvent.timestampInMillis
       };
     }
 
-    const eventTraceParam = {id: this.selectedEvent.id, ...filter};
+    const eventTraceParam = { id: this.selectedEvent.id, ...filter };
     this.uiStateService.setIsEventRequestResponseLoading(true);
     this.eventService.getEventTrace(eventTraceParam)
-        .subscribe(
-            (res) => {
-              if (res[this.llmRequestKey]) {
-                this.llmRequest = JSON.parse(res[this.llmRequestKey]);
-              }
-              if (res[this.llmResponseKey]) {
-                this.llmResponse = JSON.parse(res[this.llmResponseKey]);
-              }
-              this.uiStateService.setIsEventRequestResponseLoading(false);
-            },
-            () => {
-              this.uiStateService.setIsEventRequestResponseLoading(false);
-            });
-    this.eventService
-        .getEvent(
-            this.userId,
-            this.appName,
-            this.sessionId,
-            this.selectedEvent.id,
-            )
-        .subscribe(async (res) => {
-          if (!res.dotSrc) {
-            this.renderedEventGraph = undefined;
-            return;
+      .subscribe(
+        (res) => {
+          if (res[this.llmRequestKey]) {
+            this.llmRequest = JSON.parse(res[this.llmRequestKey]);
           }
-          const svg = await this.graphService.render(res.dotSrc);
-          this.rawSvgString = svg;
-          this.renderedEventGraph =
-              this.safeValuesService.bypassSecurityTrustHtml(svg);
+          if (res[this.llmResponseKey]) {
+            this.llmResponse = JSON.parse(res[this.llmResponseKey]);
+          }
+          this.uiStateService.setIsEventRequestResponseLoading(false);
+        },
+        () => {
+          this.uiStateService.setIsEventRequestResponseLoading(false);
         });
+    this.eventService
+      .getEvent(
+        this.userId,
+        this.appName,
+        this.sessionId,
+        this.selectedEvent.id,
+      )
+      .subscribe(async (res) => {
+        if (!res.dotSrc) {
+          this.renderedEventGraph = undefined;
+          return;
+        }
+        const svg = await this.graphService.render(res.dotSrc);
+        this.rawSvgString = svg;
+        this.renderedEventGraph =
+          this.safeValuesService.bypassSecurityTrustHtml(svg);
+      });
   }
 
   deleteSession(session: string) {
     const dialogData: DeleteSessionDialogData = {
       title: 'Confirm delete',
       message:
-          `Are you sure you want to delete this session ${this.sessionId}?`,
+        `Are you sure you want to delete this session ${this.sessionId}?`,
       confirmButtonText: 'Delete',
       cancelButtonText: 'Cancel',
     };
@@ -2064,14 +2066,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.sessionService.deleteSession(this.userId, this.appName, session)
-            .subscribe((res) => {
-              const nextSession = this.sessionTab?.refreshSession(session);
-              if (nextSession) {
-                this.sessionTab?.getSession(nextSession.id);
-              } else {
-                window.location.reload();
-              }
-            });
+          .subscribe((res) => {
+            const nextSession = this.sessionTab?.refreshSession(session);
+            if (nextSession) {
+              this.sessionTab?.getSession(nextSession.id);
+            } else {
+              window.location.reload();
+            }
+          });
       }
     });
   }
@@ -2087,7 +2089,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
-        this.selectedAppControl.setValue(app, {emitEvent: false});
+        this.selectedAppControl.setValue(app, { emitEvent: false });
         this.selectApp(app);
         this.agentService.getAppInfo(app).subscribe(info => {
           this.agentGraphData = info;
@@ -2111,32 +2113,32 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private updateSelectedAppUrl() {
     this.selectedAppControl.valueChanges
-        .pipe(distinctUntilChanged(), filter(Boolean))
-        .subscribe((app: string) => {
-          this.selectApp(app);
+      .pipe(distinctUntilChanged(), filter(Boolean))
+      .subscribe((app: string) => {
+        this.selectApp(app);
 
-          // Navigate if selected app changed.
-          const selectedAgent = this.activatedRoute.snapshot.queryParams['app'];
-          if (app === selectedAgent) {
-            return;
-          }
-          this.router.navigate([], {
-            queryParams: {'app': app, 'mode': null},
-            queryParamsHandling: 'merge',
-          });
+        // Navigate if selected app changed.
+        const selectedAgent = this.activatedRoute.snapshot.queryParams['app'];
+        if (app === selectedAgent) {
+          return;
+        }
+        this.router.navigate([], {
+          queryParams: { 'app': app, 'mode': null },
+          queryParamsHandling: 'merge',
         });
+      });
   }
 
   private updateSelectedSessionUrl() {
     const url = this.router
-                    .createUrlTree([], {
-                      queryParams: {
-                        'session': this.sessionId,
-                        'userId': this.userId,
-                      },
-                      queryParamsHandling: 'merge',
-                    })
-                    .toString();
+      .createUrlTree([], {
+        queryParams: {
+          'session': this.sessionId,
+          'userId': this.userId,
+        },
+        queryParamsHandling: 'merge',
+      })
+      .toString();
     this.location.replaceState(url);
   }
 
@@ -2181,15 +2183,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private getIndexOfKeyInMap(key: string): number|undefined {
+  private getIndexOfKeyInMap(key: string): number | undefined {
     let index = 0;
     const mapOrderPreservingSort = (a: any, b: any): number =>
-        0;  // Simple compare function
+      0;  // Simple compare function
 
     const sortedKeys = Array.from(this.eventData.keys())
-                           .sort(
-                               mapOrderPreservingSort,
-                           );
+      .sort(
+        mapOrderPreservingSort,
+      );
 
     for (const k of sortedKeys) {
       if (k === key) {
@@ -2200,14 +2202,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return undefined;  // Key not found
   }
 
-  private getKeyAtIndexInMap(index: number): string|undefined {
+  private getKeyAtIndexInMap(index: number): string | undefined {
     const mapOrderPreservingSort = (a: any, b: any): number =>
-        0;  // Simple compare function
+      0;  // Simple compare function
 
     const sortedKeys = Array.from(this.eventData.keys())
-                           .sort(
-                               mapOrderPreservingSort,
-                           );
+      .sort(
+        mapOrderPreservingSort,
+      );
 
     if (index >= 0 && index < sortedKeys.length) {
       return sortedKeys[index];
@@ -2227,7 +2229,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.safeValuesService.windowOpen(window, url, '_blank');
   }
 
-  openViewImageDialog(imageData: string|null) {
+  openViewImageDialog(imageData: string | null) {
     const dialogRef = this.dialog.open(ViewImageDialogComponent, {
       maxWidth: '90vw',
       maxHeight: '90vh',
@@ -2247,11 +2249,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected exportSession() {
     this.sessionService.getSession(this.userId, this.appName, this.sessionId)
-        .subscribe((res) => {
-          console.log(res);
-          this.downloadService.downloadObjectAsJson(
-              res, `session-${this.sessionId}.json`);
-        });
+      .subscribe((res) => {
+        console.log(res);
+        this.downloadService.downloadObjectAsJson(
+          res, `session-${this.sessionId}.json`);
+      });
   }
 
   updateState() {
@@ -2298,19 +2300,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (e.target?.result) {
           try {
             const sessionData =
-                JSON.parse(e.target.result as string) as Session;
+              JSON.parse(e.target.result as string) as Session;
             if (!sessionData.userId || !sessionData.appName ||
-                !sessionData.events) {
+              !sessionData.events) {
               this.openSnackBar('Invalid session file format', 'OK');
               return;
             }
             this.sessionService
-                .importSession(
-                    sessionData.userId, sessionData.appName, sessionData.events)
-                .subscribe((res) => {
-                  this.openSnackBar('Session imported', 'OK');
-                  this.sessionTab?.refreshSession();
-                });
+              .importSession(
+                sessionData.userId, sessionData.appName, sessionData.events)
+              .subscribe((res) => {
+                this.openSnackBar('Session imported', 'OK');
+                this.sessionTab?.refreshSession();
+              });
           } catch (error) {
             this.openSnackBar('Error parsing session file', 'OK');
           }

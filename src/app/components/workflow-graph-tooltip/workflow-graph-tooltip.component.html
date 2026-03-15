@@ -46,6 +46,7 @@
       view="auto"
       [nodes]="graphNodes()"
       [edges]="graphEdges()"
+      [connection]="connection"
       [background]="{ type: 'dots', color: '#424242', size: 1, gap: 10 }"
     >
       <ng-template nodeHtml let-ctx>
@@ -54,7 +55,10 @@
              [style.border-color]="getStatusColor(ctx.node.data().status)"
              (click)="ctx.node.data().hasNestedStructure ? navigateIntoNode(ctx.node.data().name) : null"
              selectable>
-          <handle type="target" position="top" />
+          <handle type="source" position="top" id="top" />
+          <handle type="source" position="right" id="right" />
+          <handle type="source" position="bottom" id="bottom" />
+          <handle type="source" position="left" id="left" />
           <div class="node-header">
             <mat-icon class="node-type-icon">
               {{ getNodeTypeIcon(ctx.node.data().type) }}
@@ -76,7 +80,6 @@
           @if (ctx.node.data().retryCount && ctx.node.data().retryCount > 0) {
             <div class="node-retry">Retry: {{ ctx.node.data().retryCount }}</div>
           }
-          <handle type="source" position="bottom" />
         </div>
       </ng-template>
 

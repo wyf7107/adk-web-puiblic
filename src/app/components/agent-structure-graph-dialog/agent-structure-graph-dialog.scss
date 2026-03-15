@@ -16,13 +16,15 @@
 
 h2[mat-dialog-title] {
   color: var(--mdc-dialog-supporting-text-color) !important;
+  margin: 0 0 16px 0 !important;
+  font-size: 20px !important;
+  font-weight: 500 !important;
 }
 
 mat-dialog-content {
   color: var(--mdc-dialog-supporting-text-color) !important;
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow: hidden;
 }
 
@@ -31,9 +33,10 @@ button[mat-button] {
 }
 
 .dialog-content {
-  min-width: 700px;
-  min-height: 500px;
-  height: 500px;
+  width: 1000px;
+  height: 700px;
+  max-width: 90vw;
+  max-height: 75vh;
   padding: 20px;
   overflow: hidden;
   display: flex;
@@ -50,6 +53,12 @@ button[mat-button] {
 .agent-info {
   margin: 0 0 8px 0;
   font-size: 14px;
+  color: var(--mdc-dialog-supporting-text-color);
+
+  strong {
+    font-weight: 600;
+    color: var(--mdc-dialog-supporting-text-color);
+  }
 }
 
 .breadcrumb-nav {
@@ -86,7 +95,7 @@ button[mat-button] {
 
 .vflow-container {
   flex: 1;
-  min-height: 400px;
+  min-height: 700px;
   border: 1px solid var(--mdc-dialog-supporting-text-color, rgba(255, 255, 255, 0.2));
   border-radius: 8px;
   overflow: hidden;

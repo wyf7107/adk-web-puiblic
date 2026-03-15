@@ -19,7 +19,7 @@ import {Component, Input, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
-import {Vflow, Edge, HtmlTemplateDynamicNode} from 'ngx-vflow';
+import {Vflow, Edge, HtmlTemplateDynamicNode, ConnectionSettings} from 'ngx-vflow';
 import {NodeState, NodeStatus} from '../../core/models/types';
 import {calculateGraphLayout, getNodeName, getNodeTypeIcon, getNodeTypeLabel} from '../../utils/graph-layout.utils';
 import {buildNavigationStackFromPath, findNodeInLevel, getCurrentPath, getNodesAtLevel, hasNestedStructure, NavigationStackItem, DEFAULT_LAYOUT_CONFIG} from '../../utils/graph-navigation.utils';
@@ -59,6 +59,9 @@ export class WorkflowGraphTooltipComponent implements OnInit {
   public graphNodes = signal<HtmlTemplateDynamicNode<WorkflowNodeData>[]>([]);
   public graphEdges = signal<Edge[]>([]);
   public NodeStatus = NodeStatus;
+  public connection: ConnectionSettings = {
+    mode: 'loose',
+  };
 
   // Navigation state
   private fullAgentData: any = null;
@@ -162,6 +165,7 @@ export class WorkflowGraphTooltipComponent implements OnInit {
               source: fromName,
               target: toName,
               type: 'template',
+              floating: true,
               data: { isActive },
               markers: {
                 end: {
@@ -261,6 +265,7 @@ export class WorkflowGraphTooltipComponent implements OnInit {
           source: coordinatorName,
           target: nodeName,
           type: 'template',
+          floating: true,
           data: { isActive },
           markers: {
             end: {
@@ -324,6 +329,7 @@ export class WorkflowGraphTooltipComponent implements OnInit {
           source: nodeState.triggered_by,
           target: nodeName,
           type: 'template',
+          floating: true,
           data: { isActive },
           markers: {
             end: {

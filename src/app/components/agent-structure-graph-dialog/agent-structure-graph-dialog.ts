@@ -20,7 +20,7 @@ import {MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDial
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {Vflow, Edge, HtmlTemplateDynamicNode} from 'ngx-vflow';
+import {Vflow, Edge, HtmlTemplateDynamicNode, ConnectionSettings} from 'ngx-vflow';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {calculateGraphLayout, getNodeName, getNodeTypeIcon, getNodeTypeLabel} from '../../utils/graph-layout.utils';
 import {findNodeInLevel, hasNestedStructure, NavigationStackItem, DEFAULT_LAYOUT_CONFIG} from '../../utils/graph-navigation.utils';
@@ -63,6 +63,9 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   public edges = signal<Edge[]>([]);
   public isLoading = signal<boolean>(true);
   public errorMessage = signal<string | null>(null);
+  public connection: ConnectionSettings = {
+    mode: 'loose',
+  };
 
   // Navigation state
   private fullAgentData: any = null;
@@ -159,6 +162,7 @@ export class AgentStructureGraphDialogComponent implements OnInit {
               source: fromName,
               target: toName,
               type: 'template',
+              floating: true,
               markers: {
                 end: {
                   type: 'arrow-closed',
@@ -248,6 +252,7 @@ export class AgentStructureGraphDialogComponent implements OnInit {
           source: coordinator.name,
           target: node.name,
           type: 'template',
+          floating: true,
           markers: {
             end: {
               type: 'arrow-closed',

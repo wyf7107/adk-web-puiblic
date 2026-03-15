@@ -187,7 +187,6 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     edges: Edge[]
   ): void {
     // For LlmAgent/Mesh: nodes array contains coordinator + sub-agents
-    // Layout: coordinator at top, sub-agents in row below
     const coordinatorIndex = meshNodes.findIndex(n =>
       (n.name === meshNodes[0]?.name) || n.type === 'coordinator'
     );
@@ -198,10 +197,8 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     const startY = 100;
     const ySpacing = 200;
     const xSpacing = 300;
-
-    // Calculate center X based on number of sub-agents
-    const totalWidth = (subAgents.length - 1) * xSpacing;
-    const startX = 400 - totalWidth / 2;
+    const maxNodesPerRow = 6;
+    const rowSpacing = 120;
 
     // Add coordinator node at top center
     if (coordinator) {
@@ -223,11 +220,27 @@ export class AgentStructureGraphDialogComponent implements OnInit {
       });
     }
 
-    // Add sub-agent nodes in a row below coordinator
+    // Add sub-agent nodes in grid layout
     subAgents.forEach((node: any, index: number) => {
-      const x = startX + (index * xSpacing);
-      const y = startY + ySpacing;
       const hasNested = hasNestedStructure(node);
+
+      let x: number, y: number;
+      if (subAgents.length <= maxNodesPerRow) {
+        // Single row for few nodes
+        const totalWidth = (subAgents.length - 1) * xSpacing;
+        const rowStartX = 400 - totalWidth / 2;
+        x = rowStartX + (index * xSpacing);
+        y = startY + ySpacing;
+      } else {
+        // Grid layout for many nodes
+        const row = Math.floor(index / maxNodesPerRow);
+        const col = index % maxNodesPerRow;
+        const nodesInThisRow = Math.min(maxNodesPerRow, subAgents.length - (row * maxNodesPerRow));
+        const totalWidth = (nodesInThisRow - 1) * xSpacing;
+        const rowStartX = 400 - totalWidth / 2;
+        x = rowStartX + (col * xSpacing);
+        y = startY + ySpacing + (row * rowSpacing);
+      }
 
       nodes.push({
         id: node.name,

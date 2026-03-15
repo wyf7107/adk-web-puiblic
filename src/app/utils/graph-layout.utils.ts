@@ -88,15 +88,18 @@ export function calculateGraphLayout(
   });
 
   // Calculate levels using BFS - use minimum level for better fan-out visualization
+  // This handles cycles by ignoring back edges
   const levels: Map<string, number> = new Map();
   const queue: string[] = [];
   const inDegree = new Map(inDegreeMap); // Copy for processing
+  const visited = new Set<string>();
 
   // Start with nodes that have no incoming edges
   nodeNames.forEach((name: string) => {
     if (inDegree.get(name) === 0) {
       queue.push(name);
       levels.set(name, 0);
+      visited.add(name);
     }
   });
 
@@ -106,9 +109,14 @@ export function calculateGraphLayout(
     const currentLevel = levels.get(current) || 0;
 
     adjacencyList.get(current)?.forEach((neighbor) => {
+      // Ignore back edges (edges to already visited nodes at same or earlier level)
+      const existingLevel = levels.get(neighbor);
+      if (existingLevel !== undefined && existingLevel <= currentLevel) {
+        return; // Skip back edge
+      }
+
       // Set level based on first parent (minimum level)
       const newLevel = currentLevel + 1;
-      const existingLevel = levels.get(neighbor);
       if (existingLevel === undefined) {
         levels.set(neighbor, newLevel);
       }
@@ -118,11 +126,21 @@ export function calculateGraphLayout(
       inDegree.set(neighbor, currentInDegree - 1);
 
       // Add to queue when all parents processed
-      if (inDegree.get(neighbor) === 0) {
+      if (inDegree.get(neighbor) === 0 && !visited.has(neighbor)) {
         queue.push(neighbor);
+        visited.add(neighbor);
       }
     });
   }
+
+  // Handle unreached nodes (due to cycles) - add them sequentially
+  let maxLevel = Math.max(...Array.from(levels.values()), 0);
+  nodeNames.forEach((name: string) => {
+    if (!levels.has(name)) {
+      levels.set(name, maxLevel + 1);
+      maxLevel++;
+    }
+  });
 
   // Group nodes by level
   const nodesByLevel: Map<number, string[]> = new Map();

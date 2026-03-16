@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
+import { SAFE_VALUES_SERVICE } from '../../core/services/interfaces/safevalues';
 
-import {Component, Input, inject} from '@angular/core';
-import {SafeHtml} from '@angular/platform-browser';
+import { Component, Input, inject } from '@angular/core';
+import { SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-json-tooltip',
@@ -37,10 +37,11 @@ import {SafeHtml} from '@angular/platform-browser';
       max-width: 800px;
     }
     .tooltip-title {
-      font-weight: 600;
-      font-size: 13px;
-      margin-bottom: 8px;
-      padding-bottom: 6px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
       border-bottom: 1px solid rgba(138, 180, 248, 0.3);
       color: rgba(138, 180, 248, 0.9);
     }

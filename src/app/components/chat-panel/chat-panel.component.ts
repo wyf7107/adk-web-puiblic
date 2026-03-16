@@ -561,17 +561,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
-    let nodePath = event?.nodeInfo?.path || '';
-
-    if (nodePath === 'root_agent') {
-      return nodePath;
-    }
-
-    if (nodePath && nodePath.startsWith('root_agent/')) {
-      nodePath = nodePath.substring('root_agent/'.length);
-    }
-
-    return nodePath;
+    return event?.author || '';
   }
 
   getEventOutputResultText(messageIndex: number): string {

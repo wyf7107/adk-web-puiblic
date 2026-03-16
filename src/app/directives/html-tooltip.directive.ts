@@ -26,6 +26,7 @@ import {JsonTooltipComponent} from '../components/json-tooltip/json-tooltip.comp
 })
 export class JsonTooltipDirective implements OnDestroy {
   @Input('appJsonTooltip') json: string = '';
+  @Input('appJsonTooltipTitle') title: string = '';
 
   private overlayRef: OverlayRef | null = null;
   private readonly overlay = inject(Overlay);
@@ -54,6 +55,7 @@ export class JsonTooltipDirective implements OnDestroy {
     const tooltipPortal = new ComponentPortal(JsonTooltipComponent);
     const tooltipRef = this.overlayRef.attach(tooltipPortal);
     tooltipRef.instance.json = this.json;
+    tooltipRef.instance.title = this.title;
   }
 
   @HostListener('mouseleave')

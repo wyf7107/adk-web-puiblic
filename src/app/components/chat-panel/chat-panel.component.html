@@ -280,6 +280,7 @@
                 [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
                 class="function-event-button"
                 [appJsonTooltip]="functionCall.args ? JSON.stringify(functionCall.args) : ''"
+                [appJsonTooltipTitle]="'Function Call'"
               >
                 <mat-icon>bolt</mat-icon>
                 {{ functionCall.name }}
@@ -305,7 +306,8 @@
             } @else {
               <button mat-stroked-button [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
                 class="function-event-button"
-                [appJsonTooltip]="functionResponse.response ? JSON.stringify(functionResponse.response) : ''">
+                [appJsonTooltip]="functionResponse.response ? JSON.stringify(functionResponse.response) : ''"
+                [appJsonTooltipTitle]="'Function Response'">
                 <mat-icon>check</mat-icon>
                 {{ functionResponse.name }}
               </button>
@@ -318,6 +320,7 @@
           [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
           class="function-event-button state-delta-button"
           [appJsonTooltip]="getStateDeltaTooltip(i)"
+          [appJsonTooltipTitle]="'State Update'"
         >
           <mat-icon>data_object</mat-icon>
           State: {{ getStateDeltaKeys(i) }}
@@ -329,6 +332,7 @@
           [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
           class="function-event-button artifact-delta-button"
           [appJsonTooltip]="getArtifactDeltaTooltip(i)"
+          [appJsonTooltipTitle]="'Artifact'"
         >
           <mat-icon>attachment</mat-icon>
           Artifact
@@ -340,6 +344,7 @@
           [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
           class="function-event-button output-chip"
           [appJsonTooltip]="getEventOutputDataTooltip(i)"
+          [appJsonTooltipTitle]="'Node Output'"
         >
           <mat-icon>output</mat-icon>
           {{ getEventOutputDataNodePath(i) }}: {{ getEventOutputResultText(i) }}
@@ -351,6 +356,7 @@
           [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
           class="function-event-button"
           [appJsonTooltip]="getEventRouteTooltip(i)"
+          [appJsonTooltipTitle]="'Route'"
         >
           <mat-icon>route</mat-icon>
           {{ getEventRouteText(i) }}

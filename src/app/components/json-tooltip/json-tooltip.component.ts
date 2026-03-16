@@ -21,7 +21,12 @@ import {SafeHtml} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-json-tooltip',
-  template: `<div [innerHTML]="formattedJson"></div>`,
+  template: `
+    @if (title) {
+      <div class="tooltip-title">{{ title }}</div>
+    }
+    <div [innerHTML]="formattedJson"></div>
+  `,
   styles: [`
     :host {
       display: block;
@@ -31,10 +36,19 @@ import {SafeHtml} from '@angular/platform-browser';
       white-space: pre-wrap;
       max-width: 800px;
     }
+    .tooltip-title {
+      font-weight: 600;
+      font-size: 13px;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(138, 180, 248, 0.3);
+      color: rgba(138, 180, 248, 0.9);
+    }
   `],
   standalone: true,
 })
 export class JsonTooltipComponent {
+  @Input() title: string = '';
   @Input() set json(value: string) {
     this.formattedJson = this.syntaxHighlight(value);
   }

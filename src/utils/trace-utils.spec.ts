@@ -103,7 +103,8 @@ describe('trace-utils', () => {
         attributes: {}
       };
       const normalized = normalizeSpan(span);
-      expect(normalized.attributes['gcp.vertex.agent.llm_request']).toBeUndefined();
+      expect(normalized.attributes)
+          .not.toContain('gcp.vertex.agent.llm_request');
     });
 
     it('should extract output from logs for non-execute_tool spans', () => {
@@ -138,8 +139,10 @@ describe('trace-utils', () => {
         attributes: {}
       };
       const normalized = normalizeSpan(span);
-      expect(normalized.attributes['gcp.vertex.agent.llm_request']).toBeUndefined();
-      expect(normalized.attributes['gcp.vertex.agent.llm_response']).toBeUndefined();
+      expect(normalized.attributes)
+          .not.toContain('gcp.vertex.agent.llm_request');
+      expect(normalized.attributes)
+          .not.toContain('gcp.vertex.agent.llm_response');
     });
   });
 

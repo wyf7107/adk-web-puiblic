@@ -20,6 +20,9 @@ import { EventTelemetry, Log, Span } from "../app/core/models/Trace";
 const GCP_VERTEX_AGENT_TOOL_CALL_ARGS = 'gcp.vertex.agent.tool_call_args';
 const GCP_VERTEX_AGENT_TOOL_RESPONSE = 'gcp.vertex.agent.tool_response';
 
+const GCP_VERTEX_AGENT_LLM_REQUEST = 'gcp.vertex.agent.llm_request'
+const GCP_VERTEX_AGENT_LLM_RESPONSE = 'gcp.vertex.agent.llm_response'
+
 const EXECUTE_TOOL = 'execute_tool';
 const GENERATE_CONTENT = 'generate_content';
 
@@ -32,14 +35,23 @@ const FUNCTION_RESPONSE = 'functionResponse';
 // - semconv `execute_tool` spans
 // - legacy `call_llm` spans
 export const normalizeSpan = (span: Span): Span => {
-  return {
+  const normalized = {
     ...span,
     attributes: {
       ...span.attributes,
-      'gcp.vertex.agent.llm_request': span.attributes['gcp.vertex.agent.llm_request'] ?? extractInputFromSpan(span),
-      'gcp.vertex.agent.llm_response': span.attributes['gcp.vertex.agent.llm_response'] ?? extractOutputFromSpan(span),
     }
   };
+  const request = span.attributes[GCP_VERTEX_AGENT_LLM_REQUEST] ??
+      extractInputFromSpan(span)
+  const response = span.attributes[GCP_VERTEX_AGENT_LLM_RESPONSE] ??
+      extractOutputFromSpan(span)
+  if (request !== undefined) {
+    normalized.attributes[GCP_VERTEX_AGENT_LLM_REQUEST] = request
+  }
+  if (response !== undefined) {
+    normalized.attributes[GCP_VERTEX_AGENT_LLM_RESPONSE] = response
+  }
+  return normalized;
 };
 
 const extractInputFromSpan = (span: Span): {[key: string]: any} | string | undefined => {
@@ -155,11 +167,20 @@ const stringFromLogBody = (log: Log): string => {
 // - semconv `execute_tool` spans
 // - legacy `call_llm` spans
 export const normalizeEventTelemetry = (telemetry: EventTelemetry) => {
-  return {
+  const request =
+      telemetry[GCP_VERTEX_AGENT_LLM_REQUEST] ?? extractEventInput(telemetry)
+  const response =
+      telemetry[GCP_VERTEX_AGENT_LLM_RESPONSE] ?? extractEventOutput(telemetry)
+  const normalizedEvent = {
     ...telemetry,
-    'gcp.vertex.agent.llm_request': telemetry['gcp.vertex.agent.llm_request'] ?? extractEventInput(telemetry),
-    'gcp.vertex.agent.llm_response': telemetry['gcp.vertex.agent.llm_response'] ?? extractEventOutput(telemetry),
   };
+  if (request !== undefined) {
+    normalizedEvent[GCP_VERTEX_AGENT_LLM_REQUEST] = request;
+  }
+  if (response !== undefined) {
+    normalizedEvent[GCP_VERTEX_AGENT_LLM_RESPONSE] = response;
+  }
+  return normalizedEvent;
 };
 
 const extractEventInput = (telemetry: EventTelemetry): string | undefined => {

@@ -74,6 +74,13 @@
 
 .state-delta-button {
   background-color: var(--chat-panel-function-event-button-background-color) !important;
+  max-width: 300px !important;
+}
+
+:host ::ng-deep .state-delta-button .mdc-button__label {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 .artifact-delta-button {
@@ -87,21 +94,13 @@
 }
 
 .output-chip {
-  max-width: 400px !important;
-
-  :host ::ng-deep .mdc-button__label {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    max-width: 350px !important;
-  }
+  max-width: 300px !important;
 }
 
 :host ::ng-deep .output-chip .mdc-button__label {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-  max-width: 350px !important;
 }
 
 .event-chips-container {
@@ -553,7 +552,7 @@ button.video-rec-btn {
 
 .readme-container {
   max-width: 900px;
-  margin: 60px auto;
+  margin: 0px auto;
   background-color: var(--chat-panel-message-background-color);
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -561,35 +560,8 @@ button.video-rec-btn {
   overflow: hidden;
 }
 
-.readme-header {
-  padding: 32px 40px 24px;
-  background: linear-gradient(135deg, rgba(138, 180, 248, 0.1) 0%, rgba(138, 180, 248, 0.05) 100%);
-}
-
-.agent-title {
-  font-size: 32px;
-  font-weight: 600;
-  margin: 0;
-  color: var(--chat-panel-message-text-color);
-  letter-spacing: -0.5px;
-}
-
-.readme-subtitle {
-  font-size: 14px;
-  margin: 8px 0 0;
-  color: rgba(138, 180, 248, 0.9);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.readme-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(138, 180, 248, 0.3) 50%, transparent 100%);
-}
-
 .readme-content {
-  padding: 32px 40px;
+  padding: 20px 40px 40px 40px;
   font-size: 14px;
   line-height: 1.8;
   color: var(--chat-panel-message-text-color);

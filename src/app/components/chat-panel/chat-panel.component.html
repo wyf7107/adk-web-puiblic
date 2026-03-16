@@ -25,11 +25,6 @@
   <div #videoContainer></div>
   @if (messages.length === 0 && agentReadme) {
     <div class="readme-container">
-      <div class="readme-header">
-        <h1 class="agent-title">{{ appName }}</h1>
-        <p class="readme-subtitle">Agent Documentation</p>
-      </div>
-      <div class="readme-divider"></div>
       <div class="readme-content">
         <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: agentReadme, thought: false}"></ng-container>
       </div>

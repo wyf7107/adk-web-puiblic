@@ -184,12 +184,9 @@ html.dark-theme {
   --mdc-dialog-subhead-line-height: 32px;
   --mdc-dialog-subhead-color: #e3e3e3;
 
-  @include mat.dialog-overrides(
-    (
-      container-color: #2b2b2f,
+  @include mat.dialog-overrides((container-color: #2b2b2f,
       subhead-color: white,
-    )
-  );
+    ));
 }
 
 // Light theme dialog overrides
@@ -202,12 +199,9 @@ html.light-theme {
   --mdc-dialog-subhead-line-height: 32px;
   --mdc-dialog-subhead-color: #202124;
 
-  @include mat.dialog-overrides(
-    (
-      container-color: #ffffff,
+  @include mat.dialog-overrides((container-color: #ffffff,
       subhead-color: #202124,
-    )
-  );
+    ));
 }
 
 .mat-mdc-dialog-container .mat-mdc-dialog-title.mdc-dialog__title {
@@ -224,11 +218,9 @@ html.dark-theme {
   --chat-panel-function-event-button-background-color: #333;
   --chat-panel-function-event-button-border-color: #777;
   --chat-panel-function-event-button-text-color: #ccc;
-  --chat-panel-function-event-button-highlight-background-color: rgb(
-    15,
-    82,
-    35
-  );
+  --chat-panel-function-event-button-highlight-background-color: rgb(15,
+        82,
+      35);
   --chat-panel-function-event-button-highlight-border-color: rgb(15, 82, 35);
   --chat-panel-function-event-button-highlight-color: white;
   --long-running-response-input-text-color: #000;
@@ -511,12 +503,9 @@ html.dark-theme {
   --mat-table-row-item-label-text-color: #fff;
   --mat-table-header-headline-color: #fff;
 
-  @include mat.progress-spinner-overrides(
-    (
-      active-indicator-color: #a8c7fa,
+  @include mat.progress-spinner-overrides((active-indicator-color: #a8c7fa,
       size: 80,
-    )
-  );
+    ));
 }
 
 // Light theme progress spinner and custom properties
@@ -805,19 +794,14 @@ html.light-theme {
   --builder-tool-item-border-color: #c8c6c6;
   --builder-tool-item-hover-background-color: #dcd9d9;
 
-  @include mat.progress-spinner-overrides(
-    (
-      active-indicator-color: #305f9d,
+  @include mat.progress-spinner-overrides((active-indicator-color: #305f9d,
       size: 80,
-    )
-  );
+    ));
 }
 
 // Form field overrides for dark theme
 html.dark-theme {
-  @include mat.form-field-overrides(
-    (
-      disabled-input-text-placeholder-color: orange,
+  @include mat.form-field-overrides((disabled-input-text-placeholder-color: orange,
       filled-active-indicator-color: red,
       outlined-outline-color: #cccccc,
       outlined-input-text-color: #cccccc,
@@ -828,15 +812,12 @@ html.dark-theme {
       outlined-disabled-input-text-color: #cccccc,
       outlined-disabled-outline-color: #cccccc,
       outlined-caret-color: #cccccc,
-    )
-  );
+    ));
 }
 
 // Form field overrides for light theme
 html.light-theme {
-  @include mat.form-field-overrides(
-    (
-      disabled-input-text-placeholder-color: #ff8983,
+  @include mat.form-field-overrides((disabled-input-text-placeholder-color: #ff8983,
       filled-active-indicator-color: #ba1a1a,
       outlined-outline-color: #787777,
       outlined-input-text-color: #202124,
@@ -847,8 +828,7 @@ html.light-theme {
       outlined-disabled-input-text-color: #929090,
       outlined-disabled-outline-color: #c8c6c6,
       outlined-caret-color: #305f9d,
-    )
-  );
+    ));
 }
 
 .mdc-line-ripple {

@@ -53,6 +53,18 @@
   &:empty {
     display: none;
   }
+
+  &.landing-message {
+    border: 2px solid var(--chat-panel-landing-message-border-color, #4285f4);
+    background-color: var(--chat-panel-landing-message-background-color,
+        #e8f0fe);
+  }
+
+  &.landing-message {
+    border: 2px solid var(--chat-panel-landing-message-border-color, #4285f4);
+    background-color: var(--chat-panel-landing-message-background-color,
+        #e8f0fe);
+  }
 }
 
 .function-event-button {
@@ -381,7 +393,8 @@
 }
 
 :host ::ng-deep .mat-mdc-mini-fab {
-  background-color: var(--chat-panel-mat-mdc-mini-fab-background-color, #4285f4);
+  background-color: var(--chat-panel-mat-mdc-mini-fab-background-color,
+      #4285f4);
   margin-right: 15px;
 
   mat-icon {

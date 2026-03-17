@@ -80,6 +80,8 @@ const ROOT_AGENT = 'root_agent';
 export const INITIAL_USER_INPUT_QUERY_PARAM = 'q';
 /** Query parameter for hiding the side panel. */
 export const HIDE_SIDE_PANEL_QUERY_PARAM = 'hideSidePanel';
+/** Query parameter for landing page content. */
+export const LANDING_PAGE_CONTENT_QUERY_PARAM = 'landing';
 
 
 /** A2A data part markers */
@@ -276,6 +278,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigate([], {
           relativeTo: this.activatedRoute,
           queryParams: { app: app[0] },
+          queryParamsHandling: 'merge',
         });
       }
     }),
@@ -470,6 +473,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private displayLandingPageContent() {
+    this.activatedRoute.queryParams.pipe(first()).subscribe(params => {
+      const landingContent = params[LANDING_PAGE_CONTENT_QUERY_PARAM];
+      if (landingContent) {
+        try {
+          const decodedContent = decodeURIComponent(landingContent);
+          // Check if the landing message already exists
+          if (!this.messages().some(m => m.isLanding)) {
+            this.messages.update(messages => [
+              { role: 'bot', text: decodedContent, isLanding: true },
+              ...messages
+            ]);
+          }
+        } catch (e) {
+          console.error('Error decoding landing page content:', e);
+        }
+      }
+    });
+  }
+
   private hideSidePanelIfNeeded() {
     this.activatedRoute.queryParams
       .pipe(
@@ -489,6 +512,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.artifacts = [];
     this.userInput = '';
     this.longRunningEvents = [];
+    this.displayLandingPageContent();
   }
 
   createSession() {
@@ -1775,6 +1799,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.loadTraceData();
       });
+
+    this.displayLandingPageContent();
   }
 
   protected updateWithSelectedEvalCase(evalCase: EvalCase) {

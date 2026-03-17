@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
 import type {SessionState} from '../../core/models/Session';
@@ -24,6 +24,7 @@ import {StateTabMessagesInjectionToken} from './state-tab.component.i18n';
 
 /** Component to display contents of a SessionState. */
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-state-tab',
   templateUrl: './state-tab.component.html',
   styleUrl: './state-tab.component.scss',

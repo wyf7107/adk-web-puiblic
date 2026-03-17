@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 
@@ -31,6 +31,7 @@ const MOCKED_WINDOW_WIDTH = 2000;
 const MAX_WIDTH = MOCKED_WINDOW_WIDTH / 2;  // 1000
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div appResizableDrawer>Drawer</div>
     <div class="resize-handler"></div>

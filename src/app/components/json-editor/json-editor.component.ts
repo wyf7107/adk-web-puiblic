@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, Component, ElementRef, Input} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, ChangeDetectionStrategy} from '@angular/core';
 import {createJSONEditor, Mode} from 'vanilla-jsoneditor';
 
 @Component({
-    selector: 'app-json-editor',
+    changeDetection: ChangeDetectionStrategy.Eager,selector: 'app-json-editor',
     templateUrl: './json-editor.component.html',
     styleUrls: ['./json-editor.component.scss'],
 })

@@ -93,39 +93,34 @@
   color: var(--chat-panel-function-event-button-highlight-color) !important;
 }
 
-.output-chip {
-  background-color: var(--chat-panel-bot-message-message-card-background-color);
-  padding: 5px 20px;
-  margin: 5px;
-  border-radius: 20px;
-  max-width: 80%;
-  font-size: 14px;
-  font-weight: 400;
-  box-shadow: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  color: var(--chat-panel-bot-message-message-card-color);
+.output-chip-container {
+  width: 80%;
+  display: flex;
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-  }
-
-  app-json-tooltip {
-    flex: 1;
-    min-width: 0;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
+  &.has-content-above {
+    margin-top: 5px;
   }
 }
 
-.output-chip-label {
-  font-weight: 600;
-  flex-shrink: 0;
+.message-card.output-chip {
+  display: inline-block !important;
+  padding: 10px 20px !important;
+  background-color: rgba(138, 180, 248, 0.15) !important;
+  border: 1px solid rgba(138, 180, 248, 0.3);
+  border-radius: 8px !important;
+
+  .output-chip-header {
+    font-weight: 600;
+    font-size: 9px;
+    color: rgba(138, 180, 248, 0.9);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .output-chip-content {
+    word-break: break-word;
+  }
 }
 
 .event-chips-container {
@@ -137,7 +132,7 @@
     display: flex;
     width: 100%;
     margin-top: 4px;
-    margin-left: 90px;
+    margin-left: 94px;
   }
 }
 
@@ -437,7 +432,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0px;
   scale: 0.7;
 }
 
@@ -556,8 +550,6 @@ button.video-rec-btn {
   height: 100%;
 }
 
-
-
 .messages-loading-container {
   margin-top: 1em;
   margin-bottom: 1em;
@@ -567,17 +559,16 @@ button.video-rec-btn {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  margin-top: 9px;
   margin-left: 12px;
   margin-right: 28px;
   flex-shrink: 0;
   display: inline-block;
-  align-self: flex-start;
+  align-self: center;
 }
 
 .readme-container {
   max-width: 900px;
-  margin: 0px auto;
+  margin: 0 auto;
   background-color: var(--chat-panel-message-background-color);
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);

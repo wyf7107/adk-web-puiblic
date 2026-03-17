@@ -268,7 +268,20 @@
           }
         </mat-card>
         }
-        <div class="event-chips-container" [ngClass]="{'has-content-above': shouldShowMessageCard(message)}">
+        @if (message.role === "bot" && hasEventOutputData(i)) {
+        <div class="output-chip-container" [ngClass]="{'has-content-above': shouldShowMessageCard(message)}">
+          <mat-card
+            [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
+            class="message-card output-chip"
+          >
+            <div class="output-chip-header">Node Output</div>
+            <div class="output-chip-content">
+              <ngx-json-viewer [json]="getEventOutputDataJson(i)"></ngx-json-viewer>
+            </div>
+          </mat-card>
+        </div>
+        }
+        <div class="event-chips-container" [ngClass]="{'has-content-above': shouldShowMessageCard(message) || hasEventOutputData(i)}">
         @if (message.functionCalls && message.functionCalls.length > 0) {
           @for (functionCall of message.functionCalls; track functionCall) {
             @if (isComputerUseClick(functionCall)) {
@@ -337,18 +350,6 @@
           <mat-icon>attachment</mat-icon>
           Artifact
         </button>
-        }
-        @if (message.role === "bot" && hasEventOutputData(i)) {
-        <div
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="output-chip"
-          [appJsonTooltip]="getEventOutputDataTooltip(i)"
-          [appJsonTooltipTitle]="'Node Output'"
-        >
-          <mat-icon>output</mat-icon>
-          <span class="output-chip-label">{{ getEventOutputDataNodePath(i) }}:</span>
-          <app-json-tooltip [json]="getEventOutputDataTooltip(i)"></app-json-tooltip>
-        </div>
         }
         @if (message.role === "bot" && hasEventRoute(i)) {
         <button

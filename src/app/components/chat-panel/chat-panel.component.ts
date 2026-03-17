@@ -29,7 +29,6 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {EMPTY, merge, NEVER, of, Subject} from 'rxjs';
 import {catchError, filter, first, switchMap, tap} from 'rxjs/operators';
@@ -50,7 +49,6 @@ import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {ComputerActionComponent} from '../computer-action/computer-action.component';
-import {JsonTooltipComponent} from '../json-tooltip/json-tooltip.component';
 import {LongRunningResponseComponent} from '../long-running-response/long-running-response';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
@@ -82,7 +80,6 @@ const ROOT_AGENT = 'root_agent';
     MessageFeedbackComponent,
     MatTooltipModule,
     NgClass,
-    JsonTooltipComponent,
     JsonTooltipDirective,
     WorkflowGraphTooltipDirective,
     ComputerActionComponent,
@@ -533,56 +530,25 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
-  getEventOutputDataTooltip(messageIndex: number): string {
+  getEventOutputDataJson(messageIndex: number): any {
     const message = this.messages[messageIndex];
-    if (!message.eventId) return '';
+    if (!message.eventId) return null;
 
     const event = this.eventData.get(message.eventId);
     const eventData = event?.output;
-    if (eventData === undefined || eventData === null) return '';
+    if (eventData === undefined || eventData === null) return null;
 
-    const maxLength = 500;
-
-    try {
-      const jsonString = JSON.stringify(eventData, null, 2);
-      if (jsonString.length > maxLength) {
-        return jsonString.substring(0, maxLength) + '...';
-      }
-      return jsonString;
-    } catch (e) {
-      const stringValue = String(eventData);
-      if (stringValue.length > maxLength) {
-        return stringValue.substring(0, maxLength) + '...';
-      }
-      return stringValue;
-    }
-  }
-
-
-  getEventOutputDataNodePath(messageIndex: number): string {
-    const message = this.messages[messageIndex];
-    if (!message.eventId) return '';
-
-    const event = this.eventData.get(message.eventId);
-    return event?.author || '';
-  }
-
-  getEventOutputResultText(messageIndex: number): string {
-    const message = this.messages[messageIndex];
-    if (!message.eventId) return '';
-
-    const event = this.eventData.get(message.eventId);
-    const result = event?.output;
-    if (result === undefined || result === null) return '';
-
-    if (typeof result === 'string') {
-      return result;
+    // If it's already an object, return it
+    if (typeof eventData === 'object') {
+      return eventData;
     }
 
+    // If it's a string, try to parse it as JSON
     try {
-      return JSON.stringify(result);
+      return JSON.parse(eventData);
     } catch (e) {
-      return String(result);
+      // If parsing fails, return as-is
+      return eventData;
     }
   }
 

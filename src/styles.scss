@@ -221,7 +221,9 @@ html.light-theme {
 
 // Dark theme progress spinner and custom properties
 html.dark-theme {
-  --chat-panel-function-event-button-background-color: white;
+  --chat-panel-function-event-button-background-color: #333;
+  --chat-panel-function-event-button-border-color: #777;
+  --chat-panel-function-event-button-text-color: #ccc;
   --chat-panel-function-event-button-highlight-background-color: rgb(
     15,
     82,
@@ -521,6 +523,8 @@ html.dark-theme {
 html.light-theme {
   --mat-button-outlined-label-text-color: black;
   --chat-panel-function-event-button-background-color: #f2f1ef;
+  --chat-panel-function-event-button-border-color: #333;
+  --chat-panel-function-event-button-text-color: #333;
   --chat-panel-function-event-button-highlight-border-color: #0f5223;
   --chat-panel-function-event-button-highlight-color: white;
   --long-running-response-input-text-color: #202124;
@@ -983,4 +987,31 @@ html.light-theme {
 // Transparent backdrop for workflow graph tooltip
 .cdk-overlay-transparent-backdrop {
   background: transparent;
+}
+
+// ngx-json-viewer custom colors
+ngx-json-viewer {
+  .segment-key {
+    color: #4285f4 !important;
+  }
+
+  .segment-value {
+    color: inherit;
+  }
+
+  .segment-type-string {
+    color: #0f9d58 !important;
+  }
+
+  .segment-type-number {
+    color: #db4437 !important;
+  }
+
+  .segment-type-boolean {
+    color: #f4b400 !important;
+  }
+
+  .segment-type-null {
+    color: #9e9e9e !important;
+  }
 }

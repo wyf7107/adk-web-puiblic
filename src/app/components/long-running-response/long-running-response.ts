@@ -72,12 +72,12 @@ export class LongRunningResponseComponent {
   }
 
   hasResponseSchema(): boolean {
-    return !!this.functionCall.args?.responseSchema;
+    return !!this.functionCall.args?.response_schema;
   }
 
   getResponseSchemaJson(): string {
     try {
-      return JSON.stringify(this.functionCall.args?.responseSchema || {}, null, 2);
+      return JSON.stringify(this.functionCall.args?.response_schema || {}, null, 2);
     } catch (e) {
       return '';
     }

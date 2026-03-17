@@ -71,6 +71,8 @@
 
 .function-event-button {
   background-color: var(--chat-panel-function-event-button-background-color);
+  border-color: var(--chat-panel-function-event-button-border-color) !important;
+  color: var(--chat-panel-function-event-button-text-color) !important;
   margin: 5px 5px 5px;
   font-size: 11px !important;
   padding: 6px 12px !important;
@@ -86,6 +88,7 @@
     width: 18px !important;
     height: 18px !important;
     margin-right: 6px !important;
+    color: var(--chat-panel-function-event-button-text-color) !important;
   }
 }
 
@@ -117,11 +120,12 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
+  border: 1px solid var(--chat-panel-function-event-button-border-color);
   border-radius: 6px;
-  background-color: var(--chat-panel-input-field-button-background-color);
-  color: var(--chat-panel-input-field-textarea-placeholder-color);
-  font-size: 12px;
+  background-color: var(--chat-panel-function-event-button-background-color);
+  color: var(--chat-panel-function-event-button-text-color);
+  font-size: 11px;
+  font-family: 'Roboto Mono', monospace;
   cursor: pointer;
   transition: background-color 0.2s;
 
@@ -129,10 +133,11 @@
     font-size: 16px;
     width: 16px;
     height: 16px;
+    color: var(--chat-panel-function-event-button-text-color);
   }
 
   &:hover {
-    background-color: var(--chat-panel-message-textarea-focus-background-color);
+    opacity: 0.8;
   }
 }
 
@@ -140,10 +145,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
-  border-radius: 8px;
+  border: 1px solid var(--chat-panel-function-event-button-border-color);
+  border-radius: 6px;
   padding: 8px 12px;
-  background-color: var(--chat-panel-input-field-button-background-color);
+  background-color: var(--chat-panel-function-event-button-background-color);
   width: 100%;
   box-sizing: border-box;
 
@@ -152,19 +157,21 @@
     border: none;
     outline: none;
     background: transparent;
-    font-size: 14px;
-    color: var(--chat-panel-input-field-textarea-color);
-    caret-color: var(--chat-panel-input-field-textarea-caret-color);
+    font-size: 12px;
+    font-family: 'Roboto Mono', monospace;
+    color: var(--chat-panel-function-event-button-text-color);
+    caret-color: var(--chat-panel-function-event-button-text-color);
 
     &::placeholder {
-      color: var(--chat-panel-input-field-textarea-placeholder-color);
+      color: var(--chat-panel-function-event-button-text-color);
+      opacity: 0.6;
     }
   }
 
   .send-button {
     width: 32px;
     height: 32px;
-    color: var(--chat-panel-input-field-button-color);
+    color: var(--chat-panel-function-event-button-text-color);
 
     mat-icon {
       font-size: 20px;
@@ -173,7 +180,7 @@
     }
 
     &:disabled {
-      opacity: 0.5;
+      opacity: 0.3;
     }
   }
 }

@@ -753,21 +753,32 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isModelThinkingSubject.next(false);
       this.storeEvents(part, chunkJson);
 
+      // If we have a streamingTextMessage, append inlineData to it
+      if (this.streamingTextMessage && part.inlineData) {
+        this.processPartIntoMessage(part, chunkJson, this.streamingTextMessage);
+        this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
+        this.changeDetectorRef.detectChanges();
+        return;
+      }
+
+      const role = chunkJson.author === 'user' ? 'user' : 'bot';
       const existingMessages = this.messages();
       const existingMessageIndex = existingMessages.findIndex(
-        msg => msg.eventId === chunkJson.id && msg.role === 'bot'
+        msg => msg.eventId === chunkJson.id && msg.role === role
       );
 
       if (existingMessageIndex !== -1) {
         // Update existing message by adding this part
         this.messages.update(messages => {
           const updatedMessages = [...messages];
-          this.processPartIntoMessage(part, chunkJson, updatedMessages[existingMessageIndex]);
+          const updatedMessage = { ...updatedMessages[existingMessageIndex] };
+          this.processPartIntoMessage(part, chunkJson, updatedMessage);
+          updatedMessages[existingMessageIndex] = updatedMessage;
           return updatedMessages;
         });
+        this.changeDetectorRef.detectChanges();
       } else {
-        this.storeMessage(
-          part, chunkJson, chunkJson.author === 'user' ? 'user' : 'bot');
+        this.storeMessage(part, chunkJson, role);
       }
     } else {
       this.isModelThinkingSubject.next(true);
@@ -1079,12 +1090,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             !m.isLoading);
         if (existingIndex !== -1) {
           const updatedMessages = [...messages];
-          updatedMessages[existingIndex] = {
-            ...updatedMessages[existingIndex],
-            text: message.text,
-            renderedContent: message.renderedContent ||
-              updatedMessages[existingIndex].renderedContent
-          };
+          // Replace with the new message to preserve all fields (including inlineData)
+          updatedMessages[existingIndex] = message;
           return updatedMessages;
         }
       }
@@ -1121,10 +1128,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (part.inlineData) {
       const base64Data = this.formatBase64Data(
         part.inlineData.data, part.inlineData.mimeType);
+      const mediaType = getMediaTypeFromMimetype(part.inlineData.mimeType);
       message.inlineData = {
         displayName: part.inlineData.displayName,
         data: base64Data,
         mimeType: part.inlineData.mimeType,
+        mediaType,
       };
       if (message.role === 'user' && event?.id) {
         message.eventId = event.id;

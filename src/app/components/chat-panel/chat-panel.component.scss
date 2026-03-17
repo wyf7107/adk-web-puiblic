@@ -180,6 +180,9 @@
     color: var(--chat-panel-user-message-message-card-color);
     box-shadow: none;
     order: 1;
+    width: auto;
+    min-width: fit-content;
+    max-width: 80%;
   }
 
   button {

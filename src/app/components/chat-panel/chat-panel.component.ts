@@ -29,6 +29,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {EMPTY, merge, NEVER, of, Subject} from 'rxjs';
 import {catchError, filter, first, switchMap, tap} from 'rxjs/operators';
@@ -49,6 +50,7 @@ import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
 import {MediaType,} from '../artifact-tab/artifact-tab.component';
 import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {ComputerActionComponent} from '../computer-action/computer-action.component';
+import {JsonTooltipComponent} from '../json-tooltip/json-tooltip.component';
 import {LongRunningResponseComponent} from '../long-running-response/long-running-response';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
@@ -80,6 +82,7 @@ const ROOT_AGENT = 'root_agent';
     MessageFeedbackComponent,
     MatTooltipModule,
     NgClass,
+    JsonTooltipComponent,
     JsonTooltipDirective,
     WorkflowGraphTooltipDirective,
     ComputerActionComponent,

@@ -339,16 +339,16 @@
         </button>
         }
         @if (message.role === "bot" && hasEventOutputData(i)) {
-        <button
-          mat-stroked-button
+        <div
           [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button output-chip"
+          class="output-chip"
           [appJsonTooltip]="getEventOutputDataTooltip(i)"
           [appJsonTooltipTitle]="'Node Output'"
         >
           <mat-icon>output</mat-icon>
-          {{ getEventOutputDataNodePath(i) }}: {{ getEventOutputResultText(i) }}
-        </button>
+          <span class="output-chip-label">{{ getEventOutputDataNodePath(i) }}:</span>
+          <app-json-tooltip [json]="getEventOutputDataTooltip(i)"></app-json-tooltip>
+        </div>
         }
         @if (message.role === "bot" && hasEventRoute(i)) {
         <button

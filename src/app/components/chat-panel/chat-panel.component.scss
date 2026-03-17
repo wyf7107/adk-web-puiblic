@@ -94,13 +94,38 @@
 }
 
 .output-chip {
-  max-width: 300px !important;
+  background-color: var(--chat-panel-bot-message-message-card-background-color);
+  padding: 5px 20px;
+  margin: 5px;
+  border-radius: 20px;
+  max-width: 80%;
+  font-size: 14px;
+  font-weight: 400;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--chat-panel-bot-message-message-card-color);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  app-json-tooltip {
+    flex: 1;
+    min-width: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+  }
 }
 
-:host ::ng-deep .output-chip .mdc-button__label {
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
+.output-chip-label {
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .event-chips-container {

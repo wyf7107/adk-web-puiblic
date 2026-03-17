@@ -16,7 +16,7 @@
  */
 
 import {AsyncPipe, NgClass} from '@angular/common';
-import {ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -38,6 +38,7 @@ import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
  * Displays a list of sessions and handles session loading and pagination.
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-session-tab',
   templateUrl: './session-tab.component.html',
   styleUrl: './session-tab.component.scss',

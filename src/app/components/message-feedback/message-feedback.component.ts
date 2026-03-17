@@ -16,7 +16,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
 import {rxResource} from '@angular/core/rxjs-interop';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -31,6 +31,7 @@ import {Feedback, FEEDBACK_SERVICE} from '../../core/services/interfaces/feedbac
 import {MessageFeedbackMessagesInjectionToken} from './message-feedback.component.i18n';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-message-feedback',
   templateUrl: './message-feedback.component.html',
   styleUrl: './message-feedback.component.scss',

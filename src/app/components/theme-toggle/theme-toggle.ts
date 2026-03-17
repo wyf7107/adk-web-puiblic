@@ -15,13 +15,15 @@
  * limitations under the License.
  */
 
-import { Component, inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { THEME_SERVICE } from '../../core/services/interfaces/theme';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+
+import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-theme-toggle',
   imports: [MatIconModule, MatButtonModule, MatTooltipModule],
   templateUrl: './theme-toggle.html',

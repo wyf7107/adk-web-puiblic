@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import {AsyncPipe} from '@angular/common';
-import {Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnInit, Output, signal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {MatIconButton} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
@@ -36,6 +36,7 @@ import {UI_STATE_SERVICE} from '../../../core/services/interfaces/ui-state';
 import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialog.component';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-trace-event',
   templateUrl: './trace-event.component.html',
   styleUrl: './trace-event.component.scss',

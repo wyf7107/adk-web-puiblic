@@ -17,7 +17,7 @@
 
 import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {Component, ErrorHandler} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ErrorHandler} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatSnackBar} from '@angular/material/snack-bar';
@@ -74,6 +74,7 @@ import {ChatComponent, HIDE_SIDE_PANEL_QUERY_PARAM, INITIAL_USER_INPUT_QUERY_PAR
 
 // Mock EvalTabComponent to satisfy the required viewChild in ChatComponent
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-eval-tab',
   template: '',
   standalone: true,
@@ -86,6 +87,7 @@ class MockEvalTabComponent {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'test-host-component',
   template: `<app-chat>
     <div adk-web-chat-container-top id="projected-content">
@@ -510,7 +512,8 @@ describe('ChatComponent', () => {
     it(
         'should display landing page content from "landing" query param',
         fakeAsync(() => {
-          const markdownContent = '# Welcome to the App\n\nThis is the landing page.';
+          const markdownContent =
+              '# Welcome to the App\n\nThis is the landing page.';
           const encodedContent = encodeURIComponent(markdownContent);
           const queryParams = {
             [LANDING_PAGE_CONTENT_QUERY_PARAM]: encodedContent,
@@ -525,7 +528,7 @@ describe('ChatComponent', () => {
           fixture = TestBed.createComponent(ChatComponent);
           component = fixture.componentInstance;
           fixture.detectChanges();
-          tick(); // Allow component to stabilize and load session
+          tick();  // Allow component to stabilize and load session
 
           // Manually call displayLandingPageContent to simulate the effect
           (component as any).displayLandingPageContent();

@@ -16,7 +16,7 @@
  */
 
 import {CdkScrollable} from '@angular/cdk/scrolling';
-import {Component, Inject} from '@angular/core';
+import {Component, Inject, ChangeDetectionStrategy} from '@angular/core';
 import {MatButton} from '@angular/material/button';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 
@@ -34,6 +34,7 @@ export interface DeleteSessionDialogData {
  * Dialog component to confirm deleting a session.
  */
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: 'app-delete-session-dialog',
     templateUrl: './delete-session-dialog.component.html',
     styleUrls: ['./delete-session-dialog.component.scss'],

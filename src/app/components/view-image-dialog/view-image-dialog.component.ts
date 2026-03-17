@@ -16,7 +16,7 @@
  */
 
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SafeHtml, SafeUrl} from '@angular/platform-browser';
 
@@ -25,6 +25,7 @@ export interface ViewImageDialogData {
 }
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: 'app-view-image-dialog',
     templateUrl: './view-image-dialog.component.html',
     styleUrls: ['./view-image-dialog.component.scss'],

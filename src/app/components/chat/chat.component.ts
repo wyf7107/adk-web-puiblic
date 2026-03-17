@@ -17,7 +17,7 @@
 
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButton, MatFabButton} from '@angular/material/button';
@@ -123,6 +123,7 @@ const BIDI_STREAMING_RESTART_WARNING =
     'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
@@ -478,10 +479,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           const decodedContent = decodeURIComponent(landingContent);
           // Check if the landing message already exists
           if (!this.messages().some(m => m.isLanding)) {
-            this.messages.update(messages => [
-              {role: 'bot', text: decodedContent, isLanding: true},
-              ...messages
-            ]);
+            this.messages.update(
+                messages =>
+                    [{role: 'bot', text: decodedContent, isLanding: true},
+                     ...messages]);
           }
         } catch (e) {
           console.error('Error decoding landing page content:', e);

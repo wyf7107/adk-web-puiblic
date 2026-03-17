@@ -14,12 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
 
 import {Span} from '../../../core/models/Trace';
 import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-trace-tree',
   templateUrl: './trace-tree.component.html',
   styleUrl: './trace-tree.component.scss',

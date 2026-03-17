@@ -103,8 +103,8 @@ describe('trace-utils', () => {
         attributes: {}
       };
       const normalized = normalizeSpan(span);
-      expect(normalized.attributes)
-          .not.toContain('gcp.vertex.agent.llm_request');
+      expect('gcp.vertex.agent.llm_request' in normalized.attributes)
+          .toBeFalse();
     });
 
     it('should extract output from logs for non-execute_tool spans', () => {
@@ -139,10 +139,26 @@ describe('trace-utils', () => {
         attributes: {}
       };
       const normalized = normalizeSpan(span);
-      expect(normalized.attributes)
-          .not.toContain('gcp.vertex.agent.llm_request');
-      expect(normalized.attributes)
-          .not.toContain('gcp.vertex.agent.llm_response');
+      expect('gcp.vertex.agent.llm_request' in normalized.attributes)
+          .toBeFalse();
+      expect('gcp.vertex.agent.llm_response' in normalized.attributes)
+          .toBeFalse();
+    });
+
+    it('should handle missing attributes gracefully', () => {
+      const span: Span = {
+        name: 'generate_content',
+        start_time: 0,
+        end_time: 100,
+        span_id: 's1',
+        trace_id: 't1',
+        logs: []
+      };
+      const normalized = normalizeSpan(span);
+      expect('gcp.vertex.agent.llm_request' in normalized.attributes)
+          .toBeFalse();
+      expect('gcp.vertex.agent.llm_response' in normalized.attributes)
+          .toBeFalse();
     });
   });
 

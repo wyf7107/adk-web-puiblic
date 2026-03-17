@@ -73,6 +73,7 @@
         @if (shouldShowMessageCard(message)) {
         <mat-card
           class="message-card"
+          [class.landing-message]="message.isLanding"
           [ngClass]="{
             'eval-fail': message.evalStatus === 2,
             'message-card--highlighted': shouldMessageHighlighted(i)

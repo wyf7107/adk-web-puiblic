@@ -1623,6 +1623,57 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.sessionIdOfLoadedMessages = this.sessionId;
   }
 
+  private restorePendingLongRunningCalls() {
+    const messages = this.messages();
+    const functionResponses = new Set<string>();
+
+    // Collect all function response IDs
+    messages.forEach(msg => {
+      if (msg.functionResponses) {
+        msg.functionResponses.forEach((fr: any) => {
+          if (fr.id) {
+            functionResponses.add(fr.id);
+          }
+        });
+      }
+    });
+
+    // Check each function call to see if it has a response
+    this.messages.update(messages => {
+      return messages.map(msg => {
+        if (msg.functionCalls) {
+          const updatedFunctionCalls = msg.functionCalls.map((fc: any) => {
+            // Get the event for this message to check longRunningToolIds
+            const event = msg.eventId ? this.eventData.get(msg.eventId) : null;
+            const isLongRunning = fc.isLongRunning ||
+              event?.longRunningToolIds?.includes(fc.id);
+
+            // Only restore if it's long-running AND doesn't have a response yet
+            if (isLongRunning && !functionResponses.has(fc.id)) {
+              return {
+                ...fc,
+                isLongRunning: true,
+                invocationId: event?.invocationId,
+                functionCallEventId: msg.eventId,
+                needsResponse: true,
+                responseStatus: 'pending',
+                userResponse: fc.userResponse || '',
+              };
+            }
+            return fc;
+          });
+
+          // Return a new message object to trigger Angular change detection
+          return {
+            ...msg,
+            functionCalls: updatedFunctionCalls
+          };
+        }
+        return msg;
+      });
+    });
+  }
+
   protected updateWithSelectedSession(session: Session) {
     if (!session || !session.id || !session.events || !session.state) {
       return;
@@ -1688,6 +1739,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
+
+    this.restorePendingLongRunningCalls();
+    this.changeDetectorRef.detectChanges();
 
     this.eventService.getTrace(this.sessionId)
       .pipe(first(), catchError(() => of([])))

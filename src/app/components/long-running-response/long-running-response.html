@@ -16,38 +16,84 @@
 
 <div class="response-chip-container" (click)="$event.stopPropagation()">
   @if (functionCall.responseStatus === 'sent') {
-    <div class="status-chip sent">
-      <mat-icon>check_circle</mat-icon>
-      <span>Response sent</span>
-    </div>
-    @if (functionCall.sentUserResponse) {
-      <div class="user-response-chip" [appJsonTooltip]="functionCall.sentUserResponse">
-        <mat-icon>person</mat-icon>
-        <span>User input</span>
-      </div>
-    }
+  <button mat-stroked-button class="function-event-button" [appJsonTooltip]="getSentResponseJson()"
+    appJsonTooltipTitle="Function Response">
+    <mat-icon>check</mat-icon>
+    {{ functionCall.name }}
+  </button>
   } @else if (functionCall.responseStatus === 'sending') {
-    <div class="status-chip sending">
-      <mat-icon>hourglass_empty</mat-icon>
-      <span>Sending...</span>
-    </div>
+  <div class="status-chip sending">
+    <mat-icon>hourglass_empty</mat-icon>
+    <span>Sending...</span>
+  </div>
   } @else {
-    <div class="input-chip">
-      <mat-icon class="input-icon">rate_review</mat-icon>
-      <input
-        class="response-input"
-        [(ngModel)]="functionCall.userResponse"
-        (keydown.enter)="onSend()"
-        placeholder="Enter response..."
-      />
-      <button
-        mat-icon-button
-        (click)="onSend()"
-        [disabled]="!functionCall.userResponse"
-        class="send-icon-btn"
-      >
+  @if (hasMessage()) {
+  <!-- Message box containing content and input -->
+  <div class="message-box">
+    <div class="message-content">
+      <app-markdown [text]="getPromptText()"></app-markdown>
+    </div>
+
+    <!-- Input card -->
+    <div class="request-card">
+      <!-- Data view buttons -->
+      @if (hasPayload() || hasResponseSchema()) {
+      <div class="data-buttons">
+        @if (hasPayload()) {
+        <button class="data-button" [appJsonTooltip]="getPayloadJson()" appJsonTooltipTitle="Payload">
+          <mat-icon>code</mat-icon>
+          <span>payload</span>
+        </button>
+        }
+        @if (hasResponseSchema()) {
+        <button class="data-button" [appJsonTooltip]="getResponseSchemaJson()" appJsonTooltipTitle="Response Schema">
+          <mat-icon>view_headline</mat-icon>
+          <span>response schema</span>
+        </button>
+        }
+      </div>
+      }
+
+      <!-- Input field -->
+      <div class="input-container">
+        <input class="response-input" [(ngModel)]="functionCall.userResponse" (keydown.enter)="onSend()"
+          placeholder="Enter your response..." />
+        <button mat-icon-button (click)="onSend()" [disabled]="!functionCall.userResponse" class="send-button">
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+  } @else {
+  <!-- Input card without message box wrapper -->
+  <div class="request-card-standalone">
+    <!-- Data view buttons -->
+    @if (hasPayload() || hasResponseSchema()) {
+    <div class="data-buttons">
+      @if (hasPayload()) {
+      <button class="data-button" [appJsonTooltip]="getPayloadJson()" appJsonTooltipTitle="Payload">
+        <mat-icon>code</mat-icon>
+        <span>payload</span>
+      </button>
+      }
+      @if (hasResponseSchema()) {
+      <button class="data-button" [appJsonTooltip]="getResponseSchemaJson()" appJsonTooltipTitle="Response Schema">
+        <mat-icon>view_headline</mat-icon>
+        <span>response schema</span>
+      </button>
+      }
+    </div>
+    }
+
+    <!-- Input field -->
+    <div class="input-container">
+      <input class="response-input" [(ngModel)]="functionCall.userResponse" (keydown.enter)="onSend()"
+        placeholder="Enter your response..." />
+      <button mat-icon-button (click)="onSend()" [disabled]="!functionCall.userResponse" class="send-button">
         <mat-icon>send</mat-icon>
       </button>
     </div>
+  </div>
+  }
   }
 </div>

@@ -38,18 +38,45 @@ export class JsonTooltipDirective implements OnDestroy {
 
     const positionStrategy = this.overlay.position()
       .flexibleConnectedTo(this.elementRef)
-      .withPositions([{
-        originX: 'center',
-        originY: 'top',
-        overlayX: 'center',
-        overlayY: 'bottom',
-        offsetY: -8,
-      }]);
+      .withPositions([
+        {
+          originX: 'center',
+          originY: 'top',
+          overlayX: 'center',
+          overlayY: 'bottom',
+          offsetY: -8,
+        },
+        {
+          originX: 'center',
+          originY: 'bottom',
+          overlayX: 'center',
+          overlayY: 'top',
+          offsetY: 8,
+        },
+        {
+          originX: 'start',
+          originY: 'top',
+          overlayX: 'start',
+          overlayY: 'bottom',
+          offsetY: -8,
+        },
+        {
+          originX: 'end',
+          originY: 'top',
+          overlayX: 'end',
+          overlayY: 'bottom',
+          offsetY: -8,
+        }
+      ])
+      .withViewportMargin(16)
+      .withPush(false);
 
     this.overlayRef = this.overlay.create({
       positionStrategy,
       scrollStrategy: this.overlay.scrollStrategies.close(),
       panelClass: 'json-tooltip-panel',
+      maxHeight: '80vh',
+      maxWidth: '90vw',
     });
 
     const tooltipPortal = new ComponentPortal(JsonTooltipComponent);

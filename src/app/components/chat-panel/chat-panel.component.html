@@ -283,7 +283,7 @@
         }
         <div class="event-chips-container" [ngClass]="{'has-content-above': shouldShowMessageCard(message) || hasEventOutputData(i)}">
         @if (message.functionCalls && message.functionCalls.length > 0) {
-          @for (functionCall of message.functionCalls; track functionCall) {
+          @for (functionCall of message.functionCalls; track functionCall.id) {
             @if (isComputerUseClick(functionCall)) {
               <app-computer-action [functionCall]="functionCall" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
 
@@ -298,16 +298,6 @@
                 <mat-icon>bolt</mat-icon>
                 {{ functionCall.name }}
               </button>
-            }
-
-            @if (functionCall.needsResponse) {
-              <app-long-running-response
-                [functionCall]="functionCall"
-                [appName]="appName"
-                [userId]="userId"
-                [sessionId]="sessionId"
-                (responseComplete)="longRunningResponseComplete.emit($event)"
-              ></app-long-running-response>
             }
           }
         }
@@ -389,6 +379,19 @@
         </button>
         }
         </div>
+        @if (message.functionCalls && message.functionCalls.length > 0) {
+          @for (functionCall of message.functionCalls; track functionCall.id) {
+            @if (functionCall.needsResponse) {
+              <app-long-running-response
+                [functionCall]="functionCall"
+                [appName]="appName"
+                [userId]="userId"
+                [sessionId]="sessionId"
+                (responseComplete)="longRunningResponseComplete.emit($event)"
+              ></app-long-running-response>
+            }
+          }
+        }
         @if (message.evalStatus === 1 || message.evalStatus === 2) {
         <div
           [ngClass]="{

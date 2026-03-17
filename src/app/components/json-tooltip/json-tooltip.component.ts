@@ -35,6 +35,9 @@ import { SafeHtml } from '@angular/platform-browser';
       line-height: 1.4;
       white-space: pre-wrap;
       max-width: 800px;
+      max-height: 80vh;
+      overflow: auto;
+      word-break: break-word;
     }
     .tooltip-title {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -44,6 +47,10 @@ import { SafeHtml } from '@angular/platform-browser';
       padding-bottom: 4px;
       border-bottom: 1px solid rgba(138, 180, 248, 0.3);
       color: rgba(138, 180, 248, 0.9);
+      position: sticky;
+      top: 0;
+      background: inherit;
+      z-index: 1;
     }
   `],
   standalone: true,

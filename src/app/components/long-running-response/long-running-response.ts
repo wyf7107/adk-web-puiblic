@@ -17,12 +17,13 @@
 
 import {ChangeDetectorRef, Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
+import {MarkdownComponent} from '../markdown/markdown.component';
 
 @Component({
   selector: 'app-long-running-response',
@@ -30,9 +31,11 @@ import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
   styleUrl: './long-running-response.scss',
   imports: [
     FormsModule,
+    MatButton,
     MatIconButton,
     MatIcon,
     JsonTooltipDirective,
+    MarkdownComponent,
   ],
 })
 export class LongRunningResponseComponent {
@@ -46,6 +49,47 @@ export class LongRunningResponseComponent {
   private readonly agentService = inject(AGENT_SERVICE);
   private readonly cdr = inject(ChangeDetectorRef);
   private responseChunks: any[] = [];
+
+  hasMessage(): boolean {
+    return !!(this.functionCall.args?.prompt || this.functionCall.args?.message);
+  }
+
+  getPromptText(): string {
+    return this.functionCall.args?.prompt || this.functionCall.args?.message || 'Please provide your response';
+  }
+
+  hasPayload(): boolean {
+    return this.functionCall.args?.payload !== undefined &&
+           this.functionCall.args?.payload !== null;
+  }
+
+  getPayloadJson(): string {
+    try {
+      return JSON.stringify(this.functionCall.args?.payload || {}, null, 2);
+    } catch (e) {
+      return '';
+    }
+  }
+
+  hasResponseSchema(): boolean {
+    return !!this.functionCall.args?.responseSchema;
+  }
+
+  getResponseSchemaJson(): string {
+    try {
+      return JSON.stringify(this.functionCall.args?.responseSchema || {}, null, 2);
+    } catch (e) {
+      return '';
+    }
+  }
+
+  getSentResponseJson(): string {
+    try {
+      return JSON.stringify({'response': this.functionCall.sentUserResponse}, null, 2);
+    } catch (e) {
+      return '';
+    }
+  }
 
   onSend() {
     if (!this.functionCall.userResponse ||

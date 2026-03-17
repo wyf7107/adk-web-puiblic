@@ -41,9 +41,9 @@ export const normalizeSpan = (span: Span): Span => {
       ...span.attributes,
     }
   };
-  const request = span.attributes[GCP_VERTEX_AGENT_LLM_REQUEST] ??
+  const request = span?.attributes?.[GCP_VERTEX_AGENT_LLM_REQUEST] ??
       extractInputFromSpan(span)
-  const response = span.attributes[GCP_VERTEX_AGENT_LLM_RESPONSE] ??
+  const response = span?.attributes?.[GCP_VERTEX_AGENT_LLM_RESPONSE] ??
       extractOutputFromSpan(span)
   if (request !== undefined) {
     normalized.attributes[GCP_VERTEX_AGENT_LLM_REQUEST] = request

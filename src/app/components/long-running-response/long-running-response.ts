@@ -114,7 +114,7 @@ export class LongRunningResponseComponent {
           functionResponse: {
             id: this.functionCall.id,
             name: this.functionCall.name,
-            response: {'response': this.functionCall.userResponse},
+            response: { 'result': this.functionCall.userResponse },
           },
         }],
       },

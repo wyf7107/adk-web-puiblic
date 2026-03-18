@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, input, OnChanges, SimpleChanges, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, input, OnChanges, SimpleChanges, viewChild} from '@angular/core';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: 'app-audio-player',
     templateUrl: './audio-player.component.html',
     styleUrls: ['./audio-player.component.scss'],

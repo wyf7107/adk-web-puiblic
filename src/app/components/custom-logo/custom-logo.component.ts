@@ -15,12 +15,13 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked, inject, Type} from '@angular/core';
 
 import {RuntimeConfigUtil} from '../../../utils/runtime-config-util';
 
 /** Logo component to override the default logo. */
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-custom-logo',
   standalone: true,
   templateUrl: './custom-logo.component.html',

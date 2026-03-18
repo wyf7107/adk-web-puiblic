@@ -14,10 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-json-tooltip',
   template: `
     @if (title) {

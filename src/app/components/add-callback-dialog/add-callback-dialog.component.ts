@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Component, Inject, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgModel } from '@angular/forms';
 import {
@@ -44,6 +44,7 @@ export class ImmediateErrorStateMatcher implements ErrorStateMatcher {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-add-callback-dialog',
   templateUrl: './add-callback-dialog.component.html',
   styleUrl: './add-callback-dialog.component.scss',

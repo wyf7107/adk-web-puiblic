@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, ElementRef, ViewChild, AfterViewInit, OnInit, OnChanges, SimpleChanges, inject, signal, Input, Output, EventEmitter, ChangeDetectorRef, computed} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, ViewChild, AfterViewInit, OnInit, OnChanges, SimpleChanges, inject, signal, Input, Output, EventEmitter, ChangeDetectorRef, computed} from '@angular/core';
 import { DiagramConnection, AgentNode, ToolNode, CallbackNode, YamlConfig } from '../../core/models/AgentBuilder';
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
@@ -38,6 +38,7 @@ import { AsyncPipe } from "@angular/common";
 import { BuilderAssistantComponent } from "../builder-assistant/builder-assistant.component";
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: "app-canvas",
   templateUrl: "./canvas.component.html",
   styleUrl: "./canvas.component.scss",

@@ -61,50 +61,22 @@ button[mat-button] {
   }
 }
 
-.breadcrumb-nav {
+.svg-container {
+  flex: 1;
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
-  font-size: 13px;
-  color: var(--mdc-dialog-supporting-text-color);
-}
-
-.breadcrumb-item {
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-
-  &:hover:not(.active) {
-    background-color: rgba(138, 180, 248, 0.1);
-  }
-
-  &.active {
-    font-weight: 500;
-    cursor: default;
-  }
-}
-
-.breadcrumb-separator {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  opacity: 0.5;
-  margin: 0 4px;
-}
-
-.vflow-container {
-  flex: 1;
-  min-height: 700px;
+  justify-content: center;
+  overflow: auto;
   border: 1px solid var(--mdc-dialog-supporting-text-color, rgba(255, 255, 255, 0.2));
   border-radius: 8px;
-  overflow: hidden;
-  position: relative;
+  padding: 16px;
+  background-color: rgba(255, 255, 255, 0.95);
 
-  vflow {
-    width: 100%;
-    height: 100%;
-    display: block;
+  ::ng-deep svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
   }
 }
 
@@ -144,82 +116,4 @@ button[mat-button] {
   height: 64px;
   color: var(--mdc-dialog-supporting-text-color);
   opacity: 0.6;
-}
-
-// Agent node styling
-.agent-node {
-  background-color: var(--mdc-dialog-container-color, #2b2b2f);
-  border: 2px solid rgba(138, 180, 248, 0.5);
-  border-radius: 8px;
-  padding: 12px 16px;
-  min-width: 180px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s;
-
-  &.expandable {
-    cursor: pointer;
-
-    &:hover {
-      border-color: rgba(138, 180, 248, 0.8);
-      box-shadow: 0 4px 12px rgba(138, 180, 248, 0.3);
-      transform: scale(1.02);
-    }
-  }
-}
-
-.node-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.node-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  color: rgba(138, 180, 248, 0.9);
-}
-
-.expand-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  color: rgba(138, 180, 248, 0.9);
-  margin-left: auto;
-}
-
-.node-label {
-  font-weight: 500;
-  font-size: 14px;
-  color: var(--mdc-dialog-supporting-text-color);
-}
-
-.node-type {
-  font-size: 11px;
-  color: rgba(138, 180, 248, 0.8);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 4px;
-}
-
-.node-class {
-  font-size: 12px;
-  color: var(--mdc-dialog-supporting-text-color);
-  opacity: 0.7;
-  margin-top: 2px;
-}
-
-// Edge styling
-::ng-deep {
-  .vflow-edge {
-    stroke: rgba(138, 180, 248, 0.6);
-    stroke-width: 2px;
-    fill: none;
-  }
-
-  .vflow-edge-marker {
-    fill: rgba(138, 180, 248, 0.6);
-  }
 }

@@ -183,4 +183,12 @@ export class AgentService implements AgentServiceInterface {
     }
     return new Observable<''>();
   }
+
+  getAppGraphImage(appName: string): Observable<any> {
+    if (this.apiServerDomain != undefined) {
+      const url = this.apiServerDomain + `/dev/build_graph_image/${appName}`;
+      return this.http.get<any>(url);
+    }
+    return new Observable<any>();
+  }
 }

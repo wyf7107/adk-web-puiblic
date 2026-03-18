@@ -28,70 +28,13 @@
         <mat-icon class="error-icon">error_outline</mat-icon>
         <p class="error-message">{{ errorMessage() }}</p>
       </div>
-    } @else if (nodes().length > 0) {
+    } @else if (renderedGraph()) {
       <p class="agent-info">Agent: <strong>{{ appName }}</strong></p>
-      @if (breadcrumbs().length > 1) {
-        <div class="breadcrumb-nav">
-          @for (crumb of breadcrumbs(); track $index) {
-            <span
-              class="breadcrumb-item"
-              [class.active]="$index === breadcrumbs().length - 1"
-              (click)="navigateToLevel($index)">
-              {{ crumb }}
-            </span>
-            @if ($index < breadcrumbs().length - 1) {
-              <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
-            }
-          }
-        </div>
-      }
-      <div class="vflow-container">
-        <vflow
-          view="auto"
-          [nodes]="nodes()"
-          [edges]="edges()"
-          [connection]="connection"
-          [background]="{ type: 'dots', color: '#424242', size: 1, gap: 12 }"
-        >
-          <ng-template nodeHtml let-ctx>
-            <div class="agent-node"
-                 [class.expandable]="ctx.node.data().hasNestedStructure"
-                 (click)="ctx.node.data().hasNestedStructure ? navigateIntoNode(ctx.node.data().name) : null"
-                 selectable>
-              <handle type="source" position="top" id="top" />
-              <handle type="source" position="right" id="right" />
-              <handle type="source" position="bottom" id="bottom" />
-              <handle type="source" position="left" id="left" />
-              <div class="node-header">
-                <mat-icon class="node-icon">{{ getNodeIcon(ctx.node.data().type) }}</mat-icon>
-                <span class="node-label">{{ ctx.node.data().label }}</span>
-                @if (ctx.node.data().hasNestedStructure) {
-                  <mat-icon class="expand-icon">zoom_in</mat-icon>
-                }
-              </div>
-              <div class="node-type">{{ getNodeTypeLabel(ctx.node.data().type) }}</div>
-              @if (ctx.node.data().agentClass) {
-                <div class="node-class">{{ ctx.node.data().agentClass }}</div>
-              }
-            </div>
-          </ng-template>
-
-          <ng-template edge let-ctx>
-            <svg:g customTemplateEdge>
-              <svg:path
-                fill="none"
-                [attr.d]="ctx.path()"
-                stroke="rgba(138, 180, 248, 0.8)"
-                stroke-width="2"
-                [attr.marker-end]="ctx.markerEnd()" />
-            </svg:g>
-          </ng-template>
-        </vflow>
-      </div>
+      <div class="svg-container" [innerHTML]="renderedGraph()"></div>
     } @else {
       <div class="no-graph-container">
         <mat-icon class="large-icon">account_tree</mat-icon>
-        <p>No graph structure available for this agent.</p>
+        <p>Agent structure graph not available.</p>
       </div>
     }
   </div>

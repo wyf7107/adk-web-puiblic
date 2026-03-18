@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import {CommonModule} from '@angular/common';
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, Output} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
 import {MatTooltipModule} from '@angular/material/tooltip';
 
@@ -23,6 +23,7 @@ import {ComputerUseClickCall, ComputerUsePayload, isComputerUseResponse, isVisib
 import type {FunctionCall, FunctionResponse} from '../../core/models/types';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-computer-action',
   templateUrl: './computer-action.component.html',
   styleUrl: './computer-action.component.scss',

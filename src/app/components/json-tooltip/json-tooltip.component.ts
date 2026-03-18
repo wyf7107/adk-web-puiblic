@@ -16,10 +16,11 @@
  */
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
 
-import {Component, Input, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input, inject} from '@angular/core';
 import {SafeHtml} from '@angular/platform-browser';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-json-tooltip',
   template: `<div [innerHTML]="formattedJson"></div>`,
   styles: [`

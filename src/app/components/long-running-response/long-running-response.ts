@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {ChangeDetectorRef, Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -24,6 +24,7 @@ import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-long-running-response',
   templateUrl: './long-running-response.html',
   styleUrl: './long-running-response.scss',

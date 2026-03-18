@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, inject, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Inject} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -34,6 +34,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-add-item-dialog',
   templateUrl: './add-item-dialog.component.html',
   styleUrl: './add-item-dialog.component.scss',

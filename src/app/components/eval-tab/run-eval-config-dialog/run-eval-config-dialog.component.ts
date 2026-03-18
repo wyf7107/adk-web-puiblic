@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 
@@ -34,6 +34,7 @@ export interface EvalConfigData {
 }
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
     selector: 'app-run-eval-config-dialog',
     templateUrl: './run-eval-config-dialog.component.html',
     styleUrls: ['./run-eval-config-dialog.component.scss'],

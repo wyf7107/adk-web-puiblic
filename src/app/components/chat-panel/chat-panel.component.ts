@@ -17,7 +17,7 @@
 
 import {TextFieldModule} from '@angular/cdk/text-field';
 import {CommonModule, NgClass} from '@angular/common';
-import {AfterViewInit, Component, DestroyRef, effect, ElementRef, EventEmitter, HostListener, inject, input, Input, OnChanges, Output, signal, SimpleChanges, Type, ViewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, effect, ElementRef, EventEmitter, HostListener, inject, input, Input, OnChanges, Output, signal, SimpleChanges, Type, ViewChild} from '@angular/core';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {FormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
@@ -57,6 +57,7 @@ import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 const ROOT_AGENT = 'root_agent';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-chat-panel',
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',

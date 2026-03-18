@@ -16,6 +16,7 @@
  */
 
 import {
+  ChangeDetectionStrategy,
   AfterViewInit,
   Component,
   ElementRef,
@@ -89,6 +90,7 @@ const pythonLinter = linter((view) => {
 });
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-code-editor',
   templateUrl: './code-editor.component.html',
   styleUrls: ['./code-editor.component.scss'],

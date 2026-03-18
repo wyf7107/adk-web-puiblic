@@ -16,13 +16,14 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 import {MarkdownModule, provideMarkdown} from 'ngx-markdown';
 
 /**
  * Renders markdown text.
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-markdown',
   templateUrl: './markdown.component.html',
   standalone: true,

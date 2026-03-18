@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import { ChatComponent } from './components/chat/chat.component';
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',

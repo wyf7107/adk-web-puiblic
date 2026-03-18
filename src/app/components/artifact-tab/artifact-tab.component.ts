@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, Inject, inject, input, OnChanges, SimpleChanges} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Inject, inject, input, OnChanges, SimpleChanges} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
 import {MatOption} from '@angular/material/core';
@@ -88,6 +88,7 @@ export function isArtifactAudio(mimeType: string): boolean {
 
 
 @Component({
+    changeDetection: ChangeDetectionStrategy.Eager,
     selector: 'app-artifact-tab',
     templateUrl: './artifact-tab.component.html',
     styleUrl: './artifact-tab.component.scss',

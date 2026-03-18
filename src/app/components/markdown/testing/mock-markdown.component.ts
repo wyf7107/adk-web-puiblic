@@ -16,7 +16,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 import {MarkdownComponentInterface} from '../markdown.component.interface';
 
@@ -24,6 +24,7 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
  * Mock markdown component for testing.
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-markdown',
   imports: [CommonModule],
   template: `

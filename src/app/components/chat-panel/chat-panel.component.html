@@ -271,7 +271,12 @@
         </mat-card>
         }
         @if (message.role === "bot" && hasEventOutputData(i)) {
-        <div class="output-chip-container" [ngClass]="{'has-content-above': shouldShowMessageCard(message)}">
+        <div
+          class="output-chip-container"
+          [ngClass]="{'has-content-above': shouldShowMessageCard(message)}"
+          [appJsonTooltip]="(getNodePath(i) || getEventNodePath(i))"
+          [appJsonTooltipTitle]="'Node Output'"
+        >
           <mat-card
             [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
             class="message-card output-chip"

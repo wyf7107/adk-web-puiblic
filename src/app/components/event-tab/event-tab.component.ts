@@ -29,7 +29,7 @@ import {EventTabMessagesInjectionToken} from './event-tab.component.i18n';
 import {InvocIdPipe} from './invoc-id.pipe';
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-event-tab',
     templateUrl: './event-tab.component.html',
     styleUrl: './event-tab.component.scss',

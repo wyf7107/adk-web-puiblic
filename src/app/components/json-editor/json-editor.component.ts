@@ -19,7 +19,7 @@ import {AfterViewInit, Component, ElementRef, Input, ChangeDetectionStrategy} fr
 import {createJSONEditor, Mode} from 'vanilla-jsoneditor';
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,selector: 'app-json-editor',
+    changeDetection: ChangeDetectionStrategy.Default,selector: 'app-json-editor',
     templateUrl: './json-editor.component.html',
     styleUrls: ['./json-editor.component.scss'],
 })

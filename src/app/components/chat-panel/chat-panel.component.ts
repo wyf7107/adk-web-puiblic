@@ -58,7 +58,7 @@ import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 const ROOT_AGENT = 'root_agent';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-chat-panel',
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',

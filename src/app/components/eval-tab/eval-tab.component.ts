@@ -79,7 +79,7 @@ interface AppEvaluationResult {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-eval-tab',
   templateUrl: './eval-tab.component.html',
   styleUrl: './eval-tab.component.scss',

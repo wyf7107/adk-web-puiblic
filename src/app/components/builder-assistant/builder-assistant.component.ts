@@ -32,7 +32,7 @@ import { YamlUtils } from '../../../utils/yaml-utils';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-builder-assistant',
   templateUrl: './builder-assistant.component.html',
   styleUrl: './builder-assistant.component.scss',

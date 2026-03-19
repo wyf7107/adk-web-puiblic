@@ -23,7 +23,7 @@ import {ComputerUseClickCall, ComputerUsePayload, isComputerUseResponse, isVisib
 import type {FunctionCall, FunctionResponse} from '../../core/models/types';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-computer-action',
   templateUrl: './computer-action.component.html',
   styleUrl: './computer-action.component.scss',

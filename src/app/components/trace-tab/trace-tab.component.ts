@@ -25,7 +25,7 @@ import {TraceTabMessagesInjectionToken} from './trace-tab.component.i18n';
 import {TraceTreeComponent} from './trace-tree/trace-tree.component';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-trace-tab',
   templateUrl: './trace-tab.component.html',
   styleUrl: './trace-tab.component.scss',

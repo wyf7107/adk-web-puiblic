@@ -74,7 +74,7 @@ import {ChatComponent, HIDE_SIDE_PANEL_QUERY_PARAM, INITIAL_USER_INPUT_QUERY_PAR
 
 // Mock EvalTabComponent to satisfy the required viewChild in ChatComponent
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-eval-tab',
   template: '',
   standalone: true,
@@ -87,7 +87,7 @@ class MockEvalTabComponent {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'test-host-component',
   template: `<app-chat>
     <div adk-web-chat-container-top id="projected-content">

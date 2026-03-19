@@ -20,7 +20,7 @@ import {Span} from '../../../core/models/Trace';
 import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-trace-tree',
   templateUrl: './trace-tree.component.html',
   styleUrl: './trace-tree.component.scss',

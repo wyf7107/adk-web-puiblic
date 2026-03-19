@@ -88,7 +88,7 @@ export function isArtifactAudio(mimeType: string): boolean {
 
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-artifact-tab',
     templateUrl: './artifact-tab.component.html',
     styleUrl: './artifact-tab.component.scss',

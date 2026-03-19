@@ -18,7 +18,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-json-tooltip',
   template: `
     @if (title) {

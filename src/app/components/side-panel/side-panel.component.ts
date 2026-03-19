@@ -54,7 +54,7 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
  * Side panel component.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-side-panel',
   templateUrl: './side-panel.component.html',
   styleUrls: ['./side-panel.component.scss'],

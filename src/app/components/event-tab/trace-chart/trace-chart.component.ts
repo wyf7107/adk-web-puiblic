@@ -44,7 +44,7 @@ interface TimeTick {
 }
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-trace-chart',
     templateUrl: './trace-chart.component.html',
     styleUrl: './trace-chart.component.scss',

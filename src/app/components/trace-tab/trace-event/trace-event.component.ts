@@ -36,7 +36,7 @@ import {UI_STATE_SERVICE} from '../../../core/services/interfaces/ui-state';
 import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialog.component';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-trace-event',
   templateUrl: './trace-event.component.html',
   styleUrl: './trace-event.component.scss',

@@ -26,7 +26,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-new-eval-set-dialog-component',
     templateUrl: './new-eval-set-dialog-component.component.html',
     styleUrl: './new-eval-set-dialog-component.component.scss',

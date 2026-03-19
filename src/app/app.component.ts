@@ -19,7 +19,7 @@ import {ChangeDetectionStrategy, Component} from '@angular/core';
 import { ChatComponent } from './components/chat/chat.component';
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrl: './app.component.scss',

@@ -26,7 +26,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-add-eval-session-dialog',
     templateUrl: './add-eval-session-dialog.component.html',
     styleUrl: './add-eval-session-dialog.component.scss',

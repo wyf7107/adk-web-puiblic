@@ -38,7 +38,7 @@ import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
  * Displays a list of sessions and handles session loading and pagination.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-session-tab',
   templateUrl: './session-tab.component.html',
   styleUrl: './session-tab.component.scss',

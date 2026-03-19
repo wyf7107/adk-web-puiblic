@@ -25,7 +25,7 @@ export interface ViewImageDialogData {
 }
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-view-image-dialog',
     templateUrl: './view-image-dialog.component.html',
     styleUrls: ['./view-image-dialog.component.scss'],

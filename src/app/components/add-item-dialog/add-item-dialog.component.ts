@@ -34,7 +34,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-add-item-dialog',
   templateUrl: './add-item-dialog.component.html',
   styleUrl: './add-item-dialog.component.scss',

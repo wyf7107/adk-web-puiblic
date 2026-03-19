@@ -31,7 +31,7 @@ const MOCKED_WINDOW_WIDTH = 2000;
 const MAX_WIDTH = MOCKED_WINDOW_WIDTH / 2;  // 1000
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   template: `
     <div appResizableDrawer>Drawer</div>
     <div class="resize-handler"></div>

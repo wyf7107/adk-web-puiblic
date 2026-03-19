@@ -26,7 +26,7 @@ import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 import {MarkdownComponent} from '../markdown/markdown.component';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-long-running-response',
   templateUrl: './long-running-response.html',
   styleUrl: './long-running-response.scss',

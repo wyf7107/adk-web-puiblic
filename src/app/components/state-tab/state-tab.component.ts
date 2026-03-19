@@ -24,7 +24,7 @@ import {StateTabMessagesInjectionToken} from './state-tab.component.i18n';
 
 /** Component to display contents of a SessionState. */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-state-tab',
   templateUrl: './state-tab.component.html',
   styleUrl: './state-tab.component.scss',

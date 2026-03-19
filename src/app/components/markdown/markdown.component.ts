@@ -23,7 +23,7 @@ import {MarkdownModule, provideMarkdown} from 'ngx-markdown';
  * Renders markdown text.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-markdown',
   templateUrl: './markdown.component.html',
   standalone: true,

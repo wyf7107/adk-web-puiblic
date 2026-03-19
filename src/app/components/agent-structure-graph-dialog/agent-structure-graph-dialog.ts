@@ -24,6 +24,7 @@ import {SafeHtml} from '@angular/platform-browser';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {GRAPH_SERVICE} from '../../core/services/interfaces/graph';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
+import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 
 export interface AgentStructureGraphDialogData {
   appName: string;
@@ -50,6 +51,7 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   private readonly agentService = inject(AGENT_SERVICE);
   private readonly graphService = inject(GRAPH_SERVICE);
   private readonly sanitizer = inject(SAFE_VALUES_SERVICE);
+  private readonly themeService = inject(THEME_SERVICE);
 
   public renderedGraph = signal<SafeHtml | null>(null);
   public isLoading = signal<boolean>(true);
@@ -68,7 +70,9 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     this.errorMessage.set(null);
     this.renderedGraph.set(null);
 
-    this.agentService.getAppGraphImage(this.appName).subscribe({
+    const isDarkMode = this.themeService.currentTheme() === 'dark';
+
+    this.agentService.getAppGraphImage(this.appName, isDarkMode).subscribe({
       next: async (response: any) => {
         try {
           if (!response?.dotSrc) {

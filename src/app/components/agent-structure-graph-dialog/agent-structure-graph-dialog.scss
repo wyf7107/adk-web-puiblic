@@ -70,7 +70,6 @@ button[mat-button] {
   border: 1px solid var(--mdc-dialog-supporting-text-color, rgba(255, 255, 255, 0.2));
   border-radius: 8px;
   padding: 16px;
-  background-color: rgba(255, 255, 255, 0.95);
 
   ::ng-deep svg {
     max-width: 100%;
@@ -78,6 +77,14 @@ button[mat-button] {
     width: auto;
     height: auto;
   }
+}
+
+:host-context(.dark-theme) .svg-container {
+  background-color: #0e172a;
+}
+
+:host-context(.light-theme) .svg-container {
+  background-color: #f9fafc;
 }
 
 .loading-container,

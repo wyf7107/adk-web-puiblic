@@ -304,6 +304,15 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return this.stringToColorService.stc(nodePath);
   }
 
+  getNodeInitial(messageIndex: number): string {
+    const nodePath = this.getNodePath(messageIndex) ||
+        this.getEventNodePath(messageIndex);
+    const nodeName = nodePath.split(/[/.>]/).filter(Boolean).pop() || nodePath;
+    const initialMatch = nodeName.match(/[A-Za-z0-9]/);
+
+    return initialMatch ? initialMatch[0].toUpperCase() : 'N';
+  }
+
   shouldMessageHighlighted(index: number) {
     return this.hoveredEventMessageIndices.includes(index);
   }

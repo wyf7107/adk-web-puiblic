@@ -563,14 +563,21 @@ button.video-rec-btn {
 }
 
 .node-circle-icon {
-  width: 16px;
-  height: 16px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  margin-left: 12px;
-  margin-right: 28px;
+  margin-left: 4px;
+  margin-right: 16px;
   flex-shrink: 0;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   align-self: center;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .readme-container {

@@ -74,7 +74,9 @@
           </button>
           } @else {
           <div class="node-circle-icon" [style.background-color]="getNodePathColor(i)"
-            [appJsonTooltip]="getNodePath(i) || getEventNodePath(i)" [ngClass]="{'hidden': !getAgentNameFromEvent(i)}"></div>
+            [appJsonTooltip]="getNodePath(i) || getEventNodePath(i)" [ngClass]="{'hidden': !getAgentNameFromEvent(i)}">
+            {{ getNodeInitial(i) }}
+          </div>
           }
         } 
         @if (shouldShowMessageCard(message)) {
@@ -274,7 +276,6 @@
             [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
             class="message-card output-chip"
           >
-            <div class="output-chip-header">Node Output</div>
             <div class="output-chip-content">
               <ngx-json-viewer [json]="getEventOutputDataJson(i)"></ngx-json-viewer>
             </div>

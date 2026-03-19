@@ -83,7 +83,7 @@
   background-color: var(--chat-panel-function-event-button-background-color);
   border-color: var(--chat-panel-function-event-button-border-color) !important;
   color: var(--chat-panel-function-event-button-text-color) !important;
-  margin: 5px 5px 5px;
+  margin: 5px 5px 5px 0px;
   font-size: 11px !important;
   padding: 6px 12px !important;
   min-height: 24px !important;
@@ -132,7 +132,7 @@
 
 .message-card.output-chip {
   display: inline-block !important;
-  padding: 10px 20px !important;
+  margin: 0 !important;
   background-color: rgba(138, 180, 248, 0.15) !important;
   border: 1px solid rgba(138, 180, 248, 0.3);
   border-radius: 8px !important;
@@ -160,7 +160,7 @@
     display: flex;
     width: 100%;
     margin-top: 4px;
-    margin-left: 94px;
+    margin-left: 82px;
   }
 }
 
@@ -198,7 +198,7 @@
 .user-message {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-start;
   flex-grow: 1;
   gap: 15px;
 
@@ -221,7 +221,7 @@
 .bot-message {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   flex-grow: 1;
 
   .message-card {
@@ -229,6 +229,11 @@
     align-self: flex-start;
     color: var(--chat-panel-bot-message-message-card-color);
     box-shadow: none;
+  }
+
+  button {
+    align-self: flex-start;
+    margin-top: 5px;
   }
 }
 
@@ -499,25 +504,24 @@
 .event-number-container {
   display: flex;
   flex-direction: column;
-  align-self: center;
+  align-self: flex-start;
   min-width: 30px;
-}
-
-.bot-message .event-number-container {
-  margin-right: 8px;
+  margin-top: 5px;
 }
 
 .user-event-number {
   margin-right: 8px;
-  align-self: center;
+  align-self: flex-start;
+  margin-top: 5px;
 }
 
 .event-number-label,
 .event-number-placeholder {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   text-align: center;
   display: inline-block;
+  margin-top: 5px;
 }
 
 .event-number-label {
@@ -594,11 +598,12 @@ button.video-rec-btn {
   border-radius: 50%;
   margin-left: 4px;
   margin-right: 16px;
+  margin-top: 2px;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  align-self: center;
+  align-self: flex-start;
   color: white;
   font-size: 14px;
   font-weight: 600;

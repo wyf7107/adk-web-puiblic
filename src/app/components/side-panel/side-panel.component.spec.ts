@@ -522,6 +522,60 @@ describe('SidePanelComponent', () => {
         expect(component.openImageDialog.emit).toHaveBeenCalled();
       });
     });
+
+    it('filters empty values from selected event JSON', () => {
+      fixture.componentRef.setInput('selectedEvent', {
+        id: 'event1',
+        emptyString: '',
+        nullValue: null,
+        undefinedValue: undefined,
+        nested: {
+          keep: 'value',
+          empty: '',
+          emptyObject: {},
+        },
+        list: [
+          'item',
+          '',
+          null,
+          {
+            keep: 1,
+            empty: '',
+          },
+          {},
+        ],
+      } as any);
+      fixture.detectChanges();
+
+      expect(component.getFilteredSelectedEvent() as any).toEqual({
+        id: 'event1',
+        nullValue: null,
+        nested: {
+          keep: 'value',
+        },
+        list: [
+          'item',
+          null,
+          {
+            keep: 1,
+          },
+        ],
+      });
+    });
+
+    it('returns undefined when selected event has only empty values', () => {
+      fixture.componentRef.setInput('selectedEvent', {
+        nullValue: null,
+        nested: {
+          empty: '',
+        },
+      } as any);
+      fixture.detectChanges();
+
+      expect(component.getFilteredSelectedEvent() as any).toEqual({
+        nullValue: null,
+      });
+    });
   });
 
   describe('Loading state', () => {

@@ -21,20 +21,35 @@ import { NgxJsonViewerModule } from 'ngx-json-viewer';
   changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-json-tooltip',
   template: `
-    @if (title) {
-      <div class="tooltip-title">{{ title }}</div>
-    }
-    <ngx-json-viewer [json]="parsedJson" [expanded]="true"></ngx-json-viewer>
+    <div class="tooltip-shell">
+      @if (title) {
+        <div class="tooltip-title">{{ title }}</div>
+      }
+      <div class="tooltip-content">
+        <ngx-json-viewer [json]="parsedJson" [expanded]="true"></ngx-json-viewer>
+      </div>
+    </div>
   `,
   styles: [`
     :host {
       display: block;
       font-size: 12px;
       line-height: 1.4;
+      word-break: break-word;
+      overflow: hidden;
+    }
+    .tooltip-shell {
+      display: flex;
+      flex-direction: column;
       max-width: 800px;
       max-height: 80vh;
+      overflow: hidden;
+    }
+    .tooltip-content {
+      min-height: 0;
       overflow: auto;
-      word-break: break-word;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
     }
     .tooltip-title {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -48,6 +63,11 @@ import { NgxJsonViewerModule } from 'ngx-json-viewer';
       top: 0;
       background: inherit;
       z-index: 1;
+    }
+    ngx-json-viewer {
+      display: block;
+      height: auto !important;
+      min-width: 0;
     }
   `],
   standalone: true,

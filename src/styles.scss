@@ -962,6 +962,7 @@ html.light-theme {
   padding: 8px 12px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   max-width: 800px !important;
+  overflow: hidden !important;
 }
 
 // Transparent backdrop for workflow graph tooltip

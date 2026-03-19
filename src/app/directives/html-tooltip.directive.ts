@@ -75,7 +75,6 @@ export class JsonTooltipDirective implements OnDestroy {
       positionStrategy,
       scrollStrategy: this.overlay.scrollStrategies.close(),
       panelClass: 'json-tooltip-panel',
-      maxHeight: '80vh',
       maxWidth: '90vw',
     });
 
@@ -83,6 +82,8 @@ export class JsonTooltipDirective implements OnDestroy {
     const tooltipRef = this.overlayRef.attach(tooltipPortal);
     tooltipRef.instance.json = this.json;
     tooltipRef.instance.title = this.title;
+    tooltipRef.changeDetectorRef.detectChanges();
+    this.overlayRef.updatePosition();
   }
 
   @HostListener('mouseleave')

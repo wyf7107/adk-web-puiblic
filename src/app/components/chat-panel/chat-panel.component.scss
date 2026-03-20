@@ -350,8 +350,9 @@
 
 .chat-input {
   display: flex;
+  flex-direction: column;
   padding: 10px;
-  width: 60%;
+  width: min(960px, 88%);
   margin: 0 auto;
   position: relative;
   z-index: 1;
@@ -365,7 +366,6 @@
   textarea {
     color: var(--chat-panel-input-field-textarea-color);
     border: none;
-    padding: 10px;
     box-sizing: content-box;
     caret-color: var(--chat-panel-input-field-textarea-caret-color);
 
@@ -381,17 +381,18 @@
 }
 
 .chat-input-actions {
-  width: 106%;
+  width: 100%;
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 100%;
+}
 
-  button {
-    margin-left: 10px;
-    margin-right: 10px;
-  }
+.chat-input-actions-left,
+.chat-input-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .file-preview {
@@ -447,6 +448,10 @@
 :host ::ng-deep .input-field .mat-mdc-text-field-wrapper {
   border: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
   border-radius: 16px;
+}
+
+:host ::ng-deep .input-field .mat-mdc-form-field-icon-suffix {
+  padding: 0 16px 0 8px;
 }
 
 .image-container {
@@ -580,7 +585,8 @@
 }
 
 button.audio-rec-btn,
-button.video-rec-btn {
+button.video-rec-btn,
+button.send-message-btn {
   background-color: var(--chat-card-background-color);
 
   &.recording {

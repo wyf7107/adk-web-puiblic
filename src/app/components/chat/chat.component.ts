@@ -201,6 +201,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   userInput: string = '';
   userEditEvalCaseMessage: string = '';
   userId = 'user';
+  userIdDraft = '';
+  isEditingUserId = false;
   appName = '';
   sessionId = ``;
   sessionIdOfLoadedMessages = '';
@@ -2014,6 +2016,42 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.openSnackBar(this.i18n.sessionIdCopiedMessage, 'OK');
     } catch {
       this.openSnackBar(this.i18n.copySessionIdFailedMessage, 'OK');
+    }
+  }
+
+  startUserIdEdit() {
+    this.userIdDraft = this.userId;
+    this.isEditingUserId = true;
+  }
+
+  cancelUserIdEdit() {
+    this.userIdDraft = '';
+    this.isEditingUserId = false;
+  }
+
+  saveUserId() {
+    const updatedUserId = this.userIdDraft.trim();
+    if (!updatedUserId) {
+      this.openSnackBar(this.i18n.invalidUserIdMessage, 'OK');
+      return;
+    }
+
+    this.userId = updatedUserId;
+    this.isEditingUserId = false;
+    this.isSessionUrlEnabledObs.pipe(take(1)).subscribe((enabled) => {
+      if (enabled) {
+        this.updateSelectedSessionUrl();
+      }
+    });
+  }
+
+  handleUserIdInputKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.saveUserId();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelUserIdEdit();
     }
   }
 

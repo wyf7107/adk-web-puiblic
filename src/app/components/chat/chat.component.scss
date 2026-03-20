@@ -532,6 +532,46 @@
   }
 }
 
+.toolbar-user-id-container {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+}
+
+.toolbar-user-id-edit-button,
+.toolbar-user-id-action-button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-left: 4px;
+  color: var(--chat-toolbar-icon-color);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.toolbar-user-id-input {
+  width: 140px;
+  height: 24px;
+  border: 1px solid var(--chat-toolbar-session-text-color);
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--chat-toolbar-session-id-color);
+  padding: 0 6px;
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 12px;
+}
+
+.toolbar-user-id-input:focus {
+  outline: 1px solid var(--chat-toolbar-icon-color);
+}
+
 .toolbar-icon {
   width: 24px;
   height: 24px;

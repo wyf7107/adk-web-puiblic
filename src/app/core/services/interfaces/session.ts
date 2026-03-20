@@ -18,7 +18,7 @@
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 
-import {Session} from '../../models/Session';
+import {Session, SessionState} from '../../models/Session';
 
 export const SESSION_SERVICE =
     new InjectionToken<SessionService>('SessionService');
@@ -51,6 +51,7 @@ export declare abstract class SessionService {
       userId: string,
       appName: string,
       events: any[],
+      state?: SessionState,
       ): Observable<Session>;
   abstract canEdit(userId: string, session: Session): Observable<boolean>;
 }

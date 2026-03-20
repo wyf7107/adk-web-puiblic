@@ -257,16 +257,7 @@
             <mat-icon>add</mat-icon>
             {{ i18n.newSessionButton }}
           </div>
-          @if (importSessionEnabledObs | async) {
-          <span
-            class="material-symbols-outlined toolbar-icon"
-            id="toolbar-import-session-button"
-            [matTooltip]="i18n.importSessionTooltip"
-            (click)="importSession()"
-          >
-            upload
-          </span>
-          }
+
           <button
             mat-icon-button
             [matMenuTriggerFor]="sessionActionsMenu"
@@ -293,6 +284,12 @@
             <button mat-menu-item id="toolbar-export-session-button" (click)="exportSession()">
               <mat-icon>download</mat-icon>
               <span>{{ i18n.exportSessionTooltip }}</span>
+            </button>
+            }
+            @if (importSessionEnabledObs | async) {
+            <button mat-menu-item id="toolbar-import-session-button" (click)="importSession()">
+              <mat-icon>upload</mat-icon>
+              <span>{{ i18n.importSessionTooltip }}</span>
             </button>
             }
           </mat-menu>

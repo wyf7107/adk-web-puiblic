@@ -30,9 +30,7 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
   constructor() {}
 
   isImportSessionEnabled(): Observable<boolean> {
-    return this.route.queryParams.pipe(
-        map((params) => params[IMPORT_SESSION] === 'true'),
-    );
+    return of(true);
   }
 
   isEditFunctionArgsEnabled(): Observable<boolean> {

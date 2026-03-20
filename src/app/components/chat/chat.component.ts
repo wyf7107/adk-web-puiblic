@@ -2501,18 +2501,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           try {
             const sessionData =
               JSON.parse(e.target.result as string) as Session;
-            if (!sessionData.userId || !sessionData.appName ||
-              !sessionData.events) {
-              this.openSnackBar('Invalid session file format', 'OK');
+            if (!sessionData.events || sessionData.events.length === 0) {
+              this.openSnackBar('Invalid session file: no events found', 'OK');
               return;
             }
-            this.sessionService
-              .importSession(
-                sessionData.userId, sessionData.appName, sessionData.events)
-              .subscribe((res) => {
-                this.openSnackBar('Session imported', 'OK');
-                this.sessionTab?.refreshSession();
+
+            if (sessionData.appName && sessionData.appName !== this.appName) {
+              const dialogData: DeleteSessionDialogData = {
+                title: 'App name mismatch',
+                message: `The session file was exported from app "${sessionData.appName}" but the current app is "${this.appName}". Do you want to import it anyway?`,
+                confirmButtonText: 'Import',
+                cancelButtonText: 'Cancel',
+              };
+              const dialogRef = this.dialog.open(DeleteSessionDialogComponent, {
+                width: '600px',
+                data: dialogData,
               });
+              dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+                if (confirmed) {
+                  this.doImportSession(sessionData);
+                }
+              });
+            } else {
+              this.doImportSession(sessionData);
+            }
           } catch (error) {
             this.openSnackBar('Error parsing session file', 'OK');
           }
@@ -2523,5 +2535,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     input.click();
+  }
+
+  private doImportSession(sessionData: Session) {
+    const now = Date.now() / 1000;
+    const events = sessionData.events!.map(event => ({
+      ...event,
+      timestamp: now,
+    }));
+
+    this.sessionService
+      .importSession(this.userId, this.appName, events, sessionData.state)
+      .subscribe((res) => {
+        this.openSnackBar(
+          `Session imported successfully (ID: ${res.id})`, 'OK');
+        this.sessionTab?.refreshSession();
+      });
   }
 }

@@ -2109,6 +2109,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleSse() {
     this.useSse = !this.useSse;
+    this.enableSseIndicator.set(this.useSse);
   }
 
   enterBuilderMode() {

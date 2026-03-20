@@ -23,11 +23,10 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButton, MatFabButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { MatDivider } from '@angular/material/divider';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { MatDrawer, MatDrawerContainer } from '@angular/material/sidenav';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { SafeHtml } from '@angular/platform-browser';
@@ -142,8 +141,7 @@ const BIDI_STREAMING_RESTART_WARNING =
     NgxJsonViewerModule,
     NgClass,
     MatButton,
-    MatSlideToggle,
-    MatDivider,
+    MatMenuModule,
     MatCard,
     MatFabButton,
     ResizableBottomDirective,

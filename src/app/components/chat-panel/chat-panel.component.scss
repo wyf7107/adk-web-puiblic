@@ -124,7 +124,8 @@
   width: 80%;
   display: flex;
 
-  &.has-content-above {
+  mat-card + &,
+  .message-card + & {
     margin-top: 5px;
   }
 }
@@ -156,11 +157,10 @@
   flex-wrap: wrap;
   align-items: center;
 
-  &.has-content-above {
+  mat-card ~ &,
+  .output-chip-container ~ & {
     display: flex;
     width: 100%;
-    margin-top: 4px;
-    margin-left: 82px;
   }
 }
 
@@ -170,10 +170,7 @@
   flex-direction: row;
   margin-left: -20px;
   margin-right: -20px;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding: 4px 20px;
   border: 2px solid transparent;
   border-radius: 4px;
 
@@ -220,7 +217,7 @@
 
 .bot-message {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-start;
   flex-grow: 1;
 
@@ -234,6 +231,18 @@
   button {
     align-self: flex-start;
   }
+}
+
+.message-content {
+  display: contents;
+}
+
+.bot-message > .message-content {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
 }
 
 .bot-message:focus-within {

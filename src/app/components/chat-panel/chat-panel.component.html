@@ -79,6 +79,7 @@
           </div>
           }
         } 
+        <div class="message-content">
         @if (shouldShowMessageCard(message)) {
         <mat-card
           class="message-card"
@@ -274,7 +275,6 @@
         @if (message.role === "bot" && hasEventOutputData(i)) {
         <div
           class="output-chip-container"
-          [ngClass]="{'has-content-above': shouldShowMessageCard(message)}"
           [appJsonTooltip]="(getNodePath(i) || getEventNodePath(i))"
           [appJsonTooltipTitle]="'Node Output'"
         >
@@ -288,7 +288,7 @@
           </mat-card>
         </div>
         }
-        <div class="event-chips-container" [ngClass]="{'has-content-above': shouldShowMessageCard(message) || hasEventOutputData(i)}">
+        <div class="event-chips-container">
         @if (message.functionCalls && message.functionCalls.length > 0) {
           @for (functionCall of message.functionCalls; track functionCall.id) {
             @if (isComputerUseClick(functionCall)) {
@@ -448,6 +448,7 @@
         </div>
         } 
         } 
+        </div> <!-- end message-content -->
         @if (message.role === "user") {
           <button mat-mini-fab>
             <mat-icon>person</mat-icon>

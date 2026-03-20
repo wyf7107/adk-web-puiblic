@@ -809,3 +809,7 @@ app-canvas {
   font-size: 10px;
   color: var(--adk-web-text-color-light-gray);
 }
+
+.menu-check-icon.inactive {
+  visibility: hidden;
+}

@@ -11,6 +11,11 @@
         } @else {
           <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
           {{ i18n.agentDevelopmentKitLabel }}
+          <span
+            class="material-symbols-outlined adk-info-icon"
+            [matTooltip]="i18n.disclosureTooltip"
+            matTooltipPosition="below"
+          >info</span>
         }
       </div>
       <div style="display: flex; align-items: center; gap: 8px;">

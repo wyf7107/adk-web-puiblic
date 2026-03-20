@@ -467,7 +467,7 @@
   @if(canEditSession()) {
   <div class="chat-input">
     <input type="file" multiple hidden (change)="fileSelect.emit($event)" #fileInput />
-    <mat-form-field class="input-field" appearance="outline">
+    <mat-form-field class="input-field" appearance="outline" subscriptSizing="dynamic">
       @if ((selectedFiles.length && appName != "") || updatedSessionState) {
       <div class="file-preview">
         @for (file of selectedFiles; track file; let i = $index) {
@@ -514,58 +514,65 @@
         (keydown.enter)="sendMessage.emit($event)"
         [placeholder]="i18n.typeMessagePlaceholder"
       ></textarea>
-      <div class="chat-input-actions">
-        <div>
-          <button
-            mat-icon-button
-            (click)="fileInput.click()"
-            class="chat-action-button"
-            [matTooltip]="i18n.uploadFileTooltip"
-            [disabled]="!(isMessageFileUploadEnabledObs | async)"
-          >
-            <mat-icon>attach_file</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            [matMenuTriggerFor]="moreMenu"
-            class="chat-action-button"
-            [matTooltip]="i18n.moreOptionsTooltip"
-            [disabled]="!(isManualStateUpdateEnabledObs | async)"
-          >
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #moreMenu="matMenu">
-            <span mat-menu-item [matTooltip]="i18n.updateStateMenuTooltip"
-              (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }}
-            </span>
-          </mat-menu>
-        </div>
-        <div>
-          <button
-            mat-icon-button
-            matSuffix
-            (click)="toggleAudioRecording.emit()"
-            class="audio-rec-btn"
-            [class.recording]="isAudioRecording"
-            [matTooltip]="isAudioRecording ? i18n.turnOffMicTooltip : i18n.useMicTooltip"
-            [disabled]="!(isBidiStreamingEnabledObs | async)"
-          >
-            <mat-icon>mic</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            matSuffix
-            (click)="toggleVideoRecording.emit()"
-            class="video-rec-btn"
-            [class.recording]="isVideoRecording"
-            [matTooltip]="isVideoRecording ? i18n.turnOffCamTooltip : i18n.useCamTooltip"
-            [disabled]="!(isBidiStreamingEnabledObs | async)"
-          >
-            <mat-icon>videocam</mat-icon>
-          </button>
-        </div>
-      </div>
+      <button
+        mat-icon-button
+        matSuffix
+        (click)="sendMessage.emit($event)"
+        class="send-message-btn"
+        [matTooltip]="i18n.sendMessageTooltip"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
     </mat-form-field>
+    <div class="chat-input-actions">
+      <div class="chat-input-actions-left">
+        <button
+          mat-icon-button
+          (click)="fileInput.click()"
+          class="chat-action-button"
+          [matTooltip]="i18n.uploadFileTooltip"
+          [disabled]="!(isMessageFileUploadEnabledObs | async)"
+        >
+          <mat-icon>attach_file</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="moreMenu"
+          class="chat-action-button"
+          [matTooltip]="i18n.moreOptionsTooltip"
+          [disabled]="!(isManualStateUpdateEnabledObs | async)"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #moreMenu="matMenu">
+          <span mat-menu-item [matTooltip]="i18n.updateStateMenuTooltip"
+            (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }}
+          </span>
+        </mat-menu>
+      </div>
+      <div class="chat-input-actions-right">
+        <button
+          mat-icon-button
+          (click)="toggleAudioRecording.emit()"
+          class="audio-rec-btn"
+          [class.recording]="isAudioRecording"
+          [matTooltip]="isAudioRecording ? i18n.turnOffMicTooltip : i18n.useMicTooltip"
+          [disabled]="!(isBidiStreamingEnabledObs | async)"
+        >
+          <mat-icon>mic</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          (click)="toggleVideoRecording.emit()"
+          class="video-rec-btn"
+          [class.recording]="isVideoRecording"
+          [matTooltip]="isVideoRecording ? i18n.turnOffCamTooltip : i18n.useCamTooltip"
+          [disabled]="!(isBidiStreamingEnabledObs | async)"
+        >
+          <mat-icon>videocam</mat-icon>
+        </button>
+      </div>
+    </div>
     </div>
 
   }

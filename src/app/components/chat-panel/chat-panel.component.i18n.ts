@@ -38,6 +38,7 @@ export const CHAT_PANEL_MESSAGES = {
   deleteEvalMessageTooltip: 'Delete eval case message',
   editFunctionArgsTooltip: 'Edit function arguments',
   typeMessagePlaceholder: 'Type a Message...',
+  sendMessageTooltip: 'Send message',
   uploadFileTooltip: 'Upload local file',
   moreOptionsTooltip: 'More options',
   updateStateMenuLabel: 'Update state',

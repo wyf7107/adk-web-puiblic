@@ -339,11 +339,6 @@
   border-radius: 4px;
 }
 
-button {
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
 .empty-state-container {
   color: var(--chat-empty-state-container-color);
   height: 100%;
@@ -570,6 +565,13 @@ button {
       with-icon-handle-size: 20px,
     )
   );
+}
+
+.toolbar-more-actions-button {
+  margin-right: 8px;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 :host ::ng-deep pre {

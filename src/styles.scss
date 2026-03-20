@@ -183,6 +183,7 @@ html.dark-theme {
   --mdc-dialog-subhead-font-size: 24px;
   --mdc-dialog-subhead-line-height: 32px;
   --mdc-dialog-subhead-color: #e3e3e3;
+  --mdc-dialog-container-color: #2b2b2f;
 
   @include mat.dialog-overrides((container-color: #2b2b2f,
       subhead-color: white,
@@ -198,6 +199,7 @@ html.light-theme {
   --mdc-dialog-subhead-font-size: 24px;
   --mdc-dialog-subhead-line-height: 32px;
   --mdc-dialog-subhead-color: #202124;
+  --mdc-dialog-container-color: #ffffff;
 
   @include mat.dialog-overrides((container-color: #ffffff,
       subhead-color: #202124,

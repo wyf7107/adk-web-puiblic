@@ -196,7 +196,46 @@
         </div>
         @if (isUserIdOnToolbarEnabledObs | async) {
         <div class="toolbar-session-text" style="margin-left: 16px">{{ i18n.userIdLabel }}</div>
-        <div class="toolbar-session-id">{{ userId }}</div>
+        <div class="toolbar-user-id-container">
+          @if (!isEditingUserId) {
+          <div class="toolbar-session-id">{{ userId }}</div>
+          <button
+            mat-icon-button
+            class="toolbar-user-id-edit-button"
+            [matTooltip]="i18n.editUserIdTooltip"
+            (click)="startUserIdEdit()"
+            aria-label="Edit user ID"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          } @else {
+          <input
+            class="toolbar-user-id-input"
+            [attr.placeholder]="i18n.userIdInputPlaceholder"
+            [(ngModel)]="userIdDraft"
+            (keydown)="handleUserIdInputKeydown($event)"
+            [attr.aria-label]="i18n.userIdInputPlaceholder"
+          />
+          <button
+            mat-icon-button
+            class="toolbar-user-id-action-button"
+            [matTooltip]="i18n.saveUserIdTooltip"
+            (click)="saveUserId()"
+            aria-label="Save user ID"
+          >
+            <mat-icon>check</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            class="toolbar-user-id-action-button"
+            [matTooltip]="i18n.cancelUserIdEditTooltip"
+            (click)="cancelUserIdEdit()"
+            aria-label="Cancel user ID edit"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </div>
         } @if (!canEditSession()) {
         <div class="readonly-badge">
           <mat-icon>visibility</mat-icon>

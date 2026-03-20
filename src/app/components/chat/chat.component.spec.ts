@@ -748,6 +748,46 @@ describe('ChatComponent', () => {
       });
     });
 
+    describe('when editing user ID', () => {
+      it('starts and cancels edit mode', () => {
+        component.userId = USER_ID;
+
+        component.startUserIdEdit();
+
+        expect(component.isEditingUserId).toBeTrue();
+        expect(component.userIdDraft).toBe(USER_ID);
+
+        component.cancelUserIdEdit();
+
+        expect(component.isEditingUserId).toBeFalse();
+        expect(component.userIdDraft).toBe('');
+      });
+
+      it('saves edited user ID and updates URL params', () => {
+        component.userId = USER_ID;
+        component.userIdDraft = 'new-user-id';
+
+        component.saveUserId();
+
+        expect(component.userId).toBe('new-user-id');
+        expect(component.isEditingUserId).toBeFalse();
+        expect(mockLocation.replaceState).toHaveBeenCalled();
+      });
+
+      it('does not save empty user ID', () => {
+        component.userId = USER_ID;
+        component.userIdDraft = '   ';
+
+        component.saveUserId();
+
+        expect(component.userId).toBe(USER_ID);
+        expect(mockSnackBar.open).toHaveBeenCalledWith(
+            'User ID cannot be empty',
+            OK_BUTTON_TEXT,
+        );
+      });
+    });
+
     describe('when deleting a session', () => {
       describe('and dialog is confirmed', () => {
         beforeEach(() => {

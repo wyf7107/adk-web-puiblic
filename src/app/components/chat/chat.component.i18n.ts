@@ -27,7 +27,7 @@ export const CHAT_MESSAGES = {
   saveButton: 'Save',
   editEvalCaseTooltip: 'Edit current eval case',
   deleteEvalCaseTooltip: 'Delete current eval case',
-  sessionIdLabel: 'Session ID',
+  sessionIdLabel: 'Session',
   copySessionIdTooltip: 'Copy session ID',
   sessionIdCopiedMessage: 'Session ID copied',
   copySessionIdFailedMessage: 'Failed to copy session ID',

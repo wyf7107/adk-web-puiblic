@@ -32,7 +32,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 
 import { URLUtil } from '../../../utils/url-util';
@@ -434,9 +434,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectApp(appName: string) {
     if (appName != this.appName) {
+      const isInitialLoad = !this.appName;
       this.agentService.setApp(appName);
 
-      this.loadSessionByUrlOrReset();
+      if (isInitialLoad) {
+        // On initial load, honour any session ID in the URL.
+        this.loadSessionByUrlOrReset();
+      } else {
+        // When switching agents, start fresh — the URL session belongs
+        // to the previous agent.
+        this.createSessionAndReset();
+      }
     }
   }
 
@@ -507,13 +515,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private createSessionAndReset() {
-    this.createSession();
+    this.resetToNewSession();
     this.eventData = new Map<string, any>();
     this.messages.set([]);
     this.artifacts = [];
     this.userInput = '';
     this.longRunningEvents = [];
     this.displayLandingPageContent();
+  }
+
+  private resetToNewSession() {
+    this.sessionId = '';
+    this.currentSessionState = {};
+    this.sessionTab?.refreshSession();
+    this.clearSessionUrl();
   }
 
   createSession() {
@@ -545,6 +560,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (event instanceof KeyboardEvent) {
       // support for japanese IME
       if (event.isComposing || event.keyCode === 229) {
+        return;
+      }
+    }
+
+    // Lazily create a real session on first message send.
+    if (!this.sessionId) {
+      try {
+        const res = await firstValueFrom(
+          this.sessionService.createSession(this.userId, this.appName));
+        this.currentSessionState = res.state;
+        this.sessionId = res.id ?? '';
+        this.sessionTab?.refreshSession();
+        this.sessionTab?.reloadSession(this.sessionId);
+        this.isSessionUrlEnabledObs.pipe(first()).subscribe((enabled) => {
+          if (enabled) {
+            this.updateSelectedSessionUrl();
+          }
+        });
+      } catch {
+        this.openSnackBar('Failed to create session', 'OK');
         return;
       }
     }
@@ -1981,7 +2016,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onNewSessionClick() {
-    this.createSession();
+    this.resetToNewSession();
     this.eventData.clear();
     this.messages.set([]);
     this.artifacts = [];
@@ -2000,7 +2035,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getToolbarSessionId() {
     if (!this.sessionId) {
-      return '';
+      return 'NEW';
     }
 
     return this.sessionId.length > 8 ? `${this.sessionId.slice(0, 8)}...` : this.sessionId;
@@ -2289,6 +2324,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       })
       .toString();
     this.location.replaceState(url);
+  }
+
+  private clearSessionUrl() {
+    this.isSessionUrlEnabledObs.pipe(first()).subscribe((enabled) => {
+      if (enabled) {
+        const url = this.router
+          .createUrlTree([], {
+            queryParams: {
+              'session': null,
+            },
+            queryParamsHandling: 'merge',
+          })
+          .toString();
+        this.location.replaceState(url);
+      }
+    });
   }
 
   handlePageEvent(event: any) {

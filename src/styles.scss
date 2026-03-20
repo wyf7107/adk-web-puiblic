@@ -841,6 +841,13 @@ html.light-theme {
 .mat-mdc-tooltip {
   z-index: 10000 !important;
   max-width: 300px;
+  background-color: var(--mdc-dialog-container-color) !important;
+  color: var(--mdc-dialog-supporting-text-color) !important;
+
+  .mdc-tooltip__surface {
+    background-color: var(--mdc-dialog-container-color) !important;
+    color: var(--mdc-dialog-supporting-text-color) !important;
+  }
 }
 
 // Ensure Material select panel has proper background

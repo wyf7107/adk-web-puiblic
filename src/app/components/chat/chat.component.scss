@@ -475,6 +475,8 @@
   display: flex;
   align-items: center;
   z-index: 10;
+  font-size: 13px;
+  padding-left: 20px;
 }
 
 .chat-toolbar.edit-mode {
@@ -491,27 +493,43 @@
 .toolbar-session-text {
   color: var(--chat-toolbar-session-text-color);
   font-family: Roboto;
-  font-size: 12px;
   font-style: normal;
   font-weight: 500;
-  line-height: 12px;
-  letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-left: 20px;
-  padding-top: 4px;
   flex-shrink: 0;
 }
 
 .toolbar-session-id {
   color: var(--chat-toolbar-session-id-color);
   font-family: 'Google Sans Mono', monospace;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: 20px;
-  letter-spacing: 0.25px;
   margin-left: 5px;
-  flex-shrink: 0;
+}
+
+.toolbar-session-id-container {
+  display: flex;
+  align-items: center;
+  margin-left: 5px;
+
+  .toolbar-session-id {
+    margin-left: 0;
+  }
+}
+
+.toolbar-copy-session-id-button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-left: 4px;
+  color: var(--chat-toolbar-icon-color);
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .toolbar-icon {
@@ -523,7 +541,6 @@
 }
 
 #toolbar-new-session-button {
-  font-size: 14px;
   margin-right: 16px;
   color: var(--chat-toolbar-new-session-color);
   cursor: pointer;

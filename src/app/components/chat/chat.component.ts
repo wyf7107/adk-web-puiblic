@@ -1996,6 +1996,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  getToolbarSessionId() {
+    if (!this.sessionId) {
+      return '';
+    }
+
+    return this.sessionId.length > 8 ? `${this.sessionId.slice(0, 8)}...` : this.sessionId;
+  }
+
+  async copySessionId() {
+    if (!this.sessionId) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(this.sessionId);
+      this.openSnackBar(this.i18n.sessionIdCopiedMessage, 'OK');
+    } catch {
+      this.openSnackBar(this.i18n.copySessionIdFailedMessage, 'OK');
+    }
+  }
+
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files) {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@use '@angular/material' as mat;
-
 .trace-wrapper {
   padding-left: 25px;
   padding-right: 25px;
@@ -63,7 +61,6 @@
 .trace-bar {
   position: absolute;
   height: 18px;
-  background-color: var(--trace-tab-trace-bar-background-color);
   border-radius: 4px;
   padding-left: 4px;
   overflow: hidden;
@@ -107,7 +104,6 @@
   bottom: 0;
   left: 9px;
   width: 1px;
-  background-color: var(--trace-tab-vertical-line-background-color);
 }
 
 .horizontal-line {
@@ -116,50 +112,8 @@
   left: 9px;
   width: 10px;
   height: 1px;
-  background-color: var(--trace-tab-horizontal-line-background-color);
 }
 
 .trace-item {
   margin-top: 5px;
-  @include mat.expansion-overrides(
-    (
-      container-background-color:
-        var(--trace-tab-trace-item-container-background-color),
-      header-focus-state-layer-color:
-        var(--trace-tab-trace-item-header-focus-state-layer-color),
-      header-description-color:
-        var(--trace-tab-trace-item-header-description-color),
-      header-text-size: 15,
-    )
-  );
-
-  ::ng-deep .mat-expansion-panel-header.mat-expanded:focus {
-    background-color: var(
-      --trace-tab-mat-expansion-panel-header-focus-background-color
-    );
-  }
-
-  ::ng-deep .mat-expansion-panel-header.mat-expanded {
-    background-color: var(
-      --trace-tab-mat-expansion-panel-header-background-color
-    );
-  }
-
-  ::ng-deep .mat-expansion-panel-header.mat-expanded:hover {
-    background-color: var(
-      --trace-tab-mat-expansion-panel-header-hover-background-color
-    );
-  }
-}
-
-::ng-deep .mat-expansion-panel-header-title {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-::ng-deep .mat-expansion-panel-header-description {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
 }

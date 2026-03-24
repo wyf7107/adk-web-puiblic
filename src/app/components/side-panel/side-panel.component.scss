@@ -14,29 +14,11 @@
  * limitations under the License.
  */
 
-@use '@angular/material' as mat;
-
 .drawer-header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: var(--side-panel-button-filled-container-color),
-      filled-label-text-color: var(--side-panel-button-filled-label-text-color),
-    )
-  );
-
-  .mat-icon {
-    width: 36px;
-    height: 36px;
-    color: var(--side-panel-mat-icon-color);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 }
 .tabs-container {
   width: 100%;
@@ -47,7 +29,6 @@
   font-size: 14px;
 }
 .resize-handler {
-  background: var(--side-panel-resize-handler-background-color);
   width: 4px;
   border-radius: 4px;
   position: absolute;
@@ -55,7 +36,6 @@
   height: 20%;
   top: 40%;
   right: 0;
-  z-index: 9999;
   cursor: ew-resize;
 }
 .json-viewer-container {
@@ -65,14 +45,10 @@
 .event-paginator {
   margin-top: -8px;
   margin-right: auto;
-  background-color: inherit;
   display: flex;
   justify-content: center;
 }
 
-:host ::ng-deep .mat-mdc-paginator-page-size {
-  display: none;
-}
 
 .details-panel-container {
   position: absolute;
@@ -81,11 +57,9 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--side-panel-details-panel-container-background-color);
   display: inline-block;
   justify-content: center;
   align-items: center;
-  z-index: 10;
 }
 
 .details-content {
@@ -150,7 +124,6 @@
 .app-select-container {
   width: 60%;
   margin-top: 12px;
-  background-color: var(--side-panel-app-select-container-background-color);
   margin-left: 10px;
   height: 30px;
   display: flex;
@@ -159,17 +132,6 @@
   padding-right: 20px;
   border-radius: 10px;
   padding-top: 5px;
-}
-
-.app-select-container {
-  @include mat.select-overrides(
-    (
-      placeholder-text-color: var(--side-panel-select-placeholder-text-color),
-      enabled-trigger-text-color:
-        var(--side-panel-select-enabled-trigger-text-color),
-      enabled-arrow-color: var(--side-panel-select-enabled-arrow-color),
-    )
-  );
 }
 
 .app-name-option {
@@ -197,9 +159,6 @@
 
 .build-mode-button {
   margin: 0 4px;
-  &.mat-mdc-unelevated-button {
-    height: 30px;
-  }
 }
 
 .app-actions {
@@ -232,52 +191,9 @@
   font-style: italic;
 }
 
-:host ::ng-deep .mat-mdc-tooltip .mdc-tooltip__surface {
-  max-width: 250px;
-  white-space: wrap;
-  font-size: 11px;
-}
 
-:host ::ng-deep .wide-agent-dropdown-panel {
-  min-width: 300px;
-  max-width: 600px;
-  max-height: 400px;
-
-  .mat-mdc-option {
-    white-space: normal;
-    line-height: 1.4;
-    height: auto;
-    min-height: 48px;
-    padding: 8px 16px;
-  }
-
-  .search-option {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 1000 !important;
-    background-color: var(--mat-select-panel-background-color, white) !important;
-    padding: 8px 16px !important;
-    border-bottom: 1px solid var(--mat-divider-color, rgba(0, 0, 0, 0.12));
-    min-height: auto !important;
-    height: auto !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    opacity: 1 !important;
-
-    &:hover {
-      background-color: var(--mat-select-panel-background-color, white) !important;
-    }
-
-    &.mat-mdc-option.mat-mdc-option-active {
-      background-color: var(--mat-select-panel-background-color, white) !important;
-    }
-  }
-}
 
 
 .agent-search-field {
   width: 100%;
-
-  .mat-mdc-form-field-subscript-wrapper {
-    display: none;
-  }
 }

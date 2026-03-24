@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@use '@angular/material' as mat;
-
 .events-wrapper {
   padding-left: 25px;
   padding-right: 25px;
@@ -64,25 +62,6 @@
 }
 
 .event-list {
-  @include mat.list-overrides(
-    (
-      active-indicator-color: var(--event-tab-event-list-active-indicator-color),
-      list-item-container-color:
-        var(--event-tab-event-list-list-item-container-color),
-      list-item-label-text-size: 14px,
-      list-item-label-text-weight: 400,
-      list-item-one-line-container-height: 52px,
-    )
-  );
-}
-
-:host ::ng-deep .mdc-list-item {
-  border: 1px solid var(--event-tab-mdc-list-item-border-color);
-  cursor: pointer;
-
-  &:hover {
-    background-color: var(--event-tab-mdc-list-item-hover-background-color);
-  }
 }
 
 .event-header {

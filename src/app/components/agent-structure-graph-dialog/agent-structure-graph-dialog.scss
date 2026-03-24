@@ -79,12 +79,10 @@ button[mat-button] {
   }
 }
 
-:host-context(.dark-theme) .svg-container {
-  background-color: #0e172a;
+.svg-container {
 }
 
-:host-context(.light-theme) .svg-container {
-  background-color: #f9fafc;
+.svg-container.dark-theme {
 }
 
 .loading-container,

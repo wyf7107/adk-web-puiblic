@@ -5,14 +5,6 @@ build.dialog-container {
   box-shadow: 0 8px 16px var(--run-eval-config-dialog-container-box-shadow-color);
 }
 
-.threshold-slider {
-  --mdc-slider-active-track-color: var(--run-eval-config-dialog-threshold-slider-active-track-color);
-  --mdc-slider-inactive-track-color: var(--run-eval-config-dialog-threshold-slider-inactive-track-color);
-  --mdc-slider-handle-color: var(--run-eval-config-dialog-threshold-slider-handle-color);
-  --mdc-slider-ripple-color: var(--run-eval-config-dialog-threshold-slider-ripple-color);
-  width: 100px
-}
-
 .metric-row {
   display: flex;
   flex-direction: row;
@@ -27,11 +19,6 @@ build.dialog-container {
   margin-left: 20px;
 }
 
-.mdc-slider__thumb--with-indicator {
-  background-color: var(--mdc-slider-handle-color, var(--run-eval-config-dialog-mdc-slider-thumb-background-color));
-  border: none !important;
-  box-shadow: none !important;
-}
 
 h2[mat-dialog-title] {
   color: var(--mdc-dialog-supporting-text-color) !important;

@@ -42,7 +42,6 @@
 .trace-bar {
   position: absolute;
   height: 18px;
-  background-color: var(--trace-tree-trace-bar-background-color);
   border-radius: 4px;
   padding-left: 4px;
   overflow: hidden;
@@ -72,12 +71,10 @@
   cursor: pointer;
 
   &:hover {
-    background-color: var(--trace-tree-trace-row-hover-background-color);
   }
 }
 
 .trace-row.selected {
-  background-color: var(--trace-tree-trace-row-selected-background-color);
 }
 
 .trace-indent {
@@ -99,7 +96,6 @@
   bottom: 0;
   left: 9px;
   width: 1px;
-  background-color: var(--trace-tree-vertical-line-background-color);
 }
 
 .horizontal-line {
@@ -108,7 +104,6 @@
   left: 9px;
   width: 10px;
   height: 1px;
-  background-color: var(--trace-tree-horizontal-line-background-color);
 }
 
 .trace-row-left {

@@ -34,9 +34,6 @@
   }
 
   .session-filter-container {
-    background-color: var(
-      --session-tab-session-filter-container-background-color
-    );
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
@@ -45,14 +42,6 @@
 
   .session-filter {
     width: 100%;
-
-    ::ng-deep {
-      .mdc-floating-label--float-above {
-        background-color: var(
-          --session-tab-session-filter-container-background-color
-        );
-      }
-    }
   }
 }
 
@@ -66,16 +55,13 @@
   justify-content: space-between;
   align-items: center;
   border: none;
-  background-color: var(--session-tab-session-item-background-color);
   border-radius: 8px;
   margin-bottom: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: var(--session-tab-session-item-hover-background-color);
   }
   &.current {
-    background-color: var(--session-tab-session-item-current-background-color);
   }
 
   mat-chip {
@@ -122,7 +108,6 @@
 
 .readonly-badge {
   color: var(--chat-readonly-badge-color);
-  background-color: var(--chat-readonly-badge-background-color);
   border-radius: 4px;
   padding: 1px 6px;
   display: flex;

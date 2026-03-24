@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-@use '@angular/material' as mat;
 // Builder tabs container
 .builder-tabs-container {
   width: 100%;
@@ -35,7 +34,6 @@
 }
 
 .breadcrumb-chip {
-  background-color: transparent;
   color: var(--builder-text-muted-color);
   font-family: 'Google Sans';
   font-size: 16px;
@@ -77,22 +75,6 @@
     font-size: 14px;
     line-height: 1.5;
   }
-
-  @include mat.form-field-overrides(
-    (
-      filled-container-color: var(--builder-form-field-background-color),
-      filled-focus-active-indicator-color: var(--builder-form-field-background-color),
-      filled-active-indicator-color: var(--builder-form-field-background-color),
-      filled-hover-active-indicator-color: var(--builder-form-field-background-color),
-      filled-label-text-color: var(--builder-text-secondary-color),
-      filled-focus-label-text-color: var(--builder-text-link-color),
-      filled-hover-label-text-color: var(--builder-text-secondary-color),
-    )
-  );
-}
-
-:host ::ng-deep .mat-mdc-text-field-wrapper {
-  border: none !important;
 }
 
 // Components section header
@@ -180,11 +162,9 @@
 }
 
 .tree-view mat-tree {
-  background-color: inherit !important;
 }
 
 .tree-view expand-button {
-  background-color: transparent;
   border: 0;
 }
 
@@ -225,7 +205,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
-  background-color: var(--builder-card-background-color);
   color: var(--builder-text-primary-color);
   font-family: 'Google Sans Mono', monospace;
   font-size: 14px;
@@ -239,7 +218,6 @@
   }
 
   &:hover {
-    background-color: var(--builder-hover-background-color);
 
     button {
       visibility: visible;
@@ -254,131 +232,6 @@
   flex: 1;
   min-width: 0;
   padding-right: 8px; /* Add some space between text and delete button */
-}
-
-// Tools chips styling
-::ng-deep .tools-chips-container {
-  .mat-mdc-chip-set {
-    width: 100%;
-  }
-
-  &.callbacks-list .mat-mdc-chip-set {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .mat-mdc-chip.tool-chip {
-    background-color: var(--builder-tool-chip-background-color);
-    color: var(--builder-text-primary-color);
-    font-family: 'Google Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    margin: 4px;
-
-    &:hover {
-      background-color: var(--builder-tool-chip-hover-color);
-    }
-  }
-
-  .mat-mdc-chip.tool-chip .mat-mdc-chip-action-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .mat-mdc-chip.tool-chip .tool-chip-name {
-    display: inline-flex;
-    align-items: center;
-  }
-
-  .mat-mdc-chip.tool-chip .tool-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  .mat-mdc-chip.tool-chip .mat-mdc-chip-remove {
-    opacity: 1;
-    color: var(--builder-text-secondary-color);
-
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    &:hover {
-      color: var(--builder-text-primary-color);
-    }
-  }
-
-  .mat-mdc-chip.callback-chip {
-    background: var(--builder-callback-chip-background-color);
-    background-color: var(--builder-callback-chip-background-color);
-    color: var(--builder-callback-chip-text-color);
-    font-family: 'Google Sans', sans-serif;
-    font-size: 14px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    width: auto;
-    height: 40px;
-    border-radius: 8px;
-    border: none;
-    box-shadow: none;
-    outline: none;
-    --mdc-chip-outline-width: 0;
-    --mdc-chip-outline-color: transparent;
-    --mdc-chip-elevated-container-color: var(--builder-callback-chip-background-color);
-    --mdc-chip-flat-container-color: var(--builder-callback-chip-background-color);
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
-  .mat-mdc-chip.callback-chip::before,
-  .mat-mdc-chip.callback-chip::after,
-  .mat-mdc-chip.callback-chip .mat-mdc-chip-focus-overlay {
-    border: none;
-    box-shadow: none;
-  }
-
-  .mat-mdc-chip.callback-chip .mat-mdc-chip-action-label {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    width: 100%;
-    gap: 12px;
-  }
-
-  .mat-mdc-chip.callback-chip .chip-content {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .mat-mdc-chip.callback-chip .chip-type {
-    color: var(--builder-callback-chip-type-color);
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-
-  .mat-mdc-chip.callback-chip .chip-name {
-    color: var(--builder-callback-chip-name-color);
-    font-size: 15px;
-    font-weight: 600;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
 }
 
 .tools-chips-container {
@@ -429,12 +282,6 @@
 
 .add-tool-button {
   width: 100%;
-  background: linear-gradient(
-      0deg,
-      var(--builder-add-button-background-color) 0%,
-      var(--builder-add-button-background-color) 100%
-    ),
-    var(--builder-panel-background-color);
   border: none;
   border-radius: 4px;
   margin-top: 12px;
@@ -466,7 +313,6 @@
   padding: 16px;
   border: 1px solid var(--builder-border-color);
   border-radius: 8px;
-  background-color: var(--builder-secondary-background-color);
 
   h3 {
     color: var(--builder-text-primary-color);
@@ -483,12 +329,10 @@
   }
 
   .create-agent-tool-btn {
-    background-color: var(--builder-button-primary-background-color);
     color: var(--builder-button-primary-text-color);
     font-weight: 500;
 
     &:hover {
-      background-color: var(--builder-button-primary-hover-color);
     }
   }
 }
@@ -528,14 +372,6 @@
 
 .callback-group {
   margin-top: 5px;
-  @include mat.expansion-overrides(
-    (
-      container-background-color: var(--builder-expansion-background-color),
-      header-focus-state-layer-color: red,
-      header-description-color: var(--builder-expansion-header-description-color),
-      header-text-size: 15,
-    )
-  );
 }
 
 .callback-list {
@@ -558,7 +394,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 4px;
-  background-color: var(--builder-card-background-color);
   color: var(--builder-text-primary-color);
   font-family: 'Google Sans Mono', monospace;
   font-size: 14px;
@@ -572,7 +407,6 @@
   }
 
   &:hover {
-    background-color: var(--builder-expansion-hover-color);
 
     button {
       visibility: visible;
@@ -584,27 +418,7 @@
   color: var(--builder-button-primary-background-color);
 
   &:hover {
-    background-color: var(--builder-add-button-background-color);
   }
-}
-
-// Override expansion panel styles for callbacks
-::ng-deep .callback-group .mat-expansion-panel-header.mat-expanded:focus {
-  background-color: var(--builder-expansion-hover-color) !important;
-}
-
-::ng-deep .callback-group .mat-expansion-panel-header.mat-expanded {
-  background-color: var(--builder-expansion-hover-color) !important;
-}
-
-::ng-deep .callback-group .mat-expansion-panel-header.mat-expanded:hover {
-  background-color: var(--builder-expansion-hover-color) !important;
-}
-
-::ng-deep .callback-group .mat-expansion-panel-header-title {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
 }
 
 // Make tab group take available space
@@ -617,40 +431,12 @@ mat-tab-group {
   min-height: 0;
 }
 
-::ng-deep .mat-mdc-tab-body-wrapper {
-  flex: 1;
-  overflow: hidden;
-  min-height: 0;
-}
-
-::ng-deep .mat-mdc-tab-body-content {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
 // Make tab group take available space
 mat-tab-group {
   flex: 1;
   padding-bottom: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-
-::ng-deep .mat-mdc-tab-body-wrapper {
-  flex: 1;
-  overflow: hidden;
-}
-
-::ng-deep .mat-mdc-tab-body-content {
-  height: 100%;
-  overflow: hidden;
-}
-
-::ng-deep .mat-drawer-inner-container {
   overflow: hidden;
 }
 
@@ -663,15 +449,12 @@ mat-tab-group {
   border-top: 1px solid var(--builder-border-color);
   flex-shrink: 0;
   margin-top: auto;
-  background-color: var(--builder-panel-background-color);
 
   .save-button {
-    background-color: var(--builder-button-primary-background-color);
     color: var(--builder-button-primary-text-color);
     font-weight: 500;
 
     &:hover {
-      background-color: var(--builder-button-primary-hover-color);
     }
   }
 
@@ -680,7 +463,6 @@ mat-tab-group {
     border: 1px solid var(--builder-button-secondary-border-color);
 
     &:hover {
-      background-color: var(--builder-button-secondary-hover-background-color);
       color: var(--builder-button-secondary-hover-text-color);
     }
   }
@@ -754,45 +536,6 @@ mat-tab-group {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: var(--side-panel-button-filled-container-color),
-      filled-label-text-color: var(--side-panel-button-filled-label-text-color),
-    )
-  );
-
-  .mat-icon {
-    width: 36px;
-    height: 36px;
-    color: var(--side-panel-mat-icon-color);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 }
 
-::ng-deep .mat-mdc-menu-panel {
-  background-color: var(--builder-menu-background-color) !important;
 
-  .menu-header {
-    color: var(--builder-text-secondary-color);
-    font-size: 12px;
-    padding: 8px 16px;
-    font-weight: 500;
-    text-transform: uppercase;
-    pointer-events: none;
-  }
-
-  .mat-mdc-menu-item {
-    color: var(--builder-text-primary-color);
-    &:hover {
-      background-color: var(--builder-menu-item-hover-color);
-    }
-  }
-
-  mat-divider {
-    border-top-color: var(--builder-menu-divider-color);
-    margin: 4px 0;
-  }
-}

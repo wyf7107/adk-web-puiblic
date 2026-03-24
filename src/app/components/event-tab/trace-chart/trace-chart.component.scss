@@ -40,7 +40,6 @@
 .trace-bar {
   position: absolute;
   height: 18px;
-  background-color: var(--trace-chart-trace-bar-background-color);
   border-radius: 4px;
   padding-left: 4px;
   overflow: hidden;
@@ -81,7 +80,6 @@
   bottom: 0;
   left: 9px;
   width: 1px;
-  background-color: var(--trace-chart-vertical-line-background-color);
 }
 
 .horizontal-line {
@@ -90,5 +88,4 @@
   left: 9px;
   width: 10px;
   height: 1px;
-  background-color: var(--trace-chart-horizontal-line-background-color);
 }

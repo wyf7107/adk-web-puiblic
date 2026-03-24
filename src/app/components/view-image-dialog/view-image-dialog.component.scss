@@ -1,6 +1,5 @@
 :host {
   display: block;
-  background-color: var(--mdc-dialog-container-color);
   padding: 16px;
 }
 
@@ -8,7 +7,6 @@
   position: absolute;
   top: 5px;
   right: 10px;
-  background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
@@ -18,11 +16,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10; /* Ensure button is clickable */
   margin-bottom: 15px;
 
   &:hover {
-    background-color: var(--builder-tool-item-hover-background-color);
   }
 
   svg {

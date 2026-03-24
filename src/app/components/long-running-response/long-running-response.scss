@@ -28,7 +28,6 @@
 }
 
 .message-box {
-  background-color: var(--chat-panel-bot-message-message-card-background-color);
   border-radius: 20px;
   padding: 15px 20px;
   font-size: 14px;
@@ -63,14 +62,12 @@
   }
 
   &.sending {
-    background-color: rgba(33, 150, 243, 0.1);
     border-color: rgba(33, 150, 243, 0.3);
     color: #2196f3;
   }
 }
 
 .function-event-button {
-  background-color: var(--chat-panel-function-event-button-background-color);
   border-color: var(--chat-panel-function-event-button-border-color) !important;
   color: var(--chat-panel-function-event-button-text-color) !important;
   margin: 5px 5px 5px;
@@ -100,7 +97,6 @@
 }
 
 .request-card-standalone {
-  background-color: var(--chat-panel-message-textarea-background-color);
   border: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
   border-radius: 12px;
   padding: 16px;
@@ -122,7 +118,6 @@
   padding: 6px 12px;
   border: 1px solid var(--chat-panel-function-event-button-border-color);
   border-radius: 6px;
-  background-color: var(--chat-panel-function-event-button-background-color);
   color: var(--chat-panel-function-event-button-text-color);
   font-size: 11px;
   font-family: 'Roboto Mono', monospace;
@@ -148,7 +143,6 @@
   border: 1px solid var(--chat-panel-function-event-button-border-color);
   border-radius: 6px;
   padding: 8px 12px;
-  background-color: var(--chat-panel-function-event-button-background-color);
   width: 100%;
   box-sizing: border-box;
 
@@ -156,7 +150,6 @@
     flex: 1;
     border: none;
     outline: none;
-    background: transparent;
     font-size: 12px;
     font-family: 'Roboto Mono', monospace;
     color: var(--chat-panel-function-event-button-text-color);

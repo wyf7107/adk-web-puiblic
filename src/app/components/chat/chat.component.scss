@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@use '@angular/material' as mat;
-
 .expand-side-drawer {
   position: relative;
   top: 4%;
@@ -24,7 +22,6 @@
 
 .drawer-container {
   height: 100%;
-  background-color: var(--chat-drawer-container-background-color);
 }
 
 .drawer-header {
@@ -32,22 +29,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: #89b4f8,
-      filled-label-text-color: black,
-    )
-  );
-
-  .mat-icon {
-    width: 36px;
-    height: 36px;
-    color: #bdc1c6;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 
   .drawer-logo {
     margin-left: 9px;
@@ -71,22 +52,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  @include mat.button-overrides(
-    (
-      filled-container-color: #89b4f8,
-      filled-label-text-color: black,
-    )
-  );
-
-  .mat-icon {
-    width: 36px;
-    height: 36px;
-    color: #bdc1c6;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 
   .drawer-logo {
     margin-left: 9px;
@@ -126,11 +91,6 @@
   flex: 1;
   min-height: 12%;
   box-shadow: none;
-  background-color: var(--chat-card-background-color);
-}
-
-.function-event-button .mdc-button__label {
-  font-family: 'Google Sans Mono', monospace;
 }
 
 .loading-bar {
@@ -157,14 +117,10 @@
 }
 
 .function-event-button {
-  background-color: var(--chat-function-event-button-background-color);
   margin: 5px 5px 10px;
 }
 
 .function-event-button-highlight {
-  background-color: var(
-    --chat-function-event-button-highlight-background-color
-  );
   border-color: var(
     --chat-function-event-button-highlight-border-color
   ) !important;
@@ -177,7 +133,6 @@
   align-items: center;
 
   .message-card {
-    background-color: var(--chat-user-message-message-card-background-color);
     align-self: flex-end;
     color: var(--chat-user-message-message-card-color);
     box-shadow: none;
@@ -189,7 +144,6 @@
   align-items: center;
 
   .message-card {
-    background-color: var(--chat-bot-message-message-card-background-color);
     align-self: flex-start;
     color: var(--chat-bot-message-message-card-color);
     box-shadow: none;
@@ -198,23 +152,18 @@
 
 .bot-message:focus-within {
   .message-card {
-    background-color: var(
-      --chat-bot-message-focus-within-message-card-background-color
-    );
     border: 1px solid
       var(--chat-bot-message-focus-within-message-card-border-color);
   }
 }
 
 .message-textarea {
-  background-color: var(--chat-message-textarea-background-color);
   max-width: 100%;
   border: none;
   font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
 }
 
 .message-textarea:focus {
-  background-color: var(--chat-message-textarea-focus-background-color);
   outline: none;
 }
 
@@ -227,8 +176,6 @@
   visibility: hidden;
   position: absolute;
   left: 10px;
-  z-index: 10;
-  background-color: var(--chat-eval-compare-container-background-color);
   overflow: hidden;
   border-radius: 20px;
   padding: 5px 20px;
@@ -307,17 +254,14 @@
   position: fixed;
   bottom: 200px;
   right: 100px;
-  z-index: 1000;
 }
 
 .sidepanel-toggle {
   position: relative;
   top: 100px;
-  z-index: 1000;
 }
 
 .side-drawer {
-  background-color: var(--chat-side-drawer-background-color);
   color: var(--chat-side-drawer-color);
   border-radius: 0;
 }
@@ -334,7 +278,6 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  background: var(--chat-file-item-background-color);
   padding: 5px;
   border-radius: 4px;
 }
@@ -362,51 +305,7 @@
   }
 }
 
-:host ::ng-deep .mat-mdc-unelevated-button:not(:disabled) {
-  color: var(--chat-mat-mdc-unelevated-button-color);
-  background-color: var(--chat-mat-mdc-unelevated-button-background-color);
-}
-
-:host ::ng-deep .mdc-linear-progress__buffer-dots {
-  background-image: radial-gradient(
-    circle,
-    var(
-        --chat-mdc-linear-progress-buffer-dots-background-color,
-        var(--mat-sys-surface-variant)
-      )
-      calc(var(--mat-progress-bar-track-height, 4px) / 2),
-    transparent 0
-  );
-}
-
-:host ::ng-deep .mat-mdc-select-arrow-wrapper {
-  margin-left: 4px;
-}
-
-:host ::ng-deep .mat-mdc-text-field-wrapper {
-  border: 1px solid var(--chat-mat-mdc-text-field-wrapper-border-color);
-}
-
-:host ::ng-deep .mdc-notched-outline__leading,
-:host ::ng-deep .mdc-notched-outline__notch,
-:host ::ng-deep .mdc-notched-outline__trailing {
-  border: none;
-}
-
-:host ::ng-deep .mat-mdc-form-field-icon-suffix {
-  padding: 0 10px 0 40px;
-}
-
-:host ::ng-deep .segment-key {
-  color: var(--chat-segment-key-color) !important;
-}
-
-.mat-mdc-select-placeholder {
-  margin-left: 20px;
-}
-
 .bottom-resize-handler {
-  background: var(--chat-bottom-resize-handler-background-color);
   height: 5px;
   border-radius: 4px;
   position: absolute;
@@ -415,13 +314,11 @@
   left: 40%;
   top: 0;
   right: 0;
-  z-index: 9999;
   cursor: ns-resize;
 }
 
 .trace-detail-container {
   position: relative;
-  background-color: var(--chat-trace-detail-container-background-color);
 
   app-trace-event {
     padding-top: 8px;
@@ -438,7 +335,6 @@
 
 .app-select-container {
   width: 35%;
-  background-color: #212123;
   height: 30px;
   display: flex;
   justify-content: space-between;
@@ -446,16 +342,6 @@
   padding-right: 20px;
   border-radius: 10px;
   padding-top: 5px;
-}
-
-.app-select-container {
-  @include mat.select-overrides(
-    (
-      placeholder-text-color: #8ab4f8,
-      enabled-trigger-text-color: #8ab4f8,
-      enabled-arrow-color: #8ab4f8,
-    )
-  );
 }
 
 .adk-checkbox {
@@ -471,16 +357,13 @@
   position: sticky;
   top: 0;
   height: 48px;
-  background: var(--chat-toolbar-background-color);
   display: flex;
   align-items: center;
-  z-index: 10;
   font-size: 13px;
   padding-left: 20px;
 }
 
 .chat-toolbar.edit-mode {
-  background: var(--chat-toolbar-edit-mode-background-color);
 }
 
 .toolbar-actions {
@@ -521,7 +404,6 @@
   padding: 0;
   margin-left: 4px;
   color: var(--chat-toolbar-icon-color);
-  background-color: transparent;
   border: none;
   cursor: pointer;
 
@@ -545,7 +427,6 @@
   padding: 0;
   margin-left: 4px;
   color: var(--chat-toolbar-icon-color);
-  background-color: transparent;
   border: none;
   cursor: pointer;
 
@@ -561,7 +442,6 @@
   height: 24px;
   border: 1px solid var(--chat-toolbar-session-text-color);
   border-radius: 4px;
-  background-color: transparent;
   color: var(--chat-toolbar-session-id-color);
   padding: 0 6px;
   font-family: 'Google Sans Mono', monospace;
@@ -588,45 +468,8 @@
   align-items: center;
 }
 
-.toolbar-sse-toggle {
-  @include mat.slide-toggle-overrides(
-    (
-      label-text-size: 14px,
-      label-text-color: var(--chat-toolbar-sse-toggle-label-text-color),
-      unselected-track-color:
-        var(--chat-toolbar-sse-toggle-unselected-track-color),
-      unselected-focus-track-color:
-        var(--chat-toolbar-sse-toggle-unselected-track-color),
-      unselected-hover-track-color:
-        var(--chat-toolbar-sse-toggle-unselected-track-color),
-      unselected-handle-color:
-        var(--chat-toolbar-sse-toggle-unselected-handle-color),
-      unselected-focus-handle-color:
-        var(--chat-toolbar-sse-toggle-unselected-handle-color),
-      unselected-hover-handle-color:
-        var(--chat-toolbar-sse-toggle-unselected-handle-color),
-      selected-track-color: var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-focus-track-color:
-        var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-hover-track-color:
-        var(--chat-toolbar-sse-toggle-selected-track-color),
-      selected-handle-color:
-        var(--chat-toolbar-sse-toggle-selected-handle-color),
-      selected-focus-handle-color:
-        var(--chat-toolbar-sse-toggle-selected-handle-color),
-      selected-hover-handle-color:
-        var(--chat-toolbar-sse-toggle-selected-handle-color),
-      track-height: 24px,
-      track-width: 46px,
-      track-outline-color: var(--chat-toolbar-sse-toggle-track-outline-color),
-      with-icon-handle-size: 20px,
-    )
-  );
-}
-
 .toolbar-more-actions-button {
   margin-right: 8px;
-  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
 }
@@ -640,7 +483,6 @@
 
 .readonly-badge {
   color: var(--chat-readonly-badge-color);
-  background-color: var(--chat-readonly-badge-background-color);
   border-radius: 4px;
   padding: 1px 6px;
   display: flex;
@@ -670,14 +512,6 @@
   flex-shrink: 1;
 }
 
-::ng-deep .mat-drawer-content {
-  display: flex !important;
-}
-
-::ng-deep .mat-drawer {
-  border-right: 1px solid var(--chat-mat-drawer-border-right-color) !important;
-}
-
 // Builder mode container and exit button
 .builder-mode-container {
   position: relative;
@@ -685,20 +519,17 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--builder-container-background-color);
 }
 
 .builder-exit-button {
   position: absolute;
   top: 20px;
   right: 20px;
-  z-index: 1000;
   display: flex;
   gap: 8px;
 }
 
 .builder-mode-action-button {
-  background-color: var(--builder-secondary-background-color) !important;
   color: var(--builder-text-tertiary-color) !important;
   border-radius: 50% !important;
   transition: all 0.2s ease !important;
@@ -715,20 +546,12 @@
   justify-content: center !important;
 
   &:hover {
-    background-color: var(
-      --builder-tool-item-hover-background-color
-    ) !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
   }
 
   &.active {
-    background-color: var(--builder-button-primary-background-color) !important;
     color: white !important;
     border-color: var(--builder-button-primary-background-color) !important;
-  }
-
-  .mat-mdc-button-touch-target {
-    display: none !important;
   }
 
   mat-icon {
@@ -752,7 +575,6 @@ app-canvas {
   display: flex;
   width: 100%;
   height: 100%;
-  background-color: var(--builder-container-background-color);
 }
 
 .build-left-panel,
@@ -760,14 +582,12 @@ app-canvas {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--builder-tertiary-background-color);
   border: 1px solid var(--builder-border-color);
   margin: 10px;
   border-radius: 8px;
 }
 
 .build-panel-header {
-  background-color: var(--builder-secondary-background-color);
   padding: 16px 20px;
   border-bottom: 1px solid var(--builder-border-color);
   border-radius: 8px 8px 0 0;

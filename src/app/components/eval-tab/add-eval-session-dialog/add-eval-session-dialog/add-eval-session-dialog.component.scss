@@ -30,10 +30,6 @@ mat-form-field {
   input {
     color: var(--mdc-dialog-supporting-text-color) !important;
     caret-color: var(--mdc-dialog-supporting-text-color) !important;
-    background-color: transparent !important;
   }
 }
 
-html.darkmode :host ::ng-deep .mat-mdc-text-field-wrapper {
-  background-color: #3f3f42;
-}

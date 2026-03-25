@@ -60,8 +60,10 @@
   cursor: pointer;
 
   &:hover {
+    background-color: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
   }
   &.current {
+    background-color: var(--mat-sys-secondary-container, rgba(0, 0, 0, 0.08));
   }
 
   mat-chip {

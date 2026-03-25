@@ -15,12 +15,12 @@
  * limitations under the License.
  */
 
-import { AsyncPipe, DOCUMENT, NgClass } from '@angular/common';
+import { AsyncPipe, DOCUMENT, NgClass, NgComponentOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, viewChild, WritableSignal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, Type, viewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -29,6 +29,7 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { MatDrawer, MatDrawerContainer } from '@angular/material/sidenav';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatToolbar } from '@angular/material/toolbar';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
@@ -54,6 +55,8 @@ import { SESSION_SERVICE } from '../../core/services/interfaces/session';
 import { STREAM_CHAT_SERVICE } from '../../core/services/interfaces/stream-chat';
 import { STRING_TO_COLOR_SERVICE } from '../../core/services/interfaces/string-to-color';
 import { TRACE_SERVICE } from '../../core/services/interfaces/trace';
+import { THEME_SERVICE } from '../../core/services/interfaces/theme';
+import { LOGO_COMPONENT } from '../../injection_tokens';
 import { ListResponse } from '../../core/services/interfaces/types';
 import { UI_STATE_SERVICE } from '../../core/services/interfaces/ui-state';
 import { LOCATION_SERVICE } from '../../core/services/location.service';
@@ -141,9 +144,12 @@ const BIDI_STREAMING_RESTART_WARNING =
     NgxJsonViewerModule,
     NgClass,
     MatButton,
+    MatIconButton,
     MatMenuModule,
     MatCard,
     MatFabButton,
+    MatToolbar,
+    NgComponentOutlet,
     ResizableBottomDirective,
     TraceEventComponent,
     AsyncPipe,
@@ -178,6 +184,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly traceService = inject(TRACE_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly agentBuilderService = inject(AGENT_BUILDER_SERVICE);
+  protected readonly themeService = inject(THEME_SERVICE);
+  protected readonly logoComponent: Type<Component>|null = inject(LOGO_COMPONENT, {
+    optional: true,
+  });
 
   chatPanel = viewChild.required(ChatPanelComponent);
   canvasComponent = viewChild.required(CanvasComponent);

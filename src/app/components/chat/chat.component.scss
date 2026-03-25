@@ -20,56 +20,6 @@
   left: 1%;
 }
 
-.drawer-container {
-  height: 100%;
-}
-
-.drawer-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .drawer-logo {
-    margin-left: 9px;
-    display: flex;
-    align-items: center;
-
-    img {
-      margin-right: 9px;
-    }
-
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px;
-    letter-spacing: 0.1px;
-  }
-}
-
-.drawer-header {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .drawer-logo {
-    margin-left: 9px;
-    display: flex;
-    align-items: center;
-
-    img {
-      margin-right: 9px;
-    }
-
-    font-size: 16px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: 24px;
-    letter-spacing: 0.1px;
-  }
-}
-
 .chat-container {
   width: 100%;
   height: 100%;
@@ -91,6 +41,11 @@
   flex: 1;
   min-height: 12%;
   box-shadow: none;
+  border-radius: 12px 0 0 0;
+
+  &.no-side-panel {
+    border-radius: 0;
+  }
 }
 
 .loading-bar {
@@ -353,17 +308,39 @@
   margin-left: 20px;
 }
 
-.chat-toolbar {
-  position: sticky;
-  top: 0;
+.app-toolbar {
   height: 48px;
+  min-height: 48px !important;
   display: flex;
   align-items: center;
-  font-size: 13px;
-  padding-left: 20px;
+  font-size: 14px;
+  padding: 0 8px !important;
+  z-index: 1;
 }
 
-.chat-toolbar.edit-mode {
+.toolbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.toolbar-logo-text {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer-container {
+  height: calc(100% - 48px);
 }
 
 .toolbar-actions {
@@ -376,6 +353,7 @@
 .toolbar-session-text {
   color: var(--chat-toolbar-session-text-color);
   font-family: Roboto;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
   text-transform: uppercase;
@@ -398,43 +376,32 @@
   }
 }
 
-.toolbar-copy-session-id-button {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  margin-left: 4px;
+.toolbar-icon-button {
   color: var(--chat-toolbar-icon-color);
-  border: none;
-  cursor: pointer;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
+// Smaller icon button for session/user id actions
+.small-icon-button {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+}
+
+.small-icon-button mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
 }
 
 .toolbar-user-id-container {
   display: flex;
   align-items: center;
   margin-left: 5px;
-}
-
-.toolbar-user-id-edit-button,
-.toolbar-user-id-action-button {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  margin-left: 4px;
-  color: var(--chat-toolbar-icon-color);
-  border: none;
-  cursor: pointer;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
 }
 
 .toolbar-user-id-input {
@@ -450,28 +417,6 @@
 
 .toolbar-user-id-input:focus {
   outline: 1px solid var(--chat-toolbar-icon-color);
-}
-
-.toolbar-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--chat-toolbar-icon-color);
-  cursor: pointer;
-  margin-right: 16px;
-}
-
-#toolbar-new-session-button {
-  margin-right: 16px;
-  color: var(--chat-toolbar-new-session-color);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.toolbar-more-actions-button {
-  margin-right: 8px;
-  border: none !important;
-  box-shadow: none !important;
 }
 
 :host ::ng-deep pre {

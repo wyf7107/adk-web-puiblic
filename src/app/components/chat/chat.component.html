@@ -237,12 +237,14 @@
   >
     <div class="app-selector-drawer-header">
       <span class="app-selector-drawer-title">Select an App</span>
-      <button mat-icon-button class="toolbar-icon-button" (click)="openAddItemDialog()" matTooltip="Create new agent" matTooltipPosition="below" aria-label="Create new agent">
-        <mat-icon>add</mat-icon>
-      </button>
-      <button mat-icon-button class="toolbar-icon-button" (click)="toggleAppSelectorDrawer()" aria-label="Close app selector">
-        <mat-icon>close</mat-icon>
-      </button>
+      <div>
+        <button mat-icon-button class="toolbar-icon-button" (click)="openAddItemDialog()" matTooltip="Create new agent" matTooltipPosition="below" aria-label="Create new agent">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button mat-icon-button class="toolbar-icon-button" (click)="toggleAppSelectorDrawer()" aria-label="Close app selector">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
     </div>
     <div class="app-selector-search">
       <mat-form-field class="app-selector-search-field" subscriptSizing="dynamic" appearance="outline">

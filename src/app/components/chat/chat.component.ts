@@ -460,7 +460,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get sessionTab() {
-    return this.drawerSessionTab() ?? this.sidePanel().sessionTabComponent();
+    return this.drawerSessionTab();
   }
 
   ngAfterViewInit() {

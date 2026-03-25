@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {AsyncPipe, NgComponentOutlet, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgComponentOutlet} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, Type, viewChild, ViewContainerRef} from '@angular/core';
 import {MatIconButton, MatMiniFabButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -37,7 +37,6 @@ import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {LOGO_COMPONENT} from '../../injection_tokens';
 import {ArtifactTabComponent, getMediaTypeFromMimetype} from '../artifact-tab/artifact-tab.component';
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
-import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {StateTabComponent} from '../state-tab/state-tab.component';
 import {TraceTabComponent} from '../trace-tab/trace-tab.component';
 
@@ -55,7 +54,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   imports: [
     AsyncPipe,
     NgComponentOutlet,
-    NgTemplateOutlet,
     MatTooltip,
     MatTabGroup,
     MatTab,
@@ -63,7 +61,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     TraceTabComponent,
     StateTabComponent,
     ArtifactTabComponent,
-    SessionTabComponent,
     MatPaginator,
     MatMiniFabButton,
     MatIcon,
@@ -108,7 +105,7 @@ export class SidePanelComponent implements AfterViewInit {
   readonly enterBuilderMode = output<boolean>();
   readonly showAgentStructureGraph = output<boolean>();
 
-  readonly sessionTabComponent = viewChild(SessionTabComponent);
+  readonly sessionTabComponent = undefined;
   readonly evalTabComponent = viewChild(EvalTabComponent);
   readonly evalTabContainer =
       viewChild('evalTabContainer', {read: ViewContainerRef});
@@ -137,8 +134,6 @@ export class SidePanelComponent implements AfterViewInit {
       this.featureFlagService.isManualStateUpdateEnabled();
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled;
-  protected readonly isSessionsTabReorderingEnabledObs =
-      this.featureFlagService.isSessionsTabReorderingEnabled();
 
   readonly artifactDeltaArray = computed(() => {
     const artifactDelta = this.selectedEvent()?.actions?.artifactDelta;

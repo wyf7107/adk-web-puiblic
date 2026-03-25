@@ -298,7 +298,7 @@
       } }
     </div>
     }
-    <mat-card class="chat-card">
+    <mat-card class="chat-card" [class.no-side-panel]="!showSidePanel">
       @if (!selectedAppControl.value) { @if (isLoadingApps()) {
       <div class="empty-state-container">
         <span>{{ i18n.loadingAgentsLabel }}</span>

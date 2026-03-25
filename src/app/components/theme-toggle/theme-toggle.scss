@@ -16,6 +16,15 @@
 
 .theme-toggle-button {
   color: var(--side-panel-mat-icon-color);
+  width: 24px;
+  height: 24px;
+  padding: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 
   &:hover {
     opacity: 0.8;

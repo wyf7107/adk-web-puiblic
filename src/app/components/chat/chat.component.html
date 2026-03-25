@@ -15,24 +15,6 @@
 -->
 
 <mat-drawer-container class="drawer-container" autosize>
-  @if (!showSidePanel && appName === "") {
-  <span
-    class="material-symbols-outlined"
-    style="
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      color: #c4c7c5;
-      cursor: pointer;
-      margin-left: 20px;
-      margin-top: 20px;
-      z-index: 9999;
-    "
-    [matTooltip]="i18n.openPanelTooltip"
-    (click)="toggleSidePanel()"
-    >left_panel_open</span
-  >
-  }
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
     @if (!isBuilderMode()) {
     <app-side-panel
@@ -128,21 +110,13 @@
     <div class="chat-toolbar" [ngClass]="{'edit-mode': isEvalEditMode()}">
       @if (!showSidePanel) {
       <span
-        class="material-symbols-outlined"
-        style="
-          width: 24px;
-          height: 24px;
-          color: #c4c7c5;
-          cursor: pointer;
-          margin-left: 20px;
-          margin-top: -2px;
-          z-index: 9999;
-        "
+        class="material-symbols-outlined toolbar-panel-toggle"
         [matTooltip]="i18n.openPanelTooltip"
         (click)="toggleSidePanel()"
-        >left_panel_open</span
+        >menu</span
       >
-      } @if (evalCase) {
+      }
+      @if (evalCase) {
       <div style="display: flex">
         <div class="toolbar-session-text">{{ i18n.evalCaseIdLabel }}</div>
         <div class="toolbar-session-id">{{ evalCase.evalId }}</div>
@@ -252,6 +226,7 @@
           <div
             (click)="onNewSessionClick()"
             id="toolbar-new-session-button"
+            style="display: flex; align-items: center; cursor: pointer"
             [matTooltip]="i18n.createNewSessionTooltip"
           >
             <mat-icon>add</mat-icon>
@@ -268,6 +243,10 @@
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #sessionActionsMenu="matMenu" xPosition="before" panelClass="toolbar-session-menu">
+            <button mat-menu-item (click)="themeService.toggleTheme()">
+              <mat-icon class="menu-check-icon" [class.inactive]="themeService.currentTheme() !== 'dark'">check</mat-icon>
+              <span>Dark mode</span>
+            </button>
             @if (isTokenStreamingEnabledObs | async) {
             <button mat-menu-item id="toolbar-token-streaming-button" (click)="toggleSse()">
               <mat-icon class="menu-check-icon" [class.inactive]="!enableSseIndicator()">check</mat-icon>

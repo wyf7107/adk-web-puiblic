@@ -45,7 +45,6 @@ import {ArtifactTabComponent, getMediaTypeFromMimetype} from '../artifact-tab/ar
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {StateTabComponent} from '../state-tab/state-tab.component';
-import {ThemeToggle} from '../theme-toggle/theme-toggle';
 import {TraceTabComponent} from '../trace-tab/trace-tab.component';
 
 import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
@@ -68,7 +67,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatTabGroup,
     MatTab,
     MatTabLabel,
-    ThemeToggle,
     TraceTabComponent,
     StateTabComponent,
     ArtifactTabComponent,

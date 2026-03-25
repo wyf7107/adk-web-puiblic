@@ -1,32 +1,30 @@
 @if ((isAlwaysOnSidePanelEnabledObs | async) === false) {
-<div style="margin-top: 20px; margin-left: 20px; display: flex">
+<div class="drawer-header-wrapper">
   <div style="width: 100%">
     <div class="drawer-header">
-      <div class="drawer-logo">
-        @if (logoComponent) {
-          <div>
-            <ng-container *ngComponentOutlet="logoComponent"></ng-container>
-            <div class="powered-by-adk">Powered by Agent Development Kit</div>
-          </div>
-        } @else {
-          <img src="assets/ADK-512-color.svg" width="32px" height="32px" />
-          {{ i18n.agentDevelopmentKitLabel }}
-          <span
-            class="material-symbols-outlined adk-info-icon"
-            [matTooltip]="i18n.disclosureTooltip"
-            matTooltipPosition="below"
-          >info</span>
-        }
-      </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <app-theme-toggle></app-theme-toggle>
+      <div class="drawer-header-left">
         <span
-          class="material-symbols-outlined"
-          style="color: #c4c7c5; cursor: pointer; margin-right: 15px"
+          class="material-symbols-outlined panel-toggle-icon"
           matTooltip="{{ i18n.collapsePanelTooltip }}"
           (click)="closePanel.emit()"
-          >left_panel_close</span
+          >menu</span
         >
+        <div class="drawer-logo">
+          @if (logoComponent) {
+            <div>
+              <ng-container *ngComponentOutlet="logoComponent"></ng-container>
+              <div class="powered-by-adk">Powered by Agent Development Kit</div>
+            </div>
+          } @else {
+            <img src="assets/ADK-512-color.svg" width="20px" height="20px" />
+            {{ i18n.agentDevelopmentKitLabel }}
+            <span
+              class="material-symbols-outlined adk-info-icon"
+              [matTooltip]="i18n.disclosureTooltip"
+              matTooltipPosition="below"
+            >info</span>
+          }
+        </div>
       </div>
     </div>
   </div>

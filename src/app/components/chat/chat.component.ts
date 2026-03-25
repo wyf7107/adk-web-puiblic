@@ -54,6 +54,7 @@ import { SESSION_SERVICE } from '../../core/services/interfaces/session';
 import { STREAM_CHAT_SERVICE } from '../../core/services/interfaces/stream-chat';
 import { STRING_TO_COLOR_SERVICE } from '../../core/services/interfaces/string-to-color';
 import { TRACE_SERVICE } from '../../core/services/interfaces/trace';
+import { THEME_SERVICE } from '../../core/services/interfaces/theme';
 import { ListResponse } from '../../core/services/interfaces/types';
 import { UI_STATE_SERVICE } from '../../core/services/interfaces/ui-state';
 import { LOCATION_SERVICE } from '../../core/services/location.service';
@@ -178,6 +179,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly traceService = inject(TRACE_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly agentBuilderService = inject(AGENT_BUILDER_SERVICE);
+  protected readonly themeService = inject(THEME_SERVICE);
 
   chatPanel = viewChild.required(ChatPanelComponent);
   canvasComponent = viewChild.required(CanvasComponent);

@@ -70,6 +70,7 @@
 .function-event-button {
   border-color: var(--chat-panel-function-event-button-border-color) !important;
   color: var(--chat-panel-function-event-button-text-color) !important;
+  background-color: var(--mat-sys-surface-container-high) !important;
   margin: 5px 5px 5px 0px;
   font-size: 11px !important;
   padding: 6px 12px !important;
@@ -115,14 +116,15 @@
 .message-card.output-chip {
   display: inline-block !important;
   margin: 0 !important;
-  border: 1px solid rgba(138, 180, 248, 0.3);
+  border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 8px !important;
   padding: 5px !important;
+  background-color: var(--mat-sys-surface-container-low);
 
   .output-chip-header {
     font-weight: 600;
     font-size: 9px;
-    color: rgba(138, 180, 248, 0.9);
+    color: var(--mat-sys-primary);
     margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -179,6 +181,7 @@
   .message-card {
     align-self: flex-start;
     color: var(--chat-panel-user-message-message-card-color);
+    background-color: var(--mat-sys-primary-container);
     box-shadow: none;
     order: 1;
     width: auto;
@@ -200,6 +203,7 @@
   .message-card {
     align-self: flex-start;
     color: var(--chat-panel-bot-message-message-card-color);
+    background-color: var(--mat-sys-surface-container);
     box-shadow: none;
   }
 
@@ -572,4 +576,13 @@ button.send-message-btn {
   font-size: 14px;
   line-height: 1.8;
   color: var(--chat-panel-message-text-color);
+}
+
+.bot-avatar {
+  margin-right: 12px;
+  box-shadow: none;
+}
+
+.user-avatar {
+  box-shadow: none;
 }

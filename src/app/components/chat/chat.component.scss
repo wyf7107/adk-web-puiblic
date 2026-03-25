@@ -315,7 +315,6 @@
   align-items: center;
   font-size: 14px;
   padding: 0 8px !important;
-  background: transparent !important;
   z-index: 1;
 }
 
@@ -342,28 +341,6 @@
 
 .drawer-container {
   height: calc(100% - 48px);
-}
-
-.chat-toolbar {
-  position: sticky;
-  top: 0;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  padding-left: 20px;
-}
-
-.toolbar-panel-toggle {
-  font-size: 20px;
-  width: 24px;
-  height: 24px;
-  color: var(--chat-toolbar-icon-color, #c4c7c5);
-  cursor: pointer;
-  margin-right: 12px;
-}
-
-.chat-toolbar.edit-mode {
 }
 
 .toolbar-actions {
@@ -399,25 +376,11 @@
   }
 }
 
-.toolbar-copy-session-id-button,
-.toolbar-user-id-edit-button,
-.toolbar-user-id-action-button,
-.toolbar-new-session-button,
-.toolbar-more-actions-button {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  margin-left: 4px;
+.toolbar-icon-button {
   color: var(--chat-toolbar-icon-color);
-  border: none;
-  cursor: pointer;
-  background-color: transparent;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .toolbar-user-id-container {
@@ -439,20 +402,6 @@
 
 .toolbar-user-id-input:focus {
   outline: 1px solid var(--chat-toolbar-icon-color);
-}
-
-.toolbar-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--chat-toolbar-icon-color);
-  cursor: pointer;
-  margin-right: 16px;
-}
-
-.toolbar-more-actions-button {
-  margin-right: 8px;
-  border: none !important;
-  box-shadow: none !important;
 }
 
 :host ::ng-deep pre {

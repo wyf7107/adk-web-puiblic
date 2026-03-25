@@ -15,7 +15,7 @@
 -->
 
 <mat-toolbar class="app-toolbar">
-  <button mat-icon-button (click)="toggleSidePanel()" aria-label="Toggle side panel">
+  <button mat-icon-button class="toolbar-icon-button" (click)="toggleSidePanel()" aria-label="Toggle side panel">
     <mat-icon>menu</mat-icon>
   </button>
   <div class="toolbar-logo">
@@ -47,20 +47,24 @@
         {{ i18n.saveButton }}
       </button>
       } @else {
-      <span
-        class="material-symbols-outlined toolbar-icon"
+      <button
+        mat-icon-button
+        class="toolbar-icon-button"
         [matTooltip]="i18n.editEvalCaseTooltip"
         (click)="editEvalCase()"
+        aria-label="Edit eval case"
       >
-        edit
-      </span>
-      <span
-        class="material-symbols-outlined toolbar-icon"
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        class="toolbar-icon-button"
         [matTooltip]="i18n.deleteEvalCaseTooltip"
         (click)="deleteEvalCase()"
+        aria-label="Delete eval case"
       >
-        delete
-      </span>
+        <mat-icon>delete</mat-icon>
+      </button>
       }
     </div>
     } @else {
@@ -72,7 +76,7 @@
         <div class="toolbar-session-id" [matTooltip]="sessionId">{{ getToolbarSessionId() }}</div>
         <button
           mat-icon-button
-          class="toolbar-copy-session-id-button"
+          class="toolbar-icon-button"
           [matTooltip]="i18n.copySessionIdTooltip"
           (click)="copySessionId()"
           aria-label="Copy session ID"
@@ -87,7 +91,7 @@
         <div class="toolbar-session-id">{{ userId }}</div>
         <button
           mat-icon-button
-          class="toolbar-user-id-edit-button"
+          class="toolbar-icon-button"
           [matTooltip]="i18n.editUserIdTooltip"
           (click)="startUserIdEdit()"
           aria-label="Edit user ID"
@@ -104,7 +108,7 @@
         />
         <button
           mat-icon-button
-          class="toolbar-user-id-action-button"
+          class="toolbar-icon-button"
           [matTooltip]="i18n.saveUserIdTooltip"
           (click)="saveUserId()"
           aria-label="Save user ID"
@@ -113,7 +117,7 @@
         </button>
         <button
           mat-icon-button
-          class="toolbar-user-id-action-button"
+          class="toolbar-icon-button"
           [matTooltip]="i18n.cancelUserIdEditTooltip"
           (click)="cancelUserIdEdit()"
           aria-label="Cancel user ID edit"
@@ -135,20 +139,21 @@
     @if (isSessionLoading === false) {
     <div class="toolbar-actions">
       <div style="display: flex; align-items: center">
-        <div
+        <button
+          mat-button
+          class="toolbar-icon-button"
           (click)="onNewSessionClick()"
           id="toolbar-new-session-button"
-          style="display: flex; align-items: center; cursor: pointer"
           [matTooltip]="i18n.createNewSessionTooltip"
         >
           <mat-icon>add</mat-icon>
           {{ i18n.newSessionButton }}
-        </div>
+        </button>
 
         <button
           mat-icon-button
           [matMenuTriggerFor]="sessionActionsMenu"
-          class="toolbar-more-actions-button"
+          class="toolbar-icon-button"
           [matTooltip]="i18n.moreOptionsTooltip"
           id="toolbar-session-actions-button"
         >

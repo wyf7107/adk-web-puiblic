@@ -84,12 +84,13 @@ markdown p {
 
 .json-tooltip-panel {
   color: #fff !important;
-  border: 2px solid #666 !important;
+  border: 2px solid var(--mat-sys-outline-variant) !important;
   border-radius: 4px !important;
   padding: 8px 12px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   max-width: 800px !important;
   overflow: hidden !important;
+  background-color: var(--mat-sys-background);
 }
 
 // ngx-json-viewer custom colors

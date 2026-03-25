@@ -289,6 +289,17 @@
         </button>
       </div>
     </div>
+    @if (sessionId) {
+    <div class="session-selector-current-id">
+      <span class="session-selector-current-id-label">Current Session</span>
+      <div class="session-selector-current-id-row">
+        <span class="session-selector-current-id-value" [matTooltip]="sessionId">{{ sessionId }}</span>
+        <button mat-icon-button class="session-selector-copy-button" (click)="copySessionId()" matTooltip="Copy session ID" aria-label="Copy session ID">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </div>
+    </div>
+    }
     <div class="session-selector-drawer-content">
       <app-session-tab
         #drawerSessionTab

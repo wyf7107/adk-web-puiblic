@@ -844,6 +844,49 @@ app-canvas {
   font-family: 'Google Sans', sans-serif;
 }
 
+.session-selector-current-id {
+  padding: 8px 20px 8px 20px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant, #c4c7c5);
+}
+
+.session-selector-current-id-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--mat-sys-on-surface-variant, #444746);
+}
+
+.session-selector-current-id-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.session-selector-current-id-value {
+  font-size: 13px;
+  font-family: 'Roboto Mono', monospace;
+  color: var(--mat-sys-on-surface, #1d1b20);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.session-selector-copy-button {
+  flex-shrink: 0;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .session-selector-drawer-content {
   flex: 1;
   overflow-y: auto;

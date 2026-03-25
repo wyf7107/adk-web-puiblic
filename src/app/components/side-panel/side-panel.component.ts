@@ -19,7 +19,7 @@ import {AsyncPipe, NgComponentOutlet, NgTemplateOutlet} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef, type WritableSignal} from '@angular/core';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {MatMiniFabButton} from '@angular/material/button';
+import {MatIconButton, MatMiniFabButton} from '@angular/material/button';
 import {MatOption} from '@angular/material/core';
 import {MatFormField} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
@@ -74,6 +74,7 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatPaginator,
     MatMiniFabButton,
     MatIcon,
+    MatIconButton,
     NgxJsonViewerModule,
     MatOption,
     MatSelect,

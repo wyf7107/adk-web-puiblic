@@ -68,8 +68,8 @@
         }
         @if (message.role === "bot") {
           @if (isEventContent(i) || message.isLoading) {
-          <button mat-mini-fab [disabled]="!message.eventId" [appJsonTooltip]="getAgentNameFromEvent(i)"
-            [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}">
+          <button mat-mini-fab class="bot-avatar" [disabled]="!message.eventId" [appJsonTooltip]="getAgentNameFromEvent(i)"
+            [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}" [style.background-color]="getNodePathColor(i)">
             <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
           </button>
           } @else {
@@ -450,7 +450,7 @@
         } 
         </div> <!-- end message-content -->
         @if (message.role === "user") {
-          <button mat-mini-fab>
+          <button mat-mini-fab class="user-avatar">
             <mat-icon>person</mat-icon>
           </button>
         }

@@ -419,6 +419,72 @@
   outline: 1px solid var(--chat-toolbar-icon-color);
 }
 
+.user-avatar-button {
+  margin-left: auto;
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.user-menu-panel {
+  padding: 16px;
+  min-width: 240px;
+}
+
+.user-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.user-menu-avatar-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: var(--chat-toolbar-icon-color);
+}
+
+.user-menu-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--chat-toolbar-session-text-color);
+  text-transform: uppercase;
+}
+
+.user-menu-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.user-menu-id {
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 14px;
+  color: var(--chat-toolbar-session-id-color);
+  word-break: break-all;
+}
+
+.user-menu-input {
+  flex: 1;
+  height: 28px;
+  border: 1px solid var(--chat-toolbar-session-text-color);
+  border-radius: 4px;
+  color: var(--chat-toolbar-session-id-color);
+  padding: 0 8px;
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 13px;
+  background: transparent;
+
+  &:focus {
+    outline: 1px solid var(--chat-toolbar-icon-color);
+  }
+}
+
 :host ::ng-deep pre {
   white-space: pre-wrap;
   word-break: break-word;

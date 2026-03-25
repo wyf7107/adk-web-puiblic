@@ -300,15 +300,20 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return nodePath;
   }
 
+  getNodeName(nodePath: string): string {
+    return nodePath.split(/[/.>]/).filter(Boolean).pop() || nodePath;
+  }
+
   getNodePathColor(messageIndex: number): string {
     const nodePath = this.getEventNodePath(messageIndex);
-    return this.stringToColorService.stc(nodePath);
+    const nodeName = this.getNodeName(nodePath);
+    return this.stringToColorService.stc(nodeName);
   }
 
   getNodeInitial(messageIndex: number): string {
     const nodePath = this.getNodePath(messageIndex) ||
         this.getEventNodePath(messageIndex);
-    const nodeName = nodePath.split(/[/.>]/).filter(Boolean).pop() || nodePath;
+    const nodeName = this.getNodeName(nodePath);
     const initialMatch = nodeName.match(/[A-Za-z0-9]/);
 
     return initialMatch ? initialMatch[0].toUpperCase() : 'N';

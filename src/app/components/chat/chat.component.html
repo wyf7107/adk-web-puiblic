@@ -36,13 +36,13 @@
     <button mat-icon-button class="toolbar-icon-button" (click)="openAgentStructureGraphDialog()" matTooltip="View Agent Structure Graph" matTooltipPosition="below">
       <mat-icon>account_tree</mat-icon>
     </button>
-    <button mat-icon-button class="toolbar-icon-button"
-      [disabled]="disableBuilderSwitch"
-      (click)="enterBuilderMode()"
-      [matTooltip]="disableBuilderSwitch ? 'This agent was not built by builder' : 'Edit in Builder Mode'"
-      matTooltipPosition="below">
-      <mat-icon>edit</mat-icon>
-    </button>
+    <span [matTooltip]="disableBuilderSwitch ? 'Editing is not available for this agent because it was not built by the builder' : 'Edit in Builder Mode'" matTooltipPosition="below">
+      <button mat-icon-button class="toolbar-icon-button"
+        [disabled]="disableBuilderSwitch"
+        (click)="enterBuilderMode()">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </span>
   }
   @if (appName != "") {
   <div class="toolbar-content">

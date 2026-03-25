@@ -129,6 +129,7 @@
     <div style="display: flex; justify-content: flex-end; margin-top: 10px">
       <mat-paginator
         class="event-paginator"
+        hidePageSize
         [length]="eventData().size"
         [pageSize]="1"
         [pageIndex]="selectedEventIndex()"

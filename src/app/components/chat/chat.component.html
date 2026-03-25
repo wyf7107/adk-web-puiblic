@@ -32,6 +32,21 @@
     <span class="app-selector-label">{{ appName || 'Select an app' }}</span>
     <mat-icon class="app-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
   </button>
+  @if (!isBuilderMode()) {
+    <button mat-icon-button class="toolbar-icon-button" (click)="openAddItemDialog()" matTooltip="Create new agent" matTooltipPosition="below">
+      <mat-icon>add</mat-icon>
+    </button>
+    <button mat-icon-button class="toolbar-icon-button" (click)="openAgentStructureGraphDialog()" matTooltip="View Agent Structure Graph" matTooltipPosition="below">
+      <mat-icon>account_tree</mat-icon>
+    </button>
+    <button mat-icon-button class="toolbar-icon-button"
+      [disabled]="disableBuilderSwitch"
+      (click)="enterBuilderMode()"
+      [matTooltip]="disableBuilderSwitch ? 'This agent was not built by builder' : 'Edit in Builder Mode'"
+      matTooltipPosition="below">
+      <mat-icon>edit</mat-icon>
+    </button>
+  }
   @if (appName != "") {
   <div class="toolbar-content">
     @if (evalCase) {

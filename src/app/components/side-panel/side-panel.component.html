@@ -1,25 +1,4 @@
 @if ((isAlwaysOnSidePanelEnabledObs | async) === false) {
-@if (isApplicationSelectorEnabledObs() | async) {
-  <div class="app-actions">
-    @if (!isBuilderMode()) {
-      <div class="mode-toggle-container">
-        <mat-icon (click)="openAddItemDialog.emit(true)"
-        matTooltip="Create new agent"
-        matTooltipPosition="below"
-        style="cursor: pointer; margin-right: 16px;">add</mat-icon>
-        <mat-icon (click)="!disableBuilderIcon() && enterBuilderMode.emit(true)"
-          [matTooltip]="disableBuilderIcon() ? 'This agent was not built by builder' : 'Edit in Builder Mode'"
-          [style.cursor]="disableBuilderIcon() ? 'not-allowed' : 'pointer'"
-          [style.opacity]="disableBuilderIcon() ? '0.5' : '1'"
-          [style.margin-right.px]="16">edit</mat-icon>
-        <mat-icon (click)="showAgentStructureGraph.emit(true)"
-          matTooltip="View Agent Structure Graph"
-          matTooltipPosition="below"
-          style="cursor: pointer; margin-right: 32px;">account_tree</mat-icon>
-        </div>
-    }
-  </div> 
-}
 }
 
 @let isSessionLoading = uiStateService.isSessionLoading() | async;

@@ -96,19 +96,6 @@
     <div style="display: flex; align-items: center">
       @let isSessionLoading = uiStateService.isSessionLoading() | async; @if (isSessionLoading ===
       false) {
-      <div class="toolbar-session-text">{{ i18n.sessionIdLabel }}</div>
-      <div class="toolbar-session-id-container">
-        <div class="toolbar-session-id" [matTooltip]="sessionId">{{ getToolbarSessionId() }}</div>
-        <button
-          mat-icon-button
-          class="toolbar-icon-button small-icon-button"
-          [matTooltip]="i18n.copySessionIdTooltip"
-          (click)="copySessionId()"
-          aria-label="Copy session ID"
-        >
-          <mat-icon>content_copy</mat-icon>
-        </button>
-      </div>
       @if (!canEditSession()) {
       <div class="readonly-badge">
         <mat-icon>visibility</mat-icon>
@@ -120,8 +107,7 @@
       }
     </div>
     @if (isSessionLoading === false) {
-    <div class="toolbar-actions">
-      <div style="display: flex; align-items: center">
+      @if (sessionId) {
         <button
           mat-button
           class="toolbar-icon-button"
@@ -132,6 +118,9 @@
           <mat-icon>add</mat-icon>
           {{ i18n.newSessionButton }}
         </button>
+      }
+    <div class="toolbar-actions">
+      <div style="display: flex; align-items: center">
 
         <button
           mat-icon-button
@@ -281,9 +270,6 @@
     <div class="session-selector-drawer-header">
       <span class="session-selector-drawer-title">Select a Session</span>
       <div>
-        <button mat-icon-button class="toolbar-icon-button" (click)="onNewSessionClick(); toggleSessionSelectorDrawer()" matTooltip="New session" matTooltipPosition="below" aria-label="New session">
-          <mat-icon>add</mat-icon>
-        </button>
         <button mat-icon-button class="toolbar-icon-button" (click)="toggleSessionSelectorDrawer()" aria-label="Close session selector">
           <mat-icon>close</mat-icon>
         </button>

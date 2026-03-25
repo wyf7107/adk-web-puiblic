@@ -14,6 +14,183 @@
  limitations under the License.
 -->
 
+<mat-toolbar class="app-toolbar">
+  <button mat-icon-button (click)="toggleSidePanel()" aria-label="Toggle side panel">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <div class="toolbar-logo">
+    @if (logoComponent) {
+      <ng-container *ngComponentOutlet="logoComponent"></ng-container>
+    } @else {
+      <img src="assets/ADK-512-color.svg" width="20px" height="20px" />
+      <span class="toolbar-logo-text">Agent Development Kit</span>
+    }
+  </div>
+  @if (appName != "") {
+  <div class="toolbar-content">
+    @if (evalCase) {
+    <div style="display: flex; align-items: center">
+      <div class="toolbar-session-text">{{ i18n.evalCaseIdLabel }}</div>
+      <div class="toolbar-session-id">{{ evalCase.evalId }}</div>
+    </div>
+    <div class="toolbar-actions">
+      @if (this.isEvalEditMode()) {
+      <button mat-button (click)="cancelEditEvalCase()" style="height: 30px">
+        {{ i18n.cancelButton }}
+      </button>
+      <button
+        mat-flat-button
+        (click)="saveEvalCase()"
+        style="height: 30px"
+        [disabled]="!hasEvalCaseChanged() || isEvalCaseEditing()"
+      >
+        {{ i18n.saveButton }}
+      </button>
+      } @else {
+      <span
+        class="material-symbols-outlined toolbar-icon"
+        [matTooltip]="i18n.editEvalCaseTooltip"
+        (click)="editEvalCase()"
+      >
+        edit
+      </span>
+      <span
+        class="material-symbols-outlined toolbar-icon"
+        [matTooltip]="i18n.deleteEvalCaseTooltip"
+        (click)="deleteEvalCase()"
+      >
+        delete
+      </span>
+      }
+    </div>
+    } @else {
+    <div style="display: flex; align-items: center">
+      @let isSessionLoading = uiStateService.isSessionLoading() | async; @if (isSessionLoading ===
+      false) {
+      <div class="toolbar-session-text">{{ i18n.sessionIdLabel }}</div>
+      <div class="toolbar-session-id-container">
+        <div class="toolbar-session-id" [matTooltip]="sessionId">{{ getToolbarSessionId() }}</div>
+        <button
+          mat-icon-button
+          class="toolbar-copy-session-id-button"
+          [matTooltip]="i18n.copySessionIdTooltip"
+          (click)="copySessionId()"
+          aria-label="Copy session ID"
+        >
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </div>
+      @if (isUserIdOnToolbarEnabledObs | async) {
+      <div class="toolbar-session-text" style="margin-left: 16px">{{ i18n.userIdLabel }}</div>
+      <div class="toolbar-user-id-container">
+        @if (!isEditingUserId) {
+        <div class="toolbar-session-id">{{ userId }}</div>
+        <button
+          mat-icon-button
+          class="toolbar-user-id-edit-button"
+          [matTooltip]="i18n.editUserIdTooltip"
+          (click)="startUserIdEdit()"
+          aria-label="Edit user ID"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        } @else {
+        <input
+          class="toolbar-user-id-input"
+          [attr.placeholder]="i18n.userIdInputPlaceholder"
+          [(ngModel)]="userIdDraft"
+          (keydown)="handleUserIdInputKeydown($event)"
+          [attr.aria-label]="i18n.userIdInputPlaceholder"
+        />
+        <button
+          mat-icon-button
+          class="toolbar-user-id-action-button"
+          [matTooltip]="i18n.saveUserIdTooltip"
+          (click)="saveUserId()"
+          aria-label="Save user ID"
+        >
+          <mat-icon>check</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          class="toolbar-user-id-action-button"
+          [matTooltip]="i18n.cancelUserIdEditTooltip"
+          (click)="cancelUserIdEdit()"
+          aria-label="Cancel user ID edit"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        }
+      </div>
+      } @if (!canEditSession()) {
+      <div class="readonly-badge">
+        <mat-icon>visibility</mat-icon>
+        {{ i18n.readOnlyBadgeLabel }}
+      </div>
+      <div class="readonly-session-message">{{i18n.cannotEditSessionMessage}}</div>
+      } } @else {
+      <div class="toolbar-session-text">{{ i18n.loadingSessionLabel }}</div>
+      }
+    </div>
+    @if (isSessionLoading === false) {
+    <div class="toolbar-actions">
+      <div style="display: flex; align-items: center">
+        <div
+          (click)="onNewSessionClick()"
+          id="toolbar-new-session-button"
+          style="display: flex; align-items: center; cursor: pointer"
+          [matTooltip]="i18n.createNewSessionTooltip"
+        >
+          <mat-icon>add</mat-icon>
+          {{ i18n.newSessionButton }}
+        </div>
+
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="sessionActionsMenu"
+          class="toolbar-more-actions-button"
+          [matTooltip]="i18n.moreOptionsTooltip"
+          id="toolbar-session-actions-button"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #sessionActionsMenu="matMenu" xPosition="before" panelClass="toolbar-session-menu">
+          <button mat-menu-item (click)="themeService.toggleTheme()">
+            <mat-icon class="menu-check-icon" [class.inactive]="themeService.currentTheme() !== 'dark'">check</mat-icon>
+            <span>Dark mode</span>
+          </button>
+          @if (isTokenStreamingEnabledObs | async) {
+          <button mat-menu-item id="toolbar-token-streaming-button" (click)="toggleSse()">
+            <mat-icon class="menu-check-icon" [class.inactive]="!enableSseIndicator()">check</mat-icon>
+            <span>{{ i18n.tokenStreamingLabel }}</span>
+          </button>
+          }
+          @if (isDeleteSessionEnabledObs | async) {
+          <button mat-menu-item id="toolbar-delete-session-button" (click)="deleteSession(sessionId)">
+            <mat-icon>delete</mat-icon>
+            <span>{{ i18n.deleteSessionTooltip }}</span>
+          </button>
+          }
+          @if (isExportSessionEnabledObs | async) {
+          <button mat-menu-item id="toolbar-export-session-button" (click)="exportSession()">
+            <mat-icon>download</mat-icon>
+            <span>{{ i18n.exportSessionTooltip }}</span>
+          </button>
+          }
+          @if (importSessionEnabledObs | async) {
+          <button mat-menu-item id="toolbar-import-session-button" (click)="importSession()">
+            <mat-icon>upload</mat-icon>
+            <span>{{ i18n.importSessionTooltip }}</span>
+          </button>
+          }
+        </mat-menu>
+      </div>
+    </div>
+    } }
+  </div>
+  }
+</mat-toolbar>
+
 <mat-drawer-container class="drawer-container" autosize>
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
     @if (!isBuilderMode()) {
@@ -106,177 +283,6 @@
   <!-- Test Mode Layout (existing chat interface) -->
   <div class="chat-container">
     <ng-content select="[adk-web-chat-container-top]"></ng-content>
-    @if (appName != "") {
-    <div class="chat-toolbar" [ngClass]="{'edit-mode': isEvalEditMode()}">
-      @if (!showSidePanel) {
-      <span
-        class="material-symbols-outlined toolbar-panel-toggle"
-        [matTooltip]="i18n.openPanelTooltip"
-        (click)="toggleSidePanel()"
-        >menu</span
-      >
-      }
-      @if (evalCase) {
-      <div style="display: flex">
-        <div class="toolbar-session-text">{{ i18n.evalCaseIdLabel }}</div>
-        <div class="toolbar-session-id">{{ evalCase.evalId }}</div>
-      </div>
-      <div class="toolbar-actions">
-        @if (this.isEvalEditMode()) {
-        <button mat-button (click)="cancelEditEvalCase()" style="height: 30px">
-          {{ i18n.cancelButton }}
-        </button>
-        <button
-          mat-flat-button
-          (click)="saveEvalCase()"
-          style="height: 30px"
-          [disabled]="!hasEvalCaseChanged() || isEvalCaseEditing()"
-        >
-          {{ i18n.saveButton }}
-        </button>
-        } @else {
-        <span
-          class="material-symbols-outlined toolbar-icon"
-          [matTooltip]="i18n.editEvalCaseTooltip"
-          (click)="editEvalCase()"
-        >
-          edit
-        </span>
-        <span
-          class="material-symbols-outlined toolbar-icon"
-          [matTooltip]="i18n.deleteEvalCaseTooltip"
-          (click)="deleteEvalCase()"
-        >
-          delete
-        </span>
-        }
-      </div>
-      } @else {
-      <div style="display: flex; align-items: center">
-        @let isSessionLoading = uiStateService.isSessionLoading() | async; @if (isSessionLoading ===
-        false) {
-        <div class="toolbar-session-text">{{ i18n.sessionIdLabel }}</div>
-        <div class="toolbar-session-id-container">
-          <div class="toolbar-session-id" [matTooltip]="sessionId">{{ getToolbarSessionId() }}</div>
-          <button
-            mat-icon-button
-            class="toolbar-copy-session-id-button"
-            [matTooltip]="i18n.copySessionIdTooltip"
-            (click)="copySessionId()"
-            aria-label="Copy session ID"
-          >
-            <mat-icon>content_copy</mat-icon>
-          </button>
-        </div>
-        @if (isUserIdOnToolbarEnabledObs | async) {
-        <div class="toolbar-session-text" style="margin-left: 16px">{{ i18n.userIdLabel }}</div>
-        <div class="toolbar-user-id-container">
-          @if (!isEditingUserId) {
-          <div class="toolbar-session-id">{{ userId }}</div>
-          <button
-            mat-icon-button
-            class="toolbar-user-id-edit-button"
-            [matTooltip]="i18n.editUserIdTooltip"
-            (click)="startUserIdEdit()"
-            aria-label="Edit user ID"
-          >
-            <mat-icon>edit</mat-icon>
-          </button>
-          } @else {
-          <input
-            class="toolbar-user-id-input"
-            [attr.placeholder]="i18n.userIdInputPlaceholder"
-            [(ngModel)]="userIdDraft"
-            (keydown)="handleUserIdInputKeydown($event)"
-            [attr.aria-label]="i18n.userIdInputPlaceholder"
-          />
-          <button
-            mat-icon-button
-            class="toolbar-user-id-action-button"
-            [matTooltip]="i18n.saveUserIdTooltip"
-            (click)="saveUserId()"
-            aria-label="Save user ID"
-          >
-            <mat-icon>check</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            class="toolbar-user-id-action-button"
-            [matTooltip]="i18n.cancelUserIdEditTooltip"
-            (click)="cancelUserIdEdit()"
-            aria-label="Cancel user ID edit"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
-          }
-        </div>
-        } @if (!canEditSession()) {
-        <div class="readonly-badge">
-          <mat-icon>visibility</mat-icon>
-          {{ i18n.readOnlyBadgeLabel }}
-        </div>
-        <div class="readonly-session-message">{{i18n.cannotEditSessionMessage}}</div>
-        } } @else {
-        <div class="toolbar-session-text">{{ i18n.loadingSessionLabel }}</div>
-        }
-      </div>
-      @if (isSessionLoading === false) {
-      <div class="toolbar-actions">
-        <div style="display: flex; align-items: center">
-          <div
-            (click)="onNewSessionClick()"
-            id="toolbar-new-session-button"
-            style="display: flex; align-items: center; cursor: pointer"
-            [matTooltip]="i18n.createNewSessionTooltip"
-          >
-            <mat-icon>add</mat-icon>
-            {{ i18n.newSessionButton }}
-          </div>
-
-          <button
-            mat-icon-button
-            [matMenuTriggerFor]="sessionActionsMenu"
-            class="toolbar-more-actions-button"
-            [matTooltip]="i18n.moreOptionsTooltip"
-            id="toolbar-session-actions-button"
-          >
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #sessionActionsMenu="matMenu" xPosition="before" panelClass="toolbar-session-menu">
-            <button mat-menu-item (click)="themeService.toggleTheme()">
-              <mat-icon class="menu-check-icon" [class.inactive]="themeService.currentTheme() !== 'dark'">check</mat-icon>
-              <span>Dark mode</span>
-            </button>
-            @if (isTokenStreamingEnabledObs | async) {
-            <button mat-menu-item id="toolbar-token-streaming-button" (click)="toggleSse()">
-              <mat-icon class="menu-check-icon" [class.inactive]="!enableSseIndicator()">check</mat-icon>
-              <span>{{ i18n.tokenStreamingLabel }}</span>
-            </button>
-            }
-            @if (isDeleteSessionEnabledObs | async) {
-            <button mat-menu-item id="toolbar-delete-session-button" (click)="deleteSession(sessionId)">
-              <mat-icon>delete</mat-icon>
-              <span>{{ i18n.deleteSessionTooltip }}</span>
-            </button>
-            }
-            @if (isExportSessionEnabledObs | async) {
-            <button mat-menu-item id="toolbar-export-session-button" (click)="exportSession()">
-              <mat-icon>download</mat-icon>
-              <span>{{ i18n.exportSessionTooltip }}</span>
-            </button>
-            }
-            @if (importSessionEnabledObs | async) {
-            <button mat-menu-item id="toolbar-import-session-button" (click)="importSession()">
-              <mat-icon>upload</mat-icon>
-              <span>{{ i18n.importSessionTooltip }}</span>
-            </button>
-            }
-          </mat-menu>
-        </div>
-      </div>
-      } }
-    </div>
-    }
     <mat-card class="chat-card" [class.no-side-panel]="!showSidePanel">
       @if (!selectedAppControl.value) { @if (isLoadingApps()) {
       <div class="empty-state-container">

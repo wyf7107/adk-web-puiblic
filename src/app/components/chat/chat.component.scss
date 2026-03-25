@@ -20,10 +20,6 @@
   left: 1%;
 }
 
-.drawer-container {
-  height: 100%;
-}
-
 .chat-container {
   width: 100%;
   height: 100%;
@@ -310,6 +306,42 @@
   right: 0;
   margin-bottom: 20px;
   margin-left: 20px;
+}
+
+.app-toolbar {
+  height: 48px;
+  min-height: 48px !important;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  padding: 0 8px !important;
+  background: transparent !important;
+  z-index: 1;
+}
+
+.toolbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.toolbar-logo-text {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer-container {
+  height: calc(100% - 48px);
 }
 
 .chat-toolbar {

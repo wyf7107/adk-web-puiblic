@@ -119,3 +119,9 @@ ngx-json-viewer {
     color: #9e9e9e !important;
   }
 }
+
+.user-avatar-menu {
+  .mat-mdc-menu-content {
+    padding: 0;
+  }
+}

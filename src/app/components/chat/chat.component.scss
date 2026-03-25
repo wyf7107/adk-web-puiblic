@@ -332,6 +332,15 @@
   white-space: nowrap;
 }
 
+.disclosure-info-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.6;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
 .toolbar-content {
   display: flex;
   align-items: center;

@@ -24,6 +24,7 @@
     } @else {
       <img src="assets/ADK-512-color.svg" width="20px" height="20px" />
       <span class="toolbar-logo-text">Agent Development Kit</span>
+      <mat-icon class="disclosure-info-icon" [matTooltip]="sidePanelI18n.disclosureTooltip" matTooltipPosition="below">info_outline</mat-icon>
     }
   </div>
   <button class="app-selector-button" (click)="toggleAppSelectorDrawer()" matTooltip="Select an app">

@@ -17,10 +17,8 @@
 
 import {Location} from '@angular/common';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {MatOption} from '@angular/material/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatSelectChange} from '@angular/material/select';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {By} from '@angular/platform-browser';
@@ -72,7 +70,6 @@ const EVAL_TAB_SELECTOR = By.css('app-eval-tab');
 const DETAILS_PANEL_CLOSE_BUTTON_SELECTOR =
     By.css('.details-panel-container mat-icon');
 const EVENT_GRAPH_SELECTOR = By.css('.event-graph-container div');
-const APP_SELECT_SELECTOR = By.css('.app-select');
 
 const SESSIONS_TAB_INDEX = 3;
 const EVAL_TAB_INDEX = 4;
@@ -228,43 +225,6 @@ describe('SidePanelComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  describe('App Selector', () => {
-    beforeEach(() => {
-      fixture.componentRef.setInput('isApplicationSelectorEnabledObs', of(true));
-      fixture.componentRef.setInput('apps$', of(['app1', 'app2']));
-      fixture.detectChanges();
-    });
-
-    it('shows app selector', () => {
-      expect(fixture.debugElement.query(APP_SELECT_SELECTOR)).toBeTruthy();
-    });
-
-    it('shows all apps in selector', () => {
-      const appSelect = fixture.debugElement.query(APP_SELECT_SELECTOR);
-      const options = appSelect.componentInstance.options;
-      // Filter out the search option (which has value=null)
-      const appOptions = options.filter((option: MatOption) => option.value !== null);
-      expect(appOptions.map((option: MatOption) => option.value)).toEqual([
-        'app1',
-        'app2',
-      ]);
-    });
-
-    describe('when app is selected', () => {
-      beforeEach(() => {
-        spyOn(component.appSelectionChange, 'emit');
-        const appSelect = fixture.debugElement.query(APP_SELECT_SELECTOR);
-        const mockEvent =
-            new MatSelectChange(appSelect.componentInstance, 'app1');
-        appSelect.triggerEventHandler('selectionChange', mockEvent);
-      });
-      it('emits appSelectionChange event', () => {
-        expect(component.appSelectionChange.emit)
-            .toHaveBeenCalledWith(jasmine.objectContaining({value: 'app1'}));
-      });
-    });
   });
 
   describe('Tab hiding', () => {

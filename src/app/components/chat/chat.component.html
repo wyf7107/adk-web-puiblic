@@ -24,8 +24,26 @@
     } @else {
       <img src="assets/ADK-512-color.svg" width="20px" height="20px" />
       <span class="toolbar-logo-text">Agent Development Kit</span>
+      <mat-icon class="disclosure-info-icon" [matTooltip]="sidePanelI18n.disclosureTooltip" matTooltipPosition="below">info_outline</mat-icon>
     }
   </div>
+  <button class="app-selector-button" (click)="toggleAppSelectorDrawer()" matTooltip="Select an app">
+    <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+    <span class="app-selector-label">{{ appName || 'Select an app' }}</span>
+    <mat-icon class="app-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
+  </button>
+  @if (!isBuilderMode()) {
+    <button mat-icon-button class="toolbar-icon-button" (click)="openAgentStructureGraphDialog()" matTooltip="View Agent Structure Graph" matTooltipPosition="below">
+      <mat-icon>account_tree</mat-icon>
+    </button>
+    <span [matTooltip]="disableBuilderSwitch ? 'Editing is not available for this agent because it was not built by the builder' : 'Edit in Builder Mode'" matTooltipPosition="below">
+      <button mat-icon-button class="toolbar-icon-button"
+        [disabled]="disableBuilderSwitch"
+        (click)="enterBuilderMode()">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </span>
+  }
   @if (appName != "") {
   <div class="toolbar-content">
     @if (evalCase) {
@@ -208,13 +226,56 @@
 </mat-toolbar>
 
 <mat-drawer-container class="drawer-container" autosize>
+  <mat-drawer
+    class="app-selector-drawer"
+    [class.match-side-panel-width]="showSidePanel"
+    #appSelectorDrawer
+    mode="over"
+    position="start"
+    [opened]="showAppSelectorDrawer"
+    (closedStart)="onAppSelectorDrawerClosed()"
+  >
+    <div class="app-selector-drawer-header">
+      <span class="app-selector-drawer-title">Select an App</span>
+      <div>
+        <button mat-icon-button class="toolbar-icon-button" (click)="openAddItemDialog()" matTooltip="Create new agent" matTooltipPosition="below" aria-label="Create new agent">
+          <mat-icon>add</mat-icon>
+        </button>
+        <button mat-icon-button class="toolbar-icon-button" (click)="toggleAppSelectorDrawer()" aria-label="Close app selector">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+    <div class="app-selector-search">
+      <mat-form-field class="app-selector-search-field" subscriptSizing="dynamic" appearance="outline">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Search apps..." [formControl]="appDrawerSearchControl" />
+      </mat-form-field>
+    </div>
+    <div class="app-selector-list">
+      @if (isLoadingApps()) {
+        <div class="app-selector-loading"><mat-progress-spinner mode="indeterminate" diameter="32"></mat-progress-spinner></div>
+      } @else if (filteredDrawerApps$ | async; as apps) {
+        @for (app of apps; track app) {
+          <button class="app-selector-item" [class.selected]="app === appName" (click)="selectAppFromDrawer(app)">
+            <mat-icon fontSet="material-symbols-outlined" class="app-selector-item-icon">robot_2</mat-icon>
+            <span class="app-selector-item-name">{{ app }}</span>
+            @if (app === appName) {
+              <mat-icon class="app-selector-check">check</mat-icon>
+            }
+          </button>
+        } @empty {
+          <div class="app-selector-empty">No apps found</div>
+        }
+      }
+    </div>
+  </mat-drawer>
+
+  <mat-drawer-container class="side-panel-container" autosize>
   <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
     @if (!isBuilderMode()) {
     <app-side-panel
       [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
-      [apps$]="apps$"
-      [isLoadingApps]="isLoadingApps"
-      [selectedAppControl]="selectedAppControl"
       [showSidePanel]="showSidePanel"
       [appName]="appName"
       [userId]="userId"
@@ -241,7 +302,6 @@
       (page)="handlePageEvent($event)"
       (closeSelectedEvent)="closeSelectedEvent()"
       (openImageDialog)="openViewImageDialog($event)"
-      (appSelectionChange)="onAppSelection($event)"
       (openAddItemDialog)="openAddItemDialog()"
       (enterBuilderMode)="enterBuilderMode()"
       (showAgentStructureGraph)="openAgentStructureGraphDialog()"
@@ -382,4 +442,5 @@
 
   </div>
   }
+  </mat-drawer-container>
 </mat-drawer-container>

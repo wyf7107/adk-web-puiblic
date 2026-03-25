@@ -62,7 +62,7 @@
   margin-right: auto;
   display: flex;
   justify-content: center;
-  background-color: var(--mat-sidenav-content-background-color, var(--mat-app-background-color, var(--sys-surface, #fff)));
+  background-color: var(--mat-sys-surface-variant);
 }
 
 
@@ -76,7 +76,7 @@
   bottom: 0;
   display: flex;
   flex-direction: column;
-  background-color: var(--mat-sidenav-content-background-color, var(--mat-app-background-color, var(--sys-surface, #fff)));
+  background-color: var(--mat-sys-surface-variant);
   z-index: 10;
   overflow: auto;
   border-radius: 12px;
@@ -154,37 +154,6 @@
   vertical-align: middle;
 }
 
-.app-select {
-  width: 100%;
-}
-
-.app-select-container {
-  width: 60%;
-  height: 30px;
-  display: flex;
-  justify-content: space-between;
-  padding-left: 20px;
-  padding-right: 20px;
-  border-radius: 10px;
-  padding-top: 5px;
-}
-
-.app-name-option {
-  color: var(--side-panel-app-name-option-color);
-  font-family: 'Google Sans Mono', monospace;
-  font-style: normal;
-  font-weight: 400;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-.app-select {
-  color: var(--side-panel-app-name-option-color);
-  font-family: 'Google Sans Mono', monospace;
-  font-style: normal;
-  font-weight: 400;
-  padding-left: unset;
-}
 
 .mode-toggle-container {
   display: flex;
@@ -224,8 +193,3 @@
 }
 
 
-
-
-.agent-search-field {
-  width: 100%;
-}

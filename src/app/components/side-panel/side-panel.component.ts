@@ -16,23 +16,17 @@
  */
 
 import {AsyncPipe, NgComponentOutlet, NgTemplateOutlet} from '@angular/common';
-import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef, type WritableSignal} from '@angular/core';
-import {toObservable} from '@angular/core/rxjs-interop';
-import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, Type, viewChild, ViewContainerRef} from '@angular/core';
 import {MatIconButton, MatMiniFabButton} from '@angular/material/button';
-import {MatOption} from '@angular/material/core';
-import {MatFormField} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
-import {MatInput} from '@angular/material/input';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
-import {MatSelect, MatSelectChange} from '@angular/material/select';
 import {MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
 import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {combineLatest, Observable, of} from 'rxjs';
-import {first, map, startWith, switchMap} from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
+import {first} from 'rxjs/operators';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
@@ -60,7 +54,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   standalone: true,
   imports: [
     AsyncPipe,
-    FormsModule,
     NgComponentOutlet,
     NgTemplateOutlet,
     MatTooltip,
@@ -76,12 +69,7 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatIcon,
     MatIconButton,
     NgxJsonViewerModule,
-    MatOption,
-    MatSelect,
-    ReactiveFormsModule,
     MatProgressSpinner,
-    MatFormField,
-    MatInput,
   ],
 })
 export class SidePanelComponent implements AfterViewInit {
@@ -102,16 +90,10 @@ export class SidePanelComponent implements AfterViewInit {
   llmResponse = input<LlmResponse|undefined>();
   showSidePanel = input(false);
   isApplicationSelectorEnabledObs = input<Observable<boolean>>(of(false));
-  apps$ = input<Observable<string[]|undefined>>(of([]));
-  isLoadingApps = input<WritableSignal<boolean>>(signal(false));
-  selectedAppControl = input(new FormControl<string>('', {
-    nonNullable: true,
-  }));
   readonly isBuilderMode = input<boolean>(false);
   readonly disableBuilderIcon = input<boolean>(false);
 
   readonly closePanel = output<void>();
-  readonly appSelectionChange = output<MatSelectChange>();
   readonly tabChange = output<MatTabChangeEvent>();
   readonly sessionSelected = output<Session>();
   readonly sessionReloaded = output<Session>();
@@ -157,27 +139,6 @@ export class SidePanelComponent implements AfterViewInit {
       this.featureFlagService.isBidiStreamingEnabled;
   protected readonly isSessionsTabReorderingEnabledObs =
       this.featureFlagService.isSessionsTabReorderingEnabled();
-
-  // Agent search
-  readonly agentSearchControl = new FormControl('', { nonNullable: true });
-  readonly filteredApps$: Observable<string[] | undefined> = toObservable(this.apps$).pipe(
-    switchMap(appsObservable =>
-      combineLatest([
-        appsObservable,
-        this.agentSearchControl.valueChanges.pipe(startWith(''))
-      ])
-    ),
-    map(([apps, searchTerm]) => {
-      if (!apps) {
-        return apps;
-      }
-      if (!searchTerm || searchTerm.trim() === '') {
-        return apps;
-      }
-      const lowerSearch = searchTerm.toLowerCase().trim();
-      return apps.filter(app => app.toLowerCase().startsWith(lowerSearch));
-    })
-  );
 
   readonly artifactDeltaArray = computed(() => {
     const artifactDelta = this.selectedEvent()?.actions?.artifactDelta;

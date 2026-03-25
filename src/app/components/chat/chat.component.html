@@ -259,9 +259,6 @@
     @if (!isBuilderMode()) {
     <app-side-panel
       [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
-      [apps$]="apps$"
-      [isLoadingApps]="isLoadingApps"
-      [selectedAppControl]="selectedAppControl"
       [showSidePanel]="showSidePanel"
       [appName]="appName"
       [userId]="userId"
@@ -288,7 +285,6 @@
       (page)="handlePageEvent($event)"
       (closeSelectedEvent)="closeSelectedEvent()"
       (openImageDialog)="openViewImageDialog($event)"
-      (appSelectionChange)="onAppSelection($event)"
       (openAddItemDialog)="openAddItemDialog()"
       (enterBuilderMode)="enterBuilderMode()"
       (showAgentStructureGraph)="openAgentStructureGraphDialog()"

@@ -154,37 +154,6 @@
   vertical-align: middle;
 }
 
-.app-select {
-  width: 100%;
-}
-
-.app-select-container {
-  width: 60%;
-  height: 30px;
-  display: flex;
-  justify-content: space-between;
-  padding-left: 20px;
-  padding-right: 20px;
-  border-radius: 10px;
-  padding-top: 5px;
-}
-
-.app-name-option {
-  color: var(--side-panel-app-name-option-color);
-  font-family: 'Google Sans Mono', monospace;
-  font-style: normal;
-  font-weight: 400;
-  padding-left: 12px;
-  padding-right: 12px;
-}
-
-.app-select {
-  color: var(--side-panel-app-name-option-color);
-  font-family: 'Google Sans Mono', monospace;
-  font-style: normal;
-  font-weight: 400;
-  padding-left: unset;
-}
 
 .mode-toggle-container {
   display: flex;
@@ -224,8 +193,3 @@
 }
 
 
-
-
-.agent-search-field {
-  width: 100%;
-}

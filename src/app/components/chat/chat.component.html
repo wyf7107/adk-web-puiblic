@@ -15,43 +15,45 @@
 -->
 
 <mat-toolbar class="app-toolbar">
-  <button mat-icon-button class="toolbar-icon-button" (click)="toggleSidePanel()" aria-label="Toggle side panel">
-    <mat-icon>menu</mat-icon>
-  </button>
-  <div class="toolbar-logo">
-    @if (logoComponent) {
-      <ng-container *ngComponentOutlet="logoComponent"></ng-container>
-    } @else {
-      <img src="assets/ADK-512-color.svg" width="20px" height="20px" />
-      <span class="toolbar-logo-text">Agent Development Kit</span>
-      <mat-icon class="disclosure-info-icon" [matTooltip]="sidePanelI18n.disclosureTooltip" matTooltipPosition="below">info_outline</mat-icon>
+  <div class="toolbar-group toolbar-agent-group">
+    <button mat-icon-button class="toolbar-icon-button" (click)="toggleSidePanel()" aria-label="Toggle side panel">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <div class="toolbar-logo">
+      @if (logoComponent) {
+        <ng-container *ngComponentOutlet="logoComponent"></ng-container>
+      } @else {
+        <img src="assets/ADK-512-color.svg" width="20px" height="20px" />
+        <span class="toolbar-logo-text">Agent Development Kit</span>
+        <mat-icon class="disclosure-info-icon" [matTooltip]="sidePanelI18n.disclosureTooltip" matTooltipPosition="below">info_outline</mat-icon>
+      }
+    </div>
+    <button class="app-selector-button" (click)="toggleAppSelectorDrawer()" matTooltip="Select an app">
+      <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+      <span class="app-selector-label">{{ appName || 'Select an app' }}</span>
+      <mat-icon class="app-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
+    </button>
+    @if (!isBuilderMode()) {
+      <button mat-icon-button class="toolbar-icon-button" (click)="openAgentStructureGraphDialog()" matTooltip="View Agent Structure Graph" matTooltipPosition="below">
+        <mat-icon>account_tree</mat-icon>
+      </button>
+      <span [matTooltip]="disableBuilderSwitch ? 'Editing is not available for this agent because it was not built by the builder' : 'Edit in Builder Mode'" matTooltipPosition="below">
+        <button mat-icon-button class="toolbar-icon-button"
+          [disabled]="disableBuilderSwitch"
+          (click)="enterBuilderMode()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </span>
     }
   </div>
-  <button class="app-selector-button" (click)="toggleAppSelectorDrawer()" matTooltip="Select an app">
-    <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-    <span class="app-selector-label">{{ appName || 'Select an app' }}</span>
-    <mat-icon class="app-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
-  </button>
-  @if (!isBuilderMode()) {
-    <button mat-icon-button class="toolbar-icon-button" (click)="openAgentStructureGraphDialog()" matTooltip="View Agent Structure Graph" matTooltipPosition="below">
-      <mat-icon>account_tree</mat-icon>
-    </button>
-    <span [matTooltip]="disableBuilderSwitch ? 'Editing is not available for this agent because it was not built by the builder' : 'Edit in Builder Mode'" matTooltipPosition="below">
-      <button mat-icon-button class="toolbar-icon-button"
-        [disabled]="disableBuilderSwitch"
-        (click)="enterBuilderMode()">
-        <mat-icon>edit</mat-icon>
-      </button>
-    </span>
-  }
   @if (appName) {
-  <button class="session-selector-button" (click)="toggleSessionSelectorDrawer()" matTooltip="Select a session">
-    <mat-icon fontSet="material-symbols-outlined">chat</mat-icon>
-    <span class="session-selector-label">{{ getToolbarSessionId() }}</span>
-    <mat-icon class="session-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
-  </button>
-  }
-  @if (appName != "") {
+  <div class="toolbar-divider"></div>
+  <div class="toolbar-group toolbar-session-group">
+    <button class="session-selector-button" (click)="toggleSessionSelectorDrawer()" matTooltip="Select a session">
+      <mat-icon fontSet="material-symbols-outlined">chat</mat-icon>
+      <span class="session-selector-label">{{ getToolbarSessionId() }}</span>
+      <mat-icon class="session-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
+    </button>
   <div class="toolbar-content">
     @if (evalCase) {
     <div style="display: flex; align-items: center">
@@ -110,7 +112,7 @@
       @if (sessionId) {
         <button
           mat-button
-          class="toolbar-icon-button"
+          class="toolbar-icon-button new-session-toolbar-button"
           (click)="onNewSessionClick()"
           id="toolbar-new-session-button"
           [matTooltip]="i18n.createNewSessionTooltip"
@@ -164,6 +166,7 @@
       </div>
     </div>
     } }
+  </div>
   </div>
   }
   <button

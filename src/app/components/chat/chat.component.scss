@@ -302,7 +302,8 @@
   min-height: 48px !important;
   display: flex;
   align-items: center;
-  font-size: 14px;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 13px;
   padding: 0 8px !important;
   z-index: 1;
 }
@@ -316,18 +317,20 @@
 }
 
 .toolbar-logo-text {
+  font-family: 'Google Sans', sans-serif;
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
 
 .disclosure-info-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-  opacity: 0.6;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
   cursor: pointer;
-  margin-right: 20px;
+  margin-right: 16px;
+  color: var(--chat-toolbar-icon-color);
 }
 
 .toolbar-content {
@@ -355,8 +358,8 @@
 
 .toolbar-session-text {
   color: var(--chat-toolbar-session-text-color);
-  font-family: Roboto;
-  font-size: 14px;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 13px;
   font-style: normal;
   font-weight: 500;
   text-transform: uppercase;
@@ -366,6 +369,7 @@
 .toolbar-session-id {
   color: var(--chat-toolbar-session-id-color);
   font-family: 'Google Sans Mono', monospace;
+  font-size: 13px;
   margin-left: 5px;
 }
 
@@ -384,6 +388,12 @@
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 }
 
 // Smaller icon button for session/user id actions
@@ -427,9 +437,9 @@
   flex-shrink: 0;
 
   mat-icon {
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
   }
 }
 
@@ -498,20 +508,20 @@
 .readonly-badge {
   color: var(--chat-readonly-badge-color);
   border-radius: 4px;
-  padding: 1px 6px;
+  padding: 2px 8px;
   display: flex;
   align-items: center;
   margin-left: 8px;
-  font-size: 12px;
-  line-height: 16px;
+  font-family: 'Google Sans', sans-serif;
+  font-size: 13px;
+  line-height: 18px;
   gap: 4px;
   white-space: nowrap;
 
   mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    padding-top: 1px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
   }
 }
@@ -519,9 +529,11 @@
 .readonly-session-message {
   display: block;
   color: var(--chat-toolbar-session-text-color);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 13px;
   margin-left: 1em;
   font-weight: 400;
-  line-height: 16px;
+  line-height: 18px;
   letter-spacing: 0.3px;
   flex-shrink: 1;
 }
@@ -616,10 +628,10 @@ app-canvas {
   font-size: 13px;
   font-weight: 500;
   height: 32px;
-  margin-right: 12px;
+  margin-right: 8px;
   flex-shrink: 0;
   white-space: nowrap;
-  width: 240px;
+  width: 220px;
   overflow: hidden;
   transition: background-color 0.15s ease;
 
@@ -782,10 +794,10 @@ app-canvas {
   font-size: 13px;
   font-weight: 500;
   height: 32px;
-  margin-right: 12px;
+  margin-right: 8px;
   flex-shrink: 0;
   white-space: nowrap;
-  width: 200px;
+  width: 220px;
   overflow: hidden;
   transition: background-color 0.15s ease;
 

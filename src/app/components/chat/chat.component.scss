@@ -651,8 +651,8 @@ app-canvas {
   opacity: 0.7;
 }
 
-// App selector drawer (mat-drawer with mode=over)
-.app-selector-drawer {
+// Shared selector drawer (mat-drawer with mode=over)
+.selector-drawer {
   width: 320px;
   background-color: var(--mat-sys-surface, #fff);
   display: flex;
@@ -765,6 +765,88 @@ app-canvas {
   padding: 24px;
   color: var(--chat-toolbar-session-text-color);
   font-style: italic;
+}
+
+// Session selector toolbar button (mirrors app-selector-button)
+.session-selector-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--mat-sys-outline-variant, #c4c7c5);
+  background: transparent;
+  cursor: pointer;
+  color: var(--chat-toolbar-icon-color);
+  font-family: 'Google Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  height: 32px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  width: 200px;
+  overflow: hidden;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.session-selector-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+}
+
+.session-selector-caret {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+// Session selector drawer (mirrors app-selector-drawer)
+.session-selector-drawer {
+  width: 320px;
+  background-color: var(--mat-sys-surface, #fff);
+  display: flex;
+  flex-direction: column;
+
+  &.match-side-panel-width {
+    width: var(--side-drawer-width);
+  }
+}
+
+.session-selector-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 8px 8px 20px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.session-selector-drawer-title {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Google Sans', sans-serif;
+}
+
+.session-selector-drawer-content {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .build-panel-header {

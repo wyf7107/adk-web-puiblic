@@ -74,6 +74,7 @@ import { ChatPanelComponent } from '../chat-panel/chat-panel.component';
 import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
 import { EvalTabComponent } from '../eval-tab/eval-tab.component';
 import { DeleteSessionDialogComponent, DeleteSessionDialogData, } from '../session-tab/delete-session-dialog/delete-session-dialog.component';
+import { SessionTabComponent } from '../session-tab/session-tab.component';
 import { SidePanelComponent } from '../side-panel/side-panel.component';
 import { TraceEventComponent } from '../trace-tab/trace-event/trace-event.component';
 import { ViewImageDialogComponent } from '../view-image-dialog/view-image-dialog.component';
@@ -164,6 +165,7 @@ const BIDI_STREAMING_RESTART_WARNING =
     SidePanelComponent,
     CanvasComponent,
     BuilderTabsComponent,
+    SessionTabComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -201,6 +203,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   canvasComponent = viewChild.required(CanvasComponent);
   sideDrawer = viewChild.required<MatDrawer>('sideDrawer');
   sidePanel = viewChild.required(SidePanelComponent);
+  drawerSessionTab = viewChild<SessionTabComponent>('drawerSessionTab');
   evalTab = viewChild(EvalTabComponent);
   bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
   enableSseIndicator = signal(false);
@@ -235,6 +238,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   showSidePanel = true;
   showBuilderAssistant = true;
   showAppSelectorDrawer = false;
+  showSessionSelectorDrawer = false;
   useSse = false;
   currentSessionState: SessionState | undefined = {};
   root_agent = ROOT_AGENT;
@@ -456,7 +460,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get sessionTab() {
-    return this.sidePanel().sessionTabComponent();
+    return this.drawerSessionTab() ?? this.sidePanel().sessionTabComponent();
   }
 
   ngAfterViewInit() {
@@ -1612,6 +1616,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleAppSelectorDrawer() {
+    this.showSessionSelectorDrawer = false;
     this.showAppSelectorDrawer = !this.showAppSelectorDrawer;
     if (this.showAppSelectorDrawer) {
       this.appDrawerSearchControl.setValue('');
@@ -1620,6 +1625,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   onAppSelectorDrawerClosed() {
     this.showAppSelectorDrawer = false;
+  }
+
+  toggleSessionSelectorDrawer() {
+    this.showAppSelectorDrawer = false;
+    this.showSessionSelectorDrawer = !this.showSessionSelectorDrawer;
+  }
+
+  onSessionSelectorDrawerClosed() {
+    this.showSessionSelectorDrawer = false;
+  }
+
+  onSelectorDrawerClosed() {
+    this.showAppSelectorDrawer = false;
+    this.showSessionSelectorDrawer = false;
+  }
+
+  onSessionSelectedFromDrawer(session: Session) {
+    this.showSessionSelectorDrawer = false;
+    this.updateWithSelectedSession(session);
   }
 
   selectAppFromDrawer(app: string) {
@@ -2089,10 +2113,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getToolbarSessionId() {
     if (!this.sessionId) {
-      return 'NEW';
+      return 'NEW SESSION';
     }
 
-    return this.sessionId.length > 8 ? `${this.sessionId.slice(0, 8)}...` : this.sessionId;
+    return this.sessionId;
   }
 
   async copySessionId() {

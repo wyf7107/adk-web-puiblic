@@ -23,10 +23,13 @@ import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButton, MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
+import { MatFormField } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { MatDrawer, MatDrawerContainer } from '@angular/material/sidenav';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatToolbar } from '@angular/material/toolbar';
@@ -34,7 +37,7 @@ import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable, of } from 'rxjs';
-import { catchError, distinctUntilChanged, filter, first, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, first, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { URLUtil } from '../../../utils/url-util';
 import { AgentRunRequest } from '../../core/models/AgentRunRequest';
@@ -151,6 +154,9 @@ const BIDI_STREAMING_RESTART_WARNING =
     MatToolbar,
     NgComponentOutlet,
     ResizableBottomDirective,
+    MatFormField,
+    MatInput,
+    MatProgressSpinner,
     TraceEventComponent,
     AsyncPipe,
     ChatPanelComponent,
@@ -226,6 +232,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   redirectUri = URLUtil.getBaseUrlWithoutPath();
   showSidePanel = true;
   showBuilderAssistant = true;
+  showAppSelectorDrawer = false;
   useSse = false;
   currentSessionState: SessionState | undefined = {};
   root_agent = ROOT_AGENT;
@@ -261,6 +268,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     nonNullable: true,
   });
 
+  // App selector drawer
+  protected readonly appDrawerSearchControl = new FormControl('', { nonNullable: true });
+
   protected openBase64InNewTab(data: string, mimeType: string) {
     this.safeValuesService.openBase64InNewTab(data, mimeType);
   }
@@ -294,6 +304,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }),
     shareReplay(),
+  );
+
+  protected readonly filteredDrawerApps$: Observable<string[] | undefined> = this.apps$.pipe(
+    switchMap(apps =>
+      combineLatest([
+        of(apps),
+        this.appDrawerSearchControl.valueChanges.pipe(startWith('')),
+      ])
+    ),
+    map(([apps, searchTerm]) => {
+      if (!apps) return apps;
+      if (!searchTerm || searchTerm.trim() === '') return apps;
+      const lower = searchTerm.toLowerCase().trim();
+      return apps.filter(app => app.toLowerCase().includes(lower));
+    }),
   );
 
   // Feature flag references for use in template.
@@ -1582,6 +1607,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.sideDrawer()?.open();
     }
     this.showSidePanel = !this.showSidePanel;
+  }
+
+  toggleAppSelectorDrawer() {
+    this.showAppSelectorDrawer = !this.showAppSelectorDrawer;
+    if (this.showAppSelectorDrawer) {
+      this.appDrawerSearchControl.setValue('');
+    }
+  }
+
+  onAppSelectorDrawerClosed() {
+    this.showAppSelectorDrawer = false;
+  }
+
+  selectAppFromDrawer(app: string) {
+    this.selectedAppControl.setValue(app);
+    this.showAppSelectorDrawer = false;
   }
 
   protected handleTabChange(event: any) {

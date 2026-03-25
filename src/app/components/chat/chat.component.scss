@@ -308,6 +308,26 @@
   z-index: 1;
 }
 
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.toolbar-session-group {
+  flex-shrink: 1;
+  min-width: 0;
+  flex: 1;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--chat-toolbar-divider-color, rgba(128, 128, 128, 0.3));
+  margin: 0 8px 0 0;
+  flex-shrink: 0;
+}
+
 .toolbar-logo {
   display: flex;
   align-items: center;
@@ -613,22 +633,56 @@ app-canvas {
   border-radius: 8px;
 }
 
+// App selector group (button + related actions)
+.app-selector-group {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  border: 1px solid var(--mat-sys-outline-variant, #c4c7c5);
+  margin-right: 8px;
+  flex-shrink: 0;
+  height: 32px;
+  overflow: hidden;
+
+  .toolbar-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.app-selector-group-divider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--mat-sys-outline-variant, #c4c7c5);
+  flex-shrink: 0;
+}
+
 // App selector toolbar button
 .app-selector-button {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--mat-sys-outline-variant, #c4c7c5);
+  border-radius: 0px;
+  border: none;
   background: transparent;
   cursor: pointer;
   color: var(--chat-toolbar-icon-color);
   font-family: 'Google Sans', sans-serif;
   font-size: 13px;
   font-weight: 500;
-  height: 32px;
-  margin-right: 8px;
+  height: 100%;
   flex-shrink: 0;
   white-space: nowrap;
   width: 220px;
@@ -779,22 +833,56 @@ app-canvas {
   font-style: italic;
 }
 
+// Session selector group (button + related actions)
+.session-selector-group {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  border: 1px solid var(--mat-sys-outline-variant, #c4c7c5);
+  margin-right: 8px;
+  flex-shrink: 0;
+  height: 32px;
+  overflow: visible;
+
+  .toolbar-icon-button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.session-selector-group-divider {
+  width: 1px;
+  height: 16px;
+  background-color: var(--mat-sys-outline-variant, #c4c7c5);
+  flex-shrink: 0;
+}
+
 // Session selector toolbar button (mirrors app-selector-button)
 .session-selector-button {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--mat-sys-outline-variant, #c4c7c5);
+  border-radius: 0;
+  border: none;
   background: transparent;
   cursor: pointer;
   color: var(--chat-toolbar-icon-color);
   font-family: 'Google Sans', sans-serif;
   font-size: 13px;
   font-weight: 500;
-  height: 32px;
-  margin-right: 8px;
+  height: 100%;
   flex-shrink: 0;
   white-space: nowrap;
   width: 220px;

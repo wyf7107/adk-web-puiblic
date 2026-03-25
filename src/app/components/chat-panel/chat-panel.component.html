@@ -69,7 +69,7 @@
         @if (message.role === "bot") {
           @if (isEventContent(i) || message.isLoading) {
           <button mat-mini-fab class="bot-avatar" [disabled]="!message.eventId" [appJsonTooltip]="getAgentNameFromEvent(i)"
-            [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}">
+            [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}" [style.background-color]="getNodePathColor(i)">
             <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
           </button>
           } @else {

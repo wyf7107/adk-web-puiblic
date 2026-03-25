@@ -581,6 +581,8 @@ button.send-message-btn {
 .bot-avatar {
   margin-right: 12px;
   box-shadow: none;
+  --mdc-fab-small-container-color: transparent;
+  color: white;
 }
 
 .user-avatar {

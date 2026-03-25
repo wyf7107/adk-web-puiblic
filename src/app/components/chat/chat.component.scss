@@ -635,6 +635,17 @@ app-canvas {
 .app-selector-label {
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+}
+
+.app-selector-caret {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.7;
 }
 
 // App selector drawer (mat-drawer with mode=over)

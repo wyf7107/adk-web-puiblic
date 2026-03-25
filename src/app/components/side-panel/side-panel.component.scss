@@ -62,7 +62,7 @@
   margin-right: auto;
   display: flex;
   justify-content: center;
-  background-color: var(--mat-sidenav-content-background-color, var(--mat-app-background-color, var(--sys-surface, #fff)));
+  background-color: var(--mat-sys-surface-variant);
 }
 
 
@@ -76,7 +76,7 @@
   bottom: 0;
   display: flex;
   flex-direction: column;
-  background-color: var(--mat-sidenav-content-background-color, var(--mat-app-background-color, var(--sys-surface, #fff)));
+  background-color: var(--mat-sys-surface-variant);
   z-index: 10;
   overflow: auto;
   border-radius: 12px;

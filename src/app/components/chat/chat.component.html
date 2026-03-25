@@ -44,6 +44,13 @@
       </button>
     </span>
   }
+  @if (appName) {
+  <button class="session-selector-button" (click)="toggleSessionSelectorDrawer()" matTooltip="Select a session">
+    <mat-icon fontSet="material-symbols-outlined">chat</mat-icon>
+    <span class="session-selector-label">{{ getToolbarSessionId() }}</span>
+    <mat-icon class="session-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
+  </button>
+  }
   @if (appName != "") {
   <div class="toolbar-content">
     @if (evalCase) {
@@ -89,19 +96,6 @@
     <div style="display: flex; align-items: center">
       @let isSessionLoading = uiStateService.isSessionLoading() | async; @if (isSessionLoading ===
       false) {
-      <div class="toolbar-session-text">{{ i18n.sessionIdLabel }}</div>
-      <div class="toolbar-session-id-container">
-        <div class="toolbar-session-id" [matTooltip]="sessionId">{{ getToolbarSessionId() }}</div>
-        <button
-          mat-icon-button
-          class="toolbar-icon-button small-icon-button"
-          [matTooltip]="i18n.copySessionIdTooltip"
-          (click)="copySessionId()"
-          aria-label="Copy session ID"
-        >
-          <mat-icon>content_copy</mat-icon>
-        </button>
-      </div>
       @if (!canEditSession()) {
       <div class="readonly-badge">
         <mat-icon>visibility</mat-icon>
@@ -113,8 +107,7 @@
       }
     </div>
     @if (isSessionLoading === false) {
-    <div class="toolbar-actions">
-      <div style="display: flex; align-items: center">
+      @if (sessionId) {
         <button
           mat-button
           class="toolbar-icon-button"
@@ -125,6 +118,9 @@
           <mat-icon>add</mat-icon>
           {{ i18n.newSessionButton }}
         </button>
+      }
+    <div class="toolbar-actions">
+      <div style="display: flex; align-items: center">
 
         <button
           mat-icon-button
@@ -227,14 +223,15 @@
 
 <mat-drawer-container class="drawer-container" autosize>
   <mat-drawer
-    class="app-selector-drawer"
+    class="selector-drawer"
     [class.match-side-panel-width]="showSidePanel"
-    #appSelectorDrawer
+    #selectorDrawer
     mode="over"
     position="start"
-    [opened]="showAppSelectorDrawer"
-    (closedStart)="onAppSelectorDrawerClosed()"
+    [opened]="showAppSelectorDrawer || showSessionSelectorDrawer"
+    (closedStart)="onSelectorDrawerClosed()"
   >
+    @if (showAppSelectorDrawer) {
     <div class="app-selector-drawer-header">
       <span class="app-selector-drawer-title">Select an App</span>
       <div>
@@ -269,6 +266,37 @@
         }
       }
     </div>
+    } @else if (showSessionSelectorDrawer) {
+    <div class="session-selector-drawer-header">
+      <span class="session-selector-drawer-title">Select a Session</span>
+      <div>
+        <button mat-icon-button class="toolbar-icon-button" (click)="toggleSessionSelectorDrawer()" aria-label="Close session selector">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+    @if (sessionId) {
+    <div class="session-selector-current-id">
+      <span class="session-selector-current-id-label">Current Session</span>
+      <div class="session-selector-current-id-row">
+        <span class="session-selector-current-id-value" [matTooltip]="sessionId">{{ sessionId }}</span>
+        <button mat-icon-button class="session-selector-copy-button" (click)="copySessionId()" matTooltip="Copy session ID" aria-label="Copy session ID">
+          <mat-icon>content_copy</mat-icon>
+        </button>
+      </div>
+    </div>
+    }
+    <div class="session-selector-drawer-content">
+      <app-session-tab
+        #drawerSessionTab
+        [userId]="userId"
+        [appName]="appName"
+        [sessionId]="sessionId"
+        (sessionSelected)="onSessionSelectedFromDrawer($event)"
+        (sessionReloaded)="updateWithSelectedSession($event)"
+      ></app-session-tab>
+    </div>
+    }
   </mat-drawer>
 
   <mat-drawer-container class="side-panel-container" autosize>

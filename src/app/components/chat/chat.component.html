@@ -33,9 +33,6 @@
     <mat-icon class="app-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
   </button>
   @if (!isBuilderMode()) {
-    <button mat-icon-button class="toolbar-icon-button" (click)="openAddItemDialog()" matTooltip="Create new agent" matTooltipPosition="below">
-      <mat-icon>add</mat-icon>
-    </button>
     <button mat-icon-button class="toolbar-icon-button" (click)="openAgentStructureGraphDialog()" matTooltip="View Agent Structure Graph" matTooltipPosition="below">
       <mat-icon>account_tree</mat-icon>
     </button>
@@ -240,6 +237,9 @@
   >
     <div class="app-selector-drawer-header">
       <span class="app-selector-drawer-title">Select an App</span>
+      <button mat-icon-button class="toolbar-icon-button" (click)="openAddItemDialog()" matTooltip="Create new agent" matTooltipPosition="below" aria-label="Create new agent">
+        <mat-icon>add</mat-icon>
+      </button>
       <button mat-icon-button class="toolbar-icon-button" (click)="toggleAppSelectorDrawer()" aria-label="Close app selector">
         <mat-icon>close</mat-icon>
       </button>

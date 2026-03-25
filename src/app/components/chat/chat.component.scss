@@ -679,15 +679,25 @@ app-canvas {
 }
 
 .app-selector-search {
-  padding: 0 12px 8px;
+  padding: 0 12px 4px;
   flex-shrink: 0;
 }
 
 .app-selector-search-field {
   width: 100%;
+  font-size: 13px;
+
+  .mat-mdc-form-field-infix {
+    min-height: 36px;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
 
   mat-icon {
     color: var(--chat-toolbar-session-text-color);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
 }
 

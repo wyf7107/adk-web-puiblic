@@ -48,11 +48,16 @@
   border-radius: 4px;
   position: absolute;
   display: block;
-  top: 0;
-  bottom: 0;
+  top: 20px;
+  bottom: 20px;
   right: 0;
   cursor: ew-resize;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
 }
+
 .json-viewer-container {
   margin: 10px;
 }

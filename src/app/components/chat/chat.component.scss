@@ -383,6 +383,21 @@
   box-shadow: none !important;
 }
 
+// Smaller icon button for session/user id actions
+.small-icon-button {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+}
+
+.small-icon-button mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
 .toolbar-user-id-container {
   display: flex;
   align-items: center;

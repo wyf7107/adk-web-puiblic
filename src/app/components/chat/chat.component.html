@@ -76,7 +76,7 @@
         <div class="toolbar-session-id" [matTooltip]="sessionId">{{ getToolbarSessionId() }}</div>
         <button
           mat-icon-button
-          class="toolbar-icon-button"
+          class="toolbar-icon-button small-icon-button"
           [matTooltip]="i18n.copySessionIdTooltip"
           (click)="copySessionId()"
           aria-label="Copy session ID"
@@ -91,7 +91,7 @@
         <div class="toolbar-session-id">{{ userId }}</div>
         <button
           mat-icon-button
-          class="toolbar-icon-button"
+          class="toolbar-icon-button small-icon-button"
           [matTooltip]="i18n.editUserIdTooltip"
           (click)="startUserIdEdit()"
           aria-label="Edit user ID"
@@ -108,7 +108,7 @@
         />
         <button
           mat-icon-button
-          class="toolbar-icon-button"
+          class="toolbar-icon-button small-icon-button"
           [matTooltip]="i18n.saveUserIdTooltip"
           (click)="saveUserId()"
           aria-label="Save user ID"
@@ -117,7 +117,7 @@
         </button>
         <button
           mat-icon-button
-          class="toolbar-icon-button"
+          class="toolbar-icon-button small-icon-button"
           [matTooltip]="i18n.cancelUserIdEditTooltip"
           (click)="cancelUserIdEdit()"
           aria-label="Cancel user ID edit"

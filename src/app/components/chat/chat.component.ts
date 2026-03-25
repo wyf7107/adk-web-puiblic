@@ -20,7 +20,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, Type, viewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatButton, MatFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton, MatFabButton } from '@angular/material/button';
 import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
@@ -144,6 +144,7 @@ const BIDI_STREAMING_RESTART_WARNING =
     NgxJsonViewerModule,
     NgClass,
     MatButton,
+    MatIconButton,
     MatMenuModule,
     MatCard,
     MatFabButton,

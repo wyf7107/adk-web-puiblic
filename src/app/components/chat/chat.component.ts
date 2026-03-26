@@ -657,7 +657,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Add the combined user message as a single row
     this.messages.update(messages => [...messages, userMessage]);
-    this.changeDetectorRef.detectChanges();
+    // Defer change detection to avoid race condition with URL update
+    setTimeout(() => this.changeDetectorRef.detectChanges(), 0);
 
     const userEvent = {
       id: userEventId,

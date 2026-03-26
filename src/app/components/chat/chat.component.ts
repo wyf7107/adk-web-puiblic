@@ -563,6 +563,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.userInput = '';
     this.longRunningEvents = [];
     this.displayLandingPageContent();
+    this.selectedEvent = undefined;
+    this.selectedEventIndex = undefined;
   }
 
   private resetToNewSession() {

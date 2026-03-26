@@ -289,6 +289,15 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return selectedEvent?.author ?? ROOT_AGENT;
   }
 
+  getAgentTooltip(i: number): string {
+    const key = this.messages[i].eventId;
+    const selectedEvent = this.eventData.get(key);
+    const author = selectedEvent?.author ?? ROOT_AGENT;
+    const nodePath = this.getNodePath(i) || '';
+
+    return JSON.stringify({ author, nodePath }, null, 2);
+  }
+
   isEventContent(messageIndex: number): boolean {
     const message = this.messages[messageIndex];
     if (!message.eventId) return false;
@@ -296,29 +305,20 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return !!event?.content;
   }
 
-  getEventNodePath(messageIndex: number): string {
-    const message = this.messages[messageIndex];
-    if (!message.eventId) return '';
-    const event = this.eventData.get(message.eventId);
-    let nodePath = event?.nodeInfo?.path || event?.nodeInfo?.nodePath || '';
-
-    return nodePath;
-  }
 
   getNodeName(nodePath: string): string {
     return nodePath.split(/[/.>]/).filter(Boolean).pop() || nodePath;
   }
 
   getNodePathColor(messageIndex: number): string {
-    const nodePath = this.getEventNodePath(messageIndex);
+    const nodePath = this.getNodePath(messageIndex) || '';
     const nodeName = this.getNodeName(nodePath);
     const theme = this.themeService.currentTheme();
     return this.stringToColorService.stc(nodeName, theme);
   }
 
   getNodeInitial(messageIndex: number): string {
-    const nodePath = this.getNodePath(messageIndex) ||
-        this.getEventNodePath(messageIndex);
+    const nodePath = this.getNodePath(messageIndex) || '';
     const nodeName = this.getNodeName(nodePath);
     const initialMatch = nodeName.match(/[A-Za-z0-9]/);
 

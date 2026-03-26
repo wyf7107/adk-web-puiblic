@@ -116,10 +116,10 @@
 .message-card.output-chip {
   display: inline-block !important;
   margin: 0 !important;
-  border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 8px !important;
   padding: 5px !important;
-  background-color: var(--mat-sys-surface-container-highest);
+  background-color: var(--mat-sys-surface-container-highest) !important;
+    font-size: 13px;
 
   .output-chip-header {
     font-weight: 600;

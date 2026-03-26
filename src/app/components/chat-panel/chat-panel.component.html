@@ -297,8 +297,7 @@
             } @else {
               <button
                 mat-stroked-button
-                [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-                class="function-event-button"
+                class="event-action-button"
                 [appJsonTooltip]="functionCall.args ? JSON.stringify(functionCall.args) : ''"
                 [appJsonTooltipTitle]="'Function Call'"
               >
@@ -314,8 +313,8 @@
               <app-computer-action [functionResponse]="functionResponse" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
 
             } @else {
-              <button mat-stroked-button [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-                class="function-event-button"
+              <button mat-stroked-button
+                class="event-action-button"
                 [appJsonTooltip]="functionResponse.response ? JSON.stringify(functionResponse.response) : ''"
                 [appJsonTooltipTitle]="'Function Response'">
                 <mat-icon>check</mat-icon>
@@ -327,8 +326,7 @@
         @if (message.role === "bot" && hasStateDelta(i)) {
         <button
           mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button state-delta-button"
+          class="event-action-button"
           [appJsonTooltip]="getStateDeltaTooltip(i)"
           [appJsonTooltipTitle]="'State Update'"
         >
@@ -339,8 +337,7 @@
         @if (message.role === "bot" && hasArtifactDelta(i)) {
         <button
           mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button artifact-delta-button"
+          class="event-action-button artifact-delta-button"
           [appJsonTooltip]="getArtifactDeltaTooltip(i)"
           [appJsonTooltipTitle]="'Artifact'"
         >
@@ -351,8 +348,7 @@
         @if (message.role === "bot" && hasEventRoute(i)) {
         <button
           mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button"
+          class="event-action-button"
           [appJsonTooltip]="getEventRouteTooltip(i)"
           [appJsonTooltipTitle]="'Route'"
         >
@@ -363,8 +359,7 @@
         @if (message.role === "bot" && hasWorkflowNodes(i)) {
         <button
           mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button"
+          class="event-action-button"
           [appWorkflowGraphTooltip]="getWorkflowNodes(i)"
           [agentGraphData]="agentGraphData"
           [nodePath]="getNodePath(i)"
@@ -378,8 +373,7 @@
         @if (message.role === "bot" && hasEndOfAgent(i)) {
         <button
           mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button end-of-agent-button"
+          class="event-action-button end-of-agent-button"
         >
           <mat-icon>check_circle</mat-icon>
           {{ getEndOfAgentAuthor(i) }} completed!

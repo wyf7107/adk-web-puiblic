@@ -66,9 +66,9 @@
   }
 }
 
-.function-event-button {
-  color: var(--mat-sys-on-secondary-container) !important;
-  background-color: var(--mat-sys-secondary-container) !important;
+.event-action-button {
+  color: var(--mat-sys-on-surface) !important;
+  background-color: var(--mat-sys-surface-container-high) !important;
   border-color: transparent !important;
   margin: 5px 5px 5px 0px;
   font-size: 11px !important;
@@ -84,11 +84,11 @@
     width: 18px !important;
     height: 18px !important;
     margin-right: 6px !important;
-    color: var(--mat-sys-on-secondary-container) !important;
+    color: var(--mat-sys-on-surface) !important;
   }
 }
 
-:host ::ng-deep .state-delta-button {
+:host ::ng-deep .event-action-button {
   background-color: var(--mat-sys-surface-container-high) !important;
   color: var(--mat-sys-on-surface) !important;
 
@@ -99,12 +99,9 @@
   }
 }
 
+
 .artifact-delta-button {}
 
-.function-event-button-highlight {
-  border-color: var(--mat-sys-primary) !important;
-  color: var(--mat-sys-on-primary) !important;
-}
 
 .output-chip-container {
   width: 100%;

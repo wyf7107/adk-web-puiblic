@@ -43,6 +43,7 @@ import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {ListResponse} from '../../core/services/interfaces/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
+import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 import {WorkflowGraphTooltipDirective} from '../../directives/workflow-graph-tooltip.directive';
 import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
@@ -148,6 +149,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   private nextPageToken = '';
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
+  protected readonly themeService = inject(THEME_SERVICE);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   readonly markdownComponent: Type<MarkdownComponentInterface> = inject(
       MARKDOWN_COMPONENT,
@@ -310,7 +312,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   getNodePathColor(messageIndex: number): string {
     const nodePath = this.getEventNodePath(messageIndex);
     const nodeName = this.getNodeName(nodePath);
-    return this.stringToColorService.stc(nodeName);
+    const theme = this.themeService.currentTheme();
+    return this.stringToColorService.stc(nodeName, theme);
   }
 
   getNodeInitial(messageIndex: number): string {

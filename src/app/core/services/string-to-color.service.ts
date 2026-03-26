@@ -28,11 +28,17 @@ export class StringToColorServiceImpl implements StringToColorServiceInterface {
   /**
    * Converts a string to a color, e.g. 'my string' -> '#8c8526ff'.
    */
-  stc(str: string): string {
+  stc(str: string, theme?: string): string {
     const hash = this.hashCode(str);
     const h = Math.abs(hash % 360);
     const s = 60 + Math.abs((hash >> 8) % 40);
-    const l = 40 + Math.abs((hash >> 16) % 30);
+    
+    let l;
+    if (theme === 'dark') {
+      l = 15 + Math.abs((hash >> 16) % 30);
+    } else {
+      l = 40 + Math.abs((hash >> 16) % 30);
+    }
 
     return this.hslToHex(h, s, l);
   }

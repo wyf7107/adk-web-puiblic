@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 
-<h2 mat-dialog-title>Agent Structure Graph</h2>
+<h2 mat-dialog-title>Agent Structure: {{ appName }}</h2>
 
 <mat-dialog-content class="dialog-content">
   <div class="graph-container">
@@ -45,7 +45,6 @@
         }
       </div>
 
-      <p class="agent-info">Agent: <strong>{{ appName }}</strong></p>
       <div class="svg-container" [innerHTML]="renderedGraph()"></div>
     } @else {
       <div class="no-graph-container">

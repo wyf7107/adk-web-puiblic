@@ -83,8 +83,13 @@
   flex-direction: column;
   background-color: var(--mat-sys-surface-variant);
   z-index: 10;
-  overflow: auto;
+  overflow: hidden;
   border-radius: 12px;
+}
+
+.details-panel-tabs-container {
+  flex: 1;
+  overflow: auto;
 }
 
 .details-content {

@@ -40,16 +40,20 @@
       @if (hasPayload() || hasResponseSchema()) {
       <div class="data-buttons">
         @if (hasPayload()) {
-        <button class="data-button" [appJsonTooltip]="getPayloadJson()" appJsonTooltipTitle="Payload">
-          <mat-icon>code</mat-icon>
-          <span>payload</span>
-        </button>
+        <app-hover-info-button
+          icon="code"
+          text="payload"
+          [tooltipContent]="getPayloadJson()"
+          tooltipTitle="Payload">
+        </app-hover-info-button>
         }
         @if (hasResponseSchema()) {
-        <button class="data-button" [appJsonTooltip]="getResponseSchemaJson()" appJsonTooltipTitle="Response Schema">
-          <mat-icon>view_headline</mat-icon>
-          <span>response schema</span>
-        </button>
+        <app-hover-info-button
+          icon="view_headline"
+          text="response schema"
+          [tooltipContent]="getResponseSchemaJson()"
+          tooltipTitle="Response Schema">
+        </app-hover-info-button>
         }
       </div>
       }
@@ -71,16 +75,20 @@
     @if (hasPayload() || hasResponseSchema()) {
     <div class="data-buttons">
       @if (hasPayload()) {
-      <button class="data-button" [appJsonTooltip]="getPayloadJson()" appJsonTooltipTitle="Payload">
-        <mat-icon>code</mat-icon>
-        <span>payload</span>
-      </button>
+      <app-hover-info-button
+        icon="code"
+        text="payload"
+        [tooltipContent]="getPayloadJson()"
+        tooltipTitle="Payload">
+      </app-hover-info-button>
       }
       @if (hasResponseSchema()) {
-      <button class="data-button" [appJsonTooltip]="getResponseSchemaJson()" appJsonTooltipTitle="Response Schema">
-        <mat-icon>view_headline</mat-icon>
-        <span>response schema</span>
-      </button>
+      <app-hover-info-button
+        icon="view_headline"
+        text="response schema"
+        [tooltipContent]="getResponseSchemaJson()"
+        tooltipTitle="Response Schema">
+      </app-hover-info-button>
       }
     </div>
     }

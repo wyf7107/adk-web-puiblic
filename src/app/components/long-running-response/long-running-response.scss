@@ -111,30 +111,6 @@
   gap: 8px;
 }
 
-.data-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: 1px solid var(--chat-panel-function-event-button-border-color);
-  border-radius: 6px;
-  color: var(--chat-panel-function-event-button-text-color);
-  font-size: 11px;
-  font-family: 'Roboto Mono', monospace;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: var(--chat-panel-function-event-button-text-color);
-  }
-
-  &:hover {
-    opacity: 0.8;
-  }
-}
 
 .input-container {
   display: flex;

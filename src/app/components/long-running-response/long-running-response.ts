@@ -25,6 +25,8 @@ import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 import {MarkdownComponent} from '../markdown/markdown.component';
 
+import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
+
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-long-running-response',
@@ -37,6 +39,7 @@ import {MarkdownComponent} from '../markdown/markdown.component';
     MatIcon,
     JsonTooltipDirective,
     MarkdownComponent,
+    HoverInfoButtonComponent,
   ],
 })
 export class LongRunningResponseComponent {

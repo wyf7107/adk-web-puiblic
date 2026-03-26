@@ -295,15 +295,12 @@
               <app-computer-action [functionCall]="functionCall" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
 
             } @else {
-              <button
-                mat-stroked-button
-                class="event-action-button"
-                [appJsonTooltip]="functionCall.args ? JSON.stringify(functionCall.args) : ''"
-                [appJsonTooltipTitle]="'Function Call'"
-              >
-                <mat-icon>bolt</mat-icon>
-                {{ functionCall.name }}
-              </button>
+              <app-hover-info-button
+                [icon]="'bolt'"
+                [text]="functionCall.name"
+                [tooltipContent]="functionCall.args ? JSON.stringify(functionCall.args) : ''"
+                [tooltipTitle]="'Function Call'"
+              ></app-hover-info-button>
             }
           }
         }
@@ -313,48 +310,38 @@
               <app-computer-action [functionResponse]="functionResponse" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
 
             } @else {
-              <button mat-stroked-button
-                class="event-action-button"
-                [appJsonTooltip]="functionResponse.response ? JSON.stringify(functionResponse.response) : ''"
-                [appJsonTooltipTitle]="'Function Response'">
-                <mat-icon>check</mat-icon>
-                {{ functionResponse.name }}
-              </button>
+              <app-hover-info-button
+                [icon]="'check'"
+                [text]="functionResponse.name"
+                [tooltipContent]="functionResponse.response ? JSON.stringify(functionResponse.response) : ''"
+                [tooltipTitle]="'Function Response'"
+              ></app-hover-info-button>
             }
           }
         }
         @if (message.role === "bot" && hasStateDelta(i)) {
-        <button
-          mat-stroked-button
-          class="event-action-button"
-          [appJsonTooltip]="getStateDeltaTooltip(i)"
-          [appJsonTooltipTitle]="'State Update'"
-        >
-          <mat-icon>data_object</mat-icon>
-          State: {{ getStateDeltaKeys(i) }}
-        </button>
+        <app-hover-info-button
+          [icon]="'data_object'"
+          [text]="'State: ' + getStateDeltaKeys(i)"
+          [tooltipContent]="getStateDeltaTooltip(i)"
+          [tooltipTitle]="'State Update'"
+        ></app-hover-info-button>
         }
         @if (message.role === "bot" && hasArtifactDelta(i)) {
-        <button
-          mat-stroked-button
-          class="event-action-button artifact-delta-button"
-          [appJsonTooltip]="getArtifactDeltaTooltip(i)"
-          [appJsonTooltipTitle]="'Artifact'"
-        >
-          <mat-icon>attachment</mat-icon>
-          Artifact
-        </button>
+        <app-hover-info-button
+          [icon]="'attachment'"
+          [text]="'Artifact'"
+          [tooltipContent]="getArtifactDeltaTooltip(i)"
+          [tooltipTitle]="'Artifact'"
+        ></app-hover-info-button>
         }
         @if (message.role === "bot" && hasEventRoute(i)) {
-        <button
-          mat-stroked-button
-          class="event-action-button"
-          [appJsonTooltip]="getEventRouteTooltip(i)"
-          [appJsonTooltipTitle]="'Route'"
-        >
-          <mat-icon>route</mat-icon>
-          {{ getEventRouteText(i) }}
-        </button>
+        <app-hover-info-button
+          [icon]="'route'"
+          [text]="getEventRouteText(i)"
+          [tooltipContent]="getEventRouteTooltip(i)"
+          [tooltipTitle]="'Route'"
+        ></app-hover-info-button>
         }
         @if (message.role === "bot" && hasWorkflowNodes(i)) {
         <button
@@ -371,13 +358,10 @@
         </button>
         }
         @if (message.role === "bot" && hasEndOfAgent(i)) {
-        <button
-          mat-stroked-button
-          class="event-action-button end-of-agent-button"
-        >
-          <mat-icon>check_circle</mat-icon>
-          {{ getEndOfAgentAuthor(i) }} completed!
-        </button>
+        <app-hover-info-button
+          [icon]="'check_circle'"
+          [text]="getEndOfAgentAuthor(i) + ' completed!'"
+        ></app-hover-info-button>
         }
         </div>
         @if (message.functionCalls && message.functionCalls.length > 0) {

@@ -55,6 +55,8 @@ import {MessageFeedbackComponent} from '../message-feedback/message-feedback.com
 
 import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 
+import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
+
 const ROOT_AGENT = 'root_agent';
 
 @Component({
@@ -85,6 +87,7 @@ const ROOT_AGENT = 'root_agent';
     WorkflowGraphTooltipDirective,
     ComputerActionComponent,
     LongRunningResponseComponent,
+    HoverInfoButtonComponent,
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {

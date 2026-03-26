@@ -66,41 +66,7 @@
   }
 }
 
-.event-action-button {
-  color: var(--mat-sys-on-surface) !important;
-  background-color: var(--mat-sys-surface-container-high) !important;
-  border-color: transparent !important;
-  margin: 5px 5px 5px 0px;
-  font-size: 11px !important;
-  padding: 6px 12px !important;
-  min-height: 24px !important;
-  height: 24px !important;
-  border-radius: 8px !important;
-  font-family: 'Roboto Mono', monospace !important;
-  max-width: 300px;
 
-  mat-icon {
-    font-size: 18px !important;
-    width: 18px !important;
-    height: 18px !important;
-    margin-right: 6px !important;
-    color: var(--mat-sys-on-surface) !important;
-  }
-}
-
-:host ::ng-deep .event-action-button {
-  background-color: var(--mat-sys-surface-container-high) !important;
-  color: var(--mat-sys-on-surface) !important;
-
-  .mdc-button__label {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-}
-
-
-.artifact-delta-button {}
 
 
 .output-chip-container {

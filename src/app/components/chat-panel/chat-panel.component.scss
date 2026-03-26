@@ -167,12 +167,15 @@
   flex-wrap: nowrap;
   align-items: flex-start;
   flex-grow: 1;
+  margin-right: 48px;
 
   .message-card {
     align-self: flex-start;
     color: var(--mat-sys-on-secondary-container);
     background-color: var(--mat-sys-secondary-container);
     box-shadow: none;
+    width: 100%;
+    max-width: none;
   }
 
   button {

@@ -28,14 +28,14 @@
         <mat-icon class="disclosure-info-icon" [matTooltip]="sidePanelI18n.disclosureTooltip" matTooltipPosition="below">info_outline</mat-icon>
       }
     </div>
-    <div class="app-selector-group">
-      <button class="app-selector-button" (click)="toggleAppSelectorDrawer()" matTooltip="Select an app">
+    <div class="selector-group">
+      <button class="selector-button" (click)="toggleAppSelectorDrawer()" matTooltip="Select an app">
         <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-        <span class="app-selector-label">{{ appName || 'Select an app' }}</span>
-        <mat-icon class="app-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
+        <span class="selector-label">{{ appName || 'Select an app' }}</span>
+        <mat-icon class="selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
       </button>
       @if (!isBuilderMode()) {
-        <div class="app-selector-group-divider"></div>
+        <div class="selector-group-divider"></div>
         <button mat-icon-button class="toolbar-icon-button" (click)="openAgentStructureGraphDialog()" matTooltip="View Agent Structure Graph" matTooltipPosition="below">
           <mat-icon>account_tree</mat-icon>
         </button>
@@ -51,16 +51,16 @@
   </div>
   @if (appName) {
   <div class="toolbar-group toolbar-session-group">
-    <div class="session-selector-group">
-      <button class="session-selector-button" (click)="toggleSessionSelectorDrawer()" matTooltip="Select a session">
+    <div class="selector-group">
+      <button class="selector-button" (click)="toggleSessionSelectorDrawer()" matTooltip="Select a session">
         <mat-icon fontSet="material-symbols-outlined">chat</mat-icon>
-        <span class="session-selector-label">{{ getToolbarSessionId() }}</span>
-        <mat-icon class="session-selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
+        <span class="selector-label">{{ getToolbarSessionId() }}</span>
+        <mat-icon class="selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
       </button>
       @if (!evalCase) {
         @let isSessionLoadingGroup = uiStateService.isSessionLoading() | async;
         @if (isSessionLoadingGroup === false) {
-          <div class="session-selector-group-divider"></div>
+          <div class="selector-group-divider"></div>
           <button
             mat-icon-button
             class="toolbar-icon-button"
@@ -242,8 +242,8 @@
     (closedStart)="onSelectorDrawerClosed()"
   >
     @if (showAppSelectorDrawer) {
-    <div class="app-selector-drawer-header">
-      <span class="app-selector-drawer-title">Select an App</span>
+    <div class="selector-drawer-header">
+      <span class="selector-drawer-title">Select an App</span>
       <div>
         <button mat-icon-button class="toolbar-icon-button" (click)="openAddItemDialog()" matTooltip="Create new agent" matTooltipPosition="below" aria-label="Create new agent">
           <mat-icon>add</mat-icon>
@@ -277,8 +277,8 @@
       }
     </div>
     } @else if (showSessionSelectorDrawer) {
-    <div class="session-selector-drawer-header">
-      <span class="session-selector-drawer-title">Select a Session</span>
+    <div class="selector-drawer-header">
+      <span class="selector-drawer-title">Select a Session</span>
       <div>
         <button mat-icon-button class="toolbar-icon-button" (click)="toggleSessionSelectorDrawer()" aria-label="Close session selector">
           <mat-icon>close</mat-icon>

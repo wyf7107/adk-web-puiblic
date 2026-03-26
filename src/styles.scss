@@ -16,6 +16,10 @@
 
 @use '@angular/material' as mat;
 
+:root {
+  --ngx-json-string: #558255;
+}
+
 // Apply dark theme by default
 html {
   @include mat.theme((
@@ -104,7 +108,7 @@ ngx-json-viewer {
   }
 
   .segment-type-string {
-    color: #0f9d58 !important;
+    color: var(--ngx-json-string) !important;
   }
 
   .segment-type-number {

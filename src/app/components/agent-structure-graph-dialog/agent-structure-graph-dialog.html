@@ -30,22 +30,20 @@
       </div>
     } @else if (renderedGraph()) {
       <!-- Breadcrumb navigation -->
-      @if (breadcrumbs().length > 1) {
-        <div class="breadcrumb-container">
-          @for (crumb of breadcrumbs(); track $index) {
-            @if ($index > 0) {
-              <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
-            }
-            <button
-              class="breadcrumb-item"
-              [class.active]="$index === breadcrumbs().length - 1"
-              (click)="navigateToLevel($index)"
-              [disabled]="$index === breadcrumbs().length - 1">
-              {{ crumb }}
-            </button>
+      <div class="breadcrumb-container">
+        @for (crumb of breadcrumbs(); track $index) {
+          @if ($index > 0) {
+            <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
           }
-        </div>
-      }
+          <button
+            class="breadcrumb-item"
+            [class.active]="$index === breadcrumbs().length - 1"
+            (click)="navigateToLevel($index)"
+            [disabled]="$index === breadcrumbs().length - 1">
+            {{ crumb }}
+          </button>
+        }
+      </div>
 
       <p class="agent-info">Agent: <strong>{{ appName }}</strong></p>
       <div class="svg-container" [innerHTML]="renderedGraph()"></div>

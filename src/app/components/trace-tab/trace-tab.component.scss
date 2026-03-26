@@ -31,6 +31,29 @@
   font-size: 12px;
 }
 
+.trace-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px); // Adjust based on header height
+  padding: 12px;
+
+  // Ensure scrollbar is visible but styled if needed
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--mat-sys-outline-variant);
+    border-radius: 3px;
+  }
+}
+
+.trace-item {
+  margin-top: 0; // Removing margin-top since we use gap in flexbox
+}
+
+
 .trace-title {
   color: var(--trace-tab-trace-title-color);
   font-size: 14px;
@@ -112,8 +135,4 @@
   left: 9px;
   width: 10px;
   height: 1px;
-}
-
-.trace-item {
-  margin-top: 5px;
 }

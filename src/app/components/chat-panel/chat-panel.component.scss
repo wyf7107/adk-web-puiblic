@@ -51,32 +51,32 @@
   }
 
   &.landing-message {
-    border: 2px solid var(--chat-panel-landing-message-border-color, #4285f4);
+    border: 2px solid var(--mat-sys-primary);
   }
 
   &.landing-message {
-    border: 2px solid var(--chat-panel-landing-message-border-color, #4285f4);
+    border: 2px solid var(--mat-sys-primary);
   }
 
   &.landing-message {
-    border: 2px solid var(--chat-panel-landing-message-border-color, #4285f4);
+    border: 2px solid var(--mat-sys-primary);
   }
 
   &.landing-message {
-    border: 2px solid var(--chat-panel-landing-message-border-color, #4285f4);
+    border: 2px solid var(--mat-sys-primary);
   }
 }
 
 .function-event-button {
-  border-color: var(--chat-panel-function-event-button-border-color) !important;
-  color: var(--chat-panel-function-event-button-text-color) !important;
-  background-color: var(--mat-sys-surface-container-high) !important;
+  color: var(--mat-sys-on-secondary-container) !important;
+  background-color: var(--mat-sys-secondary-container) !important;
+  border-color: transparent !important;
   margin: 5px 5px 5px 0px;
   font-size: 11px !important;
   padding: 6px 12px !important;
   min-height: 24px !important;
   height: 24px !important;
-  border-radius: 6px !important;
+  border-radius: 8px !important;
   font-family: 'Roboto Mono', monospace !important;
   max-width: 300px;
 
@@ -85,7 +85,7 @@
     width: 18px !important;
     height: 18px !important;
     margin-right: 6px !important;
-    color: var(--chat-panel-function-event-button-text-color) !important;
+    color: var(--mat-sys-on-secondary-container) !important;
   }
 }
 
@@ -99,8 +99,8 @@
 }
 
 .function-event-button-highlight {
-  border-color: var(--chat-panel-function-event-button-highlight-border-color) !important;
-  color: var(--chat-panel-function-event-button-highlight-color) !important;
+  border-color: var(--mat-sys-primary) !important;
+  color: var(--mat-sys-on-primary) !important;
 }
 
 .output-chip-container {
@@ -182,7 +182,7 @@
 
   .message-card {
     align-self: flex-start;
-    color: var(--chat-panel-user-message-message-card-color);
+    color: var(--mat-sys-on-primary-container);
     background-color: var(--mat-sys-primary-container);
     box-shadow: none;
     order: 1;
@@ -204,7 +204,7 @@
 
   .message-card {
     align-self: flex-start;
-    color: var(--chat-panel-bot-message-message-card-color);
+    color: var(--mat-sys-on-surface);
     background-color: var(--mat-sys-surface-container);
     box-shadow: none;
   }
@@ -228,7 +228,7 @@
 
 .bot-message:focus-within {
   .message-card {
-    border: 1px solid var(--chat-panel-bot-message-focus-within-message-card-border-color);
+    border: 1px solid var(--mat-sys-outline);
   }
 }
 
@@ -258,7 +258,7 @@
   font-size: 16px;
 
   .actual-result {
-    border-right: 2px solid var(--chat-panel-actual-result-border-right-color);
+    border-right: 2px solid var(--mat-sys-outline-variant);
     padding-right: 8px;
     min-width: 350px;
     max-width: 350px;
@@ -291,17 +291,17 @@
 
 .eval-response-header {
   padding-bottom: 5px;
-  border-bottom: 2px solid var(--chat-panel-eval-response-header-border-bottom-color);
+  border-bottom: 2px solid var(--mat-sys-outline-variant);
   font-style: italic;
   font-weight: 700;
 }
 
 .header-expected {
-  color: var(--chat-panel-header-expected-color);
+  color: var(--mat-sys-tertiary);
 }
 
 .header-actual {
-  color: var(--chat-panel-header-actual-color);
+  color: var(--mat-sys-primary);
 }
 
 .eval-case-edit-button {
@@ -312,12 +312,12 @@
 
 .eval-pass {
   display: flex;
-  color: var(--chat-panel-eval-pass-color);
+  color: var(--mat-sys-primary);
 }
 
 .eval-fail {
   display: flex;
-  color: var(--chat-panel-eval-fail-color);
+  color: var(--mat-sys-error);
 }
 
 .hidden {
@@ -338,18 +338,18 @@
   position: relative;
 
   textarea {
-    color: var(--chat-panel-input-field-textarea-color);
+    color: var(--mat-sys-on-surface);
     border: none;
     box-sizing: content-box;
-    caret-color: var(--chat-panel-input-field-textarea-caret-color);
+    caret-color: var(--mat-sys-primary);
 
     &::placeholder {
-      color: var(--chat-panel-input-field-textarea-placeholder-color);
+      color: var(--mat-sys-on-surface-variant);
     }
   }
 
   button {
-    color: var(--chat-panel-input-field-button-color);
+    color: var(--mat-sys-primary) !important;
   }
 }
 
@@ -359,6 +359,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  button {
+    color: var(--mat-sys-on-surface-variant) !important;
+
+    &.recording {
+      color: var(--mat-sys-error) !important;
+    }
+  }
 }
 
 .chat-input-actions-left,
@@ -423,7 +431,7 @@
   border-radius: 50%;
   padding: 8px;
   cursor: pointer;
-  color: var(--chat-panel-delete-button-color);
+  color: var(--mat-sys-error);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -480,7 +488,7 @@
 }
 
 .event-number-label {
-  color: var(--chat-panel-event-number-label-color, #5f6368);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .event-number-placeholder {
@@ -498,7 +506,7 @@
   border: none;
   padding: 0;
   font: inherit;
-  color: var(--chat-panel-link-style-button-color) !important;
+  color: var(--mat-sys-primary) !important;
   text-decoration: underline;
   cursor: pointer;
   outline: none;
@@ -508,7 +516,7 @@
 .cancel-edit-button {
   width: 24px;
   height: 24px;
-  color: var(--chat-mat-mdc-text-field-wrapper-border-color);
+  color: var(--mat-sys-outline-variant);
   cursor: pointer;
   margin-right: 16px;
 }
@@ -577,7 +585,7 @@ button.send-message-btn {
   padding: 20px 40px 40px 40px;
   font-size: 14px;
   line-height: 1.8;
-  color: var(--chat-panel-message-text-color);
+  color: var(--mat-sys-on-surface);
 }
 
 .bot-avatar {

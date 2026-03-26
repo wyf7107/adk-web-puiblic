@@ -31,7 +31,7 @@
 }
 
 .event-container {
-  color: var(--chat-event-container-color);
+  color: var(--mat-sys-on-surface);
 }
 
 .chat-card {
@@ -76,8 +76,8 @@
 }
 
 .function-event-button-highlight {
-  border-color: var(--chat-function-event-button-highlight-border-color) !important;
-  color: var(--chat-function-event-button-highlight-color) !important;
+  border-color: var(--mat-sys-primary) !important;
+  color: var(--mat-sys-on-primary) !important;
 }
 
 .user-message {
@@ -87,7 +87,8 @@
 
   .message-card {
     align-self: flex-end;
-    color: var(--chat-user-message-message-card-color);
+    color: var(--mat-sys-on-primary-container);
+    background-color: var(--mat-sys-primary-container);
     box-shadow: none;
   }
 }
@@ -98,14 +99,15 @@
 
   .message-card {
     align-self: flex-start;
-    color: var(--chat-bot-message-message-card-color);
+    color: var(--mat-sys-on-surface);
+    background-color: var(--mat-sys-surface-container);
     box-shadow: none;
   }
 }
 
 .bot-message:focus-within {
   .message-card {
-    border: 1px solid var(--chat-bot-message-focus-within-message-card-border-color);
+    border: 1px solid var(--mat-sys-outline);
   }
 }
 
@@ -135,7 +137,7 @@
   font-size: 16px;
 
   .actual-result {
-    border-right: 2px solid var(--chat-actual-result-border-right-color);
+    border-right: 2px solid var(--mat-sys-outline-variant);
     padding-right: 8px;
     min-width: 350px;
     max-width: 350px;
@@ -168,17 +170,17 @@
 
 .eval-response-header {
   padding-bottom: 5px;
-  border-bottom: 2px solid var(--chat-eval-response-header-border-bottom-color);
+  border-bottom: 2px solid var(--mat-sys-outline-variant);
   font-style: italic;
   font-weight: 700;
 }
 
 .header-expected {
-  color: var(--chat-header-expected-color);
+  color: var(--mat-sys-tertiary);
 }
 
 .header-actual {
-  color: var(--chat-header-actual-color);
+  color: var(--mat-sys-primary);
 }
 
 .eval-case-edit-button {
@@ -189,12 +191,12 @@
 
 .eval-pass {
   display: flex;
-  color: var(--chat-eval-pass-color);
+  color: var(--mat-sys-primary);
 }
 
 .eval-fail {
   display: flex;
-  color: var(--chat-eval-fail-color);
+  color: var(--mat-sys-error);
 }
 
 .navigation-button-sidepanel {

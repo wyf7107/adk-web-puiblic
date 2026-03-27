@@ -17,11 +17,6 @@
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
 <div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
-  @if((uiStateService.isMessagesLoading() | async) && (featureFlagService.isInfinityMessageScrollingEnabled() | async)) {
-    <div class="messages-loading-container">
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    </div>
-  }
   <div #videoContainer></div>
   @if (messages.length === 0 && agentReadme) {
     <div class="readme-container">
@@ -49,7 +44,7 @@
             }"
       >
         @if (message.role === "bot") {
-          @if (isEventContent(i) || message.isLoading) {
+          @if (isEventContent(i)) {
           <button mat-mini-fab class="bot-avatar" [disabled]="!message.eventId" [appJsonTooltip]="getAgentTooltip(i)"
             [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}" [style.background-color]="getNodePathColor(i)">
             <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
@@ -71,9 +66,7 @@
             'message-card--highlighted': shouldMessageHighlighted(i)
           }"
         >
-          @if (message.isLoading) {
-          <mat-progress-bar class="loading-bar" mode="buffer"></mat-progress-bar>
-          } @if (message.attachments) {
+        @if (message.attachments) {
           <div class="attachments">
             @for (file of message.attachments; track file) {
             <div class="attachment">
@@ -424,6 +417,11 @@
         <app-message-feedback [sessionName]="sessionName()" [eventId]="message.eventId"></app-message-feedback>
       }
     </div> <!-- end .message-row-container -->
+  }
+  @if (isLoadingAgentResponse()) {
+    <div class="agent-loading-indicator">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
   }
 </div>
 } @if (appName != "" && isChatMode && !isSessionLoading) {

@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-import {Component, inject, OnInit, signal} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose} from '@angular/material/dialog';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {CommonModule} from '@angular/common';
-import {SafeHtml} from '@angular/platform-browser';
-import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
-import {GRAPH_SERVICE} from '../../core/services/interfaces/graph';
-import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {THEME_SERVICE} from '../../core/services/interfaces/theme';
-import {addSvgNodeHoverEffects} from '../../utils/svg-interaction.utils';
-import {NavigationStackItem, hasNestedStructure, findNodeInLevel, getNodesAtLevel} from '../../utils/graph-navigation.utils';
-import {getNodeName} from '../../utils/graph-layout.utils';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
+import { SafeHtml } from '@angular/platform-browser';
+import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
+import { GRAPH_SERVICE } from '../../core/services/interfaces/graph';
+import { SAFE_VALUES_SERVICE } from '../../core/services/interfaces/safevalues';
+import { THEME_SERVICE } from '../../core/services/interfaces/theme';
+import { addSvgNodeHoverEffects } from '../../utils/svg-interaction.utils';
+import { NavigationStackItem, hasNestedStructure, findNodeInLevel, getNodesAtLevel } from '../../utils/graph-navigation.utils';
+import { getNodeName } from '../../utils/graph-layout.utils';
 
 export interface AgentStructureGraphDialogData {
   appName: string;
@@ -158,7 +158,7 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   }
 
   navigateIntoNode(nodeName: string, nodeData: any): void {
-    this.navigationStack.push({name: nodeName, data: nodeData});
+    this.navigationStack.push({ name: nodeName, data: nodeData });
     this.updateBreadcrumbs();
     this.isLoading.set(true);
     this.renderCurrentLevel();
@@ -181,11 +181,12 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     }
 
     const currentData = this.navigationStack[this.navigationStack.length - 1].data;
+    const currentNodeName = this.navigationStack[this.navigationStack.length - 1].name;
     const nodes = getNodesAtLevel(currentData);
 
     nodes.forEach((node: any) => {
       const nodeName = getNodeName(node);
-      if (hasNestedStructure(node)) {
+      if (nodeName !== currentNodeName && hasNestedStructure(node)) {
         expandableNodes.add(nodeName);
       }
     });

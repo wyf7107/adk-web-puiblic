@@ -1,4 +1,4 @@
-import { ExecutableCode, CodeExecutionResult, FunctionCall, FunctionResponse } from './types';
+import { ExecutableCode, CodeExecutionResult, FunctionCall, FunctionResponse, Event } from './types';
 import { MediaType } from '../../components/artifact-tab/artifact-tab.component';
 
 export interface UiEvent {
@@ -16,6 +16,7 @@ export interface UiEvent {
   a2uiData?: any;
   executableCode?: ExecutableCode;
   codeExecutionResult?: CodeExecutionResult;
+  event?: Event;
   inlineData?: {
     mediaType?: MediaType | string;
     data: string;

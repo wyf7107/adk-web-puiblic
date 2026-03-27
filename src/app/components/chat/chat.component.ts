@@ -632,7 +632,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const userParts: any[] = [];
 
     // Build combined user message
-    const userMessage: any = {
+    const userMessage: UiEvent = {
       role: 'user',
       eventId: userEventId
     };
@@ -709,7 +709,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             this.eventData = new Map(this.eventData);
 
             // Create a message entry for the event
-            const message: any = {
+            const message: UiEvent = {
               role: chunkJson.author === 'user' ? 'user' : 'bot',
               eventId: chunkJson.id
             };
@@ -778,7 +778,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (part.thought) {
         if (newChunk !== this.latestThought) {
           this.storeEvents(part, chunkJson);
-          let thoughtMessage = {
+          let thoughtMessage: UiEvent = {
             role: 'bot',
             text: this.processThoughtText(newChunk),
             thought: true,
@@ -1217,8 +1217,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return `data:${mimeType};base64,${fixedBase64Data}`;
   }
 
-  private processPartIntoMessage(part: any, event: any, message: any) {
+  private processPartIntoMessage(part: any, event: any, message: UiEvent) {
     if (!part) return;
+
+    if (event) {
+      message.event = event;
+    }
 
     if (part.text) {
       message.text = part.text;
@@ -1294,7 +1298,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Add a placeholder message for the artifact
     // Feed the placeholder with the artifact data after it's fetched
-    let message = {
+    let message: UiEvent = {
       role: 'bot',
       inlineData: {
         data: '',
@@ -1714,7 +1718,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (event.author === 'user') {
         // For user messages, combine all parts into a single message
-        const userMessage: any = {
+        const userMessage: UiEvent = {
           role: 'user',
           eventId: event.id
         };
@@ -1736,7 +1740,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       } else {
         // For bot messages, combine all parts into a single message
-        const botMessage: any = {
+        const botMessage: UiEvent = {
           role: 'bot',
           eventId: event.id
         };
@@ -1846,7 +1850,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     session.events.forEach((event: any) => {
       if (event.author === 'user') {
         // For user messages, combine all parts into a single message
-        const userMessage: any = {
+        const userMessage: UiEvent = {
           role: 'user',
           eventId: event.id
         };
@@ -1864,7 +1868,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       } else {
         // For bot messages, combine all parts into a single message
-        const botMessage: any = {
+        const botMessage: UiEvent = {
           role: 'bot',
           eventId: event.id
         };

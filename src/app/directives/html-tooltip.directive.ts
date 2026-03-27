@@ -25,7 +25,7 @@ import {JsonTooltipComponent} from '../components/json-tooltip/json-tooltip.comp
   standalone: true,
 })
 export class JsonTooltipDirective implements OnDestroy {
-  @Input('appJsonTooltip') json: string = '';
+  @Input('appJsonTooltip') json: any = '';
   @Input('appJsonTooltipTitle') title: string = '';
 
   private overlayRef: OverlayRef | null = null;

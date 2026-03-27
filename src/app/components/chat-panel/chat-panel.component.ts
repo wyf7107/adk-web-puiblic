@@ -294,8 +294,18 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     const selectedEvent = this.eventData.get(key);
     const author = selectedEvent?.author ?? ROOT_AGENT;
     const nodePath = this.getNodePath(i) || '';
+    const errorCode = selectedEvent?.errorCode;
+    const errorMessage = selectedEvent?.errorMessage;
 
-    return JSON.stringify({ author, nodePath }, null, 2);
+    const tooltipObj: any = { author, nodePath };
+    if (errorCode) {
+      tooltipObj.errorCode = errorCode;
+    }
+    if (errorMessage) {
+      tooltipObj.errorMessage = errorMessage;
+    }
+
+    return JSON.stringify(tooltipObj, null, 2);
   }
 
   isEventContent(messageIndex: number): boolean {
@@ -694,6 +704,38 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
     const event = this.eventData.get(message.eventId);
     return event?.author || 'Agent';
+  }
+
+  hasErrorCode(messageIndex: number): boolean {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return false;
+
+    const event = this.eventData.get(message.eventId);
+    return !!event?.errorCode;
+  }
+
+  getErrorCode(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    return event?.errorCode || '';
+  }
+
+  hasErrorMessage(messageIndex: number): boolean {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return false;
+
+    const event = this.eventData.get(message.eventId);
+    return !!event?.errorMessage;
+  }
+
+  getErrorMessage(messageIndex: number): string {
+    const message = this.messages[messageIndex];
+    if (!message.eventId) return '';
+
+    const event = this.eventData.get(message.eventId);
+    return event?.errorMessage || '';
   }
 
 

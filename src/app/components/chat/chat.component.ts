@@ -764,7 +764,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private processErrorMessage(chunkJson: any) {
     this.storeEvents(chunkJson, chunkJson);
     this.insertMessageBeforeLoadingMessage(
-      { text: chunkJson.errorMessage, role: 'bot' })
+      { text: chunkJson.errorMessage, role: 'bot', eventId: chunkJson.id })
   }
 
   private processPart(chunkJson: any, part: any) {

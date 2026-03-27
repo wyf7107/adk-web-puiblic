@@ -229,6 +229,15 @@
   font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
 }
 
+.error-message {
+  color: var(--mat-app-warn, #d32f2f);
+  font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  white-space: pre-line;
+  word-break: break-word;
+  padding: 8px 12px;
+}
+
 .message-text {
   white-space: pre-line;
   word-break: break-word;

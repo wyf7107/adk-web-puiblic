@@ -98,6 +98,17 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
+          if (chunk.errorCode) {
+            const lastMessage = this.messages[this.messages.length - 1];
+            if (lastMessage.role === 'bot' && lastMessage.isLoading) {
+              lastMessage.text = `Error Code: ${chunk.errorCode}`;
+              lastMessage.isLoading = false;
+              lastMessage.isError = true;
+              this.shouldAutoScroll = true;
+            }
+            this.isGenerating = false;
+            return;
+          }
           if (chunk.content) {
             let botText = '';
             for (let part of chunk.content.parts) {
@@ -169,8 +180,15 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
-          if (chunk.errorCode && (chunk.errorCode == "MALFORMED_FUNCTION_CALL" || chunk.errorCode == "STOP")) {
-            this.sendMessage("____Something went wrong, please try again");
+          if (chunk.errorCode) {
+            const lastMessage = this.messages[this.messages.length - 1];
+            if (lastMessage.role === 'bot' && lastMessage.isLoading) {
+              lastMessage.text = `Error Code: ${chunk.errorCode}`;
+              lastMessage.isLoading = false;
+              lastMessage.isError = true;
+              this.shouldAutoScroll = true;
+            }
+            this.isGenerating = false;
             return;
           }
           if (chunk.content) {

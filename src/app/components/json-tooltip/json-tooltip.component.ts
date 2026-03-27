@@ -75,11 +75,15 @@ import { NgxJsonViewerModule } from 'ngx-json-viewer';
 })
 export class JsonTooltipComponent {
   @Input() title: string = '';
-  @Input() set json(value: string) {
-    try {
-      this.parsedJson = JSON.parse(value);
-    } catch (e) {
-      // If not valid JSON, display as string
+  @Input() set json(value: any) {
+    if (typeof value === 'string') {
+      try {
+        this.parsedJson = JSON.parse(value);
+      } catch (e) {
+        // If not valid JSON, display as string
+        this.parsedJson = value;
+      }
+    } else {
       this.parsedJson = value;
     }
   }

@@ -738,6 +738,21 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return event?.errorMessage || '';
   }
 
+  getErrorJson(messageIndex: number): any {
+    const errorCode = this.getErrorCode(messageIndex);
+    const errorMessage = this.getErrorMessage(messageIndex);
+
+    const errorObj: any = {};
+    if (errorCode) {
+      errorObj.errorCode = errorCode;
+    }
+    if (errorMessage) {
+      errorObj.errorMessage = errorMessage;
+    }
+
+    return errorObj;
+  }
+
 
   handleAgentStateClick(event: Event, messageIndex: number) {
     event.stopPropagation();

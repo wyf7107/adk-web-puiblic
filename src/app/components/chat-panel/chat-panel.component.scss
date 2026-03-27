@@ -99,6 +99,18 @@
   .output-chip-content {
     word-break: break-word;
   }
+
+  &.error {
+    background-color: var(--mat-sys-error-container, rgba(186, 26, 26, 0.1)) !important;
+
+    .output-chip-header {
+      color: var(--mat-sys-error, #ba1a1a) !important;
+    }
+
+    .output-chip-content {
+      color: var(--mat-sys-on-error-container, #ba1a1a) !important;
+    }
+  }
 }
 
 .event-chips-container {

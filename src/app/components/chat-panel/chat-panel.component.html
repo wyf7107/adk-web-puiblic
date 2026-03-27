@@ -335,21 +335,21 @@
           [tooltipTitle]="'Artifact'"
         ></app-hover-info-button>
         }
-        @if (message.role === "bot" && hasErrorCode(i)) {
-        <app-hover-info-button
-          [icon]="'error'"
-          [text]="'Error: ' + getErrorCode(i)"
-          [tooltipContent]="{ errorCode: getErrorCode(i), errorMessage: getErrorMessage(i) }"
-          [tooltipTitle]="'Error'"
-        ></app-hover-info-button>
-        }
-        @if (message.role === "bot" && hasErrorMessage(i) && !hasErrorCode(i)) {
-        <app-hover-info-button
-          [icon]="'error'"
-          [text]="'Error: '"
-          [tooltipContent]="{ errorMessage: getErrorMessage(i) }"
-          [tooltipTitle]="'Error'"
-        ></app-hover-info-button>
+        @if (message.role === "bot" && (hasErrorCode(i) || hasErrorMessage(i))) {
+        <div
+          class="output-chip-container"
+          [appJsonTooltip]="{ errorCode: getErrorCode(i), errorMessage: getErrorMessage(i) }"
+          [appJsonTooltipTitle]="'Error Details'"
+        >
+          <mat-card
+            [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
+            class="message-card output-chip error"
+          >
+            <div class="output-chip-content">
+              <ngx-json-viewer [json]="getErrorJson(i)"></ngx-json-viewer>
+            </div>
+          </mat-card>
+        </div>
         }
         @if (message.role === "bot" && hasEventRoute(i)) {
         <app-hover-info-button

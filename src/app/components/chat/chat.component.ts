@@ -1715,6 +1715,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       event
     };
 
+    if (event.errorCode || event.errorMessage) {
+      uiEvent.error = {
+        errorCode: event.errorCode,
+        errorMessage: event.errorMessage
+      };
+    }
+
     partsToProcess.forEach((part: any) => {
       if (role === 'bot' && isA2aResponse && this.isA2uiDataPart(part)) {
         part = { a2ui: this.extractA2aDataPartJson(part).data };

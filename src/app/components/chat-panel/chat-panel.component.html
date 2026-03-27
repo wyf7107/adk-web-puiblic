@@ -294,14 +294,14 @@
           [tooltipTitle]="'Artifact'"
         ></app-hover-info-button>
         }
-        @if (uiEvent.role === "bot" && (hasErrorCode(i) || hasErrorMessage(i))) {
+        @if (uiEvent.role === "bot" && uiEvent.error) {
         <div
           class="output-chip error"
           [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
-          [appJsonTooltip]="{ errorCode: getErrorCode(i), errorMessage: getErrorMessage(i) }"
+          [appJsonTooltip]="uiEvent.error"
           [appJsonTooltipTitle]="'Error Details'"
         >
-          <ngx-json-viewer [json]="getErrorJson(i)"></ngx-json-viewer>
+          <ngx-json-viewer [json]="uiEvent.error"></ngx-json-viewer>
         </div>
         }
         @if (uiEvent.role === "bot" && hasEventRoute(i)) {

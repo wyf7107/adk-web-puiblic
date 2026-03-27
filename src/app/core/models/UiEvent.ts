@@ -33,4 +33,8 @@ export interface UiEvent {
   evalThreshold?: number;
   invocationIndex?: number;
   finalResponsePartIndex?: number;
+  error?: {
+    errorCode?: string;
+    errorMessage?: string;
+  };
 }

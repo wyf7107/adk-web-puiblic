@@ -692,60 +692,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return event?.author || 'Agent';
   }
 
-  hasErrorCode(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return !!event?.errorCode;
-  }
-
-  getErrorCode(messageIndex: number): string {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return event?.errorCode || '';
-  }
-
-  hasErrorMessage(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return !!event?.errorMessage;
-  }
-
-  getErrorMessage(messageIndex: number): string {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return event?.errorMessage || '';
-  }
-
-  private errorJsonCache = new Map<string, {errorCode: string, errorMessage: string, parsed: any}>();
-
-  getErrorJson(messageIndex: number): any {
-    const message = this.uiEvents[messageIndex];
-    const errorCode = this.getErrorCode(messageIndex);
-    const errorMessage = this.getErrorMessage(messageIndex);
-
-    const eventId = message.event.id;
-    const cached = this.errorJsonCache.get(eventId);
-    
-    if (cached && cached.errorCode === errorCode && cached.errorMessage === errorMessage) {
-      return cached.parsed;
-    }
-
-    const errorObj: any = {};
-    if (errorCode) {
-      errorObj.errorCode = errorCode;
-    }
-    if (errorMessage) {
-      errorObj.errorMessage = errorMessage;
-    }
-
-    this.errorJsonCache.set(eventId, {errorCode, errorMessage, parsed: errorObj});
-    return errorObj;
-  }
-
 
   handleAgentStateClick(event: Event, messageIndex: number) {
     event.stopPropagation();

@@ -1,0 +1,366 @@
+    <div class="event-number-container">
+      #{{ index + 1}}
+    </div>
+    @if (uiEvent.role === "bot" && !uiEvent.isLoading) {
+      <app-chat-avatar
+        [role]="uiEvent.event.content ? 'bot' : 'node'"
+        [author]="uiEvent.author"
+        [nodePath]="uiEvent.nodePath">
+      </app-chat-avatar>
+    } 
+    <div class="message-content">
+    @if (shouldShowMessageCard(uiEvent)) {
+    <div
+      class="message-card"
+      [ngClass]="{
+        'eval-fail': uiEvent.evalStatus === 2,
+        'message-card--highlighted': isHighlighted
+      }"
+    >
+    @if (uiEvent.attachments) {
+      <div class="attachments">
+        @for (file of uiEvent.attachments; track file) {
+        <div class="attachment">
+          @if (file.file.type.startsWith("image/")) {
+          <img [src]="file.url" alt="attachment" class="image-preview-chat" />
+          } @if (!file.file.type.startsWith("image/")) {
+          <mat-icon>insert_drive_file</mat-icon>
+          @if (file.url) {
+          <a [href]="file.url" download>{{ file.file.name }}</a>
+          } @else {
+          {{ file.file.name }}
+          }
+          }
+        </div>
+        }
+      </div>
+      }
+      @if (uiEvent.thought || uiEvent.text || uiEvent.renderedContent || uiEvent.a2uiData) {
+      <div>
+        @if (uiEvent.thought) {
+        <div class="thought-chip">{{ i18n.thoughtChipLabel }}</div>
+        }
+        <div>
+          @if (uiEvent.text) { @if (uiEvent.isEditing) {
+          <div class="edit-message-container">
+            <textarea
+              #messageTextarea
+              class="message-textarea"
+              [ngModel]="userEditEvalCaseMessage"
+              (ngModelChange)="userEditEvalCaseMessageChange.emit($event)"
+              rows="4"
+              cols="80"
+              (keydown)="handleKeydown.emit({event: $event, message: uiEvent})"
+            ></textarea>
+            <div class="edit-message-buttons-container">
+              <span
+                class="material-symbols-outlined cancel-edit-button"
+                [matTooltip]="i18n.cancelEditingTooltip"
+                (click)="cancelEditMessage.emit(uiEvent)"
+              >
+                close
+              </span>
+              <span
+                class="material-symbols-outlined save-edit-button"
+                [matTooltip]="i18n.saveEvalMessageTooltip"
+                (click)="saveEditMessage.emit(uiEvent)"
+              >
+                check
+              </span>
+            </div>
+          </div>
+          } @else {
+            <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: uiEvent.text!, thought: uiEvent.thought}"></ng-container>
+          }
+        }
+        </div>
+        @if (uiEvent.renderedContent) {
+        <div>
+          <div [innerHTML]="renderGooglerSearch(uiEvent.renderedContent)"></div>
+        </div>
+        }
+        @if (uiEvent.a2uiData) {
+        <app-a2ui-canvas
+          [beginRendering]="uiEvent.a2uiData.beginRendering"
+          [surfaceUpdate]="uiEvent.a2uiData.surfaceUpdate"
+          [dataModelUpdate]="uiEvent.a2uiData.dataModelUpdate">
+        </app-a2ui-canvas>
+        }
+      </div>
+      }
+      @if (uiEvent.executableCode) {
+      <code> {{ uiEvent.executableCode.code }} </code>
+      } @if (uiEvent.codeExecutionResult) {
+      <div>
+        <div>{{ i18n.outcomeLabel }}: {{ uiEvent.codeExecutionResult.outcome }}</div>
+        <div>{{ i18n.outputLabel }}: {{ uiEvent.codeExecutionResult.output }}</div>
+      </div>
+      } @if (uiEvent.inlineData) { @if (uiEvent.role === "bot") {
+      <div>
+        <div>
+          @switch (uiEvent.inlineData.mediaType) { @case (MediaType.IMAGE) {
+          <div class="generated-image-container">
+            <img
+              class="generated-image"
+              alt="image"
+              [src]="uiEvent.inlineData.data"
+              (click)="openViewImageDialog.emit(uiEvent.inlineData.data)"
+            />
+          </div>
+          } @case (MediaType.AUDIO) {
+          <div>
+            <app-audio-player [base64data]="uiEvent.inlineData.data"></app-audio-player>
+          </div>
+          } @case (MediaType.TEXT) {
+          <div>
+            <div class="html-artifact-container">
+              <mat-icon>description</mat-icon>
+              <button
+                class="link-style-button"
+                (click)="
+                                openBase64InNewTab.emit({
+                                  data: uiEvent.inlineData.data,
+                                  mimeType: uiEvent.inlineData.mimeType
+                                })
+                              "
+              >
+                {{ uiEvent.inlineData.name }}
+              </button>
+            </div>
+          </div>
+          } @default {
+          <div>
+            <button
+              class="link-style-button"
+              (click)="
+                              openBase64InNewTab.emit({
+                                data: uiEvent.inlineData.data,
+                                mimeType: uiEvent.inlineData.mimeType
+                              })
+                            "
+            >
+              {{ uiEvent.inlineData.name }}
+            </button>
+          </div>
+          } }
+        </div>
+      </div>
+      } @else {
+      <div>
+        @if (uiEvent.inlineData.mimeType.startsWith("image/")) {
+        <div>
+          <img
+            class="image-preview-chat"
+            alt="image"
+            [src]="uiEvent.inlineData.data"
+            (click)="openViewImageDialog.emit(uiEvent.inlineData.data)"
+          />
+        </div>
+        } @else {
+        <div class="attachment">
+          <mat-icon>insert_drive_file</mat-icon>
+          <a [href]="uiEvent.inlineData.data" download>{{ uiEvent.inlineData.displayName }}</a>
+        </div>
+        }
+      </div>
+      } } @if (uiEvent.failedMetric && uiEvent.evalStatus === 2) {
+      <div class="eval-compare-container">
+        <div class="actual-expected-compare-container">
+          @if (uiEvent.actualInvocationToolUses) {
+          <div class="actual-result">
+            <div class="eval-response-header header-actual">{{ i18n.actualToolUsesLabel }}</div>
+            <ngx-json-viewer [json]="uiEvent.actualInvocationToolUses"></ngx-json-viewer>
+          </div>
+          <div class="expected-result">
+            <div class="eval-response-header header-expected">{{ i18n.expectedToolUsesLabel }}</div>
+            <ngx-json-viewer [json]="uiEvent.expectedInvocationToolUses"></ngx-json-viewer>
+          </div>
+          } @else if (uiEvent.actualFinalResponse) {
+          <div class="actual-result">
+            <div class="eval-response-header header-actual">{{ i18n.actualResponseLabel }}</div>
+            <div>{{ uiEvent.actualFinalResponse }}</div>
+          </div>
+          <div class="expected-result">
+            <div class="eval-response-header header-expected">{{ i18n.expectedResponseLabel }}</div>
+            <div>{{ uiEvent.expectedFinalResponse }}</div>
+          </div>
+          }
+        </div>
+        @if (uiEvent.evalScore !== undefined && uiEvent.evalThreshold !== undefined) {
+        <div class="score-threshold-container">
+          <span class="header-actual">{{ i18n.matchScoreLabel }}: {{ uiEvent.evalScore }}</span>
+          <span class="header-expected"
+            >{{ i18n.thresholdLabel }}: {{ uiEvent.evalThreshold }}</span
+          >
+        </div>
+        }
+      </div>
+      }
+    </div>
+    }
+    @if (uiEvent.event.output) {
+    <div
+      class="output-chip"
+      [ngClass]="{'message-card--highlighted': isHighlighted}"
+      [appJsonTooltip]="uiEvent.event.nodeInfo?.['outputFor']"
+      [appJsonTooltipTitle]="'Node Output for'"
+    >
+      <ngx-json-viewer [json]="uiEvent.event.output"></ngx-json-viewer>
+    </div>
+    }
+    <div class="event-chips-container">
+    @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
+      @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
+        @if (isComputerUseClick(functionCall)) {
+          <app-computer-action [functionCall]="functionCall" [allMessages]="uiEvents" [index]="index" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+
+        } @else {
+          <app-hover-info-button
+            [icon]="'bolt'"
+            [text]="functionCall.name"
+            [tooltipContent]="functionCall.args || ''"
+            [tooltipTitle]="'Function Call'"
+          ></app-hover-info-button>
+        }
+      }
+    }
+    @if (uiEvent.functionResponses && uiEvent.functionResponses.length > 0) {
+      @for (functionResponse of uiEvent.functionResponses; track functionResponse) {
+        @if (isComputerUseResponse(functionResponse)) {
+          <app-computer-action [functionResponse]="functionResponse" [allMessages]="uiEvents" [index]="index" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+
+        } @else {
+          <app-hover-info-button
+            [icon]="'check'"
+            [text]="functionResponse.name"
+            [tooltipContent]="functionResponse.response || ''"
+            [tooltipTitle]="'Function Response'"
+          ></app-hover-info-button>
+        }
+      }
+    }
+    @if (uiEvent.stateDelta) {
+    <app-hover-info-button
+      [icon]="'data_object'"
+      [text]="'State: ' + Object.keys(uiEvent.stateDelta).join(', ')"
+      [tooltipContent]="uiEvent.stateDelta"
+      [tooltipTitle]="'State Update'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.artifactDelta) {
+    <app-hover-info-button
+      [icon]="'attachment'"
+      [text]="'Artifact'"
+      [tooltipContent]="uiEvent.artifactDelta"
+      [tooltipTitle]="'Artifact'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.error) {
+    <div
+      class="output-chip error"
+      [ngClass]="{'message-card--highlighted': isHighlighted}"
+      [appJsonTooltip]="uiEvent.error"
+      [appJsonTooltipTitle]="'Error Details'"
+    >
+      <ngx-json-viewer [json]="uiEvent.error"></ngx-json-viewer>
+    </div>
+    }
+    @if (uiEvent.route) {
+    <app-hover-info-button
+      [icon]="'route'"
+      [text]="'route: ' + String(uiEvent.route)"
+      [tooltipContent]="uiEvent.route"
+      [tooltipTitle]="'Route'"
+    ></app-hover-info-button>
+    }
+    @if (hasWorkflowNodes()) {
+    <button
+      mat-stroked-button
+      class="event-action-button"
+      [appWorkflowGraphTooltip]="getWorkflowNodes()"
+      [agentGraphData]="agentGraphData"
+      [nodePath]="uiEvent.nodePath"
+      [allNodes]="allWorkflowNodes"
+      (click)="agentStateClick.emit({event: $event, index: index})"
+    >
+      <mat-icon>account_tree</mat-icon>
+      Agent State
+    </button>
+    }
+    @if (hasEndOfAgent()) {
+    <app-hover-info-button
+      [icon]="'check_circle'"
+      [text]="getEndOfAgentAuthor() + ' completed!'"
+    ></app-hover-info-button>
+    }
+    </div>
+    @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
+      @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
+        @if (functionCall.needsResponse) {
+          <app-long-running-response
+            [functionCall]="functionCall"
+            [appName]="appName"
+            [userId]="userId"
+            [sessionId]="sessionId"
+            (responseComplete)="longRunningResponseComplete.emit($event)"
+          ></app-long-running-response>
+        }
+      }
+    }
+    @if (uiEvent.evalStatus === 1 || uiEvent.evalStatus === 2) {
+    <div
+      [ngClass]="{
+            'eval-pass': uiEvent.evalStatus === 1,
+            'eval-fail': uiEvent.evalStatus === 2
+          }"
+    >
+      <span class="material-symbols-outlined"
+        >{{ uiEvent.evalStatus === 1 ? "check" : uiEvent.evalStatus === 2 ? "close" : "" }}</span
+      >
+      <span
+        >{{ uiEvent.evalStatus === 1 ? i18n.evalPassLabel : uiEvent.evalStatus === 2 ?
+        i18n.evalFailLabel : "" }}</span
+      >
+    </div>
+    }
+    @if (evalCase && isEvalEditMode) { 
+      @if (uiEvent.text) {
+        <div>
+          <span
+            class="material-symbols-outlined eval-case-edit-button"
+            [ngClass]="{ hidden: isEvalCaseEditing }"
+            [matTooltip]="i18n.editEvalMessageTooltip"
+            (click)="editEvalCaseMessage.emit(uiEvent)"
+          >
+            edit
+          </span>
+          <span
+            class="material-symbols-outlined eval-case-edit-button"
+            [ngClass]="{ hidden: isEvalCaseEditing }"
+            [matTooltip]="i18n.deleteEvalMessageTooltip"
+            (click)="deleteEvalCaseMessage.emit({message: uiEvent, index: index})"
+          >
+            delete
+          </span>
+        </div>
+    } @else if (isEditFunctionArgsEnabled && uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
+    <div>
+      <span
+        class="material-symbols-outlined eval-case-edit-button"
+        [ngClass]="{ hidden: isEvalCaseEditing }"
+        [matTooltip]="i18n.editFunctionArgsTooltip"
+        (click)="editFunctionArgs.emit(uiEvent)"
+      >
+        edit
+      </span>
+    </div>
+    } 
+    } 
+    </div> <!-- end message-content -->
+    @if (uiEvent.role === "user") {
+      <app-chat-avatar role="user"></app-chat-avatar>
+    }
+  <!-- Feedback UI -->
+  @if(isUserFeedbackEnabled && !isLoadingAgentResponse && uiEvent.role === "bot") {
+    <app-message-feedback [sessionName]="sessionName" [eventId]="uiEvent.event.id || ''"></app-message-feedback>
+  }

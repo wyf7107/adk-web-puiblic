@@ -16,7 +16,7 @@
  */
 
 import {TextFieldModule} from '@angular/cdk/text-field';
-import {CommonModule, NgClass} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, effect, ElementRef, EventEmitter, HostListener, inject, input, Input, OnChanges, Output, signal, SimpleChanges, Type, ViewChild} from '@angular/core';
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {FormsModule} from '@angular/forms';
@@ -60,6 +60,7 @@ import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 
 import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
 import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
+import {EventRowComponent} from '../event-row/event-row.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
@@ -80,17 +81,8 @@ import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
     MatMenuModule,
     MatProgressSpinnerModule,
     NgxJsonViewerModule,
-    A2uiCanvasComponent,
-    AudioPlayerComponent,
-    MessageFeedbackComponent,
     MatTooltipModule,
-    NgClass,
-    JsonTooltipDirective,
-    WorkflowGraphTooltipDirective,
-    ComputerActionComponent,
-    LongRunningResponseComponent,
-    HoverInfoButtonComponent,
-    ChatAvatarComponent,
+    EventRowComponent,
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {
@@ -315,18 +307,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return index === this.selectedMessageIndex;
   }
 
-  shouldShowMessageCard(message: any): boolean {
-    return !!(
-        message.text || message.attachments || message.inlineData ||
-        message.executableCode || message.codeExecutionResult ||
-        message.a2uiData || message.renderedContent || message.isLoading ||
-        (message.failedMetric && message.evalStatus === 2));
-  }
 
-
-  renderGooglerSearch(content: string) {
-    return this.sanitizer.bypassSecurityTrustHtml(content);
-  }
 
   private restoreScrollPosition() {
     if (!this.scrollHeight) {
@@ -342,26 +323,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  isComputerUseClick(input: any): boolean {
-    return isVisibleComputerUseClick(input);
-  }
 
-  isComputerUseResponse(input: any): boolean {
-    return isComputerUseResponse(input);
-  }
-
-
-  hasWorkflowNodes(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-    const nodes = message.event?.actions?.agentState?.nodes;
-    return !!nodes && Object.keys(nodes).length > 0;
-  }
-
-
-  getWorkflowNodes(messageIndex: number): any {
-    const message = this.uiEvents[messageIndex];
-    return message.event?.actions?.agentState?.nodes || null;
-  }
 
   getAllWorkflowNodes(messageIndex: number): any {
     // Collect node states from all events, organized by nodePath
@@ -389,18 +351,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
-
-
-  hasEndOfAgent(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-    return message.event?.actions?.endOfAgent === true;
-  }
-
-
-  getEndOfAgentAuthor(messageIndex: number): string {
-    const message = this.uiEvents[messageIndex];
-    return message.event?.author || 'Agent';
-  }
 
 
   handleAgentStateClick(event: Event, messageIndex: number) {

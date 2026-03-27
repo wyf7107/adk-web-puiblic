@@ -147,6 +147,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   private scrollHeight = 0;
   private lastMessageRef: any = null;
   private nextPageToken = '';
+  private scrollTimeout: any = null;
+  private mutationObserver: MutationObserver | null = null;
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly themeService = inject(THEME_SERVICE);
@@ -232,11 +234,26 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   ngAfterViewInit() {
     if (this.scrollContainer?.nativeElement) {
-      this.scrollContainer.nativeElement.addEventListener('wheel', () => {
-        this.scrollInterrupted = true;
+      const el = this.scrollContainer.nativeElement;
+      
+      el.addEventListener('scroll', () => {
+        const isAtBottom = Math.abs(el.scrollHeight - el.scrollTop - el.clientHeight) < 50;
+        this.scrollInterrupted = !isAtBottom;
       });
-      this.scrollContainer.nativeElement.addEventListener('touchmove', () => {
-        this.scrollInterrupted = true;
+
+      this.mutationObserver = new MutationObserver(() => {
+        if (!this.scrollInterrupted) {
+          this.scrollToBottom();
+        }
+      });
+      this.mutationObserver.observe(el, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+      
+      this.destroyRef.onDestroy(() => {
+        this.mutationObserver?.disconnect();
       });
     }
   }
@@ -264,11 +281,15 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   scrollToBottom() {
     if (!this.scrollInterrupted) {
-      setTimeout(() => {
+      if (this.scrollTimeout) {
+        clearTimeout(this.scrollTimeout);
+      }
+      this.scrollTimeout = setTimeout(() => {
         this.scrollContainer?.nativeElement.scrollTo({
           top: this.scrollContainer.nativeElement.scrollHeight,
           behavior: 'auto',
         });
+        this.scrollTimeout = null;
       }, 50);
     }
   }

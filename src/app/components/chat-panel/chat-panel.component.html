@@ -278,11 +278,11 @@
             }
           }
         }
-        @if (uiEvent.role === "bot" && hasStateDelta(i)) {
+        @if (uiEvent.role === "bot" && uiEvent.state) {
         <app-hover-info-button
           [icon]="'data_object'"
-          [text]="'State: ' + getStateDeltaKeys(i)"
-          [tooltipContent]="getStateDeltaTooltip(i)"
+          [text]="'State: ' + Object.keys(uiEvent.state).join(', ')"
+          [tooltipContent]="JSON.stringify(uiEvent.state)"
           [tooltipTitle]="'State Update'"
         ></app-hover-info-button>
         }

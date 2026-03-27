@@ -419,7 +419,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.uiEvents.update(
             (uiEvents) =>
               [...uiEvents,
-              { role: 'bot', isLoading: true, event: { id: 'loading' } as any },
+              new UiEvent({ role: 'bot', isLoading: true, event: { id: 'loading' } as any }),
               ]);
         }
       } else if (lastMessage?.isLoading && !isModelThinking) {
@@ -534,7 +534,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!this.uiEvents().some(m => m.isLanding)) {
             this.uiEvents.update(
               uiEvents =>
-                [{ role: 'bot', text: decodedContent, isLanding: true, event: { id: 'landing' } as any },
+                [new UiEvent({ role: 'bot', text: decodedContent, isLanding: true, event: { id: 'landing' } as any }),
                 ...uiEvents]);
           }
         } catch (e) {
@@ -632,10 +632,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const userParts: any[] = [];
 
     // Build combined user message
-    const userUiEvent: UiEvent = {
+    const userUiEvent = new UiEvent({
       role: 'user',
       event: { id: userEventId } as any
-    };
+    });
 
     // Add user message text
     if (!!this.userInput.trim()) {
@@ -709,10 +709,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             this.eventData = new Map(this.eventData);
 
             // Create a message entry for the event
-            const uiEvent: UiEvent = {
+            const uiEvent = new UiEvent({
               role: chunkJson.author === 'user' ? 'user' : 'bot',
               event: { id: chunkJson.id } as any
-            };
+            });
             this.insertMessageBeforeLoadingMessage(uiEvent);
           }
         }
@@ -765,7 +765,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private processErrorMessage(chunkJson: any) {
     this.storeEvents(chunkJson, chunkJson);
     this.insertMessageBeforeLoadingMessage(
-      { text: chunkJson.errorMessage, role: 'bot', event: { id: chunkJson.id } as any })
+      new UiEvent({ text: chunkJson.errorMessage, role: 'bot', event: { id: chunkJson.id } as any }))
   }
 
   private processPart(chunkJson: any, part: any) {
@@ -778,23 +778,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (part.thought) {
         if (newChunk !== this.latestThought) {
           this.storeEvents(part, chunkJson);
-          let thoughtUiEvent: UiEvent = {
+          let thoughtUiEvent = new UiEvent({
             role: 'bot',
             text: this.processThoughtText(newChunk),
             thought: true,
-            event: { id: chunkJson.id } as any,
-          };
+            event: { id: chunkJson.id } as any
+          });
 
           this.insertMessageBeforeLoadingMessage(thoughtUiEvent);
         }
         this.latestThought = newChunk;
       } else if (!this.streamingTextMessage) {
-        this.streamingTextMessage = {
+        this.streamingTextMessage = new UiEvent({
           role: 'bot',
           text: this.processThoughtText(newChunk),
           thought: part.thought ? true : false,
-          event: { id: chunkJson.id } as any,
-        };
+          event: { id: chunkJson.id } as any
+        });
 
         if (renderedContent) {
           this.streamingTextMessage.renderedContent =
@@ -821,7 +821,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.uiEvents.update((uiEvents) => {
             return uiEvents.map(m => {
               if (m.event.id === oldEventId && m.role === 'bot') {
-                return { ...m, event: { id: chunkJson.id } as any };
+                return new UiEvent({ ...m, event: { id: chunkJson.id } as any });
               }
               return m;
             });
@@ -877,7 +877,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         // Update existing message by adding this part
         this.uiEvents.update(uiEvents => {
           const updatedMessages = [...uiEvents];
-          const updatedMessage = { ...updatedMessages[existingMessageIndex] };
+          const updatedMessage = new UiEvent({ ...updatedMessages[existingMessageIndex] });
           this.processPartIntoMessage(part, chunkJson, updatedMessage);
           updatedMessages[existingMessageIndex] = updatedMessage;
           return updatedMessages;
@@ -1298,14 +1298,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Add a placeholder message for the artifact
     // Feed the placeholder with the artifact data after it's fetched
-    let uiEvent: UiEvent = {
+    let uiEvent = new UiEvent({
       role: 'bot',
       event: { id: 'artifact-' + artifactId } as any,
       inlineData: {
         data: '',
         mimeType: 'image/png',
       },
-    };
+    });
     if (prepend) {
       this.uiEvents.update((uiEvents) => [uiEvent, ...uiEvents]);
     } else {
@@ -1351,10 +1351,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.uiEvents.update(uiEvents => {
             return uiEvents.map(m => {
               if (m === uiEvent) {
-                return {
+                return new UiEvent({
                   ...m,
                   inlineData,
-                };
+                });
               }
               return m;
             });
@@ -1527,8 +1527,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.uiEvents.update(
       uiEvents =>
         [...uiEvents,
-        { role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any },
-        { role: 'bot', text: 'Speaking...', event: { id: 'speaking-bot' } as any },
+        new UiEvent({ role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any }),
+        new UiEvent({ role: 'bot', text: 'Speaking...', event: { id: 'speaking-bot' } as any }),
         ]);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
@@ -1560,7 +1560,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       videoContainer,
     });
     this.uiEvents.update(
-      uiEvents => [...uiEvents, { role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any }]);
+      uiEvents => [...uiEvents, new UiEvent({ role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any })]);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
 
@@ -1710,10 +1710,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const partsToProcess = reverseOrder ? [...parts].reverse() : parts;
 
     const role = event.author === 'user' ? 'user' : 'bot';
-    const uiEvent: UiEvent = {
+    const uiEvent = new UiEvent({
       role,
       event
-    };
+    });
 
     if (event.errorCode || event.errorMessage) {
       uiEvent.error = {
@@ -1812,10 +1812,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           });
 
           // Return a new message object to trigger Angular change detection
-          return {
+          return new UiEvent({
             ...msg,
             functionCalls: updatedFunctionCalls
-          };
+          });
         }
         return msg;
       });

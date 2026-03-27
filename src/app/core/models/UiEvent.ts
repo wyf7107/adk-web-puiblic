@@ -1,8 +1,8 @@
 import { ExecutableCode, CodeExecutionResult, FunctionCall, FunctionResponse, Event } from './types';
 import { MediaType } from '../../components/artifact-tab/artifact-tab.component';
 
-export interface UiEvent {
-  role: 'user' | 'bot' | string;
+export class UiEvent {
+  role!: 'user' | 'bot' | string;
   text?: string;
   thought?: boolean;
   isLoading?: boolean;
@@ -15,7 +15,7 @@ export interface UiEvent {
   a2uiData?: any;
   executableCode?: ExecutableCode;
   codeExecutionResult?: CodeExecutionResult;
-  event: Event;
+  event!: Event;
   inlineData?: {
     mediaType?: MediaType | string;
     data: string;
@@ -37,4 +37,12 @@ export interface UiEvent {
     errorCode?: string;
     errorMessage?: string;
   };
+
+  constructor(init?: Partial<UiEvent>) {
+    Object.assign(this, init);
+  }
+
+  get state(): any {
+    return this.event?.actions?.stateDelta;
+  }
 }

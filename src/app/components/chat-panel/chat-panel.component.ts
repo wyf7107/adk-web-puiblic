@@ -165,6 +165,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
   readonly MediaType = MediaType;
   readonly JSON = JSON;
+  readonly Object = Object;
 
   readonly isMessageFileUploadEnabledObs =
       this.featureFlagService.isMessageFileUploadEnabled();
@@ -428,13 +429,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
-  hasStateDelta(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
 
-    const event = this.eventData.get(message.event.id);
-    const stateDelta = event?.actions?.stateDelta;
-    return stateDelta && Object.keys(stateDelta).length > 0;
-  }
 
 
   hasArtifactDelta(messageIndex: number): boolean {
@@ -495,30 +490,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
-  getStateDeltaKeys(messageIndex: number): string {
-    const message = this.uiEvents[messageIndex];
 
-    const event = this.eventData.get(message.event.id);
-    const stateDelta = event?.actions?.stateDelta;
-    if (!stateDelta) return '';
-
-    const keys = Object.keys(stateDelta);
-    return keys.join(', ');
-  }
-
-  getStateDeltaTooltip(messageIndex: number): string {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    const stateDelta = event?.actions?.stateDelta;
-    if (!stateDelta) return '';
-
-    try {
-      return JSON.stringify(stateDelta);
-    } catch (e) {
-      return String(stateDelta);
-    }
-  }
 
 
   getArtifactDeltaTooltip(messageIndex: number): string {

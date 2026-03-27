@@ -33,6 +33,7 @@ export const SIDE_PANEL_MESSAGES = {
   evalTabLabel: 'Eval',
   selectEventAriaLabel: 'Select event',
   eventDetailsTabLabel: 'Event',
+  graphTabLabel: 'Graph',
   requestDetailsTabLabel: 'Request',
   responseDetailsTabLabel: 'Response',
   responseIsNotAvailable: 'Response is not available',

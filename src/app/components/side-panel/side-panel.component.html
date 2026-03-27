@@ -67,13 +67,6 @@
   <div class="details-panel-tabs-container">
     <mat-tab-group>
       <mat-tab label="{{ i18n.eventDetailsTabLabel }}">
-        @if (selectedEvent()?.author !== 'user') {
-        <div class="event-graph-container">
-          @if (renderedEventGraph()) {
-          <div [innerHtml]="renderedEventGraph()" (click)="openImageDialog.emit(rawSvgString())"></div>
-          }
-        </div>
-        }
         <div class="json-viewer-container">
           <ngx-json-viewer [json]="filteredSelectedEvent()"></ngx-json-viewer>
         </div>
@@ -118,6 +111,13 @@
       @if (selectedEvent()?.actions?.artifactDelta && Object.keys(selectedEvent()?.actions?.artifactDelta).length > 0) {
       <mat-tab label="Artifact">
         <app-artifact-tab [artifacts]="artifactDeltaArray()"></app-artifact-tab>
+      </mat-tab>
+      }
+      @if (selectedEvent()?.author !== 'user' && renderedEventGraph()) {
+      <mat-tab label="{{ i18n.graphTabLabel }}">
+        <div class="event-graph-container">
+          <div [innerHtml]="renderedEventGraph()" (click)="openImageDialog.emit(rawSvgString())"></div>
+        </div>
       </mat-tab>
       }
     </mat-tab-group>

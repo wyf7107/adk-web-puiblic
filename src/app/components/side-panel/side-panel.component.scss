@@ -97,11 +97,11 @@
   font-size: 14px;
 }
 .event-graph-container {
-  margin-top: 16px;
-  margin-bottom: 16px;
+  margin: 16px;
   display: flex;
   justify-content: center;
-  max-height: 33%;
+  align-items: center;
+  height: calc(100% - 32px);
   cursor: pointer;
 }
 

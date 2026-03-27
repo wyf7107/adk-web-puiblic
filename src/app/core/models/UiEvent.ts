@@ -65,4 +65,8 @@ export class UiEvent {
   get nodePath(): string | null {
     return this.event?.nodeInfo?.path || null;
   }
+
+  get author(): string {
+    return this.event?.author ?? 'root_agent';
+  }
 }

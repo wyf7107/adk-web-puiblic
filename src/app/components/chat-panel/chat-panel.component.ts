@@ -61,8 +61,6 @@ import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
 import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
 
-const ROOT_AGENT = 'root_agent';
-
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-chat-panel',
@@ -308,11 +306,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }, 50);
   }
 
-  getAuthorFromEvent(i: number) {
-    const event = this.uiEvents[i].event;
-    return event?.author ?? ROOT_AGENT;
-  }
-
 
   shouldMessageHighlighted(index: number) {
     return this.hoveredEventMessageIndices.includes(index);
@@ -331,41 +324,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
         message.a2uiData || message.renderedContent || message.isLoading ||
         (message.failedMetric && message.evalStatus === 2));
   }
-
-  
-  isFirstUserMessageInGroup(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-
-    if (message.role !== 'user') {
-      return false;
-    }
-
-    if (messageIndex === 0) {
-      return true;
-    }
-
-    const prevMessage = this.uiEvents[messageIndex - 1];
-    return prevMessage.role !== 'user';
-  }
-
-  isFirstMessageInEventGroup(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-
-    if (message.role !== 'bot' ) {
-      return false;
-    }
-
-    if (messageIndex === 0) {
-      return true;  // First message overall
-    }
-
-    const prevMessage = this.uiEvents[messageIndex - 1];
-    return prevMessage.event.id !== message.event.id;
-  }
-
-
-
-
 
 
   renderGooglerSearch(content: string) {

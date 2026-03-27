@@ -32,18 +32,20 @@
       }"
       (click)="handleRowClick($event, message, i)"
     >
+        @if (!message.isLoading && getOverallEventNumber(i) !== -1) {
         <div class="event-number-container user-event-number">
           <div class="event-number-label">
             #{{ getOverallEventNumber(i) }}
           </div>
         </div>
+        }
       <div
         [ngClass]="{
               'user-message': message.role === 'user',
               'bot-message': message.role === 'bot'
             }"
       >
-        @if (message.role === "bot") {
+        @if (message.role === "bot" && !message.isLoading) {
           @if (isEventContent(i)) {
           <button mat-mini-fab class="bot-avatar" [disabled]="!message.eventId" [appJsonTooltip]="getAgentTooltip(i)"
             [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}" [style.background-color]="getNodePathColor(i)">

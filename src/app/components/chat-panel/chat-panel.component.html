@@ -37,34 +37,17 @@
       }"
       (click)="handleRowClick($event, message, i)"
     >
-      @if (message.role === "user") {
         <div class="event-number-container user-event-number">
-          @if (isFirstUserMessageInGroup(i)) {
           <div class="event-number-label">
             #{{ getOverallEventNumber(i) }}
           </div>
-          } @else {
-          <div class="event-number-placeholder"></div>
-          }
         </div>
-      }
       <div
         [ngClass]="{
               'user-message': message.role === 'user',
               'bot-message': message.role === 'bot'
             }"
       >
-        @if (message.role === "bot" && !message.isLoading) {
-          <div class="event-number-container">
-            @if (isFirstMessageInEventGroup(i)) {
-            <div class="event-number-label">
-              #{{ getOverallEventNumber(i) }}
-            </div>
-            } @else {
-            <div class="event-number-placeholder"></div>
-            }
-          </div>
-        }
         @if (message.role === "bot") {
           @if (isEventContent(i) || message.isLoading) {
           <button mat-mini-fab class="bot-avatar" [disabled]="!message.eventId" [appJsonTooltip]="getAgentTooltip(i)"

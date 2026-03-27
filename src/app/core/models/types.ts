@@ -117,7 +117,7 @@ export declare interface EventActions {
 }
 
 export declare interface Event extends LlmResponse {
-  id?: string;
+  id: string;
   author?: string
   invocationId?: string;
   actions?: EventActions;

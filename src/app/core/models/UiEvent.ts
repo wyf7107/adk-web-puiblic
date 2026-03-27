@@ -15,7 +15,7 @@ export interface UiEvent {
   a2uiData?: any;
   executableCode?: ExecutableCode;
   codeExecutionResult?: CodeExecutionResult;
-  event?: Event;
+  event: Event;
   inlineData?: {
     mediaType?: MediaType | string;
     data: string;

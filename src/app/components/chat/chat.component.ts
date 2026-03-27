@@ -419,7 +419,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.uiEvents.update(
             (uiEvents) =>
               [...uiEvents,
-              { role: 'bot', isLoading: true },
+              { role: 'bot', isLoading: true, event: { id: 'loading' } as any },
               ]);
         }
       } else if (lastMessage?.isLoading && !isModelThinking) {
@@ -534,7 +534,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!this.uiEvents().some(m => m.isLanding)) {
             this.uiEvents.update(
               uiEvents =>
-                [{ role: 'bot', text: decodedContent, isLanding: true },
+                [{ role: 'bot', text: decodedContent, isLanding: true, event: { id: 'landing' } as any },
                 ...uiEvents]);
           }
         } catch (e) {
@@ -685,7 +685,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedFiles = [];
     this.streamingTextMessage = null;
     this.agentService.runSse(req).subscribe({
-      next: async (chunkJson: AdkEvent) => {
+      next: async (chunkJson: any) => {
         if (chunkJson.error) {
           this.openSnackBar(chunkJson.error, 'OK');
           return;
@@ -817,10 +817,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (newChunk == this.streamingTextMessage.text) {
           // Final chunk arrived - update the existing message's eventId
-          const oldEventId = this.streamingTextMessage.event?.id;
+          const oldEventId = this.streamingTextMessage.event.id;
           this.uiEvents.update((uiEvents) => {
             return uiEvents.map(m => {
-              if (m.event?.id === oldEventId && m.role === 'bot') {
+              if (m.event.id === oldEventId && m.role === 'bot') {
                 return { ...m, event: { id: chunkJson.id } as any };
               }
               return m;
@@ -870,7 +870,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const role = chunkJson.author === 'user' ? 'user' : 'bot';
       const existingMessages = this.uiEvents();
       const existingMessageIndex = existingMessages.findIndex(
-        msg => msg.event?.id === chunkJson.id && msg.role === role
+        msg => msg.event.id === chunkJson.id && msg.role === role
       );
 
       if (existingMessageIndex !== -1) {
@@ -1188,11 +1188,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private insertMessageBeforeLoadingMessage(message: any) {
     this.uiEvents.update((uiEvents) => {
       // If SSE streaming is enabled and this is a text message with eventId
-      if (this.useSse && message.text && message.event?.id &&
+      if (this.useSse && message.text && message.event.id &&
         message.role === 'bot') {
         // Find existing streaming message with the same eventId
         const existingIndex = uiEvents.findIndex(
-          m => m.event?.id === message.event?.id && m.role === 'bot' &&
+          m => m.event.id === message.event.id && m.role === 'bot' &&
             !m.isLoading);
         if (existingIndex !== -1) {
           const updatedMessages = [...uiEvents];
@@ -1300,6 +1300,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Feed the placeholder with the artifact data after it's fetched
     let uiEvent: UiEvent = {
       role: 'bot',
+      event: { id: 'artifact-' + artifactId } as any,
       inlineData: {
         data: '',
         mimeType: 'image/png',
@@ -1351,7 +1352,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             return uiEvents.map(m => {
               if (m === uiEvent) {
                 return {
-                  role: 'bot',
+                  ...m,
                   inlineData,
                 };
               }
@@ -1459,7 +1460,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clickEvent(i: number) {
     const message = this.uiEvents()[i];
-    const key = message.event?.id;
+    const key = message.event.id;
 
     if (!key) {
       return;
@@ -1526,8 +1527,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.uiEvents.update(
       uiEvents =>
         [...uiEvents,
-        { role: 'user', text: 'Speaking...' },
-        { role: 'bot', text: 'Speaking...' },
+        { role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any },
+        { role: 'bot', text: 'Speaking...', event: { id: 'speaking-bot' } as any },
         ]);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
@@ -1559,7 +1560,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       videoContainer,
     });
     this.uiEvents.update(
-      uiEvents => [...uiEvents, { role: 'user', text: 'Speaking...' }]);
+      uiEvents => [...uiEvents, { role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any }]);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
 
@@ -1784,7 +1785,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (msg.functionCalls) {
           const updatedFunctionCalls = msg.functionCalls.map((fc: any) => {
             // Get the event for this message to check longRunningToolIds
-            const event = msg.event?.id ? this.eventData.get(msg.event?.id) : null;
+            const event = msg.event.id ? this.eventData.get(msg.event.id) : null;
             const isLongRunning = fc.isLongRunning ||
               event?.longRunningToolIds?.includes(fc.id);
 
@@ -1794,7 +1795,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                 ...fc,
                 isLongRunning: true,
                 invocationId: event?.invocationId,
-                functionCallEventId: msg.event?.id || "",
+                functionCallEventId: msg.event.id || "",
                 needsResponse: true,
                 responseStatus: 'pending',
                 userResponse: fc.userResponse || '',
@@ -2394,7 +2395,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Scroll to the corresponding message in the chat panel
         setTimeout(() => {
-          const messageIndex = this.uiEvents().findIndex(msg => msg.event?.id === key);
+          const messageIndex = this.uiEvents().findIndex(msg => msg.event.id === key);
           if (messageIndex !== -1) {
             const scrollContainer = this.chatPanel()?.scrollContainer?.nativeElement;
             if (!scrollContainer) return;

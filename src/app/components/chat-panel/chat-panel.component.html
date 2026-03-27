@@ -401,7 +401,7 @@
         }
       <!-- Feedback UI -->
       @if(isUserFeedbackEnabled() && !isLoadingAgentResponse() && message.role === "bot") {
-        <app-message-feedback [sessionName]="sessionName()" [eventId]="message.event?.id || ''"></app-message-feedback>
+        <app-message-feedback [sessionName]="sessionName()" [eventId]="message.event.id || ''"></app-message-feedback>
       }
     </div> <!-- end .message-row-container -->
   }

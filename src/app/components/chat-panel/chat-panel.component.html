@@ -81,7 +81,7 @@
         } 
         <div class="message-content">
         @if (shouldShowMessageCard(message)) {
-        <mat-card
+        <div
           class="message-card"
           [class.landing-message]="message.isLanding"
           [ngClass]="{
@@ -270,7 +270,7 @@
             }
           </div>
           }
-        </mat-card>
+        </div>
         }
         @if (message.role === "bot" && hasEventOutputData(i)) {
         <div

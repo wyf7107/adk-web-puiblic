@@ -53,8 +53,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   standalone: true,
   imports: [
     AsyncPipe,
-    NgComponentOutlet,
-    MatTooltip,
     MatTabGroup,
     MatTab,
     MatTabLabel,
@@ -62,7 +60,6 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     StateTabComponent,
     ArtifactTabComponent,
     MatPaginator,
-    MatMiniFabButton,
     MatIcon,
     MatIconButton,
     NgxJsonViewerModule,

@@ -257,7 +257,7 @@
               <app-hover-info-button
                 [icon]="'bolt'"
                 [text]="functionCall.name"
-                [tooltipContent]="functionCall.args ? JSON.stringify(functionCall.args) : ''"
+                [tooltipContent]="functionCall.args || ''"
                 [tooltipTitle]="'Function Call'"
               ></app-hover-info-button>
             }
@@ -272,7 +272,7 @@
               <app-hover-info-button
                 [icon]="'check'"
                 [text]="functionResponse.name"
-                [tooltipContent]="functionResponse.response ? JSON.stringify(functionResponse.response) : ''"
+                [tooltipContent]="functionResponse.response || ''"
                 [tooltipTitle]="'Function Response'"
               ></app-hover-info-button>
             }
@@ -282,7 +282,7 @@
         <app-hover-info-button
           [icon]="'data_object'"
           [text]="'State: ' + Object.keys(uiEvent.state).join(', ')"
-          [tooltipContent]="JSON.stringify(uiEvent.state)"
+          [tooltipContent]="uiEvent.state"
           [tooltipTitle]="'State Update'"
         ></app-hover-info-button>
         }

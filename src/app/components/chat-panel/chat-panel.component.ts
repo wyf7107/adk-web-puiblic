@@ -466,45 +466,18 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return isComputerUseResponse(input);
   }
 
-  getFunctionCallArgsTooltip(message: any): string {
-    if (!message.functionCall || !message.functionCall.args) {
-      return '';
-    }
-    try {
-      return JSON.stringify(message.functionCall.args);
-    } catch (e) {
-      return String(message.functionCall.args);
-    }
-  }
-
-
-  getFunctionResponseTooltip(message: any): string {
-    if (!message.functionResponse || !message.functionResponse.response) {
-      return '';
-    }
-    try {
-      return JSON.stringify(message.functionResponse.response);
-    } catch (e) {
-      return String(message.functionResponse.response);
-    }
-  }
 
 
 
 
-
-  getArtifactDeltaTooltip(messageIndex: number): string {
+  getArtifactDeltaTooltip(messageIndex: number): any {
     const message = this.uiEvents[messageIndex];
 
     const event = this.eventData.get(message.event.id);
     const artifactDelta = event?.actions?.artifactDelta;
     if (!artifactDelta) return '';
 
-    try {
-      return JSON.stringify(artifactDelta);
-    } catch (e) {
-      return String(artifactDelta);
-    }
+    return artifactDelta;
   }
 
 
@@ -567,35 +540,14 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return `route: ${String(route)}`;
   }
 
-  getEventRouteTooltip(messageIndex: number): string {
+  getEventRouteTooltip(messageIndex: number): any {
     const message = this.uiEvents[messageIndex];
 
     const event = this.eventData.get(message.event.id);
     const route = event?.actions?.route;
     if (route === undefined || route === null) return '';
 
-    const maxLength = 500;
-
-    if (typeof route === 'string') {
-      if (route.length > maxLength) {
-        return route.substring(0, maxLength) + '...';
-      }
-      return route;
-    }
-
-    try {
-      const jsonString = JSON.stringify(route, null, 2);
-      if (jsonString.length > maxLength) {
-        return jsonString.substring(0, maxLength) + '...';
-      }
-      return jsonString;
-    } catch (e) {
-      const stringValue = String(route);
-      if (stringValue.length > maxLength) {
-        return stringValue.substring(0, maxLength) + '...';
-      }
-      return stringValue;
-    }
+    return route;
   }
 
 

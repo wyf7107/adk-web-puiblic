@@ -33,6 +33,7 @@ import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {EMPTY, merge, NEVER, of, Subject} from 'rxjs';
 import {catchError, filter, first, switchMap, tap} from 'rxjs/operators';
 
+import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
 import type {EvalCase} from '../../core/models/Eval';
 import {FunctionCall, FunctionResponse} from '../../core/models/types';
@@ -141,7 +142,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly updateState = new EventEmitter<void>();
   @Output() readonly toggleAudioRecording = new EventEmitter<void>();
   @Output() readonly toggleVideoRecording = new EventEmitter<void>();
-  @Output() readonly longRunningResponseComplete = new EventEmitter<any[]>();
+  @Output() readonly longRunningResponseComplete = new EventEmitter<AgentRunRequest>();
 
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;

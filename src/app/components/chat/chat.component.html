@@ -461,7 +461,7 @@
         (updateState)="updateState()"
         (toggleAudioRecording)="toggleAudioRecording()"
         (toggleVideoRecording)="toggleVideoRecording()"
-        (longRunningResponseComplete)="processRunSseResponse($event)"
+        (longRunningResponseComplete)="submitAgentRunRequest($event)"
         [sessionName]="sessionId"
       ></app-chat-panel>
       }

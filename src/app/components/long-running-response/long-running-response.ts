@@ -21,7 +21,6 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 import {MarkdownComponent} from '../markdown/markdown.component';
 
@@ -48,11 +47,9 @@ export class LongRunningResponseComponent {
   @Input() userId!: string;
   @Input() sessionId!: string;
 
-  @Output() responseComplete = new EventEmitter<any[]>();
+  @Output() responseComplete = new EventEmitter<AgentRunRequest>();
 
-  private readonly agentService = inject(AGENT_SERVICE);
   private readonly cdr = inject(ChangeDetectorRef);
-  private responseChunks: any[] = [];
 
   hasMessage(): boolean {
     return !!(this.functionCall.args?.prompt || this.functionCall.args?.message);
@@ -104,8 +101,8 @@ export class LongRunningResponseComponent {
     // Store the user response before sending
     this.functionCall.sentUserResponse = this.functionCall.userResponse;
 
-    // Update status to sending
-    this.functionCall.responseStatus = 'sending';
+    // Update status to sent
+    this.functionCall.responseStatus = 'sent';
     this.cdr.detectChanges();
 
     const req: AgentRunRequest = {
@@ -125,25 +122,6 @@ export class LongRunningResponseComponent {
       functionCallEventId: this.functionCall.functionCallEventId,
     };
 
-    this.responseChunks = [];  // Reset chunks array
-    this.agentService.runSse(req).subscribe({
-      next: async (chunkJson) => {
-        this.responseChunks.push(chunkJson);
-      },
-      error: (err) => {
-        console.error('SSE error:', err);
-        this.functionCall.responseStatus = 'pending';  // Reset on error
-        this.responseChunks = [];
-        this.cdr.detectChanges();
-      },
-      complete: () => {
-        console.log(
-            'Long-running response complete for:', this.functionCall.name);
-        this.functionCall.responseStatus = 'sent';
-        this.responseComplete.emit(
-            this.responseChunks);  // Emit chunks for processing
-        this.cdr.detectChanges();
-      },
-    });
+    this.responseComplete.emit(req);
   }
 }

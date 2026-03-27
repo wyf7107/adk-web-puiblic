@@ -663,6 +663,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       stateDelta: this.updatedSessionState(),
     };
     this.selectedFiles = [];
+    this.submitAgentRunRequest(req);
+    // Clear input
+    this.userInput = '';
+    // Clear the query param for the initial user input once it is sent.
+    const updatedUrl = this.router.parseUrl(this.location.path());
+    if (updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM]) {
+      delete updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM];
+      this.location.replaceState(updatedUrl.toString());
+    }
+    this.changeDetectorRef.detectChanges();
+  }
+
+  submitAgentRunRequest(req: AgentRunRequest) {
     this.streamingTextMessage = null;
     this.agentService.runSse(req).subscribe({
       next: async (chunkJson: any) => {
@@ -731,15 +744,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.changeDetectorRef.detectChanges();
       },
     });
-    // Clear input
-    this.userInput = '';
-    // Clear the query param for the initial user input once it is sent.
-    const updatedUrl = this.router.parseUrl(this.location.path());
-    if (updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM]) {
-      delete updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM];
-      this.location.replaceState(updatedUrl.toString());
-    }
-    this.changeDetectorRef.detectChanges();
   }
 
   private processErrorMessage(chunkJson: any) {

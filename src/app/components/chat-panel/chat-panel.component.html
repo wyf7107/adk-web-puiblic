@@ -241,7 +241,7 @@
         <div
           class="output-chip"
           [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
-          [appJsonTooltip]="getNodePath(i) || ''"
+          [appJsonTooltip]="uiEvent.event.nodeInfo?.['outputFor'] || ''"
           [appJsonTooltipTitle]="'Node Output for'"
         >
           <ngx-json-viewer [json]="uiEvent.event.output"></ngx-json-viewer>

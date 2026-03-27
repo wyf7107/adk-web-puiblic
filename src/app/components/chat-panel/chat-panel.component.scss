@@ -149,6 +149,10 @@ app-message-feedback {
     min-width: fit-content;
     max-width: 80%;
   }
+
+  .event-chips-container {
+    justify-content: flex-end;
+  }
 }
 
 .message-row-container.bot {

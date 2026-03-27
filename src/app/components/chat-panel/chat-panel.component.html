@@ -234,7 +234,7 @@
           }
         </div>
         }
-        @if (uiEvent.role === "bot" && uiEvent.event.output) {
+        @if (uiEvent.event.output) {
         <div
           class="output-chip"
           [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
@@ -275,7 +275,7 @@
             }
           }
         }
-        @if (uiEvent.role === "bot" && uiEvent.stateDelta) {
+        @if (uiEvent.stateDelta) {
         <app-hover-info-button
           [icon]="'data_object'"
           [text]="'State: ' + Object.keys(uiEvent.stateDelta).join(', ')"
@@ -283,7 +283,7 @@
           [tooltipTitle]="'State Update'"
         ></app-hover-info-button>
         }
-        @if (uiEvent.role === "bot" && uiEvent.artifactDelta) {
+        @if (uiEvent.artifactDelta) {
         <app-hover-info-button
           [icon]="'attachment'"
           [text]="'Artifact'"
@@ -291,7 +291,7 @@
           [tooltipTitle]="'Artifact'"
         ></app-hover-info-button>
         }
-        @if (uiEvent.role === "bot" && uiEvent.error) {
+        @if (uiEvent.error) {
         <div
           class="output-chip error"
           [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
@@ -301,7 +301,7 @@
           <ngx-json-viewer [json]="uiEvent.error"></ngx-json-viewer>
         </div>
         }
-        @if (uiEvent.role === "bot" && uiEvent.route) {
+        @if (uiEvent.route) {
         <app-hover-info-button
           [icon]="'route'"
           [text]="'route: ' + String(uiEvent.route)"
@@ -309,7 +309,7 @@
           [tooltipTitle]="'Route'"
         ></app-hover-info-button>
         }
-        @if (uiEvent.role === "bot" && hasWorkflowNodes(i)) {
+        @if (hasWorkflowNodes(i)) {
         <button
           mat-stroked-button
           class="event-action-button"
@@ -323,7 +323,7 @@
           Agent State
         </button>
         }
-        @if (uiEvent.role === "bot" && hasEndOfAgent(i)) {
+        @if (hasEndOfAgent(i)) {
         <app-hover-info-button
           [icon]="'check_circle'"
           [text]="getEndOfAgentAuthor(i) + ' completed!'"
@@ -359,7 +359,7 @@
           >
         </div>
         }
-        @if (evalCase && uiEvent.role === "bot" && isEvalEditMode) { 
+        @if (evalCase && isEvalEditMode) { 
           @if (uiEvent.text) {
             <div>
               <span

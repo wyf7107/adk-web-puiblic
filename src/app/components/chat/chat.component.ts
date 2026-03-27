@@ -148,12 +148,10 @@ const BIDI_STREAMING_RESTART_WARNING =
     ReactiveFormsModule,
     MatIcon,
     NgxJsonViewerModule,
-    NgClass,
     MatButton,
     MatIconButton,
     MatMenuModule,
     MatCard,
-    MatFabButton,
     MatToolbar,
     NgComponentOutlet,
     ResizableBottomDirective,
@@ -868,7 +866,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.storeMessage(part, chunkJson, role);
       }
-
+    }
   }
 
   async getUserMessageParts() {

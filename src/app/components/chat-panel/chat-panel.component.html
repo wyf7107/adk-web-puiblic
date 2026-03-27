@@ -50,7 +50,6 @@
         @if (shouldShowMessageCard(uiEvent)) {
         <div
           class="message-card"
-          [class.landing-message]="uiEvent.isLanding"
           [ngClass]="{
             'eval-fail': uiEvent.evalStatus === 2,
             'message-card--highlighted': shouldMessageHighlighted(i)

@@ -6,7 +6,6 @@ export class UiEvent {
   text?: string;
   thought?: boolean;
   isLoading?: boolean;
-  isLanding?: boolean;
   isEditing?: boolean;
   evalStatus?: number;
   failedMetric?: boolean;

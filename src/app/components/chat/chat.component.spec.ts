@@ -70,7 +70,7 @@ import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 
-import {ChatComponent, HIDE_SIDE_PANEL_QUERY_PARAM, INITIAL_USER_INPUT_QUERY_PARAM, LANDING_PAGE_CONTENT_QUERY_PARAM,} from './chat.component';
+import {ChatComponent, HIDE_SIDE_PANEL_QUERY_PARAM, INITIAL_USER_INPUT_QUERY_PARAM} from './chat.component';
 
 // Mock EvalTabComponent to satisfy the required viewChild in ChatComponent
 @Component({
@@ -508,38 +508,6 @@ describe('ChatComponent', () => {
         });
       });
     });
-
-    it(
-        'should display landing page content from "landing" query param',
-        fakeAsync(() => {
-          const markdownContent =
-              '# Welcome to the App\n\nThis is the landing page.';
-          const encodedContent = encodeURIComponent(markdownContent);
-          const queryParams = {
-            [LANDING_PAGE_CONTENT_QUERY_PARAM]: encodedContent,
-          };
-          mockActivatedRoute.snapshot!.queryParams = queryParams;
-          mockActivatedRoute.queryParams = of(queryParams);
-
-          // Mock session service to return a new session
-          mockSessionService.createSessionResponse.next(
-              {id: SESSION_1_ID, state: {}, events: []});
-
-          fixture = TestBed.createComponent(ChatComponent);
-          component = fixture.componentInstance;
-          fixture.detectChanges();
-          tick();  // Allow component to stabilize and load session
-
-          // Manually call displayLandingPageContent to simulate the effect
-          (component as any).displayLandingPageContent();
-          tick();
-
-          const messages = component.uiEvents();
-          expect(component.uiEvents().length).toBe(1);
-          expect(component.uiEvents()[0].role).toBe('bot');
-          expect(component.uiEvents()[0].text).toBe(markdownContent);
-          expect(component.uiEvents()[0].isLanding).toBeTrue();
-        }));
   });
 
   describe('Session Management', () => {

@@ -634,7 +634,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Build combined user message
     const userUiEvent: UiEvent = {
       role: 'user',
-      eventId: userEventId
+      event: { id: userEventId } as any
     };
 
     // Add user message text
@@ -711,7 +711,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             // Create a message entry for the event
             const uiEvent: UiEvent = {
               role: chunkJson.author === 'user' ? 'user' : 'bot',
-              eventId: chunkJson.id
+              event: { id: chunkJson.id } as any
             };
             this.insertMessageBeforeLoadingMessage(uiEvent);
           }
@@ -765,7 +765,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private processErrorMessage(chunkJson: any) {
     this.storeEvents(chunkJson, chunkJson);
     this.insertMessageBeforeLoadingMessage(
-      { text: chunkJson.errorMessage, role: 'bot', eventId: chunkJson.id })
+      { text: chunkJson.errorMessage, role: 'bot', event: { id: chunkJson.id } as any })
   }
 
   private processPart(chunkJson: any, part: any) {
@@ -782,7 +782,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             role: 'bot',
             text: this.processThoughtText(newChunk),
             thought: true,
-            eventId: chunkJson.id,
+            event: { id: chunkJson.id } as any,
           };
 
           this.insertMessageBeforeLoadingMessage(thoughtUiEvent);
@@ -793,7 +793,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           role: 'bot',
           text: this.processThoughtText(newChunk),
           thought: part.thought ? true : false,
-          eventId: chunkJson.id,
+          event: { id: chunkJson.id } as any,
         };
 
         if (renderedContent) {
@@ -817,11 +817,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (newChunk == this.streamingTextMessage.text) {
           // Final chunk arrived - update the existing message's eventId
-          const oldEventId = this.streamingTextMessage.eventId;
+          const oldEventId = this.streamingTextMessage.event?.id;
           this.uiEvents.update((uiEvents) => {
             return uiEvents.map(m => {
-              if (m.eventId === oldEventId && m.role === 'bot') {
-                return { ...m, eventId: chunkJson.id };
+              if (m.event?.id === oldEventId && m.role === 'bot') {
+                return { ...m, event: { id: chunkJson.id } as any };
               }
               return m;
             });
@@ -870,7 +870,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const role = chunkJson.author === 'user' ? 'user' : 'bot';
       const existingMessages = this.uiEvents();
       const existingMessageIndex = existingMessages.findIndex(
-        msg => msg.eventId === chunkJson.id && msg.role === role
+        msg => msg.event?.id === chunkJson.id && msg.role === role
       );
 
       if (existingMessageIndex !== -1) {
@@ -1141,7 +1141,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           message.renderedContent =
             e.groundingMetadata.searchEntryPoint.renderedContent;
         }
-        message.eventId = e?.id;
+        message.event = e as any;
       } else if (part.functionCall) {
         // Enrich function call with long-running metadata if applicable
         const isLongRunning =
@@ -1158,10 +1158,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           }),
         };
         message.functionCalls = [enrichedFunctionCall];
-        message.eventId = e?.id;
+        message.event = e as any;
       } else if (part.functionResponse) {
         message.functionResponses = [part.functionResponse];
-        message.eventId = e?.id;
+        message.event = e as any;
       } else if (part.executableCode) {
         message.executableCode = part.executableCode;
       } else if (part.codeExecutionResult) {
@@ -1188,11 +1188,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private insertMessageBeforeLoadingMessage(message: any) {
     this.uiEvents.update((uiEvents) => {
       // If SSE streaming is enabled and this is a text message with eventId
-      if (this.useSse && message.text && message.eventId &&
+      if (this.useSse && message.text && message.event?.id &&
         message.role === 'bot') {
         // Find existing streaming message with the same eventId
         const existingIndex = uiEvents.findIndex(
-          m => m.eventId === message.eventId && m.role === 'bot' &&
+          m => m.event?.id === message.event?.id && m.role === 'bot' &&
             !m.isLoading);
         if (existingIndex !== -1) {
           const updatedMessages = [...uiEvents];
@@ -1233,7 +1233,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           event.groundingMetadata.searchEntryPoint.renderedContent;
       }
       if (event?.id) {
-        uiEvent.eventId = event.id;
+        uiEvent.event = event as any;
       }
     } else if (part.inlineData) {
       const base64Data = this.formatBase64Data(
@@ -1246,7 +1246,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         mediaType,
       };
       if (uiEvent.role === 'user' && event?.id) {
-        uiEvent.eventId = event.id;
+        uiEvent.event = event as any;
       }
     } else if (part.functionCall) {
       if (!uiEvent.functionCalls) {
@@ -1254,7 +1254,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       uiEvent.functionCalls.push(part.functionCall);
       if (event?.id) {
-        uiEvent.eventId = event.id;
+        uiEvent.event = event as any;
       }
     } else if (part.functionResponse) {
       if (!uiEvent.functionResponses) {
@@ -1262,7 +1262,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       uiEvent.functionResponses.push(part.functionResponse);
       if (event?.id) {
-        uiEvent.eventId = event.id;
+        uiEvent.event = event as any;
       }
     } else if (part.executableCode) {
       uiEvent.executableCode = part.executableCode;
@@ -1459,7 +1459,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clickEvent(i: number) {
     const message = this.uiEvents()[i];
-    const key = message.eventId;
+    const key = message.event?.id;
 
     if (!key) {
       return;
@@ -1711,7 +1711,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const role = event.author === 'user' ? 'user' : 'bot';
     const uiEvent: UiEvent = {
       role,
-      eventId: event.id
+      event
     };
 
     partsToProcess.forEach((part: any) => {
@@ -1784,7 +1784,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (msg.functionCalls) {
           const updatedFunctionCalls = msg.functionCalls.map((fc: any) => {
             // Get the event for this message to check longRunningToolIds
-            const event = msg.eventId ? this.eventData.get(msg.eventId) : null;
+            const event = msg.event?.id ? this.eventData.get(msg.event?.id) : null;
             const isLongRunning = fc.isLongRunning ||
               event?.longRunningToolIds?.includes(fc.id);
 
@@ -1794,7 +1794,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                 ...fc,
                 isLongRunning: true,
                 invocationId: event?.invocationId,
-                functionCallEventId: msg.eventId,
+                functionCallEventId: msg.event?.id || "",
                 needsResponse: true,
                 responseStatus: 'pending',
                 userResponse: fc.userResponse || '',
@@ -2394,7 +2394,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Scroll to the corresponding message in the chat panel
         setTimeout(() => {
-          const messageIndex = this.uiEvents().findIndex(msg => msg.eventId === key);
+          const messageIndex = this.uiEvents().findIndex(msg => msg.event?.id === key);
           if (messageIndex !== -1) {
             const scrollContainer = this.chatPanel()?.scrollContainer?.nativeElement;
             if (!scrollContainer) return;

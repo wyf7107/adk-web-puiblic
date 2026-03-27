@@ -413,9 +413,9 @@ describe('ChatComponent', () => {
 
         it('should add messages to the chat', () => {
           const messages = component.uiEvents();
-          expect(uiEvents.length).toBe(2);
-          expect(uiEvents[0].text).toBe('user message');
-          expect(uiEvents[1].text).toBe('bot response');
+          expect(component.uiEvents().length).toBe(2);
+          expect(component.uiEvents()[0].text).toBe('user message');
+          expect(component.uiEvents()[1].text).toBe('bot response');
         });
 
         it(
@@ -431,10 +431,10 @@ describe('ChatComponent', () => {
               });
               tick();
               const messages = component.uiEvents();
-              expect(uiEvents.length).toBe(3);
-              expect(uiEvents[0].text).toBe('user message');
-              expect(uiEvents[1].text).toBe('bot response');
-              expect(uiEvents[2].text).toBe('existing message');
+              expect(component.uiEvents().length).toBe(3);
+              expect(component.uiEvents()[0].text).toBe('user message');
+              expect(component.uiEvents()[1].text).toBe('bot response');
+              expect(component.uiEvents()[2].text).toBe('existing message');
               expect(component.eventData.has('event-old')).toBeTrue();
             }));
 
@@ -452,9 +452,9 @@ describe('ChatComponent', () => {
               });
               tick();
               const messages = component.uiEvents();
-              expect(uiEvents.length).toBe(2);
-              expect(uiEvents[0].text).toBe('user message');
-              expect(uiEvents[1].text).toBe('bot response');
+              expect(component.uiEvents().length).toBe(2);
+              expect(component.uiEvents()[0].text).toBe('user message');
+              expect(component.uiEvents()[1].text).toBe('bot response');
               expect(component.eventData.has('event-old')).toBeFalse();
             }));
 
@@ -500,8 +500,8 @@ describe('ChatComponent', () => {
           fixture.detectChanges();
 
           const messages = component.uiEvents();
-          expect(uiEvents.length).toBe(1);
-          expect(uiEvents[0].a2uiData).toEqual({
+          expect(component.uiEvents().length).toBe(1);
+          expect(component.uiEvents()[0].a2uiData).toEqual({
             beginRendering: {beginRendering: {id: '1'}},
             surfaceUpdate: {surfaceUpdate: {components: []}}
           });
@@ -535,10 +535,10 @@ describe('ChatComponent', () => {
           tick();
 
           const messages = component.uiEvents();
-          expect(uiEvents.length).toBe(1);
-          expect(uiEvents[0].role).toBe('bot');
-          expect(uiEvents[0].text).toBe(markdownContent);
-          expect(uiEvents[0].isLanding).toBeTrue();
+          expect(component.uiEvents().length).toBe(1);
+          expect(component.uiEvents()[0].role).toBe('bot');
+          expect(component.uiEvents()[0].text).toBe(markdownContent);
+          expect(component.uiEvents()[0].isLanding).toBeTrue();
         }));
   });
 
@@ -1018,7 +1018,7 @@ describe('ChatComponent', () => {
       beforeEach(() => {
         component.sessionId = SESSION_1_ID;
         component.uiEvents.set(
-            [{role: 'bot', text: 'response', eventId: EVENT_1_ID}]);
+            [{role: 'bot', text: 'response', event: { id: EVENT_1_ID } as any}]);
         spyOn(component.sideDrawer()!, 'open');
       });
 
@@ -1422,7 +1422,7 @@ describe('ChatComponent', () => {
         finalResponse: {parts: [{text: BOT_RESPONSE}]},
       }],
     };
-    const mockMessage = {
+    const mockMessage: any = {
       text: BOT_RESPONSE,
       isEditing: false,
       invocationIndex: 0,

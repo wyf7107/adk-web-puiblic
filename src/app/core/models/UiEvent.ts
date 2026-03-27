@@ -3,7 +3,6 @@ import { MediaType } from '../../components/artifact-tab/artifact-tab.component'
 
 export interface UiEvent {
   role: 'user' | 'bot' | string;
-  eventId?: string;
   text?: string;
   thought?: boolean;
   isLoading?: boolean;

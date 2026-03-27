@@ -125,21 +125,21 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should display user and bot messages', async () => {
-      component.messages = [
+      component.uiEvents = [
         {role: 'user', text: 'User message'},
         {role: 'bot', text: 'Bot message'},
       ];
       fixture.detectChanges();
       await fixture.whenStable();
       fixture.detectChanges();
-      const messages = fixture.debugElement.queryAll(By.css('.message-card'));
+      const uiEvents = fixture.debugElement.queryAll(By.css('.message-card'));
       expect(uiEvents.length).toBe(2);
       expect(uiEvents[0].nativeElement.textContent).toContain('User message');
       expect(uiEvents[1].nativeElement.textContent).toContain('Bot message');
     });
 
     it('should display function call', () => {
-      component.messages = [
+      component.uiEvents = [
         {role: 'bot', functionCalls: [{name: 'test_func', args: {}}]},
       ];
       fixture.detectChanges();
@@ -149,7 +149,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should display function response', () => {
-      component.messages = [
+      component.uiEvents = [
         {role: 'bot', functionResponses: [{name: 'test_func', response: {}}]},
       ];
       fixture.detectChanges();
@@ -173,7 +173,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should display A2UI canvas', () => {
-      component.messages = [
+      component.uiEvents = [
         {
           role: 'bot',
           a2uiData:
@@ -187,7 +187,7 @@ describe('ChatPanelComponent', () => {
   });
 
   it('should display loading bar if message isLoading', async () => {
-    component.messages = [{role: 'bot', isLoading: true}];
+    component.uiEvents = [{role: 'bot', isLoading: true}];
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -196,7 +196,7 @@ describe('ChatPanelComponent', () => {
   });
 
   it('should display thought chip for thought messages', async () => {
-    component.messages = [{role: 'bot', text: 'Thinking...', thought: true}];
+    component.uiEvents = [{role: 'bot', text: 'Thinking...', thought: true}];
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -218,8 +218,8 @@ describe('ChatPanelComponent', () => {
 
     it(
         'should show edit/delete buttons for text messages', async () => {
-          component.messages =
-              [{role: 'bot', text: 'eval message', eventId: '1'}];
+          component.uiEvents =
+              [{role: 'bot', text: 'eval message', event: { id: '1' } as any}];
           fixture.detectChanges();
           await fixture.whenStable();
           fixture.detectChanges();
@@ -231,8 +231,8 @@ describe('ChatPanelComponent', () => {
         });
 
     it('should show edit button for function calls', async () => {
-      component.messages =
-          [{role: 'bot', functionCalls: [{name: 'func1'}], eventId: '1'}];
+      component.uiEvents =
+          [{role: 'bot', functionCalls: [{name: 'func1', args: {}}], event: { id: '1' } as any}];
       component.isEditFunctionArgsEnabled = true;
       fixture.detectChanges();
       await fixture.whenStable();
@@ -245,8 +245,8 @@ describe('ChatPanelComponent', () => {
 
     it(
         'should emit editEvalCaseMessage when edit is clicked', async () => {
-          const message = {role: 'bot', text: 'eval message', eventId: '1'};
-          component.messages = [message];
+          const message = {role: 'bot', text: 'eval message', event: { id: '1' } as any};
+          component.uiEvents = [message];
           spyOn(component.editEvalCaseMessage, 'emit');
           fixture.detectChanges();
           await fixture.whenStable();
@@ -261,8 +261,8 @@ describe('ChatPanelComponent', () => {
     it(
         'should emit deleteEvalCaseMessage when delete is clicked',
         async () => {
-          const message = {role: 'bot', text: 'eval message', eventId: '1'};
-          component.messages = [message];
+          const message = {role: 'bot', text: 'eval message', event: { id: '1' } as any};
+          component.uiEvents = [message];
           spyOn(component.deleteEvalCaseMessage, 'emit');
           fixture.detectChanges();
           await fixture.whenStable();
@@ -279,10 +279,10 @@ describe('ChatPanelComponent', () => {
         async () => {
           const message = {
             role: 'bot',
-            functionCalls: [{name: 'func1'}],
-            eventId: '1'
+            functionCalls: [{name: 'func1', args: {}}],
+            event: { id: '1' } as any
           };
-          component.messages = [message];
+          component.uiEvents = [message];
           component.isEditFunctionArgsEnabled = true;
           spyOn(component.editFunctionArgs, 'emit');
           fixture.detectChanges();
@@ -297,7 +297,7 @@ describe('ChatPanelComponent', () => {
 
   describe('Events', () => {
     it('should emit clickEvent when bot icon is clicked', () => {
-      component.messages = [{role: 'bot', text: 'message', eventId: '1'}];
+      component.uiEvents = [{role: 'bot', text: 'message', event: { id: '1' } as any}];
       component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
       spyOn(component.clickEvent, 'emit');
       fixture.detectChanges();
@@ -308,7 +308,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should disable bot icon when eventId is not set', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = [{role: 'bot', text: 'message'}];
       fixture.detectChanges();
       const botIcon =
           fixture.debugElement.query(By.css('button[mat-mini-fab]'));
@@ -317,8 +317,8 @@ describe('ChatPanelComponent', () => {
 
     it(
         'should emit clickEvent when function call button is clicked', () => {
-          component.messages =
-              [{role: 'bot', functionCalls: [{name: 'func1'}], eventId: '1'}];
+          component.uiEvents =
+              [{role: 'bot', functionCalls: [{name: 'func1', args: {}}], event: { id: '1' } as any}];
           component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
           spyOn(component.clickEvent, 'emit');
           fixture.detectChanges();
@@ -355,7 +355,7 @@ describe('ChatPanelComponent', () => {
       let scrollContainerElement: HTMLElement;
 
       beforeEach(() => {
-        component.messages = [{role: 'bot', text: 'Bot message'}];
+        component.uiEvents = [{role: 'bot', text: 'Bot message'}];
         fixture.detectChanges();
         scrollContainerElement = component.scrollContainer.nativeElement;
       });
@@ -367,11 +367,11 @@ describe('ChatPanelComponent', () => {
             scrollContainerElement.dispatchEvent(new WheelEvent('wheel'));
             expect(component.scrollInterrupted).toBeTrue();
 
-            const oldMessages = component.messages;
-            component.messages = [...oldMessages, {role: 'user', text: 'User'}];
+            const oldMessages = component.uiEvents;
+            component.uiEvents = [...oldMessages, {role: 'user', text: 'User'}];
             component.ngOnChanges({
               'messages':
-                  new SimpleChange(oldMessages, component.messages, false)
+                  new SimpleChange(oldMessages, component.uiEvents, false)
             });
             fixture.detectChanges();
             tick(50);
@@ -387,7 +387,7 @@ describe('ChatPanelComponent', () => {
             const initialMessages = Array.from(
                 {length: initialMessageCount},
                 (_, i) => ({role: 'bot', text: `message ${i}`}));
-            component.messages = initialMessages;
+            component.uiEvents = initialMessages;
             fixture.detectChanges();
 
             scrollContainerElement.style.height = '100px';
@@ -409,7 +409,7 @@ describe('ChatPanelComponent', () => {
 
             const newMessages = Array.from(
                 {length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`}));
-            component.messages = [...newMessages, ...component.messages];
+            component.uiEvents = [...newMessages, ...component.uiEvents];
             mockUiStateService.newMessagesLoadedResponse.next(
                 {items: newMessages, nextPageToken: 'next'});
             tick();
@@ -653,7 +653,7 @@ describe('ChatPanelComponent', () => {
 
   describe('Feedback UI', () => {
     it('should show when feature flag is on', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = [{role: 'bot', text: 'message'}];
 
       mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(true);
       fixture.detectChanges();
@@ -664,7 +664,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should hide when feature flag is off', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = [{role: 'bot', text: 'message'}];
 
       mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(false);
       fixture.detectChanges();
@@ -675,7 +675,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should hide when agent response is loading', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = [{role: 'bot', text: 'message'}];
 
       mockAgentService.getLoadingStateResponse.next(true);
       fixture.detectChanges();
@@ -686,7 +686,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should show after each bot message', () => {
-      component.messages = [
+      component.uiEvents = [
         {role: 'bot', text: 'message 1'},
         {role: 'bot', text: 'message 1'},
         {role: 'user', text: 'message 2'},

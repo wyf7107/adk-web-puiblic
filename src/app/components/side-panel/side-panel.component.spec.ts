@@ -507,7 +507,7 @@ describe('SidePanelComponent', () => {
       } as any);
       fixture.detectChanges();
 
-      expect(component.getFilteredSelectedEvent() as any).toEqual({
+      expect(component.filteredSelectedEvent() as any).toEqual({
         id: 'event1',
         nullValue: null,
         nested: {
@@ -532,7 +532,7 @@ describe('SidePanelComponent', () => {
       } as any);
       fixture.detectChanges();
 
-      expect(component.getFilteredSelectedEvent() as any).toEqual({
+      expect(component.filteredSelectedEvent() as any).toEqual({
         nullValue: null,
       });
     });

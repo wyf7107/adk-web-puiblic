@@ -40,6 +40,15 @@ export class UiEvent {
 
   constructor(init?: Partial<UiEvent>) {
     Object.assign(this, init);
+    
+    // clean up empty objects in event.actions
+    if (this.event?.actions) {
+      for (const [key, value] of Object.entries(this.event.actions)) {
+        if (value !== null && typeof value === 'object' && Object.keys(value).length === 0) {
+          delete (this.event.actions as any)[key];
+        }
+      }
+    }
   }
 
   get state(): any {

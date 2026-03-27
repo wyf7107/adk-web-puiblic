@@ -162,43 +162,8 @@ export class SidePanelComponent implements AfterViewInit {
   });
 
   readonly filteredSelectedEvent = computed(() => {
-    return this.filterEmptyValues(this.selectedEvent()) as Event | undefined;
+    return this.selectedEvent() as Event | undefined;
   });
-
-  private filterEmptyValues(value: unknown): unknown {
-    if (value === undefined) {
-      return undefined;
-    }
-
-    if (value === null) {
-      return null;
-    }
-
-    if (typeof value === 'string') {
-      return value.trim() === '' ? undefined : value;
-    }
-
-    if (Array.isArray(value)) {
-      const filteredArray = value
-          .map((item) => this.filterEmptyValues(item))
-          .filter((item) => item !== undefined);
-      return filteredArray.length > 0 ? filteredArray : undefined;
-    }
-
-    if (typeof value === 'object') {
-      const filteredEntries = Object.entries(value)
-          .map(([key, item]) => [key, this.filterEmptyValues(item)] as const)
-          .filter(([, item]) => item !== undefined);
-
-      if (filteredEntries.length === 0) {
-        return undefined;
-      }
-
-      return Object.fromEntries(filteredEntries);
-    }
-
-    return value;
-  }
 
   ngAfterViewInit() {
     // Wait one tick until the eval tab container is ready.

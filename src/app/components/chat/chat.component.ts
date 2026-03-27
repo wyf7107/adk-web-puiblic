@@ -255,6 +255,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   selectedEvent: any = undefined;
   selectedEventIndex: any = undefined;
+  selectedMessageIndex: number | undefined = undefined;
   llmRequest: any = undefined;
   llmResponse: any = undefined;
   llmRequestKey = 'gcp.vertex.agent.llm_request';
@@ -523,6 +524,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.longRunningEvents = [];
     this.selectedEvent = undefined;
     this.selectedEventIndex = undefined;
+    this.selectedMessageIndex = undefined;
   }
 
   private resetToNewSession() {
@@ -1381,9 +1383,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // If clicking the already selected event, deselect it
-    if (this.selectedEvent && this.selectedEvent.id === key) {
+    if (this.selectedMessageIndex === i) {
       this.selectedEvent = undefined;
       this.selectedEventIndex = undefined;
+      this.selectedMessageIndex = undefined;
       return;
     }
 
@@ -1391,6 +1394,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (message.role === 'user') {
       this.selectedEvent = this.eventData.get(key);
       this.selectedEventIndex = this.getIndexOfKeyInMap(key);
+      this.selectedMessageIndex = i;
       this.llmRequest = undefined;
       this.llmResponse = undefined;
       this.sideDrawer()?.open();
@@ -1400,7 +1404,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sideDrawer()?.open();
     this.showSidePanel = true;
-    this.selectEvent(key);
+    this.selectEvent(key, i);
   }
 
   ngOnDestroy(): void {
@@ -1532,6 +1536,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       // Clear selected event when closing the drawer
       this.selectedEvent = undefined;
       this.selectedEventIndex = undefined;
+      this.selectedMessageIndex = undefined;
     } else {
       this.sideDrawer()?.open();
     }
@@ -1981,6 +1986,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Clear selected event
     this.selectedEvent = undefined;
     this.selectedEventIndex = undefined;
+    this.selectedMessageIndex = undefined;
 
     // Close eval history if opened
     if (!!this.evalTab()?.showEvalHistory) {
@@ -2138,9 +2144,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasComponent()?.saveAgent(this.appName);
   }
 
-  selectEvent(key: string) {
+  selectEvent(key: string, messageIndex?: number) {
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
+    this.selectedMessageIndex = messageIndex !== undefined ? messageIndex : this.uiEvents().findIndex(msg => msg.event.id === key);
 
     let filter = undefined;
     if (this.isEventFilteringEnabled() && this.selectedEvent.invocationId &&
@@ -2328,6 +2335,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   closeSelectedEvent() {
     this.selectedEvent = undefined;
     this.selectedEventIndex = undefined;
+    this.selectedMessageIndex = undefined;
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -2336,6 +2344,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
       this.selectedEvent = undefined;
       this.selectedEventIndex = undefined;
+      this.selectedMessageIndex = undefined;
     }
   }
 

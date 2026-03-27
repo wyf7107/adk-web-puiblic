@@ -108,7 +108,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() userEditEvalCaseMessage: string = '';
   @Input() selectedFiles: {file: File; url: string}[] = [];
   @Input() updatedSessionState: any|null = null;
-  @Input() selectedEvent: any = undefined;
+  @Input() selectedMessageIndex: number | undefined = undefined;
   @Input() isAudioRecording: boolean = false;
   @Input() isVideoRecording: boolean = false;
   @Input() hoveredEventMessageIndices: number[] = [];
@@ -312,9 +312,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   isMessageEventSelected(index: number): boolean {
-    const message = this.uiEvents[index];
-    return message.event.id && this.selectedEvent &&
-        message.event.id === this.selectedEvent.id;
+    return index === this.selectedMessageIndex;
   }
 
   shouldShowMessageCard(message: any): boolean {
@@ -408,9 +406,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   handleAgentStateClick(event: Event, messageIndex: number) {
     event.stopPropagation();
 
-    const message = this.uiEvents[messageIndex];
-    const isAlreadySelected = message.event.id && this.selectedEvent &&
-                               message.event.id === this.selectedEvent.id;
+    const isAlreadySelected = messageIndex === this.selectedMessageIndex;
 
     if (!isAlreadySelected) {
       this.clickEvent.emit(messageIndex);
@@ -434,43 +430,24 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyboardNavigation(event: KeyboardEvent) {
-    if (!this.selectedEvent) return;
+    if (this.selectedMessageIndex === undefined) return;
 
     // Only handle arrow keys
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
 
     event.preventDefault();
 
-    // Find unique eventIds and their first occurrence index
-    const uniqueEventMap = new Map<string, number>();
-    for (let i = 0; i < this.uiEvents.length; i++) {
-      const msg = this.uiEvents[i];
-      if (msg.event.id && !uniqueEventMap.has(msg.event.id)) {
-        uniqueEventMap.set(msg.event.id, i);
-      }
-    }
-
-    const eventIndices = Array.from(uniqueEventMap.values());
-
-    if (eventIndices.length === 0) return;
-
-    // Find current selected event index
-    const currentIndex = eventIndices.findIndex(
-        (idx) => this.uiEvents[idx].event?.id === this.selectedEvent.id);
-
-    if (currentIndex === -1) return;
-
     // Navigate to next or previous
     let newIndex: number;
     if (event.key === 'ArrowDown') {
-      newIndex = currentIndex + 1 >= eventIndices.length ? 0 : currentIndex + 1;
+      newIndex = this.selectedMessageIndex + 1 >= this.uiEvents.length ? 0 : this.selectedMessageIndex + 1;
     } else {
       newIndex =
-          currentIndex - 1 < 0 ? eventIndices.length - 1 : currentIndex - 1;
+          this.selectedMessageIndex - 1 < 0 ? this.uiEvents.length - 1 : this.selectedMessageIndex - 1;
     }
 
     // Emit click event for the new index
-    this.clickEvent.emit(eventIndices[newIndex]);
+    this.clickEvent.emit(newIndex);
 
     // Scroll the selected message into view
     setTimeout(() => {
@@ -478,9 +455,9 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
       const messageElements =
           this.scrollContainer.nativeElement.querySelectorAll(
-              '.message-column-container');
-      if (messageElements && messageElements[eventIndices[newIndex]]) {
-        messageElements[eventIndices[newIndex]].scrollIntoView(
+              '.message-row-container');
+      if (messageElements && messageElements[newIndex]) {
+        messageElements[newIndex].scrollIntoView(
             {behavior: 'smooth', block: 'nearest', inline: 'nearest'});
       }
     }, 0);

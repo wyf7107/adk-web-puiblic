@@ -768,12 +768,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           // Final chunk arrived - update the existing message's eventId
           const oldEventId = this.streamingTextMessage.event.id;
           this.uiEvents.update((uiEvents) => {
-            return uiEvents.map(m => {
-              if (m.event.id === oldEventId && m.role === 'bot') {
-                return new UiEvent({ ...m, event: { id: chunkJson.id } as any });
+            if (uiEvents.length > 0) {
+              const lastIndex = uiEvents.length - 1;
+              const lastMessage = uiEvents[lastIndex];
+              if (lastMessage.event.id === oldEventId && lastMessage.role === 'bot') {
+                const updatedMessages = [...uiEvents];
+                updatedMessages[lastIndex] = new UiEvent({ ...lastMessage, event: { id: chunkJson.id } as any });
+                return updatedMessages;
               }
-              return m;
-            });
+            }
+            return uiEvents;
           });
           this.storeEvents(part, chunkJson);
           this.streamingTextMessage = null;
@@ -818,17 +822,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const role = chunkJson.author === 'user' ? 'user' : 'bot';
       const existingMessages = this.uiEvents();
-      const existingMessageIndex = existingMessages.findIndex(
-        msg => msg.event.id === chunkJson.id && msg.role === role
-      );
+      const lastMessageIndex = existingMessages.length - 1;
+      const lastMessage = existingMessages.length > 0 ? existingMessages[lastMessageIndex] : undefined;
 
-      if (existingMessageIndex !== -1) {
+      if (lastMessage && lastMessage.event.id === chunkJson.id && lastMessage.role === role) {
         // Update existing message by adding this part
         this.uiEvents.update(uiEvents => {
           const updatedMessages = [...uiEvents];
-          const updatedMessage = new UiEvent({ ...updatedMessages[existingMessageIndex] });
+          const updatedMessage = new UiEvent({ ...lastMessage });
           this.processPartIntoMessage(part, chunkJson, updatedMessage);
-          updatedMessages[existingMessageIndex] = updatedMessage;
+          updatedMessages[lastMessageIndex] = updatedMessage;
           return updatedMessages;
         });
         this.changeDetectorRef.detectChanges();
@@ -1137,14 +1140,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       // If SSE streaming is enabled and this is a text message with eventId
       if (this.useSse && message.text && message.event.id &&
         message.role === 'bot') {
-        // Find existing streaming message with the same eventId
-        const existingIndex = uiEvents.findIndex(
-          m => m.event.id === message.event.id && m.role === 'bot');
-        if (existingIndex !== -1) {
-          const updatedMessages = [...uiEvents];
-          // Replace with the new message to preserve all fields (including inlineData)
-          updatedMessages[existingIndex] = message;
-          return updatedMessages;
+        if (uiEvents.length > 0) {
+          const lastIndex = uiEvents.length - 1;
+          const lastMessage = uiEvents[lastIndex];
+          if (lastMessage.event.id === message.event.id && lastMessage.role === 'bot') {
+            const updatedMessages = [...uiEvents];
+            // Replace with the new message to preserve all fields (including inlineData)
+            updatedMessages[lastIndex] = message;
+            return updatedMessages;
+          }
         }
       }
 
@@ -1221,7 +1225,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       'OK',
     );
     // Remove placeholder message and artifact on failure
-    this.uiEvents.update(uiEvents => uiEvents.filter((m) => m !== uiEvent));
+    uiEvent.error = { errorMessage: 'Failed to fetch artifact data' };
+    this.changeDetectorRef.detectChanges();
     this.artifacts = this.artifacts.filter(
       a => a.id !== artifactId || a.versionId !== versionId);
   }
@@ -1289,17 +1294,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             mediaType,
           };
 
-          this.uiEvents.update(uiEvents => {
-            return uiEvents.map(m => {
-              if (m === uiEvent) {
-                return new UiEvent({
-                  ...m,
-                  inlineData,
-                });
-              }
-              return m;
-            });
-          });
+          uiEvent.inlineData = inlineData;
+          this.changeDetectorRef.detectChanges();
 
           // Update placeholder artifact with fetched data.
           this.artifacts = this.artifacts.map(artifact => {
@@ -1659,13 +1655,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         keepOldMessages && this.sessionIdOfLoadedMessages === this.sessionId
     });
 
+    const newUiEvents: UiEvent[] = [];
     events.forEach((event: any) => {
       const uiEvent = this.buildUiEventFromEvent(event, reverseOrder);
 
       if (reverseOrder) {
-        this.uiEvents.update((uiEvents) => [uiEvent, ...uiEvents]);
+        newUiEvents.unshift(uiEvent);
       } else {
-        this.uiEvents.update((uiEvents) => [...uiEvents, uiEvent]);
+        newUiEvents.push(uiEvent);
       }
 
       const isBot = event.author !== 'user';
@@ -1686,6 +1683,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     });
 
+    if (newUiEvents.length > 0) {
+      this.uiEvents.update(uiEvents => reverseOrder ? [...newUiEvents, ...uiEvents] : [...uiEvents, ...newUiEvents]);
+    }
+
     this.sessionIdOfLoadedMessages = this.sessionId;
   }
 
@@ -1705,38 +1706,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // Check each function call to see if it has a response
-    this.uiEvents.update(uiEvents => {
-      return uiEvents.map(msg => {
-        if (msg.functionCalls) {
-          const updatedFunctionCalls = msg.functionCalls.map((fc: any) => {
-            // Get the event for this message to check longRunningToolIds
-            const event = msg.event.id ? this.eventData.get(msg.event.id) : null;
-            const isLongRunning = fc.isLongRunning ||
-              event?.longRunningToolIds?.includes(fc.id);
+    this.uiEvents().forEach(msg => {
+      if (msg.functionCalls) {
+        msg.functionCalls.forEach((fc: any) => {
+          // Get the event for this message to check longRunningToolIds
+          const event = msg.event.id ? this.eventData.get(msg.event.id) : null;
+          const isLongRunning = fc.isLongRunning ||
+            event?.longRunningToolIds?.includes(fc.id);
 
-            // Only restore if it's long-running AND doesn't have a response yet
-            if (isLongRunning && !functionResponses.has(fc.id)) {
-              return {
-                ...fc,
-                isLongRunning: true,
-                invocationId: event?.invocationId,
-                functionCallEventId: msg.event.id || "",
-                needsResponse: true,
-                responseStatus: 'pending',
-                userResponse: fc.userResponse || '',
-              };
-            }
-            return fc;
-          });
-
-          // Return a new message object to trigger Angular change detection
-          return new UiEvent({
-            ...msg,
-            functionCalls: updatedFunctionCalls
-          });
-        }
-        return msg;
-      });
+          // Only restore if it's long-running AND doesn't have a response yet
+          if (isLongRunning && !functionResponses.has(fc.id)) {
+            fc.isLongRunning = true;
+            fc.invocationId = event?.invocationId;
+            fc.functionCallEventId = msg.event.id || "";
+            fc.needsResponse = true;
+            fc.responseStatus = 'pending';
+            fc.userResponse = fc.userResponse || '';
+          }
+        });
+      }
     });
   }
 

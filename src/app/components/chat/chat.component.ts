@@ -44,6 +44,7 @@ import { AgentRunRequest } from '../../core/models/AgentRunRequest';
 import { EvalCase } from '../../core/models/Eval';
 import { Session, SessionState } from '../../core/models/Session';
 import { Event as AdkEvent, Part } from '../../core/models/types';
+import { UiEvent } from '../../core/models/UiEvent';
 import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
 import { AGENT_BUILDER_SERVICE } from '../../core/services/interfaces/agent-builder';
 import { ARTIFACT_SERVICE } from '../../core/services/interfaces/artifact';
@@ -214,9 +215,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   isBuilderMode = signal(false);  // Default to builder mode off
   videoElement!: HTMLVideoElement;
   currentMessage = '';
-  messages = signal<any[]>([]);
+  messages = signal<UiEvent[]>([]);
   lastTextChunk: string = '';
-  streamingTextMessage: any | null = null;
+  streamingTextMessage: UiEvent | null = null;
   latestThought: string = '';
   artifacts: any[] = [];
   userInput: string = '';

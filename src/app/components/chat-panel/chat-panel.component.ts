@@ -36,6 +36,7 @@ import {catchError, filter, first, switchMap, tap} from 'rxjs/operators';
 import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
 import type {EvalCase} from '../../core/models/Eval';
 import {FunctionCall, FunctionResponse} from '../../core/models/types';
+import {UiEvent} from '../../core/models/UiEvent';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
@@ -97,7 +98,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() appName: string = '';
   @Input() agentReadme: string = '';
   sessionName = input<string>('');
-  @Input() messages: any[] = [];
+  @Input() messages: UiEvent[] = [];
   @Input() isChatMode: boolean = true;
   @Input() evalCase: EvalCase|null = null;
   @Input() isEvalEditMode: boolean = false;
@@ -307,6 +308,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   getAuthorFromEvent(i: number) {
     const key = this.messages[i].eventId;
+    if (!key) return ROOT_AGENT;
     const selectedEvent = this.eventData.get(key);
 
     return selectedEvent?.author ?? ROOT_AGENT;

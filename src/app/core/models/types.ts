@@ -27,6 +27,7 @@ export declare interface FunctionCall {
   id?: string;
   name: string;
   args: {[key: string]: any};
+  needsResponse?: boolean;
 }
 
 export declare interface FunctionResponse {

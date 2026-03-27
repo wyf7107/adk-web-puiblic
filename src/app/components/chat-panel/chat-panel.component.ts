@@ -433,13 +433,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
 
-  hasArtifactDelta(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    const artifactDelta = event?.actions?.artifactDelta;
-    return artifactDelta && Object.keys(artifactDelta).length > 0;
-  }
 
   renderGooglerSearch(content: string) {
     return this.sanitizer.bypassSecurityTrustHtml(content);
@@ -471,15 +464,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
 
-  getArtifactDeltaTooltip(messageIndex: number): any {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    const artifactDelta = event?.actions?.artifactDelta;
-    if (!artifactDelta) return '';
-
-    return artifactDelta;
-  }
 
 
   hasEventOutputData(messageIndex: number): boolean {

@@ -278,19 +278,19 @@
             }
           }
         }
-        @if (uiEvent.role === "bot" && uiEvent.state) {
+        @if (uiEvent.role === "bot" && uiEvent.stateDelta) {
         <app-hover-info-button
           [icon]="'data_object'"
-          [text]="'State: ' + Object.keys(uiEvent.state).join(', ')"
-          [tooltipContent]="uiEvent.state"
+          [text]="'State: ' + Object.keys(uiEvent.stateDelta).join(', ')"
+          [tooltipContent]="uiEvent.stateDelta"
           [tooltipTitle]="'State Update'"
         ></app-hover-info-button>
         }
-        @if (uiEvent.role === "bot" && hasArtifactDelta(i)) {
+        @if (uiEvent.role === "bot" && uiEvent.artifactDelta) {
         <app-hover-info-button
           [icon]="'attachment'"
           [text]="'Artifact'"
-          [tooltipContent]="getArtifactDeltaTooltip(i)"
+          [tooltipContent]="uiEvent.artifactDelta"
           [tooltipTitle]="'Artifact'"
         ></app-hover-info-button>
         }

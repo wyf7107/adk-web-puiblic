@@ -460,54 +460,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return isComputerUseResponse(input);
   }
 
-
-
-
-
-
-
-  hasEventOutputData(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return event?.output !== undefined && event?.output !== null;
-  }
-
-
-  private parsedOutputCache = new Map<string, {raw: string, parsed: any}>();
-
-  getEventOutputDataJson(messageIndex: number): any {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    const eventData = event?.output;
-    if (eventData === undefined || eventData === null) return null;
-
-    // If it's already an object, return it
-    if (typeof eventData === 'object') {
-      return eventData;
-    }
-
-    const cached = this.parsedOutputCache.get(message.event.id);
-    if (cached && cached.raw === eventData) {
-      return cached.parsed;
-    }
-
-    let parsed = eventData;
-    // If it's a string, try to parse it as JSON
-    try {
-      if (typeof eventData === 'string') {
-        parsed = JSON.parse(eventData);
-      }
-    } catch (e) {
-      // If parsing fails, return as-is
-      parsed = eventData;
-    }
-
-    this.parsedOutputCache.set(message.event.id, {raw: eventData as string, parsed});
-    return parsed;
-  }
-
+  
   hasWorkflowNodes(messageIndex: number): boolean {
     const message = this.uiEvents[messageIndex];
 

@@ -237,14 +237,14 @@
           }
         </div>
         }
-        @if (uiEvent.role === "bot" && hasEventOutputData(i)) {
+        @if (uiEvent.role === "bot" && uiEvent.event.output) {
         <div
           class="output-chip"
           [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
           [appJsonTooltip]="getNodePath(i) || ''"
           [appJsonTooltipTitle]="'Node Output for'"
         >
-          <ngx-json-viewer [json]="getEventOutputDataJson(i)"></ngx-json-viewer>
+          <ngx-json-viewer [json]="uiEvent.event.output"></ngx-json-viewer>
         </div>
         }
         <div class="event-chips-container">

@@ -34,11 +34,9 @@
       }"
       (click)="handleRowClick($event, uiEvent, i)"
     >
-        @if (!uiEvent.isLoading && getOverallEventNumber(i) !== -1) {
         <div class="event-number-container">
-          #{{ getOverallEventNumber(i) }}
+          #{{ i + 1}}
         </div>
-        }
         @if (uiEvent.role === "bot" && !uiEvent.isLoading) {
           <app-chat-avatar
             [role]="uiEvent.event.content ? 'bot' : 'node'"

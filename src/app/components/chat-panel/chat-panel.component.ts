@@ -332,61 +332,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
         (message.failedMetric && message.evalStatus === 2));
   }
 
-  getBotEventNumber(messageIndex: number): number {
-    const message = this.uiEvents[messageIndex];
-
-    if (message.role !== 'bot' ) {
-      return -1;
-    }
-
-    const uniqueBotEventIds: string[] = [];
-    for (let i = 0; i <= messageIndex; i++) {
-      const msg = this.uiEvents[i];
-      if (msg.role === 'bot' &&
-          !uniqueBotEventIds.includes(msg.event.id)) {
-        uniqueBotEventIds.push(msg.event.id);
-      }
-    }
-
-    return uniqueBotEventIds.indexOf(message.event.id) + 1;
-  }
-
-
-  getOverallEventNumber(messageIndex: number): number {
-    let eventCount = 0;
-    let lastSeenGroupType: 'user'|'bot'|null = null;
-    let lastBotEventId: string|null = null;
-
-    for (let i = 0; i <= messageIndex; i++) {
-      const msg = this.uiEvents[i];
-
-      if (msg.role === 'user') {
-        // User messages increment when they start a new group
-        if (lastSeenGroupType !== 'user') {
-          eventCount++;
-          lastSeenGroupType = 'user';
-        }
-
-        if (i === messageIndex) {
-          return eventCount;
-        }
-      } else if (msg.role === 'bot' ) {
-        // Bot events increment when they're a new event
-        if (msg.event.id !== lastBotEventId) {
-          eventCount++;
-          lastBotEventId = msg.event.id;
-          lastSeenGroupType = 'bot';
-        }
-
-        if (i === messageIndex) {
-          return eventCount;
-        }
-      }
-    }
-
-    return -1;
-  }
-
+  
   isFirstUserMessageInGroup(messageIndex: number): boolean {
     const message = this.uiEvents[messageIndex];
 

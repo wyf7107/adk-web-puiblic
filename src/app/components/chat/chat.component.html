@@ -457,11 +457,11 @@
         (fileSelect)="onFileSelect($event)"
         (removeFile)="removeFile($event)"
         (removeStateUpdate)="removeStateUpdate()"
-        (sendMessage)="sendMessage($event)"
+        (sendMessage)="handleChatInput($event)"
         (updateState)="updateState()"
         (toggleAudioRecording)="toggleAudioRecording()"
         (toggleVideoRecording)="toggleVideoRecording()"
-        (longRunningResponseComplete)="submitAgentRunRequest($event)"
+        (longRunningResponseComplete)="sendMessage($event)"
         [sessionName]="sessionId"
       ></app-chat-panel>
       }

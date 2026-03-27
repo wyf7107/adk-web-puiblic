@@ -47,7 +47,7 @@ export class LongRunningResponseComponent {
   @Input() userId!: string;
   @Input() sessionId!: string;
 
-  @Output() responseComplete = new EventEmitter<AgentRunRequest>();
+  @Output() responseComplete = new EventEmitter<any>();
 
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -105,11 +105,7 @@ export class LongRunningResponseComponent {
     this.functionCall.responseStatus = 'sent';
     this.cdr.detectChanges();
 
-    const req: AgentRunRequest = {
-      appName: this.appName,
-      userId: this.userId,
-      sessionId: this.sessionId,
-      newMessage: {
+    const content = {
         role: 'user',
         parts: [{
           functionResponse: {
@@ -118,10 +114,9 @@ export class LongRunningResponseComponent {
             response: { 'result': this.functionCall.userResponse },
           },
         }],
-      },
-      functionCallEventId: this.functionCall.functionCallEventId,
+        functionCallEventId: this.functionCall.functionCallEventId
     };
 
-    this.responseComplete.emit(req);
+    this.responseComplete.emit(content);
   }
 }

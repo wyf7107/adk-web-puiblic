@@ -554,7 +554,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         });
   }
 
-  async sendMessage(event: Event) {
+  async handleChatInput(event: Event) {
     event.preventDefault();
     if (!this.userInput.trim() && this.selectedFiles.length <= 0) return;
 
@@ -565,6 +565,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+    const content = {
+      role: 'user',
+      parts: await this.getUserMessageParts()
+    };
+
+    // Clear input
+    this.userInput = '';
+    this.selectedFiles = [];
+
+    // Clear the query param for the initial user input once it is sent.
+    const updatedUrl = this.router.parseUrl(this.location.path());
+    if (updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM]) {
+      delete updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM];
+      this.location.replaceState(updatedUrl.toString());
+    }
+
+    await this.sendMessage(content);
+  }
+
+  async sendMessage(content: any) {
     // Lazily create a real session on first message send.
     if (!this.sessionId) {
       try {
@@ -585,70 +605,38 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
+    const functionCallEventId = content.functionCallEventId;
+    if (functionCallEventId) {
+      delete content.functionCallEventId;
+    }
+
     const userEventId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const userParts: any[] = [];
+    const apiEvent = {
+        id: userEventId,
+        author: content.role || 'user',
+        content: content
+    };
 
-    // Build combined user message
-    const userUiEvent = new UiEvent({
-      role: 'user',
-      event: { id: userEventId } as any
-    });
-
-    // Add user message text
-    if (!!this.userInput.trim()) {
-      userParts.push({ text: this.userInput });
-      userUiEvent.text = this.userInput;
-    }
-
-    // Add user message attachments
-    if (this.selectedFiles.length > 0) {
-      const messageAttachments = this.selectedFiles.map((file) => ({
-        file: file.file,
-        url: file.url,
-      }));
-
-      for (const file of this.selectedFiles) {
-        const part = await this.localFileService.createMessagePartFromFile(file.file);
-        userParts.push(part);
-      }
-
-      userUiEvent.attachments = messageAttachments;
-    }
-
-    // Add the combined user message as a single row
+    const userUiEvent = this.buildUiEventFromEvent(apiEvent);
     this.uiEvents.update(uiEvents => [...uiEvents, userUiEvent]);
-    // Defer change detection to avoid race condition with URL update
     setTimeout(() => this.changeDetectorRef.detectChanges(), 0);
 
-    const userEvent = {
-      id: userEventId,
-      author: 'user',
-      content: { parts: userParts }
-    };
-    this.eventData.set(userEventId, userEvent);
+    this.eventData.set(userEventId, apiEvent);
     this.eventData = new Map(this.eventData);
 
     const req: AgentRunRequest = {
       appName: this.appName,
       userId: this.userId,
       sessionId: this.sessionId,
-      newMessage: {
-        role: 'user',
-        parts: await this.getUserMessageParts(),
-      },
+      newMessage: content,
       streaming: this.useSse,
       stateDelta: this.updatedSessionState(),
     };
-    this.selectedFiles = [];
-    this.submitAgentRunRequest(req);
-    // Clear input
-    this.userInput = '';
-    // Clear the query param for the initial user input once it is sent.
-    const updatedUrl = this.router.parseUrl(this.location.path());
-    if (updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM]) {
-      delete updatedUrl.queryParams[INITIAL_USER_INPUT_QUERY_PARAM];
-      this.location.replaceState(updatedUrl.toString());
+    if (functionCallEventId) {
+      req.functionCallEventId = functionCallEventId;
     }
+
+    this.submitAgentRunRequest(req);
     this.changeDetectorRef.detectChanges();
   }
 

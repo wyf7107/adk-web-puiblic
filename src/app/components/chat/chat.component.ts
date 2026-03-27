@@ -1354,49 +1354,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     redirectUri: string,
   ) {
     this.longRunningEvents.pop();
-    const authResponse: AgentRunRequest = {
-      appName: this.appName,
-      userId: this.userId,
-      sessionId: this.sessionId,
-      newMessage: {
-        role: 'user',
-        parts: [],
-      },
-    };
 
     var authConfig = structuredClone(func.args.authConfig);
     authConfig.exchangedAuthCredential.oauth2.authResponseUri = authResponseUrl;
     authConfig.exchangedAuthCredential.oauth2.redirectUri = redirectUri;
 
-    authResponse.functionCallEventId = this.functionCallEventId;
-    authResponse.newMessage.parts.push({
-      functionResponse: {
-        id: func.id,
-        name: func.name,
-        response: authConfig,
-      },
-    });
-
-    let response: any[] = [];
-    this.agentService.runSse(authResponse).subscribe({
-      next: async (chunkJson) => {
-        response.push(chunkJson);
-      },
-      error: (err) => console.error('SSE error:', err),
-      complete: () => {
-        this.processRunSseResponse(response);
-      },
-    });
-  }
-
-  protected processRunSseResponse(response: any) {
-    for (const e of response) {
-      if (e.content) {
-        for (let part of e.content.parts) {
-          this.processPart(e, part);
+    const content = {
+      role: 'user',
+      parts: [
+        {
+          functionResponse: {
+            id: func.id,
+            name: func.name,
+            response: authConfig,
+          },
         }
-      }
-    }
+      ],
+      functionCallEventId: this.functionCallEventId
+    };
+
+    this.sendMessage(content);
   }
 
   clickEvent(i: number) {

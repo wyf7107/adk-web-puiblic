@@ -14,19 +14,8 @@
  limitations under the License.
 -->
 
+@if (functionCall.responseStatus !== 'sent' && functionCall.responseStatus !== 'sending') {
 <div class="response-chip-container" (click)="$event.stopPropagation()">
-  @if (functionCall.responseStatus === 'sent') {
-  <button mat-stroked-button class="function-event-button" [appJsonTooltip]="getSentResponseJson()"
-    appJsonTooltipTitle="Function Response">
-    <mat-icon>check</mat-icon>
-    {{ functionCall.name }}
-  </button>
-  } @else if (functionCall.responseStatus === 'sending') {
-  <div class="status-chip sending">
-    <mat-icon>hourglass_empty</mat-icon>
-    <span>Sending...</span>
-  </div>
-  } @else {
   @if (hasMessage()) {
   <!-- Message box containing content and input -->
   <div class="message-box">
@@ -103,5 +92,5 @@
     </div>
   </div>
   }
-  }
 </div>
+}

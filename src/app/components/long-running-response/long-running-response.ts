@@ -20,9 +20,8 @@ import {FormsModule} from '@angular/forms';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
-import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
-import {MarkdownComponent} from '../markdown/markdown.component';
+    import {AgentRunRequest} from '../../core/models/AgentRunRequest';
+    import {MarkdownComponent} from '../markdown/markdown.component';
 
 import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
 
@@ -36,7 +35,6 @@ import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.c
     MatButton,
     MatIconButton,
     MatIcon,
-    JsonTooltipDirective,
     MarkdownComponent,
     HoverInfoButtonComponent,
   ],
@@ -79,14 +77,6 @@ export class LongRunningResponseComponent {
   getResponseSchemaJson(): string {
     try {
       return JSON.stringify(this.functionCall.args?.response_schema || {}, null, 2);
-    } catch (e) {
-      return '';
-    }
-  }
-
-  getSentResponseJson(): string {
-    try {
-      return JSON.stringify({'response': this.functionCall.sentUserResponse}, null, 2);
     } catch (e) {
       return '';
     }

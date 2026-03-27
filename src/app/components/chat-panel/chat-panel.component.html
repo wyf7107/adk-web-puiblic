@@ -18,14 +18,14 @@
 @if (appName != "" && !isSessionLoading) {
 <div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
   <div #videoContainer></div>
-  @if (messages.length === 0 && agentReadme) {
+  @if (uiEvents.length === 0 && agentReadme) {
     <div class="readme-container">
       <div class="readme-content">
         <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: agentReadme, thought: false}"></ng-container>
       </div>
     </div>
   }
-  @for (message of messages; track message; let i = $index) {
+  @for (message of uiEvents; track message; let i = $index) {
     <div class="message-row-container"
       [ngClass]="{
         'selected': isMessageEventSelected(i),
@@ -251,7 +251,7 @@
         @if (message.functionCalls && message.functionCalls.length > 0) {
           @for (functionCall of message.functionCalls; track functionCall.id) {
             @if (isComputerUseClick(functionCall)) {
-              <app-computer-action [functionCall]="functionCall" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+              <app-computer-action [functionCall]="functionCall" [allMessages]="uiEvents" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
 
             } @else {
               <app-hover-info-button
@@ -266,7 +266,7 @@
         @if (message.functionResponses && message.functionResponses.length > 0) {
           @for (functionResponse of message.functionResponses; track functionResponse) {
             @if (isComputerUseResponse(functionResponse)) {
-              <app-computer-action [functionResponse]="functionResponse" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+              <app-computer-action [functionResponse]="functionResponse" [allMessages]="uiEvents" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
 
             } @else {
               <app-hover-info-button

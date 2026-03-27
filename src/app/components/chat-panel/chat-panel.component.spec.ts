@@ -133,9 +133,9 @@ describe('ChatPanelComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
       const messages = fixture.debugElement.queryAll(By.css('.message-card'));
-      expect(messages.length).toBe(2);
-      expect(messages[0].nativeElement.textContent).toContain('User message');
-      expect(messages[1].nativeElement.textContent).toContain('Bot message');
+      expect(uiEvents.length).toBe(2);
+      expect(uiEvents[0].nativeElement.textContent).toContain('User message');
+      expect(uiEvents[1].nativeElement.textContent).toContain('Bot message');
     });
 
     it('should display function call', () => {
@@ -415,9 +415,9 @@ describe('ChatPanelComponent', () => {
             tick();
             fixture.detectChanges();
 
-            expect(component.messages.length)
+            expect(component.uiEvents.length)
                 .toBe(initialMessageCount + newMessages.length);
-            expect(component.messages[0]).toEqual(newMessages[0]);
+            expect(component.uiEvents[0]).toEqual(newMessages[0]);
           }));
     });
 

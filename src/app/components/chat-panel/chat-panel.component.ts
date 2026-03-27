@@ -98,7 +98,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() appName: string = '';
   @Input() agentReadme: string = '';
   sessionName = input<string>('');
-  @Input() messages: UiEvent[] = [];
+  @Input() uiEvents: UiEvent[] = [];
   @Input() isChatMode: boolean = true;
   @Input() evalCase: EvalCase|null = null;
   @Input() isEvalEditMode: boolean = false;
@@ -263,12 +263,12 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges) {
     // Scroll to top when switching apps or when messages become empty (new session with README)
-    if ((changes['appName'] || changes['messages']) && this.messages.length === 0 && this.agentReadme) {
+    if ((changes['appName'] || changes['uiEvents']) && this.uiEvents.length === 0 && this.agentReadme) {
       setTimeout(() => this.scrollToTop(), 0);
     }
 
-    if (changes['messages']) {
-      const currentLastMessage = this.messages[this.messages.length - 1];
+    if (changes['uiEvents']) {
+      const currentLastMessage = this.uiEvents[this.uiEvents.length - 1];
       const isNewMessageAppended = currentLastMessage !== this.lastMessageRef;
 
       if (isNewMessageAppended) {
@@ -307,7 +307,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getAuthorFromEvent(i: number) {
-    const key = this.messages[i].eventId;
+    const key = this.uiEvents[i].eventId;
     if (!key) return ROOT_AGENT;
     const selectedEvent = this.eventData.get(key);
 
@@ -317,7 +317,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   isEventContent(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
     const event = this.eventData.get(message.eventId);
     return !!event?.content;
@@ -331,7 +331,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   isMessageEventSelected(index: number): boolean {
-    const message = this.messages[index];
+    const message = this.uiEvents[index];
     return message.eventId && this.selectedEvent &&
         message.eventId === this.selectedEvent.id;
   }
@@ -345,7 +345,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getBotEventNumber(messageIndex: number): number {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
 
     if (message.role !== 'bot' || !message.eventId) {
       return -1;
@@ -353,7 +353,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
     const uniqueBotEventIds: string[] = [];
     for (let i = 0; i <= messageIndex; i++) {
-      const msg = this.messages[i];
+      const msg = this.uiEvents[i];
       if (msg.role === 'bot' && msg.eventId &&
           !uniqueBotEventIds.includes(msg.eventId)) {
         uniqueBotEventIds.push(msg.eventId);
@@ -370,7 +370,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     let lastBotEventId: string|null = null;
 
     for (let i = 0; i <= messageIndex; i++) {
-      const msg = this.messages[i];
+      const msg = this.uiEvents[i];
 
       if (msg.role === 'user') {
         // User messages increment when they start a new group
@@ -400,7 +400,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   isFirstUserMessageInGroup(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
 
     if (message.role !== 'user') {
       return false;
@@ -410,12 +410,12 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       return true;
     }
 
-    const prevMessage = this.messages[messageIndex - 1];
+    const prevMessage = this.uiEvents[messageIndex - 1];
     return prevMessage.role !== 'user';
   }
 
   isFirstMessageInEventGroup(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
 
     if (message.role !== 'bot' || !message.eventId) {
       return false;
@@ -425,13 +425,13 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       return true;  // First message overall
     }
 
-    const prevMessage = this.messages[messageIndex - 1];
+    const prevMessage = this.uiEvents[messageIndex - 1];
     return prevMessage.eventId !== message.eventId;
   }
 
 
   hasStateDelta(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -441,7 +441,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   hasArtifactDelta(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -500,7 +500,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   getStateDeltaKeys(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -512,7 +512,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getStateDeltaTooltip(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -528,7 +528,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   getArtifactDeltaTooltip(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -544,7 +544,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   hasEventOutputData(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -555,7 +555,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   private parsedOutputCache = new Map<string, {raw: string, parsed: any}>();
 
   getEventOutputDataJson(messageIndex: number): any {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return null;
 
     const event = this.eventData.get(message.eventId);
@@ -588,7 +588,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   hasEventRoute(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -596,7 +596,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getEventRouteText(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -607,7 +607,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getEventRouteTooltip(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -640,7 +640,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   hasWorkflowNodes(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -650,7 +650,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   getWorkflowNodes(messageIndex: number): any {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return null;
 
     const event = this.eventData.get(message.eventId);
@@ -663,7 +663,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     const nodesByPath: any = {};
 
     for (let i = 0; i <= messageIndex; i++) {
-      const msg = this.messages[i];
+      const msg = this.uiEvents[i];
       if (!msg.eventId) continue;
 
       const event = this.eventData.get(msg.eventId);
@@ -685,7 +685,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getNodePath(messageIndex: number): string | null {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return null;
 
     const event = this.eventData.get(message.eventId);
@@ -694,7 +694,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   hasEndOfAgent(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -703,7 +703,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
 
   getEndOfAgentAuthor(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -711,7 +711,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   hasErrorCode(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -719,7 +719,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getErrorCode(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -727,7 +727,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   hasErrorMessage(messageIndex: number): boolean {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return false;
 
     const event = this.eventData.get(message.eventId);
@@ -735,7 +735,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getErrorMessage(messageIndex: number): string {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     if (!message.eventId) return '';
 
     const event = this.eventData.get(message.eventId);
@@ -745,7 +745,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   private errorJsonCache = new Map<string, {errorCode: string, errorMessage: string, parsed: any}>();
 
   getErrorJson(messageIndex: number): any {
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     const errorCode = this.getErrorCode(messageIndex);
     const errorMessage = this.getErrorMessage(messageIndex);
 
@@ -772,7 +772,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   handleAgentStateClick(event: Event, messageIndex: number) {
     event.stopPropagation();
 
-    const message = this.messages[messageIndex];
+    const message = this.uiEvents[messageIndex];
     const isAlreadySelected = message.eventId && this.selectedEvent &&
                                message.eventId === this.selectedEvent.id;
 
@@ -807,8 +807,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
     // Find unique eventIds and their first occurrence index
     const uniqueEventMap = new Map<string, number>();
-    for (let i = 0; i < this.messages.length; i++) {
-      const msg = this.messages[i];
+    for (let i = 0; i < this.uiEvents.length; i++) {
+      const msg = this.uiEvents[i];
       if (msg.eventId && !uniqueEventMap.has(msg.eventId)) {
         uniqueEventMap.set(msg.eventId, i);
       }
@@ -820,7 +820,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
     // Find current selected event index
     const currentIndex = eventIndices.findIndex(
-        (idx) => this.messages[idx].eventId === this.selectedEvent.id);
+        (idx) => this.uiEvents[idx].eventId === this.selectedEvent.id);
 
     if (currentIndex === -1) return;
 

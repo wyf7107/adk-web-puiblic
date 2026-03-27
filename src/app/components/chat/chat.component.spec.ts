@@ -403,7 +403,7 @@ describe('ChatComponent', () => {
         ];
 
         beforeEach(async () => {
-          component.messages.set([]);
+          component.uiEvents.set([]);
           component.eventData = new Map();
           mockUiStateService.newMessagesLoadedResponse.next({
             items: events,
@@ -412,16 +412,16 @@ describe('ChatComponent', () => {
         });
 
         it('should add messages to the chat', () => {
-          const messages = component.messages();
-          expect(messages.length).toBe(2);
-          expect(messages[0].text).toBe('user message');
-          expect(messages[1].text).toBe('bot response');
+          const messages = component.uiEvents();
+          expect(uiEvents.length).toBe(2);
+          expect(uiEvents[0].text).toBe('user message');
+          expect(uiEvents[1].text).toBe('bot response');
         });
 
         it(
             'should not clear existing messages or events when new messages are loaded',
             fakeAsync(() => {
-              component.messages.set([
+              component.uiEvents.set([
                 {role: 'user', text: 'existing message'},
               ]);
               component.eventData.set('event-old', {id: 'event-old'} as any);
@@ -430,18 +430,18 @@ describe('ChatComponent', () => {
                 nextPageToken: '',
               });
               tick();
-              const messages = component.messages();
-              expect(messages.length).toBe(3);
-              expect(messages[0].text).toBe('user message');
-              expect(messages[1].text).toBe('bot response');
-              expect(messages[2].text).toBe('existing message');
+              const messages = component.uiEvents();
+              expect(uiEvents.length).toBe(3);
+              expect(uiEvents[0].text).toBe('user message');
+              expect(uiEvents[1].text).toBe('bot response');
+              expect(uiEvents[2].text).toBe('existing message');
               expect(component.eventData.has('event-old')).toBeTrue();
             }));
 
         it(
             'should clear existing messages and events when new messages are loaded for a different session',
             fakeAsync(() => {
-              component.messages.set([
+              component.uiEvents.set([
                 {role: 'user', text: 'existing message'},
               ]);
               component.eventData.set('event-old', {id: 'event-old'} as any);
@@ -451,10 +451,10 @@ describe('ChatComponent', () => {
                 nextPageToken: '',
               });
               tick();
-              const messages = component.messages();
-              expect(messages.length).toBe(2);
-              expect(messages[0].text).toBe('user message');
-              expect(messages[1].text).toBe('bot response');
+              const messages = component.uiEvents();
+              expect(uiEvents.length).toBe(2);
+              expect(uiEvents[0].text).toBe('user message');
+              expect(uiEvents[1].text).toBe('bot response');
               expect(component.eventData.has('event-old')).toBeFalse();
             }));
 
@@ -499,9 +499,9 @@ describe('ChatComponent', () => {
           } as any);
           fixture.detectChanges();
 
-          const messages = component.messages();
-          expect(messages.length).toBe(1);
-          expect(messages[0].a2uiData).toEqual({
+          const messages = component.uiEvents();
+          expect(uiEvents.length).toBe(1);
+          expect(uiEvents[0].a2uiData).toEqual({
             beginRendering: {beginRendering: {id: '1'}},
             surfaceUpdate: {surfaceUpdate: {components: []}}
           });
@@ -534,11 +534,11 @@ describe('ChatComponent', () => {
           (component as any).displayLandingPageContent();
           tick();
 
-          const messages = component.messages();
-          expect(messages.length).toBe(1);
-          expect(messages[0].role).toBe('bot');
-          expect(messages[0].text).toBe(markdownContent);
-          expect(messages[0].isLanding).toBeTrue();
+          const messages = component.uiEvents();
+          expect(uiEvents.length).toBe(1);
+          expect(uiEvents[0].role).toBe('bot');
+          expect(uiEvents[0].text).toBe(markdownContent);
+          expect(uiEvents[0].isLanding).toBeTrue();
         }));
   });
 
@@ -698,7 +698,7 @@ describe('ChatComponent', () => {
         mockSessionService.createSession.and.returnValue(
             mockSessionService.createSessionResponse);
 
-        component.messages.set([{role: USER_ID, text: 'hello'}]);
+        component.uiEvents.set([{role: USER_ID, text: 'hello'}]);
         component.artifacts = [{}];
         component.eventData = new Map([['1', {}]]);
         component.traceData = [{}];
@@ -721,7 +721,7 @@ describe('ChatComponent', () => {
         });
 
         it('should clear data', () => {
-          expect(component.messages().length).toBe(0);
+          expect(component.uiEvents().length).toBe(0);
           expect(component.artifacts.length).toBe(0);
           expect(component.eventData.size).toBe(0);
           expect(component.traceData.length).toBe(0);
@@ -870,16 +870,16 @@ describe('ChatComponent', () => {
           });
 
           it('should populate messages from session events', () => {
-            expect(component.messages().length).toBe(3);
-            expect(component.messages()[0]).toEqual(jasmine.objectContaining({
+            expect(component.uiEvents().length).toBe(3);
+            expect(component.uiEvents()[0]).toEqual(jasmine.objectContaining({
               role: 'user',
               text: 'user message'
             }));
-            expect(component.messages()[1]).toEqual(jasmine.objectContaining({
+            expect(component.uiEvents()[1]).toEqual(jasmine.objectContaining({
               role: 'bot',
               text: 'bot response'
             }));
-            expect(component.messages()[2]).toEqual(jasmine.objectContaining({
+            expect(component.uiEvents()[2]).toEqual(jasmine.objectContaining({
               role: 'bot',
               inlineData: jasmine.objectContaining({
                 data: 'data:application/pdf;base64,base64data==',
@@ -1017,7 +1017,7 @@ describe('ChatComponent', () => {
     describe('when clickEvent() is called', () => {
       beforeEach(() => {
         component.sessionId = SESSION_1_ID;
-        component.messages.set(
+        component.uiEvents.set(
             [{role: 'bot', text: 'response', eventId: EVENT_1_ID}]);
         spyOn(component.sideDrawer()!, 'open');
       });
@@ -1134,7 +1134,7 @@ describe('ChatComponent', () => {
 
     describe('Message Passing', () => {
       beforeEach(async () => {
-        component.messages.set([{role: 'user', text: TEST_MESSAGE}]);
+        component.uiEvents.set([{role: 'user', text: TEST_MESSAGE}]);
         fixture.detectChanges();
         await fixture.whenStable();
         fixture.detectChanges();
@@ -1143,7 +1143,7 @@ describe('ChatComponent', () => {
         const chatPanelComponent =
             fixture.debugElement.query(By.directive(ChatPanelComponent))
                 .componentInstance;
-        expect(chatPanelComponent.messages).toEqual(component.messages());
+        expect(chatPanelComponent.uiEvents).toEqual(component.uiEvents());
         const messageCards = fixture.debugElement.queryAll(
             By.css('app-chat-panel .message-card'));
         expect(messageCards.length).toBe(1);
@@ -1229,7 +1229,7 @@ describe('ChatComponent', () => {
                 },
               };
 
-              component.messages.set([]);
+              component.uiEvents.set([]);
               component.userInput = 'test message';
               await component.sendMessage(
                   new KeyboardEvent('keydown', {key: 'Enter'}));
@@ -1237,7 +1237,7 @@ describe('ChatComponent', () => {
               fixture.detectChanges();
 
               const botMessages =
-                  component.messages().filter(m => m.role === 'bot');
+                  component.uiEvents().filter(m => m.role === 'bot');
               // Expectation: Prefix, Combined A2UI (at first A2UI pos),
               // Interim, Suffix
               expect(botMessages.length).toBe(4);
@@ -1263,7 +1263,7 @@ describe('ChatComponent', () => {
                 content:
                     {role: 'bot', parts: [{text: 'Hello '}, {text: 'World!'}]},
               };
-              component.messages.set([]);
+              component.uiEvents.set([]);
               component.userInput = 'test message';
               await component.sendMessage(
                   new KeyboardEvent('keydown', {key: 'Enter'}));
@@ -1271,7 +1271,7 @@ describe('ChatComponent', () => {
               fixture.detectChanges();
 
               const botMessages =
-                  component.messages().filter(m => m.role === 'bot');
+                  component.uiEvents().filter(m => m.role === 'bot');
               expect(botMessages.length).toBe(1);
               expect(botMessages[0].text).toBe('Hello World!');
             });
@@ -1290,7 +1290,7 @@ describe('ChatComponent', () => {
                   ]
                 },
               };
-              component.messages.set([]);
+              component.uiEvents.set([]);
               component.userInput = 'test message';
               await component.sendMessage(
                   new KeyboardEvent('keydown', {key: 'Enter'}));
@@ -1298,7 +1298,7 @@ describe('ChatComponent', () => {
               fixture.detectChanges();
 
               const botMessages =
-                  component.messages().filter(m => m.role === 'bot');
+                  component.uiEvents().filter(m => m.role === 'bot');
               expect(botMessages.length).toBe(2);
               expect(botMessages[0].text).toBe('Hello ');
               expect(botMessages[0].functionCalls)
@@ -1310,7 +1310,7 @@ describe('ChatComponent', () => {
       describe('when getTrace fails in sendMessage', () => {
         beforeEach(async () => {
           mockEventService.getTraceResponse.error(new Error('trace error'));
-          component.messages.set([]);
+          component.uiEvents.set([]);
           component.userInput = 'test message';
           await component.sendMessage(
               new KeyboardEvent('keydown', {key: 'Enter'}));
@@ -1434,7 +1434,7 @@ describe('ChatComponent', () => {
           [TEST_APP_1_NAME, TEST_APP_2_NAME]);
 
       component.evalCase = mockEvalCase;
-      component.messages.set([mockMessage]);
+      component.uiEvents.set([mockMessage]);
       fixture.detectChanges();
     });
 
@@ -1556,7 +1556,7 @@ describe('ChatComponent', () => {
         (component as any).deleteEvalCaseMessage(mockMessage, 0);
       });
       it('should delete message', () => {
-        expect(component.messages().length).toBe(0);
+        expect(component.uiEvents().length).toBe(0);
         expect(component.hasEvalCaseChanged()).toBe(true);
         expect(component.updatedEvalCase!.conversation[0]
                    .finalResponse!.parts!.length)

@@ -711,7 +711,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             // Create a message entry for the event
             const uiEvent = new UiEvent({
               role: chunkJson.author === 'user' ? 'user' : 'bot',
-              event: { id: chunkJson.id } as any
+              event: chunkJson
             });
             this.insertMessageBeforeLoadingMessage(uiEvent);
           }

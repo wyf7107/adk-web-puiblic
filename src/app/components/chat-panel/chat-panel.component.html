@@ -41,7 +41,7 @@
         }
         @if (uiEvent.role === "bot" && !uiEvent.isLoading) {
           <app-chat-avatar
-            [role]="isEventContent(i) ? 'bot' : 'node'"
+            [role]="uiEvent.event.content ? 'bot' : 'node'"
             [author]="getAuthorFromEvent(i)"
             [nodePath]="getNodePath(i)">
           </app-chat-avatar>

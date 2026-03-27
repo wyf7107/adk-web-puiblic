@@ -316,16 +316,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
-
-  isEventContent(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-    const event = this.eventData.get(message.event.id);
-    return !!event?.content;
-  }
-
-
-
-
   shouldMessageHighlighted(index: number) {
     return this.hoveredEventMessageIndices.includes(index);
   }
@@ -460,7 +450,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return isComputerUseResponse(input);
   }
 
-  
+
   hasWorkflowNodes(messageIndex: number): boolean {
     const message = this.uiEvents[messageIndex];
 

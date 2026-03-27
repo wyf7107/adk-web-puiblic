@@ -21,15 +21,24 @@
   text-transform: uppercase;
 }
 
+.bot-avatar, .user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .bot-avatar {
   margin-right: 12px;
-  box-shadow: none;
-  --mdc-fab-small-container-color: transparent;
   color: white;
 }
 
 .user-avatar {
-  box-shadow: none;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
 }
 
 .hidden {

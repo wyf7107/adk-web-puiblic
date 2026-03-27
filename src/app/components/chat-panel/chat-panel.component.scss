@@ -126,9 +126,10 @@
 }
 
 // Enables messages to have columns
-.message-column-container {
+.message-row-container {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   margin-left: -20px;
   margin-right: -20px;
   padding: 4px 20px;
@@ -148,6 +149,10 @@
     border-radius: 4px;
     background-color: rgba(66, 133, 244, 0.2) !important;
   }
+}
+
+app-message-feedback {
+  width: 100%;
 }
 
 .user-message {

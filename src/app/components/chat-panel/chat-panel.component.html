@@ -31,13 +31,12 @@
     </div>
   }
   @for (message of messages; track message; let i = $index) {
-    <div class="message-row-container">
-      <div class="message-column-container"
-        [ngClass]="{
-          'selected': isMessageEventSelected(i)
-        }"
-        (click)="handleRowClick($event, message, i)"
-      >
+    <div class="message-row-container"
+      [ngClass]="{
+        'selected': isMessageEventSelected(i)
+      }"
+      (click)="handleRowClick($event, message, i)"
+    >
       @if (message.role === "user") {
         <div class="event-number-container user-event-number">
           @if (isFirstUserMessageInGroup(i)) {
@@ -449,7 +448,6 @@
           </button>
         }
       </div>
-      </div> <!-- end .message-column-container -->
       <!-- Feedback UI -->
       @if(isUserFeedbackEnabled() && !isLoadingAgentResponse() && message.role === "bot") {
         <app-message-feedback [sessionName]="sessionName()" [eventId]="message.eventId"></app-message-feedback>

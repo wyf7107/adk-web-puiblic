@@ -256,18 +256,12 @@
         }
         @if (message.role === "bot" && hasEventOutputData(i)) {
         <div
-          class="output-chip-container"
+          class="output-chip"
+          [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
           [appJsonTooltip]="getNodePath(i) || ''"
           [appJsonTooltipTitle]="'Node Output for'"
         >
-          <mat-card
-            [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
-            class="message-card output-chip"
-          >
-            <div class="output-chip-content">
-              <ngx-json-viewer [json]="getEventOutputDataJson(i)"></ngx-json-viewer>
-            </div>
-          </mat-card>
+          <ngx-json-viewer [json]="getEventOutputDataJson(i)"></ngx-json-viewer>
         </div>
         }
         <div class="event-chips-container">
@@ -319,18 +313,12 @@
         }
         @if (message.role === "bot" && (hasErrorCode(i) || hasErrorMessage(i))) {
         <div
-          class="output-chip-container"
+          class="output-chip error"
+          [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
           [appJsonTooltip]="{ errorCode: getErrorCode(i), errorMessage: getErrorMessage(i) }"
           [appJsonTooltipTitle]="'Error Details'"
         >
-          <mat-card
-            [ngClass]="{'message-card--highlighted': shouldMessageHighlighted(i)}"
-            class="message-card output-chip error"
-          >
-            <div class="output-chip-content">
-              <ngx-json-viewer [json]="getErrorJson(i)"></ngx-json-viewer>
-            </div>
-          </mat-card>
+          <ngx-json-viewer [json]="getErrorJson(i)"></ngx-json-viewer>
         </div>
         }
         @if (message.role === "bot" && hasEventRoute(i)) {

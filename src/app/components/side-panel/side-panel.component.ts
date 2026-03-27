@@ -161,9 +161,9 @@ export class SidePanelComponent implements AfterViewInit {
     return artifacts;
   });
 
-  getFilteredSelectedEvent(): Event | undefined {
+  readonly filteredSelectedEvent = computed(() => {
     return this.filterEmptyValues(this.selectedEvent()) as Event | undefined;
-  }
+  });
 
   private filterEmptyValues(value: unknown): unknown {
     if (value === undefined) {

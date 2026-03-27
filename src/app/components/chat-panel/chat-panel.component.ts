@@ -550,6 +550,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
+  private parsedOutputCache = new Map<string, {raw: string, parsed: any}>();
+
   getEventOutputDataJson(messageIndex: number): any {
     const message = this.messages[messageIndex];
     if (!message.eventId) return null;
@@ -563,13 +565,24 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       return eventData;
     }
 
+    const cached = this.parsedOutputCache.get(message.eventId);
+    if (cached && cached.raw === eventData) {
+      return cached.parsed;
+    }
+
+    let parsed = eventData;
     // If it's a string, try to parse it as JSON
     try {
-      return JSON.parse(eventData);
+      if (typeof eventData === 'string') {
+        parsed = JSON.parse(eventData);
+      }
     } catch (e) {
       // If parsing fails, return as-is
-      return eventData;
+      parsed = eventData;
     }
+
+    this.parsedOutputCache.set(message.eventId, {raw: eventData as string, parsed});
+    return parsed;
   }
 
   hasEventRoute(messageIndex: number): boolean {
@@ -727,9 +740,19 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return event?.errorMessage || '';
   }
 
+  private errorJsonCache = new Map<string, {errorCode: string, errorMessage: string, parsed: any}>();
+
   getErrorJson(messageIndex: number): any {
+    const message = this.messages[messageIndex];
     const errorCode = this.getErrorCode(messageIndex);
     const errorMessage = this.getErrorMessage(messageIndex);
+
+    const eventId = message.eventId || `index-${messageIndex}`;
+    const cached = this.errorJsonCache.get(eventId);
+    
+    if (cached && cached.errorCode === errorCode && cached.errorMessage === errorMessage) {
+      return cached.parsed;
+    }
 
     const errorObj: any = {};
     if (errorCode) {
@@ -739,6 +762,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       errorObj.errorMessage = errorMessage;
     }
 
+    this.errorJsonCache.set(eventId, {errorCode, errorMessage, parsed: errorObj});
     return errorObj;
   }
 

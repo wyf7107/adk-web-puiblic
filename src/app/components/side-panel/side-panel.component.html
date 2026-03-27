@@ -75,7 +75,7 @@
         </div>
         }
         <div class="json-viewer-container">
-          <ngx-json-viewer [json]="getFilteredSelectedEvent()"></ngx-json-viewer>
+          <ngx-json-viewer [json]="filteredSelectedEvent()"></ngx-json-viewer>
         </div>
       </mat-tab>
       @if ((uiStateService.isEventRequestResponseLoading() | async) === true || (llmRequest() && Object.keys(llmRequest()!).length > 0)) {

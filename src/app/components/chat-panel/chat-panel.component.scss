@@ -158,7 +158,6 @@ app-message-feedback {
   gap: 15px;
 
   .message-card {
-    align-self: flex-start;
     color: var(--mat-sys-on-primary-container);
     background-color: var(--mat-sys-primary-container);
     box-shadow: none;
@@ -194,6 +193,14 @@ app-message-feedback {
   flex: 1;
   min-width: 0;
   align-items: flex-start;
+}
+
+.message-row-container.user>.message-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  align-items: flex-end;
 }
 
 .message-row-container.bot:focus-within {

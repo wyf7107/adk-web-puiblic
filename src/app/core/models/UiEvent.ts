@@ -61,4 +61,8 @@ export class UiEvent {
   get route(): any {
     return this.event?.actions?.route;
   }
+
+  get nodePath(): string | null {
+    return this.event?.nodeInfo?.path || null;
+  }
 }

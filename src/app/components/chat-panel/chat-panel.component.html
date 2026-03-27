@@ -43,7 +43,7 @@
           <app-chat-avatar
             [role]="uiEvent.event.content ? 'bot' : 'node'"
             [author]="getAuthorFromEvent(i)"
-            [nodePath]="getNodePath(i)">
+            [nodePath]="uiEvent.nodePath">
           </app-chat-avatar>
         } 
         <div class="message-content">
@@ -317,7 +317,7 @@
           class="event-action-button"
           [appWorkflowGraphTooltip]="getWorkflowNodes(i)"
           [agentGraphData]="agentGraphData"
-          [nodePath]="getNodePath(i)"
+          [nodePath]="uiEvent.nodePath"
           [allNodes]="getAllWorkflowNodes(i)"
           (click)="handleAgentStateClick($event, i)"
         >

@@ -110,7 +110,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() userEditEvalCaseMessage: string = '';
   @Input() selectedFiles: {file: File; url: string}[] = [];
   @Input() updatedSessionState: any|null = null;
-  @Input() eventData = new Map<string, any>();
   @Input() selectedEvent: any = undefined;
   @Input() isAudioRecording: boolean = false;
   @Input() isVideoRecording: boolean = false;
@@ -310,10 +309,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   getAuthorFromEvent(i: number) {
-    const key = this.uiEvents[i].event.id;
-    const selectedEvent = this.eventData.get(key);
-
-    return selectedEvent?.author ?? ROOT_AGENT;
+    const event = this.uiEvents[i].event;
+    return event?.author ?? ROOT_AGENT;
   }
 
 
@@ -454,18 +451,14 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   hasWorkflowNodes(messageIndex: number): boolean {
     const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    const nodes = event?.actions?.agentState?.nodes;
-    return nodes && Object.keys(nodes).length > 0;
+    const nodes = message.event?.actions?.agentState?.nodes;
+    return !!nodes && Object.keys(nodes).length > 0;
   }
 
 
   getWorkflowNodes(messageIndex: number): any {
     const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return event?.actions?.agentState?.nodes || null;
+    return message.event?.actions?.agentState?.nodes || null;
   }
 
   getAllWorkflowNodes(messageIndex: number): any {
@@ -475,8 +468,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
     for (let i = 0; i <= messageIndex; i++) {
       const msg = this.uiEvents[i];
-
-      const event = this.eventData.get(msg.event.id);
+      const event = msg.event;
       const nodes = event?.actions?.agentState?.nodes;
       const nodePath = event?.nodeInfo?.path;
 
@@ -494,27 +486,18 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     return Object.keys(nodesByPath).length > 0 ? nodesByPath : null;
   }
 
-  getNodePath(messageIndex: number): string | null {
-    const message = this.uiEvents[messageIndex];
 
-    const event = this.eventData.get(message.event.id);
-    return event?.nodeInfo?.path || null;
-  }
 
 
   hasEndOfAgent(messageIndex: number): boolean {
     const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return event?.actions?.endOfAgent === true;
+    return message.event?.actions?.endOfAgent === true;
   }
 
 
   getEndOfAgentAuthor(messageIndex: number): string {
     const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return event?.author || 'Agent';
+    return message.event?.author || 'Agent';
   }
 
 

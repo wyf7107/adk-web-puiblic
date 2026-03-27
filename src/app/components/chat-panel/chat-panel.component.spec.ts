@@ -297,8 +297,7 @@ describe('ChatPanelComponent', () => {
 
   describe('Events', () => {
     it('should emit clickEvent when bot icon is clicked', () => {
-      component.uiEvents = [{role: 'bot', text: 'message', event: { id: '1' } as any}];
-      component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
+      component.uiEvents = [{role: 'bot', text: 'message', event: { id: '1', author: 'bot' } as any}];
       spyOn(component.clickEvent, 'emit');
       fixture.detectChanges();
       const botIcon =
@@ -318,8 +317,7 @@ describe('ChatPanelComponent', () => {
     it(
         'should emit clickEvent when function call button is clicked', () => {
           component.uiEvents =
-              [{role: 'bot', functionCalls: [{name: 'func1', args: {}}], event: { id: '1' } as any}];
-          component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
+              [{role: 'bot', functionCalls: [{name: 'func1', args: {}}], event: { id: '1', author: 'bot' } as any}];
           spyOn(component.clickEvent, 'emit');
           fixture.detectChanges();
           const funcButton =

@@ -925,3 +925,38 @@ app-canvas {
 .menu-check-icon.inactive {
   visibility: hidden;
 }
+
+/* Responsive Toolbar Area */
+
+.logo-narrow {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .logo-wide {
+    display: none;
+  }
+  .logo-narrow {
+    display: inline;
+  }
+}
+
+@media (max-width: 750px) {
+  .toolbar-agent-group .selector-button {
+    width: auto;
+    padding: 4px 8px;
+  }
+  .toolbar-agent-group .selector-label {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .toolbar-session-group .selector-button {
+    width: auto;
+    padding: 4px 8px;
+  }
+  .toolbar-session-group .selector-label {
+    display: none;
+  }
+}

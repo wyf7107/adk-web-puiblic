@@ -46,17 +46,11 @@
             }"
       >
         @if (message.role === "bot" && !message.isLoading) {
-          @if (isEventContent(i)) {
-          <button mat-mini-fab class="bot-avatar" [disabled]="!message.eventId" [appJsonTooltip]="getAgentTooltip(i)"
-            [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}" [style.background-color]="getNodePathColor(i)">
-            <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-          </button>
-          } @else {
-          <div class="node-circle-icon" [style.background-color]="getNodePathColor(i)"
-            [appJsonTooltip]="getAgentTooltip(i)" [ngClass]="{'hidden': !getAgentNameFromEvent(i)}">
-            {{ getNodeInitial(i) }}
-          </div>
-          }
+          <app-chat-avatar
+            [role]="isEventContent(i) ? 'bot' : 'node'"
+            [author]="getAuthorFromEvent(i)"
+            [nodePath]="getNodePath(i)">
+          </app-chat-avatar>
         } 
         <div class="message-content">
         @if (shouldShowMessageCard(message)) {
@@ -409,9 +403,7 @@
         } 
         </div> <!-- end message-content -->
         @if (message.role === "user") {
-          <button mat-mini-fab class="user-avatar">
-            <mat-icon>person</mat-icon>
-          </button>
+          <app-chat-avatar role="user"></app-chat-avatar>
         }
       </div>
       <!-- Feedback UI -->

@@ -57,6 +57,7 @@ import {MessageFeedbackComponent} from '../message-feedback/message-feedback.com
 import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 
 import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
+import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
 
 const ROOT_AGENT = 'root_agent';
 
@@ -89,6 +90,7 @@ const ROOT_AGENT = 'root_agent';
     ComputerActionComponent,
     LongRunningResponseComponent,
     HoverInfoButtonComponent,
+    ChatAvatarComponent,
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {
@@ -303,31 +305,14 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }, 50);
   }
 
-  getAgentNameFromEvent(i: number) {
+  getAuthorFromEvent(i: number) {
     const key = this.messages[i].eventId;
     const selectedEvent = this.eventData.get(key);
 
     return selectedEvent?.author ?? ROOT_AGENT;
   }
 
-  getAgentTooltip(i: number): string {
-    const key = this.messages[i].eventId;
-    const selectedEvent = this.eventData.get(key);
-    const author = selectedEvent?.author ?? ROOT_AGENT;
-    const nodePath = this.getNodePath(i) || '';
-    const errorCode = selectedEvent?.errorCode;
-    const errorMessage = selectedEvent?.errorMessage;
 
-    const tooltipObj: any = { author, nodePath };
-    if (errorCode) {
-      tooltipObj.errorCode = errorCode;
-    }
-    if (errorMessage) {
-      tooltipObj.errorMessage = errorMessage;
-    }
-
-    return JSON.stringify(tooltipObj, null, 2);
-  }
 
   isEventContent(messageIndex: number): boolean {
     const message = this.messages[messageIndex];
@@ -337,24 +322,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
 
-  getNodeName(nodePath: string): string {
-    return nodePath.split(/[/.>]/).filter(Boolean).pop() || nodePath;
-  }
 
-  getNodePathColor(messageIndex: number): string {
-    const nodePath = this.getNodePath(messageIndex) || '';
-    const nodeName = this.getNodeName(nodePath);
-    const theme = this.themeService.currentTheme();
-    return this.stringToColorService.stc(nodeName, theme);
-  }
-
-  getNodeInitial(messageIndex: number): string {
-    const nodePath = this.getNodePath(messageIndex) || '';
-    const nodeName = this.getNodeName(nodePath);
-    const initialMatch = nodeName.match(/[A-Za-z0-9]/);
-
-    return initialMatch ? initialMatch[0].toUpperCase() : 'N';
-  }
 
   shouldMessageHighlighted(index: number) {
     return this.hoveredEventMessageIndices.includes(index);

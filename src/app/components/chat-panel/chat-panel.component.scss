@@ -170,7 +170,7 @@ app-message-feedback {
     max-width: 80%;
   }
 
-  button {
+  app-chat-avatar {
     order: 2;
   }
 }
@@ -189,7 +189,7 @@ app-message-feedback {
     box-shadow: none;
   }
 
-  button {
+  app-chat-avatar {
     align-self: flex-start;
   }
 }
@@ -539,25 +539,6 @@ button.send-message-btn {
   width: 240px;
 }
 
-.node-circle-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-left: 4px;
-  margin-right: 16px;
-  margin-top: 2px;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  align-self: flex-start;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
 .readme-container {
   max-width: 900px;
   margin: 0 auto;
@@ -572,15 +553,4 @@ button.send-message-btn {
   font-size: 14px;
   line-height: 1.8;
   color: var(--mat-sys-on-surface);
-}
-
-.bot-avatar {
-  margin-right: 12px;
-  box-shadow: none;
-  --mdc-fab-small-container-color: transparent;
-  color: white;
-}
-
-.user-avatar {
-  box-shadow: none;
 }

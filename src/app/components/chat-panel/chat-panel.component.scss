@@ -449,30 +449,12 @@ app-message-feedback {
   flex-direction: column;
   align-self: flex-start;
   min-width: 30px;
-  margin-top: 5px;
-}
-
-.user-event-number {
+  margin-top: 10px;
   margin-right: 8px;
-  align-self: flex-start;
-  margin-top: 5px;
-}
-
-.event-number-label,
-.event-number-placeholder {
   font-size: 12px;
   font-weight: 600;
   text-align: center;
-  display: inline-block;
-  margin-top: 5px;
-}
-
-.event-number-label {
   color: var(--mat-sys-on-surface-variant);
-}
-
-.event-number-placeholder {
-  visibility: hidden;
 }
 
 :host ::ng-deep pre {

@@ -28,7 +28,9 @@
   @for (message of messages; track message; let i = $index) {
     <div class="message-row-container"
       [ngClass]="{
-        'selected': isMessageEventSelected(i)
+        'selected': isMessageEventSelected(i),
+        'user': message.role === 'user',
+        'bot': message.role === 'bot'
       }"
       (click)="handleRowClick($event, message, i)"
     >
@@ -37,12 +39,6 @@
           #{{ getOverallEventNumber(i) }}
         </div>
         }
-      <div
-        [ngClass]="{
-              'user-message': message.role === 'user',
-              'bot-message': message.role === 'bot'
-            }"
-      >
         @if (message.role === "bot" && !message.isLoading) {
           <app-chat-avatar
             [role]="isEventContent(i) ? 'bot' : 'node'"
@@ -403,7 +399,6 @@
         @if (message.role === "user") {
           <app-chat-avatar role="user"></app-chat-avatar>
         }
-      </div>
       <!-- Feedback UI -->
       @if(isUserFeedbackEnabled() && !isLoadingAgentResponse() && message.role === "bot") {
         <app-message-feedback [sessionName]="sessionName()" [eventId]="message.eventId"></app-message-feedback>

@@ -152,11 +152,9 @@ app-message-feedback {
   width: 100%;
 }
 
-.user-message {
-  display: flex;
+.message-row-container.user {
   justify-content: flex-end;
   align-items: flex-start;
-  flex-grow: 1;
   gap: 15px;
 
   .message-card {
@@ -164,22 +162,14 @@ app-message-feedback {
     color: var(--mat-sys-on-primary-container);
     background-color: var(--mat-sys-primary-container);
     box-shadow: none;
-    order: 1;
     width: auto;
     min-width: fit-content;
     max-width: 80%;
   }
-
-  app-chat-avatar {
-    order: 2;
-  }
 }
 
-.bot-message {
-  display: flex;
-  flex-wrap: nowrap;
+.message-row-container.bot {
   align-items: flex-start;
-  flex-grow: 1;
   margin-right: 48px;
 
   .message-card {
@@ -198,7 +188,7 @@ app-message-feedback {
   display: contents;
 }
 
-.bot-message>.message-content {
+.message-row-container.bot>.message-content {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -206,7 +196,7 @@ app-message-feedback {
   align-items: flex-start;
 }
 
-.bot-message:focus-within {
+.message-row-container.bot:focus-within {
   .message-card {
     border: 1px solid var(--mat-sys-outline);
   }

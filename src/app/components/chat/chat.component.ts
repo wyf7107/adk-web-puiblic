@@ -36,7 +36,7 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
-import { BehaviorSubject, combineLatest, firstValueFrom, Observable, of } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, first, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { URLUtil } from '../../../utils/url-util';
@@ -244,7 +244,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   currentSessionState: SessionState | undefined = {};
   root_agent = ROOT_AGENT;
   updatedSessionState: WritableSignal<any> = signal(null);
-  private readonly isModelThinkingSubject = new BehaviorSubject(false);
+
   protected readonly canEditSession = signal(true);
 
   // TODO: Remove this once backend supports restarting bidi streaming.
@@ -408,25 +408,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.appName = app;
     });
 
-    combineLatest([
-      this.agentService.getLoadingState(),
-      this.isModelThinkingSubject,
-    ]).subscribe(([isLoading, isModelThinking]) => {
-      const lastMessage = this.uiEvents()[this.uiEvents().length - 1];
 
-      if (isLoading) {
-        if (!lastMessage?.isLoading && !this.streamingTextMessage) {
-          this.uiEvents.update(
-            (uiEvents) =>
-              [...uiEvents,
-              new UiEvent({ role: 'bot', isLoading: true, event: { id: 'loading' } as any }),
-              ]);
-        }
-      } else if (lastMessage?.isLoading && !isModelThinking) {
-        this.uiEvents.update((uiEvents) => uiEvents.slice(0, -1));
-        this.changeDetectorRef.detectChanges();
-      }
-    });
 
     this.traceService.selectedTraceRow$.subscribe(node => {
       const eventId = node?.attributes['gcp.vertex.agent.event_id'];
@@ -713,7 +695,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
               role: chunkJson.author === 'user' ? 'user' : 'bot',
               event: chunkJson
             });
-            this.insertMessageBeforeLoadingMessage(uiEvent);
+            this.insertOrUpdateMessage(uiEvent);
           }
         }
         if (chunkJson.actions) {
@@ -764,7 +746,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private processErrorMessage(chunkJson: any) {
     this.storeEvents(chunkJson, chunkJson);
-    this.insertMessageBeforeLoadingMessage(
+    this.insertOrUpdateMessage(
       new UiEvent({ text: chunkJson.errorMessage, role: 'bot', event: { id: chunkJson.id } as any }))
   }
 
@@ -773,7 +755,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       chunkJson.groundingMetadata?.searchEntryPoint?.renderedContent;
 
     if (part.text) {
-      this.isModelThinkingSubject.next(false);
+
       const newChunk = part.text;
       if (part.thought) {
         if (newChunk !== this.latestThought) {
@@ -785,7 +767,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             event: { id: chunkJson.id } as any
           });
 
-          this.insertMessageBeforeLoadingMessage(thoughtUiEvent);
+          this.insertOrUpdateMessage(thoughtUiEvent);
         }
         this.latestThought = newChunk;
       } else if (!this.streamingTextMessage) {
@@ -802,12 +784,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         if (!this.useSse) {
-          this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
+          this.insertOrUpdateMessage(this.streamingTextMessage);
           this.storeEvents(part, chunkJson);
           this.streamingTextMessage = null;
           return;
         } else {
-          this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
+          this.insertOrUpdateMessage(this.streamingTextMessage);
         }
       } else {
         if (renderedContent) {
@@ -832,7 +814,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         // Update the streaming text and insert to trigger UI update
         this.streamingTextMessage.text += newChunk;
-        this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
+        this.insertOrUpdateMessage(this.streamingTextMessage);
       }
     } else if (!part.thought) {
       // Skip partial events for non-text parts to avoid duplicates
@@ -848,7 +830,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
         const displayPart =
           isA2uiDataPart ? { a2ui: parsedObject.data } : { text: parsedObject };
-        this.isModelThinkingSubject.next(false);
+
         this.storeEvents(part, chunkJson);
         this.storeMessage(
           displayPart, chunkJson,
@@ -856,13 +838,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      this.isModelThinkingSubject.next(false);
+
       this.storeEvents(part, chunkJson);
 
       // If we have a streamingTextMessage, append inlineData to it
       if (this.streamingTextMessage && part.inlineData) {
         this.processPartIntoMessage(part, chunkJson, this.streamingTextMessage);
-        this.insertMessageBeforeLoadingMessage(this.streamingTextMessage);
+        this.insertOrUpdateMessage(this.streamingTextMessage);
         this.changeDetectorRef.detectChanges();
         return;
       }
@@ -886,9 +868,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.storeMessage(part, chunkJson, role);
       }
-    } else {
-      this.isModelThinkingSubject.next(true);
-    }
+
   }
 
   async getUserMessageParts() {
@@ -1180,20 +1160,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (prepend) {
         this.uiEvents.update((uiEvents) => [message, ...uiEvents]);
       } else {
-        this.insertMessageBeforeLoadingMessage(message);
+        this.insertOrUpdateMessage(message);
       }
     }
   }
 
-  private insertMessageBeforeLoadingMessage(message: any) {
+  private insertOrUpdateMessage(message: any) {
     this.uiEvents.update((uiEvents) => {
       // If SSE streaming is enabled and this is a text message with eventId
       if (this.useSse && message.text && message.event.id &&
         message.role === 'bot') {
         // Find existing streaming message with the same eventId
         const existingIndex = uiEvents.findIndex(
-          m => m.event.id === message.event.id && m.role === 'bot' &&
-            !m.isLoading);
+          m => m.event.id === message.event.id && m.role === 'bot');
         if (existingIndex !== -1) {
           const updatedMessages = [...uiEvents];
           // Replace with the new message to preserve all fields (including inlineData)
@@ -1203,12 +1182,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // Default behavior: insert new message
-      const lastMessage = uiEvents[uiEvents.length - 1];
-      if (lastMessage?.isLoading) {
-        return [...uiEvents.slice(0, -1), message, lastMessage];
-      } else {
-        return [...uiEvents, message];
-      }
+      return [...uiEvents, message];
     });
   }
 
@@ -1309,7 +1283,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (prepend) {
       this.uiEvents.update((uiEvents) => [uiEvent, ...uiEvents]);
     } else {
-      this.insertMessageBeforeLoadingMessage(uiEvent);
+      this.insertOrUpdateMessage(uiEvent);
     }
 
     // Add placeholder artifact.

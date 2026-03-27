@@ -304,11 +304,11 @@
           <ngx-json-viewer [json]="uiEvent.error"></ngx-json-viewer>
         </div>
         }
-        @if (uiEvent.role === "bot" && hasEventRoute(i)) {
+        @if (uiEvent.role === "bot" && uiEvent.route) {
         <app-hover-info-button
           [icon]="'route'"
-          [text]="getEventRouteText(i)"
-          [tooltipContent]="getEventRouteTooltip(i)"
+          [text]="'route: ' + String(uiEvent.route)"
+          [tooltipContent]="uiEvent.route"
           [tooltipTitle]="'Route'"
         ></app-hover-info-button>
         }

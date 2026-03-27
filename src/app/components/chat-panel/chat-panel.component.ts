@@ -166,6 +166,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   readonly MediaType = MediaType;
   readonly JSON = JSON;
   readonly Object = Object;
+  readonly String = String;
 
   readonly isMessageFileUploadEnabledObs =
       this.featureFlagService.isMessageFileUploadEnabled();
@@ -522,34 +523,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     this.parsedOutputCache.set(message.event.id, {raw: eventData as string, parsed});
     return parsed;
   }
-
-  hasEventRoute(messageIndex: number): boolean {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    return event?.actions?.route !== undefined && event?.actions?.route !== null;
-  }
-
-  getEventRouteText(messageIndex: number): string {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    const route = event?.actions?.route;
-    if (route === undefined || route === null) return '';
-
-    return `route: ${String(route)}`;
-  }
-
-  getEventRouteTooltip(messageIndex: number): any {
-    const message = this.uiEvents[messageIndex];
-
-    const event = this.eventData.get(message.event.id);
-    const route = event?.actions?.route;
-    if (route === undefined || route === null) return '';
-
-    return route;
-  }
-
 
   hasWorkflowNodes(messageIndex: number): boolean {
     const message = this.uiEvents[messageIndex];

@@ -45,4 +45,8 @@ export class UiEvent {
   get state(): any {
     return this.event?.actions?.stateDelta;
   }
+
+  get route(): any {
+    return this.event?.actions?.route;
+  }
 }

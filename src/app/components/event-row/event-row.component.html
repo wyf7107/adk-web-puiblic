@@ -35,7 +35,7 @@
         }
       </div>
       }
-      @if (uiEvent.thought || uiEvent.text || uiEvent.renderedContent || uiEvent.a2uiData) {
+      @if (uiEvent.thought || uiEvent.text || uiEvent.renderedContent || uiEvent.a2uiData || uiEvent.event.inputTranscription || uiEvent.event.outputTranscription) {
       <div>
         @if (uiEvent.thought) {
         <div class="thought-chip">{{ i18n.thoughtChipLabel }}</div>
@@ -207,6 +207,16 @@
     >
       <ngx-json-viewer [json]="uiEvent.event.output"></ngx-json-viewer>
     </div>
+    }
+    @if (uiEvent.event.inputTranscription) {
+      <div class="transcription-text user-transcription">
+        {{ uiEvent.event.inputTranscription.text }}
+      </div>
+    }
+    @if (uiEvent.event.outputTranscription) {
+      <div class="transcription-text bot-transcription">
+        {{ uiEvent.event.outputTranscription.text }}
+      </div>
     }
     <div class="event-chips-container">
     @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {

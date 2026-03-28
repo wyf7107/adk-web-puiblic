@@ -394,27 +394,18 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.webSocketService.getMessages().subscribe((message) => {
       if (!message) return;
       try {
-        const msg = JSON.parse(message);
-        if (msg.inputTranscription) {
-          const apiEvent = {
-            id: msg.id,
-            author: 'user',
-            partial: true,
-            content: { parts: [{ text: msg.inputTranscription.text }] },
-          };
-          this.appendEventRow(apiEvent);
-          this.changeDetectorRef.detectChanges();
+        const apiEvent = JSON.parse(message);
+
+        if (apiEvent.inputTranscription !== undefined) {
+          apiEvent.author = 'user';
+          apiEvent.partial = true;
+        } else if (apiEvent.outputTranscription !== undefined) {
+          apiEvent.author = 'bot';
+          apiEvent.partial = true;
         }
-        if (msg.outputTranscription) {
-          const apiEvent = {
-            id: msg.id,
-            author: 'bot',
-            partial: true,
-            content: { parts: [{ text: msg.outputTranscription.text }] },
-          };
-          this.appendEventRow(apiEvent);
-          this.changeDetectorRef.detectChanges();
-        }
+
+        this.appendEventRow(apiEvent);
+        this.changeDetectorRef.detectChanges();
       } catch (e) {
         // Ignored
       }
@@ -781,6 +772,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.processPartIntoMessage(part, apiEvent, updatedEvent);
               }
             });
+
+            if (apiEvent.inputTranscription !== undefined) {
+              const chunk = typeof apiEvent.inputTranscription === 'string' ? apiEvent.inputTranscription : apiEvent.inputTranscription.text;
+              const previousText = (lastEvent.event as any)?.inputTranscription?.text || '';
+              updatedEvent.event.inputTranscription = { text: previousText + (chunk || '') };
+            }
+            if (apiEvent.outputTranscription !== undefined) {
+              const chunk = typeof apiEvent.outputTranscription === 'string' ? apiEvent.outputTranscription : apiEvent.outputTranscription.text;
+              const previousText = (lastEvent.event as any)?.outputTranscription?.text || '';
+              updatedEvent.event.outputTranscription = { text: previousText + (chunk || '') };
+            }
 
             const newEvents = [...events];
             newEvents[lastIndex] = updatedEvent;
@@ -1616,6 +1618,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         errorCode: event.errorCode,
         errorMessage: event.errorMessage
       };
+    }
+
+    if (event.inputTranscription !== undefined) {
+      if (typeof event.inputTranscription === 'string') {
+        uiEvent.event.inputTranscription = { text: event.inputTranscription };
+      }
+    }
+    if (event.outputTranscription !== undefined) {
+      if (typeof event.outputTranscription === 'string') {
+        uiEvent.event.outputTranscription = { text: event.outputTranscription };
+      }
     }
 
     partsToProcess.forEach((part: any) => {

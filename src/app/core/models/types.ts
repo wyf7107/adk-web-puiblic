@@ -127,6 +127,8 @@ export declare interface Event extends LlmResponse {
   nodeInfo?: { path?: string;[key: string]: any; };
   data?: any;
   output?: { result?: any; };
+  inputTranscription?: { text: string; };
+  outputTranscription?: { text: string; };
 }
 
 export interface ComputerUsePayload {

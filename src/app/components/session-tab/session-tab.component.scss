@@ -181,7 +181,8 @@
   }
 }
 
-.session-item:hover .action-btn.edit-btn {
+.session-item:hover .action-btn.edit-btn,
+.session-item:hover .action-btn.delete-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;

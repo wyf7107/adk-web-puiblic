@@ -21,6 +21,7 @@ import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIcon, MatIconModule} from '@angular/material/icon';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatInputModule} from '@angular/material/input';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {ActivatedRoute} from '@angular/router';
@@ -32,6 +33,7 @@ import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag'
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 
+import {DeleteSessionDialogComponent, DeleteSessionDialogData} from './delete-session-dialog/delete-session-dialog.component';
 import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
 
 /**
@@ -53,6 +55,7 @@ import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
     ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule,
   ],
   standalone: true,
 })
@@ -82,6 +85,7 @@ export class SessionTabComponent implements OnInit {
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly i18n = inject(SessionTabMessagesInjectionToken);
   protected readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  protected readonly dialog = inject(MatDialog);
   isSessionFilteringEnabled =
       this.featureFlagService.isSessionFilteringEnabled();
 
@@ -294,6 +298,36 @@ export class SessionTabComponent implements OnInit {
     this.sessionService.updateSession(this.userId, this.appName, session.id, { stateDelta: updatedState }).subscribe({
       error: () => {
         // Revert on error could be implemented here
+      }
+    });
+  }
+
+  deleteSession(event: Event, session: Session) {
+    event.stopPropagation();
+    const sessionId = session.id!;
+    const displayName = this.getSessionDisplayName(session);
+    let message = `Are you sure you want to delete session ${sessionId}?`;
+    if (displayName !== sessionId) {
+      message = `Are you sure you want to delete session "${displayName}" (${sessionId})?`;
+    }
+
+    const dialogData: DeleteSessionDialogData = {
+      title: 'Confirm delete',
+      message: message,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    };
+
+    const dialogRef = this.dialog.open(DeleteSessionDialogComponent, {
+      width: '600px',
+      data: dialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.sessionService.deleteSession(this.userId, this.appName, sessionId).subscribe(() => {
+          this.refreshSession(sessionId);
+        });
       }
     });
   }

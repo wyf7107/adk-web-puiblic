@@ -739,6 +739,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private appendEventRow(apiEvent: any, reverseOrder: boolean = false) {
+    if (apiEvent.inputTranscription !== undefined || apiEvent.outputTranscription !== undefined) {
+      apiEvent.partial = true;
+    }
+
     if (apiEvent.errorMessage) {
       if (apiEvent.id && !this.eventData.has(apiEvent.id)) {
         this.eventData.set(apiEvent.id, apiEvent);
@@ -1737,8 +1741,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.resetEventsAndMessages();
 
     session.events.forEach((event: any) => {
-      const uiEvent = this.buildUiEventFromEvent(event, false);
-      this.uiEvents.update((uiEvents) => [...uiEvents, uiEvent]);
+      this.appendEventRow(event, false);
 
       const isBot = event.author !== 'user';
       if (isBot && event.actions?.artifactDelta) {
@@ -1747,12 +1750,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             this.renderArtifact(key, event.actions.artifactDelta[key]);
           }
         }
-      }
-
-      // Store the event in eventData
-      if (!this.eventData.has(event.id)) {
-        this.eventData.set(event.id, event);
-        this.eventData = new Map(this.eventData);
       }
     });
 

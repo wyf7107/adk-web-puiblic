@@ -587,35 +587,45 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     await this.sendMessage(content);
   }
 
+  async ensureSessionActive(content?: any): Promise<boolean> {
+    if (this.sessionId) {
+      return true;
+    }
+
+    try {
+      let displayName = '';
+      if (content?.parts && content.parts[0]?.text) {
+         displayName = content.parts[0].text;
+         if (displayName.length > 50) {
+           displayName = displayName.substring(0, 47) + '...';
+         }
+      }
+      const initialState = displayName ? { __session_metadata__: { displayName: displayName } } : undefined;
+      const res = await firstValueFrom(
+        this.sessionService.createSession(this.userId, this.appName, initialState));
+      this.currentSessionState = res.state || initialState || {};
+      this.sessionId = res.id ?? '';
+      this.sessionTab?.refreshSession();
+      this.sessionTab?.reloadSession(this.sessionId);
+      this.drawerSessionTab()?.refreshSession();
+      this.drawerSessionTab()?.reloadSession(this.sessionId);
+      this.isSessionUrlEnabledObs.pipe(first()).subscribe((enabled) => {
+        if (enabled) {
+          this.updateSelectedSessionUrl();
+        }
+      });
+      return true;
+    } catch {
+      this.openSnackBar('Failed to create session', 'OK');
+      return false;
+    }
+  }
+
   async sendMessage(content: any) {
     // Lazily create a real session on first message send.
-    if (!this.sessionId) {
-      try {
-        let displayName = '';
-        if (content.parts && content.parts[0]?.text) {
-           displayName = content.parts[0].text;
-           if (displayName.length > 50) {
-             displayName = displayName.substring(0, 47) + '...';
-           }
-        }
-        const initialState = displayName ? { __session_metadata__: { displayName: displayName } } : undefined;
-        const res = await firstValueFrom(
-          this.sessionService.createSession(this.userId, this.appName, initialState));
-        this.currentSessionState = res.state || initialState || {};
-        this.sessionId = res.id ?? '';
-        this.sessionTab?.refreshSession();
-        this.sessionTab?.reloadSession(this.sessionId);
-        this.drawerSessionTab()?.refreshSession();
-        this.drawerSessionTab()?.reloadSession(this.sessionId);
-        this.isSessionUrlEnabledObs.pipe(first()).subscribe((enabled) => {
-          if (enabled) {
-            this.updateSelectedSessionUrl();
-          }
-        });
-      } catch {
-        this.openSnackBar('Failed to create session', 'OK');
-        return;
-      }
+    const isSessionActive = await this.ensureSessionActive(content);
+    if (!isSessionActive) {
+      return;
     }
 
     const functionCallEventId = content.functionCallEventId;
@@ -1368,14 +1378,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.bottomPanelVisible = false;
   }
 
-  toggleAudioRecording() {
+  async toggleAudioRecording() {
     this.isAudioRecording ? this.stopAudioRecording() :
-      this.startAudioRecording();
+      await this.startAudioRecording();
   }
 
-  startAudioRecording() {
-    if (this.sessionHasUsedBidi.has(this.sessionId)) {
+  async startAudioRecording() {
+    if (this.sessionId && this.sessionHasUsedBidi.has(this.sessionId)) {
       this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK');
+      return;
+    }
+
+    // Lazily create a real session if it does not exist
+    const isSessionActive = await this.ensureSessionActive();
+    if (!isSessionActive) {
       return;
     }
 

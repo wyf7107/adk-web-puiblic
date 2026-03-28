@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
   selector: 'app-inline-edit',
   standalone: true,
-  imports: [FormsModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, FormsModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './inline-edit.component.html',
   styleUrl: './inline-edit.component.scss'
 })
@@ -23,9 +24,14 @@ export class InlineEditComponent {
   isEditing = false;
   draftValue = '';
 
+  @ViewChild('editInput') editInput!: ElementRef<HTMLInputElement>;
+
   startEdit() {
     this.draftValue = this.value;
     this.isEditing = true;
+    setTimeout(() => {
+      this.editInput.nativeElement.focus();
+    });
   }
 
   cancelEdit() {

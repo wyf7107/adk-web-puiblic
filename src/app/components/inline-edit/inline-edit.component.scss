@@ -23,22 +23,38 @@
 }
 
 .inline-edit-input {
-  min-width: 0;
+  min-width: 48px;
   max-width: 100%;
-  height: 28px;
+  
+  /* Apply padding/border visually, but cancel their layout footprint with negative margin */
+  padding: 2px 6px;
+  margin: -3px -7px;
   border: 1px solid var(--chat-toolbar-session-text-color, #ccc);
   border-radius: 4px;
+  
   color: var(--chat-toolbar-session-id-color, inherit);
-  padding: 0 8px;
   font-family: inherit;
   font-size: inherit;
   font-weight: inherit;
+  line-height: inherit;
   background: transparent;
   field-sizing: content;
+  transition: all 0.2s ease;
 
   &:focus {
     outline: none;
     border-color: var(--primary-color, #1a73e8);
+  }
+
+  &.readonly {
+    min-width: 0;
+    border-color: transparent;
+    cursor: inherit;
+    
+    &:focus {
+      outline: none;
+      border-color: transparent;
+    }
   }
 }
 

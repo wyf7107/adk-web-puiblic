@@ -595,8 +595,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         let displayName = '';
         if (content.parts && content.parts[0]?.text) {
            displayName = content.parts[0].text;
-           if (displayName.length > 30) {
-             displayName = displayName.substring(0, 27) + '...';
+           if (displayName.length > 50) {
+             displayName = displayName.substring(0, 47) + '...';
            }
         }
         const initialState = displayName ? { __session_metadata__: { displayName: displayName } } : undefined;
@@ -882,7 +882,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private processActionStateDelta(e: AdkEvent) {
     if (e.actions && e.actions.stateDelta &&
       Object.keys(e.actions.stateDelta).length > 0) {
-      this.currentSessionState = e.actions.stateDelta;
+      this.currentSessionState = {
+        ...(this.currentSessionState || {}),
+        ...e.actions.stateDelta
+      };
     }
   }
 
@@ -2057,18 +2060,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   saveSessionName() {
     if (!this.sessionId) return;
     
-    const updatedState = {
-      ...this.currentSessionState,
+    const metadataDelta = {
       __session_metadata__: {
         ...(this.currentSessionState?.['__session_metadata__'] || {}),
         displayName: this.sessionNameDraft
       }
     };
     
-    this.currentSessionState = updatedState;
+    this.currentSessionState = {
+      ...this.currentSessionState,
+      ...metadataDelta
+    };
     this.isEditingSessionName = false;
     
-    this.sessionService.updateSession(this.userId, this.appName, this.sessionId, { stateDelta: updatedState }).subscribe({
+    this.sessionService.updateSession(this.userId, this.appName, this.sessionId, { stateDelta: metadataDelta }).subscribe({
       next: () => {
         if (this.sessionTab) {
           this.sessionTab.reloadSession(this.sessionId!);

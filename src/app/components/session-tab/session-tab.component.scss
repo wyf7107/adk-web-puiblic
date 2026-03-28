@@ -73,12 +73,16 @@
 
 .session-id {
   color: var(--session-tab-session-id-color);
-  font-family: 'Google Sans Mono', monospace;
+  font-family: Roboto, sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: 20px;
   letter-spacing: 0.25px;
+
+  &.is-monospace {
+    font-family: 'Google Sans Mono', monospace;
+  }
 }
 
 .session-sub-row {
@@ -101,7 +105,7 @@
 
 .session-real-id {
   color: var(--session-tab-session-id-color);
-  font-family: Roboto;
+  font-family: 'Google Sans Mono', monospace;
   font-size: 12px;
   font-style: normal;
   font-weight: 400;

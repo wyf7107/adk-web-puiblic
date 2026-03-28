@@ -39,7 +39,7 @@
     >
       <div class="session-info">
         <div class="session-header">
-          <div class="session-id" [title]="session.id">{{ getSessionDisplayName(session) }}</div>
+          <div class="session-id" [class.is-monospace]="!hasDisplayName(session)" [title]="session.id">{{ getSessionDisplayName(session) }}</div>
         </div>
         <div class="session-sub-row">
           <div class="session-date">{{ getDate(session) }}</div>

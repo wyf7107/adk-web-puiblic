@@ -1401,12 +1401,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       userId: this.userId,
       sessionId: this.sessionId,
     });
-    this.uiEvents.update(
-      uiEvents =>
-        [...uiEvents,
-        new UiEvent({ role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any }),
-        new UiEvent({ role: 'bot', text: 'Speaking...', event: { id: 'speaking-bot' } as any }),
-        ]);
     this.sessionHasUsedBidi.add(this.sessionId);
   }
 

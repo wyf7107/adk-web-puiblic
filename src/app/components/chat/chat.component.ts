@@ -232,7 +232,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   longRunningEvents: any[] = [];
   functionCallEventId = '';
   redirectUri = URLUtil.getBaseUrlWithoutPath();
-  showSidePanel = true;
+  showSidePanel = window.localStorage.getItem('adk-side-panel-visible') !== 'false';
   showBuilderAssistant = true;
   showAppSelectorDrawer = false;
   showSessionSelectorDrawer = false;
@@ -1399,11 +1399,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.llmResponse = undefined;
       this.sideDrawer()?.open();
       this.showSidePanel = true;
+      window.localStorage.setItem('adk-side-panel-visible', 'true');
       return;
     }
 
     this.sideDrawer()?.open();
     this.showSidePanel = true;
+    window.localStorage.setItem('adk-side-panel-visible', 'true');
     this.selectEvent(key, i);
   }
 
@@ -1541,6 +1543,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.sideDrawer()?.open();
     }
     this.showSidePanel = !this.showSidePanel;
+    window.localStorage.setItem('adk-side-panel-visible', this.showSidePanel.toString());
   }
 
   toggleAppSelectorDrawer() {

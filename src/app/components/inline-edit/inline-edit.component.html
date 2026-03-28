@@ -7,13 +7,17 @@
       <mat-icon>edit</mat-icon>
     </button>
   } @else {
-    <input
-      class="inline-edit-input"
-      [attr.placeholder]="placeholder"
-      [(ngModel)]="draftValue"
-      (keydown)="handleKeydown($event)"
-      [attr.aria-label]="placeholder"
-    />
+    <div class="inline-edit-text-wrapper">
+      <input
+        class="inline-edit-input"
+        [ngClass]="textClass"
+        [attr.placeholder]="placeholder"
+        [(ngModel)]="draftValue"
+        (keydown)="handleKeydown($event)"
+        [attr.aria-label]="placeholder"
+        [attr.size]="draftValue.length || 1"
+      />
+    </div>
     <button mat-icon-button class="inline-edit-action-button" (click)="saveEdit()" aria-label="Save">
       <mat-icon>check</mat-icon>
     </button>

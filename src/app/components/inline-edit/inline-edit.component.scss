@@ -1,28 +1,40 @@
+:host {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
 .inline-edit-container {
   display: flex;
   align-items: center;
   gap: 8px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .inline-edit-text-wrapper {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
   display: flex;
   align-items: center;
 }
 
 .inline-edit-input {
-  flex: 1;
   min-width: 0;
+  max-width: 100%;
   height: 28px;
   border: 1px solid var(--chat-toolbar-session-text-color, #ccc);
   border-radius: 4px;
   color: var(--chat-toolbar-session-id-color, inherit);
   padding: 0 8px;
-  font-family: 'Google Sans Mono', monospace;
-  font-size: 13px;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
   background: transparent;
+  field-sizing: content;
 
   &:focus {
     outline: none;

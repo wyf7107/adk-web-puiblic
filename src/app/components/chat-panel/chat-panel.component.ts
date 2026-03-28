@@ -275,6 +275,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   scrollToBottom() {
+    if (!this.sessionId) return;
     if (!this.scrollInterrupted) {
       if (this.scrollTimeout) {
         clearTimeout(this.scrollTimeout);

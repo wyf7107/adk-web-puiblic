@@ -24,12 +24,12 @@
     </mat-form-field>
   </div>
   } @let isSessionListLoading = uiStateService.isSessionListLoading() | async; @if
-  (isSessionListLoading && !isLoadingMoreInProgress()) {
+  ((isSessionListLoading || !isInitialized()) && !isLoadingMoreInProgress()) {
   <div class="loading-spinner-container">
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </div>
-  } @else if (!isSessionListLoading && sessionList.length === 0) {
-  <div class="empty-state">{{ i18n.noSessionsFound }}</div>
+  } @else if (!isSessionListLoading && isInitialized() && sessionList.length === 0) {
+  <div class="empty-state">{{ i18n.noSessionsFound }} for user '{{ userId }}'</div>
   } @else {
   <div class="session-tab-container" style="margin-top: 16px">
     @for (session of sessionList; track session) {

@@ -90,6 +90,7 @@ export class SessionTabComponent implements OnInit {
       this.featureFlagService.isSessionFilteringEnabled();
 
   isLoadingMoreInProgress = signal(false);
+  isInitialized = signal(false);
 
   constructor() {
     this.filterControl.valueChanges.pipe(debounceTime(300)).subscribe(() => {
@@ -122,6 +123,7 @@ export class SessionTabComponent implements OnInit {
                   .pipe(catchError(() => of({items: [], nextPageToken: ''})));
             }),
             tap(({items, nextPageToken}) => {
+              this.isInitialized.set(true);
               this.sessionList =
                   Array
                       .from(

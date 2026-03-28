@@ -188,7 +188,20 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }
 
     if (uiEvent.event?.content !== undefined) {
-      return true;
+      const parts = uiEvent.event.content.parts || [];
+      const hasOnlyFunctions = parts.length > 0 && parts.every((p: any) => p.functionCall || p.functionResponse);
+
+      if (hasOnlyFunctions) {
+        const isLongRunning = parts.some((p: any) => {
+          const id = p.functionCall?.id || p.functionResponse?.id;
+          return id && uiEvent.event?.longRunningToolIds?.includes(id);
+        });
+        if (isLongRunning) {
+          return true;
+        }
+      } else {
+        return true;
+      }
     }
 
     if (uiEvent.event?.output !== undefined) {

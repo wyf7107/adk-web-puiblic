@@ -162,34 +162,14 @@
         </mat-menu>
       </div>
       <div class="chat-input-actions-right">
-        @if (isAudioRecording) {
-          <button
-            mat-icon-button
-            (click)="toggleVideoRecording.emit()"
-            class="video-rec-btn"
-            [class.recording]="isVideoRecording"
-            [matTooltip]="isVideoRecording ? i18n.turnOffCamTooltip : i18n.useCamTooltip"
-            [disabled]="!(isBidiStreamingEnabledObs | async)"
-          >
-            <mat-icon>videocam</mat-icon>
-          </button>
-          <div class="mic-visualizer">
-            <div class="bar" [style.height.px]="4 + micVolume * 16"></div>
-            <div class="bar" [style.height.px]="4 + micVolume * 24"></div>
-            <div class="bar" [style.height.px]="4 + micVolume * 18"></div>
-            <div class="bar" [style.height.px]="4 + micVolume * 14"></div>
-          </div>
-        }
-        <button
-          mat-icon-button
-          (click)="toggleAudioRecording.emit()"
-          class="audio-rec-btn"
-          [class.recording]="isAudioRecording"
-          [matTooltip]="isAudioRecording ? i18n.turnOffMicTooltip : i18n.useMicTooltip"
-          [disabled]="!(isBidiStreamingEnabledObs | async)"
-        >
-          <mat-icon>{{ isAudioRecording ? 'call_end' : 'call' }}</mat-icon>
-        </button>
+        <app-call-controls
+          [isAudioRecording]="isAudioRecording"
+          [isVideoRecording]="isVideoRecording"
+          [micVolume]="micVolume"
+          [isBidiStreamingEnabled]="(isBidiStreamingEnabledObs | async) ?? false"
+          (toggleAudioRecording)="toggleAudioRecording.emit()"
+          (toggleVideoRecording)="toggleVideoRecording.emit()"
+        ></app-call-controls>
       </div>
     </div>
     </div>

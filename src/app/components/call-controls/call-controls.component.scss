@@ -1,0 +1,35 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+button {
+  color: var(--mat-sys-on-surface-variant) !important;
+
+  &.recording {
+    background-color: var(--mat-sys-error) !important;
+    color: var(--mat-sys-on-error, #ffffff) !important;
+  }
+}
+
+button.audio-rec-btn:not(.recording) {
+  color: #34A853 !important;
+}
+
+.mic-visualizer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 24px;
+  margin-right: 8px;
+  width: 24px;
+
+  .bar {
+    width: 4px;
+    background-color: #34A853;
+    border-radius: 2px;
+    transition: height 0.1s ease-out;
+  }
+}

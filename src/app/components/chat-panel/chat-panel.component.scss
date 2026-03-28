@@ -152,15 +152,7 @@
   caret-color: white;
 }
 
-button.audio-rec-btn,
-button.video-rec-btn,
 button.send-message-btn {
-
-  &.recording {}
-}
-
-button.audio-rec-btn:not(.recording) {
-  color: #34A853 !important;
 }
 
 .loading-spinner-container {
@@ -196,21 +188,4 @@ button.audio-rec-btn:not(.recording) {
   font-size: 14px;
   line-height: 1.8;
   color: var(--mat-sys-on-surface);
-}
-
-.mic-visualizer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  height: 24px;
-  margin-right: 8px;
-  width: 24px;
-
-  .bar {
-    width: 4px;
-    background-color: #34A853;
-    border-radius: 2px;
-    transition: height 0.1s ease-out;
-  }
 }

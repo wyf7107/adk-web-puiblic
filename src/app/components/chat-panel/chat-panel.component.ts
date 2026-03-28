@@ -61,6 +61,7 @@ import {ChatPanelMessagesInjectionToken} from './chat-panel.component.i18n';
 import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
 import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
 import {EventRowComponent} from '../event-row/event-row.component';
+import {CallControlsComponent} from '../call-controls/call-controls.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
@@ -83,6 +84,7 @@ import {EventRowComponent} from '../event-row/event-row.component';
     NgxJsonViewerModule,
     MatTooltipModule,
     EventRowComponent,
+    CallControlsComponent,
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {

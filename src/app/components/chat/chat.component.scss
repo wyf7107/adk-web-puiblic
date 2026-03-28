@@ -60,7 +60,7 @@
   margin-top: 16px;
 }
 
-.message-card {
+.content-bubble {
   padding: 5px 20px;
   margin: 5px;
   border-radius: 20px;
@@ -80,12 +80,12 @@
   color: var(--mat-sys-on-primary) !important;
 }
 
-.user-message {
+.role-user {
   display: flex;
   justify-content: flex-end;
   align-items: center;
 
-  .message-card {
+  .content-bubble {
     align-self: flex-end;
     color: var(--mat-sys-on-primary-container);
     background-color: var(--mat-sys-primary-container);
@@ -93,11 +93,11 @@
   }
 }
 
-.bot-message {
+.role-bot {
   display: flex;
   align-items: center;
 
-  .message-card {
+  .content-bubble {
     align-self: flex-start;
     color: var(--mat-sys-on-surface);
     background-color: var(--mat-sys-surface-container-high);
@@ -105,8 +105,8 @@
   }
 }
 
-.bot-message:focus-within {
-  .message-card {
+.role-bot:focus-within {
+  .content-bubble {
     border: 1px solid var(--mat-sys-outline);
   }
 }
@@ -126,7 +126,7 @@
   justify-content: flex-end;
 }
 
-.message-card .eval-compare-container {
+.content-bubble .eval-compare-container {
   visibility: hidden;
   position: absolute;
   left: 10px;
@@ -150,7 +150,7 @@
   }
 }
 
-.message-card:hover .eval-compare-container {
+.content-bubble:hover .eval-compare-container {
   visibility: visible;
 }
 

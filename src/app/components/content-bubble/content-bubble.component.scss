@@ -1,0 +1,75 @@
+:host {
+  display: contents; /* Ensure the wrapper doesn't break flex layouts of the parent */
+}
+
+.content-bubble {
+  padding: 5px 20px;
+  border-radius: 20px;
+
+  &:not(.type-message) {
+    border-radius: 8px;
+  }
+
+  max-width: 80%;
+  font-size: 14px;
+  font-weight: 400;
+  position: relative;
+  display: inline-block;
+
+  &.content-bubble--highlighted {}
+
+  &:empty {
+    display: none;
+  }
+}
+
+.role-user {
+  color: var(--mat-sys-on-primary-container);
+  background-color: var(--mat-sys-primary-container);
+  box-shadow: none;
+  width: auto;
+  min-width: fit-content;
+  max-width: 80%;
+}
+
+.role-bot {
+  align-self: flex-start;
+  color: var(--mat-sys-on-secondary-container);
+  background-color: var(--mat-sys-secondary-container);
+  box-shadow: none;
+}
+
+.type-error {
+  background-color: var(--mat-sys-error-container, rgba(186, 26, 26, 0.1));
+  color: var(--mat-sys-on-error-container, #ba1a1a);
+
+  .output-chip-header {
+    color: var(--mat-sys-error, #ba1a1a);
+  }
+}
+
+.type-transcription {
+  background-color: var(--mat-sys-surface-container);
+}
+
+.output-chip-header {
+  font-weight: 600;
+  font-size: 9px;
+  color: var(--mat-sys-primary);
+  opacity: 0.5;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Strip backgrounds and borders from all embedded content so the bubble styling reigns supreme */
+::ng-deep {
+  .content-bubble {
+    *:not(.output-chip-header) {
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+}

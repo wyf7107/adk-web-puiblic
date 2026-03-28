@@ -10,12 +10,11 @@
     } 
     <div class="message-content">
     @if (shouldShowMessageCard(uiEvent)) {
-    <div
-      class="message-card"
-      [ngClass]="{
-        'eval-fail': uiEvent.evalStatus === 2,
-        'message-card--highlighted': isHighlighted
-      }"
+    <app-content-bubble
+      type="message"
+      [role]="uiEvent.role"
+      [isHighlighted]="isHighlighted"
+      [evalStatus]="uiEvent.evalStatus"
     >
     @if (uiEvent.attachments) {
       <div class="attachments">
@@ -38,7 +37,7 @@
       @if (uiEvent.thought || uiEvent.text || uiEvent.renderedContent || uiEvent.a2uiData || uiEvent.event.inputTranscription || uiEvent.event.outputTranscription) {
       <div>
         @if (uiEvent.thought) {
-        <div class="thought-chip">{{ i18n.thoughtChipLabel }}</div>
+        <app-content-bubble type="thought">{{ i18n.thoughtChipLabel }}</app-content-bubble>
         }
         <div>
           @if (uiEvent.text) { @if (uiEvent.isEditing) {
@@ -196,27 +195,26 @@
         }
       </div>
       }
-    </div>
+    </app-content-bubble>
     }
     @if (uiEvent.event.output) {
-    <div
-      class="output-chip"
-      [ngClass]="{'message-card--highlighted': isHighlighted}"
-      [appJsonTooltip]="uiEvent.event.nodeInfo?.['outputFor']"
-      [appJsonTooltipTitle]="'Node Output for'"
+    <app-content-bubble
+      type="output"
+      [isHighlighted]="isHighlighted"
+      [outputFor]="uiEvent.event.nodeInfo?.['outputFor']"
     >
       <ngx-json-viewer [json]="uiEvent.event.output"></ngx-json-viewer>
-    </div>
+    </app-content-bubble>
     }
     @if (uiEvent.event.inputTranscription) {
-      <div class="transcription-text user-transcription">
+      <app-content-bubble type="transcription" role="user">
         {{ uiEvent.event.inputTranscription.text }}
-      </div>
+      </app-content-bubble>
     }
     @if (uiEvent.event.outputTranscription) {
-      <div class="transcription-text bot-transcription">
+      <app-content-bubble type="transcription" role="bot">
         {{ uiEvent.event.outputTranscription.text }}
-      </div>
+      </app-content-bubble>
     }
     <div class="event-chips-container">
     @if (uiEvent.event.usageMetadata) {
@@ -274,14 +272,13 @@
     ></app-hover-info-button>
     }
     @if (uiEvent.error) {
-    <div
-      class="output-chip error"
-      [ngClass]="{'message-card--highlighted': isHighlighted}"
-      [appJsonTooltip]="uiEvent.error"
-      [appJsonTooltipTitle]="'Error Details'"
+    <app-content-bubble
+      type="error"
+      [isHighlighted]="isHighlighted"
+      [outputFor]="uiEvent.error"
     >
       <ngx-json-viewer [json]="uiEvent.error"></ngx-json-viewer>
-    </div>
+    </app-content-bubble>
     }
     @if (uiEvent.route) {
     <app-hover-info-button

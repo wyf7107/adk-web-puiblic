@@ -1113,7 +1113,7 @@ describe('ChatComponent', () => {
                 .componentInstance;
         expect(chatPanelComponent.uiEvents).toEqual(component.uiEvents());
         const messageCards = fixture.debugElement.queryAll(
-            By.css('app-chat-panel .message-card'));
+            By.css('app-chat-panel .content-bubble'));
         expect(messageCards.length).toBe(1);
         expect(messageCards[0].nativeElement.textContent)
             .toContain(TEST_MESSAGE);

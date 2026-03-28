@@ -23,6 +23,7 @@ import {LongRunningResponseComponent} from '../long-running-response/long-runnin
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
 import {ChatPanelMessagesInjectionToken} from '../chat-panel/chat-panel.component.i18n';
+import {ContentBubbleComponent} from '../content-bubble/content-bubble.component';
 
 @Component({
   selector: 'app-event-row',
@@ -47,12 +48,12 @@ import {ChatPanelMessagesInjectionToken} from '../chat-panel/chat-panel.componen
     MessageFeedbackComponent,
     MatTooltipModule,
     NgClass,
-    JsonTooltipDirective,
     WorkflowGraphTooltipDirective,
     ComputerActionComponent,
     LongRunningResponseComponent,
     HoverInfoButtonComponent,
     ChatAvatarComponent,
+    ContentBubbleComponent,
   ],
 })
 export class EventRowComponent {

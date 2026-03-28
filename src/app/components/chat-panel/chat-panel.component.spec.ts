@@ -132,7 +132,7 @@ describe('ChatPanelComponent', () => {
       fixture.detectChanges();
       await fixture.whenStable();
       fixture.detectChanges();
-      const uiEvents = fixture.debugElement.queryAll(By.css('.message-card'));
+      const uiEvents = fixture.debugElement.queryAll(By.css('.content-bubble'));
       expect(uiEvents.length).toBe(2);
       expect(uiEvents[0].nativeElement.textContent).toContain('User message');
       expect(uiEvents[1].nativeElement.textContent).toContain('Bot message');

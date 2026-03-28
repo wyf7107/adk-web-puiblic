@@ -733,7 +733,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private appendEventRow(apiEvent: any, reverseOrder: boolean = false) {
-    console.log(apiEvent);
     if (apiEvent.errorMessage) {
       if (apiEvent.id && !this.eventData.has(apiEvent.id)) {
         this.eventData.set(apiEvent.id, apiEvent);

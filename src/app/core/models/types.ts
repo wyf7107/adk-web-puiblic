@@ -130,6 +130,8 @@ export declare interface Event extends LlmResponse {
   inputTranscription?: { text: string; };
   outputTranscription?: { text: string; };
   usageMetadata?: any;
+  interrupted?: boolean;
+  turnComplete?: boolean;
 }
 
 export interface ComputerUsePayload {

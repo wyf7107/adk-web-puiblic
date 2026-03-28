@@ -225,6 +225,22 @@
       [tooltipTitle]="'Usage Metadata'"
     ></app-hover-info-button>
     }
+    @if (uiEvent.event.turnComplete) {
+    <app-hover-info-button
+      [icon]="'stop_circle'"
+      [text]="'Turn Complete'"
+      [tooltipContent]="'The agent has completed this turn'"
+      [tooltipTitle]="'Turn Complete'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.event.interrupted) {
+    <app-hover-info-button
+      [icon]="'report'"
+      [text]="'Interrupted'"
+      [tooltipContent]="'The stream was interrupted'"
+      [tooltipTitle]="'Interrupted'"
+    ></app-hover-info-button>
+    }
     @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
       @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
         @if (isComputerUseClick(functionCall)) {

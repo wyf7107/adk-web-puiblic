@@ -59,6 +59,7 @@ import { NgxJsonViewerModule } from 'ngx-json-viewer';
       padding-bottom: 4px;
       border-bottom: 1px solid rgba(138, 180, 248, 0.3);
       color: rgba(138, 180, 248, 0.9);
+      text-transform: uppercase;
       position: sticky;
       top: 0;
       background: inherit;

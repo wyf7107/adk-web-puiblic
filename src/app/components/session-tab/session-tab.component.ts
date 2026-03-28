@@ -69,6 +69,9 @@ export class SessionTabComponent implements OnInit {
   canLoadMoreSessions = false;
   pageToken = '';
   filterControl = new FormControl('');
+  
+  editingSessionId: string | null = null;
+  sessionNameControl = new FormControl('');
 
   private refreshSessionsSubject = new Subject<void>();
   private getSessionSubject = new Subject<string>();
@@ -249,6 +252,50 @@ export class SessionTabComponent implements OnInit {
   loadMoreSessions() {
     this.isLoadingMoreInProgress.set(true);
     this.refreshSessionsSubject.next();
+  }
+
+  getSessionDisplayName(session: Session): string {
+    const meta = session.state?.['__adk_metadata__'] as any;
+    return meta?.displayName || session.id;
+  }
+
+  hasDisplayName(session: Session): boolean {
+    const meta = session.state?.['__adk_metadata__'] as any;
+    return !!meta?.displayName;
+  }
+
+  startEditSessionName(session: Session) {
+    this.editingSessionId = session.id!;
+    this.sessionNameControl.setValue(this.getSessionDisplayName(session));
+  }
+
+  cancelEditSessionName() {
+    this.editingSessionId = null;
+    this.sessionNameControl.setValue('');
+  }
+
+  saveSessionName(session: Session) {
+    if (!this.editingSessionId || !session.id) return;
+    
+    const newName = this.sessionNameControl.value;
+    const currentState = session.state || {};
+    const updatedState = {
+      ...currentState,
+      __adk_metadata__: {
+        ...(currentState['__adk_metadata__'] as any || {}),
+        displayName: newName
+      }
+    };
+    
+    // Optimistic update
+    session.state = updatedState;
+    this.editingSessionId = null;
+
+    this.sessionService.updateSession(this.userId, this.appName, session.id, { stateDelta: updatedState }).subscribe({
+      error: () => {
+        // Revert on error could be implemented here
+      }
+    });
   }
 
   protected getDate(session: Session): string {

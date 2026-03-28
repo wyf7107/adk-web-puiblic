@@ -38,8 +38,15 @@
       [ngClass]="session.id === sessionId ? 'session-item current': 'session-item'"
     >
       <div class="session-info">
-        <div class="session-id">{{session.id}}</div>
-        <div class="session-date">{{ getDate(session) }}</div>
+        <div class="session-header">
+          <div class="session-id" [title]="session.id">{{ getSessionDisplayName(session) }}</div>
+        </div>
+        <div class="session-sub-row">
+          <div class="session-date">{{ getDate(session) }}</div>
+          @if (hasDisplayName(session)) {
+            <div class="session-real-id" [title]="session.id">{{ session.id }}</div>
+          }
+        </div>
       </div>
       @if ((sessionService.canEdit(userId, session) | async) === false) {
       <div class="readonly-badge">

@@ -31,7 +31,8 @@ export {type ListParams, type ListResponse} from './types';
  * Service to provide methods to handle sessions.
  */
 export declare abstract class SessionService {
-  abstract createSession(userId: string, appName: string): Observable<Session>;
+  abstract createSession(userId: string, appName: string, state?: SessionState): Observable<Session>;
+  abstract updateSession(userId: string, appName: string, sessionId: string, session: any): Observable<Session>;
   abstract listSessions(
       userId: string,
       appName: string,

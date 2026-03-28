@@ -32,7 +32,6 @@ import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.c
   styleUrl: './long-running-response.scss',
   imports: [
     FormsModule,
-    MatButton,
     MatIconButton,
     MatIcon,
     MarkdownComponent,

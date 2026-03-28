@@ -222,6 +222,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   userIdDraft = '';
   isEditingUserId = false;
   appName = '';
+  isEditingSessionName = false;
+  sessionNameDraft = '';
   sessionId = ``;
   sessionIdOfLoadedMessages = '';
   evalCase: EvalCase | null = null;
@@ -590,8 +592,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Lazily create a real session on first message send.
     if (!this.sessionId) {
       try {
+        let displayName = '';
+        if (content.parts && content.parts[0]?.text) {
+           displayName = content.parts[0].text;
+           if (displayName.length > 30) {
+             displayName = displayName.substring(0, 27) + '...';
+           }
+        }
+        const initialState = displayName ? { __adk_metadata__: { displayName: displayName } } : undefined;
         const res = await firstValueFrom(
-          this.sessionService.createSession(this.userId, this.appName));
+          this.sessionService.createSession(this.userId, this.appName, initialState));
         this.currentSessionState = res.state;
         this.sessionId = res.id ?? '';
         this.sessionTab?.refreshSession();
@@ -2002,7 +2012,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       return 'NEW SESSION';
     }
 
+    const meta = this.currentSessionState?.['__adk_metadata__'] as any;
+    if (meta?.displayName) {
+      const shortId = this.sessionId.substring(0, 4);
+      return `[${shortId}] ${meta.displayName}`;
+    }
     return this.sessionId;
+  }
+
+  getCurrentSessionDisplayName() {
+    if (!this.sessionId) {
+      return 'NEW SESSION';
+    }
+    
+    const meta = this.currentSessionState?.['__adk_metadata__'] as any;
+    return meta?.displayName || this.sessionId;
   }
 
   async copySessionId() {
@@ -2015,6 +2039,50 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.openSnackBar(this.i18n.sessionIdCopiedMessage, 'OK');
     } catch {
       this.openSnackBar(this.i18n.copySessionIdFailedMessage, 'OK');
+    }
+  }
+
+  startSessionNameEdit() {
+    const meta = this.currentSessionState?.['__adk_metadata__'] as any;
+    this.sessionNameDraft = meta?.displayName || '';
+    this.isEditingSessionName = true;
+  }
+
+  cancelSessionNameEdit() {
+    this.isEditingSessionName = false;
+  }
+
+  saveSessionName() {
+    if (!this.sessionId) return;
+    
+    const updatedState = {
+      ...this.currentSessionState,
+      __adk_metadata__: {
+        ...(this.currentSessionState?.['__adk_metadata__'] || {}),
+        displayName: this.sessionNameDraft
+      }
+    };
+    
+    this.currentSessionState = updatedState;
+    this.isEditingSessionName = false;
+    
+    this.sessionService.updateSession(this.userId, this.appName, this.sessionId, { stateDelta: updatedState }).subscribe({
+      next: () => {
+        if (this.sessionTab) {
+          this.sessionTab.reloadSession(this.sessionId!);
+        }
+        if (this.drawerSessionTab()) {
+          this.drawerSessionTab()!.reloadSession(this.sessionId!);
+        }
+      }
+    });
+  }
+
+  handleSessionNameInputKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter') {
+      this.saveSessionName();
+    } else if (event.key === 'Escape') {
+      this.cancelSessionNameEdit();
     }
   }
 

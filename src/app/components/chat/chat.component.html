@@ -290,8 +290,24 @@
     <div class="session-selector-current-id">
       <span class="session-selector-current-id-label">Current Session</span>
       <div class="session-selector-current-id-row">
-        <span class="session-selector-current-id-value" [matTooltip]="sessionId">{{ sessionId }}</span>
-        <button mat-icon-button class="session-selector-copy-button" (click)="copySessionId()" matTooltip="Copy session ID" aria-label="Copy session ID">
+        @if (!isEditingSessionName) {
+          <span class="session-selector-current-id-value" [matTooltip]="sessionId">{{ getCurrentSessionDisplayName() }}</span>
+          <button mat-icon-button class="session-selector-action-button" (click)="startSessionNameEdit()" aria-label="Edit session name">
+            <mat-icon>edit</mat-icon>
+          </button>
+        } @else {
+          <input class="user-menu-input" [(ngModel)]="sessionNameDraft" (keydown)="handleSessionNameInputKeydown($event)" />
+          <button mat-icon-button class="toolbar-icon-button small-icon-button" (click)="saveSessionName()" aria-label="Save session name">
+            <mat-icon>check</mat-icon>
+          </button>
+          <button mat-icon-button class="toolbar-icon-button small-icon-button" (click)="cancelSessionNameEdit()" aria-label="Cancel session name edit">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+      <div class="session-selector-current-real-id-row">
+        <span class="session-selector-current-real-id-value" [title]="sessionId">{{ sessionId }}</span>
+        <button mat-icon-button class="session-selector-action-button" (click)="copySessionId()" matTooltip="Copy session ID" aria-label="Copy session ID">
           <mat-icon>content_copy</mat-icon>
         </button>
       </div>

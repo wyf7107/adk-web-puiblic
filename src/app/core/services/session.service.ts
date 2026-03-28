@@ -32,13 +32,23 @@ export class SessionService implements SessionServiceInterface {
   apiServerDomain = URLUtil.getApiServerBaseUrl();
   constructor(private http: HttpClient) {}
 
-  createSession(userId: string, appName: string) {
+  createSession(userId: string, appName: string, state?: SessionState) {
     if (this.apiServerDomain != undefined) {
       const url =
           this.apiServerDomain + `/apps/${appName}/users/${userId}/sessions`;
-      return this.http.post<any>(url, null);
+      const body: any = {};
+      if (state) body.state = state;
+      else body.state = {};
+      return this.http.post<any>(url, state ? body : null);
     }
     return new Observable<Session>();
+  }
+
+  updateSession(userId: string, appName: string, sessionId: string, session: any) {
+    const url = this.apiServerDomain +
+        `/apps/${appName}/users/${userId}/sessions/${sessionId}`;
+
+    return this.http.patch<Session>(url, session);
   }
 
   listSessions(userId: string, appName: string):

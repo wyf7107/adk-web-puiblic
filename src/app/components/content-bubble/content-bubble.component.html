@@ -2,10 +2,8 @@
   class="content-bubble type-{{ type }} role-{{ role }}"
   [class.content-bubble--highlighted]="isHighlighted"
   [class.eval-fail]="evalStatus === 2"
-  [appJsonTooltip]="type === 'output' || type === 'error' ? outputFor : null"
-  [appJsonTooltipTitle]="type === 'error' ? 'Error Details' : type === 'output' ? 'Node Output for' : ''"
 >
-  @if (type !== 'message') {
+  @if (type !== 'message' && type !== 'output') {
     <div class="output-chip-header">{{ type }}</div>
   }
   <ng-content></ng-content>

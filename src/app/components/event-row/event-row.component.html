@@ -200,9 +200,12 @@
     <app-content-bubble
       type="output"
       [isHighlighted]="isHighlighted"
-      [outputFor]="uiEvent.event.nodeInfo?.['outputFor']"
     >
-      <ngx-json-viewer [json]="uiEvent.event.output"></ngx-json-viewer>
+      <ngx-json-viewer 
+        [json]="uiEvent.event.output"
+        [appJsonTooltip]="uiEvent.event.nodeInfo?.['outputFor'] || uiEvent.nodePath"
+        appJsonTooltipTitle="Node Output for"
+      ></ngx-json-viewer>
     </app-content-bubble>
     }
     @if (uiEvent.event.inputTranscription) {
@@ -290,9 +293,12 @@
     <app-content-bubble
       type="error"
       [isHighlighted]="isHighlighted"
-      [outputFor]="uiEvent.error"
     >
-      <ngx-json-viewer [json]="uiEvent.error"></ngx-json-viewer>
+      <ngx-json-viewer 
+        [json]="uiEvent.error"
+        [appJsonTooltip]="uiEvent.error"
+        appJsonTooltipTitle="Error Details"
+      ></ngx-json-viewer>
     </app-content-bubble>
     }
     @if (uiEvent.route) {

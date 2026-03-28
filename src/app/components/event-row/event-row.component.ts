@@ -54,6 +54,7 @@ import {ContentBubbleComponent} from '../content-bubble/content-bubble.component
     HoverInfoButtonComponent,
     ChatAvatarComponent,
     ContentBubbleComponent,
+    JsonTooltipDirective,
   ],
 })
 export class EventRowComponent {

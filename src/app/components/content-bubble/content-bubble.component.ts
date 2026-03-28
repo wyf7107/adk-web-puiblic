@@ -1,11 +1,10 @@
 import {Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 
 @Component({
   selector: 'app-content-bubble',
   standalone: true,
-  imports: [CommonModule, JsonTooltipDirective],
+  imports: [CommonModule],
   templateUrl: './content-bubble.component.html',
   styleUrl: './content-bubble.component.scss',
   host: {
@@ -17,6 +16,5 @@ export class ContentBubbleComponent {
   @Input() role: string = 'bot';
   @Input() isHighlighted: boolean = false;
   @Input() evalStatus?: number;
-  @Input() outputFor?: any;
 
 }

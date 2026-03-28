@@ -205,7 +205,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   drawerSessionTab = viewChild<SessionTabComponent>('drawerSessionTab');
   evalTab = viewChild(EvalTabComponent);
   bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
-  enableSseIndicator = signal(false);
+
   isChatMode = signal(true);
   isEvalCaseEditing = signal(false);
   hasEvalCaseChanged = signal(false);
@@ -234,7 +234,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   showBuilderAssistant = true;
   showAppSelectorDrawer = false;
   showSessionSelectorDrawer = false;
-  useSse = false;
+  useSse = signal(window.localStorage.getItem('adk-use-sse') === 'true');
   currentSessionState: SessionState | undefined = {};
   root_agent = ROOT_AGENT;
   updatedSessionState: WritableSignal<any> = signal(null);
@@ -639,7 +639,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       userId: this.userId,
       sessionId: this.sessionId,
       newMessage: content,
-      streaming: this.useSse,
+      streaming: this.useSse(),
       stateDelta: this.updatedSessionState(),
     };
     if (functionCallEventId) {
@@ -1078,7 +1078,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private insertOrUpdateMessage(message: any) {
     this.uiEvents.update((uiEvents) => {
       // If SSE streaming is enabled and this is a text message with eventId
-      if (this.useSse && message.text && message.event.id &&
+      if (this.useSse() && message.text && message.event.id &&
         message.role === 'bot') {
         if (uiEvents.length > 0) {
           const lastIndex = uiEvents.length - 1;
@@ -2014,8 +2014,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleSse() {
-    this.useSse = !this.useSse;
-    this.enableSseIndicator.set(this.useSse);
+    this.useSse.set(!this.useSse());
+    window.localStorage.setItem('adk-use-sse', String(this.useSse()));
   }
 
   enterBuilderMode() {

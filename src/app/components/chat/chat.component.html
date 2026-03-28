@@ -150,7 +150,7 @@
         </button>
         @if (isTokenStreamingEnabledObs | async) {
         <button mat-menu-item id="toolbar-token-streaming-button" (click)="toggleSse()">
-          <mat-icon class="menu-check-icon" [class.inactive]="!enableSseIndicator()">check</mat-icon>
+          <mat-icon class="menu-check-icon" [class.inactive]="!useSse()">check</mat-icon>
           <span>{{ i18n.tokenStreamingLabel }}</span>
         </button>
         }

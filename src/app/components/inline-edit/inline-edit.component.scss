@@ -1,0 +1,48 @@
+.inline-edit-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.inline-edit-text-wrapper {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.inline-edit-input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  border: 1px solid var(--chat-toolbar-session-text-color, #ccc);
+  border-radius: 4px;
+  color: var(--chat-toolbar-session-id-color, inherit);
+  padding: 0 8px;
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 13px;
+  background: transparent;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary-color, #1a73e8);
+  }
+}
+
+.inline-edit-action-button {
+  flex-shrink: 0;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+}

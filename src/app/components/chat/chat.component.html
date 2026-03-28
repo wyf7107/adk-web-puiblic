@@ -192,41 +192,12 @@
         <span class="user-menu-label">User ID</span>
       </div>
       <div class="user-menu-content">
-        @if (!isEditingUserId) {
-        <div class="user-menu-id">{{ userId }}</div>
-        <button
-          mat-icon-button
-          class="toolbar-icon-button small-icon-button"
-          (click)="startUserIdEdit()"
-          aria-label="Edit user ID"
-        >
-          <mat-icon>edit</mat-icon>
-        </button>
-        } @else {
-        <input
-          class="user-menu-input"
-          [attr.placeholder]="i18n.userIdInputPlaceholder"
-          [(ngModel)]="userIdDraft"
-          (keydown)="handleUserIdInputKeydown($event)"
-          [attr.aria-label]="i18n.userIdInputPlaceholder"
-        />
-        <button
-          mat-icon-button
-          class="toolbar-icon-button small-icon-button"
-          (click)="saveUserId()"
-          aria-label="Save user ID"
-        >
-          <mat-icon>check</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          class="toolbar-icon-button small-icon-button"
-          (click)="cancelUserIdEdit()"
-          aria-label="Cancel user ID edit"
-        >
-          <mat-icon>close</mat-icon>
-        </button>
-        }
+        <app-inline-edit
+          [value]="userId"
+          [placeholder]="i18n.userIdInputPlaceholder"
+          textClass="user-menu-id"
+          (save)="saveUserId($event)"
+        ></app-inline-edit>
       </div>
     </div>
   </mat-menu>
@@ -290,20 +261,13 @@
     <div class="session-selector-current-id">
       <span class="session-selector-current-id-label">Current Session</span>
       <div class="session-selector-current-id-row">
-        @if (!isEditingSessionName) {
-          <span class="session-selector-current-id-value" [matTooltip]="sessionId">{{ getCurrentSessionDisplayName() }}</span>
-          <button mat-icon-button class="session-selector-action-button" (click)="startSessionNameEdit()" aria-label="Edit session name">
-            <mat-icon>edit</mat-icon>
-          </button>
-        } @else {
-          <input class="user-menu-input" [(ngModel)]="sessionNameDraft" (keydown)="handleSessionNameInputKeydown($event)" />
-          <button mat-icon-button class="toolbar-icon-button small-icon-button" (click)="saveSessionName()" aria-label="Save session name">
-            <mat-icon>check</mat-icon>
-          </button>
-          <button mat-icon-button class="toolbar-icon-button small-icon-button" (click)="cancelSessionNameEdit()" aria-label="Cancel session name edit">
-            <mat-icon>close</mat-icon>
-          </button>
-        }
+        <app-inline-edit
+          [value]="sessionDisplayNameDraft"
+          [displayValue]="getCurrentSessionDisplayName()"
+          [tooltip]="sessionId"
+          textClass="session-selector-current-id-value"
+          (save)="saveSessionName($event)"
+        ></app-inline-edit>
       </div>
       <div class="session-selector-current-real-id-row">
         <span class="session-selector-current-real-id-value" [title]="sessionId">{{ sessionId }}</span>

@@ -79,6 +79,7 @@ import { SessionTabComponent } from '../session-tab/session-tab.component';
 import { SidePanelComponent } from '../side-panel/side-panel.component';
 import { TraceEventComponent } from '../trace-tab/trace-event/trace-event.component';
 import { ViewImageDialogComponent } from '../view-image-dialog/view-image-dialog.component';
+import { InlineEditComponent } from '../inline-edit/inline-edit.component';
 
 import { ChatMessagesInjectionToken } from './chat.component.i18n';
 import { SidePanelMessagesInjectionToken } from '../side-panel/side-panel.component.i18n';
@@ -163,6 +164,7 @@ const BIDI_STREAMING_RESTART_WARNING =
     CanvasComponent,
     BuilderTabsComponent,
     SessionTabComponent,
+    InlineEditComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -219,11 +221,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   userInput: string = '';
   userEditEvalCaseMessage: string = '';
   userId = 'user';
-  userIdDraft = '';
-  isEditingUserId = false;
   appName = '';
-  isEditingSessionName = false;
-  sessionNameDraft = '';
   sessionId = ``;
   sessionIdOfLoadedMessages = '';
   evalCase: EvalCase | null = null;
@@ -2047,23 +2045,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  startSessionNameEdit() {
-    const meta = this.currentSessionState?.['__session_metadata__'] as any;
-    this.sessionNameDraft = meta?.displayName || '';
-    this.isEditingSessionName = true;
-  }
-
-  cancelSessionNameEdit() {
-    this.isEditingSessionName = false;
-  }
-
-  saveSessionName() {
+  saveSessionName(newName: string) {
     if (!this.sessionId) return;
     
     const metadataDelta = {
       __session_metadata__: {
-        ...(this.currentSessionState?.['__session_metadata__'] || {}),
-        displayName: this.sessionNameDraft
+        ...(this.currentSessionState?.['__session_metadata__'] as any || {}),
+        displayName: newName
       }
     };
     
@@ -2071,8 +2059,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       ...this.currentSessionState,
       ...metadataDelta
     };
-    this.isEditingSessionName = false;
     
+    this.updatedSessionState.set({
+      ...this.updatedSessionState(),
+      ...metadataDelta
+    });
+
     this.sessionService.updateSession(this.userId, this.appName, this.sessionId, { stateDelta: metadataDelta }).subscribe({
       next: () => {
         if (this.sessionTab) {
@@ -2085,33 +2077,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  handleSessionNameInputKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      this.saveSessionName();
-    } else if (event.key === 'Escape') {
-      this.cancelSessionNameEdit();
-    }
+  get sessionDisplayNameDraft() {
+    const meta = this.currentSessionState?.['__session_metadata__'] as any;
+    return meta?.displayName || '';
   }
 
-  startUserIdEdit() {
-    this.userIdDraft = this.userId;
-    this.isEditingUserId = true;
-  }
-
-  cancelUserIdEdit() {
-    this.userIdDraft = '';
-    this.isEditingUserId = false;
-  }
-
-  saveUserId() {
-    const updatedUserId = this.userIdDraft.trim();
+  saveUserId(updatedUserId: string) {
+    updatedUserId = updatedUserId.trim();
     if (!updatedUserId) {
       this.openSnackBar(this.i18n.invalidUserIdMessage, 'OK');
       return;
     }
 
     this.userId = updatedUserId;
-    this.isEditingUserId = false;
     this.isSessionUrlEnabledObs.pipe(take(1)).subscribe((enabled) => {
       if (enabled) {
         this.updateSelectedSessionUrl();
@@ -2119,15 +2097,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  handleUserIdInputKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.saveUserId();
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      this.cancelUserIdEdit();
-    }
-  }
+
 
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;

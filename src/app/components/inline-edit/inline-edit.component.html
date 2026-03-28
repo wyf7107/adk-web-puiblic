@@ -1,0 +1,24 @@
+<div class="inline-edit-container">
+  @if (!isEditing) {
+    <div class="inline-edit-text-wrapper">
+      <span [class]="textClass" [matTooltip]="tooltip">{{ effectiveDisplayValue }}</span>
+    </div>
+    <button mat-icon-button class="inline-edit-action-button" (click)="startEdit()" aria-label="Edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+  } @else {
+    <input
+      class="inline-edit-input"
+      [attr.placeholder]="placeholder"
+      [(ngModel)]="draftValue"
+      (keydown)="handleKeydown($event)"
+      [attr.aria-label]="placeholder"
+    />
+    <button mat-icon-button class="inline-edit-action-button" (click)="saveEdit()" aria-label="Save">
+      <mat-icon>check</mat-icon>
+    </button>
+    <button mat-icon-button class="inline-edit-action-button" (click)="cancelEdit()" aria-label="Cancel">
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</div>

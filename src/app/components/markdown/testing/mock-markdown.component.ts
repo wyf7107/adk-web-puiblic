@@ -29,9 +29,7 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
   imports: [CommonModule],
   template: `
     <div class="mock-markdown-content">
-      <span [ngStyle]="{
-              'font-style': thought() ? 'italic' : 'normal',
-            }">
+      <span>
           {{ text() }}
       </span>
     </div>

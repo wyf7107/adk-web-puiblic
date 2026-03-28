@@ -62,14 +62,3 @@
   letter-spacing: 0.5px;
 }
 
-/* Strip backgrounds and borders from all embedded content so the bubble styling reigns supreme */
-::ng-deep {
-  .content-bubble {
-    *:not(.output-chip-header) {
-      background: transparent !important;
-      background-color: transparent !important;
-      border: none !important;
-      box-shadow: none !important;
-    }
-  }
-}

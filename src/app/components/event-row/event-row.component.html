@@ -36,11 +36,10 @@
       }
       @if (uiEvent.thought || uiEvent.text || uiEvent.renderedContent || uiEvent.a2uiData || uiEvent.event.inputTranscription || uiEvent.event.outputTranscription) {
       <div>
-        @if (uiEvent.thought) {
-        <app-content-bubble type="thought">{{ i18n.thoughtChipLabel }}</app-content-bubble>
-        }
         <div>
-          @if (uiEvent.text) { @if (uiEvent.isEditing) {
+          @if (uiEvent.text) { 
+            <app-content-bubble [type]="uiEvent.thought ? 'thought' : 'message'">
+              @if (uiEvent.isEditing) {
           <div class="edit-message-container">
             <textarea
               #messageTextarea
@@ -71,6 +70,7 @@
           } @else {
             <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: uiEvent.text!, thought: uiEvent.thought}"></ng-container>
           }
+          </app-content-bubble>
         }
         </div>
         @if (uiEvent.renderedContent) {

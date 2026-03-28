@@ -170,7 +170,7 @@
           [matTooltip]="isAudioRecording ? i18n.turnOffMicTooltip : i18n.useMicTooltip"
           [disabled]="!(isBidiStreamingEnabledObs | async)"
         >
-          <mat-icon>mic</mat-icon>
+          <mat-icon>{{ isAudioRecording ? 'call_end' : 'call' }}</mat-icon>
         </button>
         <button
           mat-icon-button

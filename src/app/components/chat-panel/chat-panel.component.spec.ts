@@ -565,7 +565,7 @@ describe('ChatPanelComponent', () => {
       const button = allButtons.find(
           b =>
               b.nativeElement.querySelector('mat-icon')?.textContent?.trim() ===
-              'mic');
+              'call');
       expect(button!.nativeElement.disabled).toBeTrue();
     });
 

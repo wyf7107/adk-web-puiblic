@@ -716,7 +716,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           const lastIndex = events.length - 1;
           const lastEvent = events[lastIndex];
 
-          if (lastEvent.event?.id === apiEvent.id && lastEvent.role === (apiEvent.author === 'user' ? 'user' : 'bot')) {
+          if ((lastEvent.event as any)?.partial && lastEvent.role === (apiEvent.author === 'user' ? 'user' : 'bot')) {
             const updatedEvent = new UiEvent({ ...lastEvent, event: apiEvent as any });
 
             let parts = apiEvent.content?.parts || [];

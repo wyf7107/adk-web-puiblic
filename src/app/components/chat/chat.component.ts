@@ -750,7 +750,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const uiEvent = this.buildUiEventFromEvent(apiEvent, reverseOrder);
 
       this.uiEvents.update(events => {
-        const existingIndex = events.findIndex(m => m.event?.id === apiEvent.id && apiEvent.id);
+        let existingIndex = events.findIndex(m => m.event?.id === apiEvent.id && apiEvent.id);
+        if (existingIndex < 0 && events.length > 0) {
+          const checkIndex = reverseOrder ? 0 : events.length - 1;
+          const checkEvent = events[checkIndex];
+          if ((checkEvent.event as any)?.partial && checkEvent.role === (apiEvent.author === 'user' ? 'user' : 'bot')) {
+            existingIndex = checkIndex;
+          }
+        }
+
         if (existingIndex >= 0) {
           const newEvents = [...events];
           newEvents[existingIndex] = uiEvent;

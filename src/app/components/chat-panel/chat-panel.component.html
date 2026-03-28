@@ -25,6 +25,7 @@
     </div>
   }
   @for (uiEvent of uiEvents; track uiEvent; let i = $index) {
+    @if (shouldShowEvent(uiEvent)) {
     <app-event-row
       [uiEvent]="uiEvent"
       [index]="i"
@@ -66,6 +67,7 @@
       (longRunningResponseComplete)="longRunningResponseComplete.emit($event)"
       (agentStateClick)="handleAgentStateClick($event.event, $event.index)"
     ></app-event-row>
+    }
   }
   @if (isLoadingAgentResponse()) {
     <div class="agent-loading-indicator">

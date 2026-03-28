@@ -136,6 +136,15 @@
     @if (isSessionLoadingActions === false) {
       <button
         mat-icon-button
+        class="toolbar-icon-button"
+        (click)="toggleHideIntermediateEvents()"
+        matTooltip="Toggle intermediate events"
+        [style.color]="hideIntermediateEvents() ? 'var(--mat-sys-primary)' : 'inherit'"
+      >
+        <mat-icon>{{ hideIntermediateEvents() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      <button
+        mat-icon-button
         [matMenuTriggerFor]="sessionActionsMenu"
         class="toolbar-icon-button"
         [matTooltip]="i18n.moreOptionsTooltip"
@@ -411,6 +420,7 @@
       <app-chat-panel
         [appName]="appName"
         [agentReadme]="agentReadme"
+        [hideIntermediateEvents]="hideIntermediateEvents()"
         [uiEvents]="uiEvents()"
         [isChatMode]="isChatMode()"
         [evalCase]="evalCase"

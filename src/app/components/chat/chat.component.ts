@@ -247,6 +247,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   updatedSessionState: WritableSignal<any> = signal(null);
 
   protected readonly canEditSession = signal(true);
+  hideIntermediateEvents = signal(window.localStorage.getItem('adk-hide-intermediate-events') === 'true');
+
+  toggleHideIntermediateEvents() {
+    const newVal = !this.hideIntermediateEvents();
+    this.hideIntermediateEvents.set(newVal);
+    window.localStorage.setItem('adk-hide-intermediate-events', String(newVal));
+  }
 
   // TODO: Remove this once backend supports restarting bidi streaming.
   sessionHasUsedBidi = new Set<string>();

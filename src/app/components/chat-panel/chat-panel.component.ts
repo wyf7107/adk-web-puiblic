@@ -176,6 +176,42 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   protected readonly onScroll = new Subject<Event>();
   protected readonly sanitizer = inject(SAFE_VALUES_SERVICE);
 
+  hideIntermediateEvents = input<boolean>(false);
+
+  shouldShowEvent(uiEvent: UiEvent): boolean {
+    if (!this.hideIntermediateEvents()) {
+      return true;
+    }
+
+    if (uiEvent.role === 'user') {
+      return true;
+    }
+
+    if (uiEvent.event?.content !== undefined) {
+      return true;
+    }
+
+    if (uiEvent.event?.output !== undefined) {
+      const nodeInfo = uiEvent.event?.nodeInfo;
+      let isTopLevel = false;
+      let outputFor = nodeInfo?.['outputFor'];
+
+      if (Array.isArray(outputFor)) {
+        isTopLevel = outputFor.some((path: string) => !path.includes('/'));
+      } else if (typeof outputFor === 'string') {
+        isTopLevel = !outputFor.includes('/');
+      } else if (nodeInfo?.path) {
+        isTopLevel = !nodeInfo.path.includes('/');
+      }
+
+      if (isTopLevel) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   constructor() {
     effect(() => {
       const sessionName = this.sessionName();

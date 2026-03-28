@@ -757,8 +757,13 @@ app-canvas {
 .selector-drawer {
   width: 320px;
   background-color: var(--mat-sys-surface, #fff);
-  display: flex;
-  flex-direction: column;
+
+  ::ng-deep .mat-drawer-inner-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
 
   &.match-side-panel-width {
     width: var(--side-drawer-width);

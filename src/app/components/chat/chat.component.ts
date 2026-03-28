@@ -57,6 +57,7 @@ import { LOCAL_FILE_SERVICE } from '../../core/services/interfaces/localfile';
 import { SAFE_VALUES_SERVICE } from '../../core/services/interfaces/safevalues';
 import { SESSION_SERVICE } from '../../core/services/interfaces/session';
 import { STREAM_CHAT_SERVICE } from '../../core/services/interfaces/stream-chat';
+import { AUDIO_RECORDING_SERVICE } from '../../core/services/interfaces/audio-recording';
 import { STRING_TO_COLOR_SERVICE } from '../../core/services/interfaces/string-to-color';
 import { TRACE_SERVICE } from '../../core/services/interfaces/trace';
 import { THEME_SERVICE } from '../../core/services/interfaces/theme';
@@ -189,6 +190,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
   private readonly sessionService = inject(SESSION_SERVICE);
   private readonly streamChatService = inject(STREAM_CHAT_SERVICE);
+  private readonly audioRecordingService = inject(AUDIO_RECORDING_SERVICE);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   private readonly traceService = inject(TRACE_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
@@ -226,6 +228,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   updatedEvalCase: EvalCase | null = null;
   evalSetId = '';
   isAudioRecording = false;
+  micVolume = this.audioRecordingService.volumeLevel;
   isVideoRecording = false;
   longRunningEvents: any[] = [];
   functionCallEventId = '';

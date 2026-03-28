@@ -102,6 +102,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() updatedSessionState: any|null = null;
   @Input() selectedMessageIndex: number | undefined = undefined;
   @Input() isAudioRecording: boolean = false;
+  @Input() micVolume: number = 0;
   @Input() isVideoRecording: boolean = false;
   @Input() hoveredEventMessageIndices: number[] = [];
   @Input() userId: string = '';

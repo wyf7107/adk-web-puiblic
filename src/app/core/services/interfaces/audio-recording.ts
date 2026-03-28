@@ -26,6 +26,7 @@ export const AUDIO_WORKLET_MODULE_PATH =
  * Service to provide methods to handle audio recording.
  */
 export declare abstract class AudioRecordingService {
+  abstract volumeLevel: import('@angular/core').WritableSignal<number>;
   abstract startRecording(): Promise<void>;
   abstract stopRecording(): void;
   abstract getCombinedAudioBuffer(): Uint8Array|void;

@@ -159,6 +159,10 @@ button.send-message-btn {
   &.recording {}
 }
 
+button.audio-rec-btn:not(.recording) {
+  color: #34A853 !important;
+}
+
 .loading-spinner-container {
   display: flex;
   justify-content: center;

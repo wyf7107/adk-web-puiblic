@@ -163,6 +163,16 @@
       </div>
       <div class="chat-input-actions-right">
         @if (isAudioRecording) {
+          <button
+            mat-icon-button
+            (click)="toggleVideoRecording.emit()"
+            class="video-rec-btn"
+            [class.recording]="isVideoRecording"
+            [matTooltip]="isVideoRecording ? i18n.turnOffCamTooltip : i18n.useCamTooltip"
+            [disabled]="!(isBidiStreamingEnabledObs | async)"
+          >
+            <mat-icon>videocam</mat-icon>
+          </button>
           <div class="mic-visualizer">
             <div class="bar" [style.height.px]="4 + micVolume * 16"></div>
             <div class="bar" [style.height.px]="4 + micVolume * 24"></div>
@@ -179,16 +189,6 @@
           [disabled]="!(isBidiStreamingEnabledObs | async)"
         >
           <mat-icon>{{ isAudioRecording ? 'call_end' : 'call' }}</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          (click)="toggleVideoRecording.emit()"
-          class="video-rec-btn"
-          [class.recording]="isVideoRecording"
-          [matTooltip]="isVideoRecording ? i18n.turnOffCamTooltip : i18n.useCamTooltip"
-          [disabled]="!(isBidiStreamingEnabledObs | async)"
-        >
-          <mat-icon>videocam</mat-icon>
         </button>
       </div>
     </div>

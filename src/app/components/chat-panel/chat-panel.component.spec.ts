@@ -571,6 +571,7 @@ describe('ChatPanelComponent', () => {
 
     it('should have the videocam button disabled', () => {
       mockFeatureFlagService.isBidiStreamingEnabledResponse.next(false);
+      component.isAudioRecording = true;
       fixture.detectChanges();
 
       const allButtons =

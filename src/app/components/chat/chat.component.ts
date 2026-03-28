@@ -733,6 +733,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private appendEventRow(apiEvent: any, reverseOrder: boolean = false) {
+    console.log(apiEvent);
     if (apiEvent.errorMessage) {
       if (apiEvent.id && !this.eventData.has(apiEvent.id)) {
         this.eventData.set(apiEvent.id, apiEvent);
@@ -752,37 +753,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           const lastIndex = events.length - 1;
           const lastEvent = events[lastIndex];
 
-          if ((lastEvent.event as any)?.partial && lastEvent.role === (apiEvent.author === 'user' ? 'user' : 'bot')) {
-            const updatedEvent = new UiEvent({ ...lastEvent, event: apiEvent as any });
+          const isLastTranscription = !!((lastEvent.event as any)?.inputTranscription || (lastEvent.event as any)?.outputTranscription);
+          const isCurrentTranscription = !!(apiEvent.inputTranscription || apiEvent.outputTranscription);
 
-            let parts = apiEvent.content?.parts || [];
-            if (this.isEventA2aResponse(apiEvent)) {
-              parts = this.combineA2uiDataParts(parts);
-            }
-            parts = this.combineTextParts(parts);
-
-            parts.forEach((part: any) => {
-              if (part.text !== undefined && part.text !== null) {
-                updatedEvent.text = (updatedEvent.text || '') + part.text;
-                if (part.thought) {
-                  updatedEvent.thought = true;
-                  updatedEvent.text = this.processThoughtText(updatedEvent.text || '');
-                }
-              } else {
-                this.processPartIntoMessage(part, apiEvent, updatedEvent);
-              }
-            });
-
-            if (apiEvent.inputTranscription !== undefined) {
-              const chunk = typeof apiEvent.inputTranscription === 'string' ? apiEvent.inputTranscription : apiEvent.inputTranscription.text;
-              const previousText = (lastEvent.event as any)?.inputTranscription?.text || '';
-              updatedEvent.event.inputTranscription = { text: previousText + (chunk || '') };
-            }
-            if (apiEvent.outputTranscription !== undefined) {
-              const chunk = typeof apiEvent.outputTranscription === 'string' ? apiEvent.outputTranscription : apiEvent.outputTranscription.text;
-              const previousText = (lastEvent.event as any)?.outputTranscription?.text || '';
-              updatedEvent.event.outputTranscription = { text: previousText + (chunk || '') };
-            }
+          if ((lastEvent.event as any)?.partial && 
+              lastEvent.role === (apiEvent.author === 'user' ? 'user' : 'bot') &&
+              isLastTranscription === isCurrentTranscription) {
+            const updatedEvent = this.mergePartialEvent(lastEvent, apiEvent);
 
             const newEvents = [...events];
             newEvents[lastIndex] = updatedEvent;
@@ -801,8 +778,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (existingIndex < 0 && events.length > 0) {
           const checkIndex = reverseOrder ? 0 : events.length - 1;
           const checkEvent = events[checkIndex];
-          if ((checkEvent.event as any)?.partial && checkEvent.role === (apiEvent.author === 'user' ? 'user' : 'bot')) {
-            existingIndex = checkIndex;
+          if ((checkEvent.event as any)?.partial) {
+            const isLastTranscription = !!((checkEvent.event as any)?.inputTranscription || (checkEvent.event as any)?.outputTranscription);
+            const isCurrentTranscription = !!(apiEvent.inputTranscription || apiEvent.outputTranscription);
+
+            if (isLastTranscription === isCurrentTranscription) {
+              existingIndex = checkIndex;
+            } else {
+              existingIndex = -1;
+            }
           }
         }
 
@@ -823,6 +807,39 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
+  }
+
+  private mergePartialEvent(lastEvent: UiEvent, apiEvent: any): UiEvent {
+    const updatedEvent = new UiEvent({ ...lastEvent, event: apiEvent as any });
+
+    let parts = apiEvent.content?.parts || [];
+    if (this.isEventA2aResponse(apiEvent)) {
+      parts = this.combineA2uiDataParts(parts);
+    }
+    parts = this.combineTextParts(parts);
+
+    parts.forEach((part: any) => {
+      if (part.text !== undefined && part.text !== null) {
+        updatedEvent.text = (updatedEvent.text || '') + part.text;
+        if (part.thought) {
+          updatedEvent.thought = true;
+          updatedEvent.text = this.processThoughtText(updatedEvent.text || '');
+        }
+      } else {
+        this.processPartIntoMessage(part, apiEvent, updatedEvent);
+      }
+    });
+
+    if (apiEvent.inputTranscription) {
+      const previousText = (lastEvent.event as any)?.inputTranscription?.text || '';
+      updatedEvent.event.inputTranscription = { text: previousText + (apiEvent.inputTranscription.text || '') };
+    }
+    if (apiEvent.outputTranscription) {
+      const previousText = (lastEvent.event as any)?.outputTranscription?.text || '';
+      updatedEvent.event.outputTranscription = { text: previousText + (apiEvent.outputTranscription.text || '') };
+    }
+
+    return updatedEvent;
   }
 
   async getUserMessageParts() {

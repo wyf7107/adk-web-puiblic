@@ -1405,24 +1405,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   startVideoRecording() {
-    if (this.sessionHasUsedBidi.has(this.sessionId)) {
-      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK');
-      return;
-    }
     const videoContainer = this.chatPanel()?.videoContainer;
     if (!videoContainer) {
       return;
     }
     this.isVideoRecording = true;
-    this.streamChatService.startVideoChat({
-      appName: this.appName,
-      userId: this.userId,
-      sessionId: this.sessionId,
-      videoContainer,
-    });
-    this.uiEvents.update(
-      uiEvents => [...uiEvents, new UiEvent({ role: 'user', text: 'Speaking...', event: { id: 'speaking-user' } as any })]);
-    this.sessionHasUsedBidi.add(this.sessionId);
+    this.streamChatService.startVideoStreaming(videoContainer);
   }
 
   stopVideoRecording() {
@@ -1430,7 +1418,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!videoContainer) {
       return;
     }
-    this.streamChatService.stopVideoChat(videoContainer);
+    this.streamChatService.stopVideoStreaming(videoContainer);
     this.isVideoRecording = false;
   }
 

@@ -115,7 +115,7 @@ export class StreamChatService implements StreamChatServiceInterface {
     this.webSocketService.closeConnection();
   }
 
-  private async startVideoStreaming(videoContainer: ElementRef) {
+  async startVideoStreaming(videoContainer: ElementRef) {
     try {
       await this.videoService.startRecording(videoContainer);
       this.videoIntervalId = window.setInterval(
@@ -140,7 +140,7 @@ export class StreamChatService implements StreamChatServiceInterface {
     this.webSocketService.sendMessage(request);
   }
 
-  private stopVideoStreaming(videoContainer: ElementRef) {
+  stopVideoStreaming(videoContainer: ElementRef) {
     clearInterval(this.videoIntervalId);
     this.videoIntervalId = undefined;
     this.videoService.stopRecording(videoContainer);

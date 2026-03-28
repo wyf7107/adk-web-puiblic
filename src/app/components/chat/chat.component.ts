@@ -1217,7 +1217,29 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (!uiEvent.functionCalls) {
         uiEvent.functionCalls = [];
       }
-      uiEvent.functionCalls.push(part.functionCall);
+      
+      const isLongRunning = event?.longRunningToolIds?.includes(part.functionCall.id);
+      let enrichedFunctionCall = part.functionCall;
+      
+      if (isLongRunning) {
+        enrichedFunctionCall = {
+          ...part.functionCall,
+          isLongRunning: true,
+          invocationId: event.invocationId,
+          functionCallEventId: event.id,
+          needsResponse: true,
+          responseStatus: part.functionCall.responseStatus || 'pending',
+          userResponse: part.functionCall.userResponse || '',
+        };
+      }
+      
+      const existingIndex = uiEvent.functionCalls.findIndex(fc => fc.id === part.functionCall.id);
+      if (existingIndex >= 0) {
+        uiEvent.functionCalls[existingIndex] = { ...uiEvent.functionCalls[existingIndex], ...enrichedFunctionCall };
+      } else {
+        uiEvent.functionCalls.push(enrichedFunctionCall);
+      }
+      
       if (event?.id) {
         uiEvent.event = event as any;
       }

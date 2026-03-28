@@ -214,9 +214,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   videoElement!: HTMLVideoElement;
   currentMessage = '';
   uiEvents = signal<UiEvent[]>([]);
-  lastTextChunk: string = '';
-  streamingTextMessage: UiEvent | null = null;
-  latestThought: string = '';
+
   artifacts: any[] = [];
   userInput: string = '';
   userEditEvalCaseMessage: string = '';
@@ -653,39 +651,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   submitAgentRunRequest(req: AgentRunRequest) {
-    this.streamingTextMessage = null;
     this.agentService.runSse(req).subscribe({
       next: async (chunkJson: any) => {
         if (chunkJson.error) {
           this.openSnackBar(chunkJson.error, 'OK');
           return;
         }
-        if (chunkJson.content) {
-          let parts = this.combineTextParts(chunkJson.content.parts);
-          if (this.isEventA2aResponse(chunkJson)) {
-            parts = this.combineA2uiDataParts(parts);
-          }
 
-          for (let part of parts) {
-            this.processPart(chunkJson, part);
-            this.traceService.setEventData(this.eventData);
-          }
-        } else if (chunkJson.errorMessage) {
-          this.processErrorMessage(chunkJson);
-        } else {
-          // Store events without content (so they render like on reload)
-          if (chunkJson.id && !this.eventData.has(chunkJson.id)) {
-            this.eventData.set(chunkJson.id, chunkJson);
-            this.eventData = new Map(this.eventData);
+        this.appendEventRow(chunkJson);
 
-            // Create a message entry for the event
-            const uiEvent = new UiEvent({
-              role: chunkJson.author === 'user' ? 'user' : 'bot',
-              event: chunkJson
-            });
-            this.insertOrUpdateMessage(uiEvent);
-          }
-        }
         if (chunkJson.actions) {
           this.processActionArtifact(chunkJson);
           this.processActionStateDelta(chunkJson);
@@ -701,7 +675,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.currentSessionState = this.updatedSessionState();
           this.updatedSessionState.set(null);
         }
-        this.streamingTextMessage = null;
         this.featureFlagService.isSessionReloadOnNewMessageEnabled()
           .pipe(first())
           .subscribe((enabled) => {
@@ -723,132 +696,76 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private processErrorMessage(chunkJson: any) {
-    this.storeEvents(chunkJson, chunkJson);
-    this.insertOrUpdateMessage(
-      new UiEvent({ text: chunkJson.errorMessage, role: 'bot', event: { id: chunkJson.id } as any }))
-  }
+  private appendEventRow(apiEvent: any, reverseOrder: boolean = false) {
+    if (apiEvent.errorMessage) {
+      if (apiEvent.id && !this.eventData.has(apiEvent.id)) {
+        this.eventData.set(apiEvent.id, apiEvent);
+        this.eventData = new Map(this.eventData);
+      }
+    }
 
-  private processPart(chunkJson: any, part: any) {
-    const renderedContent =
-      chunkJson.groundingMetadata?.searchEntryPoint?.renderedContent;
+    if (apiEvent.id && !this.eventData.has(apiEvent.id)) {
+      this.eventData.set(apiEvent.id, apiEvent);
+      this.eventData = new Map(this.eventData);
+    }
+    this.traceService.setEventData(this.eventData);
 
-    if (part.text) {
+    if (apiEvent.partial) {
+      this.uiEvents.update((events) => {
+        if (events.length > 0) {
+          const lastIndex = events.length - 1;
+          const lastEvent = events[lastIndex];
 
-      const newChunk = part.text;
-      if (part.thought) {
-        if (newChunk !== this.latestThought) {
-          this.storeEvents(part, chunkJson);
-          let thoughtUiEvent = new UiEvent({
-            role: 'bot',
-            text: this.processThoughtText(newChunk),
-            thought: true,
-            event: { id: chunkJson.id } as any
-          });
+          if (lastEvent.event?.id === apiEvent.id && lastEvent.role === (apiEvent.author === 'user' ? 'user' : 'bot')) {
+            const updatedEvent = new UiEvent({ ...lastEvent, event: apiEvent as any });
 
-          this.insertOrUpdateMessage(thoughtUiEvent);
-        }
-        this.latestThought = newChunk;
-      } else if (!this.streamingTextMessage) {
-        this.streamingTextMessage = new UiEvent({
-          role: 'bot',
-          text: this.processThoughtText(newChunk),
-          thought: part.thought ? true : false,
-          event: { id: chunkJson.id } as any
-        });
-
-        if (renderedContent) {
-          this.streamingTextMessage.renderedContent =
-            chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
-        }
-
-        if (!this.useSse) {
-          this.insertOrUpdateMessage(this.streamingTextMessage);
-          this.storeEvents(part, chunkJson);
-          this.streamingTextMessage = null;
-          return;
-        } else {
-          this.insertOrUpdateMessage(this.streamingTextMessage);
-        }
-      } else {
-        if (renderedContent) {
-          this.streamingTextMessage.renderedContent =
-            chunkJson.groundingMetadata.searchEntryPoint.renderedContent;
-        }
-
-        if (newChunk == this.streamingTextMessage.text) {
-          // Final chunk arrived - update the existing message's eventId
-          const oldEventId = this.streamingTextMessage.event.id;
-          this.uiEvents.update((uiEvents) => {
-            if (uiEvents.length > 0) {
-              const lastIndex = uiEvents.length - 1;
-              const lastMessage = uiEvents[lastIndex];
-              if (lastMessage.event.id === oldEventId && lastMessage.role === 'bot') {
-                const updatedMessages = [...uiEvents];
-                updatedMessages[lastIndex] = new UiEvent({ ...lastMessage, event: { id: chunkJson.id } as any });
-                return updatedMessages;
-              }
+            let parts = apiEvent.content?.parts || [];
+            if (this.isEventA2aResponse(apiEvent)) {
+              parts = this.combineA2uiDataParts(parts);
             }
-            return uiEvents;
-          });
-          this.storeEvents(part, chunkJson);
-          this.streamingTextMessage = null;
-          return;
+            parts = this.combineTextParts(parts);
+
+            parts.forEach((part: any) => {
+              if (part.text !== undefined && part.text !== null) {
+                updatedEvent.text = (updatedEvent.text || '') + part.text;
+                if (part.thought) {
+                  updatedEvent.thought = true;
+                  updatedEvent.text = this.processThoughtText(updatedEvent.text || '');
+                }
+              } else {
+                this.processPartIntoMessage(part, apiEvent, updatedEvent);
+              }
+            });
+
+            const newEvents = [...events];
+            newEvents[lastIndex] = updatedEvent;
+            return newEvents;
+          }
         }
-        // Update the streaming text and insert to trigger UI update
-        this.streamingTextMessage.text += newChunk;
-        this.insertOrUpdateMessage(this.streamingTextMessage);
-      }
-    } else if (!part.thought) {
-      // Skip partial events for non-text parts to avoid duplicates
-      if (this.useSse && chunkJson.partial) {
-        return;
-      }
 
-      // If the part is an A2A DataPart, display it as a message (e.g., A2UI or
-      // Json)
-      if (this.isA2aDataPart(part)) {
-        const parsedObject = this.extractA2aDataPartJson(part);
-        const isA2uiDataPart = parsedObject && parsedObject.kind === 'data' &&
-          parsedObject.metadata?.mimeType === A2UI_MIME_TYPE;
-        const displayPart =
-          isA2uiDataPart ? { a2ui: parsedObject.data } : { text: parsedObject };
+        const newUiEvent = this.buildUiEventFromEvent(apiEvent, reverseOrder);
+        return reverseOrder ? [newUiEvent, ...events] : [...events, newUiEvent];
+      });
+    } else {
+      const uiEvent = this.buildUiEventFromEvent(apiEvent, reverseOrder);
 
-        this.storeEvents(part, chunkJson);
-        this.storeMessage(
-          displayPart, chunkJson,
-          chunkJson.author === 'user' ? 'user' : 'bot');
-        return;
-      }
+      this.uiEvents.update(events => {
+        const existingIndex = events.findIndex(m => m.event?.id === apiEvent.id && apiEvent.id);
+        if (existingIndex >= 0) {
+          const newEvents = [...events];
+          newEvents[existingIndex] = uiEvent;
+          return newEvents;
+        } else {
+          return reverseOrder ? [uiEvent, ...events] : [...events, uiEvent];
+        }
+      });
+    }
 
-
-      this.storeEvents(part, chunkJson);
-
-      // If we have a streamingTextMessage, append inlineData to it
-      if (this.streamingTextMessage && part.inlineData) {
-        this.processPartIntoMessage(part, chunkJson, this.streamingTextMessage);
-        this.insertOrUpdateMessage(this.streamingTextMessage);
-        this.changeDetectorRef.detectChanges();
-        return;
-      }
-
-      const role = chunkJson.author === 'user' ? 'user' : 'bot';
-      const existingMessages = this.uiEvents();
-      const lastMessageIndex = existingMessages.length - 1;
-      const lastMessage = existingMessages.length > 0 ? existingMessages[lastMessageIndex] : undefined;
-
-      if (lastMessage && lastMessage.event.id === chunkJson.id && lastMessage.role === role) {
-        // Update existing message by adding this part
-        this.uiEvents.update(uiEvents => {
-          const updatedMessages = [...uiEvents];
-          const updatedMessage = new UiEvent({ ...lastMessage });
-          this.processPartIntoMessage(part, chunkJson, updatedMessage);
-          updatedMessages[lastMessageIndex] = updatedMessage;
-          return updatedMessages;
-        });
-        this.changeDetectorRef.detectChanges();
-      } else {
-        this.storeMessage(part, chunkJson, role);
+    if (apiEvent.actions?.artifactDelta) {
+      for (const key in apiEvent.actions.artifactDelta) {
+        if (apiEvent.actions.artifactDelta.hasOwnProperty(key)) {
+          this.renderArtifact(key, apiEvent.actions.artifactDelta[key], reverseOrder);
+        }
       }
     }
   }
@@ -1676,37 +1593,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         keepOldMessages && this.sessionIdOfLoadedMessages === this.sessionId
     });
 
-    const newUiEvents: UiEvent[] = [];
     events.forEach((event: any) => {
-      const uiEvent = this.buildUiEventFromEvent(event, reverseOrder);
-
-      if (reverseOrder) {
-        newUiEvents.unshift(uiEvent);
-      } else {
-        newUiEvents.push(uiEvent);
-      }
-
-      const isBot = event.author !== 'user';
-      if (isBot && event.actions?.artifactDelta) {
-        for (const key in event.actions.artifactDelta) {
-          if (event.actions.artifactDelta.hasOwnProperty(key)) {
-            this.renderArtifact(
-              key, event.actions.artifactDelta[key], reverseOrder);
-          }
-        }
-      }
-
-      // Store the event in eventData
-      if (!this.eventData.has(event.id)) {
-        this.eventData.set(event.id, event);
-        this.eventData = new Map(this.eventData);
-      }
-
+      this.appendEventRow(event, reverseOrder);
     });
-
-    if (newUiEvents.length > 0) {
-      this.uiEvents.update(uiEvents => reverseOrder ? [...newUiEvents, ...uiEvents] : [...uiEvents, ...newUiEvents]);
-    }
 
     this.sessionIdOfLoadedMessages = this.sessionId;
   }

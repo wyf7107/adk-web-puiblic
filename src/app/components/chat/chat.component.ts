@@ -61,6 +61,7 @@ import { AUDIO_RECORDING_SERVICE } from '../../core/services/interfaces/audio-re
 import { STRING_TO_COLOR_SERVICE } from '../../core/services/interfaces/string-to-color';
 import { TRACE_SERVICE } from '../../core/services/interfaces/trace';
 import { THEME_SERVICE } from '../../core/services/interfaces/theme';
+import { WEBSOCKET_SERVICE } from '../../core/services/interfaces/websocket';
 import { LOGO_COMPONENT } from '../../injection_tokens';
 import { ListResponse } from '../../core/services/interfaces/types';
 import { UI_STATE_SERVICE } from '../../core/services/interfaces/ui-state';
@@ -190,6 +191,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
   private readonly sessionService = inject(SESSION_SERVICE);
   private readonly streamChatService = inject(STREAM_CHAT_SERVICE);
+  private readonly webSocketService = inject(WEBSOCKET_SERVICE);
   private readonly audioRecordingService = inject(AUDIO_RECORDING_SERVICE);
   private readonly stringToColorService = inject(STRING_TO_COLOR_SERVICE);
   private readonly traceService = inject(TRACE_SERVICE);
@@ -388,6 +390,36 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         'Please check server log for full details: \n' + closeReason;
       this.openSnackBar(error, 'OK');
     });
+
+    this.webSocketService.getMessages().subscribe((message) => {
+      if (!message) return;
+      try {
+        const msg = JSON.parse(message);
+        if (msg.inputTranscription) {
+          const apiEvent = {
+            id: msg.id,
+            author: 'user',
+            partial: true,
+            content: { parts: [{ text: msg.inputTranscription.text }] },
+          };
+          this.appendEventRow(apiEvent);
+          this.changeDetectorRef.detectChanges();
+        }
+        if (msg.outputTranscription) {
+          const apiEvent = {
+            id: msg.id,
+            author: 'bot',
+            partial: true,
+            content: { parts: [{ text: msg.outputTranscription.text }] },
+          };
+          this.appendEventRow(apiEvent);
+          this.changeDetectorRef.detectChanges();
+        }
+      } catch (e) {
+        // Ignored
+      }
+    });
+
 
     // OAuth HACK: Opens oauth poup in a new window. If the oauth callback
     // is successful, the new window acquires the auth token, state and

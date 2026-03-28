@@ -1397,6 +1397,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   stopAudioRecording() {
     this.streamChatService.stopAudioChat();
     this.isAudioRecording = false;
+    if (this.isVideoRecording) {
+      this.stopVideoRecording();
+    }
   }
 
   toggleVideoRecording() {

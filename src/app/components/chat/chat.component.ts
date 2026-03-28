@@ -2318,7 +2318,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             const scrollContainer = this.chatPanel()?.scrollContainer?.nativeElement;
             if (!scrollContainer) return;
 
-            const messageElements = scrollContainer.querySelectorAll('.message-column-container');
+            const messageElements = scrollContainer.querySelectorAll('.message-row-container');
             if (messageElements && messageElements[messageIndex]) {
               messageElements[messageIndex].scrollIntoView({
                 behavior: 'smooth',

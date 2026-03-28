@@ -255,12 +255,12 @@ export class SessionTabComponent implements OnInit {
   }
 
   getSessionDisplayName(session: Session): string {
-    const meta = session.state?.['__adk_metadata__'] as any;
+    const meta = session.state?.['__session_metadata__'] as any;
     return meta?.displayName || session.id;
   }
 
   hasDisplayName(session: Session): boolean {
-    const meta = session.state?.['__adk_metadata__'] as any;
+    const meta = session.state?.['__session_metadata__'] as any;
     return !!meta?.displayName;
   }
 
@@ -281,8 +281,8 @@ export class SessionTabComponent implements OnInit {
     const currentState = session.state || {};
     const updatedState = {
       ...currentState,
-      __adk_metadata__: {
-        ...(currentState['__adk_metadata__'] as any || {}),
+      __session_metadata__: {
+        ...(currentState['__session_metadata__'] as any || {}),
         displayName: newName
       }
     };

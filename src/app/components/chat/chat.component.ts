@@ -599,13 +599,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
              displayName = displayName.substring(0, 27) + '...';
            }
         }
-        const initialState = displayName ? { __adk_metadata__: { displayName: displayName } } : undefined;
+        const initialState = displayName ? { __session_metadata__: { displayName: displayName } } : undefined;
         const res = await firstValueFrom(
           this.sessionService.createSession(this.userId, this.appName, initialState));
-        this.currentSessionState = res.state;
+        this.currentSessionState = res.state || initialState || {};
         this.sessionId = res.id ?? '';
         this.sessionTab?.refreshSession();
         this.sessionTab?.reloadSession(this.sessionId);
+        this.drawerSessionTab()?.refreshSession();
+        this.drawerSessionTab()?.reloadSession(this.sessionId);
         this.isSessionUrlEnabledObs.pipe(first()).subscribe((enabled) => {
           if (enabled) {
             this.updateSelectedSessionUrl();
@@ -2012,7 +2014,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       return 'NEW SESSION';
     }
 
-    const meta = this.currentSessionState?.['__adk_metadata__'] as any;
+    const meta = this.currentSessionState?.['__session_metadata__'] as any;
     if (meta?.displayName) {
       const shortId = this.sessionId.substring(0, 4);
       return `[${shortId}] ${meta.displayName}`;
@@ -2025,7 +2027,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       return 'NEW SESSION';
     }
     
-    const meta = this.currentSessionState?.['__adk_metadata__'] as any;
+    const meta = this.currentSessionState?.['__session_metadata__'] as any;
     return meta?.displayName || this.sessionId;
   }
 
@@ -2043,7 +2045,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   startSessionNameEdit() {
-    const meta = this.currentSessionState?.['__adk_metadata__'] as any;
+    const meta = this.currentSessionState?.['__session_metadata__'] as any;
     this.sessionNameDraft = meta?.displayName || '';
     this.isEditingSessionName = true;
   }
@@ -2057,8 +2059,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     
     const updatedState = {
       ...this.currentSessionState,
-      __adk_metadata__: {
-        ...(this.currentSessionState?.['__adk_metadata__'] || {}),
+      __session_metadata__: {
+        ...(this.currentSessionState?.['__session_metadata__'] || {}),
         displayName: this.sessionNameDraft
       }
     };

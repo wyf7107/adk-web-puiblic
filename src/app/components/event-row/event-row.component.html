@@ -219,6 +219,14 @@
       </div>
     }
     <div class="event-chips-container">
+    @if (uiEvent.event.usageMetadata) {
+    <app-hover-info-button
+      [icon]="'analytics'"
+      [text]="'tokens: ' + (uiEvent.event.usageMetadata.totalTokenCount || 0)"
+      [tooltipContent]="uiEvent.event.usageMetadata"
+      [tooltipTitle]="'Usage Metadata'"
+    ></app-hover-info-button>
+    }
     @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
       @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
         @if (isComputerUseClick(functionCall)) {

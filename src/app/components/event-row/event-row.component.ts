@@ -18,6 +18,7 @@ import {EventContentComponent} from '../event-content/event-content.component';
     '[class.selected]': 'isSelected',
     '[class.user]': 'uiEvent.role === "user"',
     '[class.bot]': 'uiEvent.role === "bot"',
+    '[class.selectable]': 'isSelectable',
     '(click)': 'onRowClick($event)'
   },
   imports: [
@@ -33,6 +34,7 @@ export class EventRowComponent {
   @Input() uiEvents: UiEvent[] = [];
   @Input() isSelected: boolean = false;
   @Input() isHighlighted: boolean = false;
+  @Input() isSelectable: boolean = true;
   
   @Input() appName: string = '';
   @Input() userId: string = '';
@@ -69,6 +71,7 @@ export class EventRowComponent {
   @Output() readonly agentStateClick = new EventEmitter<{event: Event, index: number}>();
 
   onRowClick(event: MouseEvent) {
+    if (!this.isSelectable) return;
     this.rowClick.emit({event, uiEvent: this.uiEvent, index: this.index});
   }
 }

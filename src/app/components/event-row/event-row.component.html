@@ -1,4 +1,4 @@
-    <div class="event-number-container">
+    <div class="event-number-container" [class.hidden]="!isSelectable">
       #{{ index + 1}}
     </div>
     @if (uiEvent.role === "bot" && !uiEvent.isLoading) {

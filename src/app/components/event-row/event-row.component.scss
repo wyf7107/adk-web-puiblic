@@ -41,7 +41,7 @@ app-content-bubble + app-content-bubble {
   transition: background-color 0.2s ease;
 
   // Hover effect for all rows
-  &:hover {
+  &.selectable:hover {
     background-color: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
   }
 

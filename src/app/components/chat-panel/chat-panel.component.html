@@ -61,6 +61,7 @@
   @for (uiEvent of uiEvents; track uiEvent; let i = $index) {
     <app-event-row
       [style.display]="((viewMode() === 'events' && shouldShowEvent(uiEvent)) || (viewMode() === 'traces' && uiEvent.role === 'user')) ? '' : 'none'"
+      [isSelectable]="viewMode() !== 'traces'"
       [uiEvent]="uiEvent"
       [index]="i"
       [uiEvents]="uiEvents"

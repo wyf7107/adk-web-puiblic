@@ -53,10 +53,11 @@
   top: 20px;
   bottom: 20px;
   right: 0;
+  z-index: 100;
   cursor: ew-resize;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--mat-sys-outline-variant);
   }
 }
 

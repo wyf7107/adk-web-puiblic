@@ -45,7 +45,7 @@
           [style.width.px]="400 - node.level * 20"
           [class.is-event-row]="isEventRow(node)"
         >
-          {{ node.span.name }}
+          {{ formatSpanName(node.span.name) }}
         </div>
       </div>
       <div class="trace-bar-container">

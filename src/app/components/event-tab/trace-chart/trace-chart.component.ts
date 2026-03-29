@@ -131,6 +131,16 @@ export class TraceChartComponent implements OnInit {
     return "start";
   }
 
+  formatSpanName(name: string): string {
+    if (name.startsWith('invoke_agent ')) {
+      return name.substring('invoke_agent '.length);
+    }
+    if (name.startsWith('execute_tool ')) {
+      return name.substring('execute_tool '.length);
+    }
+    return name;
+  }
+
   getArray(n: number): number[] {
     return Array.from({ length: n });
   }

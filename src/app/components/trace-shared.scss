@@ -1,0 +1,81 @@
+/**
+ * Shared styling for trace components (tree and chart).
+ */
+
+.trace-container {
+  width: 100%;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.trace-label {
+  color: var(--trace-label-color, #e3e3e3);
+  font-family: 'Google Sans Mono', monospace;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.trace-bar-container {
+  position: relative;
+  height: 16px;
+}
+
+.trace-bar {
+  position: absolute;
+  height: 18px;
+  background-color: var(--trace-bar-bg-color, #5180a5);
+  border-radius: 4px;
+  padding-left: 4px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--trace-bar-color, #8dabbf);
+  font-family: 'Google Sans';
+}
+
+.trace-duration {
+  color: var(--trace-duration-color, #888);
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+.trace-row {
+  display: flex;
+  position: relative;
+  height: 32px;
+}
+
+.trace-indent {
+  display: flex;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.indent-connector {
+  width: 20px;
+  position: relative;
+  height: 100%;
+}
+
+.vertical-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 9px;
+  width: 1px;
+  background-color: #ccc;
+}
+
+.horizontal-line {
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  width: 10px;
+  height: 1px;
+  background-color: #ccc;
+}

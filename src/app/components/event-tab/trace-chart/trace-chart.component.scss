@@ -13,79 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-.trace-container {
-  width: 100%;
-  white-space: nowrap;
-  font-size: 12px;
-}
+@use '../../trace-shared';
 
 .trace-label {
   width: 400px;
-  color: var(--trace-chart-trace-label-color);
-  text-overflow: ellipsis;
-  font-family: 'Google Sans Mono', monospace;
   font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 20px;
-  letter-spacing: 0px;
 }
 
 .trace-bar-container {
   width: 50vw;
-  position: relative;
-  height: 16px;
-}
-
-.trace-bar {
-  position: absolute;
-  height: 18px;
-  border-radius: 4px;
-  padding-left: 4px;
-  overflow: hidden;
-  font-size: 11px;
-  line-height: 16px;
-  color: var(--trace-chart-trace-bar-color);
-  font-family: 'Google Sans';
-}
-
-.trace-duration {
-  color: var(--trace-chart-trace-duration-color);
-  font-weight: normal;
-  margin-left: 4px;
 }
 
 .trace-row {
-  display: flex;
-  align-items: stretch; /* <-- stretch ensures full height */
-  position: relative;
-  height: 32px; /* Give rows a little more vertical space */
-}
-
-.trace-indent {
-  display: flex;
-  flex-shrink: 0;
-  height: 100%; /* Make sure it stretches */
-}
-
-.indent-connector {
-  width: 20px;
-  position: relative;
-  height: 100%;
-}
-
-.vertical-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 9px;
-  width: 1px;
-}
-
-.horizontal-line {
-  position: absolute;
-  top: 50%;
-  left: 9px;
-  width: 10px;
-  height: 1px;
+  align-items: stretch;
 }

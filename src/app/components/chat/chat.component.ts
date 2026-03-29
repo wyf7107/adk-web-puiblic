@@ -524,6 +524,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       if (sessionUrl) {
+        this.sessionId = sessionUrl;
         this.sessionService.getSession(this.userId, this.appName, sessionUrl)
           .pipe(take(1), catchError((error) => {
             this.openSnackBar(
@@ -1637,12 +1638,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private loadTraceData() {
+    if (!this.sessionId) return;
     this.eventService.getTrace(this.sessionId)
       .pipe(first(), catchError(() => of([])))
       .subscribe(res => {
         this.traceData = res;
         this.traceService.setEventData(this.eventData);
         this.traceService.setMessages(this.uiEvents());
+        this.changeDetectorRef.detectChanges();
       });
     this.bottomPanelVisible = false;
     this.changeDetectorRef.detectChanges();
@@ -1744,7 +1747,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected updateWithSelectedSession(session: Session) {
-    if (!session || !session.id || !session.events || !session.state) {
+    if (!session || !session.id) {
+      return;
+    }
+    this.sessionId = session.id;
+    if (!session.events || !session.state) {
       return;
     }
     this.traceService.resetTraceService();

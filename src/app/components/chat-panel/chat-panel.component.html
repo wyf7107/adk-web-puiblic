@@ -16,13 +16,13 @@
 
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
-<div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
   <div class="chat-sub-toolbar">
     <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" hideSingleSelectionIndicator>
       <mat-button-toggle value="events">Events</mat-button-toggle>
       <mat-button-toggle value="traces">Traces</mat-button-toggle>
     </mat-button-toggle-group>
   </div>
+<div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
   @if (uiEvents.length === 0 && agentReadme) {
     <div class="readme-container">
       <div class="readme-content">

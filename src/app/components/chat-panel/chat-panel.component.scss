@@ -32,8 +32,36 @@
   overflow-y: auto;
   padding: 20px;
   margin-top: 16px;
+  position: relative;
 }
 
+.chat-sub-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0 24px 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: inherit;
+  
+  mat-button-toggle-group {
+    border-radius: 20px;
+    height: 36px;
+    align-items: center;
+  }
+}
+
+.trace-tree-container {
+  max-width: min(960px, 88%);
+  margin: 16px auto 32px auto;
+  border-radius: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+  padding: 16px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
 .chat-input {
   display: flex;

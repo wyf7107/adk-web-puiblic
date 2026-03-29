@@ -17,6 +17,12 @@
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
 <div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
+  <div class="chat-sub-toolbar">
+    <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" hideSingleSelectionIndicator>
+      <mat-button-toggle value="events">Events</mat-button-toggle>
+      <mat-button-toggle value="traces">Traces</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
   @if (uiEvents.length === 0 && agentReadme) {
     <div class="readme-container">
       <div class="readme-content">
@@ -25,7 +31,7 @@
     </div>
   }
   @for (uiEvent of uiEvents; track uiEvent; let i = $index) {
-    @if (shouldShowEvent(uiEvent)) {
+    @if (viewMode() === 'events' && shouldShowEvent(uiEvent)) {
     <app-event-row
       [uiEvent]="uiEvent"
       [index]="i"
@@ -67,6 +73,57 @@
       (longRunningResponseComplete)="longRunningResponseComplete.emit($event)"
       (agentStateClick)="handleAgentStateClick($event.event, $event.index)"
     ></app-event-row>
+    } @else if (viewMode() === 'traces') {
+      @if (uiEvent.role === 'user') {
+        <app-event-row
+          [uiEvent]="uiEvent"
+          [index]="i"
+          [uiEvents]="uiEvents"
+          [isSelected]="isMessageEventSelected(i)"
+          [isHighlighted]="shouldMessageHighlighted(i)"
+          
+          [appName]="appName"
+          [userId]="userId"
+          [sessionId]="sessionId"
+          [sessionName]="sessionName()"
+          
+          [evalCase]="evalCase"
+          [isEvalEditMode]="isEvalEditMode"
+          [isEvalCaseEditing]="isEvalCaseEditing"
+          [isEditFunctionArgsEnabled]="isEditFunctionArgsEnabled"
+          [userEditEvalCaseMessage]="userEditEvalCaseMessage"
+          
+          [agentGraphData]="agentGraphData"
+          [allWorkflowNodes]="getAllWorkflowNodes(i)"
+          
+          [isUserFeedbackEnabled]="isUserFeedbackEnabled() ?? false"
+          [isLoadingAgentResponse]="isLoadingAgentResponse() ?? false"
+
+          (rowClick)="handleRowClick($event.event, $event.uiEvent, $event.index)"
+          (handleKeydown)="handleKeydown.emit($event)"
+          (cancelEditMessage)="cancelEditMessage.emit($event)"
+          (saveEditMessage)="saveEditMessage.emit($event)"
+          (userEditEvalCaseMessageChange)="userEditEvalCaseMessageChange.emit($event)"
+          
+          (openViewImageDialog)="openViewImageDialog.emit($event)"
+          (openBase64InNewTab)="openBase64InNewTab.emit($event)"
+          
+          (editEvalCaseMessage)="editEvalCaseMessage.emit($event)"
+          (deleteEvalCaseMessage)="deleteEvalCaseMessage.emit($event)"
+          (editFunctionArgs)="editFunctionArgs.emit($event)"
+          
+          (clickEvent)="clickEvent.emit($event)"
+          (longRunningResponseComplete)="longRunningResponseComplete.emit($event)"
+          (agentStateClick)="handleAgentStateClick($event.event, $event.index)"
+        ></app-event-row>
+      } @else if (uiEvent.role === 'bot' && isFirstEventForInvocation(uiEvent, i)) {
+        <div class="trace-tree-container">
+          <app-trace-tree
+            [spans]="uiEvent.event.invocationId ? (spansByInvocationId.get(uiEvent.event.invocationId!) || []) : []"
+            [invocationId]="uiEvent.event.invocationId || ''"
+          ></app-trace-tree>
+        </div>
+      }
     }
   }
   @if (isLoadingAgentResponse()) {

@@ -29,6 +29,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {EMPTY, merge, NEVER, of, Subject} from 'rxjs';
 import {catchError, filter, first, switchMap, tap} from 'rxjs/operators';
@@ -62,6 +63,7 @@ import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.c
 import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
 import {EventRowComponent} from '../event-row/event-row.component';
 import {CallControlsComponent} from '../call-controls/call-controls.component';
+import {TraceTreeComponent} from '../trace-tab/trace-tree/trace-tree.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
@@ -83,8 +85,10 @@ import {CallControlsComponent} from '../call-controls/call-controls.component';
     MatProgressSpinnerModule,
     NgxJsonViewerModule,
     MatTooltipModule,
+    MatButtonToggleModule,
     EventRowComponent,
     CallControlsComponent,
+    TraceTreeComponent,
   ],
 })
 export class ChatPanelComponent implements OnChanges, AfterViewInit {
@@ -92,6 +96,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() agentReadme: string = '';
   sessionName = input<string>('');
   @Input() uiEvents: UiEvent[] = [];
+  @Input() traceData: any[] = [];
   @Input() isChatMode: boolean = true;
   @Input() evalCase: EvalCase|null = null;
   @Input() isEvalEditMode: boolean = false;
@@ -177,6 +182,9 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   protected readonly sanitizer = inject(SAFE_VALUES_SERVICE);
 
   hideIntermediateEvents = input<boolean>(false);
+  
+  viewMode = signal<'events' | 'traces'>('events');
+  spansByInvocationId = new Map<string, any[]>();
 
   shouldShowEvent(uiEvent: UiEvent): boolean {
     if (!this.hideIntermediateEvents()) {
@@ -324,6 +332,49 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       }
       this.lastMessageRef = currentLastMessage;
     }
+
+    if (changes['traceData'] && this.traceData) {
+      this.rebuildTrace();
+    }
+  }
+
+  rebuildTrace() {
+    const invocTraces = this.traceData.reduce((map: any, item: any) => {
+      const key = item.trace_id;
+      const group = map.get(key);
+      if (group) {
+        group.push(item);
+        group.sort((a: any, b: any) => a.start_time - b.start_time);
+      } else {
+        map.set(key, [item]);
+      }
+      return map;
+    }, new Map<string, any[]>());
+
+    this.spansByInvocationId = new Map<string, any[]>();
+    for (const [key, group] of invocTraces) {
+      const invocId = group.find(
+        (item: any) => item.attributes !== undefined && 'gcp.vertex.agent.invocation_id' in item.attributes
+      )?.attributes['gcp.vertex.agent.invocation_id'];
+
+      if (invocId) {
+        this.spansByInvocationId.set(invocId, group);
+      }
+    }
+  }
+
+  isFirstEventForInvocation(uiEvent: UiEvent, index: number): boolean {
+    if (!uiEvent.event?.invocationId) return false;
+    
+    // Check if any previous bot event in uiEvents has the same invocationId
+    for (let i = index - 1; i >= 0; i--) {
+      const priorEvent = this.uiEvents[i];
+      if (priorEvent.role === 'bot' && priorEvent.event?.invocationId === uiEvent.event?.invocationId) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   scrollToBottom() {

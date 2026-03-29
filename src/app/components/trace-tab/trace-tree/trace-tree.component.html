@@ -15,7 +15,8 @@
 -->
 
 <div>
-  <div class="invocation-id-container" (click)="selectRootSpan()" [class.selected]="isRootSpanSelected()">
+  <div class="invocation-id-container" (click)="selectRootSpan()" [class.selected]="isRootSpanSelected()"
+       [attr.id]="tree && tree.length > 0 ? 'trace-node-' + tree[0].span_id : null">
     <span>Invocation ID: </span>
     <div class="invocation-id" [matTooltip]="invocationId">{{invocationId}}</div>
     <span class="total-latency">Total latency: {{formatDuration(rootLatencyNanos)}}</span>
@@ -28,6 +29,7 @@
       [class.selected]="rowSelected(node)"
       (mouseenter)="onHover(node)"
       (mouseleave)="onHoverOut()"
+      id="trace-node-{{ node.span.span_id }}"
     >
       <div class="trace-row-left">
         <div class="trace-indent">

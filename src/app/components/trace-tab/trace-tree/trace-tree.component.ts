@@ -73,8 +73,17 @@ export class TraceTreeComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.rebuildTree();
-    this.traceService.selectedTraceRow$.subscribe(
-        span => this.selectedRow = span);
+    this.traceService.selectedTraceRow$.subscribe(span => {
+      this.selectedRow = span;
+      if (span) {
+        setTimeout(() => {
+          const element = document.getElementById('trace-node-' + span.span_id);
+          if (element) {
+            element.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+          }
+        }, 50);
+      }
+    });
     this.traceService.eventData$.subscribe(e => this.eventData = e);
   }
 

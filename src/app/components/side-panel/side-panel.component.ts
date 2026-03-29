@@ -16,7 +16,7 @@
  */
 
 import {AsyncPipe, NgComponentOutlet} from '@angular/common';
-import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, Type, viewChild, ViewContainerRef} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, OnInit, output, runInInjectionContext, Type, viewChild, ViewContainerRef} from '@angular/core';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
@@ -60,7 +60,7 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatProgressSpinner,
   ],
 })
-export class SidePanelComponent implements AfterViewInit {
+export class SidePanelComponent implements AfterViewInit, OnInit {
   protected readonly Object = Object;
   appName = input('');
   userId = input('');
@@ -110,6 +110,8 @@ export class SidePanelComponent implements AfterViewInit {
   private readonly environmentInjector = inject(EnvironmentInjector);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
 
+  selectedIndex = 0;
+
   constructor() {
     effect(() => {
       const event = this.selectedEvent();
@@ -117,10 +119,24 @@ export class SidePanelComponent implements AfterViewInit {
       if (event && tabGroup) {
         // Event tab is index 0. Re-activate it if we select an event and another tab is active.
         if (tabGroup.selectedIndex !== 0) {
-          tabGroup.selectedIndex = 0;
+          this.selectedIndex = 0;
+          window.localStorage.setItem('adk-side-panel-selected-tab', '0');
         }
       }
     });
+  }
+
+  ngOnInit() {
+    const savedTab = window.localStorage.getItem('adk-side-panel-selected-tab');
+    if (savedTab !== null) {
+      this.selectedIndex = parseInt(savedTab, 10);
+    }
+  }
+
+  onTabChange(event: MatTabChangeEvent) {
+    this.tabChange.emit(event);
+    this.selectedIndex = event.index;
+    window.localStorage.setItem('adk-side-panel-selected-tab', event.index.toString());
   }
 
   // Feature flag references for use in template.

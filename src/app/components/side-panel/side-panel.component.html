@@ -12,7 +12,8 @@
 @if (appName() != "" && showSidePanel()) {
 <div class="tabs-container" [hidden]="isSessionLoading">
   <mat-tab-group
-    (selectedTabChange)="tabChange.emit($event)">
+    [(selectedIndex)]="selectedIndex"
+    (selectedTabChange)="onTabChange($event)">
     <mat-tab>
       <ng-template mat-tab-label>
         <span class="tab-label">{{ i18n.eventDetailsTabLabel }}</span>

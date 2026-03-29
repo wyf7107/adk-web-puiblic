@@ -14,30 +14,52 @@
  limitations under the License.
 -->
 
-<div class="trace-wrapper">
-  @if (invocTraces.size === 0) {
-  <div class="empty-state">{{ i18n.noInvocationsFound }}</div>
-  } @else {
-  <div class="trace-dropdown-wrapper">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="trace-dropdown">
-      <mat-label>Select Invocation</mat-label>
-      <mat-select [(value)]="selectedTraceId">
-        @for (invoc of invocTraces | keyvalue: mapOrderPreservingSort; track invoc; let i = $index) {
-          <mat-option [value]="invoc.key">
-            #{{ i + 1 }}: {{ invocToUserMsg.get(invoc.key) }}
-          </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+@if (selectedSpan() !== undefined) {
+<div class="event-details-container">
+  <div class="event-details-header">
+    <div style="margin: 0 auto 0 16px; font-weight: 500; font-family: 'Google Sans Mono', monospace; font-size: 13px; color: var(--mat-sys-on-surface); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 300px;">
+      {{ selectedSpan()?.name }}
+    </div>
+    <div style="flex-grow: 1"></div>
+    <button mat-icon-button (click)="traceService.selectedRow(undefined)" matTooltip="Clear selection">
+      <mat-icon>remove_selection</mat-icon>
+    </button>
   </div>
-  
-  @if (selectedTraceId) {
-  <div class="trace-content-wrapper">
-    <app-trace-tree
-      [spans]="invocTraces.get(selectedTraceId) || []"
-      [invocationId]="findInvocIdFromTraceId(selectedTraceId)"
-    ></app-trace-tree>
+  <div class="event-details-content">
+    <div class="vertical-tabs-sidebar">
+      <button mat-icon-button (click)="selectedDetailTab.set('span')" [class.active]="selectedDetailTab() === 'span'" matTooltip="Span Info" matTooltipPosition="right">
+        <mat-icon>info</mat-icon>
+      </button>
+      @if (selectedSpan()?.attributes && Object.keys(selectedSpan()!.attributes).length > 0) {
+        <button mat-icon-button (click)="selectedDetailTab.set('attributes')" [class.active]="selectedDetailTab() === 'attributes'" matTooltip="Attributes" matTooltipPosition="right">
+          <mat-icon>data_object</mat-icon>
+        </button>
+      }
+      @if (selectedSpan()?.logs && selectedSpan()!.logs!.length > 0) {
+        <button mat-icon-button (click)="selectedDetailTab.set('logs')" [class.active]="selectedDetailTab() === 'logs'" matTooltip="Logs" matTooltipPosition="right">
+          <mat-icon>list</mat-icon>
+        </button>
+      }
+    </div>
+    <div class="vertical-tabs-content">
+      @if (selectedDetailTab() === 'span') {
+        <div class="json-viewer-container">
+          <ngx-json-viewer [json]="selectedSpan()!"></ngx-json-viewer>
+        </div>
+      }
+      @if (selectedDetailTab() === 'attributes') {
+        <div class="json-viewer-container">
+          <ngx-json-viewer [json]="selectedSpan()!.attributes"></ngx-json-viewer>
+        </div>
+      }
+      @if (selectedDetailTab() === 'logs') {
+        <div class="json-viewer-container">
+          <ngx-json-viewer [json]="selectedSpan()!.logs"></ngx-json-viewer>
+        </div>
+      }
+    </div>
   </div>
-  }
-  }
 </div>
+} @else {
+  <div class="empty-state">Select a trace span to view its details</div>
+}

@@ -14,25 +14,76 @@
  * limitations under the License.
  */
 
-.trace-wrapper {
-  padding-left: 25px;
-  padding-right: 25px;
+:host {
+  display: block;
+  height: 100%;
+}
 
-  .empty-state {
-    padding-top: 1em;
-    text-align: center;
-    font-style: italic;
-  }
+.json-viewer-container {
+  margin: 10px;
+}
 
-  .trace-dropdown-wrapper {
-    margin-top: 16px;
-    margin-bottom: 8px;
-    
-    .trace-dropdown {
-      width: 100%;
+.event-details-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.event-details-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.vertical-tabs-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 48px;
+  border-right: 1px solid var(--mat-sys-outline-variant);
+  padding-top: 8px;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    border-radius: 6px !important;
+
+    ::ng-deep {
+      .mat-mdc-button-persistent-ripple,
+      .mat-mdc-button-ripple,
+      .mat-mdc-button-persistent-ripple::before,
+      .mat-mdc-focus-indicator {
+        border-radius: 6px !important;
+      }
+    }
+
+    &.active {
+      background-color: var(--mat-sys-secondary-container) !important;
+      color: var(--mat-sys-on-secondary-container) !important;
     }
   }
 }
 
+.vertical-tabs-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-y: auto;
+}
 
+.event-details-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  height: 48px;
+  flex-shrink: 0;
+}
 
+.empty-state {
+  padding: 16px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+  font-size: 14px;
+}

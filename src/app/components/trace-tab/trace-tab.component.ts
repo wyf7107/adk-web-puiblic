@@ -14,16 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {KeyValuePipe} from '@angular/common';
-import {ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import {MatDialogTitle} from '@angular/material/dialog';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
+import {ChangeDetectionStrategy, Component, inject, Input, signal} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {NgxJsonViewerModule} from 'ngx-json-viewer';
 
-import {LlmRequest} from '../../core/models/types';
-
-import {TraceTabMessagesInjectionToken} from './trace-tab.component.i18n';
-import {TraceTreeComponent} from './trace-tree/trace-tree.component';
+import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
@@ -32,94 +30,16 @@ import {TraceTreeComponent} from './trace-tree/trace-tree.component';
   styleUrl: './trace-tab.component.scss',
   standalone: true,
   imports: [
-    MatDialogTitle, TraceTreeComponent, KeyValuePipe,
-    MatFormFieldModule, MatSelectModule
+    MatButtonModule, MatIconModule, MatTooltipModule, NgxJsonViewerModule
   ]
 })
-
-export class TraceTabComponent implements OnInit, OnChanges {
-  @Input() traceData: any = [];
-  invocTraces = new Map<string, any[]>();
-  invocToUserMsg = new Map<string, string>();
-  protected readonly i18n = inject(TraceTabMessagesInjectionToken);
-
-  selectedTraceId: string | undefined;
-
-  constructor() {}
-
-  ngOnInit(): void {}
-
-  ngOnChanges(changes: SimpleChanges) {
-    if ('traceData' in changes) {
-      this.rebuildTrace();
-    }
-  }
-
-  rebuildTrace() {
-    const oldLatestTraceId = this.invocTraces.size > 0 ? Array.from(this.invocTraces.keys()).at(-1) : undefined;
-
-    this.invocTraces = this.traceData.reduce((map: any, item: any) => {
-      const key = item.trace_id;
-      const group = map.get(key);
-      if (group) {
-        group.push(item);
-        group.sort((a: any, b: any) => a.start_time - b.start_time);
-      } else {
-        map.set(key, [item]);
-      }
-      return map;
-    }, new Map<string, any[]>());
-
-    for (const [key, value] of this.invocTraces) {
-      this.invocToUserMsg.set(key, this.findUserMsgFromInvocGroup(value))
-    }
-
-    const newLatestTraceId = this.invocTraces.size > 0 ? Array.from(this.invocTraces.keys()).at(-1) : undefined;
-
-    if (!this.selectedTraceId || (oldLatestTraceId !== newLatestTraceId)) {
-      // Auto-select the last invocation
-      this.selectedTraceId = newLatestTraceId;
-    }
-  }
-
-
-  getArray(n: number): number[] {
-    return Array.from({length: n});
-  }
-
-  findUserMsgFromInvocGroup(group: any[]) {
-    // Find a span that has both invocation_id and llm_request
-    // The invocation_id is present on multiple spans, but llm_request
-    // is only on the call_llm span
-    const eventItem = group?.find(
-        item => item.attributes !== undefined &&
-            'gcp.vertex.agent.invocation_id' in item.attributes &&
-            'gcp.vertex.agent.llm_request' in item.attributes)
-
-    if (!eventItem) {
-      return '[no invocation id found]';
-    }
-
-    try {
-      const requestJson =
-          JSON.parse(eventItem.attributes['gcp.vertex.agent.llm_request']) as
-          LlmRequest
-      const userContent =
-          requestJson.contents.filter((c: any) => c.role == 'user').at(-1)
-      return userContent?.parts[0]?.text ?? '[attachment]';
-    } catch {
-      return '[error parsing request]';
-    }
-  }
-
-  findInvocIdFromTraceId(traceId: string) {
-    const group = this.invocTraces.get(traceId);
-    return group
-        ?.find(
-            item => item.attributes !== undefined &&
-                'gcp.vertex.agent.invocation_id' in item.attributes)
-        .attributes['gcp.vertex.agent.invocation_id']
-  }
-
-  mapOrderPreservingSort = (a: any, b: any): number => 0;
+export class TraceTabComponent {
+  // Input kept so we don't break side-panel binding, though not used here anymore
+  @Input() traceData: any[] = [];
+  
+  protected readonly traceService = inject(TRACE_SERVICE);
+  selectedSpan = toSignal(this.traceService.selectedTraceRow$);
+  selectedDetailTab = signal<'span' | 'attributes' | 'logs'>('span');
+  
+  readonly Object = Object;
 }

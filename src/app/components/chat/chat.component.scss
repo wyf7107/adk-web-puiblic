@@ -259,26 +259,6 @@
   }
 }
 
-.bottom-resize-handler {
-  height: 5px;
-  border-radius: 4px;
-  position: absolute;
-  display: block;
-  width: 20%;
-  left: 40%;
-  top: 0;
-  right: 0;
-  cursor: ns-resize;
-}
-
-.trace-detail-container {
-  position: relative;
-
-  app-trace-event {
-    padding-top: 8px;
-  }
-}
-
 .new-session-button {
   margin-top: 0px;
   margin-left: 50px;

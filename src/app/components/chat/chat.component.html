@@ -451,18 +451,6 @@
       }
     </mat-card>
 
-    @if (bottomPanelVisible) {
-    <div #bottomPanel class="trace-detail-container" appResizableBottomPanel>
-      <div class="bottom-resize-handler"></div>
-      <app-trace-event
-        [userId]="userId"
-        [appName]="appName"
-        [sessionId]="sessionId"
-        (panelClosed)="closeTraceEventDetailPanel()"
-      ></app-trace-event>
-    </div>
-    }
-
   </div>
   }
 

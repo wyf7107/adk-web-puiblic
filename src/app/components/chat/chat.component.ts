@@ -67,7 +67,6 @@ import { LOGO_COMPONENT } from '../../injection_tokens';
 import { ListResponse } from '../../core/services/interfaces/types';
 import { UI_STATE_SERVICE } from '../../core/services/interfaces/ui-state';
 import { LOCATION_SERVICE } from '../../core/services/location.service';
-import { ResizableBottomDirective } from '../../directives/resizable-bottom.directive';
 import { ResizableDrawerDirective } from '../../directives/resizable-drawer.directive';
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { AgentStructureGraphDialogComponent } from '../agent-structure-graph-dialog/agent-structure-graph-dialog';
@@ -80,7 +79,6 @@ import { EvalTabComponent } from '../eval-tab/eval-tab.component';
 import { DeleteSessionDialogComponent, DeleteSessionDialogData, } from '../session-tab/delete-session-dialog/delete-session-dialog.component';
 import { SessionTabComponent } from '../session-tab/session-tab.component';
 import { SidePanelComponent } from '../side-panel/side-panel.component';
-import { TraceEventComponent } from '../trace-tab/trace-event/trace-event.component';
 import { ViewImageDialogComponent } from '../view-image-dialog/view-image-dialog.component';
 import { InlineEditComponent } from '../inline-edit/inline-edit.component';
 
@@ -156,11 +154,9 @@ const BIDI_STREAMING_RESTART_WARNING =
     MatCard,
     MatToolbar,
     NgComponentOutlet,
-    ResizableBottomDirective,
     MatFormField,
     MatInput,
     MatProgressSpinner,
-    TraceEventComponent,
     AsyncPipe,
     ChatPanelComponent,
     AgentStructureGraphDialogComponent,
@@ -211,7 +207,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   sidePanel = viewChild.required(SidePanelComponent);
   drawerSessionTab = viewChild<SessionTabComponent>('drawerSessionTab');
   evalTab = viewChild(EvalTabComponent);
-  bottomPanelRef = viewChild.required<ElementRef>('bottomPanel');
 
   isChatMode = signal(true);
   isEvalCaseEditing = signal(false);
@@ -363,7 +358,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.featureFlagService.isDeveloperUiDisclaimerEnabled();
 
   // Trace detail
-  bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
 
   // Builder
@@ -444,16 +438,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
 
-
-    this.traceService.selectedTraceRow$.subscribe(node => {
-      const eventId = node?.attributes['gcp.vertex.agent.event_id'];
-
-      if (eventId && this.eventData.has(eventId)) {
-        this.bottomPanelVisible = true;
-      } else {
-        this.bottomPanelVisible = false;
-      }
-    });
 
     this.traceService.hoveredMessageIndices$.subscribe(
       i => this.hoveredEventMessageIndices = i);
@@ -1457,7 +1441,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.evalTab()?.resetEvalResults();
     this.traceData = [];
-    this.bottomPanelVisible = false;
   }
 
   async toggleAudioRecording() {
@@ -1647,7 +1630,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.traceService.setMessages(this.uiEvents());
         this.changeDetectorRef.detectChanges();
       });
-    this.bottomPanelVisible = false;
     this.changeDetectorRef.detectChanges();
   }
 
@@ -1985,7 +1967,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.uiEvents.set([]);
     this.artifacts = [];
     this.traceData = [];
-    this.bottomPanelVisible = false;
 
     // Clear selected event
     this.selectedEvent = undefined;
@@ -2473,11 +2454,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updatedSessionState.set(null);
   }
 
-  closeTraceEventDetailPanel() {
-    this.bottomPanelVisible = false;
-    this.traceService.selectedRow(undefined);
-    this.traceService.setHoveredMessages(undefined, '')
-  }
+  
 
   protected importSession() {
     const input = document.createElement('input');

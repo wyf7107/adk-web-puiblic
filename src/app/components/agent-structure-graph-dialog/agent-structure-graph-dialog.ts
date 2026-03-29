@@ -59,6 +59,14 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   private navigationStack: NavigationStackItem[] = [];
   public breadcrumbs = signal<string[]>([]);
 
+  // Panning and zooming state
+  private isPanning = false;
+  private startPanX = 0;
+  private startPanY = 0;
+  private scale = 1;
+  private translateX = 0;
+  private translateY = 0;
+
   onBackdropClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
     if (
@@ -122,6 +130,8 @@ export class AgentStructureGraphDialogComponent implements OnInit {
             addSvgNodeHoverEffects('.svg-container', (nodeName) => {
               this.onNodeClick(nodeName);
             }, expandableNodes);
+
+            this.initializeSvgTransform();
           }, 100);
         } catch (error) {
           console.error('Error rendering graph:', error);
@@ -193,6 +203,103 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     });
 
     return expandableNodes;
+  }
+
+  // --- Pan and Zoom logic ---
+  private getSvgElement(): SVGSVGElement | null {
+    return document.querySelector('.svg-container svg') as SVGSVGElement | null;
+  }
+
+  private applyTransform() {
+    const svg = this.getSvgElement();
+    if (svg) {
+      svg.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+    }
+  }
+
+  private initializeSvgTransform() {
+    const svg = this.getSvgElement();
+    const container = document.querySelector('.svg-container') as HTMLElement;
+    if (!svg || !container) return;
+
+    const svgRect = svg.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    
+    // Scale slightly to fit inside container with some padding if it's too big
+    const padding = 48;
+    const scaleX = (containerRect.width - padding) / svgRect.width;
+    const scaleY = (containerRect.height - padding) / svgRect.height;
+    this.scale = Math.min(1, scaleX, scaleY);
+
+    const scaledWidth = svgRect.width * this.scale;
+    const scaledHeight = svgRect.height * this.scale;
+
+    // Center properly
+    this.translateX = (containerRect.width - scaledWidth) / 2;
+    this.translateY = (containerRect.height - scaledHeight) / 2;
+
+    this.applyTransform();
+  }
+
+  onWheel(event: WheelEvent) {
+    const container = document.querySelector('.svg-container') as HTMLElement;
+    const svg = this.getSvgElement();
+    if (!container || !svg) return;
+
+    // Prevent modal scrolling
+    event.preventDefault();
+
+    const clampedDelta = Math.max(-100, Math.min(100, event.deltaY));
+    const zoomFactor = Math.pow(1.002, -clampedDelta);
+    const newScale = this.scale * zoomFactor;
+
+    const rect = container.getBoundingClientRect();
+    const posX = event.clientX - rect.left;
+    const posY = event.clientY - rect.top;
+
+    const localX = (posX - this.translateX) / this.scale;
+    const localY = (posY - this.translateY) / this.scale;
+
+    this.translateX = posX - localX * newScale;
+    this.translateY = posY - localY * newScale;
+    this.scale = newScale;
+
+    this.applyTransform();
+  }
+
+  onMouseDown(event: MouseEvent) {
+    if (event.button !== 0) return; // Only target left clicks
+    const target = event.target as HTMLElement;
+    if (!target.closest('svg')) return; // Ensure they grabbed the small SVG panel!
+
+    this.isPanning = true;
+    this.startPanX = event.clientX;
+    this.startPanY = event.clientY;
+
+    const svg = this.getSvgElement();
+    if (svg) svg.style.cursor = 'grabbing';
+  }
+
+  onMouseMove(event: MouseEvent) {
+    if (!this.isPanning) return;
+    
+    this.translateX += (event.clientX - this.startPanX);
+    this.translateY += (event.clientY - this.startPanY);
+
+    this.startPanX = event.clientX;
+    this.startPanY = event.clientY;
+
+    this.applyTransform();
+  }
+
+  onMouseUp() {
+    this.isPanning = false;
+    const svg = this.getSvgElement();
+    if (svg) svg.style.cursor = '';
+  }
+
+  resetZoomPan() {
+    this.initializeSvgTransform();
   }
 
 }

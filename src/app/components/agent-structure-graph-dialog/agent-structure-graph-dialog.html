@@ -57,7 +57,13 @@
           <p class="error-message">{{ errorMessage() }}</p>
         </div>
       } @else if (renderedGraph()) {
-        <div class="svg-container" [innerHTML]="renderedGraph()"></div>
+        <div class="svg-container" 
+             [innerHTML]="renderedGraph()"
+             (wheel)="onWheel($event)"
+             (mousedown)="onMouseDown($event)"
+             (mousemove)="onMouseMove($event)"
+             (mouseup)="onMouseUp()"
+             (mouseleave)="onMouseUp()"></div>
       } @else {
         <div class="no-graph-container">
           <mat-icon class="large-icon">account_tree</mat-icon>

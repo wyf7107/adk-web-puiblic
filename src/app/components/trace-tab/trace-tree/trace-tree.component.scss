@@ -55,10 +55,32 @@
   line-height: 20px;
   letter-spacing: 0px;
   margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+
+  span {
+    white-space: nowrap;
+    margin-right: 4px;
+  }
 }
 
 .invocation-id {
   font-family: 'Google Sans Mono', monospace;
+  max-width: 64px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-button {
+  transform: scale(0.65);
+  margin-left: -4px;
+}
+
+.total-latency {
+  color: var(--trace-tree-total-latency-color, #9aa0a6);
+  font-weight: 400;
+  margin-left: 8px;
 }
 
 .trace-row-left span,

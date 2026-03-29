@@ -14,7 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {ClipboardModule, Clipboard} from '@angular/cdk/clipboard';
+import {ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {Span} from '../../../core/models/Trace';
 import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
@@ -24,14 +28,16 @@ import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
   selector: 'app-trace-tree',
   templateUrl: './trace-tree.component.html',
   styleUrl: './trace-tree.component.scss',
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule, ClipboardModule]
 })
-export class TraceTreeComponent {
+export class TraceTreeComponent implements OnInit, OnChanges {
   @Input() spans: any[] = [];
   @Input() invocationId: string = '';
   tree: Span[] = [];
   eventData: Map<string, any>|undefined;
   baseStartTimeMs = 0;
   totalDurationMs = 1;
+  rootLatencyMs = 0;
   flatTree: {span: Span; level: number}[] = [];
   traceLabelIconMap = new Map<string, string>([
     ['Invocation', 'start'],
@@ -44,18 +50,47 @@ export class TraceTreeComponent {
   ]);
   selectedRow: Span|undefined = undefined;
   private readonly traceService = inject(TRACE_SERVICE);
+  private readonly clipboard = inject(Clipboard);
 
   constructor() {}
 
+  copyInvocationId() {
+    if (this.invocationId) {
+      this.clipboard.copy(this.invocationId);
+    }
+  }
+
   ngOnInit(): void {
+    this.rebuildTree();
+    this.traceService.selectedTraceRow$.subscribe(
+        span => this.selectedRow = span);
+    this.traceService.eventData$.subscribe(e => this.eventData = e);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['spans'] && !changes['spans'].isFirstChange()) {
+      this.rebuildTree();
+    }
+  }
+
+  rebuildTree() {
+    if (!this.spans || this.spans.length === 0) {
+      this.tree = [];
+      this.flatTree = [];
+      this.rootLatencyMs = 0;
+      return;
+    }
     this.tree = this.buildSpanTree(this.spans);
     this.flatTree = this.flattenTree(this.tree);
     const times = this.getGlobalTimes(this.spans);
     this.baseStartTimeMs = times.start;
     this.totalDurationMs = times.duration;
-    this.traceService.selectedTraceRow$.subscribe(
-        span => this.selectedRow = span);
-    this.traceService.eventData$.subscribe(e => this.eventData = e);
+    
+    if (this.tree && this.tree.length > 0) {
+      this.rootLatencyMs = this.toMs(this.tree[0].end_time) - this.toMs(this.tree[0].start_time);
+    } else {
+      this.rootLatencyMs = 0;
+    }
   }
 
 

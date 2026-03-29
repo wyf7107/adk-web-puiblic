@@ -6,5 +6,201 @@
   @if (type !== 'message' && type !== 'output') {
     <div class="output-chip-header">{{ type }}</div>
   }
-  <ng-content></ng-content>
+  @if (type === 'message' || type === 'thought') {
+    @if (uiEvent.attachments) {
+      <div class="attachments">
+        @for (file of uiEvent.attachments; track file) {
+        <div class="attachment">
+          @if (file.file.type.startsWith("image/")) {
+          <img [src]="file.url" alt="attachment" class="image-preview-chat" />
+          } @if (!file.file.type.startsWith("image/")) {
+          <mat-icon>insert_drive_file</mat-icon>
+          @if (file.url) {
+          <a [href]="file.url" download>{{ file.file.name }}</a>
+          } @else {
+          {{ file.file.name }}
+          }
+          }
+        </div>
+        }
+      </div>
+    }
+    @if (uiEvent.thought || uiEvent.text || uiEvent.renderedContent || uiEvent.a2uiData || uiEvent.event.inputTranscription || uiEvent.event.outputTranscription) {
+      <div>
+        <div>
+          @if (uiEvent.text) { 
+              @if (uiEvent.isEditing) {
+          <div class="edit-message-container">
+            <textarea
+              #messageTextarea
+              class="message-textarea"
+              [ngModel]="userEditEvalCaseMessage"
+              (ngModelChange)="userEditEvalCaseMessageChange.emit($event)"
+              rows="4"
+              cols="80"
+              (keydown)="handleKeydown.emit({event: $event, message: uiEvent})"
+            ></textarea>
+            <div class="edit-message-buttons-container">
+              <span
+                class="material-symbols-outlined cancel-edit-button"
+                [matTooltip]="i18n.cancelEditingTooltip"
+                (click)="cancelEditMessage.emit(uiEvent)"
+              >
+                close
+              </span>
+              <span
+                class="material-symbols-outlined save-edit-button"
+                [matTooltip]="i18n.saveEvalMessageTooltip"
+                (click)="saveEditMessage.emit(uiEvent)"
+              >
+                check
+              </span>
+            </div>
+          </div>
+          } @else {
+            <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: uiEvent.text!, thought: uiEvent.thought}"></ng-container>
+          }
+        }
+        </div>
+        @if (uiEvent.renderedContent) {
+        <div>
+          <div [innerHTML]="renderGooglerSearch(uiEvent.renderedContent)"></div>
+        </div>
+        }
+        @if (uiEvent.a2uiData) {
+        <app-a2ui-canvas
+          [beginRendering]="uiEvent.a2uiData.beginRendering"
+          [surfaceUpdate]="uiEvent.a2uiData.surfaceUpdate"
+          [dataModelUpdate]="uiEvent.a2uiData.dataModelUpdate">
+        </app-a2ui-canvas>
+        }
+      </div>
+    }
+    @if (uiEvent.executableCode) {
+      <code> {{ uiEvent.executableCode.code }} </code>
+    } @if (uiEvent.codeExecutionResult) {
+      <div>
+        <div>{{ i18n.outcomeLabel }}: {{ uiEvent.codeExecutionResult.outcome }}</div>
+        <div>{{ i18n.outputLabel }}: {{ uiEvent.codeExecutionResult.output }}</div>
+      </div>
+    } @if (uiEvent.inlineData) { @if (uiEvent.role === "bot") {
+      <div>
+        <div>
+          @switch (uiEvent.inlineData.mediaType) { @case (MediaType.IMAGE) {
+          <div class="generated-image-container">
+            <img
+              class="generated-image"
+              alt="image"
+              [src]="uiEvent.inlineData.data"
+              (click)="openViewImageDialog.emit(uiEvent.inlineData.data)"
+            />
+          </div>
+          } @case (MediaType.AUDIO) {
+          <div>
+            <app-audio-player [base64data]="uiEvent.inlineData.data"></app-audio-player>
+          </div>
+          } @case (MediaType.TEXT) {
+          <div>
+            <div class="html-artifact-container">
+              <mat-icon>description</mat-icon>
+              <button
+                class="link-style-button"
+                (click)="
+                                openBase64InNewTab.emit({
+                                  data: uiEvent.inlineData.data,
+                                  mimeType: uiEvent.inlineData.mimeType
+                                })
+                              "
+              >
+                {{ uiEvent.inlineData.name }}
+              </button>
+            </div>
+          </div>
+          } @default {
+          <div>
+            <button
+              class="link-style-button"
+              (click)="
+                              openBase64InNewTab.emit({
+                                data: uiEvent.inlineData.data,
+                                mimeType: uiEvent.inlineData.mimeType
+                              })
+                            "
+            >
+              {{ uiEvent.inlineData.name }}
+            </button>
+          </div>
+          } }
+        </div>
+      </div>
+    } @else {
+      <div>
+        @if (uiEvent.inlineData.mimeType.startsWith("image/")) {
+        <div>
+          <img
+            class="image-preview-chat"
+            alt="image"
+            [src]="uiEvent.inlineData.data"
+            (click)="openViewImageDialog.emit(uiEvent.inlineData.data)"
+          />
+        </div>
+        } @else {
+        <div class="attachment">
+          <mat-icon>insert_drive_file</mat-icon>
+          <a [href]="uiEvent.inlineData.data" download>{{ uiEvent.inlineData.displayName }}</a>
+        </div>
+        }
+      </div>
+    } } @if (uiEvent.failedMetric && uiEvent.evalStatus === 2) {
+      <div class="eval-compare-container">
+        <div class="actual-expected-compare-container">
+          @if (uiEvent.actualInvocationToolUses) {
+          <div class="actual-result">
+            <div class="eval-response-header header-actual">{{ i18n.actualToolUsesLabel }}</div>
+            <ngx-json-viewer [json]="uiEvent.actualInvocationToolUses"></ngx-json-viewer>
+          </div>
+          <div class="expected-result">
+            <div class="eval-response-header header-expected">{{ i18n.expectedToolUsesLabel }}</div>
+            <ngx-json-viewer [json]="uiEvent.expectedInvocationToolUses"></ngx-json-viewer>
+          </div>
+          } @else if (uiEvent.actualFinalResponse) {
+          <div class="actual-result">
+            <div class="eval-response-header header-actual">{{ i18n.actualResponseLabel }}</div>
+            <div>{{ uiEvent.actualFinalResponse }}</div>
+          </div>
+          <div class="expected-result">
+            <div class="eval-response-header header-expected">{{ i18n.expectedResponseLabel }}</div>
+            <div>{{ uiEvent.expectedFinalResponse }}</div>
+          </div>
+          }
+        </div>
+        @if (uiEvent.evalScore !== undefined && uiEvent.evalThreshold !== undefined) {
+        <div class="score-threshold-container">
+          <span class="header-actual">{{ i18n.matchScoreLabel }}: {{ uiEvent.evalScore }}</span>
+          <span class="header-expected"
+            >{{ i18n.thresholdLabel }}: {{ uiEvent.evalThreshold }}</span
+          >
+        </div>
+        }
+      </div>
+    }
+  } @else if (type === 'output') {
+      <ngx-json-viewer 
+        [json]="uiEvent.event.output!"
+        [appJsonTooltip]="uiEvent.event.nodeInfo?.['outputFor'] || uiEvent.nodePath"
+        appJsonTooltipTitle="Node Output for"
+      ></ngx-json-viewer>
+  } @else if (type === 'error') {
+      <ngx-json-viewer 
+        [json]="uiEvent.error!"
+        [appJsonTooltip]="uiEvent.error"
+        appJsonTooltipTitle="Error Details"
+      ></ngx-json-viewer>
+  } @else if (type === 'transcription') {
+      @if (role === 'user' && uiEvent.event.inputTranscription) {
+        {{ uiEvent.event.inputTranscription.text }}
+      } @else if (role === 'bot' && uiEvent.event.outputTranscription) {
+        {{ uiEvent.event.outputTranscription.text }}
+      }
+  }
 </div>

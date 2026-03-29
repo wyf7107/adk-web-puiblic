@@ -11,11 +11,8 @@ import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/model
 import type {EvalCase} from '../../core/models/Eval';
 import {UiEvent} from '../../core/models/UiEvent';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
 import {WorkflowGraphTooltipDirective} from '../../directives/workflow-graph-tooltip.directive';
-import {A2uiCanvasComponent} from '../a2ui-canvas/a2ui-canvas.component';
 import {MediaType} from '../artifact-tab/artifact-tab.component';
-import {AudioPlayerComponent} from '../audio-player/audio-player.component';
 import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
 import {ComputerActionComponent} from '../computer-action/computer-action.component';
 import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
@@ -43,8 +40,6 @@ import {ContentBubbleComponent} from '../content-bubble/content-bubble.component
     MatIconModule,
     MatButtonModule,
     NgxJsonViewerModule,
-    A2uiCanvasComponent,
-    AudioPlayerComponent,
     MessageFeedbackComponent,
     MatTooltipModule,
     NgClass,
@@ -54,7 +49,6 @@ import {ContentBubbleComponent} from '../content-bubble/content-bubble.component
     HoverInfoButtonComponent,
     ChatAvatarComponent,
     ContentBubbleComponent,
-    JsonTooltipDirective,
   ],
 })
 export class EventRowComponent {

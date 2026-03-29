@@ -22,9 +22,9 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="trace-dropdown">
       <mat-label>Select Invocation</mat-label>
       <mat-select [(value)]="selectedTraceId">
-        @for (invoc of invocTraces | keyvalue: mapOrderPreservingSort; track invoc) {
+        @for (invoc of invocTraces | keyvalue: mapOrderPreservingSort; track invoc; let i = $index) {
           <mat-option [value]="invoc.key">
-            {{ invocToUserMsg.get(invoc.key) }}
+            #{{ i + 1 }}: {{ invocToUserMsg.get(invoc.key) }}
           </mat-option>
         }
       </mat-select>

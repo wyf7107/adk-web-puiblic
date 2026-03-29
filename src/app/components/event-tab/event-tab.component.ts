@@ -90,5 +90,9 @@ export class EventTabComponent {
     return new Date(inMs).toLocaleString();
   }
 
+  isObject(value: any): boolean {
+    return value !== null && typeof value === 'object';
+  }
+
   protected readonly Object = Object;
 }

@@ -83,6 +83,28 @@
               </tbody>
             </table>
           }
+
+          @if (selectedEvent()?.actions && Object.keys(selectedEvent()!.actions!).length > 0) {
+            <table class="info-table">
+              <thead>
+                <tr><th colspan="2">Actions</th></tr>
+              </thead>
+              <tbody>
+                @for (key of Object.keys(selectedEvent()!.actions!); track key) {
+                  <tr>
+                    <td>{{ key }}</td>
+                    <td>
+                      @if (isObject($any(selectedEvent()!.actions)[key])) {
+                        <ngx-json-viewer [json]="$any(selectedEvent()!.actions)[key]"></ngx-json-viewer>
+                      } @else {
+                        {{ $any(selectedEvent()!.actions)[key] }}
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
         </div>
       }
       @if (selectedDetailTab === 'raw') {

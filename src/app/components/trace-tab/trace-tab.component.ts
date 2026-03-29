@@ -56,6 +56,8 @@ export class TraceTabComponent implements OnInit, OnChanges {
   }
 
   rebuildTrace() {
+    const oldLatestTraceId = this.invocTraces.size > 0 ? Array.from(this.invocTraces.keys()).at(-1) : undefined;
+
     this.invocTraces = this.traceData.reduce((map: any, item: any) => {
       const key = item.trace_id;
       const group = map.get(key);
@@ -72,9 +74,11 @@ export class TraceTabComponent implements OnInit, OnChanges {
       this.invocToUserMsg.set(key, this.findUserMsgFromInvocGroup(value))
     }
 
-    if (!this.selectedTraceId && this.invocTraces.size > 0) {
+    const newLatestTraceId = this.invocTraces.size > 0 ? Array.from(this.invocTraces.keys()).at(-1) : undefined;
+
+    if (!this.selectedTraceId || (oldLatestTraceId !== newLatestTraceId)) {
       // Auto-select the last invocation
-      this.selectedTraceId = Array.from(this.invocTraces.keys()).at(-1);
+      this.selectedTraceId = newLatestTraceId;
     }
   }
 

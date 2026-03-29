@@ -446,6 +446,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (span) {
          this.selectedEvent = undefined;
          this.selectedEventIndex = undefined;
+         this.selectedMessageIndex = undefined;
          this.changeDetectorRef.detectChanges();
       }
     });
@@ -2169,6 +2170,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
     this.selectedMessageIndex = messageIndex !== undefined ? messageIndex : this.uiEvents().findIndex(msg => msg.event.id === key);
+
+    if (this.chatPanel()?.viewMode() !== 'events') {
+      this.chatPanel()?.onViewModeChange('events');
+    }
+    
+    // Auto-scroll to the selected event row in the chat panel
+    this.chatPanel()?.scrollToSelectedMessage(this.selectedMessageIndex);
 
     let filter = undefined;
     if (this.isEventFilteringEnabled() && this.selectedEvent.invocationId &&

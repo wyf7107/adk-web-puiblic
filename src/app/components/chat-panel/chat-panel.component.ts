@@ -550,18 +550,24 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
     // Emit click event for the new index
     this.clickEvent.emit(newIndex);
+    this.scrollToSelectedMessage(newIndex);
+  }
 
-    // Scroll the selected message into view
+  scrollToSelectedMessage(index?: number) {
+    const targetIndex = index !== undefined ? index : this.selectedMessageIndex;
+    if (targetIndex === undefined) return;
+
+    // Scroll the selected message into view after a short delay to allow DOM updates
     setTimeout(() => {
       if (!this.scrollContainer?.nativeElement) return;
 
       const messageElements =
           this.scrollContainer.nativeElement.querySelectorAll(
               '.message-row-container');
-      if (messageElements && messageElements[newIndex]) {
-        messageElements[newIndex].scrollIntoView(
+      if (messageElements && messageElements[targetIndex]) {
+        messageElements[targetIndex].scrollIntoView(
             {behavior: 'smooth', block: 'nearest', inline: 'nearest'});
       }
-    }, 0);
+    }, 50);
   }
 }

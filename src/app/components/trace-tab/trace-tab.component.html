@@ -18,7 +18,7 @@
 <div class="event-details-container">
   <div class="event-details-header">
     <div style="margin: 0 auto 0 16px; font-weight: 500; font-family: 'Google Sans Mono', monospace; font-size: 13px; color: var(--mat-sys-on-surface); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 300px;">
-      {{ selectedSpan()?.name }}
+      Span {{ selectedSpan()?.name }}
     </div>
     <div style="flex-grow: 1"></div>
     <button mat-icon-button (click)="traceService.selectedRow(undefined)" matTooltip="Clear selection">
@@ -27,34 +27,62 @@
   </div>
   <div class="event-details-content">
     <div class="vertical-tabs-sidebar">
-      <button mat-icon-button (click)="selectedDetailTab.set('span')" [class.active]="selectedDetailTab() === 'span'" matTooltip="Span Info" matTooltipPosition="right">
+      <button mat-icon-button (click)="selectedDetailTab.set('info')" [class.active]="selectedDetailTab() === 'info'" matTooltip="Info" matTooltipPosition="right">
         <mat-icon>info</mat-icon>
       </button>
-      @if (selectedSpan()?.attributes && Object.keys(selectedSpan()!.attributes).length > 0) {
-        <button mat-icon-button (click)="selectedDetailTab.set('attributes')" [class.active]="selectedDetailTab() === 'attributes'" matTooltip="Attributes" matTooltipPosition="right">
-          <mat-icon>data_object</mat-icon>
-        </button>
-      }
-      @if (selectedSpan()?.logs && selectedSpan()!.logs!.length > 0) {
-        <button mat-icon-button (click)="selectedDetailTab.set('logs')" [class.active]="selectedDetailTab() === 'logs'" matTooltip="Logs" matTooltipPosition="right">
-          <mat-icon>list</mat-icon>
-        </button>
-      }
+      <button mat-icon-button (click)="selectedDetailTab.set('raw')" [class.active]="selectedDetailTab() === 'raw'" matTooltip="Raw JSON" matTooltipPosition="right">
+        <mat-icon>data_object</mat-icon>
+      </button>
     </div>
     <div class="vertical-tabs-content">
-      @if (selectedDetailTab() === 'span') {
+      @if (selectedDetailTab() === 'info') {
+        <div class="info-tables-container">
+          <table class="info-table">
+            <thead>
+              <tr><th colspan="2">Basic Info</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Name</td><td>{{ selectedSpan()?.name }}</td></tr>
+              <tr><td>Span ID</td><td>{{ selectedSpan()?.span_id }}</td></tr>
+              <tr><td>Parent ID</td><td>{{ selectedSpan()?.parent_span_id || 'None' }}</td></tr>
+              <tr><td>Trace ID</td><td>{{ selectedSpan()?.trace_id }}</td></tr>
+              <tr><td>Start Time</td><td>{{ formatTime(selectedSpan()?.start_time) }}</td></tr>
+              <tr><td>End Time</td><td>{{ formatTime(selectedSpan()?.end_time) }}</td></tr>
+            </tbody>
+          </table>
+
+          @if (selectedSpan()?.attributes && Object.keys(selectedSpan()!.attributes).length > 0) {
+            <table class="info-table">
+              <thead>
+                <tr><th colspan="2">Attributes</th></tr>
+              </thead>
+              <tbody>
+                @for (key of Object.keys(selectedSpan()!.attributes); track key) {
+                  <tr><td>{{ key }}</td><td>{{ selectedSpan()!.attributes[key] }}</td></tr>
+                }
+              </tbody>
+            </table>
+          }
+
+          @if (selectedSpan()?.children && selectedSpan()!.children!.length > 0) {
+            <table class="info-table">
+              <thead>
+                <tr><th>Children</th></tr>
+              </thead>
+              <tbody>
+                @for (child of selectedSpan()!.children; track child.span_id) {
+                  <tr>
+                    <td>{{ child.name }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+      @if (selectedDetailTab() === 'raw') {
         <div class="json-viewer-container">
           <ngx-json-viewer [json]="selectedSpan()!"></ngx-json-viewer>
-        </div>
-      }
-      @if (selectedDetailTab() === 'attributes') {
-        <div class="json-viewer-container">
-          <ngx-json-viewer [json]="selectedSpan()!.attributes"></ngx-json-viewer>
-        </div>
-      }
-      @if (selectedDetailTab() === 'logs') {
-        <div class="json-viewer-container">
-          <ngx-json-viewer [json]="selectedSpan()!.logs"></ngx-json-viewer>
         </div>
       }
     </div>

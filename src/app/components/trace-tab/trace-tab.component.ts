@@ -39,7 +39,12 @@ export class TraceTabComponent {
   
   protected readonly traceService = inject(TRACE_SERVICE);
   selectedSpan = toSignal(this.traceService.selectedTraceRow$);
-  selectedDetailTab = signal<'span' | 'attributes' | 'logs'>('span');
+  selectedDetailTab = signal<'info' | 'raw'>('info');
+
+  formatTime(nanos: number | undefined): string {
+    if (!nanos) return 'N/A';
+    return new Date(nanos / 1_000_000).toISOString();
+  }
   
   readonly Object = Object;
 }

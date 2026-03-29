@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ChangeDetectionStrategy, Component, inject, Input, output, signal, Injectable} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Input, output, signal, Injectable, HostListener} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -130,6 +130,26 @@ export class TraceTabComponent {
     if (event.pageIndex >= 0 && event.pageIndex < this.orderedTraceData.length) {
       this.traceService.selectedRow(this.orderedTraceData[event.pageIndex]);
     }
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardNavigation(event: KeyboardEvent) {
+    if (this.selectedSpanIndex === undefined) return;
+
+    // Only handle arrow keys
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+
+    event.preventDefault();
+
+    // Navigate to next or previous
+    let newIndex: number;
+    if (event.key === 'ArrowDown') {
+      newIndex = this.selectedSpanIndex + 1 >= this.orderedTraceData.length ? 0 : this.selectedSpanIndex + 1;
+    } else {
+      newIndex = this.selectedSpanIndex - 1 < 0 ? this.orderedTraceData.length - 1 : this.selectedSpanIndex - 1;
+    }
+
+    this.traceService.selectedRow(this.orderedTraceData[newIndex]);
   }
   
   readonly Object = Object;

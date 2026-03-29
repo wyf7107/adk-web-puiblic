@@ -33,6 +33,7 @@
 .trace-row {
   align-items: center;
   cursor: pointer;
+  scroll-margin-top: 40px;
 
   &:hover {
     background-color: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));

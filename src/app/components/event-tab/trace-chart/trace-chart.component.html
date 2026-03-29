@@ -31,14 +31,14 @@
         <div class="trace-label" [style.width.px]="400 - node.level * 20">
           {{ formatSpanName(node.span.name) }}
           <span class="trace-duration">
-            ({{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms)
+            ({{ formatDuration(node.span.end_time - node.span.start_time) }})
           </span>
         </div>
         <div class="trace-bar-container">
           <div class="trace-bar"
             [style.left.%]="getRelativeStart(node.span)"
             [style.width.%]="getRelativeWidth(node.span)">
-            {{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms
+            {{ formatDuration(node.span.end_time - node.span.start_time) }}
           </div>
         </div>
       </div>

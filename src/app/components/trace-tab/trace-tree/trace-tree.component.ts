@@ -37,7 +37,7 @@ export class TraceTreeComponent implements OnInit, OnChanges {
   eventData: Map<string, any>|undefined;
   baseStartTimeMs = 0;
   totalDurationMs = 1;
-  rootLatencyMs = 0;
+  rootLatencyNanos = 0;
   flatTree: {span: Span; level: number}[] = [];
   traceLabelIconMap = new Map<string, string>([
     ['Invocation', 'start'],
@@ -77,7 +77,7 @@ export class TraceTreeComponent implements OnInit, OnChanges {
     if (!this.spans || this.spans.length === 0) {
       this.tree = [];
       this.flatTree = [];
-      this.rootLatencyMs = 0;
+      this.rootLatencyNanos = 0;
       return;
     }
     this.tree = this.buildSpanTree(this.spans);
@@ -93,9 +93,9 @@ export class TraceTreeComponent implements OnInit, OnChanges {
     this.totalDurationMs = times.duration;
     
     if (this.tree && this.tree.length > 0) {
-      this.rootLatencyMs = this.toMs(this.tree[0].end_time) - this.toMs(this.tree[0].start_time);
+      this.rootLatencyNanos = this.tree[0].end_time - this.tree[0].start_time;
     } else {
-      this.rootLatencyMs = 0;
+      this.rootLatencyNanos = 0;
     }
   }
 
@@ -127,6 +127,18 @@ export class TraceTreeComponent implements OnInit, OnChanges {
 
   toMs(nanos: number): number {
     return nanos / 1_000_000;
+  }
+
+  formatDuration(nanos: number): string {
+    if (nanos === 0) return '0us';
+    if (nanos < 1000) return `${nanos}ns`;
+    if (nanos < 1_000_000) return `${(nanos / 1000).toFixed(2)}us`;
+    if (nanos < 1_000_000_000) return `${(nanos / 1_000_000).toFixed(2)}ms`;
+    if (nanos < 60_000_000_000) return `${(nanos / 1_000_000_000).toFixed(2)}s`;
+    
+    const minutes = Math.floor(nanos / 60_000_000_000);
+    const seconds = ((nanos % 60_000_000_000) / 1_000_000_000).toFixed(2);
+    return `${minutes}m ${seconds}s`;
   }
 
   getRelativeStart(span: Span): number {

@@ -21,7 +21,7 @@
     <button mat-icon-button class="copy-button" (click)="copyInvocationId()" matTooltip="Copy Invocation ID">
       <mat-icon>content_copy</mat-icon>
     </button>
-    <span class="total-latency">Total latency: {{rootLatencyMs.toFixed(2)}}ms</span>
+    <span class="total-latency">Total latency: {{formatDuration(rootLatencyNanos)}}</span>
   </div>
   <div class="trace-container">
     @for (node of flatTree; track node) {
@@ -59,13 +59,13 @@
           [style.left.%]="getRelativeStart(node.span)"
           [style.width.%]="getRelativeWidth(node.span)"
         >
-          {{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms
+          {{ formatDuration(node.span.end_time - node.span.start_time) }}
         </div>
         @if (getRelativeWidth(node.span) < 10) {
         <span
           class="short-trace-bar-duration"
           [style.left.%]="getRelativeStart(node.span) + 5"
-          >{{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms</span
+          >{{ formatDuration(node.span.end_time - node.span.start_time) }}</span
         >
         }
       </div>

@@ -106,6 +106,18 @@ export class TraceChartComponent implements OnInit {
     return nanos / 1_000_000;
   }
 
+  formatDuration(nanos: number): string {
+    if (nanos === 0) return '0us';
+    if (nanos < 1000) return `${nanos}ns`;
+    if (nanos < 1_000_000) return `${(nanos / 1000).toFixed(2)}us`;
+    if (nanos < 1_000_000_000) return `${(nanos / 1_000_000).toFixed(2)}ms`;
+    if (nanos < 60_000_000_000) return `${(nanos / 1_000_000_000).toFixed(2)}s`;
+    
+    const minutes = Math.floor(nanos / 60_000_000_000);
+    const seconds = ((nanos % 60_000_000_000) / 1_000_000_000).toFixed(2);
+    return `${minutes}m ${seconds}s`;
+  }
+
   getRelativeStart(span: Span): number {
     return ((this.toMs(span.start_time) - this.baseStartTimeMs) / this.totalDurationMs) * 100;
   }

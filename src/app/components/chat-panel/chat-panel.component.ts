@@ -192,6 +192,15 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   viewMode = signal<'events' | 'traces'>('events');
   spansByInvocationId = new Map<string, any[]>();
 
+  onViewModeChange(mode: 'events' | 'traces') {
+    this.viewMode.set(mode);
+    try {
+      localStorage.setItem('chat-view-mode', mode);
+    } catch (e) {
+      // Ignored
+    }
+  }
+
   shouldShowEvent(uiEvent: UiEvent): boolean {
     if (!this.hideIntermediateEvents()) {
       return true;
@@ -256,6 +265,15 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnInit() {
+    try {
+      const savedMode = localStorage.getItem('chat-view-mode');
+      if (savedMode === 'events' || savedMode === 'traces') {
+        this.viewMode.set(savedMode);
+      }
+    } catch (e) {
+      // Ignored
+    }
+
     this.featureFlagService.isInfinityMessageScrollingEnabled()
         .pipe(
             first(),

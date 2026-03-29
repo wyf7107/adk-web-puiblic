@@ -17,7 +17,7 @@
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
   <div class="chat-sub-toolbar">
-    <mat-button-toggle-group [value]="viewMode()" (change)="viewMode.set($event.value)" hideSingleSelectionIndicator>
+    <mat-button-toggle-group [value]="viewMode()" (change)="onViewModeChange($event.value)" hideSingleSelectionIndicator>
       <mat-button-toggle value="events">Events</mat-button-toggle>
       <mat-button-toggle value="traces">Traces</mat-button-toggle>
     </mat-button-toggle-group>

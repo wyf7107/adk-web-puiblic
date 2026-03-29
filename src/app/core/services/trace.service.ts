@@ -79,6 +79,7 @@ export class TraceService implements TraceServiceInterface {
   }
 
   resetTraceService() {
+    this.selectedTraceRowSource.next(undefined);
     this.eventDataSource.next(undefined);
     this.messagesSource.next([]);
     this.hoveredMessageIndicesSource.next([]);

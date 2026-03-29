@@ -564,6 +564,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEvent = undefined;
     this.selectedEventIndex = undefined;
     this.selectedMessageIndex = undefined;
+    this.traceService.resetTraceService();
   }
 
   private resetToNewSession() {
@@ -1632,6 +1633,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!keepMessages) {
       this.eventData.clear();
       this.uiEvents.set([]);
+      this.selectedEvent = undefined;
+      this.selectedEventIndex = undefined;
+      this.selectedMessageIndex = undefined;
     }
     this.artifacts = [];
   }
@@ -1988,6 +1992,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.selectedEvent = undefined;
     this.selectedEventIndex = undefined;
     this.selectedMessageIndex = undefined;
+    this.traceService.resetTraceService();
 
     // Close eval history if opened
     if (!!this.evalTab()?.showEvalHistory) {

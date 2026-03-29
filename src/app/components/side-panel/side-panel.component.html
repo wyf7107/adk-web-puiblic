@@ -16,9 +16,11 @@
     (selectedTabChange)="onTabChange($event)">
     <mat-tab>
       <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.eventDetailsTabLabel }}</span>
+        <span class="tab-label">{{ i18n.infoTabLabel }}</span>
       </ng-template>
-      @if (selectedEvent()) {
+      @if (selectedSpan()) {
+        <app-trace-tab [traceData]="traceData()" (switchToEvent)="switchToEvent.emit($event)"></app-trace-tab>
+      } @else if (selectedEvent()) {
         <app-event-tab
           [eventDataSize]="eventData().size"
           [selectedEventIndex]="selectedEventIndex()"
@@ -34,17 +36,9 @@
           (openImageDialog)="openImageDialog.emit($event)"
         ></app-event-tab>
       } @else {
-        <div class="empty-state">Select an event to view details</div>
+        <div class="empty-state">Select an event or trace span to view details</div>
       }
     </mat-tab>
-    @if (isTraceEnabledObs | async) {
-      <mat-tab class="tabs-header">
-        <ng-template mat-tab-label>
-          <span class="tab-label">{{ i18n.traceTabLabel }}</span>
-        </ng-template>
-        <app-trace-tab [traceData]="traceData()" (switchToEvent)="switchToEvent.emit($event)"></app-trace-tab>
-      </mat-tab>
-    }
     <mat-tab>
       <ng-template mat-tab-label>
         <span class="tab-label">{{ i18n.stateTabLabel }}</span>

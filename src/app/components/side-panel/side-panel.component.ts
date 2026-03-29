@@ -17,6 +17,7 @@
 
 import {AsyncPipe, NgComponentOutlet} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, OnInit, output, runInInjectionContext, Type, viewChild, ViewContainerRef} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
@@ -37,6 +38,7 @@ import {StateTabComponent} from '../state-tab/state-tab.component';
 import {TraceTabComponent} from '../trace-tab/trace-tab.component';
 import {EventTabComponent} from '../event-tab/event-tab.component';
 
+import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
 
 /**
@@ -110,14 +112,17 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   readonly evalTabComponentClass = inject(EVAL_TAB_COMPONENT, {optional: true});
   private readonly environmentInjector = inject(EnvironmentInjector);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
+  protected readonly traceService = inject(TRACE_SERVICE);
+  readonly selectedSpan = toSignal(this.traceService.selectedTraceRow$);
 
   selectedIndex = 0;
 
   constructor() {
     effect(() => {
       const event = this.selectedEvent();
+      const span = this.selectedSpan();
       const tabGroup = this.tabGroup();
-      if (event && tabGroup) {
+      if ((event || span) && tabGroup) {
         // Event tab is index 0. Re-activate it if we select an event and another tab is active.
         if (tabGroup.selectedIndex !== 0) {
           this.selectedIndex = 0;

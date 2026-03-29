@@ -16,7 +16,7 @@
   </div>
   <div class="event-details-content">
     <div class="vertical-tabs-sidebar">
-      <button mat-icon-button (click)="selectedDetailTab = 'event'" [class.active]="selectedDetailTab === 'event'" matTooltip="{{ i18n.eventDetailsTabLabel }}" matTooltipPosition="right">
+      <button mat-icon-button (click)="selectedDetailTab = 'event'" [class.active]="selectedDetailTab === 'event'" matTooltip="{{ i18n.infoTabLabel }}" matTooltipPosition="right">
         <mat-icon>info</mat-icon>
       </button>
       @if (selectedEvent()?.author !== 'user' && renderedEventGraph()) {

@@ -442,6 +442,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.traceService.hoveredMessageIndices$.subscribe(
       i => this.hoveredEventMessageIndices = i);
 
+    this.traceService.selectedTraceRow$.subscribe((span) => {
+      if (span) {
+         this.selectedEvent = undefined;
+         this.selectedEventIndex = undefined;
+         this.changeDetectorRef.detectChanges();
+      }
+    });
+
     this.featureFlagService.isInfinityMessageScrollingEnabled()
       .pipe(first())
       .subscribe((enabled) => {
@@ -2157,6 +2165,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   selectEvent(key: string, messageIndex?: number) {
+    this.traceService.selectedRow(undefined);
     this.selectedEvent = this.eventData.get(key);
     this.selectedEventIndex = this.getIndexOfKeyInMap(key);
     this.selectedMessageIndex = messageIndex !== undefined ? messageIndex : this.uiEvents().findIndex(msg => msg.event.id === key);

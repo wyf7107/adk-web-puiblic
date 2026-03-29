@@ -6,6 +6,8 @@
   width: 100%;
   white-space: nowrap;
   font-size: 12px;
+  overflow-x: auto;
+  padding: 8px;
 }
 
 .trace-label {
@@ -18,11 +20,12 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  font-size: 12px;
 }
 
 .trace-bar-container {
   position: relative;
-  height: 16px;
+  height: 18px;
 }
 
 .trace-bar {
@@ -30,11 +33,11 @@
   height: 18px;
   background-color: var(--mat-sys-primary);
   border-radius: 4px;
-  padding-left: 4px;
+  padding-left: 6px;
   box-sizing: border-box;
   overflow: hidden;
   font-size: 11px;
-  line-height: 16px;
+  line-height: 18px;
   color: var(--mat-sys-on-primary);
   font-family: 'Google Sans';
   transition: background-color 0.2s, color 0.2s;

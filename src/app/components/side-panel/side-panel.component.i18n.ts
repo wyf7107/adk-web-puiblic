@@ -38,6 +38,7 @@ export const SIDE_PANEL_MESSAGES = {
   responseDetailsTabLabel: 'Response',
   responseIsNotAvailable: 'Response is not available',
   requestIsNotAvailable: 'Request is not available',
+  clearSelectionButtonLabel: 'Remove selection',
 };
 
 /**

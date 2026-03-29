@@ -17,6 +17,7 @@
 
 import {AsyncPipe, NgComponentOutlet} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, Type, viewChild, ViewContainerRef} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
 import {MatIconButton, MatMiniFabButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
@@ -62,12 +63,14 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     MatPaginator,
     MatIcon,
     MatIconButton,
+    MatTooltip,
     NgxJsonViewerModule,
     MatProgressSpinner,
   ],
 })
 export class SidePanelComponent implements AfterViewInit {
   protected readonly Object = Object;
+  selectedDetailTab: string = 'event';
 
   appName = input('');
   userId = input('');
@@ -106,6 +109,7 @@ export class SidePanelComponent implements AfterViewInit {
   readonly evalTabComponent = viewChild(EvalTabComponent);
   readonly evalTabContainer =
       viewChild('evalTabContainer', {read: ViewContainerRef});
+  readonly tabGroup = viewChild(MatTabGroup);
 
   readonly logoComponent: Type<Component>|null = inject(LOGO_COMPONENT, {
     optional: true,
@@ -115,6 +119,44 @@ export class SidePanelComponent implements AfterViewInit {
   readonly evalTabComponentClass = inject(EVAL_TAB_COMPONENT, {optional: true});
   private readonly environmentInjector = inject(EnvironmentInjector);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
+
+  readonly isEventRequestResponseLoadingSignal = toSignal(
+      this.uiStateService.isEventRequestResponseLoading(), {initialValue: false});
+
+  constructor() {
+    effect(() => {
+      const event = this.selectedEvent();
+      const tabGroup = this.tabGroup();
+      if (event && tabGroup) {
+        // Event tab is index 0. Re-activate it if we select an event and another tab is active.
+        if (tabGroup.selectedIndex !== 0) {
+          tabGroup.selectedIndex = 0;
+        }
+      }
+
+      if (event) {
+        let isTabValid = false;
+        const currentTab = this.selectedDetailTab;
+        if (currentTab === 'event') {
+          isTabValid = true;
+        } else if (currentTab === 'request') {
+          isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmRequest() && Object.keys(this.llmRequest()!).length > 0);
+        } else if (currentTab === 'response') {
+          isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmResponse() && Object.keys(this.llmResponse()!).length > 0);
+        } else if (currentTab === 'state') {
+          isTabValid = !!(event?.actions?.stateDelta && Object.keys(event.actions.stateDelta).length > 0);
+        } else if (currentTab === 'artifact') {
+          isTabValid = !!(event?.actions?.artifactDelta && Object.keys(event.actions.artifactDelta).length > 0);
+        } else if (currentTab === 'graph') {
+          isTabValid = !!(event?.author !== 'user' && this.renderedEventGraph());
+        }
+
+        if (!isTabValid) {
+          this.selectedDetailTab = 'event';
+        }
+      }
+    });
+  }
 
   // Feature flag references for use in template.
   readonly isAlwaysOnSidePanelEnabledObs =

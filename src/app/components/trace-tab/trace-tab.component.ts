@@ -17,7 +17,8 @@
 import {KeyValuePipe} from '@angular/common';
 import {ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {MatDialogTitle} from '@angular/material/dialog';
-import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
 
 import {LlmRequest} from '../../core/models/types';
 
@@ -31,8 +32,8 @@ import {TraceTreeComponent} from './trace-tree/trace-tree.component';
   styleUrl: './trace-tab.component.scss',
   standalone: true,
   imports: [
-    MatDialogTitle, MatExpansionPanel, MatExpansionPanelHeader,
-    MatExpansionPanelTitle, TraceTreeComponent, KeyValuePipe
+    MatDialogTitle, TraceTreeComponent, KeyValuePipe,
+    MatFormFieldModule, MatSelectModule
   ]
 })
 
@@ -41,6 +42,8 @@ export class TraceTabComponent implements OnInit, OnChanges {
   invocTraces = new Map<string, any[]>();
   invocToUserMsg = new Map<string, string>();
   protected readonly i18n = inject(TraceTabMessagesInjectionToken);
+
+  selectedTraceId: string | undefined;
 
   constructor() {}
 
@@ -67,6 +70,11 @@ export class TraceTabComponent implements OnInit, OnChanges {
 
     for (const [key, value] of this.invocTraces) {
       this.invocToUserMsg.set(key, this.findUserMsgFromInvocGroup(value))
+    }
+
+    if (!this.selectedTraceId && this.invocTraces.size > 0) {
+      // Auto-select the last invocation
+      this.selectedTraceId = Array.from(this.invocTraces.keys()).at(-1);
     }
   }
 

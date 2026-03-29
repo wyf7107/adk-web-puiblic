@@ -18,21 +18,26 @@
   @if (invocTraces.size === 0) {
   <div class="empty-state">{{ i18n.noInvocationsFound }}</div>
   } @else {
-  <h2 mat-dialog-title class="trace-title">{{ i18n.invocationsTitle }}</h2>
-  <div class="trace-list-wrapper">
-    @for (invoc of invocTraces | keyvalue: mapOrderPreservingSort; track invoc; let i = $index) {
-    <div class="trace-item">
-      <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title> {{invocToUserMsg.get(invoc.key)}} </mat-panel-title>
-        </mat-expansion-panel-header>
-        <app-trace-tree
-          [spans]="invoc.value"
-          [invocationId]="findInvocIdFromTraceId(invoc.key)"
-        ></app-trace-tree>
-      </mat-expansion-panel>
-    </div>
-    }
+  <div class="trace-dropdown-wrapper">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="trace-dropdown">
+      <mat-label>Select Invocation</mat-label>
+      <mat-select [(value)]="selectedTraceId">
+        @for (invoc of invocTraces | keyvalue: mapOrderPreservingSort; track invoc) {
+          <mat-option [value]="invoc.key">
+            {{ invocToUserMsg.get(invoc.key) }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
+  
+  @if (selectedTraceId) {
+  <div class="trace-content-wrapper">
+    <app-trace-tree
+      [spans]="invocTraces.get(selectedTraceId) || []"
+      [invocationId]="findInvocIdFromTraceId(selectedTraceId)"
+    ></app-trace-tree>
+  </div>
+  }
   }
 </div>

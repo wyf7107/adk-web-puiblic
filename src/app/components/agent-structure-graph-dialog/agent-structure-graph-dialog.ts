@@ -61,6 +61,9 @@ export class AgentStructureGraphDialogComponent implements OnInit {
 
   // Panning and zooming state
   private isPanning = false;
+  private wasDragging = false;
+  private dragStartX = 0;
+  private dragStartY = 0;
   private startPanX = 0;
   private startPanY = 0;
   private scale = 1;
@@ -128,11 +131,12 @@ export class AgentStructureGraphDialogComponent implements OnInit {
           setTimeout(() => {
             const expandableNodes = this.getExpandableNodes();
             addSvgNodeHoverEffects('.svg-container', (nodeName) => {
+              if (this.wasDragging) return; // Prevent click if user was panning graph
               this.onNodeClick(nodeName);
             }, expandableNodes);
 
             this.initializeSvgTransform();
-          }, 100);
+          }, 50);
         } catch (error) {
           console.error('Error rendering graph:', error);
           this.errorMessage.set('Agent structure graph not available.');
@@ -239,6 +243,11 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     this.translateY = (containerRect.height - scaledHeight) / 2;
 
     this.applyTransform();
+    
+    // Reveal visually after transforming to avoid flash!
+    requestAnimationFrame(() => {
+      svg.classList.add('ready');
+    });
   }
 
   onWheel(event: WheelEvent) {
@@ -273,6 +282,10 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     if (!target.closest('svg')) return; // Ensure they grabbed the small SVG panel!
 
     this.isPanning = true;
+    this.wasDragging = false;
+    this.dragStartX = event.clientX;
+    this.dragStartY = event.clientY;
+    
     this.startPanX = event.clientX;
     this.startPanY = event.clientY;
 
@@ -282,6 +295,14 @@ export class AgentStructureGraphDialogComponent implements OnInit {
 
   onMouseMove(event: MouseEvent) {
     if (!this.isPanning) return;
+    
+    if (!this.wasDragging) {
+      const dx = event.clientX - this.dragStartX;
+      const dy = event.clientY - this.dragStartY;
+      if (dx * dx + dy * dy > 25) { // 5px threshold for drag vs click
+        this.wasDragging = true;
+      }
+    }
     
     this.translateX += (event.clientX - this.startPanX);
     this.translateY += (event.clientY - this.startPanY);
@@ -296,6 +317,11 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     this.isPanning = false;
     const svg = this.getSvgElement();
     if (svg) svg.style.cursor = '';
+    
+    // Reset wasDragging safely after the event loop handles clicks
+    setTimeout(() => {
+      this.wasDragging = false;
+    }, 50);
   }
 
   resetZoomPan() {

@@ -192,13 +192,37 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   viewMode = signal<'events' | 'traces'>('events');
   spansByInvocationId = new Map<string, any[]>();
 
+  eventsScrollTop = -1;
+  tracesScrollTop = -1;
+
   onViewModeChange(mode: 'events' | 'traces') {
+    if (this.scrollContainer?.nativeElement) {
+      if (this.viewMode() === 'events') {
+        this.eventsScrollTop = this.scrollContainer.nativeElement.scrollTop;
+      } else if (this.viewMode() === 'traces') {
+        this.tracesScrollTop = this.scrollContainer.nativeElement.scrollTop;
+      }
+    }
+
     this.viewMode.set(mode);
     try {
       localStorage.setItem('chat-view-mode', mode);
     } catch (e) {
       // Ignored
     }
+
+    setTimeout(() => {
+      if (this.scrollContainer?.nativeElement) {
+        if (mode === 'events' && this.eventsScrollTop !== -1) {
+          this.scrollContainer.nativeElement.scrollTop = this.eventsScrollTop;
+        } else if (mode === 'traces' && this.tracesScrollTop !== -1) {
+          this.scrollContainer.nativeElement.scrollTop = this.tracesScrollTop;
+        } else {
+          // If first time switching to mode and we haven't tracked a scroll position yet, stick to bottom
+          this.scrollToBottom();
+        }
+      }
+    });
   }
 
   shouldShowEvent(uiEvent: UiEvent): boolean {

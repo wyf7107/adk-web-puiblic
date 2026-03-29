@@ -1,0 +1,42 @@
+:host {
+  display: contents;
+}
+
+app-content-bubble + app-content-bubble {
+  margin-top: 5px;
+}
+
+.event-chips-container {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .content-bubble~& {
+    display: flex;
+    width: 100%;
+  }
+}
+
+.eval-case-edit-button {
+  cursor: pointer;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.eval-pass {
+  display: flex;
+  color: var(--mat-sys-primary);
+}
+
+.eval-fail {
+  display: flex;
+  color: var(--mat-sys-error);
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.event-action-button {
+  margin: 5px;
+}

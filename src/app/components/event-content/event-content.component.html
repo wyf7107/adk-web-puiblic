@@ -1,0 +1,196 @@
+    @if (shouldShowMessageCard(uiEvent)) {
+    <app-content-bubble
+      [type]="uiEvent.thought ? 'thought' : 'message'"
+      [role]="uiEvent.role"
+      [isHighlighted]="isHighlighted"
+      [evalStatus]="uiEvent.evalStatus"
+      [uiEvent]="uiEvent"
+      [userEditEvalCaseMessage]="userEditEvalCaseMessage"
+      (userEditEvalCaseMessageChange)="userEditEvalCaseMessageChange.emit($event)"
+      (handleKeydown)="handleKeydown.emit($event)"
+      (cancelEditMessage)="cancelEditMessage.emit($event)"
+      (saveEditMessage)="saveEditMessage.emit($event)"
+      (openViewImageDialog)="openViewImageDialog.emit($event)"
+      (openBase64InNewTab)="openBase64InNewTab.emit($event)"
+    ></app-content-bubble>
+    }
+    @if (uiEvent.event.output) {
+    <app-content-bubble
+      type="output"
+      [isHighlighted]="isHighlighted"
+      [uiEvent]="uiEvent"
+    ></app-content-bubble>
+    }
+    @if (uiEvent.event.inputTranscription) {
+      <app-content-bubble type="transcription" role="user" [uiEvent]="uiEvent"></app-content-bubble>
+    }
+    @if (uiEvent.event.outputTranscription) {
+      <app-content-bubble type="transcription" role="bot" [uiEvent]="uiEvent"></app-content-bubble>
+    }
+    <div class="event-chips-container">
+    @if (uiEvent.event.usageMetadata) {
+    <app-hover-info-button
+      [icon]="'analytics'"
+      [text]="'tokens: ' + (uiEvent.event.usageMetadata.totalTokenCount || 0)"
+      [tooltipContent]="uiEvent.event.usageMetadata"
+      [tooltipTitle]="'Usage Metadata'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.event.turnComplete) {
+    <app-hover-info-button
+      [icon]="'stop_circle'"
+      [text]="'Turn Complete'"
+      [tooltipContent]="'The agent has completed this turn'"
+      [tooltipTitle]="'Turn Complete'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.event.interrupted) {
+    <app-hover-info-button
+      [icon]="'report'"
+      [text]="'Interrupted'"
+      [tooltipContent]="'The stream was interrupted'"
+      [tooltipTitle]="'Interrupted'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
+      @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
+        @if (isComputerUseClick(functionCall)) {
+          <app-computer-action [functionCall]="functionCall" [allMessages]="uiEvents" [index]="index" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+        } @else {
+          <app-hover-info-button
+            [icon]="'bolt'"
+            [text]="functionCall.name"
+            [tooltipContent]="functionCall.args || ''"
+            [tooltipTitle]="'Function Call'"
+          ></app-hover-info-button>
+        }
+      }
+    }
+    @if (uiEvent.functionResponses && uiEvent.functionResponses.length > 0) {
+      @for (functionResponse of uiEvent.functionResponses; track functionResponse) {
+        @if (isComputerUseResponse(functionResponse)) {
+          <app-computer-action [functionResponse]="functionResponse" [allMessages]="uiEvents" [index]="index" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
+        } @else {
+          <app-hover-info-button
+            [icon]="'check'"
+            [text]="functionResponse.name"
+            [tooltipContent]="functionResponse.response || ''"
+            [tooltipTitle]="'Function Response'"
+          ></app-hover-info-button>
+        }
+      }
+    }
+    @if (uiEvent.stateDelta) {
+    <app-hover-info-button
+      [icon]="'data_object'"
+      [text]="'State: ' + Object.keys(uiEvent.stateDelta).join(', ')"
+      [tooltipContent]="uiEvent.stateDelta"
+      [tooltipTitle]="'State Update'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.artifactDelta) {
+    <app-hover-info-button
+      [icon]="'attachment'"
+      [text]="'Artifact'"
+      [tooltipContent]="uiEvent.artifactDelta"
+      [tooltipTitle]="'Artifact'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.error) {
+    <app-content-bubble
+      type="error"
+      [isHighlighted]="isHighlighted"
+      [uiEvent]="uiEvent"
+    ></app-content-bubble>
+    }
+    @if (uiEvent.route) {
+    <app-hover-info-button
+      [icon]="'route'"
+      [text]="'route: ' + String(uiEvent.route)"
+      [tooltipContent]="uiEvent.route"
+      [tooltipTitle]="'Route'"
+    ></app-hover-info-button>
+    }
+    @if (hasWorkflowNodes()) {
+    <button
+      mat-stroked-button
+      class="event-action-button"
+      [appWorkflowGraphTooltip]="getWorkflowNodes()"
+      [agentGraphData]="agentGraphData"
+      [nodePath]="uiEvent.nodePath"
+      [allNodes]="allWorkflowNodes"
+      (click)="agentStateClick.emit({event: $event, index: index})"
+    >
+      <mat-icon>account_tree</mat-icon>
+      Agent State
+    </button>
+    }
+    @if (hasEndOfAgent()) {
+    <app-hover-info-button
+      [icon]="'check_circle'"
+      [text]="getEndOfAgentAuthor() + ' completed!'"
+    ></app-hover-info-button>
+    }
+    </div>
+    @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
+      @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
+        @if (functionCall.needsResponse) {
+          <app-long-running-response
+            [functionCall]="functionCall"
+            [appName]="appName"
+            [userId]="userId"
+            [sessionId]="sessionId"
+            (responseComplete)="longRunningResponseComplete.emit($event)"
+          ></app-long-running-response>
+        }
+      }
+    }
+    @if (uiEvent.evalStatus === 1 || uiEvent.evalStatus === 2) {
+    <div
+      [ngClass]="{
+            'eval-pass': uiEvent.evalStatus === 1,
+            'eval-fail': uiEvent.evalStatus === 2
+          }"
+    >
+      <span class="material-symbols-outlined"
+        >{{ uiEvent.evalStatus === 1 ? "check" : uiEvent.evalStatus === 2 ? "close" : "" }}</span
+      >
+      <span
+        >{{ uiEvent.evalStatus === 1 ? i18n.evalPassLabel : uiEvent.evalStatus === 2 ?
+        i18n.evalFailLabel : "" }}</span
+      >
+    </div>
+    }
+    @if (evalCase && isEvalEditMode) { 
+      @if (uiEvent.text) {
+        <div>
+          <span
+            class="material-symbols-outlined eval-case-edit-button"
+            [ngClass]="{ hidden: isEvalCaseEditing }"
+            [matTooltip]="i18n.editEvalMessageTooltip"
+            (click)="editEvalCaseMessage.emit(uiEvent)"
+          >
+            edit
+          </span>
+          <span
+            class="material-symbols-outlined eval-case-edit-button"
+            [ngClass]="{ hidden: isEvalCaseEditing }"
+            [matTooltip]="i18n.deleteEvalMessageTooltip"
+            (click)="deleteEvalCaseMessage.emit({message: uiEvent, index: index})"
+          >
+            delete
+          </span>
+        </div>
+    } @else if (isEditFunctionArgsEnabled && uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
+    <div>
+      <span
+        class="material-symbols-outlined eval-case-edit-button"
+        [ngClass]="{ hidden: isEvalCaseEditing }"
+        [matTooltip]="i18n.editFunctionArgsTooltip"
+        (click)="editFunctionArgs.emit(uiEvent)"
+      >
+        edit
+      </span>
+    </div>
+    } 
+    }

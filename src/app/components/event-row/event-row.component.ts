@@ -1,26 +1,12 @@
-import {CommonModule, NgClass} from '@angular/common';
-import {Component, EventEmitter, Input, Output, Type, inject} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CommonModule} from '@angular/common';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
 import type {EvalCase} from '../../core/models/Eval';
 import {UiEvent} from '../../core/models/UiEvent';
-import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {WorkflowGraphTooltipDirective} from '../../directives/workflow-graph-tooltip.directive';
-import {MediaType} from '../artifact-tab/artifact-tab.component';
 import {ChatAvatarComponent} from '../chat-avatar/chat-avatar.component';
-import {ComputerActionComponent} from '../computer-action/computer-action.component';
-import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
-import {LongRunningResponseComponent} from '../long-running-response/long-running-response';
-import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 import {MessageFeedbackComponent} from '../message-feedback/message-feedback.component';
-import {ChatPanelMessagesInjectionToken} from '../chat-panel/chat-panel.component.i18n';
-import {ContentBubbleComponent} from '../content-bubble/content-bubble.component';
+import {EventContentComponent} from '../event-content/event-content.component';
 
 @Component({
   selector: 'app-event-row',
@@ -36,19 +22,9 @@ import {ContentBubbleComponent} from '../content-bubble/content-bubble.component
   },
   imports: [
     CommonModule,
-    FormsModule,
-    MatIconModule,
-    MatButtonModule,
-    NgxJsonViewerModule,
     MessageFeedbackComponent,
-    MatTooltipModule,
-    NgClass,
-    WorkflowGraphTooltipDirective,
-    ComputerActionComponent,
-    LongRunningResponseComponent,
-    HoverInfoButtonComponent,
     ChatAvatarComponent,
-    ContentBubbleComponent,
+    EventContentComponent,
   ],
 })
 export class EventRowComponent {
@@ -91,52 +67,6 @@ export class EventRowComponent {
   @Output() readonly clickEvent = new EventEmitter<number>();
   @Output() readonly longRunningResponseComplete = new EventEmitter<AgentRunRequest>();
   @Output() readonly agentStateClick = new EventEmitter<{event: Event, index: number}>();
-
-  protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
-  protected readonly sanitizer = inject(SAFE_VALUES_SERVICE);
-  readonly markdownComponent: Type<MarkdownComponentInterface> = inject(MARKDOWN_COMPONENT);
-
-  readonly MediaType = MediaType;
-  readonly JSON = JSON;
-  readonly Object = Object;
-  readonly String = String;
-
-  shouldShowMessageCard(message: any): boolean {
-    return !!(
-        message.text || message.attachments || message.inlineData ||
-        message.executableCode || message.codeExecutionResult ||
-        message.a2uiData || message.renderedContent || message.isLoading ||
-        (message.failedMetric && message.evalStatus === 2));
-  }
-
-  renderGooglerSearch(content: string) {
-    return this.sanitizer.bypassSecurityTrustHtml(content);
-  }
-
-  isComputerUseClick(input: any): boolean {
-    return isVisibleComputerUseClick(input);
-  }
-
-  isComputerUseResponse(input: any): boolean {
-    return isComputerUseResponse(input);
-  }
-
-  hasWorkflowNodes(): boolean {
-    const nodes = this.uiEvent.event?.actions?.agentState?.nodes;
-    return !!nodes && Object.keys(nodes).length > 0;
-  }
-
-  getWorkflowNodes(): any {
-    return this.uiEvent.event?.actions?.agentState?.nodes || null;
-  }
-
-  hasEndOfAgent(): boolean {
-    return this.uiEvent.event?.actions?.endOfAgent === true;
-  }
-
-  getEndOfAgentAuthor(): string {
-    return this.uiEvent.event?.author || 'Agent';
-  }
 
   onRowClick(event: MouseEvent) {
     this.rowClick.emit({event, uiEvent: this.uiEvent, index: this.index});

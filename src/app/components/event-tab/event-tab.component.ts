@@ -52,7 +52,7 @@ export class EventTabComponent {
   readonly isEventRequestResponseLoadingSignal = toSignal(
       this.uiStateService.isEventRequestResponseLoading(), {initialValue: false});
 
-  selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'state' | 'artifact' | 'graph' = 'event';
+  selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'artifact' | 'graph' = 'event';
 
   constructor() {
     effect(() => {
@@ -68,8 +68,7 @@ export class EventTabComponent {
           isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmRequest() && Object.keys(this.llmRequest()!).length > 0);
         } else if (currentTab === 'response') {
           isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmResponse() && Object.keys(this.llmResponse()!).length > 0);
-        } else if (currentTab === 'state') {
-          isTabValid = !!(event?.actions?.stateDelta && Object.keys(event.actions.stateDelta).length > 0);
+
         } else if (currentTab === 'artifact') {
           isTabValid = !!(event?.actions?.artifactDelta && Object.keys(event.actions.artifactDelta).length > 0);
         } else if (currentTab === 'graph') {

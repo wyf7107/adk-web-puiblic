@@ -81,7 +81,13 @@ export class TraceTreeComponent implements OnInit, OnChanges {
       return;
     }
     this.tree = this.buildSpanTree(this.spans);
-    this.flatTree = this.flattenTree(this.tree);
+    this.flatTree = [];
+    this.tree.forEach(root => {
+      if (root.children) {
+        this.flatTree.push(...this.flattenTree(root.children, 0));
+      }
+    });
+    
     const times = this.getGlobalTimes(this.spans);
     this.baseStartTimeMs = times.start;
     this.totalDurationMs = times.duration;

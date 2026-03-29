@@ -46,14 +46,12 @@ app-content-bubble + app-content-bubble {
 
   // Hover effect for all rows
   &:hover {
-    background-color: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
+    background-color: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
   }
 
   // Selected row (stays highlighted when side drawer is open)
   &.selected {
-    border: 2px solid color-mix(in srgb, var(--mat-sys-primary) 60%, transparent);
-    border-radius: 4px;
-    background-color: color-mix(in srgb, var(--mat-sys-primary) 20%, transparent) !important;
+    background-color: var(--mat-sys-secondary-container, rgba(0, 0, 0, 0.08)) !important;
   }
 }
 

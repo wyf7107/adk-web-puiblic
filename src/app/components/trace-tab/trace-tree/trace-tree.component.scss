@@ -34,12 +34,12 @@
   cursor: pointer;
 
   &:hover {
-    background-color: #3b3d3c;
+    background-color: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
   }
 }
 
 .trace-row.selected {
-  background-color: #3b3d3c;
+  background-color: var(--mat-sys-secondary-container, rgba(0, 0, 0, 0.08));
 }
 
 .trace-row-left {

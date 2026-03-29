@@ -28,14 +28,15 @@
 .trace-bar {
   position: absolute;
   height: 18px;
-  background-color: var(--trace-bar-bg-color, #5180a5);
+  background-color: var(--mat-sys-primary);
   border-radius: 4px;
   padding-left: 4px;
   overflow: hidden;
   font-size: 11px;
   line-height: 16px;
-  color: var(--trace-bar-color, #8dabbf);
+  color: var(--mat-sys-on-primary);
   font-family: 'Google Sans';
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .trace-duration {

@@ -107,6 +107,7 @@
         <app-trace-tree
           [spans]="uiEvent.event.invocationId ? (spansByInvocationId.get(uiEvent.event.invocationId!) || []) : []"
           [invocationId]="uiEvent.event.invocationId || ''"
+          [uiEvents]="uiEvents"
         ></app-trace-tree>
       </div>
     }

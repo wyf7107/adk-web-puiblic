@@ -16,8 +16,8 @@
  */
 
 import {Overlay, OverlayRef} from '@angular/cdk/overlay';
-import {ComponentPortal} from '@angular/cdk/portal';
-import {Directive, ElementRef, HostListener, inject, Input, OnDestroy} from '@angular/core';
+import {ComponentPortal, TemplatePortal} from '@angular/cdk/portal';
+import {Directive, ElementRef, HostListener, inject, Input, OnDestroy, TemplateRef, ViewContainerRef} from '@angular/core';
 import {JsonTooltipComponent} from '../components/json-tooltip/json-tooltip.component';
 
 @Directive({
@@ -84,6 +84,84 @@ export class JsonTooltipDirective implements OnDestroy {
     tooltipRef.instance.title = this.title;
     tooltipRef.changeDetectorRef.detectChanges();
     this.overlayRef.updatePosition();
+  }
+
+  @HostListener('mouseleave')
+  hide() {
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
+  }
+
+  ngOnDestroy() {
+    this.hide();
+  }
+}
+
+
+@Directive({
+  selector: '[appHtmlTooltip]',
+  standalone: true,
+})
+export class HtmlTooltipDirective implements OnDestroy {
+  @Input('appHtmlTooltip') tooltipTemplate!: TemplateRef<any>;
+  @Input('appHtmlTooltipContext') context: any = {};
+  @Input('appHtmlTooltipDisabled') disabled: boolean = false;
+
+  private overlayRef: OverlayRef | null = null;
+  private readonly overlay = inject(Overlay);
+  private readonly elementRef = inject(ElementRef);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+
+  @HostListener('mouseenter')
+  show() {
+    if (this.disabled || !this.tooltipTemplate) return;
+
+    const positionStrategy = this.overlay.position()
+      .flexibleConnectedTo(this.elementRef)
+      .withPositions([
+        {
+          originX: 'center',
+          originY: 'top',
+          overlayX: 'center',
+          overlayY: 'bottom',
+          offsetY: -8,
+        },
+        {
+          originX: 'center',
+          originY: 'bottom',
+          overlayX: 'center',
+          overlayY: 'top',
+          offsetY: 8,
+        },
+        {
+          originX: 'start',
+          originY: 'top',
+          overlayX: 'start',
+          overlayY: 'bottom',
+          offsetY: -8,
+        },
+        {
+          originX: 'end',
+          originY: 'top',
+          overlayX: 'end',
+          overlayY: 'bottom',
+          offsetY: -8,
+        }
+      ])
+      .withViewportMargin(16)
+      .withPush(false);
+
+    this.overlayRef = this.overlay.create({
+      positionStrategy,
+      scrollStrategy: this.overlay.scrollStrategies.close(),
+      panelClass: 'html-tooltip-panel',
+      maxWidth: '90vw',
+    });
+
+    const portal = new TemplatePortal(this.tooltipTemplate, this.viewContainerRef, this.context);
+    this.overlayRef.attach(portal);
   }
 
   @HostListener('mouseleave')

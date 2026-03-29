@@ -21,14 +21,10 @@ app-content-bubble + app-content-bubble {
 }
 
 .event-chips-container {
-  display: inline-flex;
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
-
-  .content-bubble~& {
-    display: flex;
-    width: 100%;
-  }
+  width: 100%;
 }
 
 // Enables messages to have columns

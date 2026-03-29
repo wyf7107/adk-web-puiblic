@@ -21,19 +21,22 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {Span} from '../../../core/models/Trace';
 import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
+import {UiEvent} from '../../../core/models/UiEvent';
+import {HtmlTooltipDirective} from '../../../directives/html-tooltip.directive';
+import {EventContentComponent} from '../../event-content/event-content.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-trace-tree',
   templateUrl: './trace-tree.component.html',
   styleUrl: './trace-tree.component.scss',
-  imports: [MatButtonModule, MatIconModule, MatTooltipModule]
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule, HtmlTooltipDirective, EventContentComponent]
 })
 export class TraceTreeComponent implements OnInit, OnChanges {
   @Input() spans: any[] = [];
   @Input() invocationId: string = '';
+  @Input() uiEvents: UiEvent[] = [];
   tree: Span[] = [];
-  eventData: Map<string, any>|undefined;
   baseStartTimeMs = 0;
   totalDurationMs = 1;
   rootLatencyNanos = 0;
@@ -84,7 +87,6 @@ export class TraceTreeComponent implements OnInit, OnChanges {
         }, 50);
       }
     });
-    this.traceService.eventData$.subscribe(e => this.eventData = e);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -225,10 +227,22 @@ export class TraceTreeComponent implements OnInit, OnChanges {
       return false;
     }
     const eventId = node?.span.attributes['gcp.vertex.agent.event_id'];
-    if (eventId && this.eventData && this.eventData.has(eventId)) {
-      return true;
+    if (eventId && this.uiEvents && this.uiEvents.length > 0) {
+      return this.uiEvents.some(e => e.event?.id === eventId);
     }
     return false;
+  }
+
+  getEventId(node: any): string {
+    return node?.span?.attributes?.['gcp.vertex.agent.event_id'] ?? '';
+  }
+
+  getUiEvent(node: any): UiEvent | null {
+    const eventId = this.getEventId(node);
+    if (eventId && this.uiEvents && this.uiEvents.length > 0) {
+      return this.uiEvents.find(e => e.event?.id === eventId) || null;
+    }
+    return null;
   }
 
   onHover(n: any) {

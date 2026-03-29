@@ -44,12 +44,38 @@
             <tbody>
               <tr><td>Name</td><td>{{ selectedSpan()?.name }}</td></tr>
               <tr><td>Span ID</td><td>{{ selectedSpan()?.span_id }}</td></tr>
-              <tr><td>Parent ID</td><td>{{ selectedSpan()?.parent_span_id || 'None' }}</td></tr>
+              <tr>
+                <td>Parent ID</td>
+                <td>
+                  @if (selectedSpan()?.parent_span_id) {
+                    <a href="javascript:void(0)" (click)="selectSpanById(selectedSpan()?.parent_span_id)" class="span-link">{{ selectedSpan()?.parent_span_id }}</a>
+                  } @else {
+                    None
+                  }
+                </td>
+              </tr>
               <tr><td>Trace ID</td><td>{{ selectedSpan()?.trace_id }}</td></tr>
               <tr><td>Start Time</td><td>{{ formatTime(selectedSpan()?.start_time) }}</td></tr>
               <tr><td>End Time</td><td>{{ formatTime(selectedSpan()?.end_time) }}</td></tr>
             </tbody>
           </table>
+          @if (selectedSpan()?.children && selectedSpan()!.children!.length > 0) {
+            <table class="info-table">
+              <thead>
+                <tr>
+                  <th colspan="2">Children</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (child of selectedSpan()!.children; track child.span_id) {
+                  <tr>
+                    <td>{{ child.name }}</td>
+                    <td><a href="javascript:void(0)" (click)="selectSpanById(child.span_id)" class="span-link">{{ child.span_id }}</a></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
 
           @if (selectedSpan()?.attributes && Object.keys(selectedSpan()!.attributes).length > 0) {
             <table class="info-table">
@@ -59,21 +85,6 @@
               <tbody>
                 @for (key of Object.keys(selectedSpan()!.attributes); track key) {
                   <tr><td>{{ key }}</td><td>{{ selectedSpan()!.attributes[key] }}</td></tr>
-                }
-              </tbody>
-            </table>
-          }
-
-          @if (selectedSpan()?.children && selectedSpan()!.children!.length > 0) {
-            <table class="info-table">
-              <thead>
-                <tr><th>Children</th></tr>
-              </thead>
-              <tbody>
-                @for (child of selectedSpan()!.children; track child.span_id) {
-                  <tr>
-                    <td>{{ child.name }}</td>
-                  </tr>
                 }
               </tbody>
             </table>

@@ -45,6 +45,14 @@ export class TraceTabComponent {
     if (!nanos) return 'N/A';
     return new Date(nanos / 1_000_000).toISOString();
   }
+
+  selectSpanById(id: string | undefined): void {
+    if (!id) return;
+    const span = this.traceData.find(s => String(s.span_id) === String(id));
+    if (span) {
+      this.traceService.selectedRow(span);
+    }
+  }
   
   readonly Object = Object;
 }

@@ -196,7 +196,8 @@ export class TraceTreeComponent implements OnInit, OnChanges {
   }
 
   rowSelected(node: any) {
-    return this.selectedRow == node.span
+    if (!this.selectedRow || !node?.span) return false;
+    return String(this.selectedRow.span_id) === String(node.span.span_id);
   }
 
   isEventRow(node: any) {

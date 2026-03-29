@@ -75,6 +75,22 @@
             </table>
           }
 
+          @if (selectedSpan()?.attributes && selectedSpan()!.attributes['gcp.vertex.agent.event_id']) {
+            <table class="info-table">
+              <thead>
+                <tr>
+                  <th colspan="2">Events</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Event ID</td>
+                  <td><a href="javascript:void(0)" (click)="switchToEvent.emit(selectedSpan()!.attributes['gcp.vertex.agent.event_id'])" class="span-link">{{ selectedSpan()!.attributes['gcp.vertex.agent.event_id'] }}</a></td>
+                </tr>
+              </tbody>
+            </table>
+          }
+
           @if (selectedSpan()?.attributes && Object.keys(selectedSpan()!.attributes).length > 0) {
             <table class="info-table">
               <thead>

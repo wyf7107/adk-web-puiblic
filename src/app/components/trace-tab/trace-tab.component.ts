@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ChangeDetectionStrategy, Component, inject, Input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Input, output, signal} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -40,6 +40,7 @@ export class TraceTabComponent {
   protected readonly traceService = inject(TRACE_SERVICE);
   selectedSpan = toSignal(this.traceService.selectedTraceRow$);
   selectedDetailTab = signal<'info' | 'raw'>('info');
+  switchToEvent = output<string>();
 
   formatTime(nanos: number | undefined): string {
     if (!nanos) return 'N/A';

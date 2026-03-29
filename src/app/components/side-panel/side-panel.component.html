@@ -42,7 +42,7 @@
         <ng-template mat-tab-label>
           <span class="tab-label">{{ i18n.traceTabLabel }}</span>
         </ng-template>
-        <app-trace-tab [traceData]="traceData()"></app-trace-tab>
+        <app-trace-tab [traceData]="traceData()" (switchToEvent)="switchToEvent.emit($event)"></app-trace-tab>
       </mat-tab>
     }
     <mat-tab>

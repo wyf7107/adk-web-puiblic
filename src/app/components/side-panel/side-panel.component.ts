@@ -89,6 +89,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   readonly returnToSession = output<boolean>();
   readonly evalNotInstalled = output<string>();
   readonly page = output<PageEvent>();
+  readonly switchToEvent = output<string>();
   readonly closeSelectedEvent = output<void>();
   readonly openImageDialog = output<string|null>();
   readonly openAddItemDialog = output<boolean>();

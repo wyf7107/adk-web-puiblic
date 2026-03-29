@@ -147,6 +147,13 @@ mat-tab-group {
   display: flex;
   flex-direction: column;
   min-height: 0;
+
+  ::ng-deep {
+    .mdc-tab {
+      padding: 0 12px;
+      min-width: 48px;
+    }
+  }
 }
 
 ::ng-deep .mat-mdc-tab-body-wrapper {

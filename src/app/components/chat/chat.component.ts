@@ -447,6 +447,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
          this.selectedEvent = undefined;
          this.selectedEventIndex = undefined;
          this.selectedMessageIndex = undefined;
+         
+         if (!this.showSidePanel) {
+           this.showSidePanel = true;
+           window.localStorage.setItem('adk-side-panel-visible', 'true');
+           this.sideDrawer()?.open();
+         }
+         
          this.changeDetectorRef.detectChanges();
       }
     });

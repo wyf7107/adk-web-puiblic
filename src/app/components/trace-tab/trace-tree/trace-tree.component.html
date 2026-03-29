@@ -78,7 +78,7 @@
 
 <ng-template #eventTooltip let-uiEvent>
   @if (uiEvent) {
-    <div style="max-width: 800px; max-height: 60vh; overflow: auto; padding: 8px; background: var(--mat-sys-surface-container-low, #202124); color: var(--mat-sys-on-surface, #e8eaed); border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); border: 1px solid var(--mat-sys-outline-variant, rgba(255,255,255,0.1));">
+    <div class="event-tooltip-container">
       <app-event-content [uiEvent]="uiEvent" [index]="0"></app-event-content>
     </div>
   }

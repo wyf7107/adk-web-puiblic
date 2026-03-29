@@ -129,3 +129,15 @@ ngx-json-viewer {
     padding: 0;
   }
 }
+
+.html-tooltip-panel {
+  .content-bubble {
+    max-width: 100% !important;
+  }
+  
+  .message-text p {
+    white-space: pre-line;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+}

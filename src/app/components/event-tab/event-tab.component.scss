@@ -74,6 +74,8 @@
   justify-content: flex-end;
   align-items: center;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
+  height: 48px;
+  flex-shrink: 0;
 }
 
 .empty-state {

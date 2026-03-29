@@ -17,8 +17,18 @@
 @if (selectedSpan() !== undefined) {
 <div class="event-details-container">
   <div class="event-details-header">
-    <div style="margin: 0 auto 0 16px; font-weight: 500; font-family: 'Google Sans Mono', monospace; font-size: 13px; color: var(--mat-sys-on-surface); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 300px;">
-      Span {{ selectedSpan()?.name }}
+    <mat-paginator
+      class="event-paginator"
+      hidePageSize
+      [length]="traceData.length"
+      [pageSize]="1"
+      [pageIndex]="selectedSpanIndex"
+      (page)="onPage($event)"
+      aria-label="Select span"
+    >
+    </mat-paginator>
+    <div class="span-title">
+      {{ selectedSpan()?.name }}
     </div>
     <div style="flex-grow: 1"></div>
     <button mat-icon-button (click)="traceService.selectedRow(undefined)" matTooltip="Clear selection">

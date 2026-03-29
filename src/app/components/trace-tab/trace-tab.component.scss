@@ -23,6 +23,32 @@
   margin: 10px;
 }
 
+.event-paginator {
+  display: flex;
+  justify-content: center;
+  background-color: transparent;
+
+  /* Move the label to the right of the navigation buttons */
+  ::ng-deep {
+    .mat-mdc-paginator-range-label {
+      order: 2;
+      margin: 0 0 0 8px; /* Override default margins and add left margin */
+    }
+  }
+}
+
+.span-title {
+  font-weight: 500;
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 300px;
+  margin-left: 16px;
+}
+
 .event-details-container {
   display: flex;
   flex-direction: column;

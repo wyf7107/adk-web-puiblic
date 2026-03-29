@@ -148,12 +148,6 @@
           <mat-icon class="menu-check-icon" [class.inactive]="themeService.currentTheme() !== 'dark'">check</mat-icon>
           <span>Dark mode</span>
         </button>
-        @if (isTokenStreamingEnabledObs | async) {
-        <button mat-menu-item id="toolbar-token-streaming-button" (click)="toggleSse()">
-          <mat-icon class="menu-check-icon" [class.inactive]="!useSse()">check</mat-icon>
-          <span>{{ i18n.tokenStreamingLabel }}</span>
-        </button>
-        }
         @if (isDeleteSessionEnabledObs | async) {
         <button mat-menu-item id="toolbar-delete-session-button" (click)="deleteSession(sessionId)">
           <mat-icon>delete</mat-icon>
@@ -415,6 +409,9 @@
         [uiEvents]="uiEvents()"
         (toggleHideIntermediateEvents)="toggleHideIntermediateEvents()"
         [traceData]="traceData"
+        [isTokenStreamingEnabled]="(isTokenStreamingEnabledObs | async) ?? false"
+        [useSse]="useSse()"
+        (toggleSse)="toggleSse()"
         [isChatMode]="isChatMode()"
         [evalCase]="evalCase"
         [isEvalEditMode]="isEvalEditMode()"

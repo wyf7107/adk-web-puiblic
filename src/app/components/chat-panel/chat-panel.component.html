@@ -21,6 +21,7 @@
       <mat-button-toggle value="events">Events</mat-button-toggle>
       <mat-button-toggle value="traces">Traces</mat-button-toggle>
     </mat-button-toggle-group>
+    
     @if (viewMode() === 'events') {
       <button
         style="margin-left: 8px; transform: scale(0.85);"
@@ -31,6 +32,21 @@
         [style.color]="hideIntermediateEvents() ? 'var(--mat-sys-primary)' : 'inherit'"
       >
         <mat-icon>{{ hideIntermediateEvents() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    }
+
+    <div style="flex-grow: 1;"></div>
+    
+    @if (isTokenStreamingEnabled) {
+      <button
+        mat-button
+        (click)="toggleSse.emit()"
+        matTooltip="Enable real-time token streaming from the server"
+        [style.color]="useSse ? 'var(--mat-sys-primary)' : 'var(--mat-sys-on-surface-variant)'"
+        style="height: 32px; line-height: 32px; padding: 0 12px; border-radius: 16px;"
+      >
+        <mat-icon style="font-size: 20px; width: 20px; height: 20px; line-height: 20px; margin-right: 4px; vertical-align: middle;">{{ useSse ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+        <span style="font-size: 13px; font-weight: 500; vertical-align: middle;">Streaming</span>
       </button>
     }
   </div>

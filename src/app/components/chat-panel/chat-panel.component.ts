@@ -28,6 +28,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
@@ -83,6 +84,7 @@ import {TraceTreeComponent} from '../trace-tab/trace-tree/trace-tree.component';
     MatFormFieldModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatSlideToggleModule,
     NgxJsonViewerModule,
     MatTooltipModule,
     MatButtonToggleModule,
@@ -103,6 +105,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() isEvalCaseEditing: boolean = false;
   @Input() agentGraphData: any = null;
   @Input() isEditFunctionArgsEnabled: boolean = false;
+  @Input() isTokenStreamingEnabled: boolean = false;
+  @Input() useSse: boolean = false;
   @Input() userInput: string = '';
   @Input() userEditEvalCaseMessage: string = '';
   @Input() selectedFiles: {file: File; url: string}[] = [];
@@ -141,6 +145,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly toggleVideoRecording = new EventEmitter<void>();
   @Output() readonly longRunningResponseComplete = new EventEmitter<AgentRunRequest>();
   @Output() readonly toggleHideIntermediateEvents = new EventEmitter<void>();
+  @Output() readonly toggleSse = new EventEmitter<void>();
 
   @ViewChild('videoContainer', {read: ElementRef}) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;

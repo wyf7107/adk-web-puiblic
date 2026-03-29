@@ -21,6 +21,18 @@
       <mat-button-toggle value="events">Events</mat-button-toggle>
       <mat-button-toggle value="traces">Traces</mat-button-toggle>
     </mat-button-toggle-group>
+    @if (viewMode() === 'events') {
+      <button
+        style="margin-left: 8px; transform: scale(0.85);"
+        mat-icon-button
+        class="toolbar-icon-button"
+        (click)="toggleHideIntermediateEvents.emit()"
+        matTooltip="Toggle intermediate events"
+        [style.color]="hideIntermediateEvents() ? 'var(--mat-sys-primary)' : 'inherit'"
+      >
+        <mat-icon>{{ hideIntermediateEvents() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    }
   </div>
 <div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
   @if (uiEvents.length === 0 && agentReadme) {

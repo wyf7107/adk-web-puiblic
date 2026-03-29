@@ -43,7 +43,14 @@ export class TraceTabComponent {
 
   formatTime(nanos: number | undefined): string {
     if (!nanos) return 'N/A';
-    return new Date(nanos / 1_000_000).toISOString();
+    return new Date(nanos / 1_000_000).toLocaleString();
+  }
+
+  get selectedSpanChildren() {
+    const span = this.selectedSpan();
+    if (!span) return [];
+    if (span.children && span.children.length > 0) return span.children;
+    return this.traceData.filter(s => s.parent_span_id === span.span_id);
   }
 
   selectSpanById(id: string | undefined): void {

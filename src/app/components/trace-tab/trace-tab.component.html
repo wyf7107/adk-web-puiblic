@@ -38,9 +38,7 @@
       @if (selectedDetailTab() === 'info') {
         <div class="info-tables-container">
           <table class="info-table">
-            <thead>
-              <tr><th colspan="2">Basic Info</th></tr>
-            </thead>
+
             <tbody>
               <tr><td>Name</td><td>{{ selectedSpan()?.name }}</td></tr>
               <tr><td>Span ID</td><td>{{ selectedSpan()?.span_id }}</td></tr>
@@ -59,7 +57,7 @@
               <tr><td>End Time</td><td>{{ formatTime(selectedSpan()?.end_time) }}</td></tr>
             </tbody>
           </table>
-          @if (selectedSpan()?.children && selectedSpan()!.children!.length > 0) {
+          @if (selectedSpanChildren.length > 0) {
             <table class="info-table">
               <thead>
                 <tr>
@@ -67,7 +65,7 @@
                 </tr>
               </thead>
               <tbody>
-                @for (child of selectedSpan()!.children; track child.span_id) {
+                @for (child of selectedSpanChildren; track child.span_id) {
                   <tr>
                     <td>{{ child.name }}</td>
                     <td><a href="javascript:void(0)" (click)="selectSpanById(child.span_id)" class="span-link">{{ child.span_id }}</a></td>

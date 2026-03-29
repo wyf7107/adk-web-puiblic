@@ -20,7 +20,7 @@
     <mat-paginator
       class="event-paginator"
       hidePageSize
-      [length]="traceData.length"
+      [length]="orderedTraceData.length"
       [pageSize]="1"
       [pageIndex]="selectedSpanIndex"
       (page)="onPage($event)"

@@ -55,8 +55,44 @@ export class SpanPaginatorIntl extends MatPaginatorIntl {
   ]
 })
 export class TraceTabComponent {
+  _traceData: any[] = [];
+  orderedTraceData: any[] = [];
+
   // Input kept so we don't break side-panel binding, though not used here anymore
-  @Input() traceData: any[] = [];
+  @Input() set traceData(val: any[]) {
+    this._traceData = val || [];
+    this.orderedTraceData = this.computeOrdered(this._traceData);
+  }
+
+  get traceData(): any[] {
+    return this._traceData;
+  }
+
+  computeOrdered(spans: any[]): any[] {
+    const spanClones = spans.map(span => ({...span}));
+    const spanMap = new Map<string, any>();
+    const roots: any[] = [];
+
+    spanClones.forEach(span => spanMap.set(span.span_id, span));
+    spanClones.forEach(span => {
+      if (span.parent_span_id && spanMap.has(span.parent_span_id)) {
+        const parent = spanMap.get(span.parent_span_id)!;
+        parent.children = parent.children || [];
+        parent.children.push(span);
+      } else {
+        roots.push(span);
+      }
+    });
+
+    const flatten = (spansArray: any[]): any[] => {
+      return spansArray.flatMap(span => [
+        span,
+        ...(span.children ? flatten(span.children) : [])
+      ]);
+    };
+
+    return flatten(roots);
+  }
   
   protected readonly traceService = inject(TRACE_SERVICE);
   selectedSpan = toSignal(this.traceService.selectedTraceRow$);
@@ -86,13 +122,13 @@ export class TraceTabComponent {
   get selectedSpanIndex(): number | undefined {
     const span = this.selectedSpan();
     if (!span) return undefined;
-    const index = this.traceData.findIndex(s => s.span_id === span.span_id);
+    const index = this.orderedTraceData.findIndex(s => s.span_id === span.span_id);
     return index === -1 ? undefined : index;
   }
 
   onPage(event: PageEvent) {
-    if (event.pageIndex >= 0 && event.pageIndex < this.traceData.length) {
-      this.traceService.selectedRow(this.traceData[event.pageIndex]);
+    if (event.pageIndex >= 0 && event.pageIndex < this.orderedTraceData.length) {
+      this.traceService.selectedRow(this.orderedTraceData[event.pageIndex]);
     }
   }
   

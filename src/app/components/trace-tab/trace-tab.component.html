@@ -41,18 +41,18 @@
 
             <tbody>
               <tr><td>Name</td><td>{{ selectedSpan()?.name }}</td></tr>
-              <tr><td>Span ID</td><td>{{ selectedSpan()?.span_id }}</td></tr>
+              <tr><td>Span ID</td><td class="id-text">{{ selectedSpan()?.span_id }}</td></tr>
               <tr>
                 <td>Parent ID</td>
                 <td>
                   @if (selectedSpan()?.parent_span_id) {
-                    <a href="javascript:void(0)" (click)="selectSpanById(selectedSpan()?.parent_span_id)" class="span-link">{{ selectedSpan()?.parent_span_id }}</a>
+                    <a href="javascript:void(0)" (click)="selectSpanById(selectedSpan()?.parent_span_id)" class="span-link id-text">{{ selectedSpan()?.parent_span_id }}</a>
                   } @else {
                     None
                   }
                 </td>
               </tr>
-              <tr><td>Trace ID</td><td>{{ selectedSpan()?.trace_id }}</td></tr>
+              <tr><td>Trace ID</td><td class="id-text">{{ selectedSpan()?.trace_id }}</td></tr>
               <tr><td>Start Time</td><td>{{ formatTime(selectedSpan()?.start_time) }}</td></tr>
               <tr><td>End Time</td><td>{{ formatTime(selectedSpan()?.end_time) }}</td></tr>
             </tbody>
@@ -68,7 +68,7 @@
                 @for (child of selectedSpanChildren; track child.span_id) {
                   <tr>
                     <td>{{ child.name }}</td>
-                    <td><a href="javascript:void(0)" (click)="selectSpanById(child.span_id)" class="span-link">{{ child.span_id }}</a></td>
+                    <td><a href="javascript:void(0)" (click)="selectSpanById(child.span_id)" class="span-link id-text">{{ child.span_id }}</a></td>
                   </tr>
                 }
               </tbody>
@@ -85,7 +85,7 @@
               <tbody>
                 <tr>
                   <td>Event ID</td>
-                  <td><a href="javascript:void(0)" (click)="switchToEvent.emit(selectedSpan()!.attributes['gcp.vertex.agent.event_id'])" class="span-link">{{ selectedSpan()!.attributes['gcp.vertex.agent.event_id'] }}</a></td>
+                  <td><a href="javascript:void(0)" (click)="switchToEvent.emit(selectedSpan()!.attributes['gcp.vertex.agent.event_id'])" class="span-link id-text">{{ selectedSpan()!.attributes['gcp.vertex.agent.event_id'] }}</a></td>
                 </tr>
               </tbody>
             </table>

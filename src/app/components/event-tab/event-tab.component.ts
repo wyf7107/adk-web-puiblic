@@ -52,7 +52,7 @@ export class EventTabComponent {
   readonly isEventRequestResponseLoadingSignal = toSignal(
       this.uiStateService.isEventRequestResponseLoading(), {initialValue: false});
 
-  selectedDetailTab: 'event' | 'request' | 'response' | 'state' | 'artifact' | 'graph' = 'event';
+  selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'state' | 'artifact' | 'graph' = 'event';
 
   constructor() {
     effect(() => {
@@ -61,6 +61,8 @@ export class EventTabComponent {
         let isTabValid = false;
         const currentTab = this.selectedDetailTab;
         if (currentTab === 'event') {
+          isTabValid = true;
+        } else if (currentTab === 'raw') {
           isTabValid = true;
         } else if (currentTab === 'request') {
           isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmRequest() && Object.keys(this.llmRequest()!).length > 0);
@@ -79,6 +81,13 @@ export class EventTabComponent {
         }
       }
     });
+  }
+
+  formatTime(timestamp: number | undefined): string {
+    if (!timestamp) return 'N/A';
+    // If timestamp is before 2286-11-20 in seconds, treat as seconds.
+    const inMs = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
+    return new Date(inMs).toLocaleString();
   }
 
   protected readonly Object = Object;

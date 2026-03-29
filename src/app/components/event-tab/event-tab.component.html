@@ -44,10 +44,49 @@
           <mat-icon>insert_drive_file</mat-icon>
         </button>
       }
+      <button mat-icon-button (click)="selectedDetailTab = 'raw'" [class.active]="selectedDetailTab === 'raw'" matTooltip="Raw JSON" matTooltipPosition="right">
+        <mat-icon>data_object</mat-icon>
+      </button>
     </div>
     <div class="vertical-tabs-content">
       @if (selectedDetailTab === 'event') {
-        <div class="json-viewer-container">
+        <div class="info-tables-container" style="flex: 1; overflow-y: auto;">
+          <table class="info-table">
+            <tbody>
+              <tr><td>Event ID</td><td class="id-text">{{ selectedEvent()?.id }}</td></tr>
+              <tr><td>Invocation ID</td><td class="id-text">{{ selectedEvent()?.invocationId || 'N/A' }}</td></tr>
+              <tr><td>Timestamp</td><td>{{ formatTime(selectedEvent()?.timestamp) }}</td></tr>
+              <tr><td>Author</td><td>{{ selectedEvent()?.author }}</td></tr>
+            </tbody>
+          </table>
+
+          @if (selectedEvent()?.usageMetadata && Object.keys(selectedEvent()!.usageMetadata).length > 0) {
+            <table class="info-table">
+              <thead>
+                <tr><th colspan="2">Usage Metadata</th></tr>
+              </thead>
+              <tbody>
+                @for (key of Object.keys(selectedEvent()!.usageMetadata); track key) {
+                  <tr>
+                    <td>{{ key }}</td>
+                    <td>
+                      @if (key === 'promptTokensDetails' || key === 'promptTokenDetails' || key === 'candidatesTokenDetails' || key === 'candidatesTokensDetails' || key === 'cacheTokensDetails') {
+                        @for (detail of selectedEvent()!.usageMetadata[key]; track detail.modality) {
+                          <div>{{ detail.modality }}: {{ detail.tokenCount }}</div>
+                        }
+                      } @else {
+                        {{ selectedEvent()!.usageMetadata[key] }}
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+      @if (selectedDetailTab === 'raw') {
+        <div class="json-viewer-container" style="flex: 1; overflow-y: auto;">
           <ngx-json-viewer [json]="filteredSelectedEvent()"></ngx-json-viewer>
         </div>
       }

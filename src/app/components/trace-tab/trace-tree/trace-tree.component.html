@@ -15,12 +15,9 @@
 -->
 
 <div>
-  <div class="invocation-id-container">
+  <div class="invocation-id-container" (click)="selectRootSpan()" [class.selected]="isRootSpanSelected()">
     <span>Invocation ID: </span>
     <div class="invocation-id" [matTooltip]="invocationId">{{invocationId}}</div>
-    <button mat-icon-button class="copy-button" (click)="copyInvocationId()" matTooltip="Copy Invocation ID">
-      <mat-icon>content_copy</mat-icon>
-    </button>
     <span class="total-latency">Total latency: {{formatDuration(rootLatencyNanos)}}</span>
   </div>
   <div class="trace-container">

@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ClipboardModule, Clipboard} from '@angular/cdk/clipboard';
 import {ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
@@ -28,7 +27,7 @@ import {TRACE_SERVICE} from '../../../core/services/interfaces/trace';
   selector: 'app-trace-tree',
   templateUrl: './trace-tree.component.html',
   styleUrl: './trace-tree.component.scss',
-  imports: [MatButtonModule, MatIconModule, MatTooltipModule, ClipboardModule]
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule]
 })
 export class TraceTreeComponent implements OnInit, OnChanges {
   @Input() spans: any[] = [];
@@ -50,15 +49,27 @@ export class TraceTreeComponent implements OnInit, OnChanges {
   ]);
   selectedRow: Span|undefined = undefined;
   private readonly traceService = inject(TRACE_SERVICE);
-  private readonly clipboard = inject(Clipboard);
 
   constructor() {}
 
-  copyInvocationId() {
-    if (this.invocationId) {
-      this.clipboard.copy(this.invocationId);
+  selectRootSpan() {
+    if (this.tree && this.tree.length > 0) {
+      if (this.selectedRow && this.selectedRow.span_id === this.tree[0].span_id) {
+        this.traceService.selectedRow(undefined);
+        this.traceService.setHoveredMessages(undefined, this.invocationId);
+        return;
+      }
+      this.traceService.selectedRow(this.tree[0]);
+      this.traceService.setHoveredMessages(this.tree[0], this.invocationId);
     }
   }
+
+  isRootSpanSelected() {
+    if (!this.selectedRow || !this.tree || this.tree.length === 0) return false;
+    return String(this.selectedRow.span_id) === String(this.tree[0].span_id);
+  }
+
+
 
   ngOnInit(): void {
     this.rebuildTree();

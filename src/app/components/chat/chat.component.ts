@@ -732,16 +732,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
               this.sessionTab?.reloadSession(this.sessionId);
             }
           });
-        this.eventService.getTrace(this.sessionId)
-          .pipe(first(), catchError((error) => {
-            return of([]);
-          }))
-          .subscribe((res) => {
-            this.traceData = res;
-            this.changeDetectorRef.detectChanges();
-          });
-        this.traceService.setMessages(this.uiEvents());
-        this.changeDetectorRef.detectChanges();
+        this.loadTraceData();
       },
     });
   }
@@ -1786,13 +1777,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.restorePendingLongRunningCalls();
     this.changeDetectorRef.detectChanges();
 
-    this.eventService.getTrace(this.sessionId)
-      .pipe(first(), catchError(() => of([])))
-      .subscribe(res => {
-        this.traceData = res;
-        this.traceService.setEventData(this.eventData);
-        this.traceService.setMessages(this.uiEvents());
-      });
+    this.loadTraceData();
 
     this.sessionService.canEdit(this.userId, session)
       .pipe(first(), catchError(() => of(true)))

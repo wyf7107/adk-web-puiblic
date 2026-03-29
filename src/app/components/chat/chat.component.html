@@ -475,5 +475,13 @@
 
   </div>
   }
+
   </mat-drawer-container>
 </mat-drawer-container>
+
+@if (showAgentStructureOverlay) {
+  <app-agent-structure-graph-dialog 
+    [appName]="appName" 
+    (close)="showAgentStructureOverlay = false">
+  </app-agent-structure-graph-dialog>
+}

@@ -14,23 +14,15 @@
  limitations under the License.
 -->
 
-<h2 mat-dialog-title>Agent Structure: {{ appName }}</h2>
+<div class="overlay-backdrop"></div>
+<div class="overlay-panel" (click)="onBackdropClick($event)">
+  <div class="overlay-header">
 
-<mat-dialog-content class="dialog-content">
-  <div class="graph-container">
-    @if (isLoading()) {
-      <div class="loading-container">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Loading agent structure...</p>
-      </div>
-    } @else if (errorMessage()) {
-      <div class="error-container">
-        <mat-icon class="error-icon">error_outline</mat-icon>
-        <p class="error-message">{{ errorMessage() }}</p>
-      </div>
-    } @else if (renderedGraph()) {
-      <!-- Breadcrumb navigation -->
+    @if (renderedGraph() && breadcrumbs().length > 0) {
       <div class="breadcrumb-container">
+        <span>Agent Structure:</span>
+        <button class="breadcrumb-item" disabled>{{ appName }}</button>
+        <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
         @for (crumb of breadcrumbs(); track $index) {
           @if ($index > 0) {
             <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
@@ -44,17 +36,34 @@
           </button>
         }
       </div>
-
-      <div class="svg-container" [innerHTML]="renderedGraph()"></div>
-    } @else {
-      <div class="no-graph-container">
-        <mat-icon class="large-icon">account_tree</mat-icon>
-        <p>Agent structure graph not available.</p>
-      </div>
     }
-  </div>
-</mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Close</button>
-</mat-dialog-actions>
+    <span style="flex: 1"></span>
+    <button mat-icon-button (click)="close.emit()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="overlay-content">
+    <div class="graph-container">
+      @if (isLoading()) {
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading agent structure...</p>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="error-container">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <p class="error-message">{{ errorMessage() }}</p>
+        </div>
+      } @else if (renderedGraph()) {
+        <div class="svg-container" [innerHTML]="renderedGraph()"></div>
+      } @else {
+        <div class="no-graph-container">
+          <mat-icon class="large-icon">account_tree</mat-icon>
+          <p>Agent structure graph not available.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

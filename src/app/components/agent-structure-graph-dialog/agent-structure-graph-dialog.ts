@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
+import { Component, inject, OnInit, signal, Input, Output, EventEmitter } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -30,10 +29,6 @@ import { addSvgNodeHoverEffects } from '../../utils/svg-interaction.utils';
 import { NavigationStackItem, hasNestedStructure, findNodeInLevel, getNodesAtLevel } from '../../utils/graph-navigation.utils';
 import { getNodeName } from '../../utils/graph-layout.utils';
 
-export interface AgentStructureGraphDialogData {
-  appName: string;
-}
-
 @Component({
   selector: 'app-agent-structure-graph-dialog',
   templateUrl: './agent-structure-graph-dialog.html',
@@ -41,18 +36,15 @@ export interface AgentStructureGraphDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatDialogClose,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
   ],
 })
 export class AgentStructureGraphDialogComponent implements OnInit {
-  readonly dialogRef = inject(MatDialogRef<AgentStructureGraphDialogComponent>);
-  readonly data = inject<AgentStructureGraphDialogData>(MAT_DIALOG_DATA);
+  @Input() appName!: string;
+  @Output() close = new EventEmitter<void>();
+
   private readonly agentService = inject(AGENT_SERVICE);
   private readonly graphService = inject(GRAPH_SERVICE);
   private readonly sanitizer = inject(SAFE_VALUES_SERVICE);
@@ -67,8 +59,17 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   private navigationStack: NavigationStackItem[] = [];
   public breadcrumbs = signal<string[]>([]);
 
-  get appName(): string {
-    return this.data.appName;
+  onBackdropClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (
+      !target.closest('svg') && 
+      !target.closest('.overlay-header') &&
+      !target.closest('.loading-container') &&
+      !target.closest('.error-container') &&
+      !target.closest('.no-graph-container')
+    ) {
+      this.close.emit();
+    }
   }
 
   ngOnInit(): void {

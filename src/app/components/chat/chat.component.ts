@@ -163,6 +163,7 @@ const BIDI_STREAMING_RESTART_WARNING =
     TraceEventComponent,
     AsyncPipe,
     ChatPanelComponent,
+    AgentStructureGraphDialogComponent,
     SidePanelComponent,
     CanvasComponent,
     BuilderTabsComponent,
@@ -2172,15 +2173,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  showAgentStructureOverlay = false;
+
   openAgentStructureGraphDialog(): void {
-    const dialogRef = this.dialog.open(AgentStructureGraphDialogComponent, {
-      width: '1000px',
-      maxWidth: '90vw',
-      maxHeight: '90vh',
-      data: {
-        appName: this.appName,
-      },
-    });
+    this.showAgentStructureOverlay = true;
   }
 
   saveAgentBuilder() {

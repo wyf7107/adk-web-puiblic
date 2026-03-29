@@ -14,33 +14,51 @@
  * limitations under the License.
  */
 
-h2[mat-dialog-title] {
-  color: var(--mdc-dialog-supporting-text-color) !important;
-  margin: 0 0 16px 0 !important;
-  font-size: 20px !important;
-  font-weight: 500 !important;
+:host {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-mat-dialog-content {
-  color: var(--mdc-dialog-supporting-text-color) !important;
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.overlay-panel {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: transparent;
+  color: var(--mat-sys-on-surface);
+  border-radius: 0;
   overflow: hidden;
+  box-shadow: none;
 }
 
-button[mat-button] {
-  color: var(--mdc-dialog-supporting-text-color) !important;
+.overlay-header {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background-color: var(--mat-sys-surface-container);
 }
 
-.dialog-content {
-  width: 1000px;
-  height: 700px;
-  max-width: 90vw;
-  max-height: 75vh;
-  padding: 20px;
-  overflow: hidden;
+.overlay-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  padding: 24px;
+  overflow: hidden;
 }
 
 .graph-container {
@@ -67,8 +85,6 @@ button[mat-button] {
   align-items: center;
   justify-content: center;
   overflow: auto;
-  border: 1px solid var(--mdc-dialog-supporting-text-color, rgba(255, 255, 255, 0.2));
-  border-radius: 8px;
   padding: 16px;
 
   ::ng-deep svg {
@@ -77,14 +93,6 @@ button[mat-button] {
     width: auto;
     height: auto;
   }
-}
-
-:host-context(.dark-theme) .svg-container {
-  background-color: #0e172a;
-}
-
-:host-context(.light-theme) .svg-container {
-  background-color: #f9fafc;
 }
 
 .loading-container,
@@ -129,10 +137,9 @@ button[mat-button] {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 16px;
-  padding: 8px 12px;
-  background-color: var(--mat-sys-surface-container);
-  border-radius: 8px;
+  margin-left: 8px;
+  padding: 0;
+  background-color: transparent;
   flex-wrap: wrap;
 }
 

@@ -17,15 +17,10 @@
 
 import {AsyncPipe, NgComponentOutlet} from '@angular/common';
 import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, Type, viewChild, ViewContainerRef} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {MatIconButton, MatMiniFabButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
-import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {Observable, of} from 'rxjs';
 import {first} from 'rxjs/operators';
 
@@ -40,6 +35,7 @@ import {ArtifactTabComponent, getMediaTypeFromMimetype} from '../artifact-tab/ar
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
 import {StateTabComponent} from '../state-tab/state-tab.component';
 import {TraceTabComponent} from '../trace-tab/trace-tab.component';
+import {EventTabComponent} from '../event-tab/event-tab.component';
 
 import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
 
@@ -60,18 +56,12 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
     TraceTabComponent,
     StateTabComponent,
     ArtifactTabComponent,
-    MatPaginator,
-    MatIcon,
-    MatIconButton,
-    MatTooltip,
-    NgxJsonViewerModule,
+    EventTabComponent,
     MatProgressSpinner,
   ],
 })
 export class SidePanelComponent implements AfterViewInit {
   protected readonly Object = Object;
-  selectedDetailTab: string = 'event';
-
   appName = input('');
   userId = input('');
   sessionId = input('');
@@ -120,9 +110,6 @@ export class SidePanelComponent implements AfterViewInit {
   private readonly environmentInjector = inject(EnvironmentInjector);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
 
-  readonly isEventRequestResponseLoadingSignal = toSignal(
-      this.uiStateService.isEventRequestResponseLoading(), {initialValue: false});
-
   constructor() {
     effect(() => {
       const event = this.selectedEvent();
@@ -131,28 +118,6 @@ export class SidePanelComponent implements AfterViewInit {
         // Event tab is index 0. Re-activate it if we select an event and another tab is active.
         if (tabGroup.selectedIndex !== 0) {
           tabGroup.selectedIndex = 0;
-        }
-      }
-
-      if (event) {
-        let isTabValid = false;
-        const currentTab = this.selectedDetailTab;
-        if (currentTab === 'event') {
-          isTabValid = true;
-        } else if (currentTab === 'request') {
-          isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmRequest() && Object.keys(this.llmRequest()!).length > 0);
-        } else if (currentTab === 'response') {
-          isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmResponse() && Object.keys(this.llmResponse()!).length > 0);
-        } else if (currentTab === 'state') {
-          isTabValid = !!(event?.actions?.stateDelta && Object.keys(event.actions.stateDelta).length > 0);
-        } else if (currentTab === 'artifact') {
-          isTabValid = !!(event?.actions?.artifactDelta && Object.keys(event.actions.artifactDelta).length > 0);
-        } else if (currentTab === 'graph') {
-          isTabValid = !!(event?.author !== 'user' && this.renderedEventGraph());
-        }
-
-        if (!isTabValid) {
-          this.selectedDetailTab = 'event';
         }
       }
     });

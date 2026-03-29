@@ -18,101 +18,20 @@
         <span class="tab-label">{{ i18n.eventDetailsTabLabel }}</span>
       </ng-template>
       @if (selectedEvent()) {
-        <div class="event-details-container">
-          <div class="event-details-header">
-            <mat-paginator
-              class="event-paginator"
-              hidePageSize
-              [length]="eventData().size"
-              [pageSize]="1"
-              [pageIndex]="selectedEventIndex()"
-              (page)="page.emit($event)"
-              [attr.aria-label]="i18n.selectEventAriaLabel"
-            >
-            </mat-paginator>
-            <button mat-icon-button (click)="closeSelectedEvent.emit()" matTooltip="{{ i18n.clearSelectionButtonLabel }}">
-              <mat-icon>remove_selection</mat-icon>
-            </button>
-          </div>
-          <div class="event-details-content">
-            <div class="vertical-tabs-sidebar">
-              <button mat-icon-button (click)="selectedDetailTab = 'event'" [class.active]="selectedDetailTab === 'event'" matTooltip="{{ i18n.eventDetailsTabLabel }}" matTooltipPosition="right">
-                <mat-icon>info</mat-icon>
-              </button>
-              @if (selectedEvent()?.author !== 'user' && renderedEventGraph()) {
-                <button mat-icon-button (click)="selectedDetailTab = 'graph'" [class.active]="selectedDetailTab === 'graph'" matTooltip="{{ i18n.graphTabLabel }}" matTooltipPosition="right">
-                  <mat-icon>account_tree</mat-icon>
-                </button>
-              }
-              @if ((uiStateService.isEventRequestResponseLoading() | async) === true || (llmRequest() && Object.keys(llmRequest()!).length > 0)) {
-                <button mat-icon-button (click)="selectedDetailTab = 'request'" [class.active]="selectedDetailTab === 'request'" matTooltip="{{ i18n.requestDetailsTabLabel }}" matTooltipPosition="right">
-                  <mat-icon>input</mat-icon>
-                </button>
-              }
-              @if ((uiStateService.isEventRequestResponseLoading() | async) === true || (llmResponse() && Object.keys(llmResponse()!).length > 0)) {
-                <button mat-icon-button (click)="selectedDetailTab = 'response'" [class.active]="selectedDetailTab === 'response'" matTooltip="{{ i18n.responseDetailsTabLabel }}" matTooltipPosition="right">
-                  <mat-icon>output</mat-icon>
-                </button>
-              }
-              @if (selectedEvent()?.actions?.stateDelta && Object.keys(selectedEvent()?.actions?.stateDelta).length > 0) {
-                <button mat-icon-button (click)="selectedDetailTab = 'state'" [class.active]="selectedDetailTab === 'state'" matTooltip="{{ i18n.stateTabLabel }}" matTooltipPosition="right">
-                  <mat-icon>data_object</mat-icon>
-                </button>
-              }
-              @if (selectedEvent()?.actions?.artifactDelta && Object.keys(selectedEvent()?.actions?.artifactDelta).length > 0) {
-                <button mat-icon-button (click)="selectedDetailTab = 'artifact'" [class.active]="selectedDetailTab === 'artifact'" matTooltip="{{ i18n.artifactsTabLabel }}" matTooltipPosition="right">
-                  <mat-icon>insert_drive_file</mat-icon>
-                </button>
-              }
-            </div>
-            <div class="vertical-tabs-content">
-              @if (selectedDetailTab === 'event') {
-                <div class="json-viewer-container">
-                  <ngx-json-viewer [json]="filteredSelectedEvent()"></ngx-json-viewer>
-                </div>
-              }
-              @if (selectedDetailTab === 'graph') {
-                <div class="event-graph-container">
-                  <div [innerHtml]="renderedEventGraph()" (click)="openImageDialog.emit(rawSvgString())"></div>
-                </div>
-              }
-              @if (selectedDetailTab === 'request') {
-                @if ((uiStateService.isEventRequestResponseLoading() | async) === true) {
-                  <div class="request-response-loading-spinner-container">
-                    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-                  </div>
-                } @else if (!llmRequest()) {
-                  <div class="request-response-empty-state">{{ i18n.requestIsNotAvailable }}</div>
-                } @else {
-                  <div class="json-viewer-container">
-                    <ngx-json-viewer [json]="llmRequest()"></ngx-json-viewer>
-                  </div>
-                }
-              }
-              @if (selectedDetailTab === 'response') {
-                @if ((uiStateService.isEventRequestResponseLoading() | async) === true) {
-                  <div class="request-response-loading-spinner-container">
-                    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-                  </div>
-                } @else if (!llmResponse()) {
-                  <div class="request-response-empty-state">{{ i18n.responseIsNotAvailable }}</div>
-                } @else {
-                  <div class="json-viewer-container">
-                    <ngx-json-viewer [json]="llmResponse()"></ngx-json-viewer>
-                  </div>
-                }
-              }
-              @if (selectedDetailTab === 'state') {
-                <div class="json-viewer-container">
-                  <ngx-json-viewer [json]="selectedEvent()?.actions?.stateDelta"></ngx-json-viewer>
-                </div>
-              }
-              @if (selectedDetailTab === 'artifact') {
-                <app-artifact-tab [artifacts]="artifactDeltaArray()"></app-artifact-tab>
-              }
-            </div>
-          </div>
-        </div>
+        <app-event-tab
+          [eventDataSize]="eventData().size"
+          [selectedEventIndex]="selectedEventIndex()"
+          [selectedEvent]="selectedEvent()"
+          [filteredSelectedEvent]="filteredSelectedEvent()"
+          [renderedEventGraph]="renderedEventGraph()"
+          [rawSvgString]="rawSvgString()"
+          [llmRequest]="llmRequest()"
+          [llmResponse]="llmResponse()"
+          [artifactDeltaArray]="artifactDeltaArray()"
+          (page)="page.emit($event)"
+          (closeSelectedEvent)="closeSelectedEvent.emit()"
+          (openImageDialog)="openImageDialog.emit($event)"
+        ></app-event-tab>
       } @else {
         <div class="empty-state">Select an event to view details</div>
       }

@@ -23,6 +23,10 @@
     }
   }
 
+  .label-col {
+    width: 30%;
+  }
+
   ::ng-deep tbody {
     tr {
       td {
@@ -33,7 +37,6 @@
         overflow-wrap: anywhere;
         
         &:first-child {
-          width: 140px;
           font-weight: 500;
           color: var(--mat-sys-on-surface);
           background-color: var(--mat-sys-surface-container-lowest);

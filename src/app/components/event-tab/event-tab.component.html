@@ -101,6 +101,24 @@
               </tbody>
             </table>
           }
+
+          @if (associatedSpans().length > 0) {
+            <table class="info-table">
+              <thead>
+                <tr><th colspan="2">Associated Spans</th></tr>
+              </thead>
+              <tbody>
+                @for (span of associatedSpans(); track span.span_id) {
+                  <tr>
+                    <td>{{ span.name }}</td>
+                    <td>
+                      <a href="javascript:void(0)" (click)="switchToSpan(span)" class="span-link id-text">{{ span.span_id }}</a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
         </div>
       }
       @if (selectedDetailTab === 'raw') {

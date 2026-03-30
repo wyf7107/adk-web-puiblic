@@ -97,6 +97,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   readonly openAddItemDialog = output<boolean>();
   readonly enterBuilderMode = output<boolean>();
   readonly showAgentStructureGraph = output<boolean>();
+  readonly switchToTraceView = output<void>();
 
   readonly sessionTabComponent = undefined;
   readonly evalTabComponent = viewChild(EvalTabComponent);

@@ -481,6 +481,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.drawerSessionTab();
   }
 
+  switchToTraceView() {
+    this.chatPanel()?.onViewModeChange('traces');
+  }
+
   ngAfterViewInit() {
     if (this.showSidePanel) {
       this.sideDrawer()?.open();

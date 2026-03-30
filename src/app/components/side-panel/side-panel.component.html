@@ -25,6 +25,7 @@
           [eventDataSize]="eventData().size"
           [selectedEventIndex]="selectedEventIndex()"
           [selectedEvent]="selectedEvent()"
+          [traceData]="traceData()"
           [filteredSelectedEvent]="filteredSelectedEvent()"
           [renderedEventGraph]="renderedEventGraph()"
           [rawSvgString]="rawSvgString()"
@@ -34,6 +35,7 @@
           (page)="page.emit($event)"
           (closeSelectedEvent)="closeSelectedEvent.emit()"
           (openImageDialog)="openImageDialog.emit($event)"
+          (switchToTraceView)="switchToTraceView.emit()"
         ></app-event-tab>
       } @else {
         <div class="empty-state">Select an event or trace span to view details</div>

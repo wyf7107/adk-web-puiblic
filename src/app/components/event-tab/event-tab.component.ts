@@ -1,5 +1,5 @@
 import {AsyncPipe} from '@angular/common';
-import {ChangeDetectionStrategy, Component, effect, inject, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, output} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -13,6 +13,8 @@ import {Event} from '../../core/models/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
 import {ArtifactTabComponent} from '../artifact-tab/artifact-tab.component';
+import {SpanNode} from '../../core/models/Trace';
+import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,19 +42,49 @@ export class EventTabComponent {
   readonly rawSvgString = input<string | null>(null);
   readonly llmRequest = input<any>();
   readonly llmResponse = input<any>();
+  readonly traceData = input<SpanNode[]>([]);
   readonly artifactDeltaArray = input<any[]>([]);
 
   readonly page = output<PageEvent>();
   readonly closeSelectedEvent = output<void>();
   readonly openImageDialog = output<string | null>();
+  readonly switchToTraceView = output<void>();
 
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
+  protected readonly traceService = inject(TRACE_SERVICE);
   readonly i18n = inject(SidePanelMessagesInjectionToken);
 
   readonly isEventRequestResponseLoadingSignal = toSignal(
       this.uiStateService.isEventRequestResponseLoading(), {initialValue: false});
 
+  readonly associatedSpans = computed(() => {
+    const ev = this.selectedEvent();
+    if (!ev || !ev.id) return [];
+    
+    const allSpans = this.traceData();
+    if (!allSpans) return [];
+    
+    const flatten = (arr: any[]): any[] => {
+      let result: any[] = [];
+      for (const item of arr) {
+        result.push(item);
+        if (item.children) {
+          result = result.concat(flatten(item.children));
+        }
+      }
+      return result;
+    };
+    
+    const flatSpans = flatten(allSpans);
+    return flatSpans.filter(s => s.attributes && s.attributes['gcp.vertex.agent.event_id'] === ev.id);
+  });
+
   selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'artifact' | 'graph' = 'event';
+
+  switchToSpan(span: any) {
+    this.switchToTraceView.emit();
+    this.traceService.selectedRow(span);
+  }
 
   constructor() {
     effect(() => {

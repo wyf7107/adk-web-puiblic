@@ -461,6 +461,9 @@
 @if (showAgentStructureOverlay) {
   <app-agent-structure-graph-dialog 
     [appName]="appName" 
+    [preloadedAppData]="agentGraphData"
+    [preloadedLightGraphSvg]="sessionGraphSvgLight"
+    [preloadedDarkGraphSvg]="sessionGraphSvgDark"
     (close)="showAgentStructureOverlay = false">
   </app-agent-structure-graph-dialog>
 }

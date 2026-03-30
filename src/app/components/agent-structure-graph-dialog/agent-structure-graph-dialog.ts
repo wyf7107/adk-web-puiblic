@@ -43,6 +43,9 @@ import { getNodeName } from '../../utils/graph-layout.utils';
 })
 export class AgentStructureGraphDialogComponent implements OnInit {
   @Input() appName!: string;
+  @Input() preloadedAppData?: any;
+  @Input() preloadedLightGraphSvg?: string | null;
+  @Input() preloadedDarkGraphSvg?: string | null;
   @Output() close = new EventEmitter<void>();
 
   private readonly agentService = inject(AGENT_SERVICE);
@@ -92,7 +95,19 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     this.errorMessage.set(null);
     this.renderedGraph.set(null);
 
-    // First, fetch full app data for navigation
+    // If preloaded app data is provided, use it directly
+    if (this.preloadedAppData) {
+      this.fullAppData = this.preloadedAppData;
+      this.navigationStack = [{
+        name: this.fullAppData.root_agent?.name || this.appName,
+        data: this.fullAppData.root_agent
+      }];
+      this.updateBreadcrumbs();
+      this.renderCurrentLevel();
+      return;
+    }
+
+    // Otherwise fetch full app data for navigation
     this.agentService.getAppInfo(this.appName).subscribe({
       next: (appData: any) => {
         this.fullAppData = appData;
@@ -114,6 +129,24 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   private renderCurrentLevel(): void {
     const isDarkMode = this.themeService.currentTheme() === 'dark';
     const currentPath = this.getCurrentPath();
+
+    if (currentPath === '') {
+      const preloadedGraph = isDarkMode ? this.preloadedDarkGraphSvg : this.preloadedLightGraphSvg;
+      if (preloadedGraph) {
+        this.renderedGraph.set(this.sanitizer.bypassSecurityTrustHtml(preloadedGraph));
+        this.isLoading.set(false);
+        setTimeout(() => {
+          const expandableNodes = this.getExpandableNodes();
+          addSvgNodeHoverEffects('.svg-container', (nodeName) => {
+            if (this.wasDragging) return;
+            this.onNodeClick(nodeName);
+          }, expandableNodes);
+
+          this.initializeSvgTransform();
+        }, 50);
+        return;
+      }
+    }
 
     this.agentService.getAppGraphImage(this.appName, isDarkMode, currentPath).subscribe({
       next: async (response: any) => {

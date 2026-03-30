@@ -32,9 +32,6 @@ export class TraceService implements TraceServiceInterface {
       new BehaviorSubject<Map<string, any>|undefined>(undefined);
   eventData$ = this.eventDataSource.asObservable();
 
-  private hoveredMessageIndicesSource = new BehaviorSubject<number[]>([]);
-  hoveredMessageIndices$ = this.hoveredMessageIndicesSource.asObservable();
-
   private messagesSource = new BehaviorSubject<any[]>([]);
   messages$ = this.messagesSource.asObservable();
 
@@ -50,38 +47,10 @@ export class TraceService implements TraceServiceInterface {
     this.messagesSource.next(messages);
   }
 
-  setHoveredMessages(span: Span|undefined, invocationId: string) {
-    if (!span) {
-      this.hoveredMessageIndicesSource.next([]);
-      return;
-    }
-
-    const attributes = span.attributes;
-    const hasEvent: boolean =
-        attributes && attributes['gcp.vertex.agent.event_id'];
-    const messageIndices = [];
-    for (const [index, msg] of this.messagesSource.value.entries()) {
-      if (msg.role === 'user') {
-        continue;
-      }
-
-      if (this.eventDataSource.value?.get(msg.eventId)?.invocationId !==
-          invocationId) {
-        continue;
-      }
-
-      if (!hasEvent ||
-          attributes['gcp.vertex.agent.event_id'] === msg.eventId) {
-        messageIndices.push(index);
-      }
-    }
-    this.hoveredMessageIndicesSource.next(messageIndices);
-  }
-
   resetTraceService() {
     this.selectedTraceRowSource.next(undefined);
     this.eventDataSource.next(undefined);
     this.messagesSource.next([]);
-    this.hoveredMessageIndicesSource.next([]);
+
   }
 }

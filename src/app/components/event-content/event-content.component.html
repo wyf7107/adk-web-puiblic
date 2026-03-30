@@ -2,7 +2,6 @@
     <app-content-bubble
       [type]="uiEvent.thought ? 'thought' : 'message'"
       [role]="uiEvent.role"
-      [isHighlighted]="isHighlighted"
       [evalStatus]="uiEvent.evalStatus"
       [uiEvent]="uiEvent"
       [userEditEvalCaseMessage]="userEditEvalCaseMessage"
@@ -17,7 +16,6 @@
     @if (uiEvent.event.output) {
     <app-content-bubble
       type="output"
-      [isHighlighted]="isHighlighted"
       [uiEvent]="uiEvent"
     ></app-content-bubble>
     }
@@ -91,7 +89,6 @@
     @if (uiEvent.error) {
     <app-content-bubble
       type="error"
-      [isHighlighted]="isHighlighted"
       [uiEvent]="uiEvent"
     ></app-content-bubble>
     }

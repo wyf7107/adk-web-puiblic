@@ -16,8 +16,6 @@
   position: relative;
   display: inline-block;
 
-  &.content-bubble--highlighted {}
-
   &:empty {
     display: none;
   }

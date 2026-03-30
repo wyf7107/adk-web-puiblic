@@ -1,6 +1,5 @@
 <div
   class="content-bubble type-{{ type }} role-{{ role }}"
-  [class.content-bubble--highlighted]="isHighlighted"
   [class.eval-fail]="evalStatus === 2"
 >
   @if (type !== 'message' && type !== 'output') {

@@ -359,8 +359,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly isDeveloperUiDisclaimerEnabledObs: Observable<boolean> =
     this.featureFlagService.isDeveloperUiDisclaimerEnabled();
 
-  // Trace detail
-  hoveredEventMessageIndices: number[] = [];
 
   // Builder
   disableBuilderSwitch = false;
@@ -447,9 +445,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
 
-
-    this.traceService.hoveredMessageIndices$.subscribe(
-      i => this.hoveredEventMessageIndices = i);
 
     this.traceService.selectedTraceRow$.subscribe((span) => {
       if (span) {

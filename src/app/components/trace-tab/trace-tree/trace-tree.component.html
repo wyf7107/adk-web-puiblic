@@ -27,8 +27,6 @@
       class="trace-row"
       (click)="selectRow(node)"
       [class.selected]="rowSelected(node)"
-      (mouseenter)="onHover(node)"
-      (mouseleave)="onHoverOut()"
       id="trace-node-{{ node.span.span_id }}"
       [appHtmlTooltip]="eventTooltip"
       [appHtmlTooltipContext]="{$implicit: getUiEvent(node)}"

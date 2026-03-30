@@ -61,7 +61,6 @@ export class TraceTreeComponent implements OnInit, OnChanges {
         return;
       }
       this.traceService.selectedRow(this.tree[0]);
-      this.traceService.setHoveredMessages(this.tree[0], this.invocationId);
     }
   }
 
@@ -210,7 +209,6 @@ export class TraceTreeComponent implements OnInit, OnChanges {
       return;
     }
     this.traceService.selectedRow(node.span);
-    this.traceService.setHoveredMessages(node.span, this.invocationId)
   }
 
   rowSelected(node: any) {
@@ -241,14 +239,5 @@ export class TraceTreeComponent implements OnInit, OnChanges {
     return null;
   }
 
-  onHover(n: any) {
-    this.traceService.setHoveredMessages(n.span, this.invocationId)
-  }
 
-  onHoverOut() {
-    this.traceService.setHoveredMessages(undefined, this.invocationId);
-    if (this.selectedRow) {
-      this.traceService.setHoveredMessages(this.selectedRow, this.invocationId);
-    }
-  }
 }

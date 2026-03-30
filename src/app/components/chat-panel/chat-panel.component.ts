@@ -115,7 +115,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() isAudioRecording: boolean = false;
   @Input() micVolume: number = 0;
   @Input() isVideoRecording: boolean = false;
-  @Input() hoveredEventMessageIndices: number[] = [];
   @Input() userId: string = '';
   @Input() sessionId: string = '';
 
@@ -454,10 +453,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }, 50);
   }
 
-
-  shouldMessageHighlighted(index: number) {
-    return this.hoveredEventMessageIndices.includes(index);
-  }
 
   isMessageEventSelected(index: number): boolean {
     return index === this.selectedMessageIndex;

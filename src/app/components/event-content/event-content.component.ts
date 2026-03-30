@@ -37,7 +37,6 @@ export class EventContentComponent {
   @Input({required: true}) uiEvent!: UiEvent;
   @Input({required: true}) index!: number;
   @Input() uiEvents: UiEvent[] = [];
-  @Input() isHighlighted: boolean = false;
   
   @Input() appName: string = '';
   @Input() userId: string = '';

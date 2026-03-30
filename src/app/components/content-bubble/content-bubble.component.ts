@@ -37,7 +37,6 @@ export class ContentBubbleComponent {
   @Input({required: true}) uiEvent!: UiEvent;
   @Input() type: 'message' | 'output' | 'transcription' | 'thought' | 'error' = 'message';
   @Input() role: string = 'bot';
-  @Input() isHighlighted: boolean = false;
   @Input() evalStatus?: number;
   
   @Input() userEditEvalCaseMessage: string = '';

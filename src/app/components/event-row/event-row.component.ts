@@ -33,7 +33,6 @@ export class EventRowComponent {
   @Input({required: true}) index!: number;
   @Input() uiEvents: UiEvent[] = [];
   @Input() isSelected: boolean = false;
-  @Input() isHighlighted: boolean = false;
   @Input() isSelectable: boolean = true;
   
   @Input() appName: string = '';

@@ -58,8 +58,6 @@ export class TraceTreeComponent implements OnInit, OnChanges {
   selectRootSpan() {
     if (this.tree && this.tree.length > 0) {
       if (this.selectedRow && this.selectedRow.span_id === this.tree[0].span_id) {
-        this.traceService.selectedRow(undefined);
-        this.traceService.setHoveredMessages(undefined, this.invocationId);
         return;
       }
       this.traceService.selectedRow(this.tree[0]);
@@ -209,8 +207,6 @@ export class TraceTreeComponent implements OnInit, OnChanges {
 
   selectRow(node: any) {
     if (this.selectedRow && this.selectedRow.span_id == node.span.span_id) {
-      this.traceService.selectedRow(undefined);
-      this.traceService.setHoveredMessages(undefined, this.invocationId)
       return;
     }
     this.traceService.selectedRow(node.span);

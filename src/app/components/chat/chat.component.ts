@@ -1450,11 +1450,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // If clicking the already selected event, deselect it
+    // If clicking the already selected event, ensure side panel is open but do not deselect
     if (this.selectedMessageIndex === i) {
-      this.selectedEvent = undefined;
-      this.selectedEventIndex = undefined;
-      this.selectedMessageIndex = undefined;
+      this.sideDrawer()?.open();
+      this.showSidePanel = true;
+      window.localStorage.setItem('adk-side-panel-visible', 'true');
       return;
     }
 

@@ -65,7 +65,7 @@
         @if (getRelativeWidth(node.span) < 10) {
         <span
           class="short-trace-bar-duration"
-          [style.left.%]="getRelativeStart(node.span) + 5"
+          [style.right.%]="100 - getRelativeStart(node.span)"
           >{{ formatDuration(node.span.end_time - node.span.start_time) }}</span
         >
         }

@@ -162,32 +162,6 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled;
 
-  readonly artifactDeltaArray = computed(() => {
-    const artifactDelta = this.selectedEvent()?.actions?.artifactDelta;
-    if (!artifactDelta || Object.keys(artifactDelta).length === 0) {
-      return [];
-    }
-
-    const artifacts: Array<{
-      id: string; versionId: number; data: string; mimeType: string;
-      mediaType: string
-    }> = [];
-    for (const [id, artifactData] of Object.entries(artifactDelta)) {
-      const data = artifactData as {
-        data?: string;
-        mimeType?: string
-      };
-      artifacts.push({
-        id,
-        versionId: 1,
-        data: data.data || '',
-        mimeType: data.mimeType || '',
-        mediaType: getMediaTypeFromMimetype(data.mimeType || ''),
-      });
-    }
-    return artifacts;
-  });
-
   readonly filteredSelectedEvent = computed(() => {
     return this.selectedEvent() as Event | undefined;
   });

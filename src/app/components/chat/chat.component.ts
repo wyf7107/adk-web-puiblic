@@ -17,7 +17,7 @@
 
 import { AsyncPipe, DOCUMENT, NgClass, NgComponentOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, Type, viewChild, WritableSignal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, effect, HostListener, inject, Injectable, OnDestroy, OnInit, Renderer2, signal, Type, viewChild, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButton, MatIconButton, MatFabButton } from '@angular/material/button';
@@ -259,7 +259,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   renderedEventGraph: SafeHtml | undefined;
   rawSvgString: string | null = null;
   agentGraphData: any = null;
-  sessionGraphSvg: string | null = null;
+  sessionGraphSvgLight: string | null = null;
+  sessionGraphSvgDark: string | null = null;
   agentReadme: string = '';
 
   selectedEvent: any = undefined;
@@ -364,7 +365,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   // Builder
   disableBuilderSwitch = false;
 
-  constructor() { }
+  constructor() {
+    effect(() => {
+      // Re-render graph when theme changes
+      if (this.themeService.currentTheme()) {
+        this.updateRenderedGraph();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.syncSelectedAppFromUrl();
@@ -2211,7 +2219,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateRenderedGraph() {
-    if (!this.sessionGraphSvg) {
+    const sessionGraphSvg = this.themeService.currentTheme() === 'dark' ? this.sessionGraphSvgDark : this.sessionGraphSvgLight;
+    if (!sessionGraphSvg) {
       this.renderedEventGraph = undefined;
       return;
     }
@@ -2221,12 +2230,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       nodePath = '__START__';
     }
 
-    let highlightedSvg = this.sessionGraphSvg;
+    let highlightedSvg = sessionGraphSvg;
 
     if (nodePath) {
       const segments = nodePath.split('/');
       const nodeName = segments[segments.length - 1];
-      highlightedSvg = this.highlightNodeInSvg(this.sessionGraphSvg, nodeName);
+      highlightedSvg = this.highlightNodeInSvg(sessionGraphSvg, nodeName);
     }
 
     this.rawSvgString = highlightedSvg;
@@ -2350,14 +2359,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.agentGraphData = info;
           this.agentReadme = info?.readme || '';
         })
-        this.agentService.getAppGraphImage(app, this.themeService.currentTheme() === 'dark').subscribe(async (res) => {
+        this.sessionGraphSvgLight = null;
+        this.sessionGraphSvgDark = null;
+
+        this.agentService.getAppGraphImage(app, false).subscribe(async (res) => {
           if (res?.dotSrc) {
-            this.sessionGraphSvg = await this.graphService.render(res.dotSrc);
+            this.sessionGraphSvgLight = await this.graphService.render(res.dotSrc);
             if (this.selectedEvent && this.selectedEventIndex !== undefined) {
                this.updateRenderedGraph();
             }
-          } else {
-            this.sessionGraphSvg = null;
+          }
+        });
+        this.agentService.getAppGraphImage(app, true).subscribe(async (res) => {
+          if (res?.dotSrc) {
+            this.sessionGraphSvgDark = await this.graphService.render(res.dotSrc);
+            if (this.selectedEvent && this.selectedEventIndex !== undefined) {
+               this.updateRenderedGraph();
+            }
           }
         });
         this.agentService.getAgentBuilder(app).subscribe((res: any) => {

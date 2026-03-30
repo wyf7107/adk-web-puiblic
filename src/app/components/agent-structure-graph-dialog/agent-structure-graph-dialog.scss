@@ -195,3 +195,23 @@
   height: 16px;
   color: var(--mat-sys-on-surface-variant);
 }
+
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-right: 16px;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 6px 16px;
+  background-color: var(--mat-sys-surface-container-lowest);
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+}

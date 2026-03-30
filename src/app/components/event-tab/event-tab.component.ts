@@ -113,7 +113,7 @@ export class EventTabComponent {
         } else if (currentTab === 'artifact') {
           isTabValid = !!(event?.actions?.artifactDelta && Object.keys(event.actions.artifactDelta).length > 0);
         } else if (currentTab === 'graph') {
-          isTabValid = !!(event?.author !== 'user');
+          isTabValid = true;
         }
 
         if (!isTabValid) {

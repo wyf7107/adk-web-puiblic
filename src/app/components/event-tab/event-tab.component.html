@@ -19,11 +19,9 @@
       <button mat-icon-button (click)="selectedDetailTab = 'event'" [class.active]="selectedDetailTab === 'event'" matTooltip="{{ i18n.infoTabLabel }}" matTooltipPosition="right">
         <mat-icon>info</mat-icon>
       </button>
-      @if (selectedEvent()?.author !== 'user') {
-        <button mat-icon-button (click)="selectedDetailTab = 'graph'" [class.active]="selectedDetailTab === 'graph'" matTooltip="{{ i18n.graphTabLabel }}" matTooltipPosition="right">
-          <mat-icon>account_tree</mat-icon>
-        </button>
-      }
+      <button mat-icon-button (click)="selectedDetailTab = 'graph'" [class.active]="selectedDetailTab === 'graph'" matTooltip="{{ i18n.graphTabLabel }}" matTooltipPosition="right">
+        <mat-icon>account_tree</mat-icon>
+      </button>
       @if ((uiStateService.isEventRequestResponseLoading() | async) === true || (llmRequest() && Object.keys(llmRequest()!).length > 0)) {
         <button mat-icon-button (click)="selectedDetailTab = 'request'" [class.active]="selectedDetailTab === 'request'" matTooltip="{{ i18n.requestDetailsTabLabel }}" matTooltipPosition="right">
           <mat-icon>input</mat-icon>
@@ -55,30 +53,6 @@
               <tr><td>Author</td><td>{{ selectedEvent()?.author }}</td></tr>
             </tbody>
           </table>
-
-          @if (selectedEvent()?.usageMetadata && Object.keys(selectedEvent()!.usageMetadata).length > 0) {
-            <table class="info-table">
-              <thead>
-                <tr><th colspan="2">Usage Metadata</th></tr>
-              </thead>
-              <tbody>
-                @for (key of Object.keys(selectedEvent()!.usageMetadata); track key) {
-                  <tr>
-                    <td>{{ key }}</td>
-                    <td>
-                      @if (key === 'promptTokensDetails' || key === 'promptTokenDetails' || key === 'candidatesTokenDetails' || key === 'candidatesTokensDetails' || key === 'cacheTokensDetails') {
-                        @for (detail of selectedEvent()!.usageMetadata[key]; track detail.modality) {
-                          <div>{{ detail.modality }}: {{ detail.tokenCount }}</div>
-                        }
-                      } @else {
-                        {{ selectedEvent()!.usageMetadata[key] }}
-                      }
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          }
 
           @if (selectedEvent()?.actions && Object.keys(selectedEvent()!.actions!).length > 0) {
             <table class="info-table">
@@ -119,6 +93,30 @@
               </tbody>
             </table>
           }
+          @if (selectedEvent()?.usageMetadata && Object.keys(selectedEvent()!.usageMetadata).length > 0) {
+            <table class="info-table">
+              <thead>
+                <tr><th colspan="2">Usage Metadata</th></tr>
+              </thead>
+              <tbody>
+                @for (key of Object.keys(selectedEvent()!.usageMetadata); track key) {
+                  <tr>
+                    <td>{{ key }}</td>
+                    <td>
+                      @if (key === 'promptTokensDetails' || key === 'promptTokenDetails' || key === 'candidatesTokenDetails' || key === 'candidatesTokensDetails' || key === 'cacheTokensDetails') {
+                        @for (detail of selectedEvent()!.usageMetadata[key]; track detail.modality) {
+                          <div>{{ detail.modality }}: {{ detail.tokenCount }}</div>
+                        }
+                      } @else {
+                        {{ selectedEvent()!.usageMetadata[key] }}
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+
         </div>
       }
       @if (selectedDetailTab === 'raw') {

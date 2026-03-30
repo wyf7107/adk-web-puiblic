@@ -259,6 +259,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   renderedEventGraph: SafeHtml | undefined;
   rawSvgString: string | null = null;
   agentGraphData: any = null;
+  sessionGraphSvg: string | null = null;
   agentReadme: string = '';
 
   selectedEvent: any = undefined;
@@ -2205,6 +2206,56 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasComponent()?.saveAgent(this.appName);
   }
 
+  updateRenderedGraph() {
+    if (!this.sessionGraphSvg) {
+      this.renderedEventGraph = undefined;
+      return;
+    }
+
+    let nodePath = this.selectedEvent?.nodeInfo?.path;
+    if (this.selectedEvent?.author === 'user') {
+      nodePath = '__START__';
+    }
+
+    let highlightedSvg = this.sessionGraphSvg;
+
+    if (nodePath) {
+      const segments = nodePath.split('/');
+      const nodeName = segments[segments.length - 1];
+      highlightedSvg = this.highlightNodeInSvg(this.sessionGraphSvg, nodeName);
+    }
+
+    this.rawSvgString = highlightedSvg;
+    this.renderedEventGraph = this.safeValuesService.bypassSecurityTrustHtml(highlightedSvg);
+  }
+
+  highlightNodeInSvg(svgString: string, nodeNameMatch: string): string {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, 'image/svg+xml');
+
+    const nodeElements = doc.querySelectorAll('g.node');
+    nodeElements.forEach((nodeElement) => {
+      const textElements = Array.from(nodeElement.querySelectorAll('text'));
+      const textContent = textElements.map(t => t.textContent?.trim() || '').join('');
+      
+      const titleElement = nodeElement.querySelector('title');
+      const titleName = titleElement?.textContent?.trim() || '';
+
+      const isTarget = textContent === nodeNameMatch || textContent.includes(nodeNameMatch) || 
+                       titleName === nodeNameMatch || titleName === `"${nodeNameMatch}"`;
+      
+      if (isTarget) {
+        const shape = nodeElement.querySelector('ellipse, polygon, path, rect');
+        if (shape) {
+          shape.setAttribute('stroke', 'blue');
+          shape.setAttribute('stroke-width', '3');
+        }
+      }
+    });
+
+    return new XMLSerializer().serializeToString(doc);
+  }
+
   selectEvent(key: string, messageIndex?: number) {
     this.traceService.selectedRow(undefined);
     this.selectedEvent = this.eventData.get(key);
@@ -2245,23 +2296,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
-    this.eventService
-      .getEvent(
-        this.userId,
-        this.appName,
-        this.sessionId,
-        this.selectedEvent.id,
-      )
-      .subscribe(async (res) => {
-        if (!res.dotSrc) {
-          this.renderedEventGraph = undefined;
-          return;
-        }
-        const svg = await this.graphService.render(res.dotSrc);
-        this.rawSvgString = svg;
-        this.renderedEventGraph =
-          this.safeValuesService.bypassSecurityTrustHtml(svg);
-      });
+    
+    this.updateRenderedGraph();
   }
 
   deleteSession(session: string) {
@@ -2310,6 +2346,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.agentGraphData = info;
           this.agentReadme = info?.readme || '';
         })
+        this.agentService.getAppGraphImage(app, this.themeService.currentTheme() === 'dark').subscribe(async (res) => {
+          if (res?.dotSrc) {
+            this.sessionGraphSvg = await this.graphService.render(res.dotSrc);
+            if (this.selectedEvent && this.selectedEventIndex !== undefined) {
+               this.updateRenderedGraph();
+            }
+          } else {
+            this.sessionGraphSvg = null;
+          }
+        });
         this.agentService.getAgentBuilder(app).subscribe((res: any) => {
           if (!res || res == '') {
             this.disableBuilderSwitch = true;

@@ -9,6 +9,7 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {type SafeHtml} from '@angular/platform-browser';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {InfoTable} from '../info-table/info-table';
 
 import {Event} from '../../core/models/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
@@ -33,6 +34,7 @@ import {addSvgNodeHoverEffects} from '../../utils/svg-interaction.utils';
     MatTooltip,
     MatMenuModule,
     NgxJsonViewerModule,
+    InfoTable,
   ],
 })
 export class EventTabComponent {

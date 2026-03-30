@@ -47,9 +47,7 @@
     <div class="vertical-tabs-content">
       @if (selectedDetailTab() === 'info') {
         <div class="info-tables-container">
-          <table class="info-table">
-
-            <tbody>
+          <table app-info-table>
               <tr><td>Name</td><td>{{ selectedSpan()?.name }}</td></tr>
               <tr><td>Span ID</td><td class="id-text"><span class="id-cell"><span>{{ selectedSpan()?.span_id }}</span><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedSpan()?.span_id)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedSpan()?.span_id ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
               <tr>
@@ -65,52 +63,32 @@
               <tr><td>Trace ID</td><td class="id-text"><span class="id-cell"><span>{{ selectedSpan()?.trace_id }}</span><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedSpan()?.trace_id)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedSpan()?.trace_id ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
               <tr><td>Start Time</td><td>{{ formatTime(selectedSpan()?.start_time) }}</td></tr>
               <tr><td>End Time</td><td>{{ formatTime(selectedSpan()?.end_time) }}</td></tr>
-            </tbody>
           </table>
           @if (selectedSpanChildren.length > 0) {
-            <table class="info-table">
-              <thead>
-                <tr>
-                  <th colspan="2">Children</th>
-                </tr>
-              </thead>
-              <tbody>
+            <table app-info-table title="Children">
                 @for (child of selectedSpanChildren; track child.span_id) {
                   <tr>
                     <td>{{ child.name }}</td>
                     <td><span class="id-cell"><a href="javascript:void(0)" (click)="selectSpanById(child.span_id)" class="span-link id-text">{{ child.span_id }}</a><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(child.span_id)" matTooltip="Copy"><mat-icon>{{ copiedId === child.span_id ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
                   </tr>
                 }
-              </tbody>
             </table>
           }
 
           @if (selectedSpan()?.attributes && selectedSpan()!.attributes['gcp.vertex.agent.event_id']) {
-            <table class="info-table">
-              <thead>
-                <tr>
-                  <th colspan="2">Events</th>
-                </tr>
-              </thead>
-              <tbody>
+            <table app-info-table title="Events">
                 <tr>
                   <td>Event ID</td>
                   <td><span class="id-cell"><a href="javascript:void(0)" (click)="switchToEvent.emit(selectedSpan()!.attributes['gcp.vertex.agent.event_id'])" class="span-link id-text">{{ selectedSpan()!.attributes['gcp.vertex.agent.event_id'] }}</a><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedSpan()!.attributes['gcp.vertex.agent.event_id'])" matTooltip="Copy"><mat-icon>{{ copiedId === selectedSpan()!.attributes['gcp.vertex.agent.event_id'] ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
                 </tr>
-              </tbody>
             </table>
           }
 
           @if (selectedSpan()?.attributes && Object.keys(selectedSpan()!.attributes).length > 0) {
-            <table class="info-table">
-              <thead>
-                <tr><th colspan="2">Attributes</th></tr>
-              </thead>
-              <tbody>
+            <table app-info-table title="Attributes">
                 @for (key of Object.keys(selectedSpan()!.attributes); track key) {
                   <tr><td>{{ key }}</td><td>{{ selectedSpan()!.attributes[key] }}</td></tr>
                 }
-              </tbody>
             </table>
           }
         </div>

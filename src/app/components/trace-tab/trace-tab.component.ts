@@ -21,6 +21,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatPaginator, MatPaginatorIntl, PageEvent} from '@angular/material/paginator';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {InfoTable} from '../info-table/info-table';
 
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 
@@ -48,7 +49,7 @@ export class SpanPaginatorIntl extends MatPaginatorIntl {
   styleUrl: './trace-tab.component.scss',
   standalone: true,
   imports: [
-    MatButtonModule, MatIconModule, MatTooltipModule, NgxJsonViewerModule, MatPaginator
+    MatButtonModule, MatIconModule, MatTooltipModule, NgxJsonViewerModule, MatPaginator, InfoTable
   ],
   providers: [
     { provide: MatPaginatorIntl, useClass: SpanPaginatorIntl }

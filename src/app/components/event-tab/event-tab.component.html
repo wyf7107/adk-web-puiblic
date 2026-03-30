@@ -49,6 +49,28 @@
             </tbody>
           </table>
 
+          @if (selectedEvent()?.nodeInfo) {
+            <table class="info-table">
+              <thead>
+                <tr><th colspan="2">Node Info</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Node Path</td><td>{{ selectedEvent()!.nodeInfo!['path'] || 'N/A' }}</td></tr>
+                <tr><td>Execution ID</td><td class="id-text"><span class="id-cell"><span>{{ selectedEvent()!.nodeInfo!['executionId'] || 'N/A' }}</span><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedEvent()!.nodeInfo!['execution_id'])" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()!.nodeInfo!['execution_id'] ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
+                <tr>
+                  <td>Output For</td>
+                  <td>
+                    @if (selectedEvent()!.nodeInfo!['outputFor']) {
+                      <ngx-json-viewer [json]="selectedEvent()!.nodeInfo!['outputFor']"></ngx-json-viewer>
+                    } @else {
+                      N/A
+                    }
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          }
+
           @if (selectedEvent()?.actions && Object.keys(selectedEvent()!.actions!).length > 0) {
             <table class="info-table">
               <thead>

@@ -260,6 +260,7 @@
         color: var(--mat-sys-on-surface-variant);
         border-bottom: 1px solid var(--mat-sys-outline-variant);
         overflow: hidden;
+        overflow-wrap: anywhere;
         
         &:first-child {
           width: 140px;

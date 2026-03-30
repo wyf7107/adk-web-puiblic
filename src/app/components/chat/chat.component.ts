@@ -529,19 +529,40 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (sessionUrl) {
         this.sessionId = sessionUrl;
-        this.sessionService.getSession(this.userId, this.appName, sessionUrl)
-          .pipe(take(1), catchError((error) => {
+        this.loadSession(sessionUrl, true);
+      }
+    });
+  }
+
+  protected loadSession(sessionId: string, isFromUrl: boolean = false) {
+    this.uiStateService.setIsSessionLoading(true);
+
+    combineLatest([
+      this.sessionService.getSession(this.userId, this.appName, sessionId).pipe(
+        catchError((error) => {
+          if (isFromUrl) {
             this.openSnackBar(
               'Cannot find specified session. Creating a new one.',
               'OK');
             this.createSessionAndReset();
-            return of(null);
-          }))
-          .subscribe((session) => {
-            if (session) {
-              this.updateWithSelectedSession(session);
-            }
-          });
+          }
+          return of(null);
+        })
+      ),
+      this.featureFlagService.isInfinityMessageScrollingEnabled()
+    ]).pipe(first()).subscribe(([session, isInfinityScrollingEnabled]) => {
+      this.uiStateService.setIsSessionLoading(false);
+      if (session) {
+        if (isInfinityScrollingEnabled && session.id) {
+          this.uiStateService
+              .lazyLoadMessages(session.id, {
+                pageSize: 100,
+                pageToken: '',
+              })
+              .pipe(first())
+              .subscribe();
+        }
+        this.updateWithSelectedSession(session);
       }
     });
   }
@@ -1601,9 +1622,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showSessionSelectorDrawer = false;
   }
 
-  onSessionSelectedFromDrawer(session: Session) {
+  onSessionSelectedFromDrawer(sessionId: string) {
     this.showSessionSelectorDrawer = false;
-    this.updateWithSelectedSession(session);
+    this.loadSession(sessionId);
+  }
+
+  onSessionReloadedFromDrawer(sessionId: string) {
+    this.loadSession(sessionId);
   }
 
   selectAppFromDrawer(app: string) {

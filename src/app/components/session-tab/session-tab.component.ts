@@ -64,8 +64,8 @@ export class SessionTabComponent implements OnInit {
   @Input() appName = '';
   @Input() sessionId = '';
 
-  @Output() readonly sessionSelected = new EventEmitter<Session>();
-  @Output() readonly sessionReloaded = new EventEmitter<Session>();
+  @Output() readonly sessionSelected = new EventEmitter<string>();
+  @Output() readonly sessionReloaded = new EventEmitter<string>();
 
   readonly SESSIONS_PAGE_LIMIT = 100;
   sessionList: Session[] = [];
@@ -77,8 +77,6 @@ export class SessionTabComponent implements OnInit {
   sessionNameControl = new FormControl('');
 
   private refreshSessionsSubject = new Subject<void>();
-  private getSessionSubject = new Subject<string>();
-  private reloadSessionSubject = new Subject<string>();
   private readonly route = inject(ActivatedRoute);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   protected readonly sessionService = inject(SESSION_SERVICE);
@@ -155,81 +153,7 @@ export class SessionTabComponent implements OnInit {
             },
         );
 
-    this.getSessionSubject
-        .pipe(
-            tap(() => {
-              this.uiStateService.setIsSessionLoading(true);
-            }),
-            withLatestFrom(
-                this.featureFlagService.isInfinityMessageScrollingEnabled()),
-            switchMap(
-                ([sessionId, isInfinityScrollingEnabled]) =>
-                    this.sessionService
-                        .getSession(this.userId, this.appName, sessionId)
-                        .pipe(
-                            map(response =>
-                                    ({response, isInfinityScrollingEnabled})))
-                        .pipe(catchError(() => of(null)))),
-            tap((res) => {
-              if (!res) return;
-              const session = this.fromApiResultToSession(res.response);
-              if (res.isInfinityScrollingEnabled && session.id) {
-                this.uiStateService
-                    .lazyLoadMessages(session.id, {
-                      pageSize: 100,
-                      pageToken: '',
-                    })
-                    .pipe(first())
-                    .subscribe();
-              }
-              this.sessionSelected.emit(session);
-              this.changeDetectorRef.markForCheck();
-            }),
-            )
-        .subscribe(
-            (session) => {
-              this.uiStateService.setIsSessionLoading(false);
-            },
-            (error) => {
-              this.uiStateService.setIsSessionLoading(false);
-            },
-        );
 
-    this.reloadSessionSubject
-        .pipe(
-            withLatestFrom(
-                this.featureFlagService.isInfinityMessageScrollingEnabled()),
-            switchMap(
-                ([sessionId, isInfinityScrollingEnabled]) =>
-                    this.sessionService
-                        .getSession(
-                            this.userId,
-                            this.appName,
-                            sessionId,
-                            )
-                        .pipe(
-                            map(response =>
-                                    ({response, isInfinityScrollingEnabled})))
-                        .pipe(catchError(() => of(null)))),
-            tap((res) => {
-              if (!res) return;
-              const session = this.fromApiResultToSession(res.response);
-              if (res.isInfinityScrollingEnabled && session.id) {
-                this.uiStateService
-                    .lazyLoadMessages(
-                        session.id, {
-                          pageSize: 100,
-                          pageToken: '',
-                        },
-                        /** isBackground= */ true)
-                    .pipe(first())
-                    .subscribe();
-              }
-              this.sessionReloaded.emit(session);
-              this.changeDetectorRef.markForCheck();
-            }),
-            )
-        .subscribe();
   }
 
   ngOnInit(): void {
@@ -251,7 +175,7 @@ export class SessionTabComponent implements OnInit {
 
   getSession(sessionId: string|undefined) {
     if (sessionId) {
-      this.getSessionSubject.next(sessionId);
+      this.sessionSelected.emit(sessionId);
     }
   }
 
@@ -353,7 +277,7 @@ export class SessionTabComponent implements OnInit {
   }
 
   reloadSession(sessionId: string) {
-    this.reloadSessionSubject.next(sessionId);
+    this.sessionReloaded.emit(sessionId);
   }
 
   refreshSession(session?: string) {

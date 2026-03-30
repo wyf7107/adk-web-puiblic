@@ -282,7 +282,7 @@
         [appName]="appName"
         [sessionId]="sessionId"
         (sessionSelected)="onSessionSelectedFromDrawer($event)"
-        (sessionReloaded)="updateWithSelectedSession($event)"
+        (sessionReloaded)="onSessionReloadedFromDrawer($event)"
       ></app-session-tab>
     </div>
     }
@@ -311,7 +311,6 @@
       (closePanel)="toggleSidePanel()"
       (tabChange)="handleTabChange($event)"
       (sessionSelected)="updateWithSelectedSession($event)"
-      (sessionReloaded)="updateWithSelectedSession($event)"
       (evalCaseSelected)="updateWithSelectedEvalCase($event)"
       (evalSetIdSelected)="updateSelectedEvalSetId($event)"
       (returnToSession)="handleReturnToSession($event)"

@@ -39,7 +39,7 @@
     </div>
     <div class="vertical-tabs-content">
       @if (selectedDetailTab === 'event') {
-        <div class="info-tables-container" style="flex: 1; overflow-y: auto;">
+        <div class="info-tables-container">
           <table app-info-table>
               <tr><td>Event ID</td><td class="id-text"><span class="id-cell"><span>{{ selectedEvent()?.id }}</span><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedEvent()?.id)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()?.id ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
               <tr><td>Invocation ID</td><td class="id-text"><span class="id-cell"><span>{{ selectedEvent()?.invocationId || 'N/A' }}</span><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedEvent()?.invocationId)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()?.invocationId ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
@@ -115,7 +115,7 @@
         </div>
       }
       @if (selectedDetailTab === 'raw') {
-        <div class="json-viewer-container" style="flex: 1; overflow-y: auto;">
+        <div class="json-viewer-container">
           <ngx-json-viewer [json]="filteredSelectedEvent()"></ngx-json-viewer>
         </div>
       }

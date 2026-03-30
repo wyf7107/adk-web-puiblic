@@ -67,6 +67,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overflow-y: auto;
 }
 
 .event-details-header {
@@ -225,6 +226,7 @@
 
 .info-tables-container {
   padding: 16px;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 24px;

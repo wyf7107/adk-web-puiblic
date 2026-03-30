@@ -142,14 +142,35 @@
         </div>
       }
       @if (selectedDetailTab === 'graph') {
-        <div class="event-graph-container">
-          @if (!renderedEventGraph()) {
-            <div class="request-response-loading-spinner-container">
-              <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <div class="event-graph-wrapper">
+          @if (breadcrumbs().length > 0 || appName()) {
+            <div class="breadcrumb-container">
+              <button class="breadcrumb-item" disabled>{{ appName() }}</button>
+              @if (breadcrumbs().length > 0) {
+                <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+              }
+              @for (crumb of breadcrumbs(); track $index) {
+                @if ($index > 0) {
+                  <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+                }
+                <button
+                  class="breadcrumb-item"
+                  [class.active]="$index === breadcrumbs().length - 1"
+                  disabled>
+                  {{ crumb }}
+                </button>
+              }
             </div>
-          } @else {
-            <div [innerHtml]="renderedEventGraph()" (click)="showAgentStructureGraph.emit(true)"></div>
           }
+          <div class="event-graph-container">
+            @if (!renderedEventGraph()) {
+              <div class="request-response-loading-spinner-container">
+                <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+              </div>
+            } @else {
+              <div [innerHtml]="renderedEventGraph()" (click)="showAgentStructureGraph.emit(true)" class="svg-graph-wrapper"></div>
+            }
+          </div>
         </div>
       }
       @if (selectedDetailTab === 'request') {

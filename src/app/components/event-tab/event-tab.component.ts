@@ -41,6 +41,14 @@ export class EventTabComponent {
   readonly llmRequest = input<any>();
   readonly llmResponse = input<any>();
   readonly traceData = input<SpanNode[]>([]);
+  readonly appName = input<string>('');
+  readonly selectedEventGraphPath = input<string>('');
+
+  readonly breadcrumbs = computed(() => {
+    const path = this.selectedEventGraphPath();
+    if (!path) return [];
+    return path.split('/').filter(s => s);
+  });
 
   readonly page = output<PageEvent>();
   readonly closeSelectedEvent = output<void>();

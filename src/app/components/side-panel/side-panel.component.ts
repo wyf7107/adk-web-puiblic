@@ -75,6 +75,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   selectedEventIndex = input<number|undefined>();
   renderedEventGraph = input<SafeHtml|undefined>();
   rawSvgString = input<string|null>(null);
+  selectedEventGraphPath = input<string>('');
   llmRequest = input<LlmRequest|undefined>();
   llmResponse = input<LlmResponse|undefined>();
   showSidePanel = input(false);

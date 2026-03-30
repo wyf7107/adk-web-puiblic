@@ -547,7 +547,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           if (isFromUrl) {
             this.openSnackBar(
               'Cannot find specified session. Creating a new one.',
-              'OK');
+              undefined,
+              3000);
             this.createSessionAndReset();
           }
           return of(null);
@@ -2531,8 +2532,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return undefined;  // Index out of bounds
   }
 
-  openSnackBar(message: string, action: string) {
-    this._snackBar.open(message, action);
+  openSnackBar(message: string, action?: string, duration?: number) {
+    if (duration !== undefined) {
+      this._snackBar.open(message, action, { duration });
+    } else {
+      this._snackBar.open(message, action);
+    }
   }
 
   private processThoughtText(text: string) {

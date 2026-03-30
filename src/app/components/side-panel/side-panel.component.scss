@@ -87,6 +87,10 @@ mat-tab-group {
 ::ng-deep .mat-mdc-tab-body-wrapper {
   flex: 1;
   min-height: 0;
+
+  .mat-mdc-tab-body-content {
+    overflow-x: hidden;
+  }
 }
 
 

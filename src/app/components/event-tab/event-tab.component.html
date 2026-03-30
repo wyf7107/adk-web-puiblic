@@ -49,8 +49,8 @@
         <div class="info-tables-container" style="flex: 1; overflow-y: auto;">
           <table class="info-table">
             <tbody>
-              <tr><td>Event ID</td><td class="id-text">{{ selectedEvent()?.id }}</td></tr>
-              <tr><td>Invocation ID</td><td class="id-text">{{ selectedEvent()?.invocationId || 'N/A' }}</td></tr>
+              <tr><td>Event ID</td><td class="id-text"><span class="id-cell"><span>{{ selectedEvent()?.id }}</span><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedEvent()?.id)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()?.id ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
+              <tr><td>Invocation ID</td><td class="id-text"><span class="id-cell"><span>{{ selectedEvent()?.invocationId || 'N/A' }}</span><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedEvent()?.invocationId)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()?.invocationId ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
               <tr><td>Timestamp</td><td>{{ formatTime(selectedEvent()?.timestamp) }}</td></tr>
               <tr><td>Author</td><td>{{ selectedEvent()?.author }}</td></tr>
             </tbody>
@@ -112,7 +112,7 @@
                   <tr>
                     <td>{{ span.name }}</td>
                     <td>
-                      <a href="javascript:void(0)" (click)="switchToSpan(span)" class="span-link id-text">{{ span.span_id }}</a>
+                      <span class="id-cell"><a href="javascript:void(0)" (click)="switchToSpan(span)" class="span-link id-text">{{ span.span_id }}</a><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(span.span_id)" matTooltip="Copy"><mat-icon>{{ copiedId === span.span_id ? 'check' : 'content_copy' }}</mat-icon></button></span>
                     </td>
                   </tr>
                 }

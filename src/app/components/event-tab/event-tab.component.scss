@@ -137,6 +137,36 @@
   font-size: 12px;
 }
 
+.id-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+
+  > :first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+  }
+}
+
+.copy-id-button {
+  width: 24px !important;
+  height: 24px !important;
+  padding: 0 !important;
+  line-height: 24px !important;
+  flex-shrink: 0;
+
+  .mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+  }
+}
+
 .info-tables-container {
   padding: 16px;
   display: flex;
@@ -154,6 +184,7 @@
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 8px;
   overflow: hidden;
+  table-layout: fixed;
 
   thead {
     background-color: var(--mat-sys-surface-container-low);
@@ -173,7 +204,7 @@
         padding: 10px 16px;
         color: var(--mat-sys-on-surface-variant);
         border-bottom: 1px solid var(--mat-sys-outline-variant);
-        word-break: break-word;
+        overflow: hidden;
         
         &:first-child {
           width: 140px;

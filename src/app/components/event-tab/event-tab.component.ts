@@ -80,6 +80,15 @@ export class EventTabComponent {
   });
 
   selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'artifact' | 'graph' = 'event';
+  copiedId: string | null = null;
+
+  copyToClipboard(value: string | undefined | null) {
+    if (!value) return;
+    navigator.clipboard.writeText(value).then(() => {
+      this.copiedId = value;
+      setTimeout(() => this.copiedId = null, 2000);
+    });
+  }
 
   switchToSpan(span: any) {
     this.switchToTraceView.emit();

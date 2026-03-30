@@ -16,7 +16,8 @@
 @use '../../trace-shared';
 
 .trace-label {
-  width: 400px;
+  flex: 1;
+  min-width: 0;
   font-size: 13px;
 }
 
@@ -46,7 +47,9 @@
 
 .trace-row-left {
   display: flex;
-  width: 50%;
+  min-width: 250px;
+  width: 20%;
+  max-width: 350px;
 }
 
 .invocation-id-container {

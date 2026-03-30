@@ -49,7 +49,6 @@
         </span>
         <div
           class="trace-label"
-          [style.width.px]="400 - node.level * 20"
           [class.is-event-row]="isEventRow(node)"
         >
           {{ formatSpanName(node.span.name) }}

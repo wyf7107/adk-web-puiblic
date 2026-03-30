@@ -99,6 +99,8 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   readonly enterBuilderMode = output<boolean>();
   readonly showAgentStructureGraph = output<boolean>();
   readonly switchToTraceView = output<void>();
+  readonly drillDownNodePath = output<string>();
+  readonly selectEventById = output<string>();
 
   readonly sessionTabComponent = undefined;
   readonly evalTabComponent = viewChild(EvalTabComponent);

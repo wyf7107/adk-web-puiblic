@@ -21,11 +21,13 @@
  * @param expandableNodes - Optional set of node names that are expandable/nested
  */
 export function addSvgNodeHoverEffects(
-  containerSelector: string,
-  onNodeClick?: (nodeName: string) => void,
+  containerOrSelector: string | HTMLElement,
+  onNodeClick?: (nodeName: string, event: MouseEvent) => void,
   expandableNodes?: Set<string>
 ): void {
-  const svgContainer = document.querySelector(containerSelector);
+  const svgContainer = typeof containerOrSelector === 'string' 
+      ? document.querySelector(containerOrSelector) 
+      : containerOrSelector;
   if (!svgContainer) return;
 
   // Find all node groups in the SVG (Graphviz creates <g class="node"> for each node)
@@ -70,11 +72,11 @@ export function addSvgNodeHoverEffects(
 
     // Add click handler if callback provided
     if (onNodeClick) {
-      htmlElement.addEventListener('click', () => {
+      htmlElement.addEventListener('click', (e: MouseEvent) => {
         const titleElement = nodeElement.querySelector('title');
         const nodeName = titleElement?.textContent || '';
         if (nodeName) {
-          onNodeClick(nodeName);
+          onNodeClick(nodeName, e);
         }
       });
     }

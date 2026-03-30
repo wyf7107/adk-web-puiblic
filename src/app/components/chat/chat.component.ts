@@ -2219,7 +2219,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasComponent()?.saveAgent(this.appName);
   }
 
-  updateRenderedGraph() {
+  onEventTabDrillDown(path: string) {
+    this.updateRenderedGraph(undefined, path);
+  }
+
+  updateRenderedGraph(overrideNodePath?: string, overrideGraphPath?: string) {
     const sessionGraphSvgLight = this.sessionGraphSvgLight;
     const sessionGraphSvgDark = this.sessionGraphSvgDark;
     if (Object.keys(sessionGraphSvgLight).length === 0 || Object.keys(sessionGraphSvgDark).length === 0) {
@@ -2227,15 +2231,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    let nodePath = this.selectedEvent?.nodeInfo?.path;
-    if (this.selectedEvent?.author === 'user') {
+    let nodePath = overrideNodePath || this.selectedEvent?.nodeInfo?.path;
+    if (!overrideNodePath && this.selectedEvent?.author === 'user') {
       nodePath = '__START__';
     }
 
-    let graphPath = '';
+    let graphPath = overrideGraphPath !== undefined ? overrideGraphPath : '';
     let nodeName = '';
 
-    if (nodePath) {
+    if (nodePath && overrideGraphPath === undefined) {
       const segments = nodePath.split('/');
       nodeName = segments[segments.length - 1];
       

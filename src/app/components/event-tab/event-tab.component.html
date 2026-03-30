@@ -162,15 +162,27 @@
               }
             </div>
           }
-          <div class="event-graph-container">
+          <div class="event-graph-container" #graphContainer>
             @if (!renderedEventGraph()) {
               <div class="request-response-loading-spinner-container">
                 <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
               </div>
             } @else {
-              <div [innerHtml]="renderedEventGraph()" (click)="showAgentStructureGraph.emit(true)" class="svg-graph-wrapper"></div>
+              <div [innerHtml]="renderedEventGraph()" class="svg-graph-wrapper"></div>
             }
           </div>
+          <div style="visibility: hidden; position: fixed"
+               [style.left]="menuPos.x + 'px'"
+               [style.top]="menuPos.y + 'px'"
+               [matMenuTriggerFor]="eventMenu"
+               #eventMenuTrigger="matMenuTrigger"></div>
+          <mat-menu #eventMenu="matMenu">
+            @for (evt of menuEvents; track evt.id) {
+              <button mat-menu-item (click)="handleMenuSelection(evt)">
+                <span>Run {{ evt.runIndex }} ({{ evt.timestamp | date:'mediumTime' }})</span>
+              </button>
+            }
+          </mat-menu>
         </div>
       }
       @if (selectedDetailTab === 'request') {

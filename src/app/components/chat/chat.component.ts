@@ -2240,7 +2240,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (nodePath) {
       const segments = nodePath.split('/');
-      const nodeName = segments[segments.length - 1];
+      let nodeName = segments[segments.length - 1];
+      
+      if (segments.length >= 2 && segments[segments.length - 1] === 'call_llm' && segments[segments.length - 2] === this.selectedEvent?.author) {
+        nodeName = segments[segments.length - 2];
+      }
+
       highlightedSvgLight = this.highlightNodeInSvg(sessionGraphSvgLight, nodeName);
       highlightedSvgDark = this.highlightNodeInSvg(sessionGraphSvgDark, nodeName);
     }

@@ -1672,7 +1672,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private loadTraceData() {
     if (!this.sessionId) return;
     this.eventService.getTrace(this.sessionId)
-      .pipe(first(), catchError(() => of([])))
+      .pipe(first(), catchError((err) => { console.error('[DEBUG] getTrace error:', err); return of([]); }))
       .subscribe(res => {
         this.traceData = res;
         this.traceService.setEventData(this.eventData);
@@ -1781,15 +1781,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!session || !session.id) {
       return;
     }
-    this.sessionId = session.id;
-    if (!session.events || !session.state) {
-      return;
-    }
     this.traceService.resetTraceService();
+    this.traceData = [];
     this.sessionId = session.id;
-    this.currentSessionState = session.state;
+    this.currentSessionState = session.state || {};
     this.evalCase = null;
     this.isChatMode.set(true);
+    this.resetEventsAndMessages();
 
     this.isSessionUrlEnabledObs.subscribe((enabled) => {
       if (enabled) {
@@ -1797,22 +1795,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    this.resetEventsAndMessages();
+    if (session.events && session.state) {
+      session.events.forEach((event: any) => {
+        this.appendEventRow(event, false);
 
-    session.events.forEach((event: any) => {
-      this.appendEventRow(event, false);
-
-      const isBot = event.author !== 'user';
-      if (isBot && event.actions?.artifactDelta) {
-        for (const key in event.actions.artifactDelta) {
-          if (event.actions.artifactDelta.hasOwnProperty(key)) {
-            this.renderArtifact(key, event.actions.artifactDelta[key]);
+        const isBot = event.author !== 'user';
+        if (isBot && event.actions?.artifactDelta) {
+          for (const key in event.actions.artifactDelta) {
+            if (event.actions.artifactDelta.hasOwnProperty(key)) {
+              this.renderArtifact(key, event.actions.artifactDelta[key]);
+            }
           }
         }
-      }
-    });
+      });
 
-    this.restorePendingLongRunningCalls();
+      this.restorePendingLongRunningCalls();
+    }
+
     this.changeDetectorRef.detectChanges();
 
     this.loadTraceData();

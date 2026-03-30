@@ -277,13 +277,17 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       const sessionName = this.sessionName();
       if (sessionName) {
         this.nextPageToken = '';
-        this.uiStateService
-            .lazyLoadMessages(sessionName, {
-              pageSize: 100,
-              pageToken: this.nextPageToken,
-            })
-            .pipe(first())
-            .subscribe();
+        this.featureFlagService.isInfinityMessageScrollingEnabled()
+            .pipe(first(), filter((enabled) => enabled))
+            .subscribe(() => {
+              this.uiStateService
+                  .lazyLoadMessages(sessionName, {
+                    pageSize: 100,
+                    pageToken: this.nextPageToken,
+                  })
+                  .pipe(first())
+                  .subscribe();
+            });
       }
     });
   }

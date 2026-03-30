@@ -46,6 +46,7 @@ export class EventTabComponent {
   readonly closeSelectedEvent = output<void>();
   readonly openImageDialog = output<string | null>();
   readonly switchToTraceView = output<void>();
+  readonly showAgentStructureGraph = output<boolean>();
 
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly traceService = inject(TRACE_SERVICE);

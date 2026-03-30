@@ -126,7 +126,7 @@
               <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
             </div>
           } @else {
-            <div [innerHtml]="renderedEventGraph()" (click)="openImageDialog.emit(rawSvgString())"></div>
+            <div [innerHtml]="renderedEventGraph()" (click)="showAgentStructureGraph.emit(true)"></div>
           }
         </div>
       }

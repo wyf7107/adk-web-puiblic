@@ -320,7 +320,7 @@
       (openImageDialog)="openViewImageDialog($event)"
       (openAddItemDialog)="openAddItemDialog()"
       (enterBuilderMode)="enterBuilderMode()"
-      (showAgentStructureGraph)="openAgentStructureGraphDialog()"
+      (showAgentStructureGraph)="openAgentStructureGraphDialog('event')"
       (switchToEvent)="selectEvent($event)"
       (switchToTraceView)="switchToTraceView()"
     >
@@ -462,8 +462,8 @@
   <app-agent-structure-graph-dialog 
     [appName]="appName" 
     [preloadedAppData]="agentGraphData"
-    [preloadedLightGraphSvg]="sessionGraphSvgLight"
-    [preloadedDarkGraphSvg]="sessionGraphSvgDark"
+    [preloadedLightGraphSvg]="agentStructureOverlayMode === 'event' ? eventGraphSvgLight : sessionGraphSvgLight"
+    [preloadedDarkGraphSvg]="agentStructureOverlayMode === 'event' ? eventGraphSvgDark : sessionGraphSvgDark"
     (close)="showAgentStructureOverlay = false">
   </app-agent-structure-graph-dialog>
 }

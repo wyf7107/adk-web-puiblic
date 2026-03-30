@@ -2208,9 +2208,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  eventGraphSvgLight: string | null = null;
+  eventGraphSvgDark: string | null = null;
   showAgentStructureOverlay = false;
+  agentStructureOverlayMode: 'session' | 'event' = 'session';
 
-  openAgentStructureGraphDialog(): void {
+  openAgentStructureGraphDialog(mode: 'session' | 'event' = 'session'): void {
+    this.agentStructureOverlayMode = mode;
     this.showAgentStructureOverlay = true;
   }
 
@@ -2219,8 +2223,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateRenderedGraph() {
-    const sessionGraphSvg = this.themeService.currentTheme() === 'dark' ? this.sessionGraphSvgDark : this.sessionGraphSvgLight;
-    if (!sessionGraphSvg) {
+    const sessionGraphSvgLight = this.sessionGraphSvgLight;
+    const sessionGraphSvgDark = this.sessionGraphSvgDark;
+    if (!sessionGraphSvgLight || !sessionGraphSvgDark) {
       this.renderedEventGraph = undefined;
       return;
     }
@@ -2230,13 +2235,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       nodePath = '__START__';
     }
 
-    let highlightedSvg = sessionGraphSvg;
+    let highlightedSvgLight = sessionGraphSvgLight;
+    let highlightedSvgDark = sessionGraphSvgDark;
 
     if (nodePath) {
       const segments = nodePath.split('/');
       const nodeName = segments[segments.length - 1];
-      highlightedSvg = this.highlightNodeInSvg(sessionGraphSvg, nodeName);
+      highlightedSvgLight = this.highlightNodeInSvg(sessionGraphSvgLight, nodeName);
+      highlightedSvgDark = this.highlightNodeInSvg(sessionGraphSvgDark, nodeName);
     }
+    
+    this.eventGraphSvgLight = highlightedSvgLight;
+    this.eventGraphSvgDark = highlightedSvgDark;
+
+    const highlightedSvg = this.themeService.currentTheme() === 'dark' ? highlightedSvgDark : highlightedSvgLight;
 
     this.rawSvgString = highlightedSvg;
     this.renderedEventGraph = this.safeValuesService.bypassSecurityTrustHtml(highlightedSvg);

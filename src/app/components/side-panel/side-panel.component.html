@@ -35,6 +35,7 @@
           (closeSelectedEvent)="closeSelectedEvent.emit()"
           (openImageDialog)="openImageDialog.emit($event)"
           (switchToTraceView)="switchToTraceView.emit()"
+          (showAgentStructureGraph)="showAgentStructureGraph.emit($event)"
         ></app-event-tab>
       } @else {
         <div class="empty-state">Select an event or trace span to view details</div>

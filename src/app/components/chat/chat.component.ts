@@ -2287,7 +2287,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       if (isTarget) {
         const shape = nodeElement.querySelector('ellipse, polygon, path, rect');
         if (shape) {
-          shape.setAttribute('stroke', 'blue');
+          shape.setAttribute('stroke', 'green');
           shape.setAttribute('stroke-width', '3');
         }
       }

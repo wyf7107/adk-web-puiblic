@@ -121,7 +121,7 @@
       }
       @if (selectedDetailTab === 'graph') {
         <div class="event-graph-wrapper">
-          @if (breadcrumbs().length > 0 || appName()) {
+          @if (hasSubWorkflows() && (breadcrumbs().length > 0 || appName())) {
             <div class="breadcrumb-container">
               <button class="breadcrumb-item" disabled>{{ appName() }}</button>
               @if (breadcrumbs().length > 0) {

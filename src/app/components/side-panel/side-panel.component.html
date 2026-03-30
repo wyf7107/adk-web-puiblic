@@ -34,6 +34,7 @@
           [selectedEventGraphPath]="selectedEventGraphPath()"
           [llmRequest]="llmRequest()"
           [llmResponse]="llmResponse()"
+          [hasSubWorkflows]="hasSubWorkflows()"
           (page)="page.emit($event)"
           (closeSelectedEvent)="closeSelectedEvent.emit()"
           (openImageDialog)="openImageDialog.emit($event)"

@@ -79,9 +79,10 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   llmRequest = input<LlmRequest|undefined>();
   llmResponse = input<LlmResponse|undefined>();
   showSidePanel = input(false);
-  isApplicationSelectorEnabledObs = input<Observable<boolean>>(of(false));
+  readonly isApplicationSelectorEnabledObs = input<Observable<boolean>>(of(false));
   readonly isBuilderMode = input<boolean>(false);
   readonly disableBuilderIcon = input<boolean>(false);
+  readonly hasSubWorkflows = input<boolean>(false);
 
   readonly closePanel = output<void>();
   readonly tabChange = output<MatTabChangeEvent>();

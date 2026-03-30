@@ -50,6 +50,7 @@ export class EventTabComponent {
   readonly traceData = input<SpanNode[]>([]);
   readonly appName = input<string>('');
   readonly selectedEventGraphPath = input<string>('');
+  readonly hasSubWorkflows = input<boolean>(false);
 
   readonly breadcrumbs = computed(() => {
     const path = this.selectedEventGraphPath();

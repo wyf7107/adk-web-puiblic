@@ -263,6 +263,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   sessionGraphSvgDark: Record<string, string> = {};
   agentReadme: string = '';
 
+  get hasSubWorkflows(): boolean {
+    return Object.keys(this.sessionGraphSvgLight).length > 1;
+  }
+
   selectedEvent: any = undefined;
   selectedEventIndex: any = undefined;
   selectedMessageIndex: number | undefined = undefined;

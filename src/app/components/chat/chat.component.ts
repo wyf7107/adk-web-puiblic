@@ -2307,6 +2307,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const doc = parser.parseFromString(svgString, 'image/svg+xml');
 
     const reverseAdjacencyList = new Map<string, string[]>();
+    const forwardAdjacencyList = new Map<string, string[]>();
     const edgeElements = doc.querySelectorAll('g.edge');
     
     edgeElements.forEach((edgeElement) => {
@@ -2319,6 +2320,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         
         if (!reverseAdjacencyList.has(to)) reverseAdjacencyList.set(to, []);
         reverseAdjacencyList.get(to)!.push(from);
+        if (!forwardAdjacencyList.has(from)) forwardAdjacencyList.set(from, []);
+        forwardAdjacencyList.get(from)!.push(to);
       }
     });
 
@@ -2348,6 +2351,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }).filter(id => id) as string[];
 
     const { visitedNodes, visitedEdges } = this.calculateVisitedPath(targetNodeIds, reverseAdjacencyList);
+    const edgeCounts = this.calculateEdgeCounts(targetNodeIds, visitedNodes, visitedEdges, forwardAdjacencyList);
 
     const visitedEdgeColor = theme === 'dark' ? '#34a853' : '#a1c2a1';
     const activeStrokeColor = theme === 'dark' ? '#ceead6' : '#0d652d';
@@ -2374,6 +2378,48 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           if (polygon) {
              polygon.setAttribute('fill', visitedEdgeColor);
              polygon.setAttribute('stroke', visitedEdgeColor);
+          }
+
+          const count = edgeCounts.get(edgeKey) || 0;
+          if (count > 1) {
+            const existingText = edgeElement.querySelector('text');
+            if (existingText) {
+               existingText.textContent = `${existingText.textContent} (${count}x)`;
+               existingText.setAttribute('fill', theme === 'dark' ? '#ffffff' : '#000000');
+               existingText.setAttribute('font-weight', 'bold');
+            } else if (shape) {
+               const d = shape.getAttribute('d') || '';
+               const matches = [...d.matchAll(/[-+]?[0-9]*\.?[0-9]+/g)];
+               if (matches.length >= 4) {
+                 const nums = matches.map(m => parseFloat(m[0]));
+                 const mx = (nums[0] + nums[nums.length - 2]) / 2;
+                 const my = (nums[1] + nums[nums.length - 1]) / 2;
+                 
+                 const badgeGroup = doc.createElementNS("http://www.w3.org/2000/svg", "g");
+                 const badge = doc.createElementNS("http://www.w3.org/2000/svg", "rect");
+                 badge.setAttribute('x', (mx - 14).toString());
+                 badge.setAttribute('y', (my - 10).toString());
+                 badge.setAttribute('width', '28');
+                 badge.setAttribute('height', '20');
+                 badge.setAttribute('rx', '4');
+                 badge.setAttribute('fill', theme === 'dark' ? '#0d652d' : '#e6f4ea');
+                 badge.setAttribute('stroke', visitedEdgeColor);
+                 badge.setAttribute('stroke-width', '1');
+                 badgeGroup.appendChild(badge);
+      
+                 const txt = doc.createElementNS("http://www.w3.org/2000/svg", "text");
+                 txt.setAttribute('x', mx.toString());
+                 txt.setAttribute('y', (my + 4).toString());
+                 txt.setAttribute('text-anchor', 'middle');
+                 txt.setAttribute('fill', theme === 'dark' ? '#ffffff' : '#000000');
+                 txt.setAttribute('font-size', '12px');
+                 txt.setAttribute('font-weight', 'bold');
+                 txt.textContent = count.toString() + 'x';
+                 badgeGroup.appendChild(txt);
+                 
+                 edgeElement.appendChild(badgeGroup);
+               }
+            }
           }
         }
       }
@@ -2449,6 +2495,71 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return { visitedNodes, visitedEdges };
+  }
+
+  private calculateEdgeCounts(
+    sequence: string[], 
+    visitedNodes: Set<string>, 
+    visitedEdges: Set<string>, 
+    adjacencyList: Map<string, string[]>
+  ): Map<string, number> {
+    const edgeCounts = new Map<string, number>();
+    const fullSeq = [...sequence];
+
+    const startNode = Array.from(visitedNodes).find(n => n.toLowerCase() === '__start__');
+    const endNode = Array.from(visitedNodes).find(n => n.toLowerCase() === '__end__');
+
+    if (fullSeq.length > 0 && fullSeq[0].toLowerCase() !== '__start__' && startNode) {
+       fullSeq.unshift(startNode);
+    }
+    if (fullSeq.length > 0 && endNode) {
+       if (fullSeq[fullSeq.length - 1].toLowerCase() !== '__end__') {
+          fullSeq.push(endNode);
+       }
+    }
+
+    for (let i = 0; i < fullSeq.length - 1; i++) {
+      const src = fullSeq[i];
+      const dst = fullSeq[i+1];
+      
+      let foundPath: string[] | null = null;
+      const queue: {node: string, path: string[]}[] = [];
+      const visited = new Set<string>();
+
+      const initialChildren = adjacencyList.get(src) || [];
+      for (const child of initialChildren) {
+         const edgeKey = `${src}->${child}`;
+         if (visitedEdges.has(edgeKey)) {
+           queue.push({node: child, path: [edgeKey]});
+           visited.add(child);
+         }
+      }
+
+      while (queue.length > 0) {
+        const current = queue.shift()!;
+        if (current.node === dst) {
+          foundPath = current.path;
+          break;
+        }
+        
+        const children = adjacencyList.get(current.node) || [];
+        for (const child of children) {
+           const edgeKey = `${current.node}->${child}`;
+           if (visitedEdges.has(edgeKey) && !visited.has(child)) {
+             visited.add(child);
+             queue.push({node: child, path: [...current.path, edgeKey]});
+           }
+        }
+      }
+      
+      if (foundPath) {
+        for (const edge of foundPath) {
+           edgeCounts.set(edge, (edgeCounts.get(edge) || 0) + 1);
+        }
+      }
+    }
+    
+    return edgeCounts;
   }
 
   selectEvent(key: string, messageIndex?: number) {

@@ -74,7 +74,27 @@ export class AgentStructureGraphDialogComponent implements OnInit {
   private translateX = 0;
   private translateY = 0;
 
+  private lastMousedownTarget: HTMLElement | null = null;
+
+  onOverlayMouseDown(event: MouseEvent): void {
+    this.lastMousedownTarget = event.target as HTMLElement;
+  }
+
   onBackdropClick(event: MouseEvent): void {
+    if (this.wasDragging) return;
+
+    if (this.lastMousedownTarget) {
+      if (
+        this.lastMousedownTarget.closest('svg') ||
+        this.lastMousedownTarget.closest('.overlay-header') ||
+        this.lastMousedownTarget.closest('.loading-container') ||
+        this.lastMousedownTarget.closest('.error-container') ||
+        this.lastMousedownTarget.closest('.no-graph-container')
+      ) {
+        return; // Mousedown started on a non-backdrop element. Don't close.
+      }
+    }
+
     const target = event.target as HTMLElement;
     if (
       !target.closest('svg') && 

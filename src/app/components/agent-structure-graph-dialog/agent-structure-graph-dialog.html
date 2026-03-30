@@ -15,7 +15,7 @@
 -->
 
 <div class="overlay-backdrop"></div>
-<div class="overlay-panel" (click)="onBackdropClick($event)">
+<div class="overlay-panel" (mousedown)="onOverlayMouseDown($event)" (click)="onBackdropClick($event)">
   <div class="overlay-header">
 
     @if (renderedGraph() && breadcrumbs().length > 0) {

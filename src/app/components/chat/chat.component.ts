@@ -2254,9 +2254,40 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let highlightedSvgLight = sessionGraphSvgLight[graphPath] || sessionGraphSvgLight[''] || Object.values(sessionGraphSvgLight)[0] || '';
     let highlightedSvgDark = sessionGraphSvgDark[graphPath] || sessionGraphSvgDark[''] || Object.values(sessionGraphSvgDark)[0] || '';
 
-    if (nodeName && highlightedSvgLight && highlightedSvgDark) {
-      highlightedSvgLight = this.highlightNodeInSvg(highlightedSvgLight, nodeName);
-      highlightedSvgDark = this.highlightNodeInSvg(highlightedSvgDark, nodeName);
+    const runNodeNames: string[] = [];
+    if (this.selectedEventIndex !== undefined) {
+      const eventArray = Array.from(this.eventData.values());
+      for (let i = 0; i <= this.selectedEventIndex; i++) {
+        const ev: any = eventArray[i];
+        let np = ev.nodeInfo?.path;
+        if (ev.author === 'user') {
+          np = '__START__';
+        }
+
+        if (np) {
+          const segments = np.split('/');
+          let evNodeName = segments[segments.length - 1];
+          let evGraphPath = '';
+
+          if (segments.length >= 2 && segments[segments.length - 1] === 'call_llm' && segments[segments.length - 2] === ev.author) {
+            evNodeName = segments[segments.length - 2];
+            evGraphPath = segments.slice(1, -2).join('/');
+          } else {
+            evGraphPath = segments.slice(1, -1).join('/');
+          }
+
+          if (evGraphPath === graphPath) {
+            if (runNodeNames.length === 0 || runNodeNames[runNodeNames.length - 1] !== evNodeName) {
+              runNodeNames.push(evNodeName);
+            }
+          }
+        }
+      }
+    }
+
+    if (runNodeNames.length > 0 && highlightedSvgLight && highlightedSvgDark) {
+      highlightedSvgLight = this.highlightExecutionPathInSvg(highlightedSvgLight, runNodeNames, 'light');
+      highlightedSvgDark = this.highlightExecutionPathInSvg(highlightedSvgDark, runNodeNames, 'dark');
     }
     
     this.selectedEventGraphPath = graphPath;
@@ -2269,10 +2300,29 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderedEventGraph = this.safeValuesService.bypassSecurityTrustHtml(highlightedSvg);
   }
 
-  highlightNodeInSvg(svgString: string, nodeNameMatch: string): string {
+  highlightExecutionPathInSvg(svgString: string, runNodeNames: string[], theme: 'light' | 'dark' = 'light'): string {
+    if (!runNodeNames || runNodeNames.length === 0) return svgString;
+
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, 'image/svg+xml');
 
+    const reverseAdjacencyList = new Map<string, string[]>();
+    const edgeElements = doc.querySelectorAll('g.edge');
+    
+    edgeElements.forEach((edgeElement) => {
+      const titleElement = edgeElement.querySelector('title');
+      let title = titleElement?.textContent?.trim() || '';
+      if (title.includes('->')) {
+        const parts = title.split('->');
+        const from = parts[0].trim().replace(/^"|"$/g, '');
+        const to = parts[1].trim().replace(/^"|"$/g, '');
+        
+        if (!reverseAdjacencyList.has(to)) reverseAdjacencyList.set(to, []);
+        reverseAdjacencyList.get(to)!.push(from);
+      }
+    });
+
+    const nodeNameToId = new Map<string, string>();
     const nodeElements = doc.querySelectorAll('g.node');
     nodeElements.forEach((nodeElement) => {
       const textElements = Array.from(nodeElement.querySelectorAll('text'));
@@ -2280,20 +2330,125 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       
       const titleElement = nodeElement.querySelector('title');
       const titleName = titleElement?.textContent?.trim() || '';
-
-      const isTarget = textContent === nodeNameMatch || textContent.includes(nodeNameMatch) || 
-                       titleName === nodeNameMatch || titleName === `"${nodeNameMatch}"`;
+      const cleanTitleName = titleName.replace(/^"|"$/g, '');
       
-      if (isTarget) {
+      nodeNameToId.set(textContent, cleanTitleName);
+      if (titleName) {
+         nodeNameToId.set(titleName, cleanTitleName);
+      }
+    });
+
+    const targetNodeIds = runNodeNames.map(name => {
+       for (const [text, id] of nodeNameToId.entries()) {
+         if (text === name || text.includes(name) || text === `"${name}"`) {
+           return id;
+         }
+       }
+       return null;
+    }).filter(id => id) as string[];
+
+    const { visitedNodes, visitedEdges } = this.calculateVisitedPath(targetNodeIds, reverseAdjacencyList);
+
+    const visitedEdgeColor = theme === 'dark' ? '#34a853' : '#a1c2a1';
+    const activeStrokeColor = theme === 'dark' ? '#ceead6' : '#0d652d';
+    const activeFillColor = theme === 'dark' ? '#137333' : '#a6d8b5';
+    const visitedStrokeColor = theme === 'dark' ? '#34a853' : '#a1c2a1';
+    const visitedFillColor = theme === 'dark' ? '#0d652d' : '#e6f4ea';
+
+    edgeElements.forEach((edgeElement) => {
+      const titleElement = edgeElement.querySelector('title');
+      let title = titleElement?.textContent?.trim() || '';
+      if (title.includes('->')) {
+        const parts = title.split('->');
+        const from = parts[0].trim().replace(/^"|"$/g, '');
+        const to = parts[1].trim().replace(/^"|"$/g, '');
+        const edgeKey = `${from}->${to}`;
+        
+        if (visitedEdges.has(edgeKey)) {
+          const shape = edgeElement.querySelector('path');
+          if (shape) {
+             shape.setAttribute('stroke', visitedEdgeColor);
+             shape.setAttribute('stroke-width', '2');
+          }
+          const polygon = edgeElement.querySelector('polygon');
+          if (polygon) {
+             polygon.setAttribute('fill', visitedEdgeColor);
+             polygon.setAttribute('stroke', visitedEdgeColor);
+          }
+        }
+      }
+    });
+
+    const lastTargetId = targetNodeIds[targetNodeIds.length - 1];
+
+    nodeElements.forEach((nodeElement) => {
+      const titleElement = nodeElement.querySelector('title');
+      const titleName = titleElement?.textContent?.trim().replace(/^"|"$/g, '') || '';
+      
+      if (visitedNodes.has(titleName)) {
         const shape = nodeElement.querySelector('ellipse, polygon, path, rect');
         if (shape) {
-          shape.setAttribute('stroke', 'green');
-          shape.setAttribute('stroke-width', '3');
+          const isActive = titleName === lastTargetId || titleName.toLowerCase() === '__end__';
+          shape.setAttribute('stroke', isActive ? activeStrokeColor : visitedStrokeColor);
+          shape.setAttribute('fill', isActive ? activeFillColor : visitedFillColor);
+          shape.setAttribute('stroke-width', isActive ? '4' : '2');
         }
       }
     });
 
     return new XMLSerializer().serializeToString(doc);
+  }
+
+  private calculateVisitedPath(targetNodeIds: string[], reverseAdjacencyList: Map<string, string[]>): { visitedNodes: Set<string>, visitedEdges: Set<string> } {
+    const visitedNodes = new Set<string>(targetNodeIds);
+    let added = true;
+
+    while (added) {
+      added = false;
+      const currentVisited = Array.from(visitedNodes);
+      for (const node of currentVisited) {
+        const parents = reverseAdjacencyList.get(node) || [];
+        if (parents.length === 1) {
+          const parent = parents[0];
+          if (!visitedNodes.has(parent)) {
+            visitedNodes.add(parent);
+            added = true;
+          }
+        }
+      }
+    }
+
+    // "light up end if any of END's incoming node is visited or active"
+    for (const [nodeId, parents] of reverseAdjacencyList.entries()) {
+      if (nodeId.toLowerCase() === '__end__') {
+        for (const parent of parents) {
+          if (visitedNodes.has(parent)) {
+            visitedNodes.add(nodeId);
+            break;
+          }
+        }
+      }
+    }
+
+    const visitedEdges = new Set<string>();
+    
+    for (const node of visitedNodes) {
+      if (node === '__start__') continue;
+
+      const parents = reverseAdjacencyList.get(node) || [];
+      if (parents.length === 1) {
+        visitedEdges.add(`${parents[0]}->${node}`);
+      } else if (parents.length > 1) {
+        // "only highlight the edge between visited node and the node with multiple inward edge"
+        for (const parent of parents) {
+          if (visitedNodes.has(parent) || parent === '__start__') {
+            visitedEdges.add(`${parent}->${node}`);
+          }
+        }
+      }
+    }
+
+    return { visitedNodes, visitedEdges };
   }
 
   selectEvent(key: string, messageIndex?: number) {

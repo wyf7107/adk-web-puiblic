@@ -61,6 +61,14 @@ markdown p {
   margin-block-end: 0.5em;
 }
 
+markdown pre {
+  border-radius: 8px !important;
+}
+
+markdown code {
+  border-radius: 4px !important;
+}
+
 .json-key {
   color: #9876aa;
   font-weight: 600;

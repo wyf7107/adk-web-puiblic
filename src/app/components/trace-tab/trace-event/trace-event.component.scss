@@ -40,6 +40,10 @@
   width: auto;
   height: auto;
   display: block;
+
+  > g.graph > polygon:first-child {
+    fill: transparent !important;
+  }
 }
 
 .event-graph-container ::ng-deep svg text {

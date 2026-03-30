@@ -110,6 +110,11 @@
   width: auto;
   height: auto;
   display: block;
+
+  /* Make the graph background match the panel */
+  > g.graph > polygon:first-child {
+    fill: transparent !important;
+  }
 }
 
 .event-graph-container ::ng-deep svg text {

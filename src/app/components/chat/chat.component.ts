@@ -2190,33 +2190,33 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Auto-scroll to the selected event row in the chat panel
     this.chatPanel()?.scrollToSelectedMessage(this.selectedMessageIndex);
 
-    let filter = undefined;
-    if (this.isEventFilteringEnabled() && this.selectedEvent.invocationId &&
-      (this.selectedEvent.timestamp ||
-        this.selectedEvent.timestampInMillis)) {
-      filter = {
-        invocationId: this.selectedEvent.invocationId,
-        timestamp:
-          this.selectedEvent.timestamp ?? this.selectedEvent.timestampInMillis
-      };
-    }
+    this.llmRequest = undefined;
+    this.llmResponse = undefined;
 
-    const eventTraceParam = { id: this.selectedEvent.id, ...filter };
-    this.uiStateService.setIsEventRequestResponseLoading(true);
-    this.eventService.getEventTrace(eventTraceParam)
-      .subscribe(
-        (res) => {
-          if (res[this.llmRequestKey]) {
-            this.llmRequest = JSON.parse(res[this.llmRequestKey]);
-          }
-          if (res[this.llmResponseKey]) {
-            this.llmResponse = JSON.parse(res[this.llmResponseKey]);
-          }
-          this.uiStateService.setIsEventRequestResponseLoading(false);
-        },
-        () => {
-          this.uiStateService.setIsEventRequestResponseLoading(false);
-        });
+    const matchingSpan = this.traceData?.find(
+      (span: any) => span?.attributes?.['gcp.vertex.agent.event_id'] === this.selectedEvent.id && span?.name === 'call_llm'
+    );
+
+    if (matchingSpan) {
+      const requestStr = matchingSpan.attributes?.[this.llmRequestKey];
+      const responseStr = matchingSpan.attributes?.[this.llmResponseKey];
+
+      if (requestStr) {
+        try {
+          this.llmRequest = typeof requestStr === 'string' ? JSON.parse(requestStr) : requestStr;
+        } catch (e) {
+          console.warn('Failed to parse LLM request', e);
+        }
+      }
+
+      if (responseStr) {
+        try {
+          this.llmResponse = typeof responseStr === 'string' ? JSON.parse(responseStr) : responseStr;
+        } catch (e) {
+          console.warn('Failed to parse LLM response', e);
+        }
+      }
+    }
     this.eventService
       .getEvent(
         this.userId,

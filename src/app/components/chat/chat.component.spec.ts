@@ -995,9 +995,6 @@ describe('ChatComponent', () => {
         component.clickEvent(0);
         expect(component.sideDrawer()!.open).toHaveBeenCalled();
         expect(component.selectedEvent.id).toBe(EVENT_1_ID);
-        expect(mockEventService.getEventTrace).toHaveBeenCalledWith({
-          id: EVENT_1_ID
-        });
         expect(mockEventService.getEvent)
             .toHaveBeenCalledWith(
                 USER_ID,
@@ -1008,7 +1005,7 @@ describe('ChatComponent', () => {
       });
 
       it(
-          'should call getEventTrace with filter and parse llm request/response',
+          'should extract llm request/response from traceData',
           () => {
             const invocationId = 'inv-1';
             const timestamp = 123456789;
@@ -1021,18 +1018,17 @@ describe('ChatComponent', () => {
             ]]);
             const llmRequest = {prompt: 'test prompt'};
             const llmResponse = {response: 'test response'};
-            mockEventService.getEventTraceResponse.next({
-              'gcp.vertex.agent.llm_request': JSON.stringify(llmRequest),
-              'gcp.vertex.agent.llm_response': JSON.stringify(llmResponse),
-            });
+            component.traceData = [{
+              name: 'call_llm',
+              attributes: {
+                'gcp.vertex.agent.event_id': EVENT_1_ID,
+                'gcp.vertex.agent.llm_request': JSON.stringify(llmRequest),
+                'gcp.vertex.agent.llm_response': JSON.stringify(llmResponse),
+              }
+            }];
 
             component.clickEvent(0);
 
-            expect(mockEventService.getEventTrace).toHaveBeenCalledWith({
-              id: EVENT_1_ID,
-              invocationId,
-              timestamp,
-            });
             expect(component.llmRequest).toEqual(llmRequest);
             expect(component.llmResponse).toEqual(llmResponse);
           });

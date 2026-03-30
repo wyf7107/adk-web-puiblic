@@ -28,14 +28,6 @@
       <app-content-bubble type="transcription" role="bot" [uiEvent]="uiEvent"></app-content-bubble>
     }
     <div class="event-chips-container">
-    @if (uiEvent.event.usageMetadata) {
-    <app-hover-info-button
-      [icon]="'analytics'"
-      [text]="'tokens: ' + (uiEvent.event.usageMetadata.totalTokenCount || 0)"
-      [tooltipContent]="uiEvent.event.usageMetadata"
-      [tooltipTitle]="'Usage Metadata'"
-    ></app-hover-info-button>
-    }
     @if (uiEvent.event.turnComplete) {
     <app-hover-info-button
       [icon]="'stop_circle'"
@@ -109,6 +101,14 @@
       [text]="'route: ' + String(uiEvent.route)"
       [tooltipContent]="uiEvent.route"
       [tooltipTitle]="'Route'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.event.usageMetadata) {
+    <app-hover-info-button
+      [icon]="'analytics'"
+      [text]="'tokens: ' + (uiEvent.event.usageMetadata.totalTokenCount || 0)"
+      [tooltipContent]="uiEvent.event.usageMetadata"
+      [tooltipTitle]="'Usage Metadata'"
     ></app-hover-info-button>
     }
     @if (hasWorkflowNodes()) {

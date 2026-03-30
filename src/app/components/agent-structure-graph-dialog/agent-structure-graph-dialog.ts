@@ -44,8 +44,9 @@ import { getNodeName } from '../../utils/graph-layout.utils';
 export class AgentStructureGraphDialogComponent implements OnInit {
   @Input() appName!: string;
   @Input() preloadedAppData?: any;
-  @Input() preloadedLightGraphSvg?: string | null;
-  @Input() preloadedDarkGraphSvg?: string | null;
+  @Input() preloadedLightGraphSvg?: Record<string, string> | null;
+  @Input() preloadedDarkGraphSvg?: Record<string, string> | null;
+  @Input() startPath?: string;
   @Output() close = new EventEmitter<void>();
 
   private readonly agentService = inject(AGENT_SERVICE);
@@ -102,6 +103,20 @@ export class AgentStructureGraphDialogComponent implements OnInit {
         name: this.fullAppData.root_agent?.name || this.appName,
         data: this.fullAppData.root_agent
       }];
+      if (this.startPath) {
+        let currentData = this.fullAppData.root_agent;
+        const segments = this.startPath.split('/');
+        for (const segment of segments) {
+          if (!segment) continue;
+          const nodeData = findNodeInLevel(currentData, segment);
+          if (nodeData) {
+            this.navigationStack.push({ name: segment, data: nodeData });
+            currentData = nodeData;
+          } else {
+            break;
+          }
+        }
+      }
       this.updateBreadcrumbs();
       this.renderCurrentLevel();
       return;
@@ -115,6 +130,20 @@ export class AgentStructureGraphDialogComponent implements OnInit {
           name: appData.root_agent?.name || this.appName,
           data: appData.root_agent
         }];
+        if (this.startPath) {
+          let currentData = this.fullAppData.root_agent;
+          const segments = this.startPath.split('/');
+          for (const segment of segments) {
+            if (!segment) continue;
+            const nodeData = findNodeInLevel(currentData, segment);
+            if (nodeData) {
+              this.navigationStack.push({ name: segment, data: nodeData });
+              currentData = nodeData;
+            } else {
+              break;
+            }
+          }
+        }
         this.updateBreadcrumbs();
         this.renderCurrentLevel();
       },
@@ -130,22 +159,22 @@ export class AgentStructureGraphDialogComponent implements OnInit {
     const isDarkMode = this.themeService.currentTheme() === 'dark';
     const currentPath = this.getCurrentPath();
 
-    if (currentPath === '') {
-      const preloadedGraph = isDarkMode ? this.preloadedDarkGraphSvg : this.preloadedLightGraphSvg;
-      if (preloadedGraph) {
-        this.renderedGraph.set(this.sanitizer.bypassSecurityTrustHtml(preloadedGraph));
-        this.isLoading.set(false);
-        setTimeout(() => {
-          const expandableNodes = this.getExpandableNodes();
-          addSvgNodeHoverEffects('.svg-container', (nodeName) => {
-            if (this.wasDragging) return;
-            this.onNodeClick(nodeName);
-          }, expandableNodes);
+    const preloadedGraphs = isDarkMode ? this.preloadedDarkGraphSvg : this.preloadedLightGraphSvg;
+    const preloadedGraph = preloadedGraphs ? preloadedGraphs[currentPath] : null;
 
-          this.initializeSvgTransform();
-        }, 50);
-        return;
-      }
+    if (preloadedGraph) {
+      this.renderedGraph.set(this.sanitizer.bypassSecurityTrustHtml(preloadedGraph));
+      this.isLoading.set(false);
+      setTimeout(() => {
+        const expandableNodes = this.getExpandableNodes();
+        addSvgNodeHoverEffects('.svg-container', (nodeName) => {
+          if (this.wasDragging) return;
+          this.onNodeClick(nodeName);
+        }, expandableNodes);
+
+        this.initializeSvgTransform();
+      }, 50);
+      return;
     }
 
     this.agentService.getAppGraphImage(this.appName, isDarkMode, currentPath).subscribe({

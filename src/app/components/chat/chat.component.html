@@ -463,6 +463,7 @@
     [preloadedAppData]="agentGraphData"
     [preloadedLightGraphSvg]="agentStructureOverlayMode === 'event' ? eventGraphSvgLight : sessionGraphSvgLight"
     [preloadedDarkGraphSvg]="agentStructureOverlayMode === 'event' ? eventGraphSvgDark : sessionGraphSvgDark"
+    [startPath]="agentStructureOverlayMode === 'event' ? selectedEventGraphPath : ''"
     (close)="showAgentStructureOverlay = false">
   </app-agent-structure-graph-dialog>
 }

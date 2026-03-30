@@ -259,8 +259,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   renderedEventGraph: SafeHtml | undefined;
   rawSvgString: string | null = null;
   agentGraphData: any = null;
-  sessionGraphSvgLight: string | null = null;
-  sessionGraphSvgDark: string | null = null;
+  sessionGraphSvgLight: Record<string, string> = {};
+  sessionGraphSvgDark: Record<string, string> = {};
   agentReadme: string = '';
 
   selectedEvent: any = undefined;
@@ -2204,8 +2204,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  eventGraphSvgLight: string | null = null;
-  eventGraphSvgDark: string | null = null;
+  eventGraphSvgLight: Record<string, string> = {};
+  eventGraphSvgDark: Record<string, string> = {};
+  selectedEventGraphPath: string = '';
   showAgentStructureOverlay = false;
   agentStructureOverlayMode: 'session' | 'event' = 'session';
 
@@ -2221,7 +2222,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   updateRenderedGraph() {
     const sessionGraphSvgLight = this.sessionGraphSvgLight;
     const sessionGraphSvgDark = this.sessionGraphSvgDark;
-    if (!sessionGraphSvgLight || !sessionGraphSvgDark) {
+    if (Object.keys(sessionGraphSvgLight).length === 0 || Object.keys(sessionGraphSvgDark).length === 0) {
       this.renderedEventGraph = undefined;
       return;
     }
@@ -2231,23 +2232,36 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       nodePath = '__START__';
     }
 
-    let highlightedSvgLight = sessionGraphSvgLight;
-    let highlightedSvgDark = sessionGraphSvgDark;
+    let graphPath = '';
+    let nodeName = '';
 
     if (nodePath) {
       const segments = nodePath.split('/');
-      let nodeName = segments[segments.length - 1];
+      nodeName = segments[segments.length - 1];
       
       if (segments.length >= 2 && segments[segments.length - 1] === 'call_llm' && segments[segments.length - 2] === this.selectedEvent?.author) {
         nodeName = segments[segments.length - 2];
+        graphPath = segments.slice(1, -2).join('/');
+      } else {
+        graphPath = segments.slice(1, -1).join('/');
       }
 
-      highlightedSvgLight = this.highlightNodeInSvg(sessionGraphSvgLight, nodeName);
-      highlightedSvgDark = this.highlightNodeInSvg(sessionGraphSvgDark, nodeName);
+      if (!(graphPath in sessionGraphSvgLight)) {
+        graphPath = '';
+      }
+    }
+
+    let highlightedSvgLight = sessionGraphSvgLight[graphPath] || sessionGraphSvgLight[''] || Object.values(sessionGraphSvgLight)[0] || '';
+    let highlightedSvgDark = sessionGraphSvgDark[graphPath] || sessionGraphSvgDark[''] || Object.values(sessionGraphSvgDark)[0] || '';
+
+    if (nodeName && highlightedSvgLight && highlightedSvgDark) {
+      highlightedSvgLight = this.highlightNodeInSvg(highlightedSvgLight, nodeName);
+      highlightedSvgDark = this.highlightNodeInSvg(highlightedSvgDark, nodeName);
     }
     
-    this.eventGraphSvgLight = highlightedSvgLight;
-    this.eventGraphSvgDark = highlightedSvgDark;
+    this.selectedEventGraphPath = graphPath;
+    this.eventGraphSvgLight = { ...sessionGraphSvgLight, [graphPath]: highlightedSvgLight };
+    this.eventGraphSvgDark = { ...sessionGraphSvgDark, [graphPath]: highlightedSvgDark };
 
     const highlightedSvg = this.themeService.currentTheme() === 'dark' ? highlightedSvgDark : highlightedSvgLight;
 
@@ -2372,20 +2386,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           this.agentGraphData = info;
           this.agentReadme = info?.readme || '';
         })
-        this.sessionGraphSvgLight = null;
-        this.sessionGraphSvgDark = null;
+        this.sessionGraphSvgLight = {};
+        this.sessionGraphSvgDark = {};
 
         this.agentService.getAppGraphImage(app, false).subscribe(async (res) => {
-          if (res?.dotSrc) {
-            this.sessionGraphSvgLight = await this.graphService.render(res.dotSrc);
+          if (res) {
+            this.sessionGraphSvgLight = {};
+            for (const [path, graph] of Object.entries(res)) {
+              if ((graph as any)?.dotSrc) {
+                this.sessionGraphSvgLight[path] = await this.graphService.render((graph as any).dotSrc);
+              }
+            }
             if (this.selectedEvent && this.selectedEventIndex !== undefined) {
                this.updateRenderedGraph();
             }
           }
         });
         this.agentService.getAppGraphImage(app, true).subscribe(async (res) => {
-          if (res?.dotSrc) {
-            this.sessionGraphSvgDark = await this.graphService.render(res.dotSrc);
+          if (res) {
+            this.sessionGraphSvgDark = {};
+            for (const [path, graph] of Object.entries(res)) {
+              if ((graph as any)?.dotSrc) {
+                this.sessionGraphSvgDark[path] = await this.graphService.render((graph as any).dotSrc);
+              }
+            }
             if (this.selectedEvent && this.selectedEventIndex !== undefined) {
                this.updateRenderedGraph();
             }

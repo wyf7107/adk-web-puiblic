@@ -1460,6 +1460,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.sideDrawer()?.open();
       this.showSidePanel = true;
       window.localStorage.setItem('adk-side-panel-visible', 'true');
+      this.updateRenderedGraph();
+      if (this.chatPanel()?.viewMode() !== 'events') {
+        this.chatPanel()?.onViewModeChange('events');
+      }
       return;
     }
 

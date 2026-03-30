@@ -33,11 +33,6 @@
         </button>
       }
 
-      @if (selectedEvent()?.actions?.artifactDelta && Object.keys(selectedEvent()?.actions?.artifactDelta).length > 0) {
-        <button mat-icon-button (click)="selectedDetailTab = 'artifact'" [class.active]="selectedDetailTab === 'artifact'" matTooltip="{{ i18n.artifactsTabLabel }}" matTooltipPosition="right">
-          <mat-icon>insert_drive_file</mat-icon>
-        </button>
-      }
       <button mat-icon-button (click)="selectedDetailTab = 'raw'" [class.active]="selectedDetailTab === 'raw'" matTooltip="Raw JSON" matTooltipPosition="right">
         <mat-icon>data_object</mat-icon>
       </button>
@@ -160,10 +155,6 @@
             <ngx-json-viewer [json]="llmResponse()"></ngx-json-viewer>
           </div>
         }
-      }
-
-      @if (selectedDetailTab === 'artifact') {
-        <app-artifact-tab [artifacts]="artifactDeltaArray()"></app-artifact-tab>
       }
     </div>
   </div>

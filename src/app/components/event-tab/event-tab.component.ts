@@ -12,7 +12,6 @@ import {NgxJsonViewerModule} from 'ngx-json-viewer';
 import {Event} from '../../core/models/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
-import {ArtifactTabComponent} from '../artifact-tab/artifact-tab.component';
 import {SpanNode} from '../../core/models/Trace';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 
@@ -30,7 +29,6 @@ import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
     MatProgressSpinner,
     MatTooltip,
     NgxJsonViewerModule,
-    ArtifactTabComponent,
   ],
 })
 export class EventTabComponent {
@@ -43,7 +41,6 @@ export class EventTabComponent {
   readonly llmRequest = input<any>();
   readonly llmResponse = input<any>();
   readonly traceData = input<SpanNode[]>([]);
-  readonly artifactDeltaArray = input<any[]>([]);
 
   readonly page = output<PageEvent>();
   readonly closeSelectedEvent = output<void>();
@@ -79,7 +76,7 @@ export class EventTabComponent {
     return flatSpans.filter(s => s.attributes && s.attributes['gcp.vertex.agent.event_id'] === ev.id);
   });
 
-  selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'artifact' | 'graph' = 'event';
+  selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'graph' = 'event';
   copiedId: string | null = null;
 
   copyToClipboard(value: string | undefined | null) {
@@ -109,9 +106,6 @@ export class EventTabComponent {
           isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmRequest() && Object.keys(this.llmRequest()!).length > 0);
         } else if (currentTab === 'response') {
           isTabValid = this.isEventRequestResponseLoadingSignal() || !!(this.llmResponse() && Object.keys(this.llmResponse()!).length > 0);
-
-        } else if (currentTab === 'artifact') {
-          isTabValid = !!(event?.actions?.artifactDelta && Object.keys(event.actions.artifactDelta).length > 0);
         } else if (currentTab === 'graph') {
           isTabValid = true;
         }

@@ -27,8 +27,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import * as YAML from 'yaml';
-import { firstValueFrom, Observable } from "rxjs";
-import { take, filter } from "rxjs/operators";
+import { firstValueFrom, Observable, forkJoin, of } from "rxjs";
+import { take, filter, catchError } from "rxjs/operators";
 import { YamlUtils } from "../../../utils/yaml-utils";
 import { ConfirmationDialogComponent } from "../confirmation-dialog/confirmation-dialog.component";
 import { AddToolDialogComponent } from "../add-tool-dialog/add-tool-dialog.component";
@@ -1377,10 +1377,21 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return toolsMap.get(nodeName) ?? [];
   }
 
-  loadFromYaml(yamlContent: string, appName: string) {
+  loadFromYaml(yamlContent: string, appName: string, pluginsContent?: string) {
     try {
       // Parse the YAML content
       const yamlData = YAML.parse(yamlContent);
+
+      if (pluginsContent) {
+        try {
+          const pluginsData = YAML.parse(pluginsContent);
+          if (pluginsData && pluginsData.bigquery_agent_analytics) {
+            yamlData.logging = pluginsData.bigquery_agent_analytics;
+          }
+        } catch (e) {
+          // It's fine if plugins.yaml is not valid YAML or doesn't exist
+        }
+      }
 
       this.agentBuilderService.clear();
       this.nodePositions.clear();
@@ -2047,10 +2058,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   reloadCanvasFromYaml(): void {
     if (this.appNameInput) {
-      this.agentService.getAgentBuilderTmp(this.appNameInput).subscribe({
-        next: (yamlContent: string) => {
-          if (yamlContent) {
-            this.loadFromYaml(yamlContent, this.appNameInput);
+      const rootYaml$ = this.agentService.getAgentBuilderTmp(this.appNameInput);
+      const pluginsYaml$ = this.agentService.getSubAgentBuilder(this.appNameInput, 'plugins.yaml').pipe(
+        catchError(() => of(''))
+      );
+
+      forkJoin([rootYaml$, pluginsYaml$]).subscribe({
+        next: ([rootContent, pluginsContent]) => {
+          if (rootContent) {
+            this.loadFromYaml(rootContent, this.appNameInput, pluginsContent);
           }
         },
         error: (error) => {

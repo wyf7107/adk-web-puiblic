@@ -47,16 +47,21 @@ export class YamlUtils {
       tools: YamlUtils.buildToolsConfig(agentNode.tools, allTabAgents)
     }
 
-    if (agentNode.isRoot) {
-      if (agentNode.logging?.enabled) {
-        const logging = agentNode.logging!;
-        yamlConfig.logging = {
+    if (agentNode.isRoot && agentNode.logging?.enabled) {
+      const logging = agentNode.logging!;
+      const pluginsConfig = {
+        bigquery_agent_analytics: {
           project_id: logging.project_id,
           dataset_id: logging.dataset_id,
           table_id: logging.table_id,
           dataset_location: logging.dataset_location
-        };
-      }
+        }
+      };
+      const pluginsYamlString = YAML.stringify(pluginsConfig);
+      const pluginsBlob = new Blob([pluginsYamlString], { type: 'application/x-yaml' });
+      const pluginsFileName = `${appName}/plugins.yaml`;
+      const pluginsFile = new File([pluginsBlob], pluginsFileName, { type: 'application/x-yaml' });
+      formData.append('files', pluginsFile);
     }
 
     if (!agentNode.description || agentNode.description.trim() === '') {

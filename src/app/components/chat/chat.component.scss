@@ -835,7 +835,7 @@ app-canvas {
 
 // Shared selector drawer (mat-drawer with mode=over)
 .selector-drawer {
-  width: 320px;
+  width: 400px;
   background-color: var(--mat-sys-surface, #fff);
 
   ::ng-deep .mat-drawer-inner-container {

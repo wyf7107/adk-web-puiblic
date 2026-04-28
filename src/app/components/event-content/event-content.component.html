@@ -109,6 +109,14 @@
       [tooltipTitle]="'Route'"
     ></app-hover-info-button>
     }
+    @if (uiEvent.transferToAgent) {
+    <app-hover-info-button
+      [icon]="'swap_horiz'"
+      [text]="uiEvent.author + ' → ' + getTransferTargetName()"
+      [tooltipContent]="uiEvent.transferToAgent"
+      [tooltipTitle]="'Transfer to Agent'"
+    ></app-hover-info-button>
+    }
     @if (hasWorkflowNodes()) {
     <button
       mat-stroked-button

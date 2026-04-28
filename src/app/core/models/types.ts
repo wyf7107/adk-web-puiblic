@@ -114,6 +114,7 @@ export declare interface EventActions {
   agentState?: AgentState;
   endOfAgent?: boolean;
   route?: any;
+  transferToAgent?: any;
 }
 
 export declare interface Event extends LlmResponse {

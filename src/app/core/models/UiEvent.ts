@@ -63,6 +63,10 @@ export class UiEvent {
     return this.event?.actions?.route;
   }
 
+  get transferToAgent(): any {
+    return this.event?.actions?.transferToAgent;
+  }
+
   get nodePath(): string | null {
     return this.event?.nodeInfo?.path || null;
   }

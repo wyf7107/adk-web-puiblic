@@ -119,6 +119,13 @@ export class EventContentComponent {
     return this.uiEvent.event?.author || 'Agent';
   }
 
+  getTransferTargetName(): string {
+    const transfer = this.uiEvent.transferToAgent;
+    if (!transfer) return '';
+    if (typeof transfer === 'string') return transfer;
+    return transfer.agentName || transfer.name || transfer.targetAgent || JSON.stringify(transfer);
+  }
+
   hasFunctionResponse(callId: string | undefined): boolean {
     if (!callId) {
       return false;

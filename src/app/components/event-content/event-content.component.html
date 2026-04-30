@@ -9,7 +9,7 @@
       (handleKeydown)="handleKeydown.emit($event)"
       (cancelEditMessage)="cancelEditMessage.emit($event)"
       (saveEditMessage)="saveEditMessage.emit($event)"
-      (openViewImageDialog)="openViewImageDialog.emit({images: [$event], currentIndex: 0})"
+      (openViewImageDialog)="onImageClick($event)"
       (openBase64InNewTab)="openBase64InNewTab.emit($event)"
     ></app-content-bubble>
     }

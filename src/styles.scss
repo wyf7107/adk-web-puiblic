@@ -175,3 +175,12 @@ ngx-json-viewer {
     overflow-wrap: break-word;
   }
 }
+
+/* Custom dialog for viewing images without white panel */
+.custom-image-dialog {
+  .mdc-dialog__surface {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}

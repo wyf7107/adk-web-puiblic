@@ -3959,8 +3959,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const dialogRef = this.dialog.open(ViewImageDialogComponent, {
-      maxWidth: '90vw',
-      maxHeight: '90vh',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      width: '100vw',
+      height: '100vh',
+      panelClass: 'custom-image-dialog',
       data: {
         imageData,
         images,

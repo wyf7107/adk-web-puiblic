@@ -185,4 +185,60 @@ export class EventContentComponent {
       }
     });
   }
+
+  getAllImages(): string[] {
+    const images: string[] = [];
+    const seen = new Set<string>();
+
+    const addImage = (img: string) => {
+      if (!seen.has(img)) {
+        seen.add(img);
+        images.push(img);
+      }
+    };
+
+    for (const event of this.uiEvents) {
+      if (event.attachments) {
+        for (const file of event.attachments) {
+          if (file.file.type.startsWith('image/') && file.url) {
+            addImage(file.url);
+          }
+        }
+      }
+      if (event.inlineData?.mimeType?.startsWith('image/') && event.inlineData.data) {
+        addImage(event.inlineData.data);
+      }
+      const parts = event.event?.content?.parts;
+      if (Array.isArray(parts)) {
+        for (const p of parts) {
+          if (p.inlineData?.mimeType?.startsWith('image/') && p.inlineData.data) {
+            const mimeType = p.inlineData.mimeType;
+            const data = p.inlineData.data.replace(/-/g, '+').replace(/_/g, '/');
+            addImage(`data:${mimeType};base64,${data}`);
+          }
+        }
+      }
+      if (event.functionResponses) {
+        for (const resp of event.functionResponses) {
+          if (this.isComputerUseResponse(resp)) {
+            const payload = resp.response as any;
+            const imageInfo = payload?.image;
+            if (imageInfo?.data) {
+              const screenshot = imageInfo.data;
+              const mimeType = imageInfo.mimetype || 'image/png';
+              const imgStr = screenshot.startsWith('data:') ? screenshot : `data:${mimeType};base64,${screenshot}`;
+              addImage(imgStr);
+            }
+          }
+        }
+      }
+    }
+    return images;
+  }
+
+  onImageClick(clickedImage: string) {
+    const images = this.getAllImages();
+    const currentIndex = images.indexOf(clickedImage);
+    this.openViewImageDialog.emit({images, currentIndex});
+  }
 }

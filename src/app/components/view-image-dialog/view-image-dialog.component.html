@@ -47,9 +47,17 @@
   }
 
   @if (!isSvgContent) {
-    <div class="image-wrapper">
+    <div class="image-wrapper" (click)="close()">
       @if (displayContent) {
-        <div class="image-container" style="position: relative; display: inline-block;">
+        <div class="image-container" 
+             (click)="$event.stopPropagation()"
+             [ngStyle]="getTransformStyle()"
+             (wheel)="onWheel($event)"
+             (mousedown)="onMouseDown($event)"
+             (mousemove)="onMouseMove($event)"
+             (mouseup)="onMouseUp()"
+             (mouseleave)="onMouseUp()"
+             style="position: relative; display: inline-block;">
           <img [src]="displayContent" alt="Viewed Image">
           @if (shouldShowHighlight()) {
             <div class="highlight-circle" [ngStyle]="getHighlightStyle()"></div>

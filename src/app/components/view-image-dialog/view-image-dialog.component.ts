@@ -16,7 +16,7 @@
  */
 
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy, HostListener} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SafeHtml, SafeUrl} from '@angular/platform-browser';
 import { NgStyle } from '@angular/common';
@@ -49,6 +49,14 @@ export class ViewImageDialogComponent implements OnInit {
   urls: string[] = [];
   coordinates: ({x: number, y: number} | null)[] = [];
 
+  // Zoom and pan state
+  scale = 1;
+  translateX = 0;
+  translateY = 0;
+  isDragging = false;
+  startX = 0;
+  startY = 0;
+
   readonly dialogRef = inject(MatDialogRef<ViewImageDialogComponent>);
   readonly data = inject<ViewImageDialogData>(MAT_DIALOG_DATA);
   private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
@@ -65,6 +73,10 @@ export class ViewImageDialogComponent implements OnInit {
    * Updates the displayed image based on currentIndex.
    */
   updateImage(): void {
+    this.scale = 1;
+    this.translateX = 0;
+    this.translateY = 0;
+    
     let imageData = this.data.imageData;
     let url = '';
     if (this.images.length > 0) {
@@ -125,6 +137,53 @@ export class ViewImageDialogComponent implements OnInit {
     if (this.currentIndex > 0) {
       this.currentIndex--;
       this.updateImage();
+    }
+  }
+
+  // Zoom and pan methods
+  onWheel(event: WheelEvent): void {
+    event.preventDefault();
+    const zoomFactor = 0.1;
+    if (event.deltaY < 0) {
+      this.scale += zoomFactor;
+    } else {
+      this.scale = Math.max(0.5, this.scale - zoomFactor);
+    }
+  }
+
+  onMouseDown(event: MouseEvent): void {
+    this.isDragging = true;
+    this.startX = event.clientX - this.translateX;
+    this.startY = event.clientY - this.translateY;
+    event.preventDefault();
+  }
+
+  onMouseMove(event: MouseEvent): void {
+    if (this.isDragging) {
+      this.translateX = event.clientX - this.startX;
+      this.translateY = event.clientY - this.startY;
+    }
+  }
+
+  onMouseUp(): void {
+    this.isDragging = false;
+  }
+
+  getTransformStyle(): {[key: string]: string} {
+    return {
+      transform: `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`,
+      transformOrigin: 'center',
+      cursor: this.isDragging ? 'grabbing' : 'grab',
+      transition: this.isDragging ? 'none' : 'transform 0.1s ease'
+    };
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'ArrowLeft') {
+      this.prevImage();
+    } else if (event.key === 'ArrowRight') {
+      this.nextImage();
     }
   }
 

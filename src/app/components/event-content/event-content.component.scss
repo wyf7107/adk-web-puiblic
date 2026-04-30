@@ -46,3 +46,29 @@ app-content-bubble + app-content-bubble {
 .function-calls-previews {
   width: 100%;
 }
+
+.function-response-chip-container {
+  display: inline-flex;
+  align-items: center;
+  margin: 5px;
+}
+
+.function-response-chip-container .menu-trigger-btn {
+  visibility: hidden;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.function-response-chip-container .menu-trigger-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+.function-response-chip-container:hover .menu-trigger-btn {
+  visibility: visible;
+}

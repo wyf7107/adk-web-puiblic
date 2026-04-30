@@ -3,6 +3,10 @@ import {Component, EventEmitter, Input, Output, inject} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatDialog} from '@angular/material/dialog';
+import {MatMenuModule} from '@angular/material/menu';
+import {FunctionResponse} from '../../core/models/types';
+import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
 import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
@@ -31,6 +35,7 @@ import {ContentBubbleComponent} from '../content-bubble/content-bubble.component
     LongRunningResponseComponent,
     HoverInfoButtonComponent,
     ContentBubbleComponent,
+    MatMenuModule,
   ],
 })
 export class EventContentComponent {
@@ -65,10 +70,11 @@ export class EventContentComponent {
   @Output() readonly editFunctionArgs = new EventEmitter<any>();
   
   @Output() readonly clickEvent = new EventEmitter<number>();
-  @Output() readonly longRunningResponseComplete = new EventEmitter<AgentRunRequest>();
+  @Output() readonly longRunningResponseComplete = new EventEmitter<any>();
   @Output() readonly agentStateClick = new EventEmitter<{event: Event, index: number}>();
 
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
+  private readonly dialog = inject(MatDialog);
 
   readonly Object = Object;
   readonly String = String;
@@ -133,5 +139,48 @@ export class EventContentComponent {
     return this.uiEvents.some(event => 
       event.functionResponses?.some(response => response.id === callId && (response.response as any)?.status !== 'pending')
     );
+  }
+
+  openSendAnotherResponseDialog(functionResponse: FunctionResponse) {
+    let functionCallEventId = '';
+    const callId = functionResponse.id;
+    
+    if (callId) {
+      for (const event of this.uiEvents) {
+        if (event.functionCalls) {
+          const fc = event.functionCalls.find(c => c.id === callId);
+          if (fc) {
+            functionCallEventId = (fc as any).functionCallEventId || event.event?.id || '';
+            break;
+          }
+        }
+      }
+    }
+
+    const dialogRef = this.dialog.open(EditJsonDialogComponent, {
+      data: {
+        dialogHeader: 'Send Another Response',
+        functionName: functionResponse.name,
+        jsonContent: functionResponse.response
+      },
+      width: '600px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const content = {
+          role: 'user',
+          parts: [{
+            functionResponse: {
+              id: callId,
+              name: functionResponse.name,
+              response: result,
+            },
+          }],
+          functionCallEventId: functionCallEventId
+        };
+        this.longRunningResponseComplete.emit(content);
+      }
+    });
   }
 }

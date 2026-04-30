@@ -289,14 +289,15 @@ export class EventTabComponent {
       }
     });
 
+    let prevForceGraphTab = false;
     effect(() => {
+      const force = this.forceGraphTab();
       const event = this.selectedEvent();
       
-      if (this.forceGraphTab()) {
+      if (force && !prevForceGraphTab) {
         this.selectedDetailTab = this.graphsAvailable() ? 'graph' : 'event';
       }
-
-
+      prevForceGraphTab = force;
     });
   }
 

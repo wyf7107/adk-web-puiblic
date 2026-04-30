@@ -47,16 +47,12 @@ app-content-bubble + app-content-bubble {
   width: 100%;
 }
 
-.function-response-chip-container {
-  display: inline-flex;
-  align-items: center;
-  margin: 5px;
-}
 
 .custom-hover-info-button {
   color: var(--mat-sys-on-surface);
   background-color: var(--mat-sys-surface-container-high);
   border: none;
+  margin: 5px 5px 5px 0px;
   font-size: 11px;
   padding: 0 12px;
   min-height: 24px;

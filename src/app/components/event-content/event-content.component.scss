@@ -53,22 +53,61 @@ app-content-bubble + app-content-bubble {
   margin: 5px;
 }
 
-.function-response-chip-container .menu-trigger-btn {
-  visibility: hidden;
-  width: 24px;
+.custom-hover-info-button {
+  color: var(--mat-sys-on-surface);
+  background-color: var(--mat-sys-surface-container-high);
+  border: none;
+  font-size: 11px;
+  padding: 0 12px;
+  min-height: 24px;
   height: 24px;
+  border-radius: 8px;
+  font-family: 'Roboto Mono', monospace;
+  max-width: 300px;
+  text-align: left;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
 }
 
-.function-response-chip-container .menu-trigger-btn mat-icon {
+.custom-hover-info-button .check-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
-  line-height: 18px;
+  margin-right: 6px;
+  color: var(--mat-sys-on-surface);
 }
 
-.function-response-chip-container:hover .menu-trigger-btn {
+.custom-hover-info-button .chip-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-hover-info-button .menu-trigger-btn {
+  visibility: hidden;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--mat-sys-surface-container-high);
+}
+
+.custom-hover-info-button .menu-trigger-btn .more-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+
+.custom-hover-info-button:hover .menu-trigger-btn {
   visibility: visible;
 }

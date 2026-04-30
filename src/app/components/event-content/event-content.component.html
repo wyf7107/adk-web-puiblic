@@ -66,17 +66,17 @@
         @if (isComputerUseResponse(functionResponse)) {
           <app-computer-action [functionResponse]="functionResponse" [allMessages]="uiEvents" [index]="index" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
         } @else {
-          <div class="function-response-chip-container"
-               [appJsonTooltip]="functionResponse.response || ''"
-               [appJsonTooltipTitle]="'Function Response'">
-            <div class="custom-hover-info-button">
-              <mat-icon class="check-icon">check</mat-icon>
-              <span class="chip-text">{{ functionResponse.name }}</span>
-              
-              <button mat-icon-button [matMenuTriggerFor]="responseMenu" class="menu-trigger-btn" (click)="$event.stopPropagation()">
-                <mat-icon class="more-icon">more_vert</mat-icon>
-              </button>
-            </div>
+          <div class="function-response-chip-container">
+            <app-hover-info-button
+              [icon]="'check'"
+              [text]="functionResponse.name"
+              [tooltipContent]="functionResponse.response || ''"
+              [tooltipTitle]="'Function Response'"
+            ></app-hover-info-button>
+            
+            <button mat-icon-button [matMenuTriggerFor]="responseMenu" class="menu-trigger-btn" (click)="$event.stopPropagation()">
+              <mat-icon class="more-icon">more_vert</mat-icon>
+            </button>
             
             <mat-menu #responseMenu="matMenu">
               <button mat-menu-item (click)="openSendAnotherResponseDialog(functionResponse)">

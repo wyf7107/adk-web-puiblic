@@ -99,6 +99,11 @@ export class ContentBubbleComponent implements OnChanges {
   }
 
   get noBubble(): boolean {
+    // If there is text content, we always want a bubble
+    if (this.uiEvent.text || this.rawMessageText) {
+      return false;
+    }
+
     if (this.uiEvent.inlineData) {
       const mediaType = this.uiEvent.inlineData.mediaType;
       if (mediaType === MediaType.AUDIO || mediaType === MediaType.IMAGE || mediaType === MediaType.VIDEO || mediaType === MediaType.TEXT) {

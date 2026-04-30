@@ -71,3 +71,54 @@
   box-shadow: none;
 }
 
+/* Max size for inline images */
+.content-bubble img {
+  max-width: min(400px, 100%);
+  max-height: 70vh;
+  height: auto;
+  border-radius: 8px;
+}
+
+.image-preview-chat {
+  max-width: min(400px, 100%);
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+
+.generated-image-container {
+  max-width: 400px;
+  margin-top: 8px;
+}
+
+.generated-image {
+  max-width: 100%;
+  min-width: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Align user attachments and images to the right */
+.role-user {
+  text-align: right;
+
+  .attachments {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  .image-preview-chat {
+    display: block;
+    margin-left: auto;
+  }
+}
+
+
+
+

@@ -16,381 +16,131 @@
 
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
+
 <div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
-  @if((uiStateService.isMessagesLoading() | async) && (featureFlagService.isInfinityMessageScrollingEnabled() | async)) {
-    <div class="messages-loading-container">
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    </div>
-  }
-  <div #videoContainer></div>
-  @for (message of messages; track message; let i = $index) {
-    <div class="message-row-container">
-      <div class="message-column-container"
-        [ngClass]="{
-          'selected': isMessageEventSelected(i)
-        }"
-        (click)="handleRowClick($event, message, i)"
-      >
-      @if (message.role === "user") {
-        <div class="event-number-container user-event-number">
-          @if (isFirstUserMessageInGroup(i)) {
-          <div class="event-number-label">
-            #{{ getOverallEventNumber(i) }}
-          </div>
+  @if (showEvalSummary() && evalCaseResult()) {
+    @let result = evalCaseResult();
+    <div class="eval-result-summary" style="margin: 16px; padding: 16px; border-radius: 8px; background: var(--mat-sys-surface-container); border: 1px solid var(--mat-sys-outline-variant);">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; color: var(--mat-sys-primary);">Evaluation Result</h3>
+        <div class="status-card__summary">
+          @if (result.finalEvalStatus == 1) {
+            <span class="status-card__passed" style="font-size: 16px; font-weight: 600; font-family: monospace;">PASS</span>
           } @else {
-          <div class="event-number-placeholder"></div>
+            <span class="status-card__failed" style="font-size: 16px; font-weight: 600; font-family: monospace;">FAIL</span>
           }
         </div>
-      }
-      <div
-        [ngClass]="{
-              'user-message': message.role === 'user',
-              'bot-message': message.role === 'bot'
-            }"
-      >
-        @if (message.role === "bot" && !message.isLoading) {
-          <div class="event-number-container">
-            @if (isFirstMessageInEventGroup(i)) {
-            <div class="event-number-label">
-              #{{ getOverallEventNumber(i) }}
-            </div>
-            } @else {
-            <div class="event-number-placeholder"></div>
-            }
-          </div>
-        }
-        @if (message.role === "bot") {
-        <button
-          mat-mini-fab
-          [disabled]="!message.eventId"
-          [matTooltip]="getAgentNameFromEvent(i)"
-          [class]="customIconColorClass(i)"
-          [ngClass]="{ 'hidden': !getAgentNameFromEvent(i)}"
-        >
-          <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-        </button>
-        } 
-        @if (shouldShowMessageCard(message)) {
-        <mat-card
-          class="message-card"
-          [class.landing-message]="message.isLanding"
-          [ngClass]="{
-            'eval-fail': message.evalStatus === 2,
-            'message-card--highlighted': shouldMessageHighlighted(i)
-          }"
-        >
-          @if (message.isLoading) {
-          <mat-progress-bar class="loading-bar" mode="buffer"></mat-progress-bar>
-          } @if (message.attachments) {
-          <div class="attachments">
-            @for (file of message.attachments; track file) {
-            <div class="attachment">
-              @if (file.file.type.startsWith("image/")) {
-              <img [src]="file.url" alt="attachment" class="image-preview-chat" />
-              } @if (!file.file.type.startsWith("image/")) {
-              <mat-icon>insert_drive_file</mat-icon>
-              @if (file.url) {
-              <a [href]="file.url" download>{{ file.file.name }}</a>
-              } @else {
-              {{ file.file.name }}
-              }
-              }
-            </div>
-            }
-          </div>
-          }
-          <div>
-            @if (message.thought) {
-            <div class="thought-chip">{{ i18n.thoughtChipLabel }}</div>
-            }
-            <div>
-              @if (message.text) { @if (message.isEditing) {
-              <div class="edit-message-container">
-                <textarea
-                  #messageTextarea
-                  class="message-textarea"
-                  [ngModel]="userEditEvalCaseMessage"
-                  (ngModelChange)="userEditEvalCaseMessageChange.emit($event)"
-                  rows="4"
-                  cols="80"
-                  (keydown)="handleKeydown.emit({event: $event, message: message})"
-                ></textarea>
-                <div class="edit-message-buttons-container">
-                  <span
-                    class="material-symbols-outlined cancel-edit-button"
-                    [matTooltip]="i18n.cancelEditingTooltip"
-                    (click)="cancelEditMessage.emit(message)"
-                  >
-                    close
-                  </span>
-                  <span
-                    class="material-symbols-outlined save-edit-button"
-                    [matTooltip]="i18n.saveEvalMessageTooltip"
-                    (click)="saveEditMessage.emit(message)"
-                  >
-                    check
-                  </span>
-                </div>
-              </div>
-              } @else {
-                <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: message.text!, thought: message.thought}"></ng-container>
-              }
-            }
-            </div>
-            @if (message.renderedContent) {
-            <div>
-              <div [innerHTML]="renderGooglerSearch(message.renderedContent)"></div>
-            </div>
-            }
-            @if (message.a2uiData) {
-            <app-a2ui-canvas
-              [beginRendering]="message.a2uiData.beginRendering"
-              [surfaceUpdate]="message.a2uiData.surfaceUpdate"
-              [dataModelUpdate]="message.a2uiData.dataModelUpdate">
-            </app-a2ui-canvas>
-            }
-          </div>
-          @if (message.executableCode) {
-          <code> {{ message.executableCode.code }} </code>
-          } @if (message.codeExecutionResult) {
-          <div>
-            <div>{{ i18n.outcomeLabel }}: {{ message.codeExecutionResult.outcome }}</div>
-            <div>{{ i18n.outputLabel }}: {{ message.codeExecutionResult.output }}</div>
-          </div>
-          } @if (message.inlineData) { @if (message.role === "bot") {
-          <div>
-            <div>
-              @switch (message.inlineData.mediaType) { @case (MediaType.IMAGE) {
-              <div class="generated-image-container">
-                <img
-                  class="generated-image"
-                  alt="image"
-                  [src]="message.inlineData.data"
-                  (click)="openViewImageDialog.emit(message.inlineData.data)"
-                />
-              </div>
-              } @case (MediaType.AUDIO) {
-              <div>
-                <app-audio-player [base64data]="message.inlineData.data"></app-audio-player>
-              </div>
-              } @case (MediaType.TEXT) {
-              <div>
-                <div class="html-artifact-container">
-                  <mat-icon>description</mat-icon>
-                  <button
-                    class="link-style-button"
-                    (click)="
-                                    openBase64InNewTab.emit({
-                                      data: message.inlineData.data,
-                                      mimeType: message.inlineData.mimeType
-                                    })
-                                  "
-                  >
-                    {{ message.inlineData.name }}
-                  </button>
-                </div>
-              </div>
-              } @default {
-              <div>
-                <button
-                  class="link-style-button"
-                  (click)="
-                                  openBase64InNewTab.emit({
-                                    data: message.inlineData.data,
-                                    mimeType: message.inlineData.mimeType
-                                  })
-                                "
-                >
-                  {{ message.inlineData.name }}
-                </button>
-              </div>
-              } }
-            </div>
-          </div>
-          } @else {
-          <div>
-            @if (message.inlineData.mimeType.startsWith("image/")) {
-            <div>
-              <img
-                class="image-preview-chat"
-                alt="image"
-                [src]="message.inlineData.data"
-                (click)="openViewImageDialog.emit(message.inlineData.data)"
-              />
-            </div>
-            } @else {
-            <div class="attachment">
-              <mat-icon>insert_drive_file</mat-icon>
-              <a [href]="message.inlineData.data" download>{{ message.inlineData.displayName }}</a>
-            </div>
-            }
-          </div>
-          } } @if (message.failedMetric && message.evalStatus === 2) {
-          <div class="eval-compare-container">
-            <div class="actual-expected-compare-container">
-              @if (message.actualInvocationToolUses) {
-              <div class="actual-result">
-                <div class="eval-response-header header-actual">{{ i18n.actualToolUsesLabel }}</div>
-                <ngx-json-viewer [json]="message.actualInvocationToolUses"></ngx-json-viewer>
-              </div>
-              <div class="expected-result">
-                <div class="eval-response-header header-expected">{{ i18n.expectedToolUsesLabel }}</div>
-                <ngx-json-viewer [json]="message.expectedInvocationToolUses"></ngx-json-viewer>
-              </div>
-              } @else if (message.actualFinalResponse) {
-              <div class="actual-result">
-                <div class="eval-response-header header-actual">{{ i18n.actualResponseLabel }}</div>
-                <div>{{ message.actualFinalResponse }}</div>
-              </div>
-              <div class="expected-result">
-                <div class="eval-response-header header-expected">{{ i18n.expectedResponseLabel }}</div>
-                <div>{{ message.expectedFinalResponse }}</div>
-              </div>
-              }
-            </div>
-            @if (message.evalScore !== undefined && message.evalThreshold !== undefined) {
-            <div class="score-threshold-container">
-              <span class="header-actual">{{ i18n.matchScoreLabel }}: {{ message.evalScore }}</span>
-              <span class="header-expected"
-                >{{ i18n.thresholdLabel }}: {{ message.evalThreshold }}</span
-              >
-            </div>
-            }
-          </div>
-          }
-        </mat-card>
-        } 
-        @if (message.functionCalls && message.functionCalls.length > 0) {
-          @for (functionCall of message.functionCalls; track functionCall) {
-            @if (isComputerUseClick(functionCall)) {
-              <app-computer-action [functionCall]="functionCall" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
-
-            } @else {
-              <button
-                mat-stroked-button
-                [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-                class="function-event-button"
-                [appJsonTooltip]="functionCall.args ? JSON.stringify(functionCall.args) : ''"
-              >
-                <mat-icon>bolt</mat-icon>
-                {{ functionCall.name }}
-              </button>
-            }
-
-            @if (functionCall.needsResponse) {
-              <app-long-running-response
-                [functionCall]="functionCall"
-                [appName]="appName"
-                [userId]="userId"
-                [sessionId]="sessionId"
-                (responseComplete)="longRunningResponseComplete.emit($event)"
-              ></app-long-running-response>
-            }
-          }
-        }
-        @if (message.functionResponses && message.functionResponses.length > 0) {
-          @for (functionResponse of message.functionResponses; track functionResponse) {
-            @if (isComputerUseResponse(functionResponse)) {
-              <app-computer-action [functionResponse]="functionResponse" [allMessages]="messages" [index]="i" (clickEvent)="clickEvent.emit($event)"></app-computer-action>
-
-            } @else {
-              <button mat-stroked-button [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-                class="function-event-button"
-                [appJsonTooltip]="functionResponse.response ? JSON.stringify(functionResponse.response) : ''">
-                <mat-icon>check</mat-icon>
-                {{ functionResponse.name }}
-              </button>
-            }
-          }
-        }
-        @if (message.role === "bot" && hasStateDelta(i)) {
-        <button
-          mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button state-delta-button"
-          [appJsonTooltip]="getStateDeltaTooltip(i)"
-        >
-          <mat-icon>data_object</mat-icon>
-          State
-        </button>
-        }
-        @if (message.role === "bot" && hasArtifactDelta(i)) {
-        <button
-          mat-stroked-button
-          [ngClass]="{'function-event-button-highlight': shouldMessageHighlighted(i)}"
-          class="function-event-button artifact-delta-button"
-          [appJsonTooltip]="getArtifactDeltaTooltip(i)"
-        >
-          <mat-icon>attachment</mat-icon>
-          Artifact
-        </button>
-        }
-        <div
-          [ngClass]="{
-                'eval-pass': message.evalStatus === 1,
-                'eval-fail': message.evalStatus === 2
-              }"
-        >
-          <span class="material-symbols-outlined"
-            >{{ message.evalStatus === 1 ? "check" : message.evalStatus === 2 ? "close" : "" }}</span
-          >
-          <span
-            >{{ message.evalStatus === 1 ? i18n.evalPassLabel : message.evalStatus === 2 ?
-            i18n.evalFailLabel : "" }}</span
-          >
-        </div>
-        @if (evalCase && message.role === "bot" && isEvalEditMode) { 
-          @if (message.text) {
-            <div>
-              <span
-                class="material-symbols-outlined eval-case-edit-button"
-                [ngClass]="{ hidden: isEvalCaseEditing }"
-                [matTooltip]="i18n.editEvalMessageTooltip"
-                (click)="editEvalCaseMessage.emit(message)"
-              >
-                edit
-              </span>
-              <span
-                class="material-symbols-outlined eval-case-edit-button"
-                [ngClass]="{ hidden: isEvalCaseEditing }"
-                [matTooltip]="i18n.deleteEvalMessageTooltip"
-                (click)="deleteEvalCaseMessage.emit({message: message, index: i})"
-              >
-                delete
-              </span>
-            </div>
-        } @else if (isEditFunctionArgsEnabled && message.functionCalls && message.functionCalls.length > 0) {
+      </div>
+      <div style="margin-top: 12px; display: flex; gap: 24px;">
         <div>
-          <span
-            class="material-symbols-outlined eval-case-edit-button"
-            [ngClass]="{ hidden: isEvalCaseEditing }"
-            [matTooltip]="i18n.editFunctionArgsTooltip"
-            (click)="editFunctionArgs.emit(message)"
-          >
-            edit
-          </span>
+          <span style="color: var(--mat-sys-on-surface-variant); font-size: 13px;">Case ID</span>
+          <div style="font-weight: 500;">{{ result.evalId }}</div>
         </div>
-        } 
-        } 
-        @if (message.role === "user") {
-          <button mat-mini-fab>
-            <mat-icon>person</mat-icon>
-          </button>
+        <div>
+          <span style="color: var(--mat-sys-on-surface-variant); font-size: 13px;">Set ID</span>
+          <div style="font-weight: 500;">{{ result.setId }}</div>
+        </div>
+        @if (result.overallEvalMetricResults?.length) {
+          <div>
+            <span style="color: var(--mat-sys-on-surface-variant); font-size: 13px;">Metrics</span>
+            <div style="display: flex; gap: 8px; margin-top: 4px;">
+              @for (metric of result.overallEvalMetricResults; track metric.metricName) {
+                <span [style.color]="metric.evalStatus == 1 ? 'var(--app-color-success)' : 'var(--app-color-error)'" style="font-size: 13px; font-weight: 500;">
+                  {{ metric.metricName }}: {{ metric.score }}
+                </span>
+              }
+            </div>
+          </div>
         }
       </div>
-      </div> <!-- end .message-column-container -->
-      <!-- Feedback UI -->
-      @if(isUserFeedbackEnabled() && !isLoadingAgentResponse() && message.role === "bot") {
-        <app-message-feedback [sessionName]="sessionName()" [eventId]="message.eventId"></app-message-feedback>
+    </div>
+  }
+  @if (uiEvents.length === 0 && agentReadme) {
+  <div class="readme-content">
+    <ng-container [ngComponentOutlet]="markdownComponent"
+      [ngComponentOutletInputs]="{text: agentReadme, thought: false}"></ng-container>
+  </div>
+  }
+  @for (item of displayItems; track item; let i = $index) {
+    @if (item.type === 'event') {
+      @let uiEvent = item.event;
+      @let show = shouldShowEvent ? shouldShowEvent(uiEvent) : true;
+      <app-event-row
+        [style.display]="((viewMode === 'events' && show) || (viewMode === 'traces' && uiEvent.role === 'user' && show)) ? '' : 'none'"
+        [isSelectable]="viewMode !== 'traces'" [uiEvent]="uiEvent" [index]="item.index" [uiEvents]="uiEvents"
+        [isSelected]="isMessageEventSelected(item.index)" [appName]="appName" [userId]="userId" [sessionId]="sessionId"
+        [sessionName]="sessionName()" [evalCase]="evalCase" [isEvalEditMode]="isEvalEditMode"
+        [isEvalCaseEditing]="isEvalCaseEditing" [isEditFunctionArgsEnabled]="isEditFunctionArgsEnabled"
+        [userEditEvalCaseMessage]="userEditEvalCaseMessage" [agentGraphData]="agentGraphData"
+        [allWorkflowNodes]="getAllWorkflowNodes(item.index)" [isUserFeedbackEnabled]="isUserFeedbackEnabled() ?? false"
+        [isLoadingAgentResponse]="isLoadingAgentResponse() ?? false"
+        (rowClick)="handleRowClick($event.event, $event.uiEvent, $event.index)" (handleKeydown)="handleKeydown.emit($event)"
+        (cancelEditMessage)="cancelEditMessage.emit($event)" (saveEditMessage)="saveEditMessage.emit($event)"
+        (userEditEvalCaseMessageChange)="userEditEvalCaseMessageChange.emit($event)"
+        (openViewImageDialog)="openViewImageDialog.emit($event)" (openBase64InNewTab)="openBase64InNewTab.emit($event)"
+        (editEvalCaseMessage)="editEvalCaseMessage.emit($event)"
+        (deleteEvalCaseMessage)="deleteEvalCaseMessage.emit($event)" (editFunctionArgs)="editFunctionArgs.emit($event)"
+        (clickEvent)="clickEvent.emit($event)" (longRunningResponseComplete)="longRunningResponseComplete.emit($event)"
+        (agentStateClick)="handleAgentStateClick($event.event, $event.index)"></app-event-row>
+
+      @if (uiEvent.role === 'bot' && isFirstEventForInvocation(uiEvent, item.index)) {
+      <div class="trace-tree-container"
+        [style.display]="(viewMode === 'traces') ? '' : 'none'">
+        <app-trace-tree
+          [spans]="spansByInvocationId.get(uiEvent.event.id) || spansByInvocationId.get(uiEvent.event.invocationId!) || []"
+          [invocationId]="uiEvent.event.invocationId || uiEvent.event.id || ''" [uiEvents]="uiEvents"
+          [shouldShowEvent]="shouldShowEvent"></app-trace-tree>
+      </div>
       }
-    </div> <!-- end .message-row-container -->
+    } @else if (item.type === 'branches') {
+      <div class="branches-container">
+        <mat-tab-group animationDuration="0ms">
+          @for (branch of item.branches; track branch.branchId) {
+            <mat-tab>
+              <ng-template mat-tab-label>
+                <span class="tab-name" [matTooltip]="'Branch ' + branch.branchId" matTooltipPosition="above">{{ branch.branchId }}</span>
+              </ng-template>
+              <div class="branch-events-content">
+                @for (bEvent of branch.events; track bEvent.event; let j = $index) {
+                  @let uiEvent = bEvent.event;
+                  @let show = shouldShowEvent ? shouldShowEvent(uiEvent) : true;
+                  <app-event-row
+                    [style.display]="((viewMode === 'events' && show) || (viewMode === 'traces' && uiEvent.role === 'user' && show)) ? '' : 'none'"
+                    [isSelectable]="viewMode !== 'traces'" [uiEvent]="uiEvent" [index]="bEvent.globalIndex" [uiEvents]="uiEvents"
+                    [isSelected]="isMessageEventSelected(bEvent.globalIndex)" [appName]="appName" [userId]="userId" [sessionId]="sessionId"
+                    [sessionName]="sessionName()" [evalCase]="evalCase" [isEvalEditMode]="isEvalEditMode"
+                    [isEvalCaseEditing]="isEvalCaseEditing" [isEditFunctionArgsEnabled]="isEditFunctionArgsEnabled"
+                    [userEditEvalCaseMessage]="userEditEvalCaseMessage" [agentGraphData]="agentGraphData"
+                    [allWorkflowNodes]="getAllWorkflowNodes(bEvent.globalIndex)" [isUserFeedbackEnabled]="isUserFeedbackEnabled() ?? false"
+                    [isLoadingAgentResponse]="isLoadingAgentResponse() ?? false"
+                    (rowClick)="handleRowClick($event.event, $event.uiEvent, $event.index)" (handleKeydown)="handleKeydown.emit($event)"
+                    (cancelEditMessage)="cancelEditMessage.emit($event)" (saveEditMessage)="saveEditMessage.emit($event)"
+                    (userEditEvalCaseMessageChange)="userEditEvalCaseMessageChange.emit($event)"
+                    (openViewImageDialog)="openViewImageDialog.emit($event)" (openBase64InNewTab)="openBase64InNewTab.emit($event)"
+                    (editEvalCaseMessage)="editEvalCaseMessage.emit($event)"
+                    (deleteEvalCaseMessage)="deleteEvalCaseMessage.emit($event)" (editFunctionArgs)="editFunctionArgs.emit($event)"
+                    (clickEvent)="clickEvent.emit($event)" (longRunningResponseComplete)="longRunningResponseComplete.emit($event)"
+                    (agentStateClick)="handleAgentStateClick($event.event, $event.index)"></app-event-row>
+                }
+              </div>
+            </mat-tab>
+          }
+        </mat-tab-group>
+      </div>
+    }
+  }
+  @if (isLoadingAgentResponse()) {
+  <div class="agent-loading-indicator">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
   }
 </div>
 } @if (appName != "" && isChatMode && !isSessionLoading) {
-  @if(canEditSession()) {
-  <div class="chat-input">
-    <input type="file" multiple hidden (change)="fileSelect.emit($event)" #fileInput />
-    <mat-form-field class="input-field" appearance="outline">
+@if(canEditSession()) {
+<div class="chat-input" [class.video-streaming]="isVideoRecording">
+  <input type="file" multiple hidden (change)="fileSelect.emit($event)" #fileInput />
+  <div class="chat-input-content-row">
+    <mat-form-field class="input-field" appearance="outline" subscriptSizing="dynamic">
       @if ((selectedFiles.length && appName != "") || updatedSessionState) {
       <div class="file-preview">
         @for (file of selectedFiles; track file; let i = $index) {
@@ -426,78 +176,46 @@
         }
       </div>
       }
-      <textarea
-        class="chat-input-box"
-        matInput
-        cdkTextareaAutosize
-        cdkAutosizeMinRows="1"
-        cdkAutosizeMaxRows="10"
-        [ngModel]="userInput"
-        (ngModelChange)="userInputChange.emit($event)"
-        (keydown.enter)="sendMessage.emit($event)"
-        [placeholder]="i18n.typeMessagePlaceholder"
-      ></textarea>
-      <div class="chat-input-actions">
-        <div>
-          <button
-            mat-icon-button
-            (click)="fileInput.click()"
-            class="function-event-button"
-            [matTooltip]="i18n.uploadFileTooltip"
-            [disabled]="!(isMessageFileUploadEnabledObs | async)"
-          >
-            <mat-icon>attach_file</mat-icon>
-          </button>
-          @if (!hideMoreOptionsButton()) {
-            <button
-              mat-icon-button
-              [matMenuTriggerFor]="moreMenu"
-              class="function-event-button"
-              [matTooltip]="i18n.moreOptionsTooltip"
-              [disabled]="!(isManualStateUpdateEnabledObs | async)"
-            >
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #moreMenu="matMenu">
-              <span mat-menu-item [matTooltip]="i18n.updateStateMenuTooltip"
-                (click)="updateState.emit()"> {{ i18n.updateStateMenuLabel }}
-              </span>
-            </mat-menu>
-          }
-        </div>
-        <div>
-          <button
-            mat-icon-button
-            matSuffix
-            (click)="toggleAudioRecording.emit()"
-            class="audio-rec-btn"
-            [class.recording]="isAudioRecording"
-            [matTooltip]="isAudioRecording ? i18n.turnOffMicTooltip : i18n.useMicTooltip"
-            [disabled]="!(isBidiStreamingEnabledObs | async)"
-          >
-            <mat-icon>mic</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            matSuffix
-            (click)="toggleVideoRecording.emit()"
-            class="video-rec-btn"
-            [class.recording]="isVideoRecording"
-            [matTooltip]="isVideoRecording ? i18n.turnOffCamTooltip : i18n.useCamTooltip"
-            [disabled]="!(isBidiStreamingEnabledObs | async)"
-          >
-            <mat-icon>videocam</mat-icon>
-          </button>
-        </div>
-      </div>
+      <textarea #messageTextarea class="chat-input-box" matInput cdkTextareaAutosize cdkAutosizeMinRows="1"
+        cdkAutosizeMaxRows="10" [ngModel]="userInput" (ngModelChange)="userInputChange.emit($event)"
+        (keydown.enter)="sendMessage.emit($event)" [placeholder]="i18n.typeMessagePlaceholder"></textarea>
+      <button mat-icon-button matSuffix (click)="sendMessage.emit($event)" class="send-message-btn"
+        [matTooltip]="i18n.sendMessageTooltip">
+        <mat-icon>send</mat-icon>
+      </button>
     </mat-form-field>
+    <div #videoContainer class="video-container" [class.visible]="isVideoRecording"></div>
+  </div>
+  <div class="chat-input-actions">
+    <div class="chat-input-actions-left">
+      <button mat-icon-button (click)="fileInput.click()" class="chat-action-button"
+        [matTooltip]="i18n.uploadFileTooltip" [disabled]="!(isMessageFileUploadEnabledObs | async)">
+        <mat-icon>attach_file</mat-icon>
+      </button>
+      <button mat-icon-button [matMenuTriggerFor]="moreMenu" class="chat-action-button"
+        [matTooltip]="i18n.moreOptionsTooltip" [disabled]="!(isManualStateUpdateEnabledObs | async)">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #moreMenu="matMenu">
+        <span mat-menu-item [matTooltip]="i18n.updateStateMenuTooltip" (click)="updateState.emit()"> {{
+          i18n.updateStateMenuLabel }}
+        </span>
+      </mat-menu>
     </div>
+    <div class="chat-input-actions-right">
+      <app-call-controls [isAudioRecording]="isAudioRecording" [isVideoRecording]="isVideoRecording"
+        [micVolume]="micVolume" [isBidiStreamingEnabled]="(isBidiStreamingEnabledObs | async) ?? false"
+        (toggleAudioRecording)="toggleAudioRecording.emit($event)"
+        (toggleVideoRecording)="toggleVideoRecording.emit()"></app-call-controls>
+    </div>
+  </div>
+</div>
 
-  }
+}
 }
 
 @if (isSessionLoading) {
-  <div class="loading-spinner-container">
-    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
-  </div>
+<div class="loading-spinner-container">
+  <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+</div>
 }

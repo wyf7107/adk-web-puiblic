@@ -21,6 +21,7 @@ import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIcon, MatIconModule} from '@angular/material/icon';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatInputModule} from '@angular/material/input';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {ActivatedRoute} from '@angular/router';
@@ -31,14 +32,16 @@ import {Session} from '../../core/models/Session';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
+import {TestsService} from '../../core/services/tests.service';
 
+import {DeleteSessionDialogComponent, DeleteSessionDialogData} from './delete-session-dialog/delete-session-dialog.component';
 import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
 
 /**
  * Displays a list of sessions and handles session loading and pagination.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-session-tab',
   templateUrl: './session-tab.component.html',
   styleUrl: './session-tab.component.scss',
@@ -53,6 +56,7 @@ import {SessionTabMessagesInjectionToken} from './session-tab.component.i18n';
     ReactiveFormsModule,
     MatButtonModule,
     MatIconModule,
+    MatDialogModule,
   ],
   standalone: true,
 })
@@ -61,28 +65,32 @@ export class SessionTabComponent implements OnInit {
   @Input() appName = '';
   @Input() sessionId = '';
 
-  @Output() readonly sessionSelected = new EventEmitter<Session>();
-  @Output() readonly sessionReloaded = new EventEmitter<Session>();
+  @Output() readonly sessionSelected = new EventEmitter<string>();
+  @Output() readonly sessionReloaded = new EventEmitter<string>();
 
   readonly SESSIONS_PAGE_LIMIT = 100;
   sessionList: Session[] = [];
   canLoadMoreSessions = false;
   pageToken = '';
   filterControl = new FormControl('');
+  
+  editingSessionId: string | null = null;
+  sessionNameControl = new FormControl('');
 
   private refreshSessionsSubject = new Subject<void>();
-  private getSessionSubject = new Subject<string>();
-  private reloadSessionSubject = new Subject<string>();
   private readonly route = inject(ActivatedRoute);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   protected readonly sessionService = inject(SESSION_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly i18n = inject(SessionTabMessagesInjectionToken);
   protected readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  protected readonly dialog = inject(MatDialog);
+  protected readonly testsService = inject(TestsService);
   isSessionFilteringEnabled =
       this.featureFlagService.isSessionFilteringEnabled();
 
   isLoadingMoreInProgress = signal(false);
+  isInitialized = signal(false);
 
   constructor() {
     this.filterControl.valueChanges.pipe(debounceTime(300)).subscribe(() => {
@@ -115,6 +123,7 @@ export class SessionTabComponent implements OnInit {
                   .pipe(catchError(() => of({items: [], nextPageToken: ''})));
             }),
             tap(({items, nextPageToken}) => {
+              this.isInitialized.set(true);
               this.sessionList =
                   Array
                       .from(
@@ -146,81 +155,7 @@ export class SessionTabComponent implements OnInit {
             },
         );
 
-    this.getSessionSubject
-        .pipe(
-            tap(() => {
-              this.uiStateService.setIsSessionLoading(true);
-            }),
-            withLatestFrom(
-                this.featureFlagService.isInfinityMessageScrollingEnabled()),
-            switchMap(
-                ([sessionId, isInfinityScrollingEnabled]) =>
-                    this.sessionService
-                        .getSession(this.userId, this.appName, sessionId)
-                        .pipe(
-                            map(response =>
-                                    ({response, isInfinityScrollingEnabled})))
-                        .pipe(catchError(() => of(null)))),
-            tap((res) => {
-              if (!res) return;
-              const session = this.fromApiResultToSession(res.response);
-              if (res.isInfinityScrollingEnabled && session.id) {
-                this.uiStateService
-                    .lazyLoadMessages(session.id, {
-                      pageSize: 100,
-                      pageToken: '',
-                    })
-                    .pipe(first())
-                    .subscribe();
-              }
-              this.sessionSelected.emit(session);
-              this.changeDetectorRef.markForCheck();
-            }),
-            )
-        .subscribe(
-            (session) => {
-              this.uiStateService.setIsSessionLoading(false);
-            },
-            (error) => {
-              this.uiStateService.setIsSessionLoading(false);
-            },
-        );
 
-    this.reloadSessionSubject
-        .pipe(
-            withLatestFrom(
-                this.featureFlagService.isInfinityMessageScrollingEnabled()),
-            switchMap(
-                ([sessionId, isInfinityScrollingEnabled]) =>
-                    this.sessionService
-                        .getSession(
-                            this.userId,
-                            this.appName,
-                            sessionId,
-                            )
-                        .pipe(
-                            map(response =>
-                                    ({response, isInfinityScrollingEnabled})))
-                        .pipe(catchError(() => of(null)))),
-            tap((res) => {
-              if (!res) return;
-              const session = this.fromApiResultToSession(res.response);
-              if (res.isInfinityScrollingEnabled && session.id) {
-                this.uiStateService
-                    .lazyLoadMessages(
-                        session.id, {
-                          pageSize: 100,
-                          pageToken: '',
-                        },
-                        /** isBackground= */ true)
-                    .pipe(first())
-                    .subscribe();
-              }
-              this.sessionReloaded.emit(session);
-              this.changeDetectorRef.markForCheck();
-            }),
-            )
-        .subscribe();
   }
 
   ngOnInit(): void {
@@ -242,13 +177,107 @@ export class SessionTabComponent implements OnInit {
 
   getSession(sessionId: string|undefined) {
     if (sessionId) {
-      this.getSessionSubject.next(sessionId);
+      this.sessionSelected.emit(sessionId);
     }
   }
 
   loadMoreSessions() {
     this.isLoadingMoreInProgress.set(true);
     this.refreshSessionsSubject.next();
+  }
+
+  getSessionDisplayName(session: Session): string {
+    const meta = session.state?.['__session_metadata__'] as any;
+    return meta?.displayName || session.id;
+  }
+
+  hasDisplayName(session: Session): boolean {
+    const meta = session.state?.['__session_metadata__'] as any;
+    return !!meta?.displayName;
+  }
+
+  startEditSessionName(session: Session) {
+    this.editingSessionId = session.id!;
+    this.sessionNameControl.setValue(this.getSessionDisplayName(session));
+  }
+
+  cancelEditSessionName() {
+    this.editingSessionId = null;
+    this.sessionNameControl.setValue('');
+  }
+
+  saveSessionName(session: Session) {
+    if (!this.editingSessionId || !session.id) return;
+    
+    const newName = this.sessionNameControl.value;
+    const currentState = session.state || {};
+    const updatedState = {
+      ...currentState,
+      __session_metadata__: {
+        ...(currentState['__session_metadata__'] as any || {}),
+        displayName: newName
+      }
+    };
+    
+    // Optimistic update
+    session.state = updatedState;
+    this.editingSessionId = null;
+
+    this.sessionService.updateSession(this.userId, this.appName, session.id, { stateDelta: updatedState }).subscribe({
+      error: () => {
+        // Revert on error could be implemented here
+      }
+    });
+  }
+
+  deleteSession(event: Event, session: Session) {
+    event.stopPropagation();
+    const sessionId = session.id!;
+    const displayName = this.getSessionDisplayName(session);
+    let message = `Are you sure you want to delete session ${sessionId}?`;
+    if (displayName !== sessionId) {
+      message = `Are you sure you want to delete session "${displayName}" (${sessionId})?`;
+    }
+
+    const dialogData: DeleteSessionDialogData = {
+      title: 'Confirm delete',
+      message: message,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    };
+
+    const dialogRef = this.dialog.open(DeleteSessionDialogComponent, {
+      width: '600px',
+      data: dialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.sessionService.deleteSession(this.userId, this.appName, sessionId).subscribe(() => {
+          this.refreshSession(sessionId);
+        });
+      }
+    });
+  }
+
+  promoteToTest(event: Event, session: Session) {
+    event.stopPropagation();
+    const testName = window.prompt('Enter test name (e.g., test1):');
+    if (!testName) return;
+
+    this.sessionService.getSession(this.userId, this.appName, session.id!)
+      .subscribe((fullSession) => {
+        const sessionData = { events: fullSession.events };
+        this.testsService.createTest(this.appName, testName, sessionData)
+          .subscribe({
+            next: () => {
+              alert(`Test ${testName} created successfully.`);
+            },
+            error: (err) => {
+              alert(`Error creating test: ${err.message || err}`);
+            }
+          });
+      });
   }
 
   protected getDate(session: Session): string {
@@ -270,7 +299,7 @@ export class SessionTabComponent implements OnInit {
   }
 
   reloadSession(sessionId: string) {
-    this.reloadSessionSubject.next(sessionId);
+    this.sessionReloaded.emit(sessionId);
   }
 
   refreshSession(session?: string) {

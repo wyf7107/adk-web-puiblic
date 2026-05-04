@@ -14,89 +14,236 @@
  * limitations under the License.
  */
 
-.response-chip-container {
-  display: inline-block;
-  margin: 5px;
+:host {
+  display: block;
 }
 
-.input-chip {
-  display: inline-flex;
+.response-chip-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 5px 5px 5px 0;
+}
+
+.message-box {
+  background-color: var(--mat-sys-surface-container-high);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 20px;
+  padding: 12px 16px;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message-content {
+  flex: 1;
+  font-size: 12px;
+}
+
+
+.request-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.request-card-standalone {
+  background: color-mix(in srgb, var(--mat-sys-surface-container-high) 70%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 30%, transparent);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 400px;
+}
+
+.data-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.input-container {
+  display: flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid var(--mat-standard-button-toggle-divider-color);
-  border-radius: 16px;
-  padding: 0 4px 0 12px;
-  background-color: var(--chat-panel-function-event-button-background-color);
-  height: 30px;
-  box-sizing: border-box;
-  max-width: 300px;
-
-  .input-icon {
-    color: var(--long-running-response-icon-color);
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
+  width: 100%;
 
   .response-input {
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 13px;
     flex: 1;
-    min-width: 120px;
-    padding: 0;
-    color: var(--long-running-response-input-text-color);
-    caret-color: var(--long-running-response-input-caret-color);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 4px;
+    padding: 4px 8px;
+    background: var(--mat-sys-surface-container);
+    outline: none;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--mat-sys-on-surface);
+    caret-color: var(--mat-sys-primary);
 
     &::placeholder {
-      color: var(--long-running-response-input-placeholder-color);
+      color: var(--mat-sys-on-surface-variant);
+      opacity: 0.6;
     }
   }
 
-  .send-icon-btn {
+  .send-button {
+    color: var(--mat-sys-primary);
     width: 24px;
     height: 24px;
+    min-width: 24px;
     padding: 0;
-    min-width: unset;
-    color: var(--long-running-response-send-button-color);
+    line-height: 24px;
+
+    box-sizing: border-box; // Ensure padding doesn't push size
+
+    &:disabled {
+      color: var(--mat-sys-on-surface-variant);
+      opacity: 0.3;
+    }
 
     mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
+  }
+
+}
+
+// closes .input-container
+
+.tabs-header {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+}
+
+.tab-link {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface-variant);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-high);
+  }
+
+  &.active {
+    color: var(--mat-sys-primary);
+    background: var(--mat-sys-primary-container);
   }
 }
 
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 16px;
-  padding: 0 12px;
-  font-size: 13px;
+.tabs-content {
+  width: 100%;
+}
+
+.json-view {
+  padding: 4px 0;
+  max-height: 200px;
+  overflow: auto;
+
+  pre {
+    margin: 0;
+    font-size: 10px;
+    font-family: monospace;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .json-textarea {
+    width: 100%;
+    height: 150px;
+    margin: 0;
+    font-size: 10px;
+    font-family: monospace;
+    color: var(--mat-sys-on-surface);
+    background: transparent;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 4px;
+    padding: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+    
+    &:focus {
+      outline: none;
+      border-color: var(--mat-sys-primary);
+    }
+  }
+}
+.schema-form.grid-layout {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 8px;
+  align-items: start;
+  width: 100%;
+  padding: 4px 2px;
+}
+
+.grid-label {
+  font-size: 11px;
   font-weight: 500;
-  height: 32px;
-  box-sizing: border-box;
-  border: 1px solid;
-  line-height: 32px;
+  color: var(--mat-sys-on-surface);
+  text-align: right;
+  white-space: nowrap;
+  padding-top: 6px;
+}
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
+.grid-value {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
 
-  &.sending {
-    background-color: rgba(33, 150, 243, 0.1);
-    border-color: rgba(33, 150, 243, 0.3);
-    color: #2196f3;
-  }
+  .form-input {
+      width: 100%;
+      border: 1px solid var(--mat-sys-outline-variant);
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 11px;
+      background: var(--mat-sys-surface-container);
+      color: var(--mat-sys-on-surface);
+      box-sizing: border-box;
+      height: 28px;
 
-  &.sent {
-    background-color: rgba(76, 175, 80, 0.1);
-    border-color: rgba(76, 175, 80, 0.3);
-    color: #4caf50;
-  }
+    &:focus {
+        outline: none;
+        border-color: var(--mat-sys-primary);
+      }
+    }
+
+    input[type="checkbox"] {
+      margin: 4px 0;
+      align-self: flex-start;
+    }
+                                                                }
+
+.field-description {
+  font-size: 10px;
+  color: var(--mat-sys-on-surface-variant);
+  opacity: 0.8;
+}
+
+.grid-submit {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.form-submit-button {
+  align-self: flex-end;
+  margin-top: 2px;
+  height: 28px !important;
+  line-height: 28px !important;
+  font-size: 11px !important;
 }

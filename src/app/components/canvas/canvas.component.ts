@@ -20,7 +20,7 @@ import { DiagramConnection, AgentNode, ToolNode, CallbackNode, YamlConfig } from
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackbarService } from '../../core/services/snackbar.service';
 import { Router } from '@angular/router';
 import { Vflow, HtmlTemplateDynamicNode, Edge, TemplateDynamicGroupNode } from 'ngx-vflow';
 import { MatIcon } from '@angular/material/icon';
@@ -38,7 +38,7 @@ import { AsyncPipe } from "@angular/common";
 import { BuilderAssistantComponent } from "../builder-assistant/builder-assistant.component";
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: "app-canvas",
   templateUrl: "./canvas.component.html",
   styleUrl: "./canvas.component.scss",
@@ -55,7 +55,7 @@ import { BuilderAssistantComponent } from "../builder-assistant/builder-assistan
   ],
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
-  private _snackBar = inject(MatSnackBar);
+  private _snackbarService = inject(SnackbarService);
   @ViewChild("canvas", { static: false })
   canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild("svgCanvas", { static: false })
@@ -841,7 +841,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       callback
     );
     if (!result.success) {
-      this._snackBar.open(result.error || "Failed to add callback", "Close", {
+      this._snackbarService.open(result.error || "Failed to add callback", "Close", {
         duration: 3000,
         panelClass: ["error-snackbar"],
       });
@@ -923,7 +923,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           callback
         );
         if (!deleteResult.success) {
-          this._snackBar.open(
+          this._snackbarService.open(
             deleteResult.error || "Failed to delete callback",
             "Close",
             {
@@ -1220,7 +1220,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.agentBuilderService.getRootNode();
 
     if (!rootAgent) {
-      this._snackBar.open("Please create an agent first.", "OK");
+      this._snackbarService.open("Please create an agent first.", "OK");
       return;
     }
 
@@ -1239,7 +1239,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
             window.location.reload();
           });
       } else {
-        this._snackBar.open("Something went wrong, please try again", "OK");
+        this._snackbarService.open("Something went wrong, please try again", "OK");
       }
     });
   }

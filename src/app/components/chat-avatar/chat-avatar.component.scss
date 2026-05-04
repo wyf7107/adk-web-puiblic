@@ -1,0 +1,46 @@
+:host {
+  display: contents;
+}
+
+.node-circle-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-left: 4px;
+  margin-right: 16px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.bot-avatar, .user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bot-avatar {
+  margin-right: 12px;
+  color: white;
+}
+
+.user-avatar {
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+.hidden {
+  visibility: hidden;
+}

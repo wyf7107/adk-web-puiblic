@@ -16,8 +16,9 @@
  */
 
 import {HttpClient} from '@angular/common/http';
-import {Injectable, inject} from '@angular/core';
-import {Observable} from 'rxjs';
+import {Injectable, inject, signal} from '@angular/core';
+import {Observable, of} from 'rxjs';
+import {tap} from 'rxjs/operators';
 
 import {URLUtil} from '../../../utils/url-util';
 import {EvalCase} from '../models/Eval';
@@ -31,6 +32,9 @@ export class EvalService implements EvalServiceInterface {
 
   apiServerDomain = URLUtil.getApiServerBaseUrl();
 
+  metricsInfo = signal<any[]>([]);
+  private metricsInfoCache = new Map<string, any[]>();
+
   getEvalSets(appName: string) {
     if (this.apiServerDomain != undefined) {
       const url = this.apiServerDomain + `/apps/${appName}/eval_sets`;
@@ -39,11 +43,45 @@ export class EvalService implements EvalServiceInterface {
     return new Observable<any>();
   }
 
-  createNewEvalSet(appName: string, evalSetId: string) {
+  getMetricsInfo(appName: string) {
+    if (this.metricsInfoCache.has(appName)) {
+      this.metricsInfo.set(this.metricsInfoCache.get(appName)!);
+      return of({metricsInfo: this.metricsInfoCache.get(appName)!});
+    }
+    if (this.apiServerDomain != undefined) {
+      const url = this.apiServerDomain + `/apps/${appName}/metrics-info`;
+      return this.http.get<any>(url).pipe(
+        tap(res => {
+          const info = res.metricsInfo || [];
+          this.metricsInfoCache.set(appName, info);
+          this.metricsInfo.set(info);
+        })
+      );
+    }
+    return new Observable<any>();
+  }
+
+  createNewEvalSet(appName: string, evalSetId: string, executionMode: 'live' | 'replay' = 'live') {
     if (this.apiServerDomain != undefined) {
       const url =
-      this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}`;
-    return this.http.post<any>(url, {});
+      this.apiServerDomain + `/apps/${appName}/eval-sets`;
+    return this.http.post<any>(url, {
+      eval_set: {
+        eval_set_id: evalSetId,
+        model_execution_mode: executionMode,
+        tool_execution_mode: executionMode,
+        eval_cases: []
+      }
+    });
+    }
+    return new Observable<any>();
+  }
+
+  getEvalSet(appName: string, evalSetId: string) {
+    if (this.apiServerDomain != undefined) {
+      const url =
+        this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}`;
+      return this.http.get<any>(url, {});
     }
     return new Observable<any>();
   }
@@ -100,7 +138,7 @@ export class EvalService implements EvalServiceInterface {
   getEvalResult(appName: string, evalResultId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/apps/${appName}/eval_results/${evalResultId}`;
+        this.apiServerDomain + `/apps/${appName}/eval_results/${encodeURIComponent(evalResultId)}`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -132,6 +170,11 @@ export class EvalService implements EvalServiceInterface {
   deleteEvalCase(appName: string, evalSetId: string, evalCaseId: string) {
     const url = this.apiServerDomain +
         `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+    return this.http.delete<any>(url, {});
+  }
+
+  deleteEvalSet(appName: string, evalSetId: string) {
+    const url = this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}`;
     return this.http.delete<any>(url, {});
   }
 }

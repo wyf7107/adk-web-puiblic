@@ -1,0 +1,217 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+:host {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.overlay-panel {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+  color: var(--mat-sys-on-surface);
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.overlay-header {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background-color: var(--mat-sys-surface-container);
+}
+
+.overlay-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.graph-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.agent-info {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: var(--mdc-dialog-supporting-text-color);
+
+  strong {
+    font-weight: 600;
+    color: var(--mdc-dialog-supporting-text-color);
+  }
+}
+
+.svg-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background-color: transparent;
+
+  ::ng-deep svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    cursor: grab;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+    /* Hide internal graphviz background so the container's background shines through perfectly */
+    > g.graph > polygon:first-child {
+      fill: transparent !important;
+      stroke: transparent !important;
+    }
+
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out;
+
+    &.ready {
+      opacity: 1;
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+}
+
+:host-context(.dark-theme) .svg-container ::ng-deep svg {
+  background-color: #0e172a;
+}
+
+:host-context(.light-theme) .svg-container ::ng-deep svg {
+  background-color: #f9fafc;
+}
+
+.loading-container,
+.error-container,
+.no-graph-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px;
+}
+
+.loading-container p,
+.error-container p,
+.no-graph-container p {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--mdc-dialog-supporting-text-color);
+}
+
+.error-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #f44336;
+}
+
+.error-message {
+  color: #f44336 !important;
+}
+
+.large-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: var(--mdc-dialog-supporting-text-color);
+  opacity: 0.6;
+}
+
+.breadcrumb-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 0;
+  background-color: transparent;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: var(--mat-sys-primary);
+  font-size: 13px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: var(--mat-sys-surface-container-high);
+  }
+
+  &:disabled, &.active {
+    color: var(--mat-sys-on-surface);
+    cursor: default;
+    font-weight: 600;
+  }
+}
+
+.breadcrumb-separator {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-right: 16px;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  padding: 6px 16px;
+  background-color: var(--mat-sys-surface-container-lowest);
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 500;
+  }
+}

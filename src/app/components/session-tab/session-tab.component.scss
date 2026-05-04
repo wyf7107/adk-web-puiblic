@@ -34,9 +34,6 @@
   }
 
   .session-filter-container {
-    background-color: var(
-      --session-tab-session-filter-container-background-color
-    );
     border-radius: 8px;
     padding: 16px;
     margin-bottom: 16px;
@@ -45,14 +42,6 @@
 
   .session-filter {
     width: 100%;
-
-    ::ng-deep {
-      .mdc-floating-label--float-above {
-        background-color: var(
-          --session-tab-session-filter-container-background-color
-        );
-      }
-    }
   }
 }
 
@@ -66,16 +55,15 @@
   justify-content: space-between;
   align-items: center;
   border: none;
-  background-color: var(--session-tab-session-item-background-color);
   border-radius: 8px;
   margin-bottom: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: var(--session-tab-session-item-hover-background-color);
+    background-color: var(--mat-sys-surface-variant, rgba(0, 0, 0, 0.04));
   }
   &.current {
-    background-color: var(--session-tab-session-item-current-background-color);
+    background-color: var(--mat-sys-secondary-container, rgba(0, 0, 0, 0.08));
   }
 
   mat-chip {
@@ -85,12 +73,23 @@
 
 .session-id {
   color: var(--session-tab-session-id-color);
-  font-family: 'Google Sans Mono', monospace;
+  font-family: Roboto, sans-serif;
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: 20px;
   letter-spacing: 0.25px;
+
+  &.is-monospace {
+    font-family: 'Google Sans Mono', monospace;
+  }
+}
+
+.session-sub-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .session-date {
@@ -101,10 +100,92 @@
   font-weight: 400;
   line-height: 16px;
   letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.session-real-id {
+  color: var(--session-tab-session-id-color);
+  font-family: 'Google Sans Mono', monospace;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0.3px;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  text-align: right;
 }
 
 .session-info {
   padding: 11px;
+  flex: 1;
+  min-width: 0;
+
+  .session-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    margin-bottom: 2px;
+    
+    .session-id {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .session-name-input {
+      flex: 1;
+      height: 20px;
+      padding: 0 4px;
+      font-family: inherit;
+      font-size: 14px;
+      border: 1px solid var(--mat-sys-outline, #ccc);
+      border-radius: 4px;
+      background: var(--mat-sys-surface, #fff);
+      color: var(--mat-sys-on-surface, #000);
+      outline: none;
+      min-width: 0;
+      margin-right: 4px;
+
+      &:focus {
+        border-color: var(--mat-sys-primary, #1976d2);
+      }
+    }
+
+    .action-btn {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      display: none; 
+
+      ::ng-deep .mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        line-height: 16px;
+      }
+    }
+
+    .save-btn, .cancel-btn {
+      display: inline-flex; 
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+    }
+  }
+}
+
+.session-item:hover .action-btn.edit-btn,
+.session-item:hover .action-btn.delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loading-spinner-container {
@@ -122,7 +203,6 @@
 
 .readonly-badge {
   color: var(--chat-readonly-badge-color);
-  background-color: var(--chat-readonly-badge-background-color);
   border-radius: 4px;
   padding: 1px 6px;
   display: flex;

@@ -1,63 +1,420 @@
-<!--
- Copyright 2025 Google LLC
+<div class="event-details-container">
+  <div class="event-details-header">
+    <mat-paginator class="event-paginator" hidePageSize [length]="eventDataSize()" [pageSize]="1"
+      [pageIndex]="selectedEventIndex()" (page)="page.emit($event)" [attr.aria-label]="i18n.selectEventAriaLabel">
+    </mat-paginator>
+    <button mat-icon-button (click)="closeSelectedEvent.emit()" matTooltip="{{ i18n.clearSelectionButtonLabel }}">
+      <mat-icon>remove_selection</mat-icon>
+    </button>
+  </div>
+  <div class="event-details-content">
+    <div class="vertical-tabs-sidebar">
+      <button mat-icon-button (click)="selectedDetailTab = 'event'" [class.active]="selectedDetailTab === 'event'"
+        matTooltip="{{ i18n.infoTabLabel }}" matTooltipPosition="right">
+        <mat-icon>info</mat-icon>
+      </button>
+      @if (graphsAvailable()) {
+        <button mat-icon-button (click)="selectedDetailTab = 'graph'" [class.active]="selectedDetailTab === 'graph'"
+          matTooltip="{{ i18n.graphTabLabel }}" matTooltipPosition="right">
+          <mat-icon>account_tree</mat-icon>
+        </button>
+      }
+      <button mat-icon-button (click)="selectedDetailTab = 'request'" [class.active]="selectedDetailTab === 'request'"
+        matTooltip="{{ i18n.requestDetailsTabLabel }}" matTooltipPosition="right">
+        <mat-icon>input</mat-icon>
+      </button>
+      <button mat-icon-button (click)="selectedDetailTab = 'response'" [class.active]="selectedDetailTab === 'response'"
+        matTooltip="{{ i18n.responseDetailsTabLabel }}" matTooltipPosition="right">
+        <mat-icon>output</mat-icon>
+      </button>
+      <button mat-icon-button (click)="selectedDetailTab = 'metadata'" [class.active]="selectedDetailTab === 'metadata'"
+        matTooltip="Usage Metadata" matTooltipPosition="right">
+        <mat-icon>analytics</mat-icon>
+      </button>
+      <button mat-icon-button (click)="selectedDetailTab = 'state'" [class.active]="selectedDetailTab === 'state'"
+        matTooltip="State Changes" matTooltipPosition="right">
+        <mat-icon>published_with_changes</mat-icon>
+      </button>
+      <button mat-icon-button (click)="selectedDetailTab = 'raw'" [class.active]="selectedDetailTab === 'raw'"
+        matTooltip="Raw JSON" matTooltipPosition="right">
+        <mat-icon>data_object</mat-icon>
+      </button>
+    </div>
+    <div class="vertical-tabs-content">
+      @if (selectedDetailTab === 'event') {
+      <div class="info-tables-container">
+        <table app-info-table>
+          <tr>
+            <td>Event ID</td>
+            <td class="id-text"><span class="id-cell"><span [matTooltip]="selectedEvent()?.id || ''">{{ selectedEvent()?.id }}</span><button mat-icon-button
+                  class="copy-id-button" (click)="copyToClipboard(selectedEvent()?.id)" matTooltip="Copy"><mat-icon>{{
+                    copiedId === selectedEvent()?.id ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
+          </tr>
+          <tr>
+            <td>Invocation ID</td>
+            <td class="id-text"><span class="id-cell"><span [matTooltip]="selectedEvent()?.invocationId || ''">{{ selectedEvent()?.invocationId || 'N/A' }}</span><button
+                  mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedEvent()?.invocationId)"
+                  matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()?.invocationId ? 'check' : 'content_copy'
+                    }}</mat-icon></button></span></td>
+          </tr>
+          <tr>
+            <td>Branch</td>
+            <td><span class="value-cell"><span [matTooltip]="selectedEvent()?.branch || ''">{{ selectedEvent()?.branch || 'N/A' }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard(selectedEvent()?.branch)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()?.branch ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
+          </tr>
+          <tr>
+            <td>Timestamp</td>
+            <td><span class="value-cell"><span [matTooltip]="formatTime(selectedEvent()?.timestamp)">{{ formatTime(selectedEvent()?.timestamp) }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard(formatTime(selectedEvent()?.timestamp), 'timestamp')" matTooltip="Copy"><mat-icon>{{ copiedId === 'timestamp' ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
+          </tr>
+          <tr>
+            <td>Author</td>
+            <td><span class="value-cell"><span [matTooltip]="selectedEvent()?.author || ''">{{ selectedEvent()?.author }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard(selectedEvent()?.author)" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()?.author ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
+          </tr>
+        </table>
 
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
--->
-
-<div class="events-wrapper">
-  @if (eventsMap().size>0) {
-    <div class="events-container">
-      <div class="event-header">
-        @if (!isTraceView()) {
-          <p>{{ i18n.conversationsHeader }}</p>
+        @if (selectedEvent()?.nodeInfo) {
+        <table app-info-table title="Node Info">
+          <tr>
+            <td>Node Path</td>
+            <td><span class="value-cell"><span [matTooltip]="selectedEvent()!.nodeInfo!['path'] || ''">{{ selectedEvent()!.nodeInfo!['path'] || 'N/A' }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard(selectedEvent()!.nodeInfo!['path'])" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()!.nodeInfo!['path'] ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
+          </tr>
+          <tr>
+            <td>Output For</td>
+            <td>
+              @if (selectedEvent()!.nodeInfo!['outputFor']) {
+              <div class="json-viewer-wrapper">
+                <ngx-json-viewer [json]="selectedEvent()!.nodeInfo!['outputFor']"></ngx-json-viewer>
+                <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(selectedEvent()!.nodeInfo!['outputFor'], 'nodeInfo.outputFor')" matTooltip="Copy JSON">
+                  <mat-icon>{{ copiedId === 'nodeInfo.outputFor' ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+              </div>
+              } @else {
+              N/A
+              }
+            </td>
+          </tr>
+          @if (selectedEvent()!.nodeInfo!['messageAsOutput'] !== undefined) {
+          <tr>
+            <td>Message As Output</td>
+            <td><span class="value-cell"><span [matTooltip]="selectedEvent()!.nodeInfo!['messageAsOutput']?.toString() || ''">{{ selectedEvent()!.nodeInfo!['messageAsOutput'] }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard(selectedEvent()!.nodeInfo!['messageAsOutput'])" matTooltip="Copy"><mat-icon>{{ copiedId === selectedEvent()!.nodeInfo!['messageAsOutput'] ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
+          </tr>
+          }
+        </table>
         }
-        @if (isTraceView()) {
-          <p>{{ i18n.traceHeader }}</p>
+
+        @if (selectedEvent()?.actions && Object.keys(selectedEvent()!.actions!).length > 0) {
+        <table app-info-table title="Actions">
+          @for (key of Object.keys(selectedEvent()!.actions!); track key) {
+          <tr>
+            <td>{{ key }}</td>
+            <td>
+              @if (isObject($any(selectedEvent()!.actions)[key])) {
+              <div class="json-viewer-wrapper">
+                <ngx-json-viewer [json]="$any(selectedEvent()!.actions)[key]"></ngx-json-viewer>
+                <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard($any(selectedEvent()!.actions)[key], 'action.' + key)" matTooltip="Copy JSON">
+                  <mat-icon>{{ copiedId === 'action.' + key ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+              </div>
+              } @else {
+              <span class="value-cell"><span [matTooltip]="$any(selectedEvent()!.actions)[key]?.toString() || ''">{{ $any(selectedEvent()!.actions)[key] }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard($any(selectedEvent()!.actions)[key]?.toString())" matTooltip="Copy"><mat-icon>{{ copiedId === $any(selectedEvent()!.actions)[key]?.toString() ? 'check' : 'content_copy' }}</mat-icon></button></span>
+              }
+            </td>
+          </tr>
+          }
+        </table>
         }
-        @if (traceData().length > 0) {
-          <mat-button-toggle-group name="fontStyle" aria-label="Font Style" style="scale: 0.8" [(ngModel)]="view">
-            <mat-button-toggle value="events">{{ i18n.eventsToggle }}</mat-button-toggle>
-            @if (isTraceEnabledObs | async) {
-              <mat-button-toggle value="trace">{{ i18n.traceToggle }}</mat-button-toggle>
-            }
-          </mat-button-toggle-group>
+
+        @if (functionCalls().length > 0) {
+        <table app-info-table title="Function Calls">
+          @for (fc of functionCalls(); track $index) {
+          <tr>
+            <td>{{ fc?.name }}</td>
+            <td>
+              <div class="json-viewer-wrapper">
+                <ngx-json-viewer [json]="fc"></ngx-json-viewer>
+                <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(fc, 'fc.' + $index)" matTooltip="Copy JSON">
+                  <mat-icon>{{ copiedId === 'fc.' + $index ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </table>
+        }
+
+        @if (processedFunctionResponses().length > 0) {
+        <table app-info-table title="Function Responses">
+          @for (pfr of processedFunctionResponses(); track $index) {
+          <tr>
+            <td>{{ pfr.name }}</td>
+            <td>
+              @if (pfr.hasMedia) {
+                <div class="media-container">
+                  @for (part of pfr.mediaParts; track $index) {
+                    @if (part.inlineData?.mimeType?.startsWith('image/')) {
+                      <div class="generated-image-container">
+                        <img [src]="'data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data" alt="image" />
+                      </div>
+                    } @else if (part.inlineData?.mimeType?.startsWith('audio/')) {
+                      <div>
+                        <audio [src]="'data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data" controls></audio>
+                      </div>
+                    } @else if (part.inlineData?.mimeType?.startsWith('video/')) {
+                      <div>
+                        <video [src]="'data:' + part.inlineData.mimeType + ';base64,' + part.inlineData.data" controls></video>
+                      </div>
+                    } @else {
+                      <div>
+                        Unsupported media type: {{ part.inlineData?.mimeType }}
+                      </div>
+                    }
+                  }
+                </div>
+              }
+              <div class="json-viewer-wrapper">
+                <ngx-json-viewer [json]="pfr.cleanedFr"></ngx-json-viewer>
+                <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(pfr.cleanedFr, 'pfr.' + $index)" matTooltip="Copy JSON">
+                  <mat-icon>{{ copiedId === 'pfr.' + $index ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </table>
+        }
+
+        @if (associatedSpans().length > 0) {
+        <table app-info-table title="Associated Spans">
+          @for (span of associatedSpans(); track span.span_id) {
+          <tr>
+            <td>{{ span.name }}</td>
+            <td>
+              <span class="id-cell"><a href="javascript:void(0)" (click)="switchToSpan(span)"
+                  class="span-link id-text" [matTooltip]="span.span_id">{{ span.span_id }}</a><button mat-icon-button class="copy-id-button"
+                  (click)="copyToClipboard(span.span_id)" matTooltip="Copy"><mat-icon>{{ copiedId === span.span_id ?
+                    'check' : 'content_copy' }}</mat-icon></button></span>
+            </td>
+          </tr>
+          }
+        </table>
         }
       </div>
-      @if (!isTraceView()) {
-        <mat-list class="event-list">
-          @for (jsonData of eventsMap() | keyvalue: mapOrderPreservingSort; track jsonData; let i = $index) {
-            <mat-list-item (click)="selectEvent(jsonData.key)">
-              <span class="event-index">{{i}}</span>
-              <span class="event-title">{{jsonData.value.title}}</span>
-            </mat-list-item>
-          }
-        </mat-list>
       }
-      @if (isTraceView()) {
-        <mat-list class="event-list">
-          @for (invoc of spansByTraceId() | keyvalue: mapOrderPreservingSort; track invoc; let i = $index) {
-            <mat-list-item (click)="openDialog(invoc.key)">
-              <span class="event-index">{{i}}</span>
-              <span>{{ i18n.invocationPrefix }} {{invoc.value | invocId}}</span>
-            </mat-list-item>
+      @if (selectedDetailTab === 'metadata') {
+      <div class="info-tables-container">
+        @if (selectedEvent()?.usageMetadata && Object.keys(selectedEvent()!.usageMetadata).length > 0) {
+        <table app-info-table title="Usage Summary for Event">
+          @for (key of Object.keys(selectedEvent()!.usageMetadata); track key) {
+          <tr>
+            <td>{{ key }}</td>
+            <td>
+              <span class="value-cell">
+                <span>
+                  @if (key === 'promptTokensDetails' || key === 'promptTokenDetails' || key === 'candidatesTokenDetails' ||
+                  key === 'candidatesTokensDetails' || key === 'cacheTokensDetails') {
+                  @for (detail of selectedEvent()!.usageMetadata[key]; track detail.modality) {
+                  <div [matTooltip]="detail.modality + ': ' + detail.tokenCount">{{ detail.modality }}: {{ detail.tokenCount }}</div>
+                  }
+                  } @else {
+                  <span [matTooltip]="selectedEvent()!.usageMetadata[key]?.toString() || ''">{{ selectedEvent()!.usageMetadata[key] }}</span>
+                  }
+                </span>
+                <button mat-icon-button class="copy-value-button" (click)="isObject(selectedEvent()!.usageMetadata[key]) ? copyJsonToClipboard(selectedEvent()!.usageMetadata[key], 'usage.' + key) : copyToClipboard(selectedEvent()!.usageMetadata[key]?.toString(), 'usage.' + key)" matTooltip="Copy"><mat-icon>{{ copiedId === 'usage.' + key ? 'check' : 'content_copy' }}</mat-icon></button>
+              </span>
+            </td>
+          </tr>
           }
-        </mat-list>
+        </table>
+        } @else {
+        <table app-info-table title="Usage Summary for Event">
+          <tr>
+            <td colspan="2" style="text-align: center; padding: 20px; color: var(--mat-sys-on-surface-variant);">
+              Select an LLM response to see usage metadata.
+            </td>
+          </tr>
+        </table>
+        }
+
+        <table app-info-table title="Usage Summary for Session">
+          <tr>
+            <td>Total Prompt Tokens</td>
+            <td>{{ sessionUsageMetadata()['Prompt Tokens'] }}</td>
+          </tr>
+          <tr>
+            <td>Total Candidates Tokens</td>
+            <td>{{ sessionUsageMetadata()['Candidates Tokens'] }}</td>
+          </tr>
+          <tr>
+            <td>Total Tokens</td>
+            <td>{{ sessionUsageMetadata()['Total Tokens'] }}</td>
+          </tr>
+        </table>
+      </div>
+      }
+      @if (selectedDetailTab === 'raw') {
+      <div class="json-viewer-container json-viewer-wrapper">
+        <ngx-json-viewer [json]="filteredSelectedEvent()"></ngx-json-viewer>
+        <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(filteredSelectedEvent(), 'raw')" matTooltip="Copy JSON">
+          <mat-icon>{{ copiedId === 'raw' ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+      </div>
+      }
+      @if (selectedDetailTab === 'state') {
+      <div class="info-tables-container">
+        @if (stateChanges().length > 0) {
+          @for (change of stateChanges(); track change.key) {
+          <div class="state-change-card">
+            <div class="state-change-header">{{ change.key }}</div>
+            <div class="state-change-values">
+              <div class="state-value-block">
+                <div class="state-value-label">Old Value</div>
+                <div class="state-value-content">
+                  @if (isObject(change.oldValue)) {
+                  <ngx-json-viewer [json]="change.oldValue"></ngx-json-viewer>
+                  } @else {
+                  <span>{{ change.oldValue }}</span>
+                  }
+                </div>
+              </div>
+              <div class="state-value-block">
+                <div class="state-value-label">New Value</div>
+                <div class="state-value-content">
+                  @if (isObject(change.newValue)) {
+                  <ngx-json-viewer [json]="change.newValue"></ngx-json-viewer>
+                  } @else {
+                  <span>{{ change.newValue }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+          }
+        } @else {
+        <div class="empty-state">
+          No state changes in this event.
+        </div>
+        }
+      </div>
+      }
+      @if (selectedDetailTab === 'graph') {
+      <div class="event-graph-wrapper">
+        @if (isViewOnlyAppNameMismatch()) {
+          <div class="warning-banner" style="background-color: #fff3cd; color: #856404; padding: 8px; margin-bottom: 8px; border-radius: 4px; display: flex; align-items: center;">
+            <mat-icon style="margin-right: 8px;">warning</mat-icon>
+            <span>The loaded session file was for a different app. The graph may not be accurate.</span>
+          </div>
+        }
+        <div class="graph-header" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; min-width: 0; flex: 1; width: 100%;">
+            <span style="white-space: nowrap; flex-shrink: 0;">Invocation:</span>
+            @if (invocationDisplayMap().size > 0 && selectedEvent()?.invocationId) {
+            <button mat-button [matMenuTriggerFor]="invocationSelectorMenu" class="invocation-selector-button"
+              style="margin-left: 8px; padding: 0 8px; min-width: 0; flex: 1; height: 24px; line-height: 24px; width: 100%;">
+              <div
+                style="display: flex; align-items: center; width: 100%; min-width: 0; justify-content: space-between;">
+                <span
+                  style="font-weight: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: left;"
+                  [matTooltip]="selectedEvent()?.invocationId || ''">
+                  {{ invocationDisplayMap().get(selectedEvent()!.invocationId!) || selectedEvent()!.invocationId }}
+                </span>
+                <mat-icon
+                  style="margin-left: 4px; font-size: 18px; width: 18px; height: 18px; flex-shrink: 0;">arrow_drop_down</mat-icon>
+              </div>
+            </button>
+            <mat-menu #invocationSelectorMenu="matMenu">
+              @for (inv of invocationDisplayEntries(); track inv.key) {
+              <button mat-menu-item (click)="onInvocationSelected(inv.key)" [matTooltip]="inv.key"
+                matTooltipPosition="right">
+                <mat-icon [style.visibility]="selectedEvent()?.invocationId === inv.key ? 'visible' : 'hidden'"
+                  style="font-size: 16px; width: 16px; height: 16px; margin-right: 8px; color: var(--mat-sys-primary);">check</mat-icon>
+                {{ inv.value }}
+              </button>
+              }
+            </mat-menu>
+            } @else {
+            <span style="margin-left: 8px; font-weight: normal;" [matTooltip]="selectedEvent()?.invocationId || ''">{{
+              selectedEvent()?.invocationId ? (invocationDisplayMap().get(selectedEvent()!.invocationId!) ||
+              selectedEvent()!.invocationId) : 'N/A' }}</span>
+            }
+          </div>
+        </div>
+        @if (hasSubWorkflows() && (breadcrumbs().length > 0 || appName())) {
+        <div class="breadcrumb-container">
+          <button class="breadcrumb-item" disabled>{{ appName() }}</button>
+          @if (breadcrumbs().length > 0) {
+          <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+          }
+          @for (crumb of breadcrumbs(); track $index) {
+          @if ($index > 0) {
+          <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+          }
+          <button class="breadcrumb-item" [class.active]="$index === breadcrumbs().length - 1" disabled>
+            {{ crumb }}
+          </button>
+          }
+        </div>
+        }
+        <div class="event-graph-container" #graphContainer>
+          @if (graphsAvailable()) {
+          <button mat-icon-button class="fullscreen-graph-button" (click)="showAgentStructureGraph.emit(true)"
+            matTooltip="Full Screen">
+            <mat-icon>fullscreen</mat-icon>
+          </button>
+          }
+          @if (!graphsAvailable()) {
+          <div class="request-response-empty-state">
+            Graph is not available for this agent.
+          </div>
+          } @else if (!renderedEventGraph()) {
+          <div class="request-response-loading-spinner-container">
+            <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+          </div>
+          } @else {
+          <div [innerHtml]="renderedEventGraph()" class="svg-graph-wrapper"></div>
+          }
+        </div>
+        <div style="visibility: hidden; position: fixed" [style.left]="menuPos.x + 'px'" [style.top]="menuPos.y + 'px'"
+          [matMenuTriggerFor]="eventMenu" #eventMenuTrigger="matMenuTrigger"></div>
+        <mat-menu #eventMenu="matMenu">
+          @for (evt of menuEvents; track evt.id) {
+          <button mat-menu-item (click)="handleMenuSelection(evt)">
+            <span>Run {{ evt.runIndex }} ({{ evt.timestamp | date:'mediumTime' }})</span>
+          </button>
+          }
+        </mat-menu>
+      </div>
+      }
+      @if (selectedDetailTab === 'request') {
+      @if ((uiStateService.isEventRequestResponseLoading() | async) === true) {
+      <div class="request-response-loading-spinner-container">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      </div>
+      } @else if (!llmRequest()) {
+      <div class="request-response-empty-state">Select an LLM response to see request details.</div>
+      } @else {
+      <div class="json-viewer-container json-viewer-wrapper">
+        <ngx-json-viewer [json]="llmRequest()"></ngx-json-viewer>
+        <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(llmRequest(), 'request')" matTooltip="Copy JSON">
+          <mat-icon>{{ copiedId === 'request' ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+      </div>
+      }
+      }
+      @if (selectedDetailTab === 'response') {
+      @if ((uiStateService.isEventRequestResponseLoading() | async) === true) {
+      <div class="request-response-loading-spinner-container">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+      </div>
+      } @else if (!llmResponse()) {
+      <div class="request-response-empty-state">Select an LLM response to see response details.</div>
+      } @else {
+      <div class="json-viewer-container json-viewer-wrapper">
+        <ngx-json-viewer [json]="llmResponse()"></ngx-json-viewer>
+        <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(llmResponse(), 'response')" matTooltip="Copy JSON">
+          <mat-icon>{{ copiedId === 'response' ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+      </div>
+      }
       }
     </div>
-  }
-  @if (eventsMap().size==0) {
-    <div class="empty-state">
-      {{ i18n.noConversationsMessage }}
-    </div>
-  }
+  </div>
 </div>

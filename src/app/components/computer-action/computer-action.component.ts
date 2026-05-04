@@ -23,7 +23,7 @@ import {ComputerUseClickCall, ComputerUsePayload, isComputerUseResponse, isVisib
 import type {FunctionCall, FunctionResponse} from '../../core/models/types';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-computer-action',
   templateUrl: './computer-action.component.html',
   styleUrl: './computer-action.component.scss',
@@ -37,9 +37,10 @@ import type {FunctionCall, FunctionResponse} from '../../core/models/types';
 export class ComputerActionComponent {
   @Input() functionCall?: FunctionCall;
   @Input() functionResponse?: FunctionResponse;
-  @Input() allMessages: Array<{functionResponses?: FunctionResponse[]}> = [];
+  @Input() allMessages: Array<{functionResponses?: FunctionResponse[], functionCalls?: FunctionCall[]}> = [];
   @Input() index: number = 0;
   @Output() readonly clickEvent = new EventEmitter<number>();
+  @Output() readonly openImage = new EventEmitter<{images: string[], currentIndex: number, urls?: string[], coordinates?: ({x: number, y: number} | null)[]}>();
   imageDimensions = new Map < number, {
     width: number;
     height: number
@@ -82,6 +83,19 @@ export class ComputerActionComponent {
                const payload = resp.response as ComputerUsePayload;
                return this.getScreenshotFromPayload(payload);
             }
+            
+            // Fallback: check if the response has parts with inlineData
+            const parts = (resp as any)['parts'];
+            if (Array.isArray(parts)) {
+              for (let k = parts.length - 1; k >= 0; k--) {
+                const p = parts[k];
+                if (p.inlineData?.mimeType?.startsWith('image/') && p.inlineData.data) {
+                  const mimeType = p.inlineData.mimeType;
+                  const data = p.inlineData.data.replace(/-/g, '+').replace(/_/g, '/');
+                  return `data:${mimeType};base64,${data}`;
+                }
+              }
+            }
           }
         }
       }
@@ -89,9 +103,48 @@ export class ComputerActionComponent {
     return '';
   }
 
-  getClickCoordinates(): {x: number; y: number}|null {
-    if (!this.isComputerUseClick()) return null;
-    const args = this.functionCall!.args;
+  getNextComputerUseScreenshot(): string {
+    for (let i = this.index + 1; i < this.allMessages.length; i++) {
+      const msg = this.allMessages[i];
+      if (this.isMsgComputerUseResponse(msg)) {
+        if (msg.functionResponses && msg.functionResponses.length > 0) {
+          for (let j = 0; j < msg.functionResponses.length; j++) {
+            const resp = msg.functionResponses[j];
+            if (isComputerUseResponse(resp)) {
+               const payload = resp.response as ComputerUsePayload;
+               return this.getScreenshotFromPayload(payload);
+            }
+            
+            const parts = (resp as any)['parts'];
+            if (Array.isArray(parts)) {
+              for (let k = 0; k < parts.length; k++) {
+                const p = parts[k];
+                if (p.inlineData?.mimeType?.startsWith('image/') && p.inlineData.data) {
+                  const mimeType = p.inlineData.mimeType;
+                  const data = p.inlineData.data.replace(/-/g, '+').replace(/_/g, '/');
+                  return `data:${mimeType};base64,${data}`;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return '';
+  }
+
+  getActionName(): string {
+    if (!this.functionCall) return '';
+    const name = this.functionCall.name;
+    if (name === 'computer') {
+      return this.functionCall.args?.['action'] || name;
+    }
+    return name;
+  }
+
+  getClickCoordinates(call: FunctionCall | undefined = this.functionCall): {x: number; y: number}|null {
+    if (!call || !isVisibleComputerUseClick(call)) return null;
+    const args = call.args;
     if (!args) return null;
     if (args['coordinate']) {
       return {
@@ -144,7 +197,15 @@ export class ComputerActionComponent {
 
   private isMsgComputerUseResponse(message: {functionResponses?: FunctionResponse[]}): boolean {
     if (message.functionResponses && message.functionResponses.length > 0) {
-        return message.functionResponses.some((resp: FunctionResponse) => isComputerUseResponse(resp));
+        return message.functionResponses.some((resp: FunctionResponse) => {
+          if (isComputerUseResponse(resp)) return true;
+          
+          const parts = (resp as any)['parts'];
+          if (Array.isArray(parts)) {
+            return parts.some(p => p.inlineData?.mimeType?.startsWith('image/'));
+          }
+          return false;
+        });
     }
     return false;
   }
@@ -157,5 +218,119 @@ export class ComputerActionComponent {
     if (screenshot.startsWith('data:')) return screenshot;
     const mimeType = imageInfo.mimetype || 'image/png';
     return `data:${mimeType};base64,${screenshot}`;
+  }
+
+  getAllComputerUseScreenshots(): string[] {
+    const screenshots: string[] = [];
+    for (const msg of this.allMessages) {
+      if (this.isMsgComputerUseResponse(msg)) {
+        if (msg.functionResponses) {
+          for (const resp of msg.functionResponses) {
+            if (isComputerUseResponse(resp)) {
+              const payload = resp.response as ComputerUsePayload;
+              screenshots.push(this.getScreenshotFromPayload(payload));
+            }
+            
+            const parts = (resp as any)['parts'];
+            if (Array.isArray(parts)) {
+              for (const p of parts) {
+                if (p.inlineData?.mimeType?.startsWith('image/') && p.inlineData.data) {
+                  const mimeType = p.inlineData.mimeType;
+                  const data = p.inlineData.data.replace(/-/g, '+').replace(/_/g, '/');
+                  screenshots.push(`data:${mimeType};base64,${data}`);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return screenshots;
+  }
+
+  getAllComputerUseUrls(): string[] {
+    const urls: string[] = [];
+    let lastKnownUrl = '';
+    for (const msg of this.allMessages) {
+      if (this.isMsgComputerUseResponse(msg)) {
+        if (msg.functionResponses) {
+          for (const resp of msg.functionResponses) {
+            const url = (resp.response as any)?.url;
+            if (url) {
+              lastKnownUrl = url;
+            }
+
+            if (isComputerUseResponse(resp)) {
+              urls.push(lastKnownUrl);
+            }
+            
+            const parts = (resp as any)['parts'];
+            if (Array.isArray(parts)) {
+              for (const p of parts) {
+                if (p.inlineData?.mimeType?.startsWith('image/') && p.inlineData.data) {
+                  urls.push(lastKnownUrl);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return urls;
+  }
+
+  getAllComputerUseCoordinates(): ({x: number, y: number} | null)[] {
+    const coords: ({x: number, y: number} | null)[] = [];
+    let lastCall: any = null;
+    
+    for (const msg of this.allMessages) {
+      const functionCalls = (msg as any)['functionCalls'];
+      if (Array.isArray(functionCalls)) {
+        for (const call of functionCalls) {
+          if (isVisibleComputerUseClick(call)) {
+            lastCall = call;
+          } else if (call.name === 'computer') {
+            lastCall = null;
+          }
+        }
+      }
+      
+      if (this.isMsgComputerUseResponse(msg)) {
+        if (msg.functionResponses) {
+          for (const resp of msg.functionResponses) {
+            let foundImage = false;
+            
+            if (isComputerUseResponse(resp)) {
+              foundImage = true;
+            }
+            
+            const parts = (resp as any)['parts'];
+            if (Array.isArray(parts)) {
+              for (const p of parts) {
+                if (p.inlineData?.mimeType?.startsWith('image/') && p.inlineData.data) {
+                  foundImage = true;
+                }
+              }
+            }
+            
+            if (foundImage) {
+              if (lastCall && coords.length > 0) {
+                coords[coords.length - 1] = this.getClickCoordinates(lastCall);
+              }
+              coords.push(null);
+            }
+          }
+        }
+      }
+    }
+    return coords;
+  }
+
+  openImageViewer(currentScreenshot: string): void {
+    const images = this.getAllComputerUseScreenshots();
+    const urls = this.getAllComputerUseUrls();
+    const coordinates = this.getAllComputerUseCoordinates();
+    const currentIndex = images.indexOf(currentScreenshot);
+    this.openImage.emit({images, currentIndex, urls, coordinates});
   }
 }

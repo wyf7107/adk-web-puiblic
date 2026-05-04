@@ -1,27 +1,47 @@
 @if (isComputerUseClick()) {
   @let screenshot = getPreviousComputerUseScreenshot();
-  @if (screenshot) {
-    <div class="computer-use-container click-visualization-container" (click)="clickEvent.emit(index)">
-      <div class="computer-use-header">
-        <span class="computer-use-tool-name">
-          {{ functionCall!.name }}
-          @if (functionCall!.args && functionCall!.args['action']) {
-            ({{ functionCall!.args['action'] }})
+  @let nextScreenshot = getNextComputerUseScreenshot();
+  @if (screenshot || nextScreenshot) {
+    <div class="computer-use-container click-visualization-container" [class.dual-images]="!!nextScreenshot" (click)="clickEvent.emit(index)">
+      <div class="images-wrapper-flex">
+        @if (nextScreenshot) {
+          @if (screenshot) {
+            <div class="image-wrapper">
+              <img [src]="screenshot" class="computer-use-screenshot" alt="Computer Use Screenshot"
+                (load)="onImageLoad($event)" (click)="openImageViewer(screenshot); $event.stopPropagation()" />
+              <div class="click-overlay-box" [ngStyle]="getClickBoxStyle()"></div>
+            </div>
+          } @else {
+            <div class="image-wrapper fallback-image">
+              <mat-icon class="missing-icon">image_not_supported</mat-icon>
+              <span class="fallback-text">No screenshot</span>
+            </div>
           }
-          @let actualCoords = getActualPixelCoordinates();
-          @if (actualCoords) {
-            <span class="actual-pixels" [matTooltip]="actualCoords.isVirtual ? 'Virtual (1000x1000)' : 'Hardware Mapping'">
-              [&#64; {{ actualCoords.x }}{{ actualCoords.isVirtual ? 'v' : 'px' }}, {{ actualCoords.y }}{{
-              actualCoords.isVirtual
-              ? 'v' : 'px' }}]
-            </span>
-          }
-        </span>
+
+          <div class="arrow-container">
+            <span class="action-name-above">{{ getActionName() }}</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </div>
+
+          <div class="image-wrapper">
+            <img [src]="nextScreenshot" class="computer-use-screenshot" alt="Next Screenshot"
+              (click)="openImageViewer(nextScreenshot); $event.stopPropagation()" />
+          </div>
+        } @else {
+          <div class="image-wrapper">
+            <img [src]="screenshot" class="computer-use-screenshot" alt="Computer Use Screenshot"
+              (load)="onImageLoad($event)" (click)="openImageViewer(screenshot); $event.stopPropagation()" />
+            <div class="click-overlay-box" [ngStyle]="getClickBoxStyle()"></div>
+          </div>
+        }
       </div>
-      <div class="image-wrapper">
-        <img [src]="screenshot" class="computer-use-screenshot" alt="Computer Use Screenshot"
-          (load)="onImageLoad($event)" />
-        <div class="click-overlay-box" [ngStyle]="getClickBoxStyle()"></div>
+    </div>
+  } @else {
+    <div class="computer-use-container click-visualization-container fallback" (click)="clickEvent.emit(index)">
+
+      <div class="image-wrapper fallback-image">
+        <mat-icon class="missing-icon">image_not_supported</mat-icon>
+        <span class="fallback-text">No screenshot</span>
       </div>
     </div>
   }

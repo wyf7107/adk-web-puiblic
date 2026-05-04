@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-import {HttpClient} from '@angular/common/http';
-import {Injectable, NgZone} from '@angular/core';
-import {BehaviorSubject, Observable, of} from 'rxjs';
-import {URLUtil} from '../../../utils/url-util';
-import {AgentRunRequest} from '../models/AgentRunRequest';
-import {LlmResponse} from '../models/types';
-import {AgentService as AgentServiceInterface} from './interfaces/agent';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, NgZone } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { URLUtil } from '../../../utils/url-util';
+import { AgentRunRequest } from '../models/AgentRunRequest';
+import { LlmResponse } from '../models/types';
+import { AgentService as AgentServiceInterface } from './interfaces/agent';
 
 @Injectable({
   providedIn: 'root',
@@ -35,7 +35,7 @@ export class AgentService implements AgentServiceInterface {
   constructor(
     private http: HttpClient,
     private zone: NgZone,
-  ) {}
+  ) { }
 
   getApp(): Observable<string> {
     return this.currentApp;
@@ -69,35 +69,35 @@ export class AgentService implements AgentServiceInterface {
 
           const read = () => {
             reader?.read()
-                .then(({done, value}) => {
-                  this.isLoading.next(true);
-                  if (done) {
-                    this.isLoading.next(false);
-                    return observer.complete();
+              .then(({ done, value }) => {
+                this.isLoading.next(true);
+                if (done) {
+                  this.isLoading.next(false);
+                  return observer.complete();
+                }
+                const chunk = decoder.decode(value, { stream: true });
+                lastData += chunk;
+                try {
+                  const lines = lastData.split(/\r?\n/).filter(
+                    (line) => line.startsWith('data:'));
+                  lines.forEach((line) => {
+                    const data = line.replace(/^data:\s*/, '');
+                    const llmResponse = JSON.parse(data) as LlmResponse;
+                    self.zone.run(() => observer.next(llmResponse));
+                  });
+                  lastData = '';
+                } catch (e) {
+                  // the data is not a valid json, it could be an incomplete
+                  // chunk. we ignore it and wait for the next chunk.
+                  if (e instanceof SyntaxError) {
+                    read();
                   }
-                  const chunk = decoder.decode(value, {stream: true});
-                  lastData += chunk;
-                  try {
-                    const lines = lastData.split(/\r?\n/).filter(
-                        (line) => line.startsWith('data:'));
-                    lines.forEach((line) => {
-                      const data = line.replace(/^data:\s*/, '');
-                      const llmResponse = JSON.parse(data) as LlmResponse;
-                      self.zone.run(() => observer.next(llmResponse));
-                    });
-                    lastData = '';
-                  } catch (e) {
-                    // the data is not a valid json, it could be an incomplete
-                    // chunk. we ignore it and wait for the next chunk.
-                    if (e instanceof SyntaxError) {
-                      read();
-                    }
-                  }
-                  read();  // Read the next chunk
-                })
-                .catch((err) => {
-                  self.zone.run(() => observer.error(err));
-                });
+                }
+                read();  // Read the next chunk
+              })
+              .catch((err) => {
+                self.zone.run(() => observer.error(err));
+              });
           };
 
           read();
@@ -114,6 +114,14 @@ export class AgentService implements AgentServiceInterface {
       return this.http.get<string[]>(url);
     }
     return new Observable<[]>();
+  }
+
+  getVersion(): Observable<any> {
+    if (this.apiServerDomain != undefined) {
+      const url = this.apiServerDomain + `/version`;
+      return this.http.get<any>(url);
+    }
+    return new Observable<any>();
   }
 
   agentBuild(req: any): Observable<boolean> {
@@ -136,7 +144,7 @@ export class AgentService implements AgentServiceInterface {
 
   getAgentBuilder(agentName: string) {
     if (this.apiServerDomain != undefined) {
-      const url = 
+      const url =
         this.apiServerDomain + `/builder/app/${agentName}?ts=${Date.now()}`
       return this.http.get(url, {
         responseType: 'text'
@@ -147,7 +155,7 @@ export class AgentService implements AgentServiceInterface {
 
   getAgentBuilderTmp(agentName: string) {
     if (this.apiServerDomain != undefined) {
-      const url = 
+      const url =
         this.apiServerDomain + `/builder/app/${agentName}?ts=${Date.now()}&tmp=true`
       return this.http.get(url, {
         responseType: 'text'
@@ -158,7 +166,7 @@ export class AgentService implements AgentServiceInterface {
 
   getSubAgentBuilder(appName: string, relativePath: string) {
     if (this.apiServerDomain != undefined) {
-      let url = 
+      let url =
         this.apiServerDomain + `/builder/app/${appName}?ts=${Date.now()}&file_path=${relativePath}&tmp=true`
       return this.http.get(url, {
         responseType: 'text'
@@ -169,7 +177,7 @@ export class AgentService implements AgentServiceInterface {
 
   agentChangeCancel(appName: string) {
     if (this.apiServerDomain != undefined) {
-      let url = 
+      let url =
         this.apiServerDomain + `/builder/app/${appName}/cancel`
       return this.http.post<any>(url, {});
     }
@@ -183,4 +191,18 @@ export class AgentService implements AgentServiceInterface {
     }
     return new Observable<''>();
   }
+
+  getAppGraphImage(appName: string, darkMode: boolean, node?: string): Observable<any> {
+    if (this.apiServerDomain != undefined) {
+      const url = this.apiServerDomain + `/dev/build_graph_image/${appName}`;
+      const params: any = { dark_mode: darkMode };
+      if (node) {
+        params.node = node;
+      }
+      return this.http.get<any>(url, { params });
+    }
+    return new Observable<any>();
+  }
+
+
 }

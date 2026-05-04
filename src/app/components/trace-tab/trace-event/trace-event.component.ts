@@ -36,7 +36,7 @@ import {UI_STATE_SERVICE} from '../../../core/services/interfaces/ui-state';
 import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialog.component';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-trace-event',
   templateUrl: './trace-event.component.html',
   styleUrl: './trace-event.component.scss',
@@ -80,30 +80,27 @@ export class TraceEventComponent implements OnInit {
       this.selectedRow = span;
       const eventId = this.getEventIdFromSpan();
       if (eventId) {
-        let filter = undefined;
-        if (this.isEventFilteringEnabled() && this.selectedRow?.invoc_id &&
-            this.selectedRow?.start_time) {
-          filter = {
-            invocationId: this.selectedRow.invoc_id,
-            timestamp: this.selectedRow.start_time / 1000000,
-          };
+        this.llmRequest = undefined;
+        this.llmResponse = undefined;
+
+        const requestStr = this.selectedRow?.attributes?.[this.llmRequestKey];
+        const responseStr = this.selectedRow?.attributes?.[this.llmResponseKey];
+
+        if (requestStr) {
+          try {
+            this.llmRequest = typeof requestStr === 'string' ? JSON.parse(requestStr) : requestStr;
+          } catch (e) {
+            console.warn('Failed to parse LLM request', e);
+          }
         }
-        const eventTraceParam = {id: eventId, ...filter};
 
-        this.eventService.getEventTrace(eventTraceParam)
-            .pipe(tap(() => {
-              this.uiStateService.setIsEventRequestResponseLoading(true);
-            }))
-            .subscribe(
-                (res) => {
-                  this.llmRequest = JSON.parse(res[this.llmRequestKey]);
-                  this.llmResponse = JSON.parse(res[this.llmResponseKey]);
-
-                  this.uiStateService.setIsEventRequestResponseLoading(false);
-                },
-                () => {
-                  this.uiStateService.setIsEventRequestResponseLoading(false);
-                });
+        if (responseStr) {
+          try {
+            this.llmResponse = typeof responseStr === 'string' ? JSON.parse(responseStr) : responseStr;
+          } catch (e) {
+            console.warn('Failed to parse LLM response', e);
+          }
+        }
         this.getEventGraph(eventId);
       }
     });

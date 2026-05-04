@@ -21,7 +21,7 @@ import {RuntimeConfigUtil} from '../../../utils/runtime-config-util';
 
 /** Logo component to override the default logo. */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-custom-logo',
   standalone: true,
   templateUrl: './custom-logo.component.html',

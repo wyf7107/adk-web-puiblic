@@ -15,11 +15,11 @@
  * limitations under the License.
  */
 
-import {inject, Injectable} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {Observable, of, pipe} from 'rxjs';
-import {map} from 'rxjs/operators';
-import {A2A_CARD, EDIT_FUNCTION_ARGS, FeatureFlagService as FeatureFlagServiceInterface, IMPORT_SESSION, SESSION_URL} from './interfaces/feature-flag';
+import { inject, Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Observable, of, pipe } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { A2A_CARD, EDIT_FUNCTION_ARGS, EVAL_V2, FeatureFlagService as FeatureFlagServiceInterface, IMPORT_SESSION, SESSION_URL, TESTS } from './interfaces/feature-flag';
 
 @Injectable({
   providedIn: 'root'
@@ -27,17 +27,15 @@ import {A2A_CARD, EDIT_FUNCTION_ARGS, FeatureFlagService as FeatureFlagServiceIn
 export class FeatureFlagService implements FeatureFlagServiceInterface {
   private route = inject(ActivatedRoute);
 
-  constructor() {}
+  constructor() { }
 
   isImportSessionEnabled(): Observable<boolean> {
-    return this.route.queryParams.pipe(
-        map((params) => params[IMPORT_SESSION] === 'true'),
-    );
+    return of(true);
   }
 
   isEditFunctionArgsEnabled(): Observable<boolean> {
     return this.route.queryParams.pipe(
-        map((params) => params[EDIT_FUNCTION_ARGS] === 'true'),
+      map((params) => params[EDIT_FUNCTION_ARGS] === 'true'),
     );
   }
 
@@ -47,7 +45,7 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
 
   isA2ACardEnabled(): Observable<boolean> {
     return this.route.queryParams.pipe(
-        map((params) => params[A2A_CARD] === 'true'),
+      map((params) => params[A2A_CARD] === 'true'),
     );
   }
 
@@ -69,6 +67,18 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
 
   isEvalEnabled(): Observable<boolean> {
     return of(true);
+  }
+
+  isEvalV2Enabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+      map((params) => params[EVAL_V2] === 'true'),
+    );
+  }
+
+  isTestsEnabled(): Observable<boolean> {
+    return this.route.queryParams.pipe(
+      map((params) => params[TESTS] === 'true'),
+    );
   }
 
   isTokenStreamingEnabled(): Observable<boolean> {

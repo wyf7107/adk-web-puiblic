@@ -14,100 +14,185 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {KeyValuePipe} from '@angular/common';
-import {ChangeDetectionStrategy, Component, inject, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
-import {MatDialogTitle} from '@angular/material/dialog';
-import {MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle} from '@angular/material/expansion';
+import {ChangeDetectionStrategy, Component, inject, Input, output, signal, Injectable, HostListener, effect} from '@angular/core';
+import {toSignal} from '@angular/core/rxjs-interop';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
+import {MatPaginator, MatPaginatorIntl, PageEvent} from '@angular/material/paginator';
+import {MatTooltipModule} from '@angular/material/tooltip';
+import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {InfoTable} from '../info-table/info-table';
 
-import {LlmRequest} from '../../core/models/types';
+import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 
-import {TraceTabMessagesInjectionToken} from './trace-tab.component.i18n';
-import {TraceTreeComponent} from './trace-tree/trace-tree.component';
+@Injectable()
+export class SpanPaginatorIntl extends MatPaginatorIntl {
+  override nextPageLabel = 'Next Span';
+  override previousPageLabel = 'Previous Span';
+  override firstPageLabel = 'First Span';
+  override lastPageLabel = 'Last Span';
+
+  override getRangeLabel = (page: number, pageSize: number, length: number) => {
+    if (length === 0) {
+      return `Span 0 of 0`;
+    }
+    length = Math.max(length, 0);
+    const startIndex = page * pageSize;
+    return `Span ${startIndex + 1} of ${length}`;
+  };
+}
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-trace-tab',
   templateUrl: './trace-tab.component.html',
   styleUrl: './trace-tab.component.scss',
   standalone: true,
   imports: [
-    MatDialogTitle, MatExpansionPanel, MatExpansionPanelHeader,
-    MatExpansionPanelTitle, TraceTreeComponent, KeyValuePipe
+    MatButtonModule, MatIconModule, MatTooltipModule, NgxJsonViewerModule, MatPaginator, InfoTable
+  ],
+  providers: [
+    { provide: MatPaginatorIntl, useClass: SpanPaginatorIntl }
   ]
 })
+export class TraceTabComponent {
+  _traceData: any[] = [];
+  orderedTraceData: any[] = [];
 
-export class TraceTabComponent implements OnInit, OnChanges {
-  @Input() traceData: any = [];
-  invocTraces = new Map<string, any[]>();
-  invocToUserMsg = new Map<string, string>();
-  protected readonly i18n = inject(TraceTabMessagesInjectionToken);
-
-  constructor() {}
-
-  ngOnInit(): void {}
-
-  ngOnChanges(changes: SimpleChanges) {
-    if ('traceData' in changes) {
-      this.rebuildTrace();
-    }
+  // Input kept so we don't break side-panel binding, though not used here anymore
+  @Input() set traceData(val: any[]) {
+    this._traceData = val || [];
+    this.orderedTraceData = this.computeOrdered(this._traceData);
   }
 
-  rebuildTrace() {
-    this.invocTraces = this.traceData.reduce((map: any, item: any) => {
-      const key = item.trace_id;
-      const group = map.get(key);
-      if (group) {
-        group.push(item);
-        group.sort((a: any, b: any) => a.start_time - b.start_time);
+  get traceData(): any[] {
+    return this._traceData;
+  }
+
+  computeOrdered(spans: any[]): any[] {
+    const spanClones = spans.map(span => ({...span}));
+    const spanMap = new Map<string, any>();
+    const roots: any[] = [];
+
+    spanClones.forEach(span => spanMap.set(span.span_id, span));
+    spanClones.forEach(span => {
+      if (span.parent_span_id && spanMap.has(span.parent_span_id)) {
+        const parent = spanMap.get(span.parent_span_id)!;
+        parent.children = parent.children || [];
+        parent.children.push(span);
       } else {
-        map.set(key, [item]);
+        roots.push(span);
       }
-      return map;
-    }, new Map<string, any[]>());
+    });
 
-    for (const [key, value] of this.invocTraces) {
-      this.invocToUserMsg.set(key, this.findUserMsgFromInvocGroup(value))
+    const flatten = (spansArray: any[]): any[] => {
+      return spansArray.flatMap(span => [
+        span,
+        ...(span.children ? flatten(span.children) : [])
+      ]);
+    };
+
+    return flatten(roots);
+  }
+  
+  protected readonly traceService = inject(TRACE_SERVICE);
+  selectedSpan = toSignal(this.traceService.selectedTraceRow$);
+  
+  private static getValidTraceTab(tab: string | null): 'info' | 'attributes' | 'raw' {
+    if (tab === 'info' || tab === 'attributes' || tab === 'raw') {
+      return tab;
+    }
+    return 'info';
+  }
+
+  selectedDetailTab = signal<'info' | 'attributes' | 'raw'>(
+    TraceTabComponent.getValidTraceTab(localStorage.getItem('adk-trace-tab-selected-tab'))
+  );
+  
+  switchToEvent = output<string>();
+
+  constructor() {
+    effect(() => {
+      localStorage.setItem('adk-trace-tab-selected-tab', this.selectedDetailTab());
+    });
+  }
+
+  formatTime(nanos: number | undefined): string {
+    if (!nanos) return 'N/A';
+    return new Date(nanos / 1_000_000).toLocaleString();
+  }
+
+  get selectedSpanChildren() {
+    const span = this.selectedSpan();
+    if (!span) return [];
+    if (span.children && span.children.length > 0) return span.children;
+    return this.traceData.filter(s => s.parent_span_id === span.span_id);
+  }
+
+  selectSpanById(id: string | undefined): void {
+    if (!id) return;
+    const span = this.traceData.find(s => String(s.span_id) === String(id));
+    if (span) {
+      this.traceService.selectedRow(span);
     }
   }
 
-
-  getArray(n: number): number[] {
-    return Array.from({length: n});
+  get selectedSpanIndex(): number | undefined {
+    const span = this.selectedSpan();
+    if (!span) return undefined;
+    const index = this.orderedTraceData.findIndex(s => s.span_id === span.span_id);
+    return index === -1 ? undefined : index;
   }
 
-  findUserMsgFromInvocGroup(group: any[]) {
-    // Find a span that has both invocation_id and llm_request
-    // The invocation_id is present on multiple spans, but llm_request
-    // is only on the call_llm span
-    const eventItem = group?.find(
-        item => item.attributes !== undefined &&
-            'gcp.vertex.agent.invocation_id' in item.attributes &&
-            'gcp.vertex.agent.llm_request' in item.attributes)
-
-    if (!eventItem) {
-      return '[no invocation id found]';
-    }
-
-    try {
-      const requestJson =
-          JSON.parse(eventItem.attributes['gcp.vertex.agent.llm_request']) as
-          LlmRequest
-      const userContent =
-          requestJson.contents.filter((c: any) => c.role == 'user').at(-1)
-      return userContent?.parts[0]?.text ?? '[attachment]';
-    } catch {
-      return '[error parsing request]';
+  onPage(event: PageEvent) {
+    if (event.pageIndex >= 0 && event.pageIndex < this.orderedTraceData.length) {
+      this.traceService.selectedRow(this.orderedTraceData[event.pageIndex]);
     }
   }
 
-  findInvocIdFromTraceId(traceId: string) {
-    const group = this.invocTraces.get(traceId);
-    return group
-        ?.find(
-            item => item.attributes !== undefined &&
-                'gcp.vertex.agent.invocation_id' in item.attributes)
-        .attributes['gcp.vertex.agent.invocation_id']
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardNavigation(event: KeyboardEvent) {
+    if (this.selectedSpanIndex === undefined) return;
+
+    const activeElement = document.activeElement as HTMLElement | null;
+    if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable)) {
+      return;
+    }
+
+    // Only handle arrow keys
+    if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+
+    event.preventDefault();
+
+    // Navigate to next or previous
+    let newIndex: number;
+    if (event.key === 'ArrowDown') {
+      newIndex = this.selectedSpanIndex + 1 >= this.orderedTraceData.length ? 0 : this.selectedSpanIndex + 1;
+    } else {
+      newIndex = this.selectedSpanIndex - 1 < 0 ? this.orderedTraceData.length - 1 : this.selectedSpanIndex - 1;
+    }
+
+    this.traceService.selectedRow(this.orderedTraceData[newIndex]);
+  }
+  
+  readonly Object = Object;
+
+  copiedId: string | null = null;
+
+  copyToClipboard(value: string | undefined | null, key?: string) {
+    if (!value) return;
+    navigator.clipboard.writeText(value).then(() => {
+      this.copiedId = key || value;
+      setTimeout(() => this.copiedId = null, 2000);
+    });
   }
 
-  mapOrderPreservingSort = (a: any, b: any): number => 0;
+  copyJsonToClipboard(json: any, key: string) {
+    if (!json) return;
+    const value = JSON.stringify(json, null, 2);
+    navigator.clipboard.writeText(value).then(() => {
+      this.copiedId = key;
+      setTimeout(() => this.copiedId = null, 2000);
+    });
+  }
 }

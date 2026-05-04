@@ -18,10 +18,16 @@
 <mat-dialog-content>
   Please enter the eval case name
 </mat-dialog-content>
-<mat-form-field style="padding-left:20px; padding-right: 24px;">
+@if (loading) {
+  <div style="display: flex; justify-content: center; padding: 20px;">
+    <mat-progress-spinner mode="indeterminate" [diameter]="28" [strokeWidth]="3"></mat-progress-spinner>
+  </div>
+} @else {
+  <mat-form-field style="padding-left:20px; padding-right: 24px;">
     <input [(ngModel)]="newCaseId" matInput (keydown.enter)="createNewEvalCase()">
   </mat-form-field>
+}
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancel</button>
-  <button mat-button cdkFocusInitial (click)="createNewEvalCase()">Create</button>
+  <button mat-button mat-dialog-close [disabled]="loading">Cancel</button>
+  <button mat-button cdkFocusInitial (click)="createNewEvalCase()" [disabled]="loading">Create</button>
 </mat-dialog-actions>

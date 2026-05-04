@@ -1,0 +1,124 @@
+:host {
+  display: contents; /* Ensure the wrapper doesn't break flex layouts of the parent */
+}
+
+.content-bubble {
+  padding: 5px 20px;
+  border-radius: 20px;
+
+  &:not(.type-message) {
+    border-radius: 8px;
+  }
+
+  max-width: 80%;
+  font-size: 14px;
+  font-weight: 400;
+  position: relative;
+  display: inline-block;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.role-user {
+  color: var(--mat-sys-on-primary-container);
+  background-color: var(--mat-sys-primary-container);
+  box-shadow: none;
+  width: auto;
+  min-width: fit-content;
+  max-width: 80%;
+}
+
+.role-bot {
+  align-self: flex-start;
+  color: var(--mat-sys-on-secondary-container);
+  background-color: var(--mat-sys-secondary-container);
+  box-shadow: none;
+}
+
+.type-error {
+  background-color: var(--mat-sys-error-container, rgba(186, 26, 26, 0.1));
+  color: var(--mat-sys-on-error-container, #ba1a1a);
+
+  .output-chip-header {
+    color: var(--mat-sys-error, #ba1a1a);
+  }
+}
+
+.type-transcription {
+  background-color: var(--mat-sys-surface-container);
+}
+
+.type-output {
+  background-color: var(--mat-sys-surface-container-highest);
+}
+
+.output-chip-header {
+  font-weight: 600;
+  font-size: 9px;
+  color: var(--mat-sys-primary);
+  opacity: 0.5;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.content-bubble.no-bubble {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Max size for inline images */
+.content-bubble img {
+  max-width: min(400px, 100%);
+  max-height: 70vh;
+  height: auto;
+  border-radius: 8px;
+}
+
+.image-preview-chat {
+  max-width: min(400px, 100%);
+  max-height: 70vh;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+
+.generated-image-container {
+  max-width: 400px;
+  margin-top: 8px;
+}
+
+.generated-image {
+  max-width: 100%;
+  min-width: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Align user attachments and images to the right */
+.role-user {
+  text-align: right;
+
+  .attachments {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+  }
+
+  .image-preview-chat {
+    display: block;
+    margin-left: auto;
+  }
+}
+
+
+
+

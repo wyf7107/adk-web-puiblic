@@ -23,7 +23,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-theme-toggle',
   imports: [MatIconModule, MatButtonModule, MatTooltipModule],
   templateUrl: './theme-toggle.html',

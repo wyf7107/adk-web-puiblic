@@ -112,4 +112,48 @@ describe('RunEvalConfigDialogComponent', () => {
     expect(thresholdValueDisplays[0].textContent).toContain('0.4');
     expect(thresholdValueDisplays[1].textContent).toContain('0.5');
   });
+
+  describe('with metricsInfo', () => {
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [
+          ReactiveFormsModule,
+          MatDialogModule,
+          MatRadioModule,
+          MatSliderModule,
+          NoopAnimationsModule,
+          RunEvalConfigDialogComponent,
+        ],
+        providers: [
+          { provide: MatDialogRef, useValue: mockDialogRef },
+          {
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+              evalMetrics: [],
+              metricsInfo: [
+                {
+                  metricName: 'custom_metric',
+                  description: 'Custom metric description',
+                  metricValueInfo: {
+                    interval: { minValue: 0, maxValue: 10, openAtMin: false, openAtMax: false }
+                  }
+                }
+              ]
+            },
+          },
+        ],
+      }).compileComponents();
+    });
+
+    it('should initialize form with dynamic controls', () => {
+      const fixture2 = TestBed.createComponent(RunEvalConfigDialogComponent);
+      const component2 = fixture2.componentInstance;
+      fixture2.detectChanges();
+
+      expect(component2.evalForm.get('custom_metric_selected')).toBeTruthy();
+      expect(component2.evalForm.get('custom_metric_threshold')).toBeTruthy();
+      expect(component2.evalForm.get('custom_metric_threshold')?.value).toBe(10); // Default to max
+    });
+  });
 });

@@ -143,6 +143,10 @@ ngx-json-viewer {
 
   .segment-type-string {
     color: var(--mat-sys-tertiary) !important;
+
+    .segment-value {
+      white-space: pre-wrap !important;
+    }
   }
 
   .segment-type-number {

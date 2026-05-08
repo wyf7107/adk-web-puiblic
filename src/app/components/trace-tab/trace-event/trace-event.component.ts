@@ -23,7 +23,7 @@ import {MatIcon} from '@angular/material/icon';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {SafeHtml} from '@angular/platform-browser';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CustomJsonViewerComponent} from '../../custom-json-viewer/custom-json-viewer.component';
 import {tap} from 'rxjs/operators';
 
 import {Span} from '../../../core/models/Trace';
@@ -41,7 +41,7 @@ import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialo
   templateUrl: './trace-event.component.html',
   styleUrl: './trace-event.component.scss',
   imports: [
-    MatTabGroup, MatTab, NgxJsonViewerModule, MatIconButton, MatIcon,
+    MatTabGroup, MatTab, CustomJsonViewerComponent, MatIconButton, MatIcon,
     MatProgressSpinner, AsyncPipe
   ]
 })

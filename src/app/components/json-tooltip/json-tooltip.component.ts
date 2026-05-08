@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { CustomJsonViewerComponent } from '../custom-json-viewer/custom-json-viewer.component';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
@@ -26,7 +26,7 @@ import { NgxJsonViewerModule } from 'ngx-json-viewer';
         <div class="tooltip-title">{{ title }}</div>
       }
       <div class="tooltip-content">
-        <ngx-json-viewer [json]="parsedJson" [expanded]="true"></ngx-json-viewer>
+        <app-custom-json-viewer [json]="parsedJson" [expanded]="true"></app-custom-json-viewer>
       </div>
     </div>
   `,
@@ -64,14 +64,14 @@ import { NgxJsonViewerModule } from 'ngx-json-viewer';
       background: inherit;
       z-index: 1;
     }
-    ngx-json-viewer {
+    app-custom-json-viewer {
       display: block;
       height: auto !important;
       min-width: 0;
     }
   `],
   standalone: true,
-  imports: [NgxJsonViewerModule],
+  imports: [CustomJsonViewerComponent],
 })
 export class JsonTooltipComponent {
   @Input() title: string = '';

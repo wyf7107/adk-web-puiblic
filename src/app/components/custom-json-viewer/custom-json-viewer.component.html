@@ -1,13 +1,13 @@
 <div class="segment" [class.segment-expandable]="isExpandable()">
   <div class="segment-header">
-    @if (isExpandable()) {
+    @if (isExpandable() && depth > 0) {
       <span class="segment-toggler" (click)="toggleExpand($event)" [class.expanded]="isExpanded"></span>
     }
     
     @if (key !== undefined) {
       <span class="segment-key">{{ key }}</span>
       <span class="segment-separator">:</span>
-      @if (hasLineBreaks(json)) {
+      @if (showMarkdown && hasLineBreaks(json)) {
         <button class="md-btn" (click)="openMarkdownDialog(key, json, $event)" matTooltip="View in Markdown">
           MARKDOWN
         </button>
@@ -47,14 +47,14 @@
   </div>
 
   @if (isExpandable() && isExpanded) {
-    <div class="segment-children">
+    <div class="segment-children" [class.root-children]="depth === 0">
       @if (isArray(json)) {
         @for (item of json; track $index; let last = $last) {
-          <app-custom-json-viewer [json]="item" [key]="$index" [depth]="depth + 1" [expanded]="expanded"></app-custom-json-viewer>
+          <app-custom-json-viewer [json]="item" [key]="$index" [depth]="depth + 1" [expanded]="expanded" [showMarkdown]="showMarkdown"></app-custom-json-viewer>
         }
       } @else {
         @for (k of getKeys(json); track k; let last = $last) {
-          <app-custom-json-viewer [json]="json[k]" [key]="k" [depth]="depth + 1" [expanded]="expanded"></app-custom-json-viewer>
+          <app-custom-json-viewer [json]="json[k]" [key]="k" [depth]="depth + 1" [expanded]="expanded" [showMarkdown]="showMarkdown"></app-custom-json-viewer>
         }
       }
       @if (isArray(json)) {

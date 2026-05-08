@@ -36,7 +36,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatToolbar } from '@angular/material/toolbar';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { CustomJsonViewerComponent } from '../custom-json-viewer/custom-json-viewer.component';
 import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, first, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
@@ -154,7 +154,6 @@ const BIDI_STREAMING_RESTART_WARNING =
     FormsModule,
     ReactiveFormsModule,
     MatIcon,
-    NgxJsonViewerModule,
     MatButton,
     MatIconButton,
     MatMenuModule,

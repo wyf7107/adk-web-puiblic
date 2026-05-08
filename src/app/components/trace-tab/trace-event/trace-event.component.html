@@ -17,7 +17,7 @@
   <mat-tab-group animationDuration="0ms" mat-stretch-tabs="false" mat-align-tabs="start">
     <mat-tab label="Event">
       <div class="json-viewer-container">
-        <ngx-json-viewer [json]="getEventDetails()"></ngx-json-viewer>
+        <app-custom-json-viewer [json]="getEventDetails()"></app-custom-json-viewer>
       </div>
     </mat-tab>
     <mat-tab label="Request">
@@ -27,7 +27,7 @@
         <div>Request is not available.</div>
       } @else {
       <div class="json-viewer-container">
-        <ngx-json-viewer [json]="llmRequest"></ngx-json-viewer>
+        <app-custom-json-viewer [json]="llmRequest"></app-custom-json-viewer>
       </div>
       }
     </mat-tab>
@@ -38,7 +38,7 @@
         <div>Response is not available.</div>
       } @else {
         <div class="json-viewer-container">
-          <ngx-json-viewer [json]="llmResponse"></ngx-json-viewer>
+          <app-custom-json-viewer [json]="llmResponse"></app-custom-json-viewer>
         </div>
       }
     </mat-tab>

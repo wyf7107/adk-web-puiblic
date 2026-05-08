@@ -33,7 +33,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
+import { CustomJsonViewerComponent } from '../custom-json-viewer/custom-json-viewer.component';
 import { EMPTY, merge, NEVER, of, Subject } from 'rxjs';
 import { catchError, filter, first, switchMap, tap } from 'rxjs/operators';
 
@@ -110,7 +110,6 @@ export type DisplayItem = {
     MatMenuModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
-    NgxJsonViewerModule,
     MatTooltipModule,
     MatButtonToggleModule,
     MatTabsModule,

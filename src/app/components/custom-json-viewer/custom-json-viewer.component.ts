@@ -108,6 +108,7 @@ export class CustomJsonViewerComponent implements OnInit {
   @Input() key: string | number | undefined;
   @Input() expanded = true;
   @Input() depth = 0;
+  @Input() showMarkdown = false;
 
   private readonly dialog = inject(MatDialog);
 

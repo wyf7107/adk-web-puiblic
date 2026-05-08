@@ -17,7 +17,7 @@
 
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewer.component';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 
@@ -39,7 +39,7 @@ import {MatIcon} from '@angular/material/icon';
     MatButton,
     MatIcon,
     MarkdownComponent,
-    NgxJsonViewerModule,
+    CustomJsonViewerComponent,
   ],
 })
 export class LongRunningResponseComponent implements OnChanges {

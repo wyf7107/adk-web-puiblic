@@ -104,7 +104,7 @@
       }
       @if (selectedDetailTab() === 'raw') {
         <div class="json-viewer-container json-viewer-wrapper">
-          <ngx-json-viewer [json]="selectedSpan()!"></ngx-json-viewer>
+          <app-custom-json-viewer [json]="selectedSpan()!"></app-custom-json-viewer>
           <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(selectedSpan()!, 'raw')" matTooltip="Copy JSON">
             <mat-icon>{{ copiedId === 'raw' ? 'check' : 'content_copy' }}</mat-icon>
           </button>

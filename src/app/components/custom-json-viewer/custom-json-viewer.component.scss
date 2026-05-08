@@ -12,7 +12,7 @@
 
 .segment-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
@@ -25,6 +25,7 @@
   border-width: 5px 0 5px 6px;
   border-color: transparent transparent transparent var(--mat-sys-outline);
   margin-right: 8px;
+  margin-top: 4px;
   transition: transform 0.15s ease;
   
   &.expanded {
@@ -70,6 +71,11 @@
 .segment-children {
   margin-left: 12px;
   padding-left: 4px;
+  
+  &.root-children {
+    margin-left: 0;
+    padding-left: 0;
+  }
 }
 
 .close-bracket {

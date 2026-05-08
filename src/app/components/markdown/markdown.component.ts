@@ -58,12 +58,43 @@ import 'prismjs/components/prism-yaml';
       max-width: 100%;
       height: auto;
     }
-    .mermaid .node rect,
-    .mermaid .node circle,
-    .mermaid .node ellipse,
-    .mermaid .node polygon,
-    .mermaid .node path {
-      stroke-width: 1px;
+    ::ng-deep .copy-code-button {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 4px;
+      background-color: var(--mat-sys-surface-container-high) !important;
+      color: var(--mat-sys-on-surface-variant);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    }
+    ::ng-deep pre:hover .copy-code-button {
+      opacity: 1;
+    }
+    ::ng-deep .copy-code-button:hover {
+      background-color: var(--mat-sys-secondary-container) !important;
+      color: var(--mat-sys-on-secondary-container) !important;
+    }
+    ::ng-deep .copy-code-button:active {
+      transform: scale(0.95);
+    }
+    ::ng-deep .copy-code-button.copied {
+      color: #81c784 !important;
+      background-color: rgba(76, 175, 80, 0.15) !important;
+      opacity: 1;
+    }
+    ::ng-deep .copy-code-button svg {
+      width: 16px;
+      height: 16px;
     }
   `]
 })
@@ -76,6 +107,7 @@ export class MarkdownComponent implements OnInit {
       const _ = this.text();
       setTimeout(() => {
         this.renderMermaid();
+        this.addCopyButtons();
       }, 100);
     });
   }
@@ -126,5 +158,58 @@ export class MarkdownComponent implements OnInit {
     if (needsRun) {
       mermaid.run();
     }
+  }
+
+  private addCopyButtons() {
+    const container = this.elementRef.nativeElement;
+    const preElements = container.querySelectorAll('pre');
+    
+    preElements.forEach((preEl: HTMLElement) => {
+      // Skip if it is inside mermaid-container or already has a copy button
+      if (preEl.querySelector('.copy-code-button') || preEl.closest('.mermaid-container')) {
+        return;
+      }
+      
+      preEl.style.position = 'relative';
+      
+      const button = document.createElement('button');
+      button.className = 'copy-code-button';
+      button.setAttribute('aria-label', 'Copy code');
+      button.type = 'button';
+      
+      const copyIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+          <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0-33-23.5-56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/>
+        </svg>
+      `;
+      
+      const checkIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/>
+        </svg>
+      `;
+      
+      button.innerHTML = copyIcon;
+      
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const codeEl = preEl.querySelector('code');
+        const textToCopy = codeEl ? codeEl.textContent || '' : preEl.textContent || '';
+        
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          button.innerHTML = checkIcon;
+          button.classList.add('copied');
+          
+          setTimeout(() => {
+            button.innerHTML = copyIcon;
+            button.classList.remove('copied');
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+        });
+      });
+      
+      preEl.appendChild(button);
+    });
   }
 }

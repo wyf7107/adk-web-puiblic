@@ -91,17 +91,23 @@ export class EventContentComponent {
       }
     }
     if (args && typeof args === 'object') {
+      const specialFuncArgMap: Record<string, string> = {
+        'EditFile': 'path',
+        'WriteFile': 'path',
+      };
+      if (functionCall.name in specialFuncArgMap) {
+        const argKey = specialFuncArgMap[functionCall.name];
+        if (argKey in args) {
+          const valueStr = this.formatPythonValue(args[argKey]);
+          const hasMore = Object.keys(args).length > 1;
+          return `${functionCall.name}(${valueStr}${hasMore ? ', …' : ''})`;
+        }
+      }
+
       const keys = Object.keys(args);
       if (keys.length === 1) {
         const value = args[keys[0]];
-        let valueStr = this.formatPythonValue(value);
-        if (valueStr.length > 30) {
-          if (typeof value === 'string') {
-            valueStr = `"${value.substring(0, 27)}…"`;
-          } else {
-            valueStr = valueStr.substring(0, 29) + '…';
-          }
-        }
+        const valueStr = this.formatPythonValue(value);
         return `${functionCall.name}(${valueStr})`;
       } else if (keys.length === 0) {
         return `${functionCall.name}()`;

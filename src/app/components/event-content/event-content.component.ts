@@ -5,7 +5,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDialog} from '@angular/material/dialog';
 import {MatMenuModule} from '@angular/material/menu';
-import {FunctionResponse} from '../../core/models/types';
+import {FunctionCall, FunctionResponse} from '../../core/models/types';
 import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
 
 import {AgentRunRequest} from '../../core/models/AgentRunRequest';
@@ -80,6 +80,56 @@ export class EventContentComponent {
 
   readonly Object = Object;
   readonly String = String;
+
+  getFunctionCallButtonText(functionCall: FunctionCall): string {
+    let args: any = functionCall.args;
+    if (args && typeof args === 'string') {
+      try {
+        args = JSON.parse(args);
+      } catch {
+        // ignore parsing error, treat as raw string
+      }
+    }
+    if (args && typeof args === 'object') {
+      const keys = Object.keys(args);
+      if (keys.length === 1) {
+        const value = args[keys[0]];
+        let valueStr = this.formatPythonValue(value);
+        if (valueStr.length > 30) {
+          if (typeof value === 'string') {
+            valueStr = `"${value.substring(0, 27)}…"`;
+          } else {
+            valueStr = valueStr.substring(0, 29) + '…';
+          }
+        }
+        return `${functionCall.name}(${valueStr})`;
+      } else if (keys.length === 0) {
+        return `${functionCall.name}()`;
+      }
+    } else if (!args) {
+      return `${functionCall.name}()`;
+    }
+    return functionCall.name;
+  }
+
+  private formatPythonValue(value: any): string {
+    if (value === null || value === undefined) {
+      return 'None';
+    }
+    if (typeof value === 'boolean') {
+      return value ? 'True' : 'False';
+    }
+    if (typeof value === 'string') {
+      return `"${value}"`;
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value)
+        .replace(/\btrue\b/g, 'True')
+        .replace(/\bfalse\b/g, 'False')
+        .replace(/\bnull\b/g, 'None');
+    }
+    return String(value);
+  }
 
   shouldShowMessageCard(message: any): boolean {
     return !!(

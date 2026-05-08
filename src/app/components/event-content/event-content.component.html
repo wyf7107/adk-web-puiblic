@@ -47,7 +47,7 @@
         @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
           <app-hover-info-button
             [icon]="'bolt'"
-            [text]="functionCall.name"
+            [text]="getFunctionCallButtonText(functionCall)"
             [tooltipContent]="functionCall.args || ''"
             [tooltipTitle]="'Function Call'"
           ></app-hover-info-button>

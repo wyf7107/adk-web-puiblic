@@ -100,7 +100,6 @@ import 'prismjs/components/prism-yaml';
       display: inline-block;
       position: relative;
       padding-right: 4px;
-      transition: padding-right 0.2s ease-in-out;
     }
     ::ng-deep code:not(pre code):hover {
       padding-right: 36px !important;
@@ -113,13 +112,13 @@ import 'prismjs/components/prism-yaml';
       width: 28px;
       height: 28px;
       opacity: 0;
-      transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.1s ease;
+      transition: none !important;
     }
     ::ng-deep code:not(pre code):hover .copy-code-button {
       opacity: 1;
     }
     ::ng-deep code:not(pre code) .copy-code-button:active {
-      transform: translateY(-50%) scale(0.95);
+      transform: translateY(-50%) !important;
     }
   `]
 })

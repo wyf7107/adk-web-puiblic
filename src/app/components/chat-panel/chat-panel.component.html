@@ -58,7 +58,7 @@
   @if (uiEvents.length === 0 && agentReadme) {
   <div class="readme-content">
     <ng-container [ngComponentOutlet]="markdownComponent"
-      [ngComponentOutletInputs]="{text: agentReadme, thought: false}"></ng-container>
+      [ngComponentOutletInputs]="{text: agentReadme, thought: false, isReadme: true}"></ng-container>
   </div>
   }
   @for (item of displayItems; track item; let i = $index) {

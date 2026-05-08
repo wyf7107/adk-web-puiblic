@@ -16,7 +16,8 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {ChangeDetectionStrategy, Component, input, ElementRef, effect, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, ElementRef, effect, OnInit, Optional} from '@angular/core';
+import {ChatPanelComponent} from '../chat-panel/chat-panel.component';
 import {MarkdownModule, provideMarkdown} from 'ngx-markdown';
 import mermaid from 'mermaid';
 
@@ -96,6 +97,36 @@ import 'prismjs/components/prism-yaml';
       width: 16px;
       height: 16px;
     }
+    ::ng-deep .run-code-button {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 4px;
+      background-color: var(--mat-sys-surface-container-high) !important;
+      color: var(--mat-sys-on-surface-variant);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out, background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    }
+    ::ng-deep .run-code-button:hover {
+      background-color: var(--mat-sys-primary-container) !important;
+      color: var(--mat-sys-on-primary-container) !important;
+    }
+    ::ng-deep .run-code-button:active {
+      transform: scale(0.95);
+    }
+    ::ng-deep .run-code-button svg {
+      width: 16px;
+      height: 16px;
+    }
     ::ng-deep code:not(pre code) {
       display: inline-block;
       position: relative;
@@ -103,6 +134,9 @@ import 'prismjs/components/prism-yaml';
     }
     ::ng-deep code:not(pre code):hover {
       padding-right: 36px !important;
+    }
+    ::ng-deep code:not(pre code).runnable:hover {
+      padding-right: 68px !important;
     }
     ::ng-deep code:not(pre code) .copy-code-button {
       position: absolute;
@@ -117,7 +151,26 @@ import 'prismjs/components/prism-yaml';
     ::ng-deep code:not(pre code):hover .copy-code-button {
       opacity: 1;
     }
+    ::ng-deep code:not(pre code).runnable:hover .copy-code-button {
+      right: 32px !important;
+    }
     ::ng-deep code:not(pre code) .copy-code-button:active {
+      transform: translateY(-50%) !important;
+    }
+    ::ng-deep code:not(pre code) .run-code-button {
+      position: absolute;
+      top: 50%;
+      right: 2px;
+      transform: translateY(-50%);
+      width: 28px;
+      height: 28px;
+      opacity: 0;
+      transition: none !important;
+    }
+    ::ng-deep code:not(pre code).runnable:hover .run-code-button {
+      opacity: 1;
+    }
+    ::ng-deep code:not(pre code) .run-code-button:active {
       transform: translateY(-50%) !important;
     }
   `]
@@ -125,8 +178,12 @@ import 'prismjs/components/prism-yaml';
 export class MarkdownComponent implements OnInit {
   text = input('');
   thought = input(false);
+  isReadme = input(false);
 
-  constructor(private elementRef: ElementRef) {
+  constructor(
+    private elementRef: ElementRef,
+    @Optional() private chatPanel: ChatPanelComponent
+  ) {
     effect(() => {
       const _ = this.text();
       setTimeout(() => {
@@ -198,16 +255,28 @@ export class MarkdownComponent implements OnInit {
       this.createCopyButton(preEl, preEl.querySelector('code') || preEl);
     });
 
-    // Handle inline code elements
-    const codeElements = container.querySelectorAll('code');
-    codeElements.forEach((codeEl: HTMLElement) => {
-      // Skip if it is inside a pre tag or has a copy button already or is mermaid
-      if (codeEl.closest('pre') || codeEl.querySelector('.copy-code-button') || codeEl.closest('.mermaid-container')) {
-        return;
+    // Handle inline code elements or headings to track section context
+    let currentHeading = '';
+    const allElements = container.querySelectorAll('*');
+    allElements.forEach((el: HTMLElement) => {
+      if (/^H[1-6]$/.test(el.tagName)) {
+        currentHeading = el.textContent || '';
+      } else if (el.tagName === 'CODE') {
+        const codeEl = el;
+        // Skip if it is inside a pre tag or has a copy button already or is mermaid
+        if (codeEl.closest('pre') || codeEl.querySelector('.copy-code-button') || codeEl.closest('.mermaid-container')) {
+          return;
+        }
+        
+        codeEl.style.position = 'relative';
+        this.createCopyButton(codeEl, codeEl);
+        
+        // If it is the readme.md showing in the chat and under 'Sample Inputs' section, show a run button
+        if (this.isReadme() && currentHeading.toLowerCase().includes('sample inputs')) {
+          codeEl.classList.add('runnable');
+          this.createRunButton(codeEl, codeEl);
+        }
       }
-      
-      codeEl.style.position = 'relative';
-      this.createCopyButton(codeEl, codeEl);
     });
   }
 
@@ -246,6 +315,41 @@ export class MarkdownComponent implements OnInit {
       }).catch(err => {
         console.error('Failed to copy text: ', err);
       });
+    });
+    
+    parentEl.appendChild(button);
+  }
+
+  private createRunButton(parentEl: HTMLElement, textEl: HTMLElement) {
+    if (parentEl.querySelector('.run-code-button')) {
+      return;
+    }
+
+    const button = document.createElement('button');
+    button.className = 'run-code-button';
+    button.setAttribute('aria-label', 'Run sample input');
+    button.type = 'button';
+    
+    const runIcon = `
+      <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="currentColor">
+        <path d="M320-203v-554l440 277-440 277Z"/>
+      </svg>
+    `;
+    
+    button.innerHTML = runIcon;
+    
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const codeText = (textEl.textContent || '').trim();
+      
+      // Run the sample input
+      if (this.chatPanel) {
+        this.chatPanel.userInput = codeText;
+        this.chatPanel.userInputChange.emit(codeText);
+        setTimeout(() => {
+          this.chatPanel.sendMessage.emit(new Event('submit'));
+        }, 50);
+      }
     });
     
     parentEl.appendChild(button);

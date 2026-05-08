@@ -93,6 +93,11 @@ import 'prismjs/components/prism-yaml';
       background-color: rgba(76, 175, 80, 0.15) !important;
       opacity: 1;
     }
+    ::ng-deep pre:not(:hover) .copy-code-button.copied,
+    ::ng-deep code:not(pre code):not(:hover) .copy-code-button.copied {
+      opacity: 0 !important;
+      transition: none !important;
+    }
     ::ng-deep .copy-code-button svg {
       width: 16px;
       height: 16px;
@@ -130,7 +135,9 @@ import 'prismjs/components/prism-yaml';
     ::ng-deep code:not(pre code) {
       display: inline-block;
       position: relative;
-      padding-right: 4px;
+      padding: 0 4px;
+      background-color: var(--mat-sys-surface-container-high);
+      vertical-align: top;
     }
     ::ng-deep code:not(pre code):hover {
       padding-right: 36px !important;

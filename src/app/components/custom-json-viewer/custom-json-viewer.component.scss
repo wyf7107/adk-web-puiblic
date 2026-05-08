@@ -116,7 +116,7 @@
 
 /* Type highlighting classes */
 .segment-type-string {
-  color: var(--mat-sys-tertiary);
+  color: var(--ngx-json-string, #FF6B6B);
   
   .value-string {
     white-space: pre-wrap;

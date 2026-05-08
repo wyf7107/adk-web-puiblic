@@ -8,7 +8,7 @@ import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {type SafeHtml} from '@angular/platform-browser';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewer.component';
 import {InfoTable} from '../info-table/info-table';
 
 import {Event, Part} from '../../core/models/types';
@@ -34,7 +34,7 @@ import {addSvgNodeHoverEffects} from '../../utils/svg-interaction.utils';
     MatProgressSpinner,
     MatTooltip,
     MatMenuModule,
-    NgxJsonViewerModule,
+    CustomJsonViewerComponent,
     InfoTable,
   ],
 })

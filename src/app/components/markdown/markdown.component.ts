@@ -139,9 +139,6 @@ import 'prismjs/components/prism-yaml';
       background-color: var(--mat-sys-surface-container-high);
       vertical-align: top;
     }
-    ::ng-deep code:not(pre code):hover {
-      padding-right: 36px !important;
-    }
     ::ng-deep code:not(pre code).runnable:hover {
       padding-right: 68px !important;
     }
@@ -275,11 +272,10 @@ export class MarkdownComponent implements OnInit {
           return;
         }
         
-        codeEl.style.position = 'relative';
-        this.createCopyButton(codeEl, codeEl);
-        
-        // If it is the readme.md showing in the chat and under 'Sample Inputs' section, show a run button
+        // If it is the readme.md showing in the chat and under 'Sample Inputs' section, show copy and run buttons
         if (this.isReadme() && currentHeading.toLowerCase().includes('sample inputs')) {
+          codeEl.style.position = 'relative';
+          this.createCopyButton(codeEl, codeEl);
           codeEl.classList.add('runnable');
           this.createRunButton(codeEl, codeEl);
         }

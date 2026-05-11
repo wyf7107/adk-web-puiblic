@@ -87,6 +87,7 @@ import { FormatMetricNamePipe } from '../eval-tab/format-metric-name.pipe';
 
 import { ChatMessagesInjectionToken } from './chat.component.i18n';
 import { SidePanelMessagesInjectionToken } from '../side-panel/side-panel.component.i18n';
+import { Span, OPERATION_GENERATE_CONTENT, SpanIo } from '../../core/models/Trace';
 
 const ROOT_AGENT = 'root_agent';
 /** Query parameter for pre-filling user input. */
@@ -531,7 +532,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   sessionHasUsedBidi = new Set<string>();
 
   eventData = new Map<string, any>();
-  traceData: any[] = [];
+  traceData: Span[] = [];
   renderedEventGraph: SafeHtml | undefined;
   rawSvgString: string | null = null;
   agentGraphData = signal<any>(null);
@@ -551,8 +552,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedMessageIndex: number | undefined = undefined;
   llmRequest: any = undefined;
   llmResponse: any = undefined;
-  llmRequestKey = 'gcp.vertex.agent.llm_request';
-  llmResponseKey = 'gcp.vertex.agent.llm_response';
 
   getMediaTypeFromMimetype = getMediaTypeFromMimetype;
 
@@ -1271,7 +1270,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (existingIndex >= 0) {
           const existingEvent = events[existingIndex];
-          
+
           // Preserve functionResponses and functionCalls if not present in new event
           if (!uiEvent.functionResponses || uiEvent.functionResponses.length === 0) {
             uiEvent.functionResponses = existingEvent.functionResponses;
@@ -1639,14 +1638,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (res: any) => {
           let mimeType = res.mimeType;
           let data = res.data;
-          
+
           if (!mimeType || !data) {
             if (res.inlineData) {
               mimeType = res.inlineData.mimeType;
               data = res.inlineData.data;
             }
           }
-          
+
           if (!mimeType && !data && res.text) {
             mimeType = 'text/plain';
             try {
@@ -1657,7 +1656,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
               return;
             }
           }
-          
+
           if (!mimeType || !data) {
             this.handleArtifactFetchFailure(uiEvent, artifactId, versionId, { message: 'Invalid response data: missing mimeType or data or text' });
             return;
@@ -2042,7 +2041,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.sessionId) return;
     this.uiStateService.setIsEventRequestResponseLoading(true);
     this.eventService.getTrace(this.sessionId)
-      .pipe(first(), catchError((err) => { console.error('[DEBUG] getTrace error:', err); return of([]); }))
+      .pipe(first(), catchError((err) => { console.error('[DEBUG] getTrace error:', err); return of([] as Span[]); }))
       .subscribe(res => {
         this.traceData = res;
         this.traceService.setEventData(this.eventData);
@@ -3589,30 +3588,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!this.selectedEvent) return;
 
-    const matchingSpan = this.traceData?.find(
-      (span: any) => span?.attributes?.['gcp.vertex.agent.event_id'] === this.selectedEvent.id && span?.name === 'call_llm'
+    const io = this.findSpanIoForSelectedEvent();
+    if (io === undefined) return;
+
+    // The downstream JSON viewer renders whatever shape comes in, so we
+    // pass the discriminated {@link SpanIo} payload through verbatim.
+    this.llmRequest = io.inputs;
+    this.llmResponse = io.outputs;
+  }
+
+  private findSpanIoForSelectedEvent(): SpanIo | undefined {
+    const eventId = this.selectedEvent?.id;
+    if (eventId === undefined) return undefined;
+
+    const generateContentSpan = this.traceData?.find(
+        (span) =>
+            span.attrOperationName === OPERATION_GENERATE_CONTENT
+            && span.attrEventId === eventId
     );
+    if (generateContentSpan?.io !== undefined) return generateContentSpan.io;
 
-    if (matchingSpan) {
-      const requestStr = matchingSpan.attributes?.[this.llmRequestKey];
-      const responseStr = matchingSpan.attributes?.[this.llmResponseKey];
-
-      if (requestStr) {
-        try {
-          this.llmRequest = typeof requestStr === 'string' ? JSON.parse(requestStr) : requestStr;
-        } catch (e) {
-          console.warn('Failed to parse LLM request', e);
-        }
-      }
-
-      if (responseStr) {
-        try {
-          this.llmResponse = typeof responseStr === 'string' ? JSON.parse(responseStr) : responseStr;
-        } catch (e) {
-          console.warn('Failed to parse LLM response', e);
-        }
-      }
-    }
+    const legacySpan = this.traceData?.find(
+        (span) => span.attrEventId === eventId && span.name === 'call_llm',
+    );
+    return legacySpan?.io;
   }
 
   deleteSession(session: string) {

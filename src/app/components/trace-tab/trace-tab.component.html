@@ -78,11 +78,12 @@
             </table>
           }
 
-          @if (selectedSpan()?.attributes && selectedSpan()!.attributes['gcp.vertex.agent.event_id']) {
+          @let eventId = getSelectedSpanEventId();
+          @if (eventId) {
             <table app-info-table title="Events">
                 <tr>
                   <td>Event ID</td>
-                  <td><span class="id-cell"><a href="javascript:void(0)" (click)="switchToEvent.emit(selectedSpan()!.attributes['gcp.vertex.agent.event_id'])" class="span-link id-text" [matTooltip]="selectedSpan()!.attributes['gcp.vertex.agent.event_id'] || ''">{{ selectedSpan()!.attributes['gcp.vertex.agent.event_id'] }}</a><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(selectedSpan()!.attributes['gcp.vertex.agent.event_id'])" matTooltip="Copy"><mat-icon>{{ copiedId === selectedSpan()!.attributes['gcp.vertex.agent.event_id'] ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
+                  <td><span class="id-cell"><a href="javascript:void(0)" (click)="switchToEvent.emit(eventId)" class="span-link id-text" [matTooltip]="eventId || ''">{{ eventId }}</a><button mat-icon-button class="copy-id-button" (click)="copyToClipboard(eventId)" matTooltip="Copy"><mat-icon>{{ copiedId === eventId ? 'check' : 'content_copy' }}</mat-icon></button></span></td>
                 </tr>
             </table>
           }
@@ -91,10 +92,11 @@
       }
       @if (selectedDetailTab() === 'attributes') {
         <div class="info-tables-container">
-          @if (selectedSpan()?.attributes && Object.keys(selectedSpan()!.attributes).length > 0) {
+          @let attrs = getSelectedSpanAttributesView();
+          @if (attrs && Object.keys(attrs).length > 0) {
             <table app-info-table>
-                @for (key of Object.keys(selectedSpan()!.attributes); track key) {
-                  <tr><td>{{ key }}</td><td><span class="value-cell"><span>{{ selectedSpan()!.attributes[key] }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard(selectedSpan()!.attributes[key]?.toString())" matTooltip="Copy"><mat-icon>{{ copiedId === selectedSpan()!.attributes[key]?.toString() ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
+                @for (key of Object.keys(attrs); track key) {
+                  <tr><td>{{ key }}</td><td><span class="value-cell"><span>{{ attrs[key] }}</span><button mat-icon-button class="copy-value-button" (click)="copyToClipboard(attrs[key]?.toString())" matTooltip="Copy"><mat-icon>{{ copiedId === attrs[key]?.toString() ? 'check' : 'content_copy' }}</mat-icon></button></span></td></tr>
                 }
             </table>
           } @else {
@@ -103,9 +105,10 @@
         </div>
       }
       @if (selectedDetailTab() === 'raw') {
+        @let rawSpan = getSelectedSpanRawView();
         <div class="json-viewer-container json-viewer-wrapper">
-          <app-custom-json-viewer [json]="selectedSpan()!"></app-custom-json-viewer>
-          <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(selectedSpan()!, 'raw')" matTooltip="Copy JSON">
+          <app-custom-json-viewer [json]="rawSpan"></app-custom-json-viewer>
+          <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(rawSpan, 'raw')" matTooltip="Copy JSON">
             <mat-icon>{{ copiedId === 'raw' ? 'check' : 'content_copy' }}</mat-icon>
           </button>
         </div>

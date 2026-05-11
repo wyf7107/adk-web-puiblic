@@ -18,6 +18,7 @@ import {Event} from '../../models/types';
 
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
+import type { Span } from '../../models/Trace';
 
 export const EVENT_SERVICE = new InjectionToken<EventService>('EventService');
 
@@ -33,7 +34,7 @@ export type EventIdentifier = Pick<Event, 'id'|'invocationId'|'timestamp'>;
  */
 export declare abstract class EventService {
   abstract getEventTrace(event: EventIdentifier): Observable<any>;
-  abstract getTrace(sessionId: string): Observable<any>;
+  abstract getTrace(sessionId: string): Observable<Span[]>;
   abstract getEvent(
       userId: string,
       appName: string,

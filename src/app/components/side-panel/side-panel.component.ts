@@ -27,7 +27,7 @@ import {first} from 'rxjs/operators';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
-import {SpanNode} from '../../core/models/Trace';
+import {Span} from '../../core/models/Trace';
 import {Blob, Event, LlmRequest, LlmResponse} from '../../core/models/types';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
@@ -69,7 +69,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   appName = input('');
   userId = input('');
   sessionId = input('');
-  traceData = input<SpanNode[]>([]);
+  traceData = input<Span[]>([]);
   eventData = input(new Map<string, Event>());
   currentSessionState = input<SessionState|undefined>();
   artifacts = input<Blob[]>([]);
@@ -204,7 +204,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   switchToEvalTab() {
     this.isEvalEnabledObs.pipe(first()).subscribe((isEvalEnabled) => {
       if (!isEvalEnabled) return;
-      
+
       forkJoin([
         this.isArtifactsTabEnabledObs.pipe(first()),
         this.isTestsEnabledObs.pipe(first()),

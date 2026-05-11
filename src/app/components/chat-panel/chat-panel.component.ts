@@ -42,6 +42,7 @@ import { isComputerUseResponse, isVisibleComputerUseClick } from '../../core/mod
 import type { EvalCase } from '../../core/models/Eval';
 import { FunctionCall, FunctionResponse } from '../../core/models/types';
 import { UiEvent } from '../../core/models/UiEvent';
+import { Span } from '../../core/models/Trace';
 import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
 import { FEATURE_FLAG_SERVICE } from '../../core/services/interfaces/feature-flag';
 import { SAFE_VALUES_SERVICE } from '../../core/services/interfaces/safevalues';
@@ -125,7 +126,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   sessionName = input<string>('');
   @Input() uiEvents: UiEvent[] = [];
   @Input() showBranches: boolean = false;
-  @Input() traceData: any[] = [];
+  @Input() traceData: Span[] = [];
   @Input() isChatMode: boolean = true;
   @Input() evalCase: EvalCase | null = null;
   @Input() isEvalEditMode: boolean = false;
@@ -146,7 +147,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() sessionId: string = '';
   @Input() viewMode: 'events' | 'traces' = 'events';
   @Input() shouldShowEvent?: (uiEvent: UiEvent) => boolean;
-  spansByInvocationId = new Map<string, any[]>();
+  spansByInvocationId = new Map<string, Span[]>();
   displayItems: DisplayItem[] = [];
   eventsScrollTop = -1;
   tracesScrollTop = -1;
@@ -225,13 +226,6 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   invocationDisplayMap = input<Map<string, string>>(new Map());
   evalCaseResult = input<any | null>(null);
   showEvalSummary = input<boolean>(false);
-
-
-  
-
-
-
-  
 
   constructor() {
     effect(() => {
@@ -331,7 +325,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     if (changes['viewMode']) {
       const prevMode = changes['viewMode'].previousValue;
       const currentMode = changes['viewMode'].currentValue;
-      
+
       if (this.scrollContainer?.nativeElement) {
         if (prevMode === 'events') {
           this.eventsScrollTop = this.scrollContainer.nativeElement.scrollTop;
@@ -339,7 +333,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
           this.tracesScrollTop = this.scrollContainer.nativeElement.scrollTop;
         }
       }
-      
+
       setTimeout(() => {
         if (this.scrollContainer?.nativeElement) {
           if (currentMode === 'events' && this.eventsScrollTop !== -1) {
@@ -450,29 +444,25 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   }
 
   rebuildTrace() {
-    const invocTraces = this.traceData.reduce((map: any, item: any) => {
-      const key = item.trace_id;
+    const invocTraces = this.traceData.reduce((map: Map<string, Span[]>, item: Span) => {
+      const key = String(item.trace_id);
       const group = map.get(key);
       if (group) {
         group.push(item);
-        group.sort((a: any, b: any) => a.start_time - b.start_time);
+        group.sort((a: Span, b: Span) => a.start_time - b.start_time);
       } else {
         map.set(key, [item]);
       }
       return map;
-    }, new Map<string, any[]>());
+    }, new Map<string, Span[]>());
 
-    this.spansByInvocationId = new Map<string, any[]>();
+    this.spansByInvocationId = new Map<string, Span[]>();
     for (const [key, group] of invocTraces) {
-      let invocId = group.find(
-        (item: any) => item.attributes !== undefined && 'gcp.vertex.agent.invocation_id' in item.attributes
-      )?.attributes['gcp.vertex.agent.invocation_id'];
+      let invocId = group.find(s => s.attrInvocationId !== undefined)?.attrInvocationId;
 
       // Fallback 1: Use associated_event_ids
       if (!invocId) {
-        const associatedEventIds = group.find(
-          (item: any) => item.attributes !== undefined && 'gcp.vertex.agent.associated_event_ids' in item.attributes
-        )?.attributes['gcp.vertex.agent.associated_event_ids'];
+        const associatedEventIds = group.find(s => s.attrAssociatedEventIds !== undefined)?.attrAssociatedEventIds;
         if (associatedEventIds && associatedEventIds.length > 0) {
           invocId = associatedEventIds[0];
         }
@@ -484,7 +474,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
       }
 
       if (invocId) {
-        this.spansByInvocationId.set(invocId, group);
+        this.spansByInvocationId.set(String(invocId), group);
       }
     }
   }

@@ -24,6 +24,7 @@ import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewe
 import {InfoTable} from '../info-table/info-table';
 
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {Span} from '../../core/models/Trace';
 
 @Injectable()
 export class SpanPaginatorIntl extends MatPaginatorIntl {
@@ -56,28 +57,28 @@ export class SpanPaginatorIntl extends MatPaginatorIntl {
   ]
 })
 export class TraceTabComponent {
-  _traceData: any[] = [];
-  orderedTraceData: any[] = [];
+  _traceData: Span[] = [];
+  orderedTraceData: Span[] = [];
 
   // Input kept so we don't break side-panel binding, though not used here anymore
-  @Input() set traceData(val: any[]) {
+  @Input() set traceData(val: Span[]) {
     this._traceData = val || [];
     this.orderedTraceData = this.computeOrdered(this._traceData);
   }
 
-  get traceData(): any[] {
+  get traceData(): Span[] {
     return this._traceData;
   }
 
-  computeOrdered(spans: any[]): any[] {
+  computeOrdered(spans: Span[]): Span[] {
     const spanClones = spans.map(span => ({...span}));
-    const spanMap = new Map<string, any>();
-    const roots: any[] = [];
+    const spanMap = new Map<string, Span>();
+    const roots: Span[] = [];
 
-    spanClones.forEach(span => spanMap.set(span.span_id, span));
+    spanClones.forEach(span => spanMap.set(String(span.span_id), span));
     spanClones.forEach(span => {
-      if (span.parent_span_id && spanMap.has(span.parent_span_id)) {
-        const parent = spanMap.get(span.parent_span_id)!;
+      if (span.parent_span_id && spanMap.has(String(span.parent_span_id))) {
+        const parent = spanMap.get(String(span.parent_span_id))!;
         parent.children = parent.children || [];
         parent.children.push(span);
       } else {
@@ -85,7 +86,7 @@ export class TraceTabComponent {
       }
     });
 
-    const flatten = (spansArray: any[]): any[] => {
+    const flatten = (spansArray: Span[]): Span[] => {
       return spansArray.flatMap(span => [
         span,
         ...(span.children ? flatten(span.children) : [])
@@ -94,10 +95,10 @@ export class TraceTabComponent {
 
     return flatten(roots);
   }
-  
+
   protected readonly traceService = inject(TRACE_SERVICE);
   selectedSpan = toSignal(this.traceService.selectedTraceRow$);
-  
+
   private static getValidTraceTab(tab: string | null): 'info' | 'attributes' | 'raw' {
     if (tab === 'info' || tab === 'attributes' || tab === 'raw') {
       return tab;
@@ -108,7 +109,7 @@ export class TraceTabComponent {
   selectedDetailTab = signal<'info' | 'attributes' | 'raw'>(
     TraceTabComponent.getValidTraceTab(window.localStorage.getItem('adk-trace-tab-selected-tab'))
   );
-  
+
   switchToEvent = output<string>();
 
   constructor() {
@@ -122,14 +123,14 @@ export class TraceTabComponent {
     return new Date(nanos / 1_000_000).toLocaleString();
   }
 
-  get selectedSpanChildren() {
+  get selectedSpanChildren(): Span[] {
     const span = this.selectedSpan();
     if (!span) return [];
     if (span.children && span.children.length > 0) return span.children;
-    return this.traceData.filter(s => s.parent_span_id === span.span_id);
+    return this.traceData.filter(s => s.parent_span_id && String(s.parent_span_id) === String(span.span_id));
   }
 
-  selectSpanById(id: string | undefined): void {
+  selectSpanById(id: string | number | null | undefined): void {
     if (!id) return;
     const span = this.traceData.find(s => String(s.span_id) === String(id));
     if (span) {
@@ -174,17 +175,32 @@ export class TraceTabComponent {
 
     this.traceService.selectedRow(this.orderedTraceData[newIndex]);
   }
-  
+
   readonly Object = Object;
 
   copiedId: string | null = null;
 
-  copyToClipboard(value: string | undefined | null, key?: string) {
-    if (!value) return;
-    navigator.clipboard.writeText(value).then(() => {
-      this.copiedId = key || value;
+  copyToClipboard(value: string | number | undefined | null, key?: string) {
+    if (value === undefined || value === null || value === '') return;
+    const strValue = String(value);
+    navigator.clipboard.writeText(strValue).then(() => {
+      this.copiedId = key || strValue;
       setTimeout(() => this.copiedId = null, 2000);
     });
+  }
+
+  getSelectedSpanEventId(): string | undefined {
+    return this.selectedSpan()?.attrEventId;
+  }
+
+  getSelectedSpanAttributesView(): Record<string, unknown> {
+    const span = this.selectedSpan();
+    return span?.rawAttributesUseThisFieldOnlyForDisplay ?? {};
+  }
+
+  getSelectedSpanRawView(): unknown {
+    const span = this.selectedSpan();
+    return span?.rawSpanUseThisFieldOnlyForDisplay;
   }
 
   copyJsonToClipboard(json: any, key: string) {

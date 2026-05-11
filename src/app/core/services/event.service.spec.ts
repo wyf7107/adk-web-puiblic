@@ -67,7 +67,7 @@ describe('EventService', () => {
           'http://test.com/dev/apps/app1/debug/trace/session/session1',
       );
       expect(req.request.method).toEqual('GET');
-      req.flush({});
+      req.flush([]);
     });
   });
 

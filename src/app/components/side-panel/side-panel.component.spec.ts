@@ -436,4 +436,28 @@ describe('SidePanelComponent', () => {
       });
     });
   });
+
+  describe('Dynamic Eval Tab Initialization', () => {
+    it('should initialize Eval tab dynamically when appName transitions from empty to non-empty', async () => {
+      fixture = TestBed.createComponent(SidePanelComponent);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('appName', '');
+      fixture.componentRef.setInput('showSidePanel', true);
+      fixture.detectChanges();
+
+      // Assert: Tab container is not rendered
+      expect(fixture.debugElement.query(TABS_CONTAINER_SELECTOR)).toBeNull();
+      expect(fixture.debugElement.query(EVAL_TAB_SELECTOR)).toBeNull();
+
+      // Act: Change appName to a non-empty string
+      fixture.componentRef.setInput('appName', 'my-app');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Assert: Tab container is now rendered, and Eval tab component is instantiated
+      expect(fixture.debugElement.query(TABS_CONTAINER_SELECTOR)).toBeTruthy();
+      expect(fixture.debugElement.query(EVAL_TAB_SELECTOR)).toBeTruthy();
+    });
+  });
 });

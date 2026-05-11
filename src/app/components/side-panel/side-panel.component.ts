@@ -16,7 +16,7 @@
  */
 
 import {AsyncPipe, NgComponentOutlet} from '@angular/common';
-import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, OnInit, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, computed, effect, EnvironmentInjector, inject, input, OnInit, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
@@ -133,6 +133,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   selectedIndex = 0;
   private pendingEvalCaseSelection = signal<{ evalSetId: string, evalCase: EvalCase } | undefined>(undefined);
   private pendingEvalResultSelection = signal<{ evalSetId: string, timestamp: string, evalCase?: EvalCase } | undefined>(undefined);
+  protected readonly evalTabRef = signal<ComponentRef<EvalTabComponent> | null>(null);
 
   constructor() {
     effect(() => {
@@ -143,23 +144,61 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
         // Event tab is index 0. Re-activate it if we select an event and another tab is active.
         if (tabGroup.selectedIndex !== 0) {
           this.selectedIndex = 0;
-          window.localStorage.setItem('adk-side-panel-selected-tab', '0');
         }
+      }
+    });
+
+    effect(() => {
+      const container = this.evalTabContainer();
+      if (container) {
+        this.initEvalTab();
+      } else {
+        this.evalTabRef.set(null);
+      }
+    });
+
+    effect(() => {
+      const ref = this.evalTabRef();
+      if (ref) {
+        ref.setInput('appName', this.appName());
+        ref.setInput('userId', this.userId());
+        ref.setInput('sessionId', this.sessionId());
+      }
+    });
+
+    effect(() => {
+      const ref = this.evalTabRef();
+      const pending = this.pendingEvalCaseSelection();
+      if (ref && pending) {
+        ref.instance.selectEvalSet(pending.evalSetId);
+        ref.instance.selectedEvalTab.set('cases');
+        ref.instance.selectedEvalCase.set(pending.evalCase);
+        this.pendingEvalCaseSelection.set(undefined);
+      }
+    });
+
+    effect(() => {
+      const ref = this.evalTabRef();
+      const pending = this.pendingEvalResultSelection();
+      if (ref && pending) {
+        ref.instance.selectEvalSet(pending.evalSetId);
+        ref.instance.selectedHistoryRun.set(pending.timestamp);
+        if (pending.evalCase) {
+          ref.instance.selectedEvalTab.set('cases');
+          ref.instance.selectedEvalCase.set(pending.evalCase);
+        } else {
+          ref.instance.selectedEvalTab.set('history');
+        }
+        this.pendingEvalResultSelection.set(undefined);
       }
     });
   }
 
-  ngOnInit() {
-    const savedTab = window.localStorage.getItem('adk-side-panel-selected-tab');
-    if (savedTab !== null) {
-      this.selectedIndex = parseInt(savedTab, 10);
-    }
-  }
+  ngOnInit() {}
 
   onTabChange(event: MatTabChangeEvent) {
     this.tabChange.emit(event);
     this.selectedIndex = event.index;
-    window.localStorage.setItem('adk-side-panel-selected-tab', event.index.toString());
   }
 
   switchToEvalTab() {
@@ -174,7 +213,6 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
         if (artifactsEnabled) index++;
         if (testsEnabled) index++;
         this.selectedIndex = index;
-        window.localStorage.setItem('adk-side-panel-selected-tab', index.toString());
       });
     });
   }
@@ -192,20 +230,16 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
 
   selectEvalResult(evalSetId: string, timestamp: string, evalCase?: EvalCase) {
     const tab = this.evalTabComponent();
-    console.log('selectEvalResult tab available:', !!tab, 'evalCase:', evalCase);
     if (tab) {
       tab.selectEvalSet(evalSetId);
       tab.selectedHistoryRun.set(timestamp);
       if (evalCase) {
-        console.log('selectEvalResult setting cases tab and case');
         tab.selectedEvalTab.set('cases');
         tab.selectedEvalCase.set(evalCase);
       } else {
-        console.log('selectEvalResult setting history tab and run');
         tab.selectedEvalTab.set('history');
       }
     } else {
-      console.log('selectEvalResult deferred to pending');
       this.pendingEvalResultSelection.set({ evalSetId, timestamp, evalCase });
     }
   }
@@ -231,12 +265,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
     return this.selectedEvent() as Event | undefined;
   });
 
-  ngAfterViewInit() {
-    // Wait one tick until the eval tab container is ready.
-    setTimeout(() => {
-      this.initEvalTab();
-    }, 500);
-  }
+  ngAfterViewInit() {}
 
   /**
    * Dynamically create the eval tab. We must do this programmatically until
@@ -246,49 +275,16 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   private initEvalTab() {
     this.isEvalEnabledObs.pipe(first()).subscribe((isEvalEnabled) => {
       if (isEvalEnabled) {
-        const evalTabComponent = this.evalTabContainer()?.createComponent(
+        const container = this.evalTabContainer();
+        if (!container) return;
+        container.clear();
+
+        const evalTabComponent = container.createComponent(
             this.evalTabComponentClass ?? EvalTabComponent, {
               environmentInjector: this.environmentInjector,
             });
         if (!evalTabComponent) return;
 
-        runInInjectionContext(this.environmentInjector, () => {
-          // Ensure inputs are updated dynamically using effect.
-          effect(() => {
-            evalTabComponent.setInput('appName', this.appName());
-            evalTabComponent.setInput('userId', this.userId());
-            evalTabComponent.setInput('sessionId', this.sessionId());
-          });
-
-          effect(() => {
-            const pending = this.pendingEvalCaseSelection();
-            if (pending) {
-              console.log('initEvalTab applying pendingEvalCaseSelection:', pending);
-              evalTabComponent.instance.selectEvalSet(pending.evalSetId);
-              evalTabComponent.instance.selectedEvalTab.set('cases');
-              evalTabComponent.instance.selectedEvalCase.set(pending.evalCase);
-              this.pendingEvalCaseSelection.set(undefined);
-            }
-          });
-
-          effect(() => {
-            const pending = this.pendingEvalResultSelection();
-            if (pending) {
-              console.log('initEvalTab applying pendingEvalResultSelection:', pending);
-              evalTabComponent.instance.selectEvalSet(pending.evalSetId);
-              evalTabComponent.instance.selectedHistoryRun.set(pending.timestamp);
-              if (pending.evalCase) {
-                console.log('initEvalTab setting cases tab and case');
-                evalTabComponent.instance.selectedEvalTab.set('cases');
-                evalTabComponent.instance.selectedEvalCase.set(pending.evalCase);
-              } else {
-                console.log('initEvalTab setting history tab and run');
-                evalTabComponent.instance.selectedEvalTab.set('history');
-              }
-              this.pendingEvalResultSelection.set(undefined);
-            }
-          });
-        });
         evalTabComponent.instance.sessionSelected.subscribe(
             (session: Session) => {
               this.sessionSelected.emit(session);
@@ -314,7 +310,7 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
               this.evalNotInstalled.emit(message);
             });
 
-        // Pending selections are now handled by effects reactively.
+        this.evalTabRef.set(evalTabComponent);
       }
     });
   }

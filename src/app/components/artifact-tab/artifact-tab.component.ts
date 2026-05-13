@@ -65,7 +65,6 @@ export function getMediaTypeFromMimetype(mimetype: string): MediaType {
 
   return MediaType.UNSPECIFIED;
 }
-export { MediaType, getMediaTypeFromMimetype };
 
 /**
  * Returns true if the mime type is an image type.

@@ -26,9 +26,9 @@ describe('SnackbarService', () => {
   });
 
   it('should truncate long messages', () => {
-    const longMessage = 'a'.repeat(250);
+    const longMessage = 'a'.repeat(300);
     service.open(longMessage);
-    expect(mockMatSnackBar.open).toHaveBeenCalledWith('a'.repeat(200) + '...', undefined, undefined);
+    expect(mockMatSnackBar.open).toHaveBeenCalledWith('a'.repeat(250) + '...', undefined, undefined);
   });
 
   it('should not truncate short messages', () => {

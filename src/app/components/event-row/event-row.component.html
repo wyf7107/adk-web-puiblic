@@ -43,7 +43,7 @@
       (agentStateClick)="agentStateClick.emit($event)"
     ></app-event-content>
     @if (uiEvent.role === "user") {
-      <app-chat-avatar role="user"></app-chat-avatar>
+      <app-chat-avatar></app-chat-avatar>
     }
   <!-- Feedback UI -->
   @if(isUserFeedbackEnabled && !isLoadingAgentResponse && uiEvent.role === "bot") {

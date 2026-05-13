@@ -106,14 +106,14 @@ export class TraceTabComponent {
   }
 
   selectedDetailTab = signal<'info' | 'attributes' | 'raw'>(
-    TraceTabComponent.getValidTraceTab(localStorage.getItem('adk-trace-tab-selected-tab'))
+    TraceTabComponent.getValidTraceTab(window.localStorage.getItem('adk-trace-tab-selected-tab'))
   );
   
   switchToEvent = output<string>();
 
   constructor() {
     effect(() => {
-      localStorage.setItem('adk-trace-tab-selected-tab', this.selectedDetailTab());
+      window.localStorage.setItem('adk-trace-tab-selected-tab', this.selectedDetailTab());
     });
   }
 

@@ -18,11 +18,20 @@
 
 // Apply dark theme by default
 html {
-  @include mat.theme((
-    color: (theme-type: dark),
-    typography: (brand-family: 'Google Sans', plain-family: 'Google Sans'),
-    density: (scale: 0),
-  ));
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+      ),
+      typography: (
+        brand-family: 'Google Sans',
+        plain-family: 'Google Sans',
+      ),
+      density: (
+        scale: 0,
+      ),
+    )
+  );
   color-scheme: dark;
 
   // Blue theme overrides
@@ -46,11 +55,20 @@ html {
 
 // Light theme override
 html.light-theme {
-  @include mat.theme((
-    color: (theme-type: light),
-    typography: (brand-family: 'Google Sans', plain-family: 'Google Sans'),
-    density: (scale: 0),
-  ));
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+      ),
+      typography: (
+        brand-family: 'Google Sans',
+        plain-family: 'Google Sans',
+      ),
+      density: (
+        scale: 0,
+      ),
+    )
+  );
   color-scheme: light;
 
   // Blue theme overrides
@@ -74,11 +92,20 @@ html.light-theme {
 
 // Dark theme explicit class (for consistency)
 html.dark-theme {
-  @include mat.theme((
-    color: (theme-type: dark),
-    typography: (brand-family: 'Google Sans', plain-family: 'Google Sans'),
-    density: (scale: 0),
-  ));
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+      ),
+      typography: (
+        brand-family: 'Google Sans',
+        plain-family: 'Google Sans',
+      ),
+      density: (
+        scale: 0,
+      ),
+    )
+  );
   color-scheme: dark;
 
   // Blue theme overrides
@@ -142,7 +169,7 @@ markdown code {
   .content-bubble {
     max-width: 100% !important;
   }
-  
+
   .message-text p {
     white-space: pre-line;
     word-break: break-word;

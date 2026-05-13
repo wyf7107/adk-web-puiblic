@@ -33,17 +33,7 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss",
-              {
-                "input": "node_modules/prismjs/themes/prism.css",
-                "bundleName": "prism-light",
-                "inject": false
-              },
-              {
-                "input": "node_modules/prismjs/themes/prism-tomorrow.css",
-                "bundleName": "prism-dark",
-                "inject": false
-              }
+              "src/styles.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -51,15 +41,7 @@
               "json-source-map",
               "natural-compare-lite",
               "ajv",
-              "jmespath",
-              "prismjs",
-              "prismjs/components/prism-javascript",
-              "prismjs/components/prism-typescript",
-              "prismjs/components/prism-css",
-              "prismjs/components/prism-json",
-              "prismjs/components/prism-bash",
-              "prismjs/components/prism-python",
-              "prismjs/components/prism-yaml"
+              "jmespath"
             ]
           },
           "configurations": {
@@ -123,17 +105,7 @@
               }
             ],
             "styles": [
-              "src/styles.scss",
-              {
-                "input": "node_modules/prismjs/themes/prism.css",
-                "bundleName": "prism-light",
-                "inject": false
-              },
-              {
-                "input": "node_modules/prismjs/themes/prism-tomorrow.css",
-                "bundleName": "prism-dark",
-                "inject": false
-              }
+              "src/styles.scss"
             ],
             "scripts": []
           }

@@ -114,11 +114,11 @@
 .compact-select {
   width: 50px;
   font-size: 10px;
-  
+
   ::ng-deep .mat-mdc-select-trigger {
     padding: 2px 4px;
   }
-  
+
   ::ng-deep .mat-mdc-select-value {
     font-size: 10px;
   }
@@ -126,13 +126,13 @@
 
 ::ng-deep .compact-select-panel {
   font-size: 10px !important;
-  
+
   .mat-mdc-option {
     font-size: 10px !important;
     min-height: 28px !important;
     padding: 0 8px !important;
   }
-  
+
   .mat-mdc-option-pseudo-checkbox {
     transform: scale(0.7) !important;
   }
@@ -144,7 +144,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  
+
   mat-icon {
     font-size: 18px;
     width: 18px;

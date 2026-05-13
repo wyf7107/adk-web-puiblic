@@ -142,16 +142,16 @@
     .breadcrumb-item {
       font-size: 14px;
       color: var(--mat-sys-on-surface-variant);
-      
+
       &.clickable {
         color: var(--mat-sys-primary);
         cursor: pointer;
-        
+
         &:hover {
           text-decoration: underline;
         }
       }
-      
+
       &:last-child {
         color: var(--mat-sys-on-surface);
         font-weight: 500;
@@ -159,13 +159,13 @@
     }
   }
 
-    .eval-set-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--mat-sys-on-surface);
-      margin-right: 16px;
-    }
+  .eval-set-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+    margin-right: 16px;
   }
+}
 
 .eval-case-id {
   cursor: pointer;
@@ -227,7 +227,7 @@
 
   &:hover {
     background-color: var(--mat-sys-surface-container-low, #f5f5f5);
-    
+
     .delete-btn {
       opacity: 1;
     }
@@ -406,7 +406,7 @@
     white-space: nowrap;
     flex: 1;
   }
-  
+
   &__metric-value {
     margin-left: 4px;
     flex-shrink: 0;
@@ -469,7 +469,7 @@
     border-radius: 4px;
     cursor: pointer;
     box-sizing: border-box;
-    
+
     &:hover {
       background-color: var(--mat-sys-surface-container-low, #f5f5f5);
     }
@@ -546,8 +546,9 @@
 
   &:hover {
     background-color: var(--mat-sys-surface-container-low);
-    
-    .delete-btn, .edit-btn {
+
+    .delete-btn,
+    .edit-btn {
       opacity: 1;
     }
   }
@@ -562,7 +563,7 @@
     font-family: 'Google Sans Mono', monospace;
     flex: 1;
   }
-  
+
   .edit-btn {
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
@@ -596,11 +597,11 @@
       line-height: 20px !important;
     }
   }
-  
+
   &.header-row {
     cursor: default;
     background-color: var(--mat-sys-surface-container-lowest);
-    
+
     &:hover {
       background-color: var(--mat-sys-surface-container-lowest);
     }

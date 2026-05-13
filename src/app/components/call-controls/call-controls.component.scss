@@ -20,7 +20,7 @@ button {
 }
 
 button.audio-rec-btn:not(.recording) {
-  color: #34A853 !important;
+  color: #34a853 !important;
 }
 
 .mic-visualizer {
@@ -34,7 +34,7 @@ button.audio-rec-btn:not(.recording) {
 
   .bar {
     width: 4px;
-    background-color: #34A853;
+    background-color: #34a853;
     border-radius: 2px;
     transition: height 0.1s ease-out;
   }

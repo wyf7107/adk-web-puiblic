@@ -39,7 +39,9 @@
   line-height: 18px;
   color: var(--mat-sys-on-primary);
   font-family: 'Google Sans';
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .trace-duration {

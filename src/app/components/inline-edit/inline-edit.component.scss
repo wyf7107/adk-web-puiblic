@@ -25,13 +25,13 @@
 .inline-edit-input {
   min-width: 48px;
   max-width: 100%;
-  
+
   /* Apply padding/border visually, but cancel their layout footprint with negative margin */
   padding: 2px 6px;
   margin: -3px -7px;
   border: 1px solid var(--chat-toolbar-session-text-color, #ccc);
   border-radius: 4px;
-  
+
   color: var(--chat-toolbar-session-id-color, inherit);
   font-family: inherit;
   font-size: inherit;
@@ -50,7 +50,7 @@
     min-width: 0;
     border-color: transparent;
     cursor: inherit;
-    
+
     &:focus {
       outline: none;
       border-color: transparent;

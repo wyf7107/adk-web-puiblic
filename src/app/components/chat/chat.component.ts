@@ -205,7 +205,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly traceService = inject(TRACE_SERVICE);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly agentBuilderService = inject(AGENT_BUILDER_SERVICE);
-  protected readonly themeService = inject(THEME_SERVICE);
+  protected readonly themeService = inject(THEME_SERVICE, {optional: true});
   protected readonly logoComponent: Type<Component> | null = inject(LOGO_COMPONENT, {
     optional: true,
   });
@@ -303,7 +303,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly isSideBySide = signal(false);
   protected readonly showBranches = signal(false);
   protected readonly expectedUiEvents = signal<UiEvent[]>([]);
-  protected readonly viewMode = signal<'events' | 'traces'>((localStorage.getItem('chat-view-mode') as 'events' | 'traces') || 'events');
+  protected readonly viewMode = signal<'events' | 'traces'>((window.localStorage.getItem('chat-view-mode') as 'events' | 'traces') || 'events');
   protected readonly invocationIdFilterActive = signal<boolean>(false);
   protected readonly nodePathFilterActive = signal<boolean>(false);
   protected readonly invocationIdFilter = signal<string>('');
@@ -513,7 +513,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   onViewModeChange(mode: 'events' | 'traces') {
     this.viewMode.set(mode);
     try {
-      localStorage.setItem('chat-view-mode', mode);
+      window.localStorage.setItem('chat-view-mode', mode);
     } catch (e) {
       // Ignored
     }
@@ -631,6 +631,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.featureFlagService.isTokenStreamingEnabled();
   readonly isExportSessionEnabledObs: Observable<boolean> =
     this.featureFlagService.isExportSessionEnabled();
+  readonly isNewSessionButtonEnabledObs: Observable<boolean> =
+    this.featureFlagService.isNewSessionButtonEnabled();
   readonly isEventFilteringEnabled =
     toSignal(this.featureFlagService.isEventFilteringEnabled());
   readonly isApplicationSelectorEnabled =
@@ -650,7 +652,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor() {
     effect(() => {
       // Re-render graph when theme changes
-      if (this.themeService.currentTheme()) {
+      if (this.themeService?.currentTheme()) {
         this.updateRenderedGraph();
       }
     });
@@ -694,7 +696,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.webSocketService.getMessages().subscribe((message) => {
       if (!message) return;
       try {
-        const apiEvent = JSON.parse(message);
+        const apiEvent = JSON.parse(message) as any;
 
 
 
@@ -802,7 +804,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private loadSessionByUrlOrReset() {
     this.isSessionUrlEnabledObs.subscribe((sessionUrlEnabled) => {
-      const queryParams = this.activatedRoute.snapshot.queryParams;
+      const queryParams = this.activatedRoute.snapshot?.queryParams;
       const sessionUrl = queryParams['session'];
       const userUrl = queryParams['userId'];
       const evalCaseUrl = queryParams['evalCase'];
@@ -1824,7 +1826,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.isAudioRecording = true;
-    this.streamChatService.startAudioChat({
+    void this.streamChatService.startAudioChat({
       appName: this.appName,
       userId: this.userId,
       sessionId: this.sessionId,
@@ -2983,7 +2985,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventGraphSvgLight = { ...sessionGraphSvgLight, [graphPath]: highlightedSvgLight };
     this.eventGraphSvgDark = { ...sessionGraphSvgDark, [graphPath]: highlightedSvgDark };
 
-    const highlightedSvg = this.themeService.currentTheme() === 'dark' ? highlightedSvgDark : highlightedSvgLight;
+    const highlightedSvg = this.themeService?.currentTheme() === 'dark' ? highlightedSvgDark : highlightedSvgLight;
 
     this.rawSvgString = highlightedSvg;
     this.renderedEventGraph = this.safeValuesService.bypassSecurityTrustHtml(highlightedSvg);
@@ -3093,7 +3095,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     const forwardAdjacencyList = new Map<string, string[]>();
     const edgeElements = doc.querySelectorAll('g.edge');
 
-    edgeElements.forEach((edgeElement) => {
+    edgeElements.forEach((edgeElement: any) => {
       const titleElement = edgeElement.querySelector('title');
       let title = titleElement?.textContent?.trim() || '';
       if (title.includes('->')) {
@@ -3110,9 +3112,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const nodeNameToId = new Map<string, string>();
     const nodeElements = doc.querySelectorAll('g.node');
-    nodeElements.forEach((nodeElement) => {
+    nodeElements.forEach((nodeElement: any) => {
       const textElements = Array.from(nodeElement.querySelectorAll('text'));
-      const textContent = textElements.map(t => t.textContent?.trim() || '').join('');
+      const textContent = textElements.map((t: any) => t.textContent?.trim() || '').join('');
 
       const titleElement = nodeElement.querySelector('title');
       const titleName = titleElement?.textContent?.trim() || '';
@@ -3208,7 +3210,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    edgeElements.forEach((edgeElement) => {
+    edgeElements.forEach((edgeElement: any) => {
       const titleElement = edgeElement.querySelector('title');
       let title = titleElement?.textContent?.trim() || '';
       if (title.includes('->')) {
@@ -3275,7 +3277,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    nodeElements.forEach((nodeElement) => {
+    nodeElements.forEach((nodeElement: any) => {
       const titleElement = nodeElement.querySelector('title');
       const titleName = titleElement?.textContent?.trim().replace(/^"|"$/g, '') || '';
 
@@ -3300,7 +3302,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           shape.appendChild(shapeTitle);
         }
         const textElements = nodeElement.querySelectorAll('text');
-        textElements.forEach((t) => {
+        textElements.forEach((t: any) => {
           t.setAttribute('fill', theme === 'dark' ? '#888888' : '#757575');
           const textTitle = doc.createElementNS('http://www.w3.org/2000/svg', 'title');
           textTitle.textContent = 'Not run in this invocation';
@@ -3314,9 +3316,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           nodeElement.appendChild(newTitle);
         }
         const aElements = nodeElement.querySelectorAll('a');
-        aElements.forEach((aElem) => {
-          aElem.setAttribute('title', 'Not run in this invocation');
-          aElem.setAttributeNS('http://www.w3.org/1999/xlink', 'title', 'Not run in this invocation');
+        aElements.forEach((aElem: any) => {
+          aElem.title = 'Not run in this invocation';
         });
       }
     });
@@ -3378,12 +3379,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Highlight nodes
     const nodeElements = doc.querySelectorAll('g.node');
-    nodeElements.forEach((nodeElement) => {
+    nodeElements.forEach((nodeElement: any) => {
       const titleElement = nodeElement.querySelector('title');
       const nodeName = titleElement?.textContent?.trim().replace(/^"|"$/g, '') || '';
 
       const textElements = Array.from(nodeElement.querySelectorAll('text'));
-      const textContent = textElements.map(t => t.textContent?.trim() || '').join('').toLowerCase().replace(/\s+/g, '_');
+      const textContent = textElements.map((t: any) => t.textContent?.trim() || '').join('').toLowerCase().replace(/\s+/g, '_');
 
       let isHighlighted = highlightedNodeNames.has(nodeName);
       if (!isHighlighted) {
@@ -3403,16 +3404,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           ellipse.setAttribute('fill', darkGreen);
           ellipse.setAttribute('stroke', darkGreen);
         }
-        textElements.forEach(t => t.setAttribute('fill', textColor));
+        textElements.forEach((t: any) => t.setAttribute('fill', textColor));
       } else {
         // Unhighlighted nodes: set text color based on theme
-        textElements.forEach(t => t.setAttribute('fill', textColor));
+        textElements.forEach((t: any) => t.setAttribute('fill', textColor));
       }
     });
 
     // Highlight edges
     const edgeElements = doc.querySelectorAll('g.edge');
-    edgeElements.forEach((edgeElement) => {
+    edgeElements.forEach((edgeElement: any) => {
       const titleElement = edgeElement.querySelector('title');
       const title = titleElement?.textContent?.trim() || '';
 
@@ -3645,7 +3646,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private syncSelectedAppFromUrl() {
     // Optimistically select app from URL to avoid waiting for listApps
-    const initialApp = this.activatedRoute.snapshot.queryParams['app'];
+    const initialApp = this.activatedRoute.snapshot?.queryParams?.['app'];
     if (initialApp) {
       this.selectedAppControl.setValue(initialApp, { emitEvent: false });
       this.selectApp(initialApp);
@@ -3704,7 +3705,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                 console.log('sessionGraphSvgLight after rendering:', Object.keys(this.sessionGraphSvgLight));
                 console.log('graphsAvailable:', this.graphsAvailable());
                 if (this.selectedEvent && this.selectedEventIndex !== undefined) {
-                  this.updateRenderedGraph();
+                  void this.updateRenderedGraph();
                 }
               }
             } catch (error) {
@@ -3740,7 +3741,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
                   }
                 }
                 if (this.selectedEvent && this.selectedEventIndex !== undefined) {
-                  this.updateRenderedGraph();
+                  void this.updateRenderedGraph();
                 }
               }
             } catch (error) {
@@ -3783,7 +3784,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.selectApp(app);
 
         // Navigate if selected app changed.
-        const selectedAgent = this.activatedRoute.snapshot.queryParams['app'];
+        const selectedAgent = this.activatedRoute.snapshot?.queryParams?.['app'];
         if (app === selectedAgent) {
           return;
         }

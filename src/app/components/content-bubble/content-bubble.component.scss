@@ -1,5 +1,6 @@
 :host {
-  display: contents; /* Ensure the wrapper doesn't break flex layouts of the parent */
+  display: contents;
+  /* Ensure the wrapper doesn't break flex layouts of the parent */
 }
 
 .content-bubble {
@@ -118,7 +119,3 @@
     margin-left: auto;
   }
 }
-
-
-
-

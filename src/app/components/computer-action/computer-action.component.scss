@@ -6,7 +6,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 12px;
-  border: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
+  border: 1px solid
+    var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
   overflow: hidden;
   cursor: pointer;
   margin: 5px 5px 10px;
@@ -34,7 +35,8 @@
   width: 100%;
   height: auto;
   display: block;
-  border-bottom: 1px solid var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
+  border-bottom: 1px solid
+    var(--chat-panel-input-field-mat-mdc-text-field-wrapper-border-color);
 }
 
 .computer-use-footprint {
@@ -72,13 +74,15 @@
   justify-content: center;
   width: 580px;
   gap: 12px;
-  
+
   .image-wrapper {
     flex: 1;
     min-width: 0;
-    
+
     .computer-use-screenshot {
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
       border-radius: 8px;
     }
   }
@@ -92,7 +96,7 @@
   color: var(--chat-panel-input-field-textarea-color);
   opacity: 0.8;
   gap: 4px;
-  
+
   .action-name-above {
     font-size: 11px;
     font-family: monospace;

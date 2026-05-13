@@ -1,3 +1,5 @@
+// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
+import {initTestBed} from '../../testing/utils';
 import { TestBed } from '@angular/core/testing';
 import { SnackbarService } from './snackbar.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -9,6 +11,7 @@ describe('SnackbarService', () => {
   beforeEach(() => {
     mockMatSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
 
+    initTestBed();  // required for 1p compat
     TestBed.configureTestingModule({
       providers: [
         SnackbarService,
@@ -23,9 +26,9 @@ describe('SnackbarService', () => {
   });
 
   it('should truncate long messages', () => {
-    const longMessage = 'a'.repeat(250);
+    const longMessage = 'a'.repeat(300);
     service.open(longMessage);
-    expect(mockMatSnackBar.open).toHaveBeenCalledWith('a'.repeat(200) + '...', undefined, undefined);
+    expect(mockMatSnackBar.open).toHaveBeenCalledWith('a'.repeat(250) + '...', undefined, undefined);
   });
 
   it('should not truncate short messages', () => {

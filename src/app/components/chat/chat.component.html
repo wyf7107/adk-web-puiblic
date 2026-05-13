@@ -23,7 +23,7 @@
       @if (logoComponent) {
         <ng-container *ngComponentOutlet="logoComponent"></ng-container>
       } @else {
-        <img src="assets/ADK-512-color.svg" width="20px" height="20px" />
+        <img src="assets/ADK-512-color.svg" width="20px" height="20px" alt="ADK Logo" />
         <div class="logo-title-container">
           <div class="logo-text-wrapper">
             <span class="toolbar-logo-text logo-wide">Agent Development Kit</span> @if (adkVersion()) { <span class="toolbar-logo-text logo-wide" style="color: var(--mat-sys-outline);"> {{ adkVersion() }}</span>}
@@ -93,27 +93,29 @@
         @if (!evalCase) {
           @let isSessionLoadingGroup = uiStateService.isSessionLoading() | async;
           @if (isSessionLoadingGroup === false) {
-            @if (sessionId) {
-              <div class="selector-group-divider"></div>
-              @if (uiEvents().length > 0) {
-                <button
-                  class="selector-button new-session-button"
-                  (click)="onNewSessionClick()"
-                  id="toolbar-new-session-button"
-                  [matTooltip]="i18n.createNewSessionTooltip"
-                >
-                  <mat-icon fontSet="material-symbols-outlined">add_comment</mat-icon>
-                  <span>{{ i18n.newSessionButton }}</span>
-                </button>
-              } @else {
-                <button
-                  class="selector-button new-session-button icon-only"
-                  (click)="onNewSessionClick()"
-                  id="toolbar-new-session-button"
-                  [matTooltip]="i18n.createNewSessionTooltip"
-                >
-                  <mat-icon fontSet="material-symbols-outlined">add_comment</mat-icon>
-                </button>
+            @if (isNewSessionButtonEnabledObs | async) {
+              @if (sessionId) {
+                <div class="selector-group-divider"></div>
+                @if (uiEvents().length > 0) {
+                  <button
+                    class="selector-button new-session-button"
+                    (click)="onNewSessionClick()"
+                    id="toolbar-new-session-button"
+                    [matTooltip]="i18n.createNewSessionTooltip"
+                  >
+                    <mat-icon fontSet="material-symbols-outlined">add_comment</mat-icon>
+                    <span>{{ i18n.newSessionButton }}</span>
+                  </button>
+                } @else {
+                  <button
+                    class="selector-button new-session-button icon-only"
+                    (click)="onNewSessionClick()"
+                    id="toolbar-new-session-button"
+                    [matTooltip]="i18n.createNewSessionTooltip"
+                  >
+                    <mat-icon fontSet="material-symbols-outlined">add_comment</mat-icon>
+                  </button>
+                }
               }
             }
           }
@@ -163,10 +165,10 @@
       <button
         mat-icon-button
         class="toolbar-icon-button"
-        (click)="themeService.toggleTheme()"
-        [matTooltip]="themeService.currentTheme() === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        (click)="themeService?.toggleTheme()"
+        [matTooltip]="themeService?.currentTheme() === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
       >
-        <mat-icon>{{ themeService.currentTheme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        <mat-icon>{{ themeService?.currentTheme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
     }
   </div>
@@ -477,17 +479,17 @@
     </div>
     }
     @if (!invocationIdFilterActive() || !nodePathFilterActive() || !hideIntermediateEvents()) {
-    <div class="add-filter-btn" [matMenuTriggerFor]="addFilterMenu" #addMenuTrigger="matMenuTrigger"
+    <button type="button" class="add-filter-btn" [matMenuTriggerFor]="addFilterMenu" #addMenuTrigger="matMenuTrigger"
       (click)="$event.stopPropagation()" matTooltip="Add a filter">
       <mat-icon>add</mat-icon>
       <span>Filter</span>
-    </div>
+    </button>
     }
     @if (invocationIdFilterActive() || nodePathFilterActive() || hideIntermediateEvents()) {
-    <div class="add-filter-btn" (click)="clearAllFilters($event)" matTooltip="Clear all filters">
+    <button type="button" class="add-filter-btn" (click)="clearAllFilters($event)" matTooltip="Clear all filters">
       <mat-icon>clear_all</mat-icon>
       <span>Clear</span>
-    </div>
+    </button>
     }
   </div>
 

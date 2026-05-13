@@ -43,12 +43,12 @@
   padding: 0 20px;
   background-color: var(--mat-sys-surface-container);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
-  
+
   mat-button-toggle-group {
     border-radius: 16px;
     height: 28px;
     align-items: center;
-    
+
     ::ng-deep .mat-button-toggle-label-content {
       line-height: 28px;
       padding: 0 12px;
@@ -128,7 +128,7 @@
       border-color: var(--mat-sys-outline);
       color: var(--mat-sys-on-surface);
     }
-    
+
     mat-icon {
       font-size: 14px;
       width: 14px;
@@ -136,7 +136,6 @@
       margin-right: 4px;
     }
   }
-
 }
 
 ::ng-deep .filter-panel {
@@ -146,8 +145,9 @@
   .mat-mdc-menu-item {
     min-height: 32px !important;
     font-size: 12px !important;
-    
-    .mat-mdc-menu-item-text, .mdc-list-item__primary-text {
+
+    .mat-mdc-menu-item-text,
+    .mdc-list-item__primary-text {
       font-size: 12px !important;
       line-height: normal;
     }
@@ -159,7 +159,9 @@
   border-radius: 12px;
   border: none;
   background: var(--mat-sys-surface-container-lowest, #fff);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .chat-input {
@@ -192,14 +194,14 @@
     justify-content: center;
     align-items: center;
     flex-shrink: 0;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15); /* Nice floating shadow */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); /* Nice floating shadow */
   }
 
   /* Style the video element inserted by VideoService */
   ::ng-deep video {
     width: 100% !important;
     height: auto !important;
-    max-height: 280px; 
+    max-height: 280px;
     object-fit: cover;
     border-radius: 12px;
     transform: scaleX(-1);
@@ -258,7 +260,6 @@
   margin-bottom: 8px;
 }
 
-
 .image-container {
   position: relative;
   display: inline-block;
@@ -309,7 +310,6 @@
   padding-left: 16px;
 }
 
-
 .chat-input-box {
   caret-color: white;
 }
@@ -336,7 +336,6 @@ button.send-message-btn {
   width: 240px;
 }
 
-
 .readme-content {
   padding: 0 20px;
   font-size: 14px;
@@ -356,7 +355,6 @@ button.send-message-btn {
   overflow: hidden;
 
   :host-context(.light-theme) & {
-    
     ::ng-deep .mat-mdc-tab-header {
       background: transparent !important;
     }
@@ -419,7 +417,7 @@ button.send-message-btn {
     .mat-mdc-tab-body-content {
       padding: 0 !important;
     }
-    
+
     .mdc-tab__text-label {
       font-size: 12px !important;
     }

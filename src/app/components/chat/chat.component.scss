@@ -350,7 +350,6 @@
   flex: 1;
 }
 
-
 .toolbar-logo {
   display: flex;
   align-items: center;
@@ -426,14 +425,14 @@
   font-size: 13px;
   font-weight: 500;
   gap: 6px;
-  
+
   .chip-label {
     text-transform: uppercase;
     font-size: 11px;
     font-weight: 700;
     opacity: 0.9;
   }
-  
+
   .chip-value {
     font-family: 'Google Sans Mono', monospace;
   }
@@ -449,7 +448,7 @@
     color: inherit !important;
     opacity: 0.8;
     margin-left: 4px;
-    
+
     &:hover {
       opacity: 1;
       background-color: rgba(255, 255, 255, 0.2) !important;
@@ -773,7 +772,10 @@ app-canvas {
     right: 1px;
     bottom: 1px;
     border-radius: 4px;
-    background-color: var(--mat-icon-button-state-layer-color, var(--mat-sys-on-surface-variant));
+    background-color: var(
+      --mat-icon-button-state-layer-color,
+      var(--mat-sys-on-surface-variant)
+    );
     opacity: 0;
     pointer-events: none;
     z-index: -1;
@@ -781,7 +783,10 @@ app-canvas {
   }
 
   &:hover::before {
-    opacity: var(--mat-icon-button-hover-state-layer-opacity, var(--mat-sys-hover-state-layer-opacity));
+    opacity: var(
+      --mat-icon-button-hover-state-layer-opacity,
+      var(--mat-sys-hover-state-layer-opacity)
+    );
   }
 
   mat-icon {
@@ -794,7 +799,7 @@ app-canvas {
 
 .new-session-button {
   width: auto !important;
-  
+
   &.icon-only {
     width: 32px !important;
     padding: 0 !important;
@@ -849,7 +854,6 @@ app-canvas {
     width: var(--side-drawer-width);
   }
 }
-
 
 .app-selector-search {
   padding: 0 12px 4px;
@@ -939,7 +943,6 @@ app-canvas {
   color: var(--chat-toolbar-session-text-color);
   font-style: italic;
 }
-
 
 .session-selector-current-id {
   padding: 8px 20px 8px 20px;
@@ -1102,12 +1105,12 @@ app-canvas {
   padding: 0 20px;
   background-color: var(--mat-sys-surface-container);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
-  
+
   mat-button-toggle-group {
     border-radius: 16px;
     height: 28px;
     align-items: center;
-    
+
     ::ng-deep .mat-button-toggle-label-content {
       line-height: 28px;
       padding: 0 12px;
@@ -1187,7 +1190,7 @@ app-canvas {
       border-color: var(--mat-sys-outline);
       color: var(--mat-sys-on-surface);
     }
-    
+
     mat-icon {
       font-size: 14px;
       width: 14px;
@@ -1195,7 +1198,6 @@ app-canvas {
       margin-right: 4px;
     }
   }
-
 }
 
 ::ng-deep .filter-panel {
@@ -1205,8 +1207,9 @@ app-canvas {
   .mat-mdc-menu-item {
     min-height: 32px !important;
     font-size: 12px !important;
-    
-    .mat-mdc-menu-item-text, .mdc-list-item__primary-text {
+
+    .mat-mdc-menu-item-text,
+    .mdc-list-item__primary-text {
       font-size: 12px !important;
       line-height: normal;
     }
@@ -1234,7 +1237,9 @@ app-canvas {
   padding: 12px;
   width: 220px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease;
   pointer-events: none;
 
   .tooltip-title {
@@ -1304,7 +1309,9 @@ app-canvas {
   padding: 12px;
   width: 250px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease;
   pointer-events: none;
   white-space: normal;
 

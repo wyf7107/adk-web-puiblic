@@ -28,10 +28,10 @@
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
-      
+
       &.mat-mdc-button {
         padding: 0 12px !important;
-        
+
         mat-icon {
           margin-right: 4px !important;
         }
@@ -42,7 +42,7 @@
         min-width: 32px !important;
         padding: 0 !important;
         border-radius: 50% !important;
-        
+
         mat-icon {
           margin-right: 0 !important;
         }
@@ -122,7 +122,7 @@
 
       td.mat-column-actions {
         text-align: right;
-        
+
         button {
           opacity: 0;
           transition: opacity 0.2s ease-in-out;
@@ -191,7 +191,13 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 0.6; }
-  50% { opacity: 1; }
-  100% { opacity: 0.6; }
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }

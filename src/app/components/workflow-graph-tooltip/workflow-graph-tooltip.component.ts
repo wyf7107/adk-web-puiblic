@@ -165,7 +165,6 @@ export class WorkflowGraphTooltipComponent implements OnInit {
               source: fromName,
               target: toName,
               type: 'template',
-              floating: true,
               data: { isActive },
               markers: {
                 end: {

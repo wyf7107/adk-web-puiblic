@@ -41,7 +41,6 @@
   font-size: 12px;
 }
 
-
 .request-card {
   display: flex;
   flex-direction: column;
@@ -50,10 +49,15 @@
 }
 
 .request-card-standalone {
-  background: color-mix(in srgb, var(--mat-sys-surface-container-high) 70%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--mat-sys-surface-container-high) 70%,
+    transparent
+  );
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid color-mix(in srgb, var(--mat-sys-outline-variant) 30%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--mat-sys-outline-variant) 30%, transparent);
   border-radius: 12px;
   padding: 12px;
   box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
@@ -113,7 +117,6 @@
       height: 16px;
     }
   }
-
 }
 
 // closes .input-container
@@ -173,7 +176,7 @@
     padding: 4px;
     resize: vertical;
     box-sizing: border-box;
-    
+
     &:focus {
       outline: none;
       border-color: var(--mat-sys-primary);
@@ -205,27 +208,27 @@
   width: 100%;
 
   .form-input {
-      width: 100%;
-      border: 1px solid var(--mat-sys-outline-variant);
-      border-radius: 4px;
-      padding: 4px 6px;
-      font-size: 11px;
-      background: var(--mat-sys-surface-container);
-      color: var(--mat-sys-on-surface);
-      box-sizing: border-box;
-      height: 28px;
+    width: 100%;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 11px;
+    background: var(--mat-sys-surface-container);
+    color: var(--mat-sys-on-surface);
+    box-sizing: border-box;
+    height: 28px;
 
     &:focus {
-        outline: none;
-        border-color: var(--mat-sys-primary);
-      }
+      outline: none;
+      border-color: var(--mat-sys-primary);
     }
+  }
 
-    input[type="checkbox"] {
-      margin: 4px 0;
-      align-self: flex-start;
-    }
-                                                                }
+  input[type='checkbox'] {
+    margin: 4px 0;
+    align-self: flex-start;
+  }
+}
 
 .field-description {
   font-size: 10px;

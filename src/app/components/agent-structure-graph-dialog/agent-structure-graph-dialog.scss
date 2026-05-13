@@ -91,7 +91,7 @@
     transform-origin: 0 0;
     cursor: grab;
     border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 
     /* Hide internal graphviz background so the container's background shines through perfectly */
     > g.graph > polygon:first-child {
@@ -182,7 +182,8 @@
     background-color: var(--mat-sys-surface-container-high);
   }
 
-  &:disabled, &.active {
+  &:disabled,
+  &.active {
     color: var(--mat-sys-on-surface);
     cursor: default;
     font-weight: 600;

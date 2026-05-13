@@ -2,7 +2,8 @@
   border-radius: 12px;
   padding: 12px;
   width: 680px;
-  box-shadow: 0 8px 16px var(--run-eval-config-dialog-container-box-shadow-color);
+  box-shadow: 0 8px 16px
+    var(--run-eval-config-dialog-container-box-shadow-color);
 }
 
 .metric-container {
@@ -21,12 +22,12 @@
   justify-content: space-between;
   margin-bottom: 2px;
 }
-  
+
 .metric-title {
   font-weight: 600;
   font-size: 1em;
 }
-  
+
 .metric-description {
   font-size: 0.85em;
   color: var(--run-eval-config-dialog-description-color, #666);
@@ -44,19 +45,19 @@
 .inline-slider {
   margin-left: 20px;
   flex: 1;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-  }
-  
-  .slider-label {
-    margin-right: 10px;
-    font-size: 0.9em;
-  }
-  
-  .threshold-slider {
-    max-width: 80px;
-    flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.slider-label {
+  margin-right: 10px;
+  font-size: 0.9em;
+}
+
+.threshold-slider {
+  max-width: 80px;
+  flex: 1;
 }
 
 .threshold-value {

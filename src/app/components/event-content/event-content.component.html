@@ -20,10 +20,10 @@
     ></app-content-bubble>
     }
     @if (uiEvent.event.inputTranscription) {
-      <app-content-bubble type="transcription" role="user" [uiEvent]="uiEvent"></app-content-bubble>
+      <app-content-bubble type="transcription" [role]="'user'" [uiEvent]="uiEvent"></app-content-bubble>
     }
     @if (uiEvent.event.outputTranscription) {
-      <app-content-bubble type="transcription" role="bot" [uiEvent]="uiEvent"></app-content-bubble>
+      <app-content-bubble type="transcription" [role]="'bot'" [uiEvent]="uiEvent"></app-content-bubble>
     }
     <div class="event-chips-container">
     @if (uiEvent.event.turnComplete) {

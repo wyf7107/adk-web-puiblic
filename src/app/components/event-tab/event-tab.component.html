@@ -375,9 +375,9 @@
         <div style="visibility: hidden; position: fixed" [style.left]="menuPos.x + 'px'" [style.top]="menuPos.y + 'px'"
           [matMenuTriggerFor]="eventMenu" #eventMenuTrigger="matMenuTrigger"></div>
         <mat-menu #eventMenu="matMenu">
-          @for (evt of menuEvents; track evt.id) {
-          <button mat-menu-item (click)="handleMenuSelection(evt)">
-            <span>Run {{ evt.runIndex }} ({{ evt.timestamp | date:'mediumTime' }})</span>
+          @for (event of menuEvents; track event.id) {
+          <button mat-menu-item (click)="handleMenuSelection(event)">
+            <span>Run {{ event.runIndex }} ({{ event.timestamp | date:'mediumTime' }})</span>
           </button>
           }
         </mat-menu>

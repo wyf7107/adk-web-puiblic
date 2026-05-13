@@ -455,6 +455,9 @@ describe('SidePanelComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
+      // Switch to Eval Tab to instantiate its container
+      await switchTab(EVAL_TAB_INDEX);
+
       // Assert: Tab container is now rendered, and Eval tab component is instantiated
       expect(fixture.debugElement.query(TABS_CONTAINER_SELECTOR)).toBeTruthy();
       expect(fixture.debugElement.query(EVAL_TAB_SELECTOR)).toBeTruthy();

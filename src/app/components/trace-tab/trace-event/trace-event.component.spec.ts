@@ -98,7 +98,7 @@ describe('TraceEventComponent', () => {
 
     await TestBed
         .configureTestingModule({
-          imports: [MatDialogModule, TraceEventComponent, NoopAnimationsModule],
+          imports: [TraceEventComponent, NoopAnimationsModule],
           providers: [
             {provide: MatDialog, useValue: matDialog},
             {provide: TRACE_SERVICE, useValue: traceService},
@@ -111,6 +111,13 @@ describe('TraceEventComponent', () => {
               useValue: domSanitizer,
             },
           ],
+        })
+        .overrideComponent(TraceEventComponent, {
+          set: {
+            providers: [
+              {provide: MatDialog, useValue: matDialog},
+            ],
+          },
         })
         .compileComponents();
 

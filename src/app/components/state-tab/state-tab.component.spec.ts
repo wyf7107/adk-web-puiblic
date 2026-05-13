@@ -66,7 +66,7 @@ describe('StateTabComponent', () => {
         'sessionState', {foo: 'bar'} as unknown as SessionState);
     fixture.detectChanges();
 
-    const jsonViewer = fixture.debugElement.query(By.css('ngx-json-viewer'));
+    const jsonViewer = fixture.debugElement.query(By.css('app-custom-json-viewer'));
     expect(jsonViewer).toBeTruthy();
 
     const emptyState = fixture.debugElement.query(By.css('.empty-state'));

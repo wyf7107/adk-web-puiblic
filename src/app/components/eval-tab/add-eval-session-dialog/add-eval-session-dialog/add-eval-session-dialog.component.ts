@@ -24,9 +24,10 @@ import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
-    changeDetection: ChangeDetectionStrategy.Eager,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-add-eval-session-dialog',
     templateUrl: './add-eval-session-dialog.component.html',
     styleUrl: './add-eval-session-dialog.component.scss',
@@ -40,6 +41,7 @@ import { MatButton } from '@angular/material/button';
         MatDialogActions,
         MatButton,
         MatDialogClose,
+        MatProgressSpinner,
     ],
 })
 export class AddEvalSessionDialogComponent {
@@ -49,10 +51,13 @@ export class AddEvalSessionDialogComponent {
     userId: string;
     sessionId: string;
     evalSetId: string;
+    defaultName?: string;
+    existingCases?: string[];
   } = inject(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<AddEvalSessionDialogComponent>);
 
-  newCaseId: string = 'case' + uuidv4().slice(0, 6);
+  newCaseId: string = this.data.defaultName || ('case_' + uuidv4().slice(0, 6));
+  loading = false;
 
   constructor() {}
 
@@ -60,6 +65,12 @@ export class AddEvalSessionDialogComponent {
     if (!this.newCaseId || this.newCaseId == '') {
       alert('Cannot create eval set with empty id!');
     } else {
+      if (this.data.existingCases?.includes(this.newCaseId)) {
+        if (!confirm(`Eval case "${this.newCaseId}" already exists. Do you want to overwrite it?`)) {
+          return;
+        }
+      }
+      this.loading = true;
       this.evalService
           .addCurrentSession(
               this.data.appName,
@@ -68,8 +79,14 @@ export class AddEvalSessionDialogComponent {
               this.data.sessionId,
               this.data.userId,
               )
-          .subscribe((res) => {
-            this.dialogRef.close(true);
+          .subscribe({
+            next: (res) => {
+              this.dialogRef.close(true);
+            },
+            error: (err) => {
+              this.loading = false;
+              alert('Failed to add session to eval set!');
+            }
           });
     }
   }

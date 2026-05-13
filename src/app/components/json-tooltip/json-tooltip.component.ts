@@ -14,78 +14,79 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-
-import {ChangeDetectionStrategy, Component, Input, inject} from '@angular/core';
-import {SafeHtml} from '@angular/platform-browser';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { NgxJsonViewerModule } from 'ngx-json-viewer';
 
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-json-tooltip',
-  template: `<div [innerHTML]="formattedJson"></div>`,
+  template: `
+    <div class="tooltip-shell">
+      @if (title) {
+        <div class="tooltip-title">{{ title }}</div>
+      }
+      <div class="tooltip-content">
+        <ngx-json-viewer [json]="parsedJson" [expanded]="true"></ngx-json-viewer>
+      </div>
+    </div>
+  `,
   styles: [`
     :host {
       display: block;
-      font-family: 'Courier New', monospace;
       font-size: 12px;
       line-height: 1.4;
-      white-space: pre-wrap;
+      word-break: break-word;
+      overflow: hidden;
+    }
+    .tooltip-shell {
+      display: flex;
+      flex-direction: column;
       max-width: 800px;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+    .tooltip-content {
+      min-height: 0;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+    .tooltip-title {
+      font-weight: 600;
+      font-size: 9px;
+      color: var(--mat-sys-primary);
+      opacity: 0.5;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      background: inherit;
+      z-index: 1;
+    }
+    ngx-json-viewer {
+      display: block;
+      height: auto !important;
+      min-width: 0;
     }
   `],
   standalone: true,
+  imports: [NgxJsonViewerModule],
 })
 export class JsonTooltipComponent {
-  @Input() set json(value: string) {
-    this.formattedJson = this.syntaxHighlight(value);
-  }
-
-  formattedJson: SafeHtml = '';
-
-  readonly sanitizer = inject(SAFE_VALUES_SERVICE);
-
-  private syntaxHighlight(json: string): SafeHtml {
-    if (!json) return '';
-
-    try {
-      // Parse and re-stringify to ensure valid JSON
-      const obj = JSON.parse(json);
-      json = JSON.stringify(obj, null, 0);
-    } catch (e) {
-      // If not valid JSON, just return the string
-      return this.sanitizer.bypassSecurityTrustHtml(this.escapeHtml(json));
-    }
-
-    // Syntax highlight the JSON
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    json = json.replace(
-      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
-      (match) => {
-        let cls = 'json-number';
-        if (/^"/.test(match)) {
-          if (/:$/.test(match)) {
-            cls = 'json-key';
-          } else {
-            cls = 'json-string';
-          }
-        } else if (/true|false/.test(match)) {
-          cls = 'json-boolean';
-        } else if (/null/.test(match)) {
-          cls = 'json-null';
-        }
-        return '<span class="' + cls + '">' + match + '</span>';
+  @Input() title: string = '';
+  @Input() set json(value: any) {
+    if (typeof value === 'string') {
+      try {
+        this.parsedJson = JSON.parse(value);
+      } catch (e) {
+        // If not valid JSON, display as string
+        this.parsedJson = value;
       }
-    );
-
-    return this.sanitizer.bypassSecurityTrustHtml(json);
+    } else {
+      this.parsedJson = value;
+    }
   }
 
-  private escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
+  parsedJson: any = {};
 }

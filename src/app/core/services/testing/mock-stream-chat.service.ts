@@ -26,6 +26,8 @@ export class MockStreamChatService implements Partial<StreamChatService> {
   stopAudioChat = jasmine.createSpy('stopAudioChat');
   startVideoChat = jasmine.createSpy('startVideoChat');
   stopVideoChat = jasmine.createSpy('stopVideoChat');
+  startVideoStreaming = jasmine.createSpy('startVideoStreaming');
+  stopVideoStreaming = jasmine.createSpy('stopVideoStreaming');
   closeStream = jasmine.createSpy('closeStream');
   onStreamCloseResponse = new ReplaySubject<string>(1);
   onStreamClose = jasmine.createSpy('onStreamClose')

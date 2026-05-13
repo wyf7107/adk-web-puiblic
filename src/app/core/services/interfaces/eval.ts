@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {InjectionToken} from '@angular/core';
+import {InjectionToken, WritableSignal} from '@angular/core';
 import {Observable} from 'rxjs';
 import {EvalCase} from '../../models/Eval';
 
@@ -25,8 +25,11 @@ export const EVAL_SERVICE = new InjectionToken<EvalService>('EvalService');
  * Service to provide methods to handle evals.
  */
 export declare abstract class EvalService {
+  abstract metricsInfo: WritableSignal<any[]>;
   abstract getEvalSets(appName: string): Observable<any>;
-  abstract createNewEvalSet(appName: string, evalSetId: string): Observable<any>;
+  abstract getMetricsInfo(appName: string): Observable<any>;
+  abstract createNewEvalSet(appName: string, evalSetId: string, executionMode?: 'live' | 'replay'): Observable<any>;
+  abstract getEvalSet(appName: string, evalSetId: string): Observable<any>;
   abstract listEvalCases(appName: string, evalSetId: string): Observable<any>;
   abstract addCurrentSession(
     appName: string,
@@ -58,5 +61,9 @@ export declare abstract class EvalService {
     appName: string,
     evalSetId: string,
     evalCaseId: string,
+  ): Observable<any>;
+  abstract deleteEvalSet(
+    appName: string,
+    evalSetId: string,
   ): Observable<any>;
 }

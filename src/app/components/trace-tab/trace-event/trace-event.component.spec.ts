@@ -137,20 +137,6 @@ describe('TraceEventComponent', () => {
       expect(component.selectedRow).toEqual(span);
     });
 
-    it('should call event service to get trace for the selected row', () => {
-      expect(eventService.getEventTrace).toHaveBeenCalledWith({id: EVENT_ID});
-    });
-
-    it('should set loading state for event trace', () => {
-      expect(uiStateService.setIsEventRequestResponseLoading)
-          .toHaveBeenCalledWith(true);
-      expect(uiStateService.setIsEventRequestResponseLoading)
-          .toHaveBeenCalledWith(false);
-      const calls =
-          uiStateService.setIsEventRequestResponseLoading.calls.allArgs();
-      expect(calls).toEqual([[true], [false]]);
-    });
-
     it('should call event service to get event details for the selected row',
        () => {
          expect(eventService.getEvent)
@@ -162,39 +148,27 @@ describe('TraceEventComponent', () => {
              );
        });
 
-    it('should parse LLM request from the event trace', () => {
+    it('should parse LLM request from the selected span attributes', () => {
+      traceService.selectedTraceRow$.next({
+        ...span,
+        attributes: {
+          'gcp.vertex.agent.event_id': EVENT_ID,
+          'gcp.vertex.agent.llm_request': JSON.stringify({data: 'request'}),
+        }
+      });
       expect(component.llmRequest).toEqual({data: 'request'});
     });
 
-    it('should parse LLM response from the event trace', () => {
+    it('should parse LLM response from the selected span attributes', () => {
+      traceService.selectedTraceRow$.next({
+        ...span,
+        attributes: {
+          'gcp.vertex.agent.event_id': EVENT_ID,
+          'gcp.vertex.agent.llm_response': JSON.stringify({data: 'response'}),
+        }
+      });
       expect(component.llmResponse).toEqual({data: 'response'});
     });
-
-    it('should call getEventTrace with event and parse llm request/response',
-       () => {
-         const invocationId = 'inv-1';
-         const startTime = 123456789000000;
-         const llmRequest = {prompt: 'test prompt'};
-         const llmResponse = {response: 'test response'};
-         eventService.getEventTraceResponse.next({
-           'gcp.vertex.agent.llm_request': JSON.stringify(llmRequest),
-            'gcp.vertex.agent.llm_response': JSON.stringify(llmResponse),
-         });
-
-         traceService.selectedTraceRow$.next({
-           ...span,
-           invoc_id: invocationId,
-           start_time: startTime,
-         });
-
-         expect(eventService.getEventTrace).toHaveBeenCalledWith({
-          id: EVENT_ID,
-           invocationId,
-           timestamp: startTime / 1000000,
-         });
-         expect(component.llmRequest).toEqual(llmRequest);
-         expect(component.llmResponse).toEqual(llmResponse);
-       });
   });
 
   describe('getEventIdFromSpan()', () => {

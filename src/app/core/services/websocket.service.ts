@@ -51,7 +51,7 @@ export class WebSocketService implements WebSocketServiceInterface {
 
     this.socket$.subscribe(
         (message) => {
-          this.handleIncomingAudio(message), this.messages$.next(message);
+          this.handleIncomingEvent(message);
         },
         (error) => {
           console.error('WebSocket error:', error);
@@ -96,7 +96,7 @@ export class WebSocketService implements WebSocketServiceInterface {
     return btoa(binary);
   }
 
-  private handleIncomingAudio(message: any) {
+  private handleIncomingEvent(message: any) {
     const msg = JSON.parse(message) as Event;
     if (
       msg['content'] &&
@@ -107,6 +107,8 @@ export class WebSocketService implements WebSocketServiceInterface {
           msg['content']['parts'][0]['inlineData']['data'],
       );
       this.audioBuffer.push(pcmBytes);
+    } else {
+      this.messages$.next(message);
     }
   }
 

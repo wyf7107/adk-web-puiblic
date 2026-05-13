@@ -74,75 +74,6 @@ describe('TraceService', () => {
     });
   });
 
-  describe('setHoveredMessages', () => {
-    it('should set hovered indices to empty if span is undefined', async () => {
-      service.setHoveredMessages(undefined, 'inv1');
-      const indices = await firstValueFrom(service.hoveredMessageIndices$);
-      expect(indices).toEqual([]);
-    });
-
-    it('should set hovered indices for span with specific event_id',
-       async () => {
-         const messages = [
-           {role: 'user', eventId: 'e0'},
-           {role: 'bot', eventId: 'e1'},
-           {role: 'bot', eventId: 'e2'},
-         ];
-         const eventData = new Map<string, any>([
-           ['e1', {invocationId: 'inv1'}],
-           ['e2', {invocationId: 'inv1'}],
-         ]);
-         const span: Partial<Span> = {
-           attributes: {'gcp.vertex.agent.event_id': 'e1'},
-         };
-         service.setMessages(messages);
-         service.setEventData(eventData);
-         service.setHoveredMessages(span as Span, 'inv1');
-         const indices = await firstValueFrom(service.hoveredMessageIndices$);
-         expect(indices).toEqual([1]);
-       });
-
-    it('should set hovered indices for span without event_id but matching invocationId',
-       async () => {
-         const messages = [
-           {role: 'user', eventId: 'e0'},
-           {role: 'bot', eventId: 'e1'},
-           {role: 'bot', eventId: 'e2'},
-         ];
-         const eventData = new Map<string, any>([
-           ['e1', {invocationId: 'inv1'}],
-           ['e2', {invocationId: 'inv2'}],
-         ]);
-         const span: Partial<Span> = {
-           attributes: {},
-         };
-         service.setMessages(messages);
-         service.setEventData(eventData);
-         service.setHoveredMessages(span as Span, 'inv1');
-         const indices = await firstValueFrom(service.hoveredMessageIndices$);
-         expect(indices).toEqual([1]);
-       });
-
-    it(
-        'should safely handle messages with missing event data', async () => {
-          const messages = [
-            {role: 'bot', eventId: 'e1'},
-            {role: 'bot', eventId: 'e2'},  // e2 is missing in eventData
-          ];
-          const eventData = new Map<string, any>([
-            ['e1', {invocationId: 'inv1'}],
-          ]);
-          const span: Partial<Span> = {
-            attributes: {'gcp.vertex.agent.event_id': 'e1'},
-          };
-          service.setMessages(messages);
-          service.setEventData(eventData);
-          service.setHoveredMessages(span as Span, 'inv1');
-          const indices = await firstValueFrom(service.hoveredMessageIndices$);
-          expect(indices).toEqual([0]);
-        });
-  });
-
   describe('resetTraceService', () => {
     it('should reset eventData to undefined', async () => {
       service.setEventData(new Map<string, any>());
@@ -156,13 +87,6 @@ describe('TraceService', () => {
       service.resetTraceService();
       const messages = await firstValueFrom(service.messages$);
       expect(messages).toEqual([]);
-    });
-
-    it('should reset hoveredMessageIndices to empty array', async () => {
-      service.setHoveredMessages({} as Span, 'inv1');
-      service.resetTraceService();
-      const indices = await firstValueFrom(service.hoveredMessageIndices$);
-      expect(indices).toEqual([]);
     });
   });
 });

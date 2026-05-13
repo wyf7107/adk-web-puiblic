@@ -31,6 +31,9 @@ export abstract class AgentService {
   abstract getLoadingState(): BehaviorSubject<boolean>;
   abstract runSse(req: AgentRunRequest): Observable<LlmResponse>;
   abstract listApps(): Observable<string[]>;
+  abstract getAppInfo(name: string): Observable<any>;
+  abstract getAppGraphImage(name: string, darkMode: boolean, node?: string): Observable<any>;
+  abstract getVersion(): Observable<any>;
   getAgentBuilderTmp(agentName: string): Observable<string> {
     console.warn('unimplemented');
     return of('');
@@ -54,9 +57,5 @@ export abstract class AgentService {
   agentBuild(req: any): Observable<boolean> {
     console.warn('unimplemented');
     return of(false);
-  }
-  getAppInfo(appName: string): Observable<string> {
-    console.warn('unimplemented');
-    return of('');
   }
 }

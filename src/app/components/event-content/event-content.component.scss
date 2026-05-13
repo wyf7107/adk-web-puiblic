@@ -1,0 +1,82 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+app-content-bubble + app-content-bubble {
+  margin-top: 5px;
+}
+
+.event-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+}
+
+:host-context(.user) .event-chips-container {
+  justify-content: flex-end;
+}
+
+.eval-case-edit-button {
+  cursor: pointer;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.eval-pass {
+  display: flex;
+  color: #2e7d32;
+}
+
+.eval-fail {
+  display: flex;
+  color: var(--mat-sys-error);
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.event-action-button {
+  margin: 5px;
+}
+
+.function-calls-previews {
+  width: 100%;
+}
+
+.function-response-chip-container {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.function-response-chip-container .menu-trigger-btn {
+  visibility: hidden;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--mat-sys-surface-container-high);
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.function-response-chip-container .menu-trigger-btn .more-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+
+.function-response-chip-container:hover .menu-trigger-btn {
+  visibility: visible;
+}

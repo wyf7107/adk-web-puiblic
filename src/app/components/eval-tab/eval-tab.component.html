@@ -15,173 +15,311 @@
 -->
 
 <div class="eval-container">
-  @if (selectedEvalSet == '') {
-    <div class="eval-set-actions">
-      <div>{{ i18n.allEvalSetsHeader }}</div>
-      <mat-icon style="cursor: pointer;" (click)="openNewEvalSetDialog()" [matTooltip]="i18n.createNewEvalSetTooltip">add</mat-icon>
-    </div>
+  <div class="eval-detail-header">
+    <button mat-icon-button (click)="clearAllNavigation()" matTooltip="All Eval Sets">
+      <mat-icon>home</mat-icon>
+    </button>
+    
+    @if (selectedEvalSet() === '') {
+      <span class="breadcrumb-item" style="font-weight: 500; color: var(--mat-sys-on-surface);">Eval Sets</span>
+    }
+    
+    @if (selectedEvalSet() !== '') {
+      <span class="breadcrumb-separator">></span>
+      @if (selectedEvalTab() === 'history' || selectedHistoryRun() || selectedEvalCase()) {
+        <span class="breadcrumb-item clickable" (click)="goToEvalSet()" matTooltip="Eval Set">{{selectedEvalSet()}}</span>
+      } @else {
+        <span class="breadcrumb-item" matTooltip="Eval Set">{{selectedEvalSet()}}</span>
+      }
+    }
+    
+    @if (selectedEvalSet() !== '' && selectedEvalTab() === 'cases' && !selectedEvalCase()) {
+      <span class="breadcrumb-separator">></span>
+      <span class="breadcrumb-item" matTooltip="Eval Cases">Eval Cases</span>
+    }
+    
+    @if (selectedEvalSet() !== '' && selectedEvalTab() === 'history' && !selectedHistoryRun()) {
+      <span class="breadcrumb-separator">></span>
+      <span class="breadcrumb-item" matTooltip="Runs">Runs</span>
+    }
+    
+    @if (selectedHistoryRun() && !selectedEvalCase()) {
+      <span class="breadcrumb-separator">></span>
+      <span class="breadcrumb-item" matTooltip="Run">{{formatTimestamp(selectedHistoryRun()!)}}</span>
+    }
+    
+    @if (selectedEvalCase()) {
+      <span class="breadcrumb-separator">></span>
+      <span class="breadcrumb-item" matTooltip="Eval Case">{{selectedEvalCase()?.evalId}}</span>
+    }
+    
+    <span class="spacer"></span>
+    
+    @if (selectedEvalSet() === '') {
+      <button mat-button (click)="openNewEvalSetDialog()" [matTooltip]="i18n.createNewEvalSetTooltip">
+        <mat-icon>add</mat-icon> New
+      </button>
+      <button mat-icon-button (click)="getEvalSet()" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    }
+  </div>
+  @if (selectedEvalSet() == '') {
+
   }
   @if (evalsets.length == 0) {
-    <div>
-      <div class="empty-eval-info">
-        <div class="info-title">
-          {{ i18n.createNewEvalSetTitle }}
-        </div>
-        <div class="info-detail">
-          {{ i18n.evalSetDescription }}
-        </div>
-        <div class="info-create" (click)="openNewEvalSetDialog()">
-          {{ i18n.createEvalSetButton }}
-        </div>
+  <div>
+    <div class="empty-eval-info">
+      <div class="info-title">
+        {{ i18n.createNewEvalSetTitle }}
+      </div>
+      <div class="info-detail">
+        {{ i18n.evalSetDescription }}
+      </div>
+      <div class="info-create" (click)="openNewEvalSetDialog()">
+        {{ i18n.createEvalSetButton }}
       </div>
     </div>
+  </div>
   }
-  @if (evalsets.length > 0 && this.selectedEvalSet == '') {
-    <div>
-      @for (set of evalsets; track set) {
-        <div class="eval-set-row" (click)="selectEvalSet(set)">
-          <div style="display: flex;">
-            <span class="material-symbols-outlined" style="margin-right:10px; padding-top: 16px;">folder</span>
-            <div style="font-family: Roboto;font-size: 14px; padding: 16px; padding-top: 20px;">{{set}}</div>
-          </div>
-          <div>
-            <mat-icon style="padding-top: 20px; color:#9AA0A6;">chevron_right</mat-icon>
-          </div>
-        </div>
-      }
-    </div>
-  }
-  @if (selectedEvalSet != '') {
-    <div>
-      <div style="display: flex;">
-        <mat-icon style="color:white;cursor: pointer;" (click)="clearSelectedEvalSet()">chevron_left</mat-icon>
-        <div style="color:#9AA0A6; padding-top:2px;cursor: pointer;" (click)="clearSelectedEvalSet()">
-          {{selectedEvalSet}}
-        </div>
+  @if (evalsets.length > 0 && selectedEvalSet() == '') {
+  <div>
+    @for (set of evalsets; track set) {
+    <div class="eval-set-row" (click)="selectEvalSet(set)">
+      <div class="eval-set-left">
+        <span class="material-symbols-outlined">folder</span>
+        <div class="eval-set-name">{{set}}</div>
       </div>
-      @if (evalCases.length > 0 && !evalRunning()) {
-        <div>
-          @if (!showEvalHistory()) {
-            <div>
-              <div class="evaluation-tab-header">
-                <button class="run-eval-btn" (click)="openEvalConfigDialog()">{{ i18n.runEvaluationButton }}</button>
-                <mat-icon class="evaluation-history-icon" (click)="toggleEvalHistoryButton()" [matTooltip]="i18n.viewEvalRunHistoryTooltip">history</mat-icon>
-              </div>
-              <div class="mat-table-container" style="margin-top:16px;">
-                <table mat-table [dataSource]="dataSource">
-                  <ng-container matColumnDef="select">
-                    <th mat-header-cell *matHeaderCellDef>
-                      <mat-checkbox (change)="$event ? toggleAllRows() : null"
-                        [checked]="selection.hasValue() && isAllSelected()"
-                        [indeterminate]="selection.hasValue() && !isAllSelected()">
-                      </mat-checkbox>
-                    </th>
-                    <td mat-cell *matCellDef="let row">
-                      <mat-checkbox (click)="$event.stopPropagation()"
-                        (change)="$event ? selection.toggle(row) : null"
-                        [checked]="selection.isSelected(row)">
-                      </mat-checkbox>
-                    </td>
-                  </ng-container>
-                  <!-- Column Definitions -->
-                  <ng-container matColumnDef="evalId">
-                    <th mat-header-cell *matHeaderCellDef> {{ i18n.caseIdHeader }} </th>
-                    <td mat-cell class="eval-case-id" [class.selected-eval-case]="element === selectedEvalCase()?.evalId" *matCellDef="let element" (click)="getEvalCase(element)"> {{element}} </td>
-                  </ng-container>
-                  <ng-container matColumnDef="finalEvalStatus">
-                    <th mat-header-cell *matHeaderCellDef> {{ i18n.resultHeader }} </th>
-                    <td mat-cell *matCellDef="let element">
-                      @if (getEvalResultForCase(element)) {
-                        <button
-                          [ngClass]="getEvalResultForCase(element) == 1 ? 'result-btn pass': 'result-btn fail'" (click)="getSession(element)" [matTooltip]="i18n.viewEvalRunResultTooltip">
-                          <span class="material-symbols-outlined">
-                            {{ getEvalResultForCase(element) == 1 ? "check": "close" }}
-                          </span>
-                          <div style="padding-top: 4px;">{{getEvalResultForCase(element) == 1 ? i18n.passStatus: i18n.failStatus}} </div>
-                        </button>
-                      }
-                    </td>
-                  </ng-container>
-                  <!-- Table Rows -->
-                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                </table>
-              </div>
-            </div>
-          }
-          @if (showEvalHistory()) {
-            <div>
-              @for (evalResult of getEvalHistoryOfCurrentSetSorted(); track evalResult) {
-                <div>
-                  <div class="status-card">
-                    <div class="status-card__overview">
-                      <div class="status-card__info">
-                        <div class="status-card__timestamp">{{ formatTimestamp(evalResult.timestamp) }}</div>
-                        <div class="status-card__summary">
-                          <span class="status-card__passed">{{ getPassCountForCurrentResult(evalResult.evaluationResults.evaluationResults) }} {{ i18n.passedSuffix }}</span>
-                          @if (getFailCountForCurrentResult(evalResult.evaluationResults.evaluationResults) > 0) {
-                            <div>
-                              <span class="status-card__separator">|</span>
-                              <span class="status-card__failed">{{ getFailCountForCurrentResult(evalResult.evaluationResults.evaluationResults) }} {{ i18n.failedSuffix }}</span>
-                            </div>
-                          }
-                        </div>
-                        @if (getEvalMetrics(evalResult)) {
-                          <div class="status-card__metrics">
-                            @for (evalMetric of getEvalMetrics(evalResult); track evalMetric) {
-                              <span class="status-card__metric"> {{ evalMetric.metricName }}:
-                                {{ evalMetric.threshold }}
-                              </span>
-                            }
-                          </div>
-                        }
+      <div class="eval-set-right">
+        <button mat-icon-button class="delete-btn" (click)="confirmDeleteEvalSet($event, set)" [matTooltip]="i18n.deleteEvalSetTooltip">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+    }
+  </div>
+  }
+  @if (selectedEvalSet() != '') {
+  <div class="eval-details-container">
 
+
+
+
+    <div class="eval-details-content">
+      <div class="vertical-tabs-sidebar">
+        <button mat-icon-button (click)="selectedEvalTab.set('info'); selectedEvalCase.set(null); selectedHistoryRun.set(null)" [class.active]="selectedEvalTab() === 'info'"
+          matTooltip="Info" matTooltipPosition="right">
+          <mat-icon>info</mat-icon>
+        </button>
+        <button mat-icon-button (click)="selectedEvalTab.set('cases'); selectedEvalCase.set(null); selectedHistoryRun.set(null)" [class.active]="selectedEvalTab() === 'cases'"
+          matTooltip="Eval Cases" matTooltipPosition="right">
+          <mat-icon>list</mat-icon>
+        </button>
+        <button mat-icon-button (click)="selectedEvalTab.set('history'); selectedEvalCase.set(null); selectedHistoryRun.set(null); getEvaluationResult()" [class.active]="selectedEvalTab() === 'history'"
+          matTooltip="Runs" matTooltipPosition="right">
+          <mat-icon>history</mat-icon>
+        </button>
+      </div>
+      <div class="vertical-tabs-content">
+        @if (evalRunning()) {
+        <div style="display: flex; justify-content: center; align-items: center; padding: 20px;">
+          <mat-progress-spinner mode="indeterminate" [diameter]="28" [strokeWidth]="3"></mat-progress-spinner>
+        </div>
+        } @else {
+          @if (selectedEvalTab() === 'info') {
+          <div class="info-tables-container">
+            <table app-info-table>
+              <tr>
+                <td>Name</td>
+                <td><span [matTooltip]="selectedEvalSet()">{{ selectedEvalSet() }}</span></td>
+              </tr>
+              @if (isEvalV2Enabled()) {
+              <tr>
+                <td>Execution Mode</td>
+                <td><span [matTooltip]="currentEvalSet()?.model_execution_mode || 'N/A'">{{ currentEvalSet()?.model_execution_mode || 'N/A' }}</span></td>
+              </tr>
+              }
+              <tr>
+                <td>Total Cases</td>
+                <td><span [matTooltip]="evalCases.length.toString()">{{ evalCases.length }}</span></td>
+              </tr>
+              <tr>
+                <td>Total Runs</td>
+                <td><span [matTooltip]="getEvalHistoryOfCurrentSetSorted().length.toString()">{{ getEvalHistoryOfCurrentSetSorted().length }}</span></td>
+              </tr>
+            </table>
+          </div>
+          }
+
+          @if (selectedEvalTab() === 'cases') {
+          <div>
+            @if (!selectedEvalCase()) {
+              <div class="toolbar" style="position: sticky; top: 0; z-index: 1;">
+                <mat-checkbox style="margin-left: 6px;" (change)="$event ? toggleAllRows() : null"
+                  [checked]="selection.hasValue() && isAllSelected()"
+                  [indeterminate]="selection.hasValue() && !isAllSelected()">
+                </mat-checkbox>
+                <button mat-button color="primary" (click)="openEvalConfigDialog()" [disabled]="evalCases.length == 0 || loadingMetrics()">
+                  @if (loadingMetrics()) {
+                    <mat-progress-spinner mode="indeterminate" [diameter]="20" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-progress-spinner>
+                  } @else {
+                    <mat-icon>play_arrow</mat-icon>
+                  }
+                  {{ (isAllSelected() || selection.isEmpty()) ? i18n.runEvaluationButton :
+                  i18n.runSelectedEvaluationButton }}
+                </button>
+                <button mat-button color="accent" (click)="openNewEvalCaseDialog()">
+                  <mat-icon>add</mat-icon> {{ i18n.addSessionToSetButtonPrefix }}
+                </button>
+                <span class="spacer"></span>
+                <button mat-icon-button (click)="listEvalCases()" matTooltip="Refresh">
+                  <mat-icon>refresh</mat-icon>
+                </button>
+              </div>
+              @if (evalCases.length > 0) {
+              <div class="eval-cases-list">
+  
+                @for (element of evalCases; track element) {
+                <div class="eval-case-row" [class.selected-row]="element === selectedEvalCase()?.evalId" (click)="getEvalCase(element)">
+                  <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(element) : null"
+                    [checked]="selection.isSelected(element)">
+                  </mat-checkbox>
+                  <div class="eval-case-id">
+                    {{element}}
+                  </div>
+                  <button mat-icon-button class="edit-btn" (click)="requestEditEvalCase($event, element)" [matTooltip]="i18n.editEvalCaseTooltip">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button class="delete-btn" (click)="confirmDeleteEvalCase($event, element)" [matTooltip]="i18n.deleteEvalCaseTooltip">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+                }
+              </div>
+              }
+            } @else {
+              @let currentCase = selectedEvalCase()!;
+              <div class="eval-case-details" style="padding: 16px;">
+                <div style="margin-bottom: 16px;">
+                  <h3 style="margin-top: 0;">Case: {{ currentCase.evalId }}</h3>
+                </div>
+                
+                <h4 style="margin-bottom: 8px;">Past Runs</h4>
+                <div class="eval-cases-list">
+                  @let history = caseHistory();
+                  @for (item of history; track item.timestamp; let i = $index) {
+                    <div class="eval-case-row clickable" [class.selected-row]="item.timestamp == selectedHistoryRun()" (click)="getHistorySession(item.result!, item.timestamp)">
+                      <div class="eval-case-id">
+                        #{{ history.length - i }} {{ formatTimestamp(item.timestamp) }}
                       </div>
-                      <div class="status-card__action">
-                        <mat-icon (click)="toggleHistoryStatusCard(evalResult.timestamp)">{{ getEvaluationStatusCardActionButtonIcon(evalResult.timestamp) }}</mat-icon>
+                      <div class="spacer"></div>
+                      <div class="status-card__summary" style="width: 50px; text-align: center;">
+                        <span [ngClass]="isMetricsSucceed(item.result) ? 'status-card__passed': 'status-card__failed'"
+                          style="font-family: monospace;">
+                          {{ getMetricsScore(item.result) }}
+                        </span>
                       </div>
                     </div>
-                    @if (isEvaluationStatusCardToggled(evalResult.timestamp)) {
-                      <div class="status-card__history-cases">
-                        @for (evalResult of generateHistoryEvaluationDatasource(evalResult.timestamp); track evalResult) {
-                          <div>
-                            <div class="status-card__history-case">
-                              <span> {{ evalResult.evalId }} </span>
-                              <button
-                                [ngClass]="evalResult.finalEvalStatus == 1 ? 'result-btn pass': 'result-btn fail'" (click)="getHistorySession(evalResult)">
-                                <span class="material-symbols-outlined">
-                                  {{ evalResult.finalEvalStatus == 1 ? "check": "close" }}
-                                </span>
-                                <div style="padding-top: 4px;">{{ evalResult.finalEvalStatus == 1 ? i18n.passStatusCaps : i18n.failStatusCaps}} </div>
-                              </button>
-                            </div>
-                          </div>
+                  }
+                  @if (history.length === 0) {
+                    <div style="padding: 16px; text-align: center; color: var(--app-color-text-secondary);">
+                      No runs found for this case.
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+            @if (evalCases.length === 0) {
+            <div class="empty-eval-info">
+              <div class="info-title">No Eval Cases</div>
+              <div class="info-detail">Add a session to this set to get started.</div>
+            </div>
+            }
+          </div>
+          }
+
+          @if (selectedEvalTab() === 'history') {
+            @let sortedRuns = evalHistorySorted();
+            @if (sortedRuns.length === 0) {
+            <div class="empty-eval-info">
+              <div class="info-title">No Runs</div>
+              <div class="info-detail">Run an evaluation to see results here.</div>
+            </div>
+            } @else {
+            <div style="padding: 16px;">
+              @if (!selectedHistoryRun()) {
+                <div class="eval-cases-list">
+                  @for (run of sortedRuns; track run.timestamp; let i = $index) {
+                    <div class="eval-case-row" (click)="selectedHistoryRun.set(run.timestamp)">
+                      <div class="eval-case-id">
+                        #{{ sortedRuns.length - i }} {{ formatTimestamp(run.timestamp) }}
+                      </div>
+                      <div class="spacer"></div>
+                      <div class="status-card__summary">
+                        <span class="status-card__passed" style="font-family: monospace;">{{
+                          getPassCountForCurrentResult(run.evaluationResults.evaluationResults) }} {{ i18n.passStatusCaps }}</span>
+                        <span class="status-card__separator">|</span>
+                        <span class="status-card__failed" style="font-family: monospace;"
+                          [style.color]="getFailCountForCurrentResult(run.evaluationResults.evaluationResults) === 0 ? 'gray' : ''">{{
+                          getFailCountForCurrentResult(run.evaluationResults.evaluationResults) }} {{ i18n.failStatusCaps }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                @let currentRunId = selectedHistoryRun()!;
+                @let currentRun = getEvalHistoryOfCurrentSet()[currentRunId];
+                
+                @if (currentRun) {
+                  <div class="status-card" style="margin-top: 0;">
+                    <div class="status-card__overview">
+                      <div class="status-card__info">
+                        <div class="status-card__summary">
+                          <span class="status-card__passed" style="font-family: monospace;">{{
+                            getPassCountForCurrentResult(currentRun.evaluationResults) }} {{ i18n.passStatusCaps
+                            }}</span>
+                          @if (getFailCountForCurrentResult(currentRun.evaluationResults) > 0) {
+                            <span class="status-card__separator">|</span>
+                            <span class="status-card__failed" style="font-family: monospace;">{{
+                              getFailCountForCurrentResult(currentRun.evaluationResults) }} {{
+                              i18n.failStatusCaps }}</span>
+                          }
+                        </div>
+                        @if (currentHistoryMetrics().length > 0) {
+                        <div class="status-card__metrics">
+                          @for (evalMetric of currentHistoryMetrics(); track evalMetric) {
+                          <span class="status-card__metric">
+                            <span class="status-card__metric-name" [matTooltip]="evalMetric.metricName">{{ evalMetric.metricName | formatMetricName }}</span>:
+                            <span class="status-card__metric-value">{{ evalMetric.threshold | number:'1.2-2' }}</span>
+                          </span>
+                          }
+                        </div>
                         }
                       </div>
+                    </div>
+                    
+                  </div>
+                    
+                  <div class="status-card__history-cases">
+                    @for (evalRes of currentRun.evaluationResults; track evalRes.evalId) {
+                    <div class="status-card__history-case" (click)="getHistorySession(evalRes, currentRunId)"
+                      style="display: flex; justify-content: space-between; align-items: center;">
+                      <span> {{ evalRes.evalId }} </span>
+                      <span [ngClass]="isMetricsSucceed(evalRes) ? 'status-card__passed': 'status-card__failed'"
+                        style="font-family: monospace; width: 50px; text-align: center;">
+                        {{ getMetricsScore(evalRes) }}
+                      </span>
+                    </div>
                     }
                   </div>
-                </div>
+                }
               }
             </div>
+            }
           }
-        </div>
-      }
-      @if (!evalRunning() && !showEvalHistory()) {
-        <button class="save-session-btn" (click)="openNewEvalCaseDialog()">
-          <div class="save-session-btn-detail">
-            <mat-icon>add</mat-icon>
-            <div class="save-session-btn-text">
-              {{ i18n.addSessionToSetButtonPrefix }} {{selectedEvalSet}}
-            </div>
-          </div>
-        </button>
-      }
-      @if (evalRunning()) {
-        <div>
-          <mat-spinner class="eval-spinner" [diameter]="28" [strokeWidth]="3"></mat-spinner>
-        </div>
-      }
+        }
+      </div>
     </div>
+  </div>
   }
 </div>
-

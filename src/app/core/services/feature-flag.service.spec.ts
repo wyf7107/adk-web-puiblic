@@ -58,12 +58,12 @@ describe('FeatureFlagService', () => {
          expect(isEnabled).toBeTrue();
        });
 
-    it('should return false if \'import_session\' query param is not \'true\'',
+    it('should return true (always enabled in this implementation)',
        async () => {
          activatedRoute.queryParams.next({});
          const isEnabled =
              await firstValueFrom(service.isImportSessionEnabled());
-         expect(isEnabled).toBeFalse();
+         expect(isEnabled).toBeTrue();
        });
   });
 

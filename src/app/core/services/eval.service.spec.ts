@@ -89,12 +89,20 @@ describe('EvalService', () => {
   });
 
   describe('createNewEvalSet', () => {
-    it('should call POST /apps/{appName}/eval_sets/{evalSetId}', () => {
+    it('should call POST /apps/{appName}/eval-sets with correct body', () => {
       service.createNewEvalSet(APP_NAME, EVAL_SET_ID).subscribe();
       const req = httpTestingController.expectOne(
-          API_SERVER_BASE_URL + EVAL_SET_PATH,
+          API_SERVER_BASE_URL + `/apps/${APP_NAME}/eval-sets`,
       );
       expect(req.request.method).toEqual('POST');
+      expect(req.request.body).toEqual({
+        eval_set: {
+          eval_set_id: EVAL_SET_ID,
+          model_execution_mode: 'live',
+          tool_execution_mode: 'live',
+          eval_cases: [],
+        },
+      });
       req.flush({});
     });
 
@@ -103,7 +111,7 @@ describe('EvalService', () => {
       const resultP = firstValueFrom(
           service.createNewEvalSet(APP_NAME, EVAL_SET_ID),
       );
-      const req = httpTestingController.expectOne(EVAL_SET_PATH);
+      const req = httpTestingController.expectOne(`/apps/${APP_NAME}/eval-sets`);
       req.flush(null);
       const result = await resultP;
       expect(result).toBeNull();

@@ -24,14 +24,12 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
  * Mock markdown component for testing.
  */
 @Component({
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-markdown',
   imports: [CommonModule],
   template: `
     <div class="mock-markdown-content">
-      <span [ngStyle]="{
-              'font-style': thought() ? 'italic' : 'normal',
-            }">
+      <span>
           {{ text() }}
       </span>
     </div>

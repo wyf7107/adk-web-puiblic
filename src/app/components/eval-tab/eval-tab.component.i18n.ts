@@ -21,14 +21,13 @@ import {InjectionToken} from '@angular/core';
  * Default English messages for EvalTabComponent.
  */
 export const EVAL_TAB_MESSAGES = {
-  allEvalSetsHeader: 'Eval sets',
+  allEvalSetsHeader: 'All eval sets',
   createNewEvalSetTooltip: 'Create new evaluation set',
   createNewEvalSetTitle: 'Create New Evaluation Set',
   evalSetDescription:
       'An evaluation set is a curated collection of evaluation cases, where each case includes input-output examples for assessing agent performance.',
   createEvalSetButton: 'Create Evaluation Set',
-  runEvaluationButton: 'Run All',
-  runSelectedEvaluationButton: 'Run Selected',
+  runEvaluationButton: 'Run Evaluation',
   viewEvalRunHistoryTooltip: 'View eval run history',
   caseIdHeader: 'Case ID',
   resultHeader: 'Result',
@@ -39,10 +38,7 @@ export const EVAL_TAB_MESSAGES = {
   failStatusCaps: 'FAIL',
   passedSuffix: 'Passed',
   failedSuffix: 'Failed',
-  addSessionToSetButtonPrefix: 'From Current Session',
-  deleteEvalCaseTooltip: 'Delete eval case',
-  editEvalCaseTooltip: 'Edit eval case',
-  deleteEvalSetTooltip: 'Delete eval set',
+  addSessionToSetButtonPrefix: 'Add current session to',
 };
 
 

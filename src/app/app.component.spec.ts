@@ -38,7 +38,6 @@ import {GRAPH_SERVICE} from './core/services/interfaces/graph';
 import {LOCAL_FILE_SERVICE} from './core/services/interfaces/localfile';
 import {SAFE_VALUES_SERVICE} from './core/services/interfaces/safevalues';
 import {STRING_TO_COLOR_SERVICE} from './core/services/interfaces/string-to-color';
-import {THEME_SERVICE} from './core/services/interfaces/theme';
 import {LOCATION_SERVICE} from './core/services/location.service';
 import {SESSION_SERVICE} from './core/services/interfaces/session';
 import {STREAM_CHAT_SERVICE} from './core/services/interfaces/stream-chat';
@@ -56,7 +55,6 @@ import {MockSafeValuesService} from './core/services/testing/mock-safevalues.ser
 import {MockSessionService} from './core/services/testing/mock-session.service';
 import {MockStreamChatService} from './core/services/testing/mock-stream-chat.service';
 import {MockStringToColorService} from './core/services/testing/mock-string-to-color.service';
-import {MockThemeService} from './core/services/testing/mock-theme.service';
 import {MockTraceService} from './core/services/testing/mock-trace.service';
 import {MockUiStateService} from './core/services/testing/mock-ui-state.service';
 import {MockVideoService} from './core/services/testing/mock-video.service';
@@ -65,7 +63,6 @@ import {TRACE_SERVICE} from './core/services/interfaces/trace';
 import {UI_STATE_SERVICE} from './core/services/interfaces/ui-state';
 import {VIDEO_SERVICE} from './core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from './core/services/interfaces/websocket';
-import {TelemetryService} from './core/services/telemetry.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -98,10 +95,6 @@ describe('AppComponent', () => {
         .configureTestingModule({
           imports: [AppComponent, NoopAnimationsModule],
           providers: [
-            {
-              provide: TelemetryService,
-              useValue: { telemetryEnabled: () => false }
-            },
             {provide: MatDialog, useValue: {}},
             {
               provide: ActivatedRoute,
@@ -199,19 +192,6 @@ describe('AppComponent', () => {
             {
               provide: AGENT_BUILDER_SERVICE,
               useValue: mockAgentBuilderService,
-            },
-            {
-              provide: THEME_SERVICE,
-              useClass: MockThemeService,
-            },
-            {
-              provide: TelemetryService,
-              useValue: {
-                telemetryStatus: () => false,
-                telemetryEnabled: () => false,
-                fetchTelemetryStatus: () => Promise.resolve(false),
-                setTelemetry: () => Promise.resolve(false)
-              }
             },
           ],
         })

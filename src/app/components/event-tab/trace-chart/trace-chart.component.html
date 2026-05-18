@@ -29,16 +29,16 @@
           {{ getSpanIcon(node.span.name) }}
         </span>
         <div class="trace-label" [style.width.px]="400 - node.level * 20">
-          {{ formatSpanName(node.span.name) }}
+          {{ node.span.name }}
           <span class="trace-duration">
-            ({{ formatDuration(node.span.end_time - node.span.start_time) }})
+            ({{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms)
           </span>
         </div>
         <div class="trace-bar-container">
           <div class="trace-bar"
             [style.left.%]="getRelativeStart(node.span)"
             [style.width.%]="getRelativeWidth(node.span)">
-            {{ formatDuration(node.span.end_time - node.span.start_time) }}
+            {{ (toMs(node.span.end_time) - toMs(node.span.start_time)).toFixed(2) }}ms
           </div>
         </div>
       </div>

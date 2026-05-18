@@ -25,7 +25,7 @@ interface ResizingEvent {
 
 @Directive({ selector: '[appResizableDrawer]', })
 export class ResizableDrawerDirective implements AfterViewInit {
-  private readonly sideDrawerMinWidth = 360;
+  private readonly sideDrawerMinWidth = 310;
   private sideDrawerMaxWidth = window.innerWidth / 2;
   private resizeHandle: HTMLElement|null = null;
 
@@ -46,7 +46,7 @@ export class ResizableDrawerDirective implements AfterViewInit {
           this.resizeHandle, 'mousedown',
           (event) => this.onResizeHandleMouseDown(event));
     }
-    document.documentElement.style.setProperty('--side-drawer-width', '480px');
+    document.documentElement.style.setProperty('--side-drawer-width', '570px');
 
     this.renderer.setStyle(
         this.el.nativeElement, 'width', 'var(--side-drawer-width)');
@@ -97,6 +97,6 @@ export class ResizableDrawerDirective implements AfterViewInit {
                             .getPropertyValue('--side-drawer-width');
     const parsedWidth = parseFloat(widthString);
 
-    return isNaN(parsedWidth) ? 480 : parsedWidth;
+    return isNaN(parsedWidth) ? 500 : parsedWidth;
   }
 }

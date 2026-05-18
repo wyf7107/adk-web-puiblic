@@ -30,5 +30,4 @@ export const MARKDOWN_COMPONENT = new InjectionToken<Type<MarkdownComponentInter
 export interface MarkdownComponentInterface {
   text: InputSignal<string>;
   thought: InputSignal<boolean>;
-  isReadme?: InputSignal<boolean>;
 }

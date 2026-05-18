@@ -25,8 +25,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
-import { SnackbarService } from '../../core/services/snackbar.service';
-import { AnalyticsService } from '../../core/services/analytics.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
@@ -127,10 +126,9 @@ export class BuilderTabsComponent {
   private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   private dialog = inject(MatDialog);
   private agentService = inject(AGENT_SERVICE);
-  private snackBar = inject(SnackbarService);
+  private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-  private analyticsService = inject(AnalyticsService);
 
   protected selectedTool: ToolNode | undefined = undefined;
   protected toolAgentName: string = '';
@@ -710,19 +708,6 @@ export class BuilderTabsComponent {
     }
   }
 
-  onTelemetryChange(enabled: boolean) {
-    if (this.agentConfig) {
-      if (!this.agentConfig.logging) {
-        this.agentConfig.logging = {
-          enabled: enabled,
-          dataset_location: 'US'
-        };
-      } else {
-        this.agentConfig.logging.enabled = enabled;
-      }
-    }
-  }
-
   createAgentTool() {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '750px',
@@ -749,17 +734,6 @@ export class BuilderTabsComponent {
   }
 
   saveChanges() {
-    if (this.agentConfig?.isRoot && this.agentConfig?.logging?.enabled) {
-      if (!this.agentConfig.logging.project_id?.trim() || 
-          !this.agentConfig.logging.dataset_id?.trim() || 
-          !this.agentConfig.logging.dataset_location?.trim()) {
-        this.snackBar.open("Project ID, Dataset ID, and Dataset Location are required when Agent Analytics is enabled.", "OK", {
-          duration: 3000
-        });
-        return;
-      }
-    }
-
     const rootAgent = this.agentBuilderService.getRootNode();
 
     if (!rootAgent) {
@@ -800,11 +774,10 @@ export class BuilderTabsComponent {
 
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
-    this.agentService.agentBuildTmp(appName, formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(formData).subscribe((success) => {
       if (success) {
-        this.agentService.agentBuild(appName, formData).subscribe((success) => {
+        this.agentService.agentBuild(formData).subscribe((success) => {
           if (success) {
-            this.analyticsService.sendEvent('builder_agent_save_click');
             this.router.navigate(['/'], {
               queryParams: { app: appName }
             }).then(() => {

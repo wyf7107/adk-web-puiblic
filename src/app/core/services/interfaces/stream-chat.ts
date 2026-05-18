@@ -38,8 +38,6 @@ export declare abstract class StreamChatService {
     videoContainer: ElementRef;
   }): Promise<void>;
   abstract stopVideoChat(videoContainer: ElementRef): void;
-  abstract startVideoStreaming(videoContainer: ElementRef): Promise<void>;
-  abstract stopVideoStreaming(videoContainer: ElementRef): void;
   abstract onStreamClose(): Observable<string>;
   abstract closeStream(): void;
 }

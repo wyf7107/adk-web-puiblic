@@ -1,129 +1,36 @@
-.run-eval-config-dialog {
-  width: 680px;
-  max-width: 90vw;
-}
-
-.metric-container {
-  margin-bottom: 6px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--run-eval-config-dialog-border-color, #e0e0e0);
-}
-
-.metric-container:last-child {
-  border-bottom: none;
-}
-
-.metric-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 2px;
-}
-
-.metric-title {
-  font-weight: 600;
-  font-size: 1em;
-}
-
-.metric-description {
-  font-size: 0.85em;
-  color: var(--run-eval-config-dialog-description-color, #666);
-  margin-top: 2px;
-  white-space: normal;
-}
-
-.metric-slider-container {
-  display: flex;
-  align-items: center;
-  margin-left: 28px;
-  /* Align with checkbox text */
-}
-
-.inline-slider {
-  margin-left: 20px;
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.slider-label {
-  margin-right: 10px;
-  font-size: 0.9em;
+build.dialog-container {
+  border-radius: 12px;
+  padding: 18px;
+  width:500px;
+  box-shadow: 0 8px 16px var(--run-eval-config-dialog-container-box-shadow-color);
 }
 
 .threshold-slider {
-  max-width: 80px;
-  flex: 1;
+  --mdc-slider-active-track-color: var(--run-eval-config-dialog-threshold-slider-active-track-color);
+  --mdc-slider-inactive-track-color: var(--run-eval-config-dialog-threshold-slider-inactive-track-color);
+  --mdc-slider-handle-color: var(--run-eval-config-dialog-threshold-slider-handle-color);
+  --mdc-slider-ripple-color: var(--run-eval-config-dialog-threshold-slider-ripple-color);
+  width: 100px
+}
+
+.metric-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.metric-name {
+  width: 250px;
 }
 
 .threshold-value {
-  margin-left: 10px;
-  min-width: 30px;
-  text-align: right;
+  margin-left: 20px;
 }
 
-/* ---- Run mode selector (top of dialog) ---- */
-.run-mode-form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--run-eval-config-dialog-border-color, #e0e0e0);
-}
-
-.run-mode-toggle {
-  width: 100%;
-}
-
-.run-mode-toggle .mat-button-toggle {
-  flex: 1;
-}
-
-/* ---- Live input modality + audio user simulation ---- */
-.run-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--run-eval-config-dialog-border-color, #e0e0e0);
-}
-
-.run-option-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.option-hint {
-  font-size: 0.85em;
-  color: var(--run-eval-config-dialog-description-color, #666);
-  margin-left: 2px;
-}
-
-.modality-row {
-  gap: 6px;
-}
-
-.modality-field {
-  max-width: 220px;
-}
-
-/* Trim the outline field's default bottom padding so the hint sits close. */
-.modality-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-  display: none;
-}
-
-.audio-sim-fields {
-  display: flex;
-  gap: 12px;
-  margin-top: 4px;
-}
-
-.audio-sim-fields mat-form-field {
-  flex: 1;
+.mdc-slider__thumb--with-indicator {
+  background-color: var(--mdc-slider-handle-color, var(--run-eval-config-dialog-mdc-slider-thumb-background-color));
+  border: none !important;
+  box-shadow: none !important;
 }
 
 h2[mat-dialog-title] {

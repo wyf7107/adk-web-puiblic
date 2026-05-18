@@ -17,12 +17,11 @@
 
 import {ChangeDetectionStrategy, Component, Inject, inject, input, OnChanges, SimpleChanges} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatButton} from '@angular/material/button';
 import {MatOption} from '@angular/material/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatIcon} from '@angular/material/icon';
 import {MatSelect} from '@angular/material/select';
-import {MatTooltip} from '@angular/material/tooltip';
 
 import {DOWNLOAD_SERVICE, DownloadService} from '../../core/services/interfaces/download';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
@@ -37,7 +36,6 @@ const DEFAULT_ARTIFACT_NAME = 'default_artifact_name';
 export enum MediaType {
   IMAGE = 'image',
   AUDIO = 'audio',
-  VIDEO = 'video',
   TEXT = 'text',  // for text/html
   UNSPECIFIED = 'unspecified',
 }
@@ -99,10 +97,8 @@ export function isArtifactAudio(mimeType: string): boolean {
         FormsModule,
         MatOption,
         MatButton,
-        MatIconButton,
         MatIcon,
         AudioPlayerComponent,
-        MatTooltip,
     ],
 })
 export class ArtifactTabComponent implements OnChanges {
@@ -152,18 +148,6 @@ export class ArtifactTabComponent implements OnChanges {
         });
   }
 
-  protected getTextContent(dataUrl: string): string {
-    if (!dataUrl) return '';
-    const commaIndex = dataUrl.indexOf(',');
-    if (commaIndex === -1) return '';
-    const base64 = dataUrl.substring(commaIndex + 1);
-    try {
-      return atob(base64);
-    } catch (e) {
-      return 'Failed to decode text content';
-    }
-  }
-
   protected onArtifactVersionChange(event: any, index: number) {
     this.selectedArtifacts[index] = event.value;
   }
@@ -184,6 +168,11 @@ export class ArtifactTabComponent implements OnChanges {
   }
 
   protected openArtifact(fullBase64DataUrl: string, mimeType: string) {
+    if (this.isArtifactImage(mimeType)) {
+      this.openViewImageDialog(fullBase64DataUrl);
+      return;
+    }
+
     this.openBase64InNewTab(fullBase64DataUrl, mimeType);
   }
 
@@ -191,6 +180,5 @@ export class ArtifactTabComponent implements OnChanges {
    * Opens the base64 data in a new tab.
    */
   private openBase64InNewTab(dataUrl: string, mimeType: string) {
-    this.safeValuesService.openBase64InNewTab(dataUrl, mimeType);
   }
 }

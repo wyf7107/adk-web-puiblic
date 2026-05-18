@@ -22,23 +22,19 @@ import {InjectionToken} from '@angular/core';
  */
 export const SIDE_PANEL_MESSAGES = {
   agentDevelopmentKitLabel: 'Agent Development Kit',
-  disclosureTooltip:
-      'ADK Web is for development purposes. It has access to all the data and should not be used in production.',
   collapsePanelTooltip: 'Collapse panel',
+  traceTabLabel: 'Trace',
   eventsTabLabel: 'Events',
   stateTabLabel: 'State',
   artifactsTabLabel: 'Artifacts',
   sessionsTabLabel: 'Sessions',
-  evalTabLabel: 'Evals',
-  testsTabLabel: 'Tests',
+  evalTabLabel: 'Eval',
   selectEventAriaLabel: 'Select event',
-  infoTabLabel: 'Info',
-  graphTabLabel: 'Graph',
+  eventDetailsTabLabel: 'Event',
   requestDetailsTabLabel: 'Request',
   responseDetailsTabLabel: 'Response',
   responseIsNotAvailable: 'Response is not available',
   requestIsNotAvailable: 'Request is not available',
-  clearSelectionButtonLabel: 'Remove selection',
 };
 
 /**

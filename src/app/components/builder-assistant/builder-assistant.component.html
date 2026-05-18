@@ -51,11 +51,7 @@ limitations under the License.
               } @else {
                 @if (message.role === 'bot') {
                   <div class="bot-label">Assistant</div>
-                  @if (message.isError) {
-                    <div class="error-message">{{message.text}}</div>
-                  } @else {
-                    <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: message.text!, thought: false}"></ng-container>
-                  }
+                  <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: message.text!, thought: false}"></ng-container>
                 } @else {
                   <div class="message-text">{{message.text}}</div>
                 }

@@ -281,9 +281,7 @@ describe('SessionTabComponent', () => {
     });
   });
 
-  // Skipped: getSession was refactored to only emit sessionSelected event
-  // Session loading and lazy loading are now handled by the parent component
-  xdescribe('when getting a session', () => {
+  describe('when getting a session', () => {
     beforeEach(() => {
       spyOn(component.sessionSelected, 'emit');
     });
@@ -297,7 +295,13 @@ describe('SessionTabComponent', () => {
         'emits sessionSelected with default values for partial data', () => {
           sessionService.getSessionResponse.next({id: 'session1'} as Session);
           component.getSession('session1');
-          expect(component.sessionSelected.emit).toHaveBeenCalledWith('session1');
+          expect(component.sessionSelected.emit).toHaveBeenCalledWith({
+            id: 'session1',
+            appName: '',
+            userId: '',
+            state: {},
+            events: [],
+          } as Session);
         });
 
     describe('when getting a session is successful', () => {
@@ -369,9 +373,7 @@ describe('SessionTabComponent', () => {
     });
   });
 
-  // Skipped: reloadSession was refactored to only emit sessionReloaded event
-  // Session loading and lazy loading are now handled by the parent component
-  xdescribe('when reloading a session', () => {
+  describe('when reloading a session', () => {
     beforeEach(() => {
       spyOn(component.sessionReloaded, 'emit');
     });

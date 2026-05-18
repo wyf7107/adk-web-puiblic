@@ -22,7 +22,6 @@
 export declare interface RuntimeConfig {
   backendUrl: string;
   logo?: LogoConfig;
-  telemetry?: boolean;
 }
 
 /**

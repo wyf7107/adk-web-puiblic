@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {inject, Injectable, signal, WritableSignal} from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {AUDIO_WORKLET_MODULE_PATH, AudioRecordingService as AudioRecordingServiceInterface} from './interfaces/audio-recording';
 
 
@@ -29,15 +29,12 @@ export class AudioRecordingService implements AudioRecordingServiceInterface {
   private audioContext!: AudioContext;
   private source!: MediaStreamAudioSourceNode;
   private audioBuffer: Uint8Array[] = [];
-  volumeLevel: WritableSignal<number> = signal(0);
-  private lastVolumeUpdate: number = 0;
 
   async startRecording() {
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
 
-      // Hint capture rate; worklet still resamples to 16 kHz if ignored
-      this.audioContext = new AudioContext({sampleRate: 16000});
+      this.audioContext = new AudioContext();
       await this.audioContext.audioWorklet.addModule(
           this.audioWorkletModulePath);
 
@@ -49,19 +46,6 @@ export class AudioRecordingService implements AudioRecordingServiceInterface {
 
       workletNode.port.onmessage = (event) => {
         const audioData = event.data;
-        
-        const now = Date.now();
-        if (now - this.lastVolumeUpdate > 100) {
-          let sumSquares = 0.0;
-          for (let i = 0; i < audioData.length; i++) {
-            sumSquares += audioData[i] * audioData[i];
-          }
-          const rms = Math.sqrt(sumSquares / audioData.length);
-          const volume = Math.min(1, Math.max(0, rms * 15));
-          this.volumeLevel.set(volume);
-          this.lastVolumeUpdate = now;
-        }
-
         const pcmBlob = this.float32ToPCM(audioData);
         this.audioBuffer.push(pcmBlob);
       };
@@ -83,7 +67,6 @@ export class AudioRecordingService implements AudioRecordingServiceInterface {
     if (this.stream) {
       this.stream.getTracks().forEach((track) => track.stop());
     }
-    this.volumeLevel.set(0);
   }
 
   getCombinedAudioBuffer(): Uint8Array|void {

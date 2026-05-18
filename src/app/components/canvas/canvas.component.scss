@@ -28,6 +28,7 @@
 .canvas-container {
   width: 100%;
   height: 100%;
+  background: var(--builder-canvas-container-background);
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -39,6 +40,7 @@
 }
 
 .canvas-header {
+  background: var(--builder-canvas-header-background);
   padding: 16px 24px;
   border-bottom: 2px solid var(--builder-border-color);
   display: flex;
@@ -51,6 +53,7 @@
     font-size: 18px;
     font-weight: 600;
     font-family: 'Google Sans', 'Helvetica Neue', sans-serif;
+    background: var(--builder-canvas-header-title-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -62,11 +65,13 @@
   gap: 8px;
 
   button {
+    background: var(--builder-button-background-color);
     border: 1px solid var(--builder-button-border-color);
     color: var(--builder-button-text-color);
     transition: all 0.3s ease;
 
     &:hover {
+      background: var(--builder-button-hover-background-color);
       border-color: var(--builder-button-hover-border-color);
       transform: translateY(-1px);
     }
@@ -77,6 +82,7 @@
   flex: 1;
   position: relative;
   overflow: hidden;
+  background-color: var(--builder-canvas-workspace-background);
   min-height: 0;
   width: 100%;
   height: 100%;
@@ -88,6 +94,8 @@
   top: 0;
   left: 0;
   right: 0;
+  z-index: 1000;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
   border-bottom: 2px solid rgba(59, 130, 246, 0.3);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 
@@ -98,11 +106,13 @@
     gap: 16px;
 
     .back-to-main-btn {
+      background: rgba(255, 255, 255, 0.1);
       color: white;
       border: 1px solid rgba(255, 255, 255, 0.2);
       transition: all 0.2s ease;
 
       &:hover {
+        background: rgba(255, 255, 255, 0.2);
         transform: scale(1.05);
       }
 
@@ -169,6 +179,7 @@
 }
 
 ::ng-deep vflow .root-svg {
+  background-color: var(--builder-canvas-workspace-background) !important;
   color: var(--builder-text-primary-color) !important;
   width: 100% !important;
   height: 100% !important;
@@ -197,9 +208,11 @@
   transform: translate(-50%, -50%);
   text-align: center;
   pointer-events: none;
+  z-index: 1;
 }
 
 .instruction-content {
+  background: var(--builder-canvas-instruction-background);
   backdrop-filter: blur(10px);
   border: 2px solid var(--builder-canvas-instruction-border);
   border-radius: 16px;
@@ -257,10 +270,12 @@
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 10;
   animation: slideDown 0.3s ease-out;
 }
 
 .connection-indicator-content {
+  background: linear-gradient(135deg, #1b73e8 0%, #4285f4 100%);
   color: white;
   padding: 12px 20px;
   border-radius: 24px;
@@ -284,6 +299,7 @@
   }
 
   button {
+    background: rgba(255, 255, 255, 0.2);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.3);
     width: 32px;
@@ -291,6 +307,7 @@
     min-width: 32px;
 
     &:hover {
+      background: rgba(255, 255, 255, 0.3);
       transform: scale(1.1);
     }
 
@@ -315,6 +332,7 @@
 }
 
 .canvas-footer {
+  background: var(--builder-canvas-header-background);
   padding: 12px 24px;
   border-top: 1px solid var(--builder-border-color);
   display: flex;
@@ -355,6 +373,22 @@
 
 // Drag over effect
 .canvas-workspace.drag-over {
+  background: radial-gradient(
+      circle at 20% 50%,
+      rgba(66, 133, 244, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(52, 168, 83, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 80%,
+      rgba(251, 188, 4, 0.1) 0%,
+      transparent 50%
+    ),
+    #131314;
 
   &::before {
     content: '';
@@ -418,6 +452,7 @@
 
 .custom-node {
   width: 340px;
+  background: var(--builder-canvas-node-background);
   border: 1px solid var(--builder-canvas-node-border);
   border-radius: 8px;
   align-items: center;
@@ -445,6 +480,7 @@
 }
 
 :host ::ng-deep .default-group-node {
+  background-color: var(--builder-canvas-group-background) !important;
   border: 2px solid var(--builder-canvas-group-border) !important;
 }
 
@@ -470,6 +506,7 @@
   margin-left: 8px;
   padding: 2px 6px;
   border-radius: 999px;
+  background: var(--builder-canvas-node-badge-background);
   color: var(--builder-accent-color);
   font-size: 11px;
   font-weight: 600;
@@ -499,6 +536,7 @@
   color: var(--builder-text-primary-color);
 
   &:hover {
+    background-color: var(--builder-item-hover-color);
   }
 
   .tool-item-icon {
@@ -564,6 +602,7 @@
 
 .callback-type {
   font-size: 11px;
+  background: var(--builder-chip-background-color);
   color: var(--builder-accent-color);
   padding: 2px 6px;
   border-radius: 4px;
@@ -572,6 +611,7 @@
 }
 
 .add-callback-btn {
+  background: none;
   border: none;
   cursor: pointer;
   border-radius: 4px;
@@ -588,6 +628,7 @@
 
   &:hover {
     color: var(--builder-text-primary-color);
+    background-color: var(--builder-item-hover-color);
     transform: scale(1.1);
   }
 }
@@ -628,6 +669,7 @@
   margin-right: 4px;
 
   .action-btn {
+    background: none;
     color: var(--builder-text-secondary-color);
     border: none;
     width: 32px;
@@ -642,6 +684,7 @@
 
     &:hover {
       color: var(--builder-text-primary-color);
+      background-color: var(--builder-item-hover-color);
       transform: scale(1.1);
     }
 
@@ -660,6 +703,7 @@
 }
 
 .add-tool-btn {
+  background: none;
   border: none;
   cursor: pointer;
   border-radius: 4px;
@@ -676,6 +720,7 @@
 
   &:hover {
     color: var(--builder-text-primary-color);
+    background-color: var(--builder-item-hover-color);
     transform: scale(1.1);
   }
 }
@@ -702,6 +747,7 @@
   height: 48px;
   border-radius: 50%;
   border: 2px solid var(--builder-accent-color);
+  background: var(--builder-canvas-add-btn-background);
   color: var(--builder-accent-color);
   display: flex;
   align-items: center;
@@ -723,6 +769,7 @@
   &:hover {
     transform: scale(1.05);
     box-shadow: var(--builder-canvas-add-btn-shadow);
+    background: var(--builder-canvas-add-btn-hover-background);
   }
 
   &:focus-visible {
@@ -739,6 +786,7 @@
   cursor: pointer;
   margin-left: 20px;
   margin-top: 20px;
+  z-index: 9999;
 }
 
 .custom-node {
@@ -785,6 +833,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
+  background: var(--builder-canvas-workflow-chip-background);
   border: 1px solid var(--builder-canvas-workflow-chip-border);
   border-radius: 16px;
   color: var(--builder-accent-color);
@@ -820,15 +869,18 @@
   padding: 16px;
   border-radius: 8px;
   text-align: center;
+  background: var(--builder-canvas-empty-group-background);
   border: 2px dashed var(--builder-canvas-empty-group-border);
   transition: all 0.3s ease;
 
   &:hover {
+    background: var(--builder-canvas-empty-group-hover-background);
     border-color: var(--builder-canvas-empty-group-hover-border);
   }
 
   button {
     border: 2px solid var(--builder-accent-color);
+    background-color: var(--builder-canvas-empty-group-btn-background);
     color: var(--builder-accent-color);
     width: 40px;
     height: 40px;
@@ -839,6 +891,7 @@
     transition: all 0.2s ease;
 
     &:hover {
+      background-color: var(--builder-canvas-empty-group-btn-hover-background);
       transform: scale(1.1);
       box-shadow: var(--builder-canvas-add-btn-shadow);
     }

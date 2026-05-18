@@ -54,8 +54,7 @@ describe('MarkdownComponent', () => {
        expect(element.querySelector('strong')?.textContent).toBe('bold');
      }));
 
-  // Skipped: Thought styling removed in UI refactor
-  xit('should apply italic style when thought is true', () => {
+  it('should apply italic style when thought is true', () => {
     fixture.componentRef.setInput('thought', true);
     fixture.detectChanges();
     const markdownElement: HTMLElement|null =
@@ -64,8 +63,7 @@ describe('MarkdownComponent', () => {
     expect(markdownElement?.style.color).toBe('rgb(154, 160, 166)');
   });
 
-  // Skipped: Thought styling removed in UI refactor
-  xit('should apply normal style when thought is false', () => {
+  it('should apply normal style when thought is false', () => {
     fixture.componentRef.setInput('thought', false);
     fixture.detectChanges();
     const markdownElement: HTMLElement|null =

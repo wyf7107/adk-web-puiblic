@@ -29,7 +29,9 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
   imports: [CommonModule],
   template: `
     <div class="mock-markdown-content">
-      <span>
+      <span [ngStyle]="{
+              'font-style': thought() ? 'italic' : 'normal',
+            }">
           {{ text() }}
       </span>
     </div>
@@ -39,5 +41,4 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
 export class MockMarkdownComponent implements MarkdownComponentInterface {
   text = input<string>('');
   thought = input<boolean>(false);
-  isReadme = input<boolean>(false);
 }

@@ -15,32 +15,39 @@
  * limitations under the License.
  */
 
-import {AsyncPipe, NgComponentOutlet} from '@angular/common';
-import {AfterViewInit, ChangeDetectionStrategy, Component, ComponentRef, computed, effect, EnvironmentInjector, inject, input, OnInit, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {AsyncPipe, NgComponentOutlet, NgTemplateOutlet} from '@angular/common';
+import {AfterViewInit, ChangeDetectionStrategy, Component, computed, effect, EnvironmentInjector, inject, input, output, runInInjectionContext, signal, Type, viewChild, ViewContainerRef, type WritableSignal} from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {MatMiniFabButton} from '@angular/material/button';
+import {MatOption} from '@angular/material/core';
+import {MatFormField} from '@angular/material/form-field';
+import {MatIcon} from '@angular/material/icon';
+import {MatInput} from '@angular/material/input';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
+import {MatSelect, MatSelectChange} from '@angular/material/select';
 import {MatTab, MatTabChangeEvent, MatTabGroup, MatTabLabel} from '@angular/material/tabs';
+import {MatTooltip} from '@angular/material/tooltip';
 import {type SafeHtml} from '@angular/platform-browser';
-import {Observable, of, forkJoin} from 'rxjs';
-import {first} from 'rxjs/operators';
+import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {combineLatest, Observable, of} from 'rxjs';
+import {first, map, startWith, switchMap} from 'rxjs/operators';
 
 import {EvalCase} from '../../core/models/Eval';
 import {Session, SessionState} from '../../core/models/Session';
-import {Span} from '../../core/models/Trace';
+import {SpanNode} from '../../core/models/Trace';
 import {Blob, Event, LlmRequest, LlmResponse} from '../../core/models/types';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {LOGO_COMPONENT} from '../../injection_tokens';
 import {ArtifactTabComponent, getMediaTypeFromMimetype} from '../artifact-tab/artifact-tab.component';
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
-import {TestsTabComponent} from '../tests-tab/tests-tab.component';
+import {SessionTabComponent} from '../session-tab/session-tab.component';
 import {StateTabComponent} from '../state-tab/state-tab.component';
+import {ThemeToggle} from '../theme-toggle/theme-toggle';
 import {TraceTabComponent} from '../trace-tab/trace-tab.component';
-import {EventTabComponent} from '../event-tab/event-tab.component';
 
-import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
-import {AnalyticsService} from '../../core/services/analytics.service';
 import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
 
 /**
@@ -54,23 +61,37 @@ import {SidePanelMessagesInjectionToken} from './side-panel.component.i18n';
   standalone: true,
   imports: [
     AsyncPipe,
+    FormsModule,
+    NgComponentOutlet,
+    NgTemplateOutlet,
+    MatTooltip,
     MatTabGroup,
     MatTab,
     MatTabLabel,
+    ThemeToggle,
     TraceTabComponent,
     StateTabComponent,
     ArtifactTabComponent,
-    EventTabComponent,
+    SessionTabComponent,
+    MatPaginator,
+    MatMiniFabButton,
+    MatIcon,
+    NgxJsonViewerModule,
+    MatOption,
+    MatSelect,
+    ReactiveFormsModule,
     MatProgressSpinner,
-    TestsTabComponent,
+    MatFormField,
+    MatInput,
   ],
 })
-export class SidePanelComponent implements AfterViewInit, OnInit {
+export class SidePanelComponent implements AfterViewInit {
   protected readonly Object = Object;
+
   appName = input('');
   userId = input('');
   sessionId = input('');
-  traceData = input<Span[]>([]);
+  traceData = input<SpanNode[]>([]);
   eventData = input(new Map<string, Event>());
   currentSessionState = input<SessionState|undefined>();
   artifacts = input<Blob[]>([]);
@@ -78,49 +99,38 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   selectedEventIndex = input<number|undefined>();
   renderedEventGraph = input<SafeHtml|undefined>();
   rawSvgString = input<string|null>(null);
-  selectedEventGraphPath = input<string>('');
   llmRequest = input<LlmRequest|undefined>();
   llmResponse = input<LlmResponse|undefined>();
   showSidePanel = input(false);
-  readonly isApplicationSelectorEnabledObs = input<Observable<boolean>>(of(false));
+  isApplicationSelectorEnabledObs = input<Observable<boolean>>(of(false));
+  apps$ = input<Observable<string[]|undefined>>(of([]));
+  isLoadingApps = input<WritableSignal<boolean>>(signal(false));
+  selectedAppControl = input(new FormControl<string>('', {
+    nonNullable: true,
+  }));
   readonly isBuilderMode = input<boolean>(false);
   readonly disableBuilderIcon = input<boolean>(false);
-  readonly hasSubWorkflows = input<boolean>(false);
-  readonly graphsAvailable = input<boolean>(true);
-  readonly invocationDisplayMap = input<Map<string, string>>(new Map());
-  readonly forceGraphTab = input(false);
-  readonly isViewOnlySession = input(false);
-  readonly isViewOnlyAppNameMismatch = input(false);
 
   readonly closePanel = output<void>();
+  readonly appSelectionChange = output<MatSelectChange>();
   readonly tabChange = output<MatTabChangeEvent>();
   readonly sessionSelected = output<Session>();
   readonly sessionReloaded = output<Session>();
   readonly evalCaseSelected = output<EvalCase>();
-  readonly editEvalCaseRequested = output<EvalCase>();
-  readonly testSelected = output<{ testName: string; events: any[] }>();
   readonly evalSetIdSelected = output<string>();
   readonly returnToSession = output<boolean>();
   readonly evalNotInstalled = output<string>();
   readonly page = output<PageEvent>();
-  readonly switchToEvent = output<string>();
   readonly closeSelectedEvent = output<void>();
   readonly openImageDialog = output<string|null>();
   readonly openAddItemDialog = output<boolean>();
   readonly enterBuilderMode = output<boolean>();
-  readonly showAgentStructureGraph = output<boolean>();
-  readonly switchToTraceView = output<void>();
-  readonly drillDownNodePath = output<string>();
-  readonly selectEventById = output<string>();
-  readonly jumpToInvocation = output<string>();
 
-  readonly sessionTabComponent = undefined;
+  readonly sessionTabComponent = viewChild(SessionTabComponent);
   readonly evalTabComponent = viewChild(EvalTabComponent);
   readonly evalTabContainer =
       viewChild('evalTabContainer', {read: ViewContainerRef});
-  readonly tabGroup = viewChild(MatTabGroup);
 
-  protected readonly analyticsService = inject(AnalyticsService);
   readonly logoComponent: Type<Component>|null = inject(LOGO_COMPONENT, {
     optional: true,
   });
@@ -129,122 +139,6 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   readonly evalTabComponentClass = inject(EVAL_TAB_COMPONENT, {optional: true});
   private readonly environmentInjector = inject(EnvironmentInjector);
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
-  protected readonly traceService = inject(TRACE_SERVICE);
-  readonly selectedSpan = toSignal(this.traceService.selectedTraceRow$);
-
-  selectedIndex = 0;
-  private pendingEvalCaseSelection = signal<{ evalSetId: string, evalCase: EvalCase } | undefined>(undefined);
-  private pendingEvalResultSelection = signal<{ evalSetId: string, timestamp: string, evalCase?: EvalCase } | undefined>(undefined);
-  protected readonly evalTabRef = signal<ComponentRef<EvalTabComponent> | null>(null);
-
-  constructor() {
-    effect(() => {
-      const event = this.selectedEvent();
-      const span = this.selectedSpan();
-      const tabGroup = this.tabGroup();
-      if ((event || span) && tabGroup) {
-        // Event tab is index 0. Re-activate it if we select an event and another tab is active.
-        if (tabGroup.selectedIndex !== 0) {
-          this.selectedIndex = 0;
-        }
-      }
-    });
-
-    effect(() => {
-      const container = this.evalTabContainer();
-      if (container) {
-        this.initEvalTab();
-      } else {
-        this.evalTabRef.set(null);
-      }
-    });
-
-    effect(() => {
-      const ref = this.evalTabRef();
-      if (ref) {
-        ref.setInput('appName', this.appName());
-        ref.setInput('userId', this.userId());
-        ref.setInput('sessionId', this.sessionId());
-      }
-    });
-
-    effect(() => {
-      const ref = this.evalTabRef();
-      const pending = this.pendingEvalCaseSelection();
-      if (ref && pending) {
-        ref.instance.selectEvalSet(pending.evalSetId);
-        ref.instance.selectedEvalTab.set('cases');
-        ref.instance.selectedEvalCase.set(pending.evalCase);
-        this.pendingEvalCaseSelection.set(undefined);
-      }
-    });
-
-    effect(() => {
-      const ref = this.evalTabRef();
-      const pending = this.pendingEvalResultSelection();
-      if (ref && pending) {
-        ref.instance.selectEvalSet(pending.evalSetId);
-        ref.instance.selectedHistoryRun.set(pending.timestamp);
-        if (pending.evalCase) {
-          ref.instance.selectedEvalTab.set('cases');
-          ref.instance.selectedEvalCase.set(pending.evalCase);
-        } else {
-          ref.instance.selectedEvalTab.set('history');
-        }
-        this.pendingEvalResultSelection.set(undefined);
-      }
-    });
-  }
-
-  ngOnInit() {}
-
-  onTabChange(event: MatTabChangeEvent) {
-    this.tabChange.emit(event);
-    this.selectedIndex = event.index;
-  }
-
-  switchToEvalTab() {
-    this.isEvalEnabledObs.pipe(first()).subscribe((isEvalEnabled) => {
-      if (!isEvalEnabled) return;
-
-      forkJoin([
-        this.isArtifactsTabEnabledObs.pipe(first()),
-        this.isTestsEnabledObs.pipe(first()),
-      ]).subscribe(([artifactsEnabled, testsEnabled]) => {
-        let index = 2; // Info and State are always there
-        if (artifactsEnabled) index++;
-        if (testsEnabled) index++;
-        this.selectedIndex = index;
-      });
-    });
-  }
-
-  selectEvalCase(evalSetId: string, evalCase: EvalCase) {
-    const tab = this.evalTabComponent();
-    if (tab) {
-      tab.selectEvalSet(evalSetId);
-      tab.selectedEvalTab.set('cases');
-      tab.selectedEvalCase.set(evalCase);
-    } else {
-      this.pendingEvalCaseSelection.set({ evalSetId, evalCase });
-    }
-  }
-
-  selectEvalResult(evalSetId: string, timestamp: string, evalCase?: EvalCase) {
-    const tab = this.evalTabComponent();
-    if (tab) {
-      tab.selectEvalSet(evalSetId);
-      tab.selectedHistoryRun.set(timestamp);
-      if (evalCase) {
-        tab.selectedEvalTab.set('cases');
-        tab.selectedEvalCase.set(evalCase);
-      } else {
-        tab.selectedEvalTab.set('history');
-      }
-    } else {
-      this.pendingEvalResultSelection.set({ evalSetId, timestamp, evalCase });
-    }
-  }
 
   // Feature flag references for use in template.
   readonly isAlwaysOnSidePanelEnabledObs =
@@ -253,7 +147,6 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   readonly isArtifactsTabEnabledObs =
       this.featureFlagService.isArtifactsTabEnabled();
   readonly isEvalEnabledObs = this.featureFlagService.isEvalEnabled();
-  readonly isTestsEnabledObs = this.featureFlagService.isTestsEnabled();
   readonly isTokenStreamingEnabledObs =
       this.featureFlagService.isTokenStreamingEnabled();
   readonly isMessageFileUploadEnabledObs =
@@ -262,12 +155,62 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
       this.featureFlagService.isManualStateUpdateEnabled();
   readonly isBidiStreamingEnabledObs =
       this.featureFlagService.isBidiStreamingEnabled;
+  protected readonly isSessionsTabReorderingEnabledObs =
+      this.featureFlagService.isSessionsTabReorderingEnabled();
 
-  readonly filteredSelectedEvent = computed(() => {
-    return this.selectedEvent() as Event | undefined;
+  // Agent search
+  readonly agentSearchControl = new FormControl('', { nonNullable: true });
+  readonly filteredApps$: Observable<string[] | undefined> = toObservable(this.apps$).pipe(
+    switchMap(appsObservable =>
+      combineLatest([
+        appsObservable,
+        this.agentSearchControl.valueChanges.pipe(startWith(''))
+      ])
+    ),
+    map(([apps, searchTerm]) => {
+      if (!apps) {
+        return apps;
+      }
+      if (!searchTerm || searchTerm.trim() === '') {
+        return apps;
+      }
+      const lowerSearch = searchTerm.toLowerCase().trim();
+      return apps.filter(app => app.toLowerCase().startsWith(lowerSearch));
+    })
+  );
+
+  readonly artifactDeltaArray = computed(() => {
+    const artifactDelta = this.selectedEvent()?.actions?.artifactDelta;
+    if (!artifactDelta || Object.keys(artifactDelta).length === 0) {
+      return [];
+    }
+
+    const artifacts: Array<{
+      id: string; versionId: number; data: string; mimeType: string;
+      mediaType: string
+    }> = [];
+    for (const [id, artifactData] of Object.entries(artifactDelta)) {
+      const data = artifactData as {
+        data?: string;
+        mimeType?: string
+      };
+      artifacts.push({
+        id,
+        versionId: 1,
+        data: data.data || '',
+        mimeType: data.mimeType || '',
+        mediaType: getMediaTypeFromMimetype(data.mimeType || ''),
+      });
+    }
+    return artifacts;
   });
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    // Wait one tick until the eval tab container is ready.
+    setTimeout(() => {
+      this.initEvalTab();
+    }, 500);
+  }
 
   /**
    * Dynamically create the eval tab. We must do this programmatically until
@@ -277,16 +220,20 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   private initEvalTab() {
     this.isEvalEnabledObs.pipe(first()).subscribe((isEvalEnabled) => {
       if (isEvalEnabled) {
-        const container = this.evalTabContainer();
-        if (!container) return;
-        container.clear();
-
-        const evalTabComponent = container.createComponent(
+        const evalTabComponent = this.evalTabContainer()?.createComponent(
             this.evalTabComponentClass ?? EvalTabComponent, {
               environmentInjector: this.environmentInjector,
             });
         if (!evalTabComponent) return;
 
+        runInInjectionContext(this.environmentInjector, () => {
+          // Ensure inputs are updated dynamically using effect.
+          effect(() => {
+            evalTabComponent.setInput('appName', this.appName());
+            evalTabComponent.setInput('userId', this.userId());
+            evalTabComponent.setInput('sessionId', this.sessionId());
+          });
+        });
         evalTabComponent.instance.sessionSelected.subscribe(
             (session: Session) => {
               this.sessionSelected.emit(session);
@@ -294,10 +241,6 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
         evalTabComponent.instance.evalCaseSelected.subscribe(
             (evalCase: EvalCase) => {
               this.evalCaseSelected.emit(evalCase);
-            });
-        evalTabComponent.instance.editEvalCaseRequested.subscribe(
-            (evalCase: EvalCase) => {
-              this.editEvalCaseRequested.emit(evalCase);
             });
         evalTabComponent.instance.evalSetIdSelected.subscribe(
             (evalSetId: string) => {
@@ -311,8 +254,6 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
             (message: string) => {
               this.evalNotInstalled.emit(message);
             });
-
-        this.evalTabRef.set(evalTabComponent);
       }
     });
   }

@@ -28,6 +28,7 @@ describe('TraceTreeComponent', () => {
     const traceService = {
       ...jasmine.createSpyObj<TraceService>([
         'selectedRow',
+        'setHoveredMessages',
       ]),
       selectedTraceRow$: of(undefined),
       eventData$: of(new Map<string, any>()),

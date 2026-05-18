@@ -27,11 +27,10 @@ import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
 import {MockThemeService} from '../../core/services/testing/mock-theme.service';
 import {MatDialog} from '@angular/material/dialog';
-import { SnackbarService } from '../../core/services/snackbar.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {initTestBed} from '../../testing/utils';
-import {AnalyticsService} from '../../core/services/analytics.service';
 
 describe('BuilderTabsComponent - Callback Support', () => {
   let component: BuilderTabsComponent;
@@ -44,7 +43,7 @@ describe('BuilderTabsComponent - Callback Support', () => {
     ]);
     const mockFeatureFlagService = new MockFeatureFlagService();
     const mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    const mockSnackBar = jasmine.createSpyObj('SnackbarService', ['open']);
+    const mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
     const mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     initTestBed();  // required for 1p compat
@@ -55,11 +54,10 @@ describe('BuilderTabsComponent - Callback Support', () => {
         {provide: AGENT_SERVICE, useValue: agentServiceSpy},
         {provide: FEATURE_FLAG_SERVICE, useValue: mockFeatureFlagService},
         {provide: MatDialog, useValue: mockDialog},
-        {provide: SnackbarService, useValue: mockSnackBar},
+        {provide: MatSnackBar, useValue: mockSnackBar},
         {provide: Router, useValue: mockRouter},
         provideNoopAnimations(),
         {provide: THEME_SERVICE, useClass: MockThemeService},
-        {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     }).compileComponents();
 

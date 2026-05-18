@@ -26,7 +26,6 @@ import { EvalService } from '../../../../core/services/eval.service';
 import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import {EVAL_SERVICE} from '../../../../core/services/interfaces/eval';
-import {AnalyticsService} from '../../../../core/services/analytics.service';
 
 describe('AddEvalSessionDialogComponent', () => {
   let component: AddEvalSessionDialogComponent;
@@ -52,7 +51,6 @@ describe('AddEvalSessionDialogComponent', () => {
           useValue: {},
         },
         { provide: EVAL_SERVICE, useValue: evalService },
-        {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     }).compileComponents();
 
@@ -63,31 +61,5 @@ describe('AddEvalSessionDialogComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should ask for confirmation if case already exists and not proceed if cancelled', () => {
-    spyOn(window, 'confirm').and.returnValue(false);
-    const evalService = TestBed.inject(EVAL_SERVICE) as unknown as jasmine.SpyObj<any>;
-    
-    component.data.existingCases = ['existing_case'];
-    component.newCaseId = 'existing_case';
-    
-    component.createNewEvalCase();
-    
-    expect(window.confirm).toHaveBeenCalled();
-    expect(evalService.addCurrentSession).not.toHaveBeenCalled();
-  });
-
-  it('should ask for confirmation if case already exists and proceed if confirmed', () => {
-    spyOn(window, 'confirm').and.returnValue(true);
-    const evalService = TestBed.inject(EVAL_SERVICE) as unknown as jasmine.SpyObj<any>;
-    
-    component.data.existingCases = ['existing_case'];
-    component.newCaseId = 'existing_case';
-    
-    component.createNewEvalCase();
-    
-    expect(window.confirm).toHaveBeenCalled();
-    expect(evalService.addCurrentSession).toHaveBeenCalled();
   });
 });

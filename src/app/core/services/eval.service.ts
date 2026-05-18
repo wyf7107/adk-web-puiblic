@@ -16,12 +16,11 @@
  */
 
 import {HttpClient} from '@angular/common/http';
-import {Injectable, inject, signal} from '@angular/core';
-import {Observable, of} from 'rxjs';
-import {tap} from 'rxjs/operators';
+import {Injectable, inject} from '@angular/core';
+import {Observable} from 'rxjs';
 
 import {URLUtil} from '../../../utils/url-util';
-import {EvalCase, EvalMetric, UserSimulatorConfig} from '../models/Eval';
+import {EvalCase} from '../models/Eval';
 import {EvalService as EvalServiceInterface} from './interfaces/eval';
 
 @Injectable({
@@ -32,56 +31,19 @@ export class EvalService implements EvalServiceInterface {
 
   apiServerDomain = URLUtil.getApiServerBaseUrl();
 
-  metricsInfo = signal<any[]>([]);
-  private metricsInfoCache = new Map<string, any[]>();
-
   getEvalSets(appName: string) {
     if (this.apiServerDomain != undefined) {
-      const url = this.apiServerDomain + `/dev/apps/${appName}/eval_sets`;
+      const url = this.apiServerDomain + `/apps/${appName}/eval_sets`;
       return this.http.get<any>(url);
     }
     return new Observable<any>();
   }
 
-  getMetricsInfo(appName: string) {
-    if (this.metricsInfoCache.has(appName)) {
-      this.metricsInfo.set(this.metricsInfoCache.get(appName)!);
-      return of({metricsInfo: this.metricsInfoCache.get(appName)!});
-    }
-    if (this.apiServerDomain != undefined) {
-      const url = this.apiServerDomain + `/dev/apps/${appName}/metrics-info`;
-      return this.http.get<any>(url).pipe(
-        tap(res => {
-          const info = res.metricsInfo || [];
-          this.metricsInfoCache.set(appName, info);
-          this.metricsInfo.set(info);
-        })
-      );
-    }
-    return new Observable<any>();
-  }
-
-  createNewEvalSet(appName: string, evalSetId: string, executionMode: 'live' | 'replay' = 'live') {
+  createNewEvalSet(appName: string, evalSetId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/dev/apps/${appName}/eval-sets`;
-    return this.http.post<any>(url, {
-      eval_set: {
-        eval_set_id: evalSetId,
-        model_execution_mode: executionMode,
-        tool_execution_mode: executionMode,
-        eval_cases: []
-      }
-    });
-    }
-    return new Observable<any>();
-  }
-
-  getEvalSet(appName: string, evalSetId: string) {
-    if (this.apiServerDomain != undefined) {
-      const url =
-        this.apiServerDomain + `/dev/apps/${appName}/eval-sets/${evalSetId}`;
-      return this.http.get<any>(url, {});
+      this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}`;
+    return this.http.post<any>(url, {});
     }
     return new Observable<any>();
   }
@@ -89,7 +51,7 @@ export class EvalService implements EvalServiceInterface {
   listEvalCases(appName: string, evalSetId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}/evals`;
+      this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}/evals`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -104,7 +66,7 @@ export class EvalService implements EvalServiceInterface {
   ) {
     const url =
       this.apiServerDomain +
-      `/dev/apps/${appName}/eval_sets/${evalSetId}/add_session`;
+      `/apps/${appName}/eval_sets/${evalSetId}/add_session`;
     return this.http.post<any>(url, {
       evalId: evalId,
       sessionId: sessionId,
@@ -112,35 +74,23 @@ export class EvalService implements EvalServiceInterface {
     });
   }
 
-  // Live mode is signalled to the backend by the presence of
-  // `live_model_config`, not a boolean; an empty object uses its default
-  // timeout. `userSimulatorConfig` (e.g. `llm_audio`) synthesizes user turns.
   runEval(
     appName: string,
     evalSetId: string,
-    evalCaseIds: string[],
-    evalMetrics: EvalMetric[],
-    useLive: boolean = false,
-    userSimulatorConfig?: UserSimulatorConfig,
+    evalIds: string[],
+    evalMetrics: any[],
   ) {
     const url =
-      this.apiServerDomain + `/dev/apps/${appName}/eval-sets/${evalSetId}/run`;
-    const body: any = {
-      eval_case_ids: evalCaseIds,
-      eval_metrics: evalMetrics,
-    };
-    if (useLive) {
-      body.live_model_config = {};
-    }
-    if (userSimulatorConfig) {
-      body.user_simulator_config = userSimulatorConfig;
-    }
-    return this.http.post<any>(url, body);
+      this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}/run_eval`;
+    return this.http.post<any>(url, {
+      evalIds: evalIds,
+      evalMetrics: evalMetrics,
+    });
   }
 
   listEvalResults(appName: string) {
     if (this.apiServerDomain != undefined) {
-      const url = this.apiServerDomain + `/dev/apps/${appName}/eval_results`;
+      const url = this.apiServerDomain + `/apps/${appName}/eval_results`;
 
       return this.http.get<any>(url, {});
     }
@@ -150,7 +100,7 @@ export class EvalService implements EvalServiceInterface {
   getEvalResult(appName: string, evalResultId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/dev/apps/${appName}/eval_results/${encodeURIComponent(evalResultId)}`;
+        this.apiServerDomain + `/apps/${appName}/eval_results/${evalResultId}`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -160,7 +110,7 @@ export class EvalService implements EvalServiceInterface {
     if (this.apiServerDomain != undefined) {
       const url =
         this.apiServerDomain +
-        `/dev/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -170,7 +120,7 @@ export class EvalService implements EvalServiceInterface {
       appName: string, evalSetId: string, evalCaseId: string,
       updatedEvalCase: EvalCase) {
     const url = this.apiServerDomain +
-      `/dev/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
     return this.http.put<any>(url, {
       evalId: evalCaseId,
       conversation: updatedEvalCase.conversation,
@@ -181,12 +131,7 @@ export class EvalService implements EvalServiceInterface {
 
   deleteEvalCase(appName: string, evalSetId: string, evalCaseId: string) {
     const url = this.apiServerDomain +
-      `/dev/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
-    return this.http.delete<any>(url, {});
-  }
-
-  deleteEvalSet(appName: string, evalSetId: string) {
-    const url = this.apiServerDomain + `/dev/apps/${appName}/eval-sets/${evalSetId}`;
+        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
     return this.http.delete<any>(url, {});
   }
 }

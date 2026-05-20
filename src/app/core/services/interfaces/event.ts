@@ -32,8 +32,8 @@ export type EventIdentifier = Pick<Event, 'id'|'invocationId'|'timestamp'>;
  * Service to provide methods to handle events.
  */
 export declare abstract class EventService {
-  abstract getEventTrace(event: EventIdentifier): Observable<any>;
-  abstract getTrace(sessionId: string): Observable<any>;
+  abstract getEventTrace(appName: string, event: EventIdentifier): Observable<any>;
+  abstract getTrace(appName: string, sessionId: string): Observable<any>;
   abstract getEvent(
       userId: string,
       appName: string,

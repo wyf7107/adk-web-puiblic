@@ -50,10 +50,10 @@ describe('EventService', () => {
   });
 
   describe('getEventTrace', () => {
-    it('should call GET /debug/trace/{id}', () => {
-      service.getEventTrace(EVENT_ID).subscribe();
+    it('should call GET /dev/apps/{appName}/debug/trace/{id}', () => {
+      service.getEventTrace('app1', EVENT_ID).subscribe();
       const req = httpTestingController.expectOne(
-          'http://test.com/debug/trace/trace1',
+          'http://test.com/dev/apps/app1/debug/trace/trace1',
       );
       expect(req.request.method).toEqual('GET');
       req.flush({});
@@ -61,10 +61,10 @@ describe('EventService', () => {
   });
 
   describe('getTrace', () => {
-    it('should call GET /debug/trace/session/{sessionId}', () => {
-      service.getTrace('session1').subscribe();
+    it('should call GET /dev/apps/{appName}/debug/trace/session/{sessionId}', () => {
+      service.getTrace('app1', 'session1').subscribe();
       const req = httpTestingController.expectOne(
-          'http://test.com/debug/trace/session/session1',
+          'http://test.com/dev/apps/app1/debug/trace/session/session1',
       );
       expect(req.request.method).toEqual('GET');
       req.flush({});
@@ -72,11 +72,11 @@ describe('EventService', () => {
   });
 
   describe('getEvent', () => {
-    it('should call GET /apps/{appName}/users/{userId}/sessions/{sessionId}/events/{eventId}/graph',
+    it('should call GET /dev/apps/{appName}/users/{userId}/sessions/{sessionId}/events/{eventId}/graph',
        () => {
          service.getEvent('user1', 'app1', 'session1', 'event1').subscribe();
          const req = httpTestingController.expectOne(
-             'http://test.com/apps/app1/users/user1/sessions/session1/events/event1/graph',
+             'http://test.com/dev/apps/app1/users/user1/sessions/session1/events/event1/graph',
          );
          expect(req.request.method).toEqual('GET');
          req.flush({});

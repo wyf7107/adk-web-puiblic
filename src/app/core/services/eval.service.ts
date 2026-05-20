@@ -37,7 +37,7 @@ export class EvalService implements EvalServiceInterface {
 
   getEvalSets(appName: string) {
     if (this.apiServerDomain != undefined) {
-      const url = this.apiServerDomain + `/apps/${appName}/eval_sets`;
+      const url = this.apiServerDomain + `/dev/apps/${appName}/eval_sets`;
       return this.http.get<any>(url);
     }
     return new Observable<any>();
@@ -49,7 +49,7 @@ export class EvalService implements EvalServiceInterface {
       return of({metricsInfo: this.metricsInfoCache.get(appName)!});
     }
     if (this.apiServerDomain != undefined) {
-      const url = this.apiServerDomain + `/apps/${appName}/metrics-info`;
+      const url = this.apiServerDomain + `/dev/apps/${appName}/metrics-info`;
       return this.http.get<any>(url).pipe(
         tap(res => {
           const info = res.metricsInfo || [];
@@ -64,7 +64,7 @@ export class EvalService implements EvalServiceInterface {
   createNewEvalSet(appName: string, evalSetId: string, executionMode: 'live' | 'replay' = 'live') {
     if (this.apiServerDomain != undefined) {
       const url =
-      this.apiServerDomain + `/apps/${appName}/eval-sets`;
+        this.apiServerDomain + `/dev/apps/${appName}/eval-sets`;
     return this.http.post<any>(url, {
       eval_set: {
         eval_set_id: evalSetId,
@@ -80,7 +80,7 @@ export class EvalService implements EvalServiceInterface {
   getEvalSet(appName: string, evalSetId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}`;
+        this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -89,7 +89,7 @@ export class EvalService implements EvalServiceInterface {
   listEvalCases(appName: string, evalSetId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-      this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}/evals`;
+        this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}/evals`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -104,7 +104,7 @@ export class EvalService implements EvalServiceInterface {
   ) {
     const url =
       this.apiServerDomain +
-      `/apps/${appName}/eval_sets/${evalSetId}/add_session`;
+      `/dev/apps/${appName}/eval_sets/${evalSetId}/add_session`;
     return this.http.post<any>(url, {
       evalId: evalId,
       sessionId: sessionId,
@@ -119,7 +119,7 @@ export class EvalService implements EvalServiceInterface {
     evalMetrics: any[],
   ) {
     const url =
-      this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}/run_eval`;
+      this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}/run_eval`;
     return this.http.post<any>(url, {
       evalIds: evalIds,
       evalMetrics: evalMetrics,
@@ -128,7 +128,7 @@ export class EvalService implements EvalServiceInterface {
 
   listEvalResults(appName: string) {
     if (this.apiServerDomain != undefined) {
-      const url = this.apiServerDomain + `/apps/${appName}/eval_results`;
+      const url = this.apiServerDomain + `/dev/apps/${appName}/eval_results`;
 
       return this.http.get<any>(url, {});
     }
@@ -138,7 +138,7 @@ export class EvalService implements EvalServiceInterface {
   getEvalResult(appName: string, evalResultId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/apps/${appName}/eval_results/${encodeURIComponent(evalResultId)}`;
+        this.apiServerDomain + `/dev/apps/${appName}/eval_results/${encodeURIComponent(evalResultId)}`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -148,7 +148,7 @@ export class EvalService implements EvalServiceInterface {
     if (this.apiServerDomain != undefined) {
       const url =
         this.apiServerDomain +
-        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+        `/dev/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -158,7 +158,7 @@ export class EvalService implements EvalServiceInterface {
       appName: string, evalSetId: string, evalCaseId: string,
       updatedEvalCase: EvalCase) {
     const url = this.apiServerDomain +
-        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+      `/dev/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
     return this.http.put<any>(url, {
       evalId: evalCaseId,
       conversation: updatedEvalCase.conversation,
@@ -169,12 +169,12 @@ export class EvalService implements EvalServiceInterface {
 
   deleteEvalCase(appName: string, evalSetId: string, evalCaseId: string) {
     const url = this.apiServerDomain +
-        `/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
+      `/dev/apps/${appName}/eval_sets/${evalSetId}/evals/${evalCaseId}`;
     return this.http.delete<any>(url, {});
   }
 
   deleteEvalSet(appName: string, evalSetId: string) {
-    const url = this.apiServerDomain + `/apps/${appName}/eval_sets/${evalSetId}`;
+    const url = this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}`;
     return this.http.delete<any>(url, {});
   }
 }

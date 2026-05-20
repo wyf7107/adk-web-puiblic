@@ -774,9 +774,9 @@ export class BuilderTabsComponent {
 
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
-    this.agentService.agentBuildTmp(formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(appName, formData).subscribe((success) => {
       if (success) {
-        this.agentService.agentBuild(formData).subscribe((success) => {
+        this.agentService.agentBuild(appName, formData).subscribe((success) => {
           if (success) {
             this.router.navigate(['/'], {
               queryParams: { app: appName }

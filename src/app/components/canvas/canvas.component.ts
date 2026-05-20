@@ -1229,7 +1229,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const agentToolBoards = this.agentToolBoards();
     YamlUtils.generateYamlFile(rootAgent, formData, appName, agentToolBoards);
 
-    this.agentService.agentBuild(formData).subscribe((success) => {
+    this.agentService.agentBuild(appName, formData).subscribe((success) => {
       if (success) {
         this.router
           .navigate(["/"], {

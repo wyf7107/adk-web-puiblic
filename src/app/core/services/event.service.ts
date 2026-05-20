@@ -33,16 +33,16 @@ export class EventService implements EventServiceInterface {
   /**
    * Returns the trace data for a given event id.
    */
-  getEventTrace(event: EventIdentifier) {
-    const url = this.apiServerDomain + `/debug/trace/${event.id!}`;
+  getEventTrace(appName: string, event: EventIdentifier) {
+    const url = this.apiServerDomain + `/dev/apps/${appName}/debug/trace/${event.id!}`;
     const eventTelemetry = this.http.get<EventTelemetry>(url);
     return eventTelemetry.pipe(
       map(eventTelemetry => normalizeEventTelemetry(eventTelemetry))
     );
   }
 
-  getTrace(sessionId: string) {
-    const url = this.apiServerDomain + `/debug/trace/session/${sessionId}`;
+  getTrace(appName: string, sessionId: string) {
+    const url = this.apiServerDomain + `/dev/apps/${appName}/debug/trace/session/${sessionId}`;
     const spans = this.http.get<Span[]>(url);
     return spans.pipe(
       map(spans => Array.isArray(spans) ? spans.map(normalizeSpan) : spans)
@@ -56,7 +56,7 @@ export class EventService implements EventServiceInterface {
       eventId: string,
   ) {
     const url = this.apiServerDomain +
-        `/apps/${appName}/users/${userId}/sessions/${sessionId}/events/${
+      `/dev/apps/${appName}/users/${userId}/sessions/${sessionId}/events/${
                     eventId}/graph`;
     return this.http.get<{dotSrc?: string}>(url);
   }

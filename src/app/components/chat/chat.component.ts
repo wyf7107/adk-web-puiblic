@@ -1493,8 +1493,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-
-
   private formatBase64Data(data: string, mimeType: string) {
     const fixedBase64Data = fixBase64String(data);
     return `data:${mimeType};base64,${fixedBase64Data}`;
@@ -2041,7 +2039,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private loadTraceData() {
     if (!this.sessionId) return;
     this.uiStateService.setIsEventRequestResponseLoading(true);
-    this.eventService.getTrace(this.sessionId)
+    this.eventService.getTrace(this.appName, this.sessionId)
       .pipe(first(), catchError((err) => { console.error('[DEBUG] getTrace error:', err); return of([]); }))
       .subscribe(res => {
         this.traceData = res;

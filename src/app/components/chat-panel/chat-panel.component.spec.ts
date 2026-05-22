@@ -550,8 +550,13 @@ describe('ChatPanelComponent', () => {
       mockFeatureFlagService.isMessageFileUploadEnabledResponse.next(false);
       fixture.detectChanges();
 
+      // Open the actions menu
+      const prefixButton = fixture.debugElement.query(By.css('.input-prefix-menu-btn'));
+      prefixButton.nativeElement.click();
+      fixture.detectChanges();
+
       const allButtons =
-          fixture.debugElement.queryAll(By.css('button[mat-icon-button]'));
+          fixture.debugElement.queryAll(By.css('button[mat-menu-item]'));
       const button = allButtons.find(
           b =>
               b.nativeElement.querySelector('mat-icon')?.textContent?.trim() ===
@@ -563,12 +568,17 @@ describe('ChatPanelComponent', () => {
       mockFeatureFlagService.isManualStateUpdateEnabledResponse.next(false);
       fixture.detectChanges();
 
+      // Open the actions menu
+      const prefixButton = fixture.debugElement.query(By.css('.input-prefix-menu-btn'));
+      prefixButton.nativeElement.click();
+      fixture.detectChanges();
+
       const allButtons =
-          fixture.debugElement.queryAll(By.css('button[mat-icon-button]'));
+          fixture.debugElement.queryAll(By.css('button[mat-menu-item]'));
       const button = allButtons.find(
           b =>
               b.nativeElement.querySelector('mat-icon')?.textContent?.trim() ===
-              'more_vert');
+              'tune');
       expect(button!.nativeElement.disabled).toBeTrue();
     });
 

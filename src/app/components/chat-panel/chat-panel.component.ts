@@ -253,6 +253,13 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
           });
       }
     });
+
+    effect(() => {
+      const isLoading = this.isLoadingAgentResponse();
+      if (!isLoading) {
+        this.focusInput();
+      }
+    });
   }
 
   ngOnInit() {

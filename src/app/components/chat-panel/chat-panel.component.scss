@@ -226,6 +226,17 @@
   button:not(:disabled):not(.stop-message-btn) {
     color: var(--mat-sys-primary) !important;
   }
+
+  ::ng-deep {
+    .mat-mdc-form-field-flex {
+      align-items: flex-end !important;
+    }
+    .mat-mdc-form-field-icon-prefix,
+    .mat-mdc-form-field-icon-suffix {
+      align-self: flex-end !important;
+      margin-bottom: 8px !important;
+    }
+  }
 }
 
 button.stop-message-btn:not(:disabled) {
@@ -242,28 +253,19 @@ button:disabled {
   cursor: not-allowed;
 }
 
-.chat-input-actions {
-  width: 100%;
-  margin-top: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+button.input-prefix-menu-btn {
+  margin-left: 12px !important;
 
-  button:not(:disabled) {
+  &:not(:disabled) {
     color: var(--mat-sys-on-surface-variant) !important;
-
-    &.recording {
-      background-color: var(--mat-sys-error) !important;
-      color: var(--mat-sys-on-error, #ffffff) !important;
-    }
   }
 }
 
-.chat-input-actions-left,
-.chat-input-actions-right {
+.input-suffix-container {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-end;
+  gap: 8px;
+  margin-right: 12px !important;
 }
 
 .file-preview {

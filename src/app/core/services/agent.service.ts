@@ -54,6 +54,10 @@ export class AgentService implements AgentServiceInterface {
     this.isLoading.next(true);
     return new Observable<LlmResponse>((observer) => {
       const self = this;
+      const controller = new AbortController();
+      const signal = controller.signal;
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+
       fetch(url, {
         method: 'POST',
         headers: {
@@ -61,9 +65,10 @@ export class AgentService implements AgentServiceInterface {
           'Accept': 'text/event-stream',
         },
         body: JSON.stringify(req),
+        signal,
       })
         .then((response) => {
-          const reader = response.body?.getReader();
+          reader = response.body?.getReader();
           const decoder = new TextDecoder('utf-8');
           let lastData = '';
 
@@ -96,6 +101,9 @@ export class AgentService implements AgentServiceInterface {
                 read();  // Read the next chunk
               })
               .catch((err) => {
+                if (signal.aborted) {
+                  return;
+                }
                 self.zone.run(() => observer.error(err));
               });
           };
@@ -103,8 +111,17 @@ export class AgentService implements AgentServiceInterface {
           read();
         })
         .catch((err) => {
+          if (signal.aborted) {
+            return;
+          }
           self.zone.run(() => observer.error(err));
         });
+
+      return () => {
+        controller.abort();
+        reader?.cancel();
+        this.isLoading.next(false);
+      };
     });
   }
 

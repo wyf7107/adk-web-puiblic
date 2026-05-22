@@ -10,7 +10,7 @@
   background-color: var(--mat-sys-surface-variant);
 }
 
-button {
+button:not(:disabled) {
   color: var(--mat-sys-on-surface-variant) !important;
 
   &.recording {
@@ -19,8 +19,14 @@ button {
   }
 }
 
-button.audio-rec-btn:not(.recording) {
+button.audio-rec-btn:not(.recording):not(:disabled) {
   color: #34a853 !important;
+}
+
+button:disabled {
+  color: var(--mat-sys-on-surface-variant) !important;
+  opacity: 0.38 !important;
+  cursor: not-allowed;
 }
 
 .mic-visualizer {

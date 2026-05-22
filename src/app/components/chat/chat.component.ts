@@ -37,7 +37,7 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
-import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
+import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, first, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { URLUtil } from '../../../utils/url-util';
@@ -210,6 +210,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly logoComponent: Type<Component> | null = inject(LOGO_COMPONENT, {
     optional: true,
   });
+
+  private activeSseSubscription?: Subscription;
 
   chatPanel = viewChild(ChatPanelComponent);
   canvasComponent = viewChild.required(CanvasComponent);
@@ -1110,7 +1112,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   submitAgentRunRequest(req: AgentRunRequest) {
     this.autoSelectLatestEvent = true;
-    this.agentService.runSse(req).subscribe({
+    this.activeSseSubscription = this.agentService.runSse(req).subscribe({
       next: async (chunkJson: any) => {
         if (chunkJson.error) {
           this.openSnackBar(chunkJson.error, 'OK');
@@ -1130,10 +1132,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.changeDetectorRef.detectChanges();
       },
       error: (err) => {
+        this.activeSseSubscription = undefined;
         console.error('Send message error:', err);
+        const errString = String(err);
+        if (errString.includes('aborted') || errString.includes('AbortError')) {
+          return;
+        }
         this.openSnackBar(err, 'OK');
       },
       complete: () => {
+        this.activeSseSubscription = undefined;
         if (this.updatedSessionState()) {
           this.currentSessionState = this.updatedSessionState();
           this.updatedSessionState.set(null);
@@ -1148,6 +1156,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadTraceData();
       },
     });
+  }
+
+  handleStopMessage() {
+    if (this.activeSseSubscription) {
+      this.activeSseSubscription.unsubscribe();
+      this.activeSseSubscription = undefined;
+    }
   }
 
   private appendEventRow(apiEvent: any, reverseOrder: boolean = false) {
@@ -1793,6 +1808,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.handleStopMessage();
     this.streamChatService.closeStream();
   }
 

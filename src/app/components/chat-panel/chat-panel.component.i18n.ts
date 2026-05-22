@@ -39,6 +39,7 @@ export const CHAT_PANEL_MESSAGES = {
   editFunctionArgsTooltip: 'Edit function arguments',
   typeMessagePlaceholder: 'Type a message...',
   sendMessageTooltip: 'Send message',
+  stopMessageTooltip: 'Stop',
   uploadFileTooltip: 'Upload local file',
   moreOptionsTooltip: 'More options',
   updateStateMenuLabel: 'Update state',

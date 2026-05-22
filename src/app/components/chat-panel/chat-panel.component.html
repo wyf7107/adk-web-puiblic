@@ -176,49 +176,49 @@
         }
       </div>
       }
+
+      <button mat-icon-button matPrefix [matMenuTriggerFor]="inputActionsMenu" class="input-prefix-menu-btn"
+        [disabled]="isLoadingAgentResponse() ?? false" [matTooltip]="'Actions'">
+        <mat-icon>add</mat-icon>
+      </button>
+      <mat-menu #inputActionsMenu="matMenu" xPosition="after">
+        <button mat-menu-item (click)="fileInput.click()" [disabled]="(isLoadingAgentResponse() ?? false) || !(isMessageFileUploadEnabledObs | async)">
+          <mat-icon>attach_file</mat-icon>
+          <span>{{ i18n.uploadFileTooltip }}</span>
+        </button>
+        @if (!hideMoreOptionsButton()) {
+          <button mat-menu-item (click)="updateState.emit()" [disabled]="(isLoadingAgentResponse() ?? false) || !(isManualStateUpdateEnabledObs | async)">
+            <mat-icon>tune</mat-icon>
+            <span>{{ i18n.updateStateMenuLabel }}</span>
+          </button>
+        }
+      </mat-menu>
+
       <textarea #messageTextarea class="chat-input-box" matInput cdkTextareaAutosize cdkAutosizeMinRows="1"
         cdkAutosizeMaxRows="10" [ngModel]="userInput" (ngModelChange)="userInputChange.emit($event)"
         (keydown.enter)="!isLoadingAgentResponse() && sendMessage.emit($event)" [placeholder]="i18n.typeMessagePlaceholder"
         [disabled]="isLoadingAgentResponse() ?? false"></textarea>
-      @if (isLoadingAgentResponse()) {
-        <button mat-icon-button matSuffix (click)="stopMessage.emit($event)" class="stop-message-btn"
-          [matTooltip]="i18n.stopMessageTooltip">
-          <mat-icon color="warn">stop</mat-icon>
-        </button>
-      } @else {
-        <button mat-icon-button matSuffix (click)="sendMessage.emit($event)" class="send-message-btn"
-          [matTooltip]="i18n.sendMessageTooltip">
-          <mat-icon>send</mat-icon>
-        </button>
-      }
+
+      <div matSuffix class="input-suffix-container">
+        <app-call-controls [isAudioRecording]="isAudioRecording" [isVideoRecording]="isVideoRecording"
+          [micVolume]="micVolume" [isBidiStreamingEnabled]="(isBidiStreamingEnabledObs | async) ?? false"
+          [disabled]="isLoadingAgentResponse() ?? false"
+          (toggleAudioRecording)="toggleAudioRecording.emit($event)"
+          (toggleVideoRecording)="toggleVideoRecording.emit()"></app-call-controls>
+        @if (isLoadingAgentResponse()) {
+          <button mat-icon-button (click)="stopMessage.emit($event)" class="stop-message-btn"
+            [matTooltip]="i18n.stopMessageTooltip">
+            <mat-icon>stop</mat-icon>
+          </button>
+        } @else {
+          <button mat-icon-button (click)="sendMessage.emit($event)" class="send-message-btn"
+            [matTooltip]="i18n.sendMessageTooltip">
+            <mat-icon>send</mat-icon>
+          </button>
+        }
+      </div>
     </mat-form-field>
     <div #videoContainer class="video-container" [class.visible]="isVideoRecording"></div>
-  </div>
-  <div class="chat-input-actions">
-    <div class="chat-input-actions-left">
-      <button mat-icon-button (click)="fileInput.click()" class="chat-action-button"
-        [matTooltip]="i18n.uploadFileTooltip" [disabled]="(isLoadingAgentResponse() ?? false) || !(isMessageFileUploadEnabledObs | async)">
-        <mat-icon>attach_file</mat-icon>
-      </button>
-      @if (!hideMoreOptionsButton()) {
-        <button mat-icon-button [matMenuTriggerFor]="moreMenu" class="chat-action-button"
-          [matTooltip]="i18n.moreOptionsTooltip" [disabled]="(isLoadingAgentResponse() ?? false) || !(isManualStateUpdateEnabledObs | async)">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #moreMenu="matMenu">
-          <span mat-menu-item [matTooltip]="i18n.updateStateMenuTooltip" (click)="updateState.emit()"> {{
-            i18n.updateStateMenuLabel }}
-          </span>
-        </mat-menu>
-      }
-    </div>
-    <div class="chat-input-actions-right">
-      <app-call-controls [isAudioRecording]="isAudioRecording" [isVideoRecording]="isVideoRecording"
-        [micVolume]="micVolume" [isBidiStreamingEnabled]="(isBidiStreamingEnabledObs | async) ?? false"
-        [disabled]="isLoadingAgentResponse() ?? false"
-        (toggleAudioRecording)="toggleAudioRecording.emit($event)"
-        (toggleVideoRecording)="toggleVideoRecording.emit()"></app-call-controls>
-    </div>
   </div>
 </div>
 

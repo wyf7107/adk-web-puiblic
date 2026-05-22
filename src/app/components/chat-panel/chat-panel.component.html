@@ -178,23 +178,31 @@
       }
       <textarea #messageTextarea class="chat-input-box" matInput cdkTextareaAutosize cdkAutosizeMinRows="1"
         cdkAutosizeMaxRows="10" [ngModel]="userInput" (ngModelChange)="userInputChange.emit($event)"
-        (keydown.enter)="sendMessage.emit($event)" [placeholder]="i18n.typeMessagePlaceholder"></textarea>
-      <button mat-icon-button matSuffix (click)="sendMessage.emit($event)" class="send-message-btn"
-        [matTooltip]="i18n.sendMessageTooltip">
-        <mat-icon>send</mat-icon>
-      </button>
+        (keydown.enter)="!isLoadingAgentResponse() && sendMessage.emit($event)" [placeholder]="i18n.typeMessagePlaceholder"
+        [disabled]="isLoadingAgentResponse() ?? false"></textarea>
+      @if (isLoadingAgentResponse()) {
+        <button mat-icon-button matSuffix (click)="stopMessage.emit($event)" class="stop-message-btn"
+          [matTooltip]="i18n.stopMessageTooltip">
+          <mat-icon color="warn">stop</mat-icon>
+        </button>
+      } @else {
+        <button mat-icon-button matSuffix (click)="sendMessage.emit($event)" class="send-message-btn"
+          [matTooltip]="i18n.sendMessageTooltip">
+          <mat-icon>send</mat-icon>
+        </button>
+      }
     </mat-form-field>
     <div #videoContainer class="video-container" [class.visible]="isVideoRecording"></div>
   </div>
   <div class="chat-input-actions">
     <div class="chat-input-actions-left">
       <button mat-icon-button (click)="fileInput.click()" class="chat-action-button"
-        [matTooltip]="i18n.uploadFileTooltip" [disabled]="!(isMessageFileUploadEnabledObs | async)">
+        [matTooltip]="i18n.uploadFileTooltip" [disabled]="(isLoadingAgentResponse() ?? false) || !(isMessageFileUploadEnabledObs | async)">
         <mat-icon>attach_file</mat-icon>
       </button>
       @if (!hideMoreOptionsButton()) {
         <button mat-icon-button [matMenuTriggerFor]="moreMenu" class="chat-action-button"
-          [matTooltip]="i18n.moreOptionsTooltip" [disabled]="!(isManualStateUpdateEnabledObs | async)">
+          [matTooltip]="i18n.moreOptionsTooltip" [disabled]="(isLoadingAgentResponse() ?? false) || !(isManualStateUpdateEnabledObs | async)">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #moreMenu="matMenu">
@@ -207,6 +215,7 @@
     <div class="chat-input-actions-right">
       <app-call-controls [isAudioRecording]="isAudioRecording" [isVideoRecording]="isVideoRecording"
         [micVolume]="micVolume" [isBidiStreamingEnabled]="(isBidiStreamingEnabledObs | async) ?? false"
+        [disabled]="isLoadingAgentResponse() ?? false"
         (toggleAudioRecording)="toggleAudioRecording.emit($event)"
         (toggleVideoRecording)="toggleVideoRecording.emit()"></app-call-controls>
     </div>

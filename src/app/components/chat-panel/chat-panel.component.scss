@@ -223,9 +223,23 @@
     }
   }
 
-  button {
+  button:not(:disabled):not(.stop-message-btn) {
     color: var(--mat-sys-primary) !important;
   }
+}
+
+button.stop-message-btn:not(:disabled) {
+  color: #ea4335 !important;
+
+  &:hover {
+    background-color: rgba(234, 67, 53, 0.08) !important;
+  }
+}
+
+button:disabled {
+  color: var(--mat-sys-on-surface-variant) !important;
+  opacity: 0.38 !important;
+  cursor: not-allowed;
 }
 
 .chat-input-actions {
@@ -235,7 +249,7 @@
   justify-content: space-between;
   align-items: center;
 
-  button {
+  button:not(:disabled) {
     color: var(--mat-sys-on-surface-variant) !important;
 
     &.recording {

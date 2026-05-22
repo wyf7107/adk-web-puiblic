@@ -145,6 +145,7 @@ describe('AgentService', () => {
               [HEADER_ACCEPT]: TEXT_EVENT_STREAM,
             },
             body: JSON.stringify(RUN_SSE_PAYLOAD),
+            signal: jasmine.any(AbortSignal),
           });
     });
 

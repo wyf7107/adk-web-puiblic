@@ -173,6 +173,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly removeFile = new EventEmitter<number>();
   @Output() readonly removeStateUpdate = new EventEmitter<void>();
   @Output() readonly sendMessage = new EventEmitter<Event>();
+  @Output() readonly stopMessage = new EventEmitter<Event>();
   @Output() readonly updateState = new EventEmitter<void>();
   @Output() readonly toggleAudioRecording = new EventEmitter<LiveFlags>();
   @Output() readonly toggleVideoRecording = new EventEmitter<void>();

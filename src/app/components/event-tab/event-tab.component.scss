@@ -250,6 +250,70 @@
   }
 }
 
+.numeric-cell {
+  text-align: right !important;
+}
+
+.value-cell.numeric-cell {
+  justify-content: flex-end;
+
+  > :first-child {
+    text-align: right;
+    font-family: 'Google Sans Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface);
+
+    span {
+      font-family: 'Google Sans Mono', monospace;
+    }
+  }
+}
+
+td.numeric-cell {
+  text-align: right !important;
+  font-family: 'Google Sans Mono', monospace !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--mat-sys-on-surface) !important;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  transition: transform 0.15s ease-in-out;
+
+  &:hover {
+    transform: translateX(-2px);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .modality-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--mat-sys-primary);
+    background-color: var(--mat-sys-primary-container);
+    opacity: 0.85;
+  }
+
+  .modality-value {
+    font-weight: 500;
+    font-family: 'Google Sans Mono', monospace;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
 .copy-id-button,
 .copy-value-button {
   width: 28px !important;

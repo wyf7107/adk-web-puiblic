@@ -158,4 +158,28 @@ describe('EventTabComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('numeric helpers', () => {
+    it('isNumber should return true for numbers and false for others', () => {
+      expect(component.isNumber(123)).toBeTrue();
+      expect(component.isNumber(0)).toBeTrue();
+      expect(component.isNumber(-45.6)).toBeTrue();
+      expect(component.isNumber('123')).toBeFalse();
+      expect(component.isNumber(null)).toBeFalse();
+      expect(component.isNumber(undefined)).toBeFalse();
+      expect(component.isNumber({})).toBeFalse();
+      expect(component.isNumber([])).toBeFalse();
+    });
+
+    it('isNumericValue should identify numbers and specific detail token keys', () => {
+      expect(component.isNumericValue('promptTokenCount', 123)).toBeTrue();
+      expect(component.isNumericValue('promptTokensDetails', [])).toBeTrue();
+      expect(component.isNumericValue('candidatesTokenDetails', [])).toBeTrue();
+      expect(component.isNumericValue('cacheTokensDetails', [])).toBeTrue();
+      expect(component.isNumericValue('candidatesTokensDetails', [])).toBeTrue();
+      expect(component.isNumericValue('promptTokenDetails', [])).toBeTrue();
+      expect(component.isNumericValue('otherKey', {})).toBeFalse();
+      expect(component.isNumericValue('otherKey', '123')).toBeFalse();
+    });
+  });
 });

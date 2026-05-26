@@ -1002,6 +1002,45 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         });
   }
 
+  refreshLatestSession() {
+    if (!this.appName) {
+      return;
+    }
+
+    this.uiStateService.setIsSessionLoading(true);
+
+    this.sessionService.listSessions(this.userId, this.appName)
+      .pipe(first())
+      .subscribe({
+        next: (response) => {
+          if (response.items && response.items.length > 0) {
+            const sortedSessions = response.items.sort((a, b) => {
+              const timeA = Number(a.lastUpdateTime || 0);
+              const timeB = Number(b.lastUpdateTime || 0);
+              return timeB - timeA;
+            });
+
+            const latestSession = sortedSessions[0];
+            if (latestSession.id) {
+              this.loadSession(latestSession.id);
+            } else {
+              this.uiStateService.setIsSessionLoading(false);
+            }
+          } else {
+            this.uiStateService.setIsSessionLoading(false);
+            this.openSnackBar('No sessions found for this app.', 'OK');
+          }
+
+          this.sessionTab?.refreshSession();
+        },
+        error: (err) => {
+          this.uiStateService.setIsSessionLoading(false);
+          this.openSnackBar('Failed to refresh sessions.', 'OK');
+          console.error('Error listing sessions:', err);
+        }
+      });
+  }
+
   async handleChatInput(event: Event) {
     event.preventDefault();
     if (!this.userInput.trim() && this.selectedFiles.length <= 0) return;

@@ -1382,4 +1382,60 @@ describe('ChatComponent', () => {
           expect(combinedJson.data).toEqual([a2ui1, a2ui2]);
         });
   });
+
+  describe('refreshLatestSession', () => {
+    beforeEach(() => {
+      mockAgentService.listAppsResponse.next([TEST_APP_1_NAME]);
+      component.appName = TEST_APP_1_NAME;
+      fixture.detectChanges();
+    });
+
+    it('should do nothing if appName is not set', () => {
+      component.appName = '';
+      (mockSessionService.listSessions as jasmine.Spy).calls.reset();
+      
+      component.refreshLatestSession();
+      
+      expect(mockSessionService.listSessions).not.toHaveBeenCalled();
+    });
+
+    it('should list sessions, sort them descending by lastUpdateTime, and load the latest session', fakeAsync(() => {
+      const mockSessions: Session[] = [
+        { id: 'session-old', lastUpdateTime: 1000 },
+        { id: 'session-newest', lastUpdateTime: 3000 },
+        { id: 'session-mid', lastUpdateTime: 2000 },
+      ];
+      
+      spyOn(component as any, 'loadSession').and.callThrough();
+      mockSessionService.getSessionResponse.next({ id: 'session-newest', state: {}, events: [] });
+      mockEventService.getTraceResponse.next([]);
+      
+      component.refreshLatestSession();
+      
+      mockSessionService.listSessionsResponse.next({ items: mockSessions });
+      tick();
+      
+      expect(mockSessionService.listSessions).toHaveBeenCalledWith(USER_ID, TEST_APP_1_NAME);
+      expect((component as any).loadSession).toHaveBeenCalledWith('session-newest');
+      expect(component.sessionId).toBe('session-newest');
+    }));
+
+    it('should show snackbar message when no sessions are found', fakeAsync(() => {
+      component.refreshLatestSession();
+      
+      mockSessionService.listSessionsResponse.next({ items: [] });
+      tick();
+      
+      expect(mockSnackBar.open).toHaveBeenCalledWith('No sessions found for this app.', 'OK');
+    }));
+
+    it('should show snackbar message on list sessions API error', fakeAsync(() => {
+      component.refreshLatestSession();
+      
+      mockSessionService.listSessionsResponse.error(new Error('API Error'));
+      tick();
+      
+      expect(mockSnackBar.open).toHaveBeenCalledWith('Failed to refresh sessions.', 'OK');
+    }));
+  });
 });

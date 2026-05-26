@@ -180,6 +180,7 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Output() readonly longRunningResponseComplete = new EventEmitter<AgentRunRequest>();
   @Output() readonly toggleHideIntermediateEvents = new EventEmitter<void>();
   @Output() readonly toggleSse = new EventEmitter<void>();
+  @Output() readonly manualScroll = new EventEmitter<void>();
 
   @ViewChild('videoContainer', { read: ElementRef }) videoContainer!: ElementRef;
   @ViewChild('autoScroll') scrollContainer!: ElementRef;
@@ -222,6 +223,11 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
 
   protected readonly onScroll = new Subject<Event>();
   protected readonly sanitizer = inject(SAFE_VALUES_SERVICE);
+
+  onManualScroll() {
+    this.scrollInterrupted = true;
+    this.manualScroll.emit();
+  }
 
   hideIntermediateEvents = input<boolean>(false);
   invocationDisplayMap = input<Map<string, string>>(new Map());

@@ -17,7 +17,7 @@
 @let isSessionLoading = uiStateService.isSessionLoading() | async;
 @if (appName != "" && !isSessionLoading) {
 
-<div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)">
+<div #autoScroll class="chat-messages" (scroll)="onScroll.next($event)" (wheel)="onManualScroll()" (touchmove)="onManualScroll()" (mousedown)="onManualScroll()" (keydown)="onManualScroll()">
   @if (showEvalSummary() && evalCaseResult()) {
     @let result = evalCaseResult();
     <div class="eval-result-summary" style="margin: 16px; padding: 16px; border-radius: 8px; background: var(--mat-sys-surface-container); border: 1px solid var(--mat-sys-outline-variant);">

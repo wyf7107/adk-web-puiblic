@@ -640,6 +640,7 @@
               [invocationDisplayMap]="invocationDisplayMap()"
               [viewMode]="viewMode()"
               [shouldShowEvent]="shouldShowEventFn"
+              (manualScroll)="onManualScroll()"
             ></app-chat-panel>
           }
           @case ('eval-case') {
@@ -754,6 +755,7 @@
                     [invocationDisplayMap]="invocationDisplayMap()"
                     [viewMode]="viewMode()"
                     [shouldShowEvent]="shouldShowEventFn"
+                    (manualScroll)="onManualScroll()"
                   ></app-chat-panel>
                 </div>
                 <div class="side-panel-half">
@@ -806,6 +808,7 @@
                     [invocationDisplayMap]="invocationDisplayMap()"
                     [viewMode]="viewMode()"
                     [shouldShowEvent]="shouldShowEventFn"
+                    (manualScroll)="onManualScroll()"
                   ></app-chat-panel>
                 </div>
               </div>
@@ -827,6 +830,7 @@
                 [invocationDisplayMap]="invocationDisplayMap()"
                 [viewMode]="viewMode()"
                 [shouldShowEvent]="shouldShowEventFn"
+                (manualScroll)="onManualScroll()"
               ></app-chat-panel>
             }
           }

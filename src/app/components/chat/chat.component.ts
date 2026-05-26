@@ -3618,6 +3618,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return edgeCounts;
   }
 
+  onManualScroll() {
+    this.autoSelectLatestEvent = false;
+  }
+
   selectEvent(key: string, messageIndex?: number, isManual = true) {
     if (isManual) {
       this.autoSelectLatestEvent = false;

@@ -22,6 +22,7 @@ import {InjectionToken} from '@angular/core';
  */
 export const CHAT_MESSAGES = {
   openPanelTooltip: 'Open panel',
+  retrieveLatestSessionTooltip: 'Retrieve latest session and show',
   evalCaseIdLabel: 'Eval Case ID',
   cancelButton: 'Cancel',
   saveButton: 'Save',

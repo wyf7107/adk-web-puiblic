@@ -533,10 +533,23 @@
 
   <div style="flex-grow: 1;"></div>
 
+  <button
+    mat-icon-button
+    class="toolbar-icon-button"
+    (click)="refreshLatestSession()"
+    [matTooltip]="i18n.retrieveLatestSessionTooltip"
+    [disabled]="(uiStateService.isSessionLoading() | async) === true"
+  >
+    <mat-icon
+      [class.spinning]="uiStateService.isSessionLoading() | async"
+      fontSet="material-symbols-outlined"
+    >refresh</mat-icon>
+  </button>
+
   @if (chatType() === 'eval-result') {
   <button mat-button (click)="isSideBySide.set(!isSideBySide())" matTooltip="Compare with expected"
     [style.color]="isSideBySide() ? 'var(--mat-sys-primary)' : 'var(--mat-sys-on-surface-variant)'"
-    style="height: 32px; line-height: 32px; padding: 0 12px; border-radius: 16px;">
+    style="height: 32px; line-height: 32px; padding: 0 12px; border-radius: 16px; margin-left: 8px;">
     <mat-icon
       style="font-size: 20px; width: 20px; height: 20px; line-height: 20px; margin-right: 4px; vertical-align: middle;">{{
       isSideBySide() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
@@ -544,26 +557,44 @@
   </button>
   }
 
-  @if (viewMode() !== 'traces') {
-  <button mat-button (click)="showBranches.set(!showBranches())" matTooltip="Group events from parallel nodes"
-    [style.color]="showBranches() ? 'var(--mat-sys-primary)' : 'var(--mat-sys-on-surface-variant)'"
-    style="height: 32px; line-height: 32px; padding: 0 12px; border-radius: 16px;">
-    <mat-icon
-      style="font-size: 20px; width: 20px; height: 20px; line-height: 20px; margin-right: 4px; vertical-align: middle;">{{
-      showBranches() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-    <span style="font-size: 13px; font-weight: 500; vertical-align: middle;">Branches</span>
+  @let hasBranchesOption = viewMode() !== 'traces';
+  @let hasStreamingOption = (isTokenStreamingEnabledObs | async) && canEditSession();
+  @if (hasBranchesOption || hasStreamingOption) {
+  <button
+    mat-icon-button
+    class="toolbar-icon-button"
+    [matMenuTriggerFor]="moreOptionsMenu"
+    [matTooltip]="i18n.moreOptionsTooltip"
+    aria-label="More options"
+    style="margin-left: 8px;"
+  >
+    <mat-icon>more_vert</mat-icon>
   </button>
-  }
 
-  @if ((isTokenStreamingEnabledObs | async) && canEditSession()) {
-  <button mat-button (click)="toggleSse()" matTooltip="Enable real-time token streaming from the server"
-    [style.color]="useSse() ? 'var(--mat-sys-primary)' : 'var(--mat-sys-on-surface-variant)'"
-    style="height: 32px; line-height: 32px; padding: 0 12px; border-radius: 16px;">
-    <mat-icon
-      style="font-size: 20px; width: 20px; height: 20px; line-height: 20px; margin-right: 4px; vertical-align: middle;">{{
-      useSse() ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
-    <span style="font-size: 13px; font-weight: 500; vertical-align: middle;">Streaming</span>
-  </button>
+  <mat-menu #moreOptionsMenu="matMenu" xPosition="before">
+    @if (hasBranchesOption) {
+    <button mat-menu-item (click)="showBranches.set(!showBranches()); $event.stopPropagation()">
+      <mat-icon
+        [style.color]="showBranches() ? 'var(--mat-sys-primary)' : 'var(--mat-sys-on-surface-variant)'"
+        style="font-size: 20px; width: 20px; height: 20px; line-height: 20px; margin-right: 8px; vertical-align: middle;"
+      >
+        {{ showBranches() ? 'check_box' : 'check_box_outline_blank' }}
+      </mat-icon>
+      <span style="vertical-align: middle;">Branches</span>
+    </button>
+    }
+    @if (hasStreamingOption) {
+    <button mat-menu-item (click)="toggleSse(); $event.stopPropagation()">
+      <mat-icon
+        [style.color]="useSse() ? 'var(--mat-sys-primary)' : 'var(--mat-sys-on-surface-variant)'"
+        style="font-size: 20px; width: 20px; height: 20px; line-height: 20px; margin-right: 8px; vertical-align: middle;"
+      >
+        {{ useSse() ? 'check_box' : 'check_box_outline_blank' }}
+      </mat-icon>
+      <span style="vertical-align: middle;">Streaming</span>
+    </button>
+    }
+  </mat-menu>
   }
 </div>
 

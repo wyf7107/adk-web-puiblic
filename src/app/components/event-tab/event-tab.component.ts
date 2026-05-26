@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {AsyncPipe, DatePipe, KeyValuePipe} from '@angular/common';
+import {AsyncPipe, DatePipe, DecimalPipe, KeyValuePipe} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, effect, inject, input, output, ViewChild, ElementRef} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {MatIconButton, MatButtonModule} from '@angular/material/button';
@@ -44,6 +44,7 @@ import {addSvgNodeHoverEffects} from '../../utils/svg-interaction.utils';
   imports: [
     AsyncPipe,
     DatePipe,
+    DecimalPipe,
     MatButtonModule,
     MatIconButton,
     MatIcon,
@@ -323,6 +324,22 @@ export class EventTabComponent {
     // If timestamp is before 2286-11-20 in seconds, treat as seconds.
     const inMs = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
     return new Date(inMs).toLocaleString();
+  }
+
+  isNumber(value: any): boolean {
+    return typeof value === 'number';
+  }
+
+  isNumericValue(key: string, value: any): boolean {
+    if (typeof value === 'number') return true;
+    const detailKeys = [
+      'promptTokensDetails',
+      'promptTokenDetails',
+      'candidatesTokenDetails',
+      'candidatesTokensDetails',
+      'cacheTokensDetails',
+    ];
+    return detailKeys.includes(key);
   }
 
   isObject(value: any): boolean {

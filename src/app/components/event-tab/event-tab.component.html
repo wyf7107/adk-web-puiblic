@@ -207,18 +207,24 @@
           <tr>
             <td>{{ key }}</td>
             <td>
-              <span class="value-cell">
+              <span class="value-cell" [class.numeric-cell]="isNumericValue(key, selectedEvent()!.usageMetadata[key])">
                 <span>
                   @if (key === 'promptTokensDetails' || key === 'promptTokenDetails' || key === 'candidatesTokenDetails' ||
                   key === 'candidatesTokensDetails' || key === 'cacheTokensDetails') {
                   @for (detail of selectedEvent()!.usageMetadata[key]; track detail.modality) {
-                  <div [matTooltip]="detail.modality + ': ' + detail.tokenCount">{{ detail.modality }}: {{ detail.tokenCount }}</div>
+                  <div [matTooltip]="detail.modality + ': ' + (detail.tokenCount | number)" class="detail-row">
+                    <span class="modality-label">{{ detail.modality }}</span>
+                    <span class="modality-value">{{ detail.tokenCount | number }}</span>
+                  </div>
                   }
+                  } @else {
+                  @if (isNumber(selectedEvent()!.usageMetadata[key])) {
+                  <span [matTooltip]="(selectedEvent()!.usageMetadata[key] | number) || ''">{{ selectedEvent()!.usageMetadata[key] | number }}</span>
                   } @else {
                   <span [matTooltip]="selectedEvent()!.usageMetadata[key]?.toString() || ''">{{ selectedEvent()!.usageMetadata[key] }}</span>
                   }
+                  }
                 </span>
-                <button mat-icon-button class="copy-value-button" (click)="isObject(selectedEvent()!.usageMetadata[key]) ? copyJsonToClipboard(selectedEvent()!.usageMetadata[key], 'usage.' + key) : copyToClipboard(selectedEvent()!.usageMetadata[key]?.toString(), 'usage.' + key)" matTooltip="Copy"><mat-icon>{{ copiedId === 'usage.' + key ? 'check' : 'content_copy' }}</mat-icon></button>
               </span>
             </td>
           </tr>
@@ -237,15 +243,15 @@
         <table app-info-table title="Usage Summary for Session">
           <tr>
             <td>Total Prompt Tokens</td>
-            <td>{{ sessionUsageMetadata()['Prompt Tokens'] }}</td>
+            <td class="numeric-cell">{{ sessionUsageMetadata()['Prompt Tokens'] | number }}</td>
           </tr>
           <tr>
             <td>Total Candidates Tokens</td>
-            <td>{{ sessionUsageMetadata()['Candidates Tokens'] }}</td>
+            <td class="numeric-cell">{{ sessionUsageMetadata()['Candidates Tokens'] | number }}</td>
           </tr>
           <tr>
             <td>Total Tokens</td>
-            <td>{{ sessionUsageMetadata()['Total Tokens'] }}</td>
+            <td class="numeric-cell">{{ sessionUsageMetadata()['Total Tokens'] | number }}</td>
           </tr>
         </table>
       </div>

@@ -119,3 +119,14 @@
     margin-left: auto;
   }
 }
+
+@media (max-width: 768px) {
+  .content-bubble {
+    padding: 5px 12px !important;
+    max-width: 90% !important;
+  }
+
+  .role-user {
+    max-width: 90% !important;
+  }
+}

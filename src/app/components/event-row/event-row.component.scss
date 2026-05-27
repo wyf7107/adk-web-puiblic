@@ -270,3 +270,21 @@ app-content-bubble:hover .eval-compare-container {
   margin-top: -4px;
   margin-bottom: -4px;
 }
+
+@media (max-width: 768px) {
+  :host {
+    margin-left: -12px !important;
+    margin-right: -12px !important;
+    padding: 4px 12px !important;
+  }
+  :host(.bot) {
+    padding-right: 12px !important;
+  }
+  .indentation-line {
+    width: 12px !important;
+  }
+  .event-number-container {
+    min-width: 20px !important;
+    margin-right: 4px !important;
+  }
+}

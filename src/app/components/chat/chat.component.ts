@@ -287,6 +287,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   longRunningEvents: any[] = [];
   functionCallEventId = '';
   redirectUri = URLUtil.getBaseUrlWithoutPath();
+  isMobile = signal(window.innerWidth <= 768);
   showSidePanel = window.localStorage.getItem('adk-side-panel-visible') !== 'false';
   showBuilderAssistant = true;
   showAppSelectorDrawer = false;
@@ -662,6 +663,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.checkScreenSize();
+    if (this.isMobile()) {
+      this.showSidePanel = false;
+    } else {
+      this.showSidePanel = window.localStorage.getItem('adk-side-panel-visible') !== 'false';
+    }
     this.syncSelectedAppFromUrl();
     this.updateSelectedAppUrl();
     this.hideSidePanelIfNeeded();
@@ -4252,5 +4259,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showSessionSelectorDrawer = false;
         this.updateWithSelectedSession(res);
       });
+  }
+
+  @HostListener('window:resize', [])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    const mobile = window.innerWidth <= 768;
+    this.isMobile.set(mobile);
   }
 }

@@ -96,7 +96,7 @@
             @if (isNewSessionButtonEnabledObs | async) {
               @if (sessionId) {
                 <div class="selector-group-divider"></div>
-                @if (uiEvents().length > 0) {
+                @if (uiEvents().length > 0 && !isMobile()) {
                   <button
                     class="selector-button new-session-button"
                     (click)="onNewSessionClick()"
@@ -317,7 +317,7 @@
   </mat-drawer>
 
   <mat-drawer-container class="side-panel-container" autosize>
-  <mat-drawer class="side-drawer" #sideDrawer mode="side" appResizableDrawer>
+  <mat-drawer class="side-drawer" #sideDrawer [mode]="isMobile() ? 'over' : 'side'" appResizableDrawer>
     @if (!isBuilderMode()) {
     <app-side-panel
       [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"

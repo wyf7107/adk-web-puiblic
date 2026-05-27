@@ -160,3 +160,15 @@ mat-tab-group {
   align-items: center;
   height: 100%;
 }
+
+@media (max-width: 768px) {
+  .resize-handler {
+    display: none !important;
+  }
+  .tab-label {
+    font-size: 12px !important;
+  }
+  ::ng-deep .mdc-tab {
+    padding: 0 8px !important;
+  }
+}

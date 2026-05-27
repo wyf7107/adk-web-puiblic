@@ -172,6 +172,7 @@
   margin: 0 auto;
   position: relative;
   transition: all 0.3s ease;
+  box-sizing: border-box;
 
   .chat-input-content-row {
     display: flex;
@@ -454,5 +455,25 @@ button.send-message-btn {
     :host-context(.light-theme) & {
       background: #e8f5e9;
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-messages {
+    padding: 12px !important;
+  }
+  .chat-input {
+    width: 100% !important;
+    padding: 8px !important;
+  }
+  .chat-input-content-row {
+    gap: 8px !important;
+  }
+  .input-suffix-container {
+    gap: 4px !important;
+    margin-right: 4px !important;
+  }
+  button.input-prefix-menu-btn {
+    margin-left: 4px !important;
   }
 }

@@ -487,8 +487,8 @@ describe('ChatComponent', () => {
             content: {
               role: 'bot',
               parts: [
-                createA2uiPart({beginRendering: {id: '1'}}),
-                createA2uiPart({surfaceUpdate: {components: []}})
+                createA2uiPart({beginRendering: {surfaceId: 's1', root: 'root-column'}}),
+                createA2uiPart({surfaceUpdate: {surfaceId: 's1', components: [{id: 'dummy', component: {Text: {text: {path: 'dummy'}}}}]}})
               ]
             },
           };
@@ -503,8 +503,8 @@ describe('ChatComponent', () => {
           const messages = component.messages();
           expect(messages.length).toBe(1);
           expect(messages[0].a2uiData).toEqual({
-            beginRendering: {beginRendering: {id: '1'}},
-            surfaceUpdate: {surfaceUpdate: {components: []}}
+            beginRendering: {beginRendering: {surfaceId: 's1', root: 'root-column'}},
+            surfaceUpdate: {surfaceUpdate: {surfaceId: 's1', components: [{id: 'dummy', component: {Text: {text: {path: 'dummy'}}}}]}}
           });
         });
       });
@@ -1230,9 +1230,9 @@ describe('ChatComponent', () => {
                   role: 'bot',
                   parts: [
                     {text: 'Prefix'},
-                    createA2uiPart({beginRendering: {id: '1'}}),
+                    createA2uiPart({beginRendering: {surfaceId: 's1', root: 'root-column'}}),
                     {text: 'Interim'},
-                    createA2uiPart({surfaceUpdate: {components: []}}),
+                    createA2uiPart({surfaceUpdate: {surfaceId: 's1', components: [{id: 'dummy', component: {Text: {text: {path: 'dummy'}}}}]}}),
                     {text: 'Suffix'}
                   ]
                 },
@@ -1253,8 +1253,8 @@ describe('ChatComponent', () => {
               expect(botMessages[0].text).toBe('Prefix');
               // The combined A2UI message
               expect(botMessages[1].a2uiData).toEqual({
-                beginRendering: {beginRendering: {id: '1'}},
-                surfaceUpdate: {surfaceUpdate: {components: []}}
+                beginRendering: {beginRendering: {surfaceId: 's1', root: 'root-column'}},
+                surfaceUpdate: {surfaceUpdate: {surfaceId: 's1', components: [{id: 'dummy', component: {Text: {text: {path: 'dummy'}}}}]}}
               });
               expect(botMessages[2].text).toBe('Interim');
               expect(botMessages[3].text).toBe('Suffix');
@@ -1857,5 +1857,120 @@ describe('ChatComponent', () => {
               (component as any).extractA2aDataPartJson(result[1]);
           expect(combinedJson.data).toEqual([a2ui1, a2ui2]);
         });
+  });
+
+  describe('Custom Metadata from Query Params', () => {
+    beforeEach(async () => {
+      mockActivatedRoute.snapshot!.queryParams = {
+        'a2ajson_jsonKey': '{"nested": "value"}',
+        'a2ametadata_strKey': 'stringValue',
+      };
+      mockActivatedRoute.queryParams = of({
+        'a2ajson_jsonKey': '{"nested": "value"}',
+        'a2ametadata_strKey': 'stringValue',
+      });
+      fixture = TestBed.createComponent(ChatComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('should include custom metadata in sendMessage request', fakeAsync(() => {
+      component.userInput = 'hello';
+      component.sendMessage(new Event('click'));
+      tick();
+
+      expect(mockAgentService.runSse).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          customMetadata: {
+            jsonKey: {nested: 'value'},
+            strKey: 'stringValue',
+          },
+        }),
+      );
+    }));
+
+    it('should handle invalid JSON in a2ajson query params gracefully', fakeAsync(() => {
+      // Overwrite query params for this test
+      mockActivatedRoute.snapshot!.queryParams = {
+        'a2ajson_invalidKey': '{invalid json}',
+      };
+      mockActivatedRoute.queryParams = of({
+        'a2ajson_invalidKey': '{invalid json}',
+      });
+      fixture = TestBed.createComponent(ChatComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      tick();
+
+      spyOn(console, 'warn'); // Suppress warning in test output
+
+      component.userInput = 'hello';
+      component.sendMessage(new Event('click'));
+      tick();
+
+      // Should not include the invalid key, and customMetadata should be undefined since it's empty
+      expect(mockAgentService.runSse).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          customMetadata: undefined,
+        }),
+      );
+      expect(console.warn).toHaveBeenCalledWith(
+        jasmine.stringContaining('Failed to parse custom JSON metadata for a2ajson_invalidKey'),
+        jasmine.any(Error),
+      );
+    }));
+
+    it('should use the last value if a2ajson query param is an array', fakeAsync(() => {
+      // Overwrite query params for this test
+      mockActivatedRoute.snapshot!.queryParams = {
+        'a2ajson_jsonKey': ['{"nested": "first"}', '{"nested": "last"}'],
+      };
+      mockActivatedRoute.queryParams = of({
+        'a2ajson_jsonKey': ['{"nested": "first"}', '{"nested": "last"}'],
+      });
+      fixture = TestBed.createComponent(ChatComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      tick();
+
+      component.userInput = 'hello';
+      component.sendMessage(new Event('click'));
+      tick();
+
+      expect(mockAgentService.runSse).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          customMetadata: {
+            jsonKey: {nested: 'last'},
+          },
+        }),
+      );
+    }));
+
+    it('should use the last value if a2ametadata query param is an array', fakeAsync(() => {
+      // Overwrite query params for this test
+      mockActivatedRoute.snapshot!.queryParams = {
+        'a2ametadata_strKey': ['firstValue', 'lastValue'],
+      };
+      mockActivatedRoute.queryParams = of({
+        'a2ametadata_strKey': ['firstValue', 'lastValue'],
+      });
+      fixture = TestBed.createComponent(ChatComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      tick();
+
+      component.userInput = 'hello';
+      component.sendMessage(new Event('click'));
+      tick();
+
+      expect(mockAgentService.runSse).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          customMetadata: {
+            strKey: 'lastValue',
+          },
+        }),
+      );
+    }));
   });
 });

@@ -597,6 +597,27 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventData.set(userEventId, userEvent);
     this.eventData = new Map(this.eventData);
 
+    const queryParams = this.activatedRoute.snapshot.queryParams;
+    const customMetadata: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value == null) continue;
+
+      const rawValue = Array.isArray(value) ? value[value.length - 1] : value;
+      if (rawValue === undefined) {
+        continue;
+      }
+
+      if (key.startsWith('a2ajson_') && typeof rawValue === 'string') {
+        try {
+          customMetadata[key.substring('a2ajson_'.length)] = JSON.parse(rawValue);
+        } catch (e) {
+          console.warn(`Failed to parse custom JSON metadata for ${key}:`, e);
+        }
+      } else if (key.startsWith('a2ametadata_')) {
+        customMetadata[key.substring('a2ametadata_'.length)] = rawValue;
+      }
+    }
+
     const req: AgentRunRequest = {
       appName: this.appName,
       userId: this.userId,
@@ -607,6 +628,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       streaming: this.useSse,
       stateDelta: this.updatedSessionState(),
+      customMetadata:
+        Object.keys(customMetadata).length > 0 ? customMetadata : undefined,
     };
     this.selectedFiles = [];
     this.streamingTextMessage = null;

@@ -32,4 +32,5 @@ export declare interface AgentRunRequest {
   streaming?: boolean;
   stateDelta?: any;
   invocationId?: string;
+  customMetadata?: {[key: string]: any};
 }

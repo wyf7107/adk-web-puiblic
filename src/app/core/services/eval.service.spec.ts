@@ -34,11 +34,11 @@ const EVAL_ID = 'eval1';
 const EVAL_RESULT_ID = 'result1';
 const USER_ID = 'user1';
 const SESSION_ID = 'session1';
-const EVAL_SETS_PATH = `/apps/${APP_NAME}/eval_sets`;
+const EVAL_SETS_PATH = `/dev/apps/${APP_NAME}/eval_sets`;
 const EVAL_SET_PATH = `${EVAL_SETS_PATH}/${EVAL_SET_ID}`;
 const EVAL_CASES_PATH = `${EVAL_SET_PATH}/evals`;
 const EVAL_CASE_PATH = `${EVAL_CASES_PATH}/${EVAL_CASE_ID}`;
-const EVAL_RESULTS_PATH = `/apps/${APP_NAME}/eval_results`;
+const EVAL_RESULTS_PATH = `/dev/apps/${APP_NAME}/eval_results`;
 const EVAL_RESULT_PATH = `${EVAL_RESULTS_PATH}/${EVAL_RESULT_ID}`;
 const ADD_SESSION_PATH = `${EVAL_SET_PATH}/add_session`;
 const RUN_EVAL_PATH = `${EVAL_SET_PATH}/run_eval`;
@@ -92,7 +92,7 @@ describe('EvalService', () => {
     it('should call POST /apps/{appName}/eval-sets with correct body', () => {
       service.createNewEvalSet(APP_NAME, EVAL_SET_ID).subscribe();
       const req = httpTestingController.expectOne(
-          API_SERVER_BASE_URL + `/apps/${APP_NAME}/eval-sets`,
+          API_SERVER_BASE_URL + `/dev/apps/${APP_NAME}/eval-sets`,
       );
       expect(req.request.method).toEqual('POST');
       expect(req.request.body).toEqual({
@@ -111,7 +111,7 @@ describe('EvalService', () => {
       const resultP = firstValueFrom(
           service.createNewEvalSet(APP_NAME, EVAL_SET_ID),
       );
-      const req = httpTestingController.expectOne(`/apps/${APP_NAME}/eval-sets`);
+      const req = httpTestingController.expectOne(`/dev/apps/${APP_NAME}/eval-sets`);
       req.flush(null);
       const result = await resultP;
       expect(result).toBeNull();

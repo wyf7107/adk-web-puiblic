@@ -191,7 +191,7 @@ export const CompletionDetailsLogAttributesValidator = z.object({
       ResponseFinishReasonsAttrValidator.optional(),
   [GEN_AI_USAGE_INPUT_TOKENS]: UsageTokensAttrValidator.optional(),
   [GEN_AI_USAGE_OUTPUT_TOKENS]: UsageTokensAttrValidator.optional(),
-}).loose();  // Unknown common attributes (e.g. `gen_ai.agent.name`,
+}).passthrough();  // Unknown common attributes (e.g. `gen_ai.agent.name`,
              // `gcp.vertex.agent.event_id`) are allowed through unchanged.
 
 export const CompletionDetailsLogValidator = z.object({

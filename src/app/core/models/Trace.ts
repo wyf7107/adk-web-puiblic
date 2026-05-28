@@ -265,18 +265,18 @@ function buildPromotedAttrsCandidate(raw: RawSpan): Record<string, unknown> {
 
 const InvokeAgentTightening = z.object({
   attrConversationId: z.string({
-    required_error: `'${GEN_AI_CONVERSATION_ID}' is required on '${
+    message: `'${GEN_AI_CONVERSATION_ID}' is required on '${
         OPERATION_INVOKE_AGENT}' spans`,
   }),
 });
 
 const GenerateContentTightening = z.object({
   attrEventId: z.string({
-    required_error: `'${GCP_VERTEX_AGENT_EVENT_ID}' is required on '${
+    message: `'${GCP_VERTEX_AGENT_EVENT_ID}' is required on '${
         OPERATION_GENERATE_CONTENT}' spans`,
   }),
   attrInvocationId: z.string({
-    required_error: `'${GCP_VERTEX_AGENT_INVOCATION_ID}' is required on '${
+    message: `'${GCP_VERTEX_AGENT_INVOCATION_ID}' is required on '${
         OPERATION_GENERATE_CONTENT}' spans`,
   }),
 });
@@ -455,7 +455,7 @@ function parsePromotedAttrs<T extends z.ZodObject<any>>(
  * payload (rather than the post-validation typed projection, which
  * duplicates information and is unfamiliar to anyone outside ADK Web).
  */
-export const SpanValidator: z.ZodType<ValidatedSpan, z.ZodTypeDef, unknown> =
+export const SpanValidator: z.ZodType<ValidatedSpan> =
     z.unknown().transform((rawInput, ctx): ValidatedSpan => {
       const parseResult = RawSpanValidator.safeParse(rawInput);
       if (!parseResult.success) {
@@ -529,7 +529,7 @@ export const SpanValidator: z.ZodType<ValidatedSpan, z.ZodTypeDef, unknown> =
         ...(io !== undefined ? { io } : {}),
       };
       return result;
-    }) as z.ZodType<ValidatedSpan, z.ZodTypeDef, unknown>;
+    }) as z.ZodType<ValidatedSpan>;
 
 // ---------------------------------------------------------------------------
 // UI-facing Span type — adds a `children` tree-structure helper on top of

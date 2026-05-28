@@ -633,7 +633,7 @@ describe('ChatComponent', () => {
 
           it('should call getTrace', () => {
             expect(mockEventService.getTrace)
-                .toHaveBeenCalledWith(SESSION_1_ID);
+                .toHaveBeenCalledWith(component.appName, SESSION_1_ID);
           });
 
           describe('canEdit', () => {

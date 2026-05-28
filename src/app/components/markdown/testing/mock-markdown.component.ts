@@ -39,4 +39,5 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
 export class MockMarkdownComponent implements MarkdownComponentInterface {
   text = input<string>('');
   thought = input<boolean>(false);
+  isReadme = input<boolean>(false);
 }

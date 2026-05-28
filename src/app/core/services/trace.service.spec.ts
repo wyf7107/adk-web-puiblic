@@ -48,7 +48,8 @@ describe('TraceService', () => {
         parent_span_id: undefined,
         start_time: 0,
         end_time: 0,
-        attributes: {},
+        rawAttributesUseThisFieldOnlyForDisplay: {},
+        rawSpanUseThisFieldOnlyForDisplay: {},
       };
       service.selectedRow(span);
       const selectedSpan = await firstValueFrom(service.selectedTraceRow$);

@@ -141,19 +141,19 @@ export class AgentService implements AgentServiceInterface {
     return new Observable<any>();
   }
 
-  agentBuild(req: any): Observable<boolean> {
+  agentBuild(appName: string, req: any): Observable<boolean> {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/builder/save`;
+        this.apiServerDomain + `/dev/apps/${appName}/builder/save`;
       return this.http.post<any>(url, req);
     }
     return new Observable<false>();
   }
 
-  agentBuildTmp(req: any): Observable<boolean> {
+  agentBuildTmp(appName: string, req: any): Observable<boolean> {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/builder/save?tmp=true`;
+        this.apiServerDomain + `/dev/apps/${appName}/builder/save?tmp=true`;
       return this.http.post<any>(url, req);
     }
     return new Observable<false>();
@@ -162,7 +162,7 @@ export class AgentService implements AgentServiceInterface {
   getAgentBuilder(agentName: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/builder/app/${agentName}?ts=${Date.now()}`
+        this.apiServerDomain + `/dev/apps/${agentName}/builder?ts=${Date.now()}`
       return this.http.get(url, {
         responseType: 'text'
       });
@@ -173,7 +173,7 @@ export class AgentService implements AgentServiceInterface {
   getAgentBuilderTmp(agentName: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/builder/app/${agentName}?ts=${Date.now()}&tmp=true`
+        this.apiServerDomain + `/dev/apps/${agentName}/builder?ts=${Date.now()}&tmp=true`
       return this.http.get(url, {
         responseType: 'text'
       });
@@ -184,7 +184,7 @@ export class AgentService implements AgentServiceInterface {
   getSubAgentBuilder(appName: string, relativePath: string) {
     if (this.apiServerDomain != undefined) {
       let url =
-        this.apiServerDomain + `/builder/app/${appName}?ts=${Date.now()}&file_path=${relativePath}&tmp=true`
+        this.apiServerDomain + `/dev/apps/${appName}/builder?ts=${Date.now()}&file_path=${relativePath}&tmp=true`
       return this.http.get(url, {
         responseType: 'text'
       });
@@ -195,7 +195,7 @@ export class AgentService implements AgentServiceInterface {
   agentChangeCancel(appName: string) {
     if (this.apiServerDomain != undefined) {
       let url =
-        this.apiServerDomain + `/builder/app/${appName}/cancel`
+        this.apiServerDomain + `/dev/apps/${appName}/builder/cancel`
       return this.http.post<any>(url, {});
     }
     return new Observable<false>();
@@ -203,7 +203,7 @@ export class AgentService implements AgentServiceInterface {
 
   getAppInfo(appName: string) {
     if (this.apiServerDomain != undefined) {
-      let url = this.apiServerDomain + `/dev/build_graph/${appName}`
+      let url = this.apiServerDomain + `/dev/apps/${appName}/build_graph`
       return this.http.get<any>(url);
     }
     return new Observable<''>();
@@ -211,7 +211,7 @@ export class AgentService implements AgentServiceInterface {
 
   getAppGraphImage(appName: string, darkMode: boolean, node?: string): Observable<any> {
     if (this.apiServerDomain != undefined) {
-      const url = this.apiServerDomain + `/dev/build_graph_image/${appName}`;
+      const url = this.apiServerDomain + `/dev/apps/${appName}/build_graph_image`;
       const params: any = { dark_mode: darkMode };
       if (node) {
         params.node = node;

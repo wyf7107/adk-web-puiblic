@@ -44,7 +44,7 @@
             </div>
             <div class="confirmation-payload" style="margin-bottom: 10px;">
               <div class="field-label" style="margin-bottom: 5px; font-size: 12px; font-weight: 500; color: var(--mat-sys-on-surface-variant);">Payload</div>
-              <ngx-json-viewer [json]="functionCall.args?.originalFunctionCall?.args"></ngx-json-viewer>
+              <app-custom-json-viewer [json]="functionCall.args?.originalFunctionCall?.args"></app-custom-json-viewer>
             </div>
             <div class="confirmation-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
               <div class="confirmation-checkbox" style="font-size: 12px;">
@@ -141,7 +141,7 @@
           </div>
           <div class="confirmation-payload" style="margin-bottom: 10px;">
             <div class="field-label" style="margin-bottom: 5px; font-size: 12px; font-weight: 500; color: var(--mat-sys-on-surface-variant);">Payload</div>
-            <ngx-json-viewer [json]="functionCall.args?.originalFunctionCall?.args"></ngx-json-viewer>
+            <app-custom-json-viewer [json]="functionCall.args?.originalFunctionCall?.args"></app-custom-json-viewer>
           </div>
           <div class="confirmation-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
             <div class="confirmation-checkbox" style="font-size: 12px;">

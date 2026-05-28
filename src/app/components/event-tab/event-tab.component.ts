@@ -25,15 +25,21 @@ import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {type SafeHtml} from '@angular/platform-browser';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewer.component';
 import {InfoTable} from '../info-table/info-table';
 
 import {Event, Part} from '../../core/models/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
-import {SpanNode} from '../../core/models/Trace';
+import {Span} from '../../core/models/Trace';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 import {addSvgNodeHoverEffects} from '../../utils/svg-interaction.utils';
+export type SpanNode = Span & {
+  children: SpanNode[];
+  depth: number;
+  duration: number;
+  id: string;  // Using span_id as string ID
+};
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,7 +58,7 @@ import {addSvgNodeHoverEffects} from '../../utils/svg-interaction.utils';
     MatProgressSpinner,
     MatTooltip,
     MatMenuModule,
-    NgxJsonViewerModule,
+    CustomJsonViewerComponent,
     InfoTable,
   ],
 })
@@ -66,7 +72,7 @@ export class EventTabComponent {
   readonly rawSvgString = input<string | null>(null);
   readonly llmRequest = input<any>();
   readonly llmResponse = input<any>();
-  readonly traceData = input<SpanNode[]>([]);
+  readonly traceData = input<Span[]>([]);
   readonly appName = input<string>('');
   readonly selectedEventGraphPath = input<string>('');
   readonly hasSubWorkflows = input<boolean>(false);
@@ -161,10 +167,10 @@ export class EventTabComponent {
   readonly associatedSpans = computed(() => {
     const ev = this.selectedEvent();
     if (!ev || !ev.id) return [];
-    
+
     const allSpans = this.traceData();
     if (!allSpans) return [];
-    
+
     const flatten = (arr: any[]): any[] => {
       let result: any[] = [];
       for (const item of arr) {
@@ -175,9 +181,9 @@ export class EventTabComponent {
       }
       return result;
     };
-    
+
     const flatSpans = flatten(allSpans);
-    return flatSpans.filter(s => s.attributes && s.attributes['gcp.vertex.agent.event_id'] === ev.id);
+    return flatSpans.filter(s => s.attrEventId === ev.id);
   });
 
   readonly sessionUsageMetadata = computed(() => {
@@ -207,11 +213,11 @@ export class EventTabComponent {
   });
 
   private _selectedDetailTab: 'event' | 'raw' | 'request' | 'response' | 'graph' | 'metadata' | 'state' = 'event';
-  
+
   get selectedDetailTab() {
     return this._selectedDetailTab;
   }
-  
+
   set selectedDetailTab(tab: 'event' | 'raw' | 'request' | 'response' | 'graph' | 'metadata' | 'state') {
     this._selectedDetailTab = tab;
     window.localStorage.setItem('adk-event-tab-selected-tab', tab);
@@ -311,7 +317,7 @@ export class EventTabComponent {
     effect(() => {
       const force = this.forceGraphTab();
       const event = this.selectedEvent();
-      
+
       if (force && !prevForceGraphTab) {
         this.selectedDetailTab = this.graphsAvailable() ? 'graph' : 'event';
       }
@@ -354,7 +360,7 @@ export class EventTabComponent {
     if (targetInvocationId) {
       allEvents = allEvents.filter(ev => ev.invocationId === targetInvocationId);
     }
-    
+
     const travelsForNode: any[][] = [];
     let currentTravel: any[] = [];
     let lastNodeName = '';
@@ -381,7 +387,7 @@ export class EventTabComponent {
       } else {
         evGraphPath = segments.slice(1, -1).join('/');
       }
-      
+
       if (evGraphPath === this.selectedEventGraphPath()) {
         const fullSegments = np.split('/');
         const fullEvNodeName = fullSegments[fullSegments.length - 1];
@@ -394,7 +400,7 @@ export class EventTabComponent {
            lastNodeName = currentName;
            currentTravel = [];
         }
-        
+
         if (currentName === nodeName) {
            currentTravel.push(ev);
         }

@@ -20,14 +20,27 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatExpansionPanelHarness} from '@angular/material/expansion/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
-import {Span} from '../../core/models/Trace';
+import {Span, SpanValidator} from '../../core/models/Trace';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
 
 import {MockTraceService} from './../../core/services/testing/mock-trace.service';
 import {TraceTabComponent} from './trace-tab.component';
 
+/**
+ * Helper that builds a `Span` by routing a raw OTel-shaped object through
+ * `SpanValidator`. Required because the validator strips the raw
+ * `attributes` bag in favor of typed `attr*` promoted fields.
+ */
+function makeSpan(raw: unknown): Span {
+  const result = SpanValidator.safeParse(raw);
+  if (!result.success) {
+    throw new Error(`Failed to build test span: ${result.error.message}`);
+  }
+  return result.data;
+}
+
 const MOCK_TRACE_DATA: Span[] = [
-  {
+  makeSpan({
     name: 'agent.act',
     start_time: 1733084700000000000,
     end_time: 1733084760000000000,
@@ -39,8 +52,8 @@ const MOCK_TRACE_DATA: Span[] = [
       'gcp.vertex.agent.llm_request':
           '{"contents":[{"role":"user","parts":[{"text":"Hello"}]},{"role":"agent","parts":[{"text":"Hi. What can I help you with?"}]},{"role":"user","parts":[{"text":"I need help with my project."}]}]}',
     },
-  },
-  {
+  }),
+  makeSpan({
     name: 'tool.invoke',
     start_time: 1733084705000000000,
     end_time: 1733084755000000000,
@@ -50,7 +63,7 @@ const MOCK_TRACE_DATA: Span[] = [
     attributes: {
       'tool_name': 'project_helper',
     },
-  },
+  }),
 ];
 
 describe('TraceTabComponent', () => {
@@ -89,7 +102,7 @@ describe('TraceTabComponent', () => {
   xdescribe('with trace data', () => {
     const MOCK_TRACE_DATA_WITH_MULTIPLE_TRACES: Span[] = [
       ...MOCK_TRACE_DATA,
-      {
+      makeSpan({
         name: 'agent.act-2',
         start_time: 1733084700000000000,
         end_time: 1733084760000000000,
@@ -101,7 +114,7 @@ describe('TraceTabComponent', () => {
           'gcp.vertex.agent.llm_request':
               '{"contents":[{"role":"user","parts":[{"text":"Another user message"}]}]}',
         },
-      },
+      }),
     ];
 
     beforeEach(async () => {

@@ -118,7 +118,7 @@ export class AddItemDialogComponent {
     const allTabAgents = new Map<string, AgentNode>();
     YamlUtils.generateYamlFile(rootAgent, formData, trimmedName, allTabAgents);
 
-    this.agentService.agentBuildTmp(formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(trimmedName, formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
             queryParams: { app: trimmedName, mode: 'builder' }

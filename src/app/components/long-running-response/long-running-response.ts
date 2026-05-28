@@ -15,16 +15,16 @@
  * limitations under the License.
  */
 
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {FormsModule} from '@angular/forms';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
-import {MatButton, MatIconButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CustomJsonViewerComponent } from '../custom-json-viewer/custom-json-viewer.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 
 
-    import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-    import {MarkdownComponent} from '../markdown/markdown.component';
+import { AgentRunRequest } from '../../core/models/AgentRunRequest';
+import { MarkdownComponent } from '../markdown/markdown.component';
 
 
 
@@ -38,8 +38,8 @@ import {MatIcon} from '@angular/material/icon';
     MatIconButton,
     MatButton,
     MatIcon,
-    NgxJsonViewerModule,
     MarkdownComponent,
+    CustomJsonViewerComponent,
   ],
 })
 export class LongRunningResponseComponent implements OnChanges {
@@ -75,7 +75,7 @@ export class LongRunningResponseComponent implements OnChanges {
   initForm() {
     this.formModel = {};
     this.formFields = [];
-    
+
     if (this.isConfirmationRequest) {
       this.confirmationModel.confirmed = this.functionCall.args?.toolConfirmation?.confirmed || false;
       this.confirmationModel.payload = JSON.stringify(this.functionCall.args?.originalFunctionCall?.args || {}, null, 2);
@@ -87,7 +87,7 @@ export class LongRunningResponseComponent implements OnChanges {
       for (const key of Object.keys(schema.properties)) {
         const prop = schema.properties[key];
         let type = prop.type;
-        
+
         if (!type && prop.anyOf) {
           // Find the first non-null type
           const nonNullType = prop.anyOf.find((t: any) => t.type !== 'null');
@@ -120,7 +120,7 @@ export class LongRunningResponseComponent implements OnChanges {
     if (!schema || schema.type !== 'object' || !schema.properties) {
       return this.formModel;
     }
-    const cleaned = {...this.formModel};
+    const cleaned = { ...this.formModel };
     for (const key of Object.keys(schema.properties)) {
       const prop = schema.properties[key];
       const value = cleaned[key];
@@ -132,7 +132,7 @@ export class LongRunningResponseComponent implements OnChanges {
             type = nonNullType.type;
           }
         }
-        
+
         if (type === 'integer') {
           cleaned[key] = parseInt(value, 10);
         } else if (type === 'number') {
@@ -175,7 +175,7 @@ export class LongRunningResponseComponent implements OnChanges {
 
   hasPayload(): boolean {
     return this.functionCall.args?.payload !== undefined &&
-           this.functionCall.args?.payload !== null;
+      this.functionCall.args?.payload !== null;
   }
 
   getPayloadJson(): string {
@@ -206,25 +206,25 @@ export class LongRunningResponseComponent implements OnChanges {
       } catch (e) {
         payloadObj = this.functionCall.args?.originalFunctionCall?.args || {};
       }
-      
+
       const responseValue = {
         confirmed: this.confirmationModel.confirmed,
         payload: payloadObj
       };
-      
+
       this.functionCall.responseStatus = 'sent';
       this.cdr.detectChanges();
 
       const content = {
-          role: 'user',
-          parts: [{
-            functionResponse: {
-              id: this.functionCall.id,
-              name: this.functionCall.name,
-              response: responseValue,
-            },
-          }],
-          functionCallEventId: this.functionCall.functionCallEventId
+        role: 'user',
+        parts: [{
+          functionResponse: {
+            id: this.functionCall.id,
+            name: this.functionCall.name,
+            response: responseValue,
+          },
+        }],
+        functionCallEventId: this.functionCall.functionCallEventId
       };
 
       this.responseComplete.emit(content);
@@ -242,7 +242,7 @@ export class LongRunningResponseComponent implements OnChanges {
       this.functionCall.sentUserResponse = this.functionCall.userResponse;
     } else {
       if (!this.functionCall.userResponse ||
-          !this.functionCall.userResponse.trim()) {
+        !this.functionCall.userResponse.trim()) {
         return;
       }
 
@@ -266,15 +266,15 @@ export class LongRunningResponseComponent implements OnChanges {
     this.cdr.detectChanges();
 
     const content = {
-        role: 'user',
-        parts: [{
-          functionResponse: {
-            id: this.functionCall.id,
-            name: this.functionCall.name,
-            response: responseValue,
-          },
-        }],
-        functionCallEventId: this.functionCall.functionCallEventId
+      role: 'user',
+      parts: [{
+        functionResponse: {
+          id: this.functionCall.id,
+          name: this.functionCall.name,
+          response: responseValue,
+        },
+      }],
+      functionCallEventId: this.functionCall.functionCallEventId
     };
 
     this.responseComplete.emit(content);

@@ -4,7 +4,7 @@
   width: 100%;
 }
 
-app-content-bubble + app-content-bubble {
+app-content-bubble+app-content-bubble {
   margin-top: 5px;
 }
 
@@ -46,6 +46,7 @@ app-content-bubble + app-content-bubble {
 .function-calls-previews {
   width: 100%;
 }
+
 
 .function-response-chip-container {
   display: inline-flex;

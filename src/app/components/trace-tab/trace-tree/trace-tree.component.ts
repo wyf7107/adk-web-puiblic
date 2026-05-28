@@ -25,6 +25,11 @@ import {UiEvent} from '../../../core/models/UiEvent';
 import {HtmlTooltipDirective} from '../../../directives/html-tooltip.directive';
 import {EventContentComponent} from '../../event-content/event-content.component';
 
+export interface FlatTreeNode {
+  span: Span;
+  level: number;
+}
+
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-trace-tree',
@@ -33,7 +38,7 @@ import {EventContentComponent} from '../../event-content/event-content.component
   imports: [MatButtonModule, MatIconModule, MatTooltipModule, HtmlTooltipDirective, EventContentComponent]
 })
 export class TraceTreeComponent implements OnInit, OnChanges {
-  @Input() spans: any[] = [];
+  @Input() spans: Span[] = [];
   @Input() invocationId: string = '';
   @Input() uiEvents: UiEvent[] = [];
   @Input() shouldShowEvent?: (uiEvent: UiEvent) => boolean;
@@ -42,9 +47,9 @@ export class TraceTreeComponent implements OnInit, OnChanges {
   baseStartTimeMs = 0;
   totalDurationMs = 1;
   rootLatencyNanos = 0;
-  flatTree: {span: Span; level: number}[] = [];
+  flatTree: FlatTreeNode[] = [];
 
-  shouldShowNode(node: any): boolean {
+  shouldShowNode(node: FlatTreeNode): boolean {
     const uiEvent = this.getUiEvent(node);
     if (!uiEvent) {
       return true;
@@ -121,11 +126,11 @@ export class TraceTreeComponent implements OnInit, OnChanges {
         this.flatTree.push(...this.flattenTree(root.children, 0));
       }
     });
-    
+
     const times = this.getGlobalTimes(this.spans);
     this.baseStartTimeMs = times.start;
     this.totalDurationMs = times.duration;
-    
+
     if (this.tree && this.tree.length > 0) {
       this.rootLatencyNanos = this.tree[0].end_time - this.tree[0].start_time;
     } else {
@@ -139,10 +144,10 @@ export class TraceTreeComponent implements OnInit, OnChanges {
     const spanMap = new Map<string, Span>();
     const roots: Span[] = [];
 
-    spanClones.forEach(span => spanMap.set(span.span_id, span));
+    spanClones.forEach(span => spanMap.set(String(span.span_id), span));
     spanClones.forEach(span => {
-      if (span.parent_span_id && spanMap.has(span.parent_span_id)) {
-        const parent = spanMap.get(span.parent_span_id)!;
+      if (span.parent_span_id && spanMap.has(String(span.parent_span_id))) {
+        const parent = spanMap.get(String(span.parent_span_id))!;
         parent.children = parent.children || [];
         parent.children.push(span);
       } else {
@@ -169,7 +174,7 @@ export class TraceTreeComponent implements OnInit, OnChanges {
     if (nanos < 1_000_000) return `${(nanos / 1000).toFixed(2)}us`;
     if (nanos < 1_000_000_000) return `${(nanos / 1_000_000).toFixed(2)}ms`;
     if (nanos < 60_000_000_000) return `${(nanos / 1_000_000_000).toFixed(2)}s`;
-    
+
     const minutes = Math.floor(nanos / 60_000_000_000);
     const seconds = ((nanos % 60_000_000_000) / 1_000_000_000).toFixed(2);
     return `${minutes}m ${seconds}s`;
@@ -187,7 +192,7 @@ export class TraceTreeComponent implements OnInit, OnChanges {
         100;
   }
 
-  flattenTree(spans: Span[], level: number = 0): any[] {
+  flattenTree(spans: Span[], level: number = 0): FlatTreeNode[] {
     const tree = spans.flatMap(
         span =>
             [{span, level},
@@ -222,34 +227,31 @@ export class TraceTreeComponent implements OnInit, OnChanges {
     return Array.from({length: n});
   }
 
-  selectRow(node: any) {
+  selectRow(node: FlatTreeNode) {
     if (this.selectedRow && this.selectedRow.span_id == node.span.span_id) {
       return;
     }
     this.traceService.selectedRow(node.span);
   }
 
-  rowSelected(node: any) {
+  rowSelected(node: FlatTreeNode) {
     if (!this.selectedRow || !node?.span) return false;
     return String(this.selectedRow.span_id) === String(node.span.span_id);
   }
 
-  isEventRow(node: any) {
-    if (!node.span.attributes) {
-      return false;
-    }
-    const eventId = node?.span.attributes['gcp.vertex.agent.event_id'];
+  isEventRow(node: FlatTreeNode) {
+    const eventId = this.getEventId(node);
     if (eventId && this.uiEvents && this.uiEvents.length > 0) {
       return this.uiEvents.some(e => e.event?.id === eventId);
     }
     return false;
   }
 
-  getEventId(node: any): string {
-    return node?.span?.attributes?.['gcp.vertex.agent.event_id'] ?? '';
+  getEventId(node: FlatTreeNode): string {
+    return node?.span?.attrEventId ?? '';
   }
 
-  getUiEvent(node: any): UiEvent | null {
+  getUiEvent(node: FlatTreeNode): UiEvent | null {
     const eventId = this.getEventId(node);
     if (eventId && this.uiEvents && this.uiEvents.length > 0) {
       return this.uiEvents.find(e => e.event?.id === eventId) || null;

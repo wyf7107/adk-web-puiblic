@@ -23,10 +23,10 @@ import {MatIcon} from '@angular/material/icon';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {SafeHtml} from '@angular/platform-browser';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CustomJsonViewerComponent} from '../../custom-json-viewer/custom-json-viewer.component';
 import {tap} from 'rxjs/operators';
 
-import {Span} from '../../../core/models/Trace';
+import {OPERATION_GENERATE_CONTENT, Span} from '../../../core/models/Trace';
 import {EVENT_SERVICE} from '../../../core/services/interfaces/event';
 import {FEATURE_FLAG_SERVICE} from '../../../core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE} from '../../../core/services/interfaces/graph';
@@ -41,7 +41,7 @@ import {ViewImageDialogComponent} from '../../view-image-dialog/view-image-dialo
   templateUrl: './trace-event.component.html',
   styleUrl: './trace-event.component.scss',
   imports: [
-    MatTabGroup, MatTab, NgxJsonViewerModule, MatIconButton, MatIcon,
+    MatTabGroup, MatTab, CustomJsonViewerComponent, MatIconButton, MatIcon,
     MatProgressSpinner, AsyncPipe
   ]
 })
@@ -58,8 +58,6 @@ export class TraceEventComponent implements OnInit {
 
   llmRequest: any = undefined;
   llmResponse: any = undefined;
-  llmRequestKey = 'gcp.vertex.agent.llm_request';
-  llmResponseKey = 'gcp.vertex.agent.llm_response';
 
   private readonly dialog = inject(MatDialog);
   private readonly traceService = inject(TRACE_SERVICE);
@@ -80,27 +78,9 @@ export class TraceEventComponent implements OnInit {
       this.selectedRow = span;
       const eventId = this.getEventIdFromSpan();
       if (eventId) {
-        this.llmRequest = undefined;
-        this.llmResponse = undefined;
-
-        const requestStr = this.selectedRow?.attributes?.[this.llmRequestKey];
-        const responseStr = this.selectedRow?.attributes?.[this.llmResponseKey];
-
-        if (requestStr) {
-          try {
-            this.llmRequest = typeof requestStr === 'string' ? JSON.parse(requestStr) : requestStr;
-          } catch (e) {
-            console.warn('Failed to parse LLM request', e);
-          }
-        }
-
-        if (responseStr) {
-          try {
-            this.llmResponse = typeof responseStr === 'string' ? JSON.parse(responseStr) : responseStr;
-          } catch (e) {
-            console.warn('Failed to parse LLM response', e);
-          }
-        }
+        const io = this.selectedRow?.io;
+        this.llmRequest = io?.inputs;
+        this.llmResponse = io?.outputs;
         this.getEventGraph(eventId);
       }
     });
@@ -119,17 +99,15 @@ export class TraceEventComponent implements OnInit {
 
   getEventDetails() {
     if (this.eventData && this.selectedRow) {
-      return this.eventData.get(this.getEventIdFromSpan());
+      const eventId = this.getEventIdFromSpan();
+      return eventId ? this.eventData.get(eventId) : undefined;
     } else {
       return undefined;
     }
   }
 
   getEventIdFromSpan() {
-    if (!this.selectedRow) {
-      return undefined;
-    }
-    return this.selectedRow.attributes['gcp.vertex.agent.event_id'];
+    return this.selectedRow?.attrEventId;
   }
 
   getEventGraph(eventId: string) {

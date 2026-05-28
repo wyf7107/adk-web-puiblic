@@ -185,11 +185,11 @@
           @if (uiEvent.actualInvocationToolUses) {
           <div class="actual-result">
             <div class="eval-response-header header-actual">{{ i18n.actualToolUsesLabel }}</div>
-            <ngx-json-viewer [json]="uiEvent.actualInvocationToolUses"></ngx-json-viewer>
+            <app-custom-json-viewer [json]="uiEvent.actualInvocationToolUses"></app-custom-json-viewer>
           </div>
           <div class="expected-result">
             <div class="eval-response-header header-expected">{{ i18n.expectedToolUsesLabel }}</div>
-            <ngx-json-viewer [json]="uiEvent.expectedInvocationToolUses"></ngx-json-viewer>
+            <app-custom-json-viewer [json]="uiEvent.expectedInvocationToolUses"></app-custom-json-viewer>
           </div>
           } @else if (uiEvent.actualFinalResponse) {
           <div class="actual-result">
@@ -213,17 +213,17 @@
       </div>
     }
   } @else if (type === 'output') {
-      <ngx-json-viewer 
+      <app-custom-json-viewer 
         [json]="uiEvent.event.output!"
         [appJsonTooltip]="uiEvent.event.nodeInfo?.['outputFor'] || uiEvent.nodePath"
         appJsonTooltipTitle="Node Output for"
-      ></ngx-json-viewer>
+      ></app-custom-json-viewer>
   } @else if (type === 'error') {
-      <ngx-json-viewer 
+      <app-custom-json-viewer 
         [json]="uiEvent.error!"
         [appJsonTooltip]="uiEvent.error"
         appJsonTooltipTitle="Error Details"
-      ></ngx-json-viewer>
+      ></app-custom-json-viewer>
   } @else if (type === 'transcription') {
       @if (role === 'user' && uiEvent.event.inputTranscription) {
         {{ uiEvent.event.inputTranscription.text }}

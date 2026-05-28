@@ -158,32 +158,6 @@ markdown code {
   background-color: var(--mat-sys-surface-container-high) !important;
 }
 
-// ngx-json-viewer custom colors
-ngx-json-viewer {
-  .segment-key {
-    color: var(--mat-sys-primary) !important;
-  }
-
-  .segment-value {
-    color: inherit;
-  }
-
-  .segment-type-string {
-    color: var(--mat-sys-tertiary) !important;
-  }
-
-  .segment-type-number {
-    color: var(--mat-sys-error) !important;
-  }
-
-  .segment-type-boolean {
-    color: var(--mat-sys-secondary) !important;
-  }
-
-  .segment-type-null {
-    color: var(--mat-sys-outline) !important;
-  }
-}
 
 .user-avatar-menu {
   .mat-mdc-menu-content {

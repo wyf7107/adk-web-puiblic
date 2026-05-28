@@ -277,7 +277,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
-    this.agentService.agentBuildTmp(formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(appName, formData).subscribe((success) => {
       if (success) {
         console.log("save to tmp")
       } else {

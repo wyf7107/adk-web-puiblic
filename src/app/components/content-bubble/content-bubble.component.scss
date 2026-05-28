@@ -1,5 +1,6 @@
 :host {
-  display: contents; /* Ensure the wrapper doesn't break flex layouts of the parent */
+  display: contents;
+  /* Ensure the wrapper doesn't break flex layouts of the parent */
 }
 
 .content-bubble {
@@ -89,6 +90,7 @@
   transition: transform 0.2s ease-in-out;
 }
 
+
 .generated-image-container {
   max-width: 400px;
   margin-top: 8px;
@@ -123,6 +125,7 @@
     padding: 5px 12px !important;
     max-width: 90% !important;
   }
+
   .role-user {
     max-width: 90% !important;
   }

@@ -21,7 +21,7 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {MatIconModule} from '@angular/material/icon';
 import {MatTooltipModule} from '@angular/material/tooltip';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewer.component';
 
 import {UiEvent} from '../../core/models/UiEvent';
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
@@ -42,7 +42,7 @@ import { ARTIFACT_SERVICE } from '../../core/services/interfaces/artifact';
     FormsModule,
     MatIconModule,
     MatTooltipModule,
-    NgxJsonViewerModule,
+    CustomJsonViewerComponent,
     A2uiCanvasComponent,
     AudioPlayerComponent,
     JsonTooltipDirective,

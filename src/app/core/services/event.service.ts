@@ -19,9 +19,9 @@ import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {URLUtil} from '../../../utils/url-util';
 import {EventIdentifier, EventService as EventServiceInterface} from './interfaces/event';
-import { EventTelemetry, Span } from '../models/Trace';
+import type { Observable } from 'rxjs';
+import { SpanValidator, Span } from '../models/Trace';
 import {map} from 'rxjs/operators';
-import { normalizeEventTelemetry, normalizeSpan } from '../../../utils/trace-utils';
 
 @Injectable({
   providedIn: 'root',
@@ -33,20 +33,23 @@ export class EventService implements EventServiceInterface {
   /**
    * Returns the trace data for a given event id.
    */
-  getEventTrace(event: EventIdentifier) {
-    const url = this.apiServerDomain + `/debug/trace/${event.id!}`;
-    const eventTelemetry = this.http.get<EventTelemetry>(url);
-    return eventTelemetry.pipe(
-      map(eventTelemetry => normalizeEventTelemetry(eventTelemetry))
-    );
+  getEventTrace(appName: string, event: EventIdentifier): Observable<any> {
+    const url = this.apiServerDomain + `/dev/apps/${appName}/debug/trace/${event.id!}`;
+    return this.http.get<any>(url);
   }
 
-  getTrace(sessionId: string) {
-    const url = this.apiServerDomain + `/debug/trace/session/${sessionId}`;
-    const spans = this.http.get<Span[]>(url);
+  getTrace(appName: string, sessionId: string): Observable<Span[]> {
+    const url = this.apiServerDomain + `/dev/apps/${appName}/debug/trace/session/${sessionId}`;
+    const spans = this.http.get(url);
     return spans.pipe(
-      map(spans => Array.isArray(spans) ? spans.map(normalizeSpan) : spans)
-    );
+      map(spans => {
+        const result = SpanValidator.array().safeParse(spans);
+        if (!result.success) {
+          throw new Error(result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', '));
+        } else {
+          return result.data;
+        }
+      }));
   }
 
   getEvent(
@@ -56,7 +59,7 @@ export class EventService implements EventServiceInterface {
       eventId: string,
   ) {
     const url = this.apiServerDomain +
-        `/apps/${appName}/users/${userId}/sessions/${sessionId}/events/${
+      `/dev/apps/${appName}/users/${userId}/sessions/${sessionId}/events/${
                     eventId}/graph`;
     return this.http.get<{dotSrc?: string}>(url);
   }

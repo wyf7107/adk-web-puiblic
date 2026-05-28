@@ -5,12 +5,8 @@
   height: 100vh;
   padding: 0;
   overflow: hidden;
-  background-color: rgba(
-    0,
-    0,
-    0,
-    0.6
-  ); /* Semi-transparent backdrop for lightbox effect */
+  background-color: rgba(0, 0, 0, 0.6);
+  /* Semi-transparent backdrop for lightbox effect */
 }
 
 .close-button {
@@ -37,24 +33,29 @@
   svg {
     width: 24px;
     height: 24px;
-    fill: currentColor; /* Use current color for SVG fill */
+    fill: currentColor;
+    /* Use current color for SVG fill */
   }
 }
 
 .image-wrapper {
-  flex-grow: 1; /* Allow image wrapper to take available space */
+  flex-grow: 1;
+  /* Allow image wrapper to take available space */
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* Hide scrollbars, use pan to move image */
+  overflow: hidden;
+  /* Hide scrollbars, use pan to move image */
 }
 
 .image-wrapper img,
 .image-wrapper .svg-container {
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain; /* Ensure image fits within bounds without cropping */
-  border-radius: 0; /* Remove rounded corners for full screen view */
+  object-fit: contain;
+  /* Ensure image fits within bounds without cropping */
+  border-radius: 0;
+  /* Remove rounded corners for full screen view */
 }
 
 .no-image-placeholder {

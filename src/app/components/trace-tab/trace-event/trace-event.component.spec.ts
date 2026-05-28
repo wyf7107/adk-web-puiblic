@@ -22,7 +22,7 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {of} from 'rxjs';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 
-import {Span} from '../../../core/models/Trace';
+import {Span, SpanValidator} from '../../../core/models/Trace';
 import {EVENT_SERVICE, EventService} from '../../../core/services/interfaces/event';
 import {FEATURE_FLAG_SERVICE} from '../../../core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE, GraphService} from '../../../core/services/interfaces/graph';
@@ -61,16 +61,28 @@ describe('TraceEventComponent', () => {
   let featureFlagService: MockFeatureFlagService;
   let uiStateService: MockUiStateService;
 
-  const span: Span = {
-    name: 'test-span',
-    trace_id: 'trace-id',
-    span_id: 'span-id',
-    start_time: 1,
-    end_time: 2,
-    attributes: {
-      'gcp.vertex.agent.event_id': EVENT_ID,
-    },
-  };
+  /**
+   * Builds a `Span` by routing the raw object through `SpanValidator` so
+   * promoted attribute fields (e.g. `attrEventId`) are populated.
+   */
+  function makeSpan(attrs: Record<string, unknown>): Span {
+    const result = SpanValidator.safeParse({
+      name: 'test-span',
+      trace_id: 'trace-id',
+      span_id: 'span-id',
+      start_time: 1,
+      end_time: 2,
+      attributes: attrs,
+    });
+    if (!result.success) {
+      throw new Error(`Failed to build test span: ${result.error.message}`);
+    }
+    return result.data;
+  }
+
+  const span: Span = makeSpan({
+    'gcp.vertex.agent.event_id': EVENT_ID,
+  });
 
   beforeEach(async () => {
     traceService = new MockTraceService();
@@ -98,9 +110,8 @@ describe('TraceEventComponent', () => {
 
     await TestBed
         .configureTestingModule({
-          imports: [MatDialogModule, TraceEventComponent, NoopAnimationsModule],
+          imports: [TraceEventComponent, NoopAnimationsModule],
           providers: [
-            {provide: MatDialog, useValue: matDialog},
             {provide: TRACE_SERVICE, useValue: traceService},
             {provide: EVENT_SERVICE, useValue: eventService},
             {provide: GRAPH_SERVICE, useValue: graphService},
@@ -111,6 +122,13 @@ describe('TraceEventComponent', () => {
               useValue: domSanitizer,
             },
           ],
+        })
+        .overrideComponent(TraceEventComponent, {
+          set: {
+            providers: [
+              {provide: MatDialog, useValue: matDialog},
+            ],
+          },
         })
         .compileComponents();
 
@@ -149,24 +167,18 @@ describe('TraceEventComponent', () => {
        });
 
     it('should parse LLM request from the selected span attributes', () => {
-      traceService.selectedTraceRow$.next({
-        ...span,
-        attributes: {
-          'gcp.vertex.agent.event_id': EVENT_ID,
-          'gcp.vertex.agent.llm_request': JSON.stringify({data: 'request'}),
-        }
-      });
+      traceService.selectedTraceRow$.next(makeSpan({
+        'gcp.vertex.agent.event_id': EVENT_ID,
+        'gcp.vertex.agent.llm_request': JSON.stringify({data: 'request'}),
+      }));
       expect(component.llmRequest).toEqual({data: 'request'});
     });
 
     it('should parse LLM response from the selected span attributes', () => {
-      traceService.selectedTraceRow$.next({
-        ...span,
-        attributes: {
-          'gcp.vertex.agent.event_id': EVENT_ID,
-          'gcp.vertex.agent.llm_response': JSON.stringify({data: 'response'}),
-        }
-      });
+      traceService.selectedTraceRow$.next(makeSpan({
+        'gcp.vertex.agent.event_id': EVENT_ID,
+        'gcp.vertex.agent.llm_response': JSON.stringify({data: 'response'}),
+      }));
       expect(component.llmResponse).toEqual({data: 'response'});
     });
   });
@@ -183,14 +195,7 @@ describe('TraceEventComponent', () => {
 
     it('should return undefined if the selected row lacks the event_id attribute',
        () => {
-         component.selectedRow = {
-           name: 'test-span',
-           trace_id: 'trace-id',
-           span_id: 'span-id',
-           start_time: 1,
-           end_time: 2,
-           attributes: {'another_attribute': 'value'},
-         };
+         component.selectedRow = makeSpan({'another_attribute': 'value'});
          expect(component.getEventIdFromSpan()).toBeUndefined();
        });
   });

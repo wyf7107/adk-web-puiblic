@@ -15,27 +15,27 @@
  * limitations under the License.
  */
 
-import {CommonModule, NgClass} from '@angular/common';
-import {Component, EventEmitter, Input, Output, inject} from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import {MatDialog} from '@angular/material/dialog';
-import {MatMenuModule} from '@angular/material/menu';
-import {FunctionResponse} from '../../core/models/types';
-import {EditJsonDialogComponent} from '../edit-json-dialog/edit-json-dialog.component';
+import { CommonModule, NgClass } from '@angular/common';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
+import { FunctionCall, FunctionResponse } from '../../core/models/types';
+import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
 
-import {AgentRunRequest} from '../../core/models/AgentRunRequest';
-import {isComputerUseResponse, isVisibleComputerUseClick} from '../../core/models/ComputerUse';
-import type {EvalCase} from '../../core/models/Eval';
-import {UiEvent} from '../../core/models/UiEvent';
-import {WorkflowGraphTooltipDirective} from '../../directives/workflow-graph-tooltip.directive';
-import {JsonTooltipDirective} from '../../directives/html-tooltip.directive';
-import {ComputerActionComponent} from '../computer-action/computer-action.component';
-import {HoverInfoButtonComponent} from '../hover-info-button/hover-info-button.component';
-import {LongRunningResponseComponent} from '../long-running-response/long-running-response';
-import {ChatPanelMessagesInjectionToken} from '../chat-panel/chat-panel.component.i18n';
-import {ContentBubbleComponent} from '../content-bubble/content-bubble.component';
+import { AgentRunRequest } from '../../core/models/AgentRunRequest';
+import { isComputerUseResponse, isVisibleComputerUseClick } from '../../core/models/ComputerUse';
+import type { EvalCase } from '../../core/models/Eval';
+import { UiEvent } from '../../core/models/UiEvent';
+import { WorkflowGraphTooltipDirective } from '../../directives/workflow-graph-tooltip.directive';
+import { JsonTooltipDirective } from '../../directives/html-tooltip.directive';
+import { ComputerActionComponent } from '../computer-action/computer-action.component';
+import { HoverInfoButtonComponent } from '../hover-info-button/hover-info-button.component';
+import { LongRunningResponseComponent } from '../long-running-response/long-running-response';
+import { ChatPanelMessagesInjectionToken } from '../chat-panel/chat-panel.component.i18n';
+import { ContentBubbleComponent } from '../content-bubble/content-bubble.component';
 
 @Component({
   selector: 'app-event-content',
@@ -58,39 +58,39 @@ import {ContentBubbleComponent} from '../content-bubble/content-bubble.component
   ],
 })
 export class EventContentComponent {
-  @Input({required: true}) uiEvent!: UiEvent;
-  @Input({required: true}) index!: number;
+  @Input({ required: true }) uiEvent!: UiEvent;
+  @Input({ required: true }) index!: number;
   @Input() uiEvents: UiEvent[] = [];
-  
+
   @Input() appName: string = '';
   @Input() userId: string = '';
   @Input() sessionId: string = '';
   @Input() sessionName: string = '';
-  
+
   @Input() evalCase: EvalCase | null = null;
   @Input() isEvalEditMode: boolean = false;
   @Input() isEvalCaseEditing: boolean = false;
   @Input() isEditFunctionArgsEnabled: boolean = false;
   @Input() userEditEvalCaseMessage: string = '';
-  
+
   @Input() agentGraphData: any = null;
   @Input() allWorkflowNodes: any = null;
 
-  @Output() readonly handleKeydown = new EventEmitter<{event: KeyboardEvent, message: any}>();
+  @Output() readonly handleKeydown = new EventEmitter<{ event: KeyboardEvent, message: any }>();
   @Output() readonly cancelEditMessage = new EventEmitter<any>();
   @Output() readonly saveEditMessage = new EventEmitter<any>();
   @Output() readonly userEditEvalCaseMessageChange = new EventEmitter<string>();
-  
-  @Output() readonly openViewImageDialog = new EventEmitter<{images: string[], currentIndex: number, urls?: string[], coordinates?: ({x: number, y: number} | null)[]}>();
-  @Output() readonly openBase64InNewTab = new EventEmitter<{data: string, mimeType: string}>();
-  
+
+  @Output() readonly openViewImageDialog = new EventEmitter<{ images: string[], currentIndex: number, urls?: string[], coordinates?: ({ x: number, y: number } | null)[] }>();
+  @Output() readonly openBase64InNewTab = new EventEmitter<{ data: string, mimeType: string }>();
+
   @Output() readonly editEvalCaseMessage = new EventEmitter<any>();
-  @Output() readonly deleteEvalCaseMessage = new EventEmitter<{message: any, index: number}>();
+  @Output() readonly deleteEvalCaseMessage = new EventEmitter<{ message: any, index: number }>();
   @Output() readonly editFunctionArgs = new EventEmitter<any>();
-  
+
   @Output() readonly clickEvent = new EventEmitter<number>();
   @Output() readonly longRunningResponseComplete = new EventEmitter<any>();
-  @Output() readonly agentStateClick = new EventEmitter<{event: Event, index: number}>();
+  @Output() readonly agentStateClick = new EventEmitter<{ event: Event, index: number }>();
 
   protected readonly i18n = inject(ChatPanelMessagesInjectionToken);
   private readonly dialog = inject(MatDialog);
@@ -98,13 +98,69 @@ export class EventContentComponent {
   readonly Object = Object;
   readonly String = String;
 
+  getFunctionCallButtonText(functionCall: FunctionCall): string {
+    let args: any = functionCall.args;
+    if (args && typeof args === 'string') {
+      try {
+        args = JSON.parse(args);
+      } catch {
+        // ignore parsing error, treat as raw string
+      }
+    }
+    if (args && typeof args === 'object') {
+      const specialFuncArgMap: Record<string, string> = {
+        'EditFile': 'path',
+        'WriteFile': 'path',
+      };
+      if (functionCall.name in specialFuncArgMap) {
+        const argKey = specialFuncArgMap[functionCall.name];
+        if (argKey in args) {
+          const valueStr = this.formatPythonValue(args[argKey]);
+          const hasMore = Object.keys(args).length > 1;
+          return `${functionCall.name}(${valueStr}${hasMore ? ', …' : ''})`;
+        }
+      }
+
+      const keys = Object.keys(args);
+      if (keys.length === 1) {
+        const value = args[keys[0]];
+        const valueStr = this.formatPythonValue(value);
+        return `${functionCall.name}(${valueStr})`;
+      } else if (keys.length === 0) {
+        return `${functionCall.name}()`;
+      }
+    } else if (!args) {
+      return `${functionCall.name}()`;
+    }
+    return functionCall.name;
+  }
+
+  private formatPythonValue(value: any): string {
+    if (value === null || value === undefined) {
+      return 'None';
+    }
+    if (typeof value === 'boolean') {
+      return value ? 'True' : 'False';
+    }
+    if (typeof value === 'string') {
+      return `"${value}"`;
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value)
+        .replace(/\btrue\b/g, 'True')
+        .replace(/\bfalse\b/g, 'False')
+        .replace(/\bnull\b/g, 'None');
+    }
+    return String(value);
+  }
+
   shouldShowMessageCard(message: any): boolean {
     return !!(
-        message.text || message.attachments || message.inlineData ||
-        message.executableCode || message.codeExecutionResult ||
-        message.a2uiData || message.renderedContent || message.isLoading ||
-        (message.failedMetric && message.evalStatus === 2) ||
-        message.event?.content?.parts?.some((part: any) => part.fileData));
+      message.text || message.attachments || message.inlineData ||
+      message.executableCode || message.codeExecutionResult ||
+      message.a2uiData || message.renderedContent || message.isLoading ||
+      (message.failedMetric && message.evalStatus === 2) ||
+      message.event?.content?.parts?.some((part: any) => part.fileData));
   }
 
   isComputerUseClick(input: any): boolean {
@@ -122,7 +178,7 @@ export class EventContentComponent {
 
   getFilteredStateDelta(stateDelta: any): any {
     if (!stateDelta) return null;
-    const filtered = {...stateDelta};
+    const filtered = { ...stateDelta };
     delete filtered['__llm_request_key__'];
     return filtered;
   }
@@ -155,7 +211,7 @@ export class EventContentComponent {
     if (!callId) {
       return false;
     }
-    return this.uiEvents.some(event => 
+    return this.uiEvents.some(event =>
       event.functionResponses?.some(response => response.id === callId && (response.response as any)?.status !== 'pending')
     );
   }
@@ -163,7 +219,7 @@ export class EventContentComponent {
   openSendAnotherResponseDialog(functionResponse: FunctionResponse) {
     let functionCallEventId = '';
     const callId = functionResponse.id;
-    
+
     if (callId) {
       for (const event of this.uiEvents) {
         if (event.functionCalls) {
@@ -256,6 +312,6 @@ export class EventContentComponent {
   onImageClick(clickedImage: string) {
     const images = this.getAllImages();
     const currentIndex = images.indexOf(clickedImage);
-    this.openViewImageDialog.emit({images, currentIndex});
+    this.openViewImageDialog.emit({ images, currentIndex });
   }
 }

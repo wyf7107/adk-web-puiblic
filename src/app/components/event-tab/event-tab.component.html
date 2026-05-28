@@ -82,7 +82,7 @@
             <td>
               @if (selectedEvent()!.nodeInfo!['outputFor']) {
               <div class="json-viewer-wrapper">
-                <ngx-json-viewer [json]="selectedEvent()!.nodeInfo!['outputFor']"></ngx-json-viewer>
+                <app-custom-json-viewer [json]="selectedEvent()!.nodeInfo!['outputFor']" [showMarkdown]="true"></app-custom-json-viewer>
                 <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(selectedEvent()!.nodeInfo!['outputFor'], 'nodeInfo.outputFor')" matTooltip="Copy JSON">
                   <mat-icon>{{ copiedId === 'nodeInfo.outputFor' ? 'check' : 'content_copy' }}</mat-icon>
                 </button>
@@ -109,7 +109,7 @@
             <td>
               @if (isObject($any(selectedEvent()!.actions)[key])) {
               <div class="json-viewer-wrapper">
-                <ngx-json-viewer [json]="$any(selectedEvent()!.actions)[key]"></ngx-json-viewer>
+                <app-custom-json-viewer [json]="$any(selectedEvent()!.actions)[key]" [showMarkdown]="true"></app-custom-json-viewer>
                 <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard($any(selectedEvent()!.actions)[key], 'action.' + key)" matTooltip="Copy JSON">
                   <mat-icon>{{ copiedId === 'action.' + key ? 'check' : 'content_copy' }}</mat-icon>
                 </button>
@@ -130,7 +130,7 @@
             <td>{{ fc?.name }}</td>
             <td>
               <div class="json-viewer-wrapper">
-                <ngx-json-viewer [json]="fc"></ngx-json-viewer>
+                <app-custom-json-viewer [json]="fc" [showMarkdown]="true"></app-custom-json-viewer>
                 <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(fc, 'fc.' + $index)" matTooltip="Copy JSON">
                   <mat-icon>{{ copiedId === 'fc.' + $index ? 'check' : 'content_copy' }}</mat-icon>
                 </button>
@@ -171,7 +171,7 @@
                 </div>
               }
               <div class="json-viewer-wrapper">
-                <ngx-json-viewer [json]="pfr.cleanedFr"></ngx-json-viewer>
+                <app-custom-json-viewer [json]="pfr.cleanedFr" [showMarkdown]="true"></app-custom-json-viewer>
                 <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(pfr.cleanedFr, 'pfr.' + $index)" matTooltip="Copy JSON">
                   <mat-icon>{{ copiedId === 'pfr.' + $index ? 'check' : 'content_copy' }}</mat-icon>
                 </button>
@@ -258,7 +258,7 @@
       }
       @if (selectedDetailTab === 'raw') {
       <div class="json-viewer-container json-viewer-wrapper">
-        <ngx-json-viewer [json]="filteredSelectedEvent()"></ngx-json-viewer>
+        <app-custom-json-viewer [json]="filteredSelectedEvent()" [showMarkdown]="true"></app-custom-json-viewer>
         <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(filteredSelectedEvent(), 'raw')" matTooltip="Copy JSON">
           <mat-icon>{{ copiedId === 'raw' ? 'check' : 'content_copy' }}</mat-icon>
         </button>
@@ -275,7 +275,7 @@
                 <div class="state-value-label">Old Value</div>
                 <div class="state-value-content">
                   @if (isObject(change.oldValue)) {
-                  <ngx-json-viewer [json]="change.oldValue"></ngx-json-viewer>
+                  <app-custom-json-viewer [json]="change.oldValue" [showMarkdown]="true"></app-custom-json-viewer>
                   } @else {
                   <span>{{ change.oldValue }}</span>
                   }
@@ -285,7 +285,7 @@
                 <div class="state-value-label">New Value</div>
                 <div class="state-value-content">
                   @if (isObject(change.newValue)) {
-                  <ngx-json-viewer [json]="change.newValue"></ngx-json-viewer>
+                  <app-custom-json-viewer [json]="change.newValue" [showMarkdown]="true"></app-custom-json-viewer>
                   } @else {
                   <span>{{ change.newValue }}</span>
                   }
@@ -398,7 +398,7 @@
       <div class="request-response-empty-state">Select an LLM response to see request details.</div>
       } @else {
       <div class="json-viewer-container json-viewer-wrapper">
-        <ngx-json-viewer [json]="llmRequest()"></ngx-json-viewer>
+        <app-custom-json-viewer [json]="llmRequest()" [showMarkdown]="true"></app-custom-json-viewer>
         <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(llmRequest(), 'request')" matTooltip="Copy JSON">
           <mat-icon>{{ copiedId === 'request' ? 'check' : 'content_copy' }}</mat-icon>
         </button>
@@ -414,7 +414,7 @@
       <div class="request-response-empty-state">Select an LLM response to see response details.</div>
       } @else {
       <div class="json-viewer-container json-viewer-wrapper">
-        <ngx-json-viewer [json]="llmResponse()"></ngx-json-viewer>
+        <app-custom-json-viewer [json]="llmResponse()" [showMarkdown]="true"></app-custom-json-viewer>
         <button mat-icon-button class="floating-copy-button" (click)="copyJsonToClipboard(llmResponse(), 'response')" matTooltip="Copy JSON">
           <mat-icon>{{ copiedId === 'response' ? 'check' : 'content_copy' }}</mat-icon>
         </button>

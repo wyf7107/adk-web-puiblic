@@ -30,27 +30,27 @@ export class TestsService {
   apiServerDomain = URLUtil.getApiServerBaseUrl();
 
   listTests(appName: string): Observable<string[]> {
-    const url = `${this.apiServerDomain}/dev/${appName}/tests`;
+    const url = `${this.apiServerDomain}/dev/apps/${appName}/tests`;
     return this.http.get<string[]>(url);
   }
 
   getTest(appName: string, testName: string): Observable<any[]> {
-    const url = `${this.apiServerDomain}/dev/${appName}/tests/${testName}`;
+    const url = `${this.apiServerDomain}/dev/apps/${appName}/tests/${testName}`;
     return this.http.get<any[]>(url);
   }
 
   createTest(appName: string, testName: string, sessionData: any): Observable<any> {
-    const url = `${this.apiServerDomain}/dev/${appName}/tests/${testName}`;
+    const url = `${this.apiServerDomain}/dev/apps/${appName}/tests/${testName}`;
     return this.http.put<any>(url, { session_data: sessionData });
   }
 
   deleteTest(appName: string, testName: string): Observable<any> {
-    const url = `${this.apiServerDomain}/dev/${appName}/tests/${testName}`;
+    const url = `${this.apiServerDomain}/dev/apps/${appName}/tests/${testName}`;
     return this.http.delete<any>(url);
   }
 
   rebuildTests(appName: string, testName?: string): Observable<any> {
-    let url = `${this.apiServerDomain}/dev/${appName}/tests/rebuild`;
+    let url = `${this.apiServerDomain}/dev/apps/${appName}/tests/rebuild`;
     if (testName) {
       url += `?test_name=${testName}`;
     }
@@ -58,7 +58,7 @@ export class TestsService {
   }
 
   runTests(appName: string, testName?: string): Observable<string> {
-    let url = `${this.apiServerDomain}/dev/${appName}/tests/run`;
+    let url = `${this.apiServerDomain}/dev/apps/${appName}/tests/run`;
     if (testName) {
       url += `?test_name=${testName}`;
     }

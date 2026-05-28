@@ -50,11 +50,11 @@ export abstract class AgentService {
     console.warn('unimplemented');
     return undefined;
   }
-  agentBuildTmp(req: any): Observable<boolean> {
+  agentBuildTmp(appName: string, req: any): Observable<boolean> {
     console.warn('unimplemented');
     return of(false);
   }
-  agentBuild(req: any): Observable<boolean> {
+  agentBuild(appName: string, req: any): Observable<boolean> {
     console.warn('unimplemented');
     return of(false);
   }

@@ -36,6 +36,7 @@ import { HoverInfoButtonComponent } from '../hover-info-button/hover-info-button
 import { LongRunningResponseComponent } from '../long-running-response/long-running-response';
 import { ChatPanelMessagesInjectionToken } from '../chat-panel/chat-panel.component.i18n';
 import { ContentBubbleComponent } from '../content-bubble/content-bubble.component';
+import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff-dialog/system-instruction-diff-dialog.component';
 
 @Component({
   selector: 'app-event-content',
@@ -313,5 +314,23 @@ export class EventContentComponent {
     const images = this.getAllImages();
     const currentIndex = images.indexOf(clickedImage);
     this.openViewImageDialog.emit({ images, currentIndex });
+  }
+
+  openSystemInstructionDiffDialog(event: MouseEvent) {
+    event.stopPropagation();
+    const preceding = this.uiEvent.event.precedingSystemInstruction || '';
+    const current = this.uiEvent.event.currentSystemInstruction || '';
+    
+    this.dialog.open(SystemInstructionDiffDialogComponent, {
+      data: {
+        precedingInstruction: preceding,
+        currentInstruction: current
+      },
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      width: '85vw',
+      height: '90vh',
+      panelClass: 'system-instruction-diff-dialog-panel'
+    });
   }
 }

@@ -2143,6 +2143,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     // Clear flags first
     for (const event of this.eventData.values()) {
       event.systemInstructionChanged = false;
+      event.precedingSystemInstruction = undefined;
+      event.currentSystemInstruction = undefined;
     }
 
     // Compare consecutive LLM turns
@@ -2159,6 +2161,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           const event = this.eventData.get(eventId);
           if (event) {
             event.systemInstructionChanged = true;
+            event.precedingSystemInstruction = precedingSys;
+            event.currentSystemInstruction = currentSys;
           }
         }
       }

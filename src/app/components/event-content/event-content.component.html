@@ -30,9 +30,10 @@
     <app-hover-info-button
       [icon]="'warning'"
       [text]="'Performance'"
-      [tooltipContent]="'The system instruction changed between turns, which will have a negative impact on latency because it will cause a cache miss.'"
+      [tooltipContent]="'System instructions modified between turns, causing a context cache miss and increasing latency. Click to compare changes and view the diff.'"
       [tooltipTitle]="'Performance Warning'"
       class="performance-warning-btn"
+      (buttonClick)="openSystemInstructionDiffDialog($event)"
     ></app-hover-info-button>
     }
     @if (uiEvent.event.turnComplete) {

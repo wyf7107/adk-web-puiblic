@@ -539,3 +539,23 @@ export const SpanValidator: z.ZodType<ValidatedSpan> =
 export type Span = ValidatedSpan & {
   children?: Span[];
 };
+
+export function extractSystemInstruction(inputs: any): string | undefined {
+  if (!inputs) return undefined;
+
+  let sys = inputs.system_instruction;
+  if (sys === undefined && inputs.systemInstruction) {
+    sys = inputs.systemInstruction;
+  }
+  if (sys === undefined && inputs.config) {
+    sys = inputs.config.system_instruction !== undefined
+      ? inputs.config.system_instruction
+      : inputs.config.systemInstruction;
+  }
+
+  if (typeof sys === 'string') {
+    return sys;
+  }
+
+  return undefined;
+}

@@ -87,7 +87,7 @@ import { FormatMetricNamePipe } from '../eval-tab/format-metric-name.pipe';
 
 import { ChatMessagesInjectionToken } from './chat.component.i18n';
 import { SidePanelMessagesInjectionToken } from '../side-panel/side-panel.component.i18n';
-import { Span, OPERATION_GENERATE_CONTENT, SpanIo } from '../../core/models/Trace';
+import { Span, OPERATION_GENERATE_CONTENT, SpanIo, extractSystemInstruction } from '../../core/models/Trace';
 
 const ROOT_AGENT = 'root_agent';
 /** Query parameter for pre-filling user input. */
@@ -2104,6 +2104,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(first(), catchError((err) => { console.error('[DEBUG] getTrace error:', err); return of([] as Span[]); }))
       .subscribe(res => {
         this.traceData = res;
+        this.updateSystemInstructionFlags();
         this.traceService.setEventData(this.eventData);
         this.traceService.setMessages(this.uiEvents());
         if (this.selectedEvent) {
@@ -2113,6 +2114,55 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.changeDetectorRef.detectChanges();
       });
     this.changeDetectorRef.detectChanges();
+  }
+
+  private updateSystemInstructionFlags() {
+    if (!this.traceData || this.traceData.length === 0 || this.eventData.size === 0) return;
+
+    const flatten = (arr: any[]): any[] => {
+      let result: any[] = [];
+      for (const item of arr) {
+        result.push(item);
+        if (item.children) {
+          result = result.concat(flatten(item.children));
+        }
+      }
+      return result;
+    };
+
+    const flatSpans = flatten(this.traceData);
+    
+    const llmSpans = flatSpans
+      .filter(s => {
+        const isGCSpan = s.attrOperationName === OPERATION_GENERATE_CONTENT;
+        const isLegacySpan = s.name === 'call_llm';
+        return (isGCSpan || isLegacySpan) && s.io?.inputs !== undefined;
+      })
+      .sort((a, b) => (a.start_time || 0) - (b.start_time || 0));
+
+    // Clear flags first
+    for (const event of this.eventData.values()) {
+      event.systemInstructionChanged = false;
+    }
+
+    // Compare consecutive LLM turns
+    for (let i = 1; i < llmSpans.length; i++) {
+      const currentSpan = llmSpans[i];
+      const precedingSpan = llmSpans[i - 1];
+
+      const currentSys = extractSystemInstruction(currentSpan.io?.inputs);
+      const precedingSys = extractSystemInstruction(precedingSpan.io?.inputs);
+
+      if (currentSys && precedingSys && currentSys !== precedingSys) {
+        const eventId = currentSpan.attrEventId;
+        if (eventId) {
+          const event = this.eventData.get(eventId);
+          if (event) {
+            event.systemInstructionChanged = true;
+          }
+        }
+      }
+    }
   }
 
   private buildUiEventFromEvent(event: any, reverseOrder: boolean = false): UiEvent {

@@ -81,3 +81,37 @@ app-content-bubble+app-content-bubble {
 .function-response-chip-container:hover .menu-trigger-btn {
   visibility: visible;
 }
+
+::ng-deep .performance-warning-btn {
+  &.hover-info-button,
+  .hover-info-button {
+    background-color: rgba(255, 179, 0, 0.1) !important;
+    border: 1px solid rgba(255, 179, 0, 0.3) !important;
+
+    mat-icon {
+      color: #ffb300 !important;
+    }
+
+    &:hover {
+      background-color: rgba(255, 179, 0, 0.2) !important;
+      box-shadow: 0 2px 6px rgba(255, 179, 0, 0.15);
+    }
+  }
+}
+
+html.light-theme ::ng-deep .performance-warning-btn {
+  &.hover-info-button,
+  .hover-info-button {
+    background-color: rgba(230, 81, 0, 0.08) !important;
+    border: 1px solid rgba(230, 81, 0, 0.3) !important;
+
+    mat-icon {
+      color: #e65100 !important;
+    }
+
+    &:hover {
+      background-color: rgba(230, 81, 0, 0.15) !important;
+      box-shadow: 0 2px 6px rgba(230, 81, 0, 0.15);
+    }
+  }
+}

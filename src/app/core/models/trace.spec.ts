@@ -23,6 +23,7 @@ import {
   OPERATION_INVOKE_AGENT,
   SpanValidator,
   ValidatedSpan,
+  extractSystemInstruction,
 } from './Trace';
 
 // ---------------------------------------------------------------------------
@@ -603,6 +604,29 @@ describe('Trace Validation', () => {
         event_name: 'gen_ai.user.message',
         body: '{ invalid json }',
       }]))).toBeDefined();
+    });
+  });
+
+  describe('extractSystemInstruction helper', () => {
+    it('returns undefined for empty/missing/non-string inputs', () => {
+      expect(extractSystemInstruction(undefined)).toBeUndefined();
+      expect(extractSystemInstruction(null)).toBeUndefined();
+      expect(extractSystemInstruction({})).toBeUndefined();
+      expect(extractSystemInstruction({ system_instruction: 123 })).toBeUndefined();
+      expect(extractSystemInstruction({ system_instruction: ['not', 'string'] })).toBeUndefined();
+    });
+
+    it('extracts simple string instruction', () => {
+      expect(extractSystemInstruction({ system_instruction: ' hello  ' })).toBe(' hello  ');
+      expect(extractSystemInstruction({ systemInstruction: 'world' })).toBe('world');
+    });
+
+    it('extracts instruction from legacy config structure', () => {
+      expect(extractSystemInstruction({
+        config: {
+          system_instruction: ' legacy vertex  '
+        }
+      })).toBe(' legacy vertex  ');
     });
   });
 });

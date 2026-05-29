@@ -26,6 +26,15 @@
       <app-content-bubble type="transcription" [role]="'bot'" [uiEvent]="uiEvent"></app-content-bubble>
     }
     <div class="event-chips-container">
+    @if (uiEvent.event.systemInstructionChanged) {
+    <app-hover-info-button
+      [icon]="'warning'"
+      [text]="'Performance'"
+      [tooltipContent]="'The system instruction changed between turns, which will have a negative impact on latency because it will cause a cache miss.'"
+      [tooltipTitle]="'Performance Warning'"
+      class="performance-warning-btn"
+    ></app-hover-info-button>
+    }
     @if (uiEvent.event.turnComplete) {
     <app-hover-info-button
       [icon]="'stop_circle'"

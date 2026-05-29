@@ -133,6 +133,7 @@ export declare interface Event extends LlmResponse {
   usageMetadata?: any;
   interrupted?: boolean;
   turnComplete?: boolean;
+  systemInstructionChanged?: boolean;
 }
 
 export interface ComputerUsePayload {

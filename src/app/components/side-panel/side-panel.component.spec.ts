@@ -178,8 +178,6 @@ describe('SidePanelComponent', () => {
     mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(true);
     mockFeatureFlagService.isTraceEnabledResponse.next(true);
     mockFeatureFlagService.isArtifactsTabEnabledResponse.next(true);
-    mockFeatureFlagService.isSessionsTabEnabledResponse.next(true);
-    mockFeatureFlagService.isStateTabEnabledResponse.next(true);
     mockFeatureFlagService.isEvalEnabledResponse.next(true);
     mockFeatureFlagService.isTokenStreamingEnabled.and.returnValue(of(true));
     mockFeatureFlagService.isMessageFileUploadEnabled.and.returnValue(of(true));
@@ -305,31 +303,6 @@ describe('SidePanelComponent', () => {
       );
       expect(evalLabel).toBeUndefined();
     });
-
-    it('hides State tab when isStateTabEnabled is false', () => {
-      mockFeatureFlagService.isStateTabEnabledResponse.next(false);
-      fixture.detectChanges();
-      const tabLabels = fixture.debugElement.queryAll(
-          By.css('.tab-label'),
-      );
-      const stateLabel = tabLabels.find(
-          (label) => label.nativeElement.textContent.trim() === 'State',
-      );
-      expect(stateLabel).toBeUndefined();
-    });
-
-    it(
-        'hides Sessions tab when isSessionsTabEnabled is false', () => {
-          mockFeatureFlagService.isSessionsTabEnabledResponse.next(false);
-          fixture.detectChanges();
-          const tabLabels = fixture.debugElement.queryAll(
-              By.css('.tab-label'),
-          );
-          const sessionsLabel = tabLabels.find(
-              (label) => label.nativeElement.textContent.trim() === 'Sessions',
-          );
-          expect(sessionsLabel).toBeUndefined();
-        });
   });
 
   describe('Rendering', () => {

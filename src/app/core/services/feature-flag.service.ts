@@ -138,12 +138,4 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
   isNewSessionButtonEnabled(): Observable<boolean> {
     return of(true);
   }
-
-  isSessionsTabEnabled(): Observable<boolean> {
-    return of(true);
-  }
-
-  isStateTabEnabled(): Observable<boolean> {
-    return of(true);
-  }
 }

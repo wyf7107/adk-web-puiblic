@@ -146,9 +146,6 @@ export class SidePanelComponent implements AfterViewInit {
   readonly isTraceEnabledObs = this.featureFlagService.isTraceEnabled();
   readonly isArtifactsTabEnabledObs =
       this.featureFlagService.isArtifactsTabEnabled();
-  readonly isSessionsTabEnabledObs =
-      this.featureFlagService.isSessionsTabEnabled();
-  readonly isStateTabEnabledObs = this.featureFlagService.isStateTabEnabled();
   readonly isEvalEnabledObs = this.featureFlagService.isEvalEnabled();
   readonly isTokenStreamingEnabledObs =
       this.featureFlagService.isTokenStreamingEnabled();

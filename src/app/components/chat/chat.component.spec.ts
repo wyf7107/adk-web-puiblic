@@ -1383,6 +1383,50 @@ describe('ChatComponent', () => {
         });
   });
 
+  describe('extractA2uiJsonFromText', () => {
+    it('should do nothing if message has no text', () => {
+      const uiEvent = new UiEvent({role: 'bot', event: {} as any});
+      (component as any).extractA2uiJsonFromText(uiEvent);
+      expect(uiEvent.a2uiData).toBeUndefined();
+    });
+
+    it('should do nothing if text has no <a2ui-json> tags', () => {
+      const uiEvent = new UiEvent({
+        role: 'bot',
+        text: 'hello world',
+        event: {} as any
+      });
+      (component as any).extractA2uiJsonFromText(uiEvent);
+      expect(uiEvent.a2uiData).toBeUndefined();
+      expect(uiEvent.text).toBe('hello world');
+    });
+
+    it('should extract and parse inline <a2ui-json> block, and strip it from text', () => {
+      const payload = [{beginRendering: {surfaceId: 'cloud_dash'}}];
+      const uiEvent = new UiEvent({
+        role: 'bot',
+        text: `Here is the UI:\n<a2ui-json>\n${JSON.stringify(payload)}\n</a2ui-json>\nEnjoy!`,
+        event: {} as any
+      });
+
+      (component as any).extractA2uiJsonFromText(uiEvent);
+      expect(uiEvent.a2uiData).toEqual({beginRendering: {beginRendering: {surfaceId: 'cloud_dash'}}});
+      expect(uiEvent.text).toBe('Here is the UI:\n\nEnjoy!');
+    });
+
+    it('should keep tags and log warning if JSON parsing fails', () => {
+      const uiEvent = new UiEvent({
+        role: 'bot',
+        text: `broken tags: <a2ui-json>{broken-json}</a2ui-json>`,
+        event: {} as any
+      });
+
+      (component as any).extractA2uiJsonFromText(uiEvent);
+      expect(uiEvent.a2uiData).toBeUndefined();
+      expect(uiEvent.text).toBe('broken tags: <a2ui-json>{broken-json}</a2ui-json>');
+    });
+  });
+
   describe('refreshLatestSession', () => {
     beforeEach(() => {
       mockAgentService.listAppsResponse.next([TEST_APP_1_NAME]);

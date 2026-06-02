@@ -183,6 +183,8 @@ describe('ChatComponent', () => {
     mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
         false);
     mockFeatureFlagService.isNewSessionButtonEnabledResponse.next(true);
+    mockFeatureFlagService.isSessionsTabEnabledResponse.next(true);
+    mockFeatureFlagService.isStateTabEnabledResponse.next(true);
 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);

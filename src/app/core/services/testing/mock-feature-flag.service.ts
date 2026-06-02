@@ -123,6 +123,13 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isNewSessionButtonEnabled =
       jasmine.createSpy('isNewSessionButtonEnabled')
           .and.returnValue(this.isNewSessionButtonEnabledResponse);
+  isSessionsTabEnabledResponse = new ReplaySubject<boolean>(1);
+  isSessionsTabEnabled =
+      jasmine.createSpy('isSessionsTabEnabled')
+          .and.returnValue(this.isSessionsTabEnabledResponse);
+  isStateTabEnabledResponse = new ReplaySubject<boolean>(1);
+  isStateTabEnabled = jasmine.createSpy('isStateTabEnabled')
+                          .and.returnValue(this.isStateTabEnabledResponse);
 
   setNewSessionButtonEnabled(value: boolean) {
     this.isNewSessionButtonEnabledResponse.next(value);

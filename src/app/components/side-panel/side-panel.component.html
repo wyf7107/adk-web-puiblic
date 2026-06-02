@@ -88,7 +88,8 @@
   <mat-tab-group
     (selectedTabChange)="tabChange.emit($event)">
     @let sessionTabReorderingEnabled = isSessionsTabReorderingEnabledObs | async;
-    @if (sessionTabReorderingEnabled) {
+    @let sessionsTabEnabled = isSessionsTabEnabledObs | async;
+    @if (sessionTabReorderingEnabled && sessionsTabEnabled) {
       <mat-tab class="tabs-header">
         <ng-template mat-tab-label>
           <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>
@@ -104,12 +105,14 @@
         <app-trace-tab [traceData]="traceData()"></app-trace-tab>
       </mat-tab>
     }
-    <mat-tab>
-      <ng-template mat-tab-label>
-        <span class="tab-label">{{ i18n.stateTabLabel }}</span>
-      </ng-template>
-      <app-state-tab [sessionState]="currentSessionState()"></app-state-tab>
-    </mat-tab>
+    @if (isStateTabEnabledObs | async) {
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <span class="tab-label">{{ i18n.stateTabLabel }}</span>
+        </ng-template>
+        <app-state-tab [sessionState]="currentSessionState()"></app-state-tab>
+      </mat-tab>
+    }
     @if (isArtifactsTabEnabledObs | async) {
       <mat-tab>
         <ng-template mat-tab-label>
@@ -118,7 +121,7 @@
         <app-artifact-tab [artifacts]="artifacts()"> </app-artifact-tab>
       </mat-tab>
     }
-    @if (!sessionTabReorderingEnabled) {
+    @if (!sessionTabReorderingEnabled && sessionsTabEnabled) {
       <mat-tab class="tabs-header">
         <ng-template mat-tab-label>
           <span class="tab-label">{{ i18n.sessionsTabLabel }}</span>

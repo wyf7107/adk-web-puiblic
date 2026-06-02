@@ -1541,6 +1541,48 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return a2uiData;
   }
 
+  private extractA2uiJsonFromText(uiEvent: UiEvent) {
+    if (!uiEvent.text) return;
+
+    const startTag = '<a2ui-json>';
+    const endTag = '</a2ui-json>';
+
+    const startIndex = uiEvent.text.indexOf(startTag);
+    if (startIndex === -1) return;
+
+    const endIndex = uiEvent.text.indexOf(endTag, startIndex + startTag.length);
+    if (endIndex === -1) return;
+
+    const jsonStr = uiEvent.text.substring(startIndex + startTag.length, endIndex).trim();
+    try {
+      let parsed = JSON.parse(jsonStr);
+      if (!Array.isArray(parsed)) {
+        parsed = [parsed];
+      }
+
+      const a2uiData: any = {};
+      parsed.forEach((msg: any) => {
+        if (msg.beginRendering) {
+          a2uiData.beginRendering = msg;
+        } else if (msg.surfaceUpdate) {
+          a2uiData.surfaceUpdate = msg;
+        } else if (msg.dataModelUpdate) {
+          a2uiData.dataModelUpdate = msg;
+        }
+      });
+
+      uiEvent.a2uiData = a2uiData;
+
+      // Strip the <a2ui-json> block from uiEvent.text
+      const beforeText = uiEvent.text.substring(0, startIndex);
+      const afterText = uiEvent.text.substring(endIndex + endTag.length);
+      uiEvent.text = (beforeText + afterText).trim();
+
+    } catch (e) {
+      console.warn('Failed to parse inline <a2ui-json> block from text:', e);
+    }
+  }
+
   private updateRedirectUri(urlString: string, newRedirectUri: string): string {
     try {
       const url = new URL(urlString);
@@ -2152,6 +2194,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       this.processPartIntoMessage(part, event, uiEvent);
     });
+
+    this.extractA2uiJsonFromText(uiEvent);
 
     return uiEvent;
   }

@@ -29,6 +29,7 @@ export class UiEvent {
   attachments?: { file: File; url: string }[];
   renderedContent?: any;
   a2uiData?: any;
+  textParts?: Array<{text: string, thought?: boolean}>;
   executableCode?: ExecutableCode;
   codeExecutionResult?: CodeExecutionResult;
   event!: Event;

@@ -120,6 +120,22 @@
   }
 }
 
+.thought-container {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--mat-sys-outline-variant, rgba(0, 0, 0, 0.1));
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.not-first-part {
+  margin-top: 12px;
+}
+
 @media (max-width: 768px) {
   .content-bubble {
     padding: 5px 12px !important;

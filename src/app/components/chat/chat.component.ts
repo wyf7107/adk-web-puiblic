@@ -1156,6 +1156,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   submitAgentRunRequest(req: AgentRunRequest) {
     this.autoSelectLatestEvent = true;
+
     this.activeSseSubscription = this.agentService.runSse(req).subscribe({
       next: async (chunkJson: any) => {
         if (chunkJson.error) {
@@ -1362,7 +1363,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private mergePartialEvent(lastEvent: UiEvent, apiEvent: any): UiEvent {
-    const updatedEvent = new UiEvent({ ...lastEvent, event: apiEvent as any });
+    const updatedEvent = new UiEvent({
+      ...lastEvent,
+      event: apiEvent as any,
+      textParts: lastEvent.textParts ? lastEvent.textParts.map(p => ({ ...p })) : undefined
+    });
 
     let parts = apiEvent.content?.parts || [];
     if (this.isEventA2aResponse(apiEvent)) {
@@ -1372,15 +1377,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     parts.forEach((part: any) => {
       if (part.text !== undefined && part.text !== null) {
-        updatedEvent.text = (updatedEvent.text || '') + part.text;
-        if (part.thought) {
-          updatedEvent.thought = true;
-          updatedEvent.text = this.processThoughtText(updatedEvent.text || '');
-        }
+        const processedText = part.thought ? this.processThoughtText(part.text) : part.text;
+        updatedEvent.text = (updatedEvent.text || '') + processedText;
+        const isThought = !!part.thought;
+        this.addTextToParts(updatedEvent, processedText, isThought);
       } else {
         this.processPartIntoMessage(part, apiEvent, updatedEvent);
       }
     });
+    updatedEvent.thought = updatedEvent.textParts?.every(p => p.thought) ?? false;
 
     if (apiEvent.inputTranscription) {
       const previousText = (lastEvent.event as any)?.inputTranscription?.text || '';
@@ -1431,12 +1436,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     let combinedTextPart: Part | undefined;
 
     for (const part of parts) {
-      if (part.text && !part.thought) {
-        if (!combinedTextPart) {
-          combinedTextPart = { text: part.text };
-          result.push(combinedTextPart);
-        } else {
+      if (part.text) {
+        const isThought = !!part.thought;
+        if (combinedTextPart && combinedTextPart.text && !!combinedTextPart.thought === isThought) {
           combinedTextPart.text += part.text;
+        } else {
+          combinedTextPart = { text: part.text, thought: isThought };
+          result.push(combinedTextPart);
         }
       } else {
         combinedTextPart = undefined;
@@ -1578,6 +1584,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const afterText = uiEvent.text.substring(endIndex + endTag.length);
       uiEvent.text = (beforeText + afterText).trim();
 
+      // Strip from uiEvent.textParts as well
+      if (uiEvent.textParts) {
+        for (const part of uiEvent.textParts) {
+          const partStartIndex = part.text.indexOf(startTag);
+          if (partStartIndex !== -1) {
+            const partEndIndex = part.text.indexOf(endTag, partStartIndex + startTag.length);
+            if (partEndIndex !== -1) {
+              const partBefore = part.text.substring(0, partStartIndex);
+              const partAfter = part.text.substring(partEndIndex + endTag.length);
+              part.text = (partBefore + partAfter).trim();
+            }
+          }
+        }
+        // Remove any parts that became empty after stripping
+        uiEvent.textParts = uiEvent.textParts.filter(part => part.text.trim().length > 0);
+      }
+
     } catch (e) {
       console.warn('Failed to parse inline <a2ui-json> block from text:', e);
     }
@@ -1600,6 +1623,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return `data:${mimeType};base64,${fixedBase64Data}`;
   }
 
+  private addTextToParts(uiEvent: UiEvent, text: string, thought: boolean) {
+    if (!text) return;
+    if (!uiEvent.textParts) {
+      uiEvent.textParts = [];
+    }
+    const lastPart = uiEvent.textParts[uiEvent.textParts.length - 1];
+    if (lastPart && !!lastPart.thought === thought) {
+      lastPart.text += text;
+    } else {
+      uiEvent.textParts.push({ text, thought });
+    }
+  }
+
   private processPartIntoMessage(part: any, event: any, uiEvent: UiEvent) {
     if (!part) return;
 
@@ -1617,8 +1653,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (part.text) {
-      uiEvent.text = (uiEvent.text || '') + part.text;
-      uiEvent.thought = part.thought ? true : false;
+      const processedText = part.thought ? this.processThoughtText(part.text) : part.text;
+      uiEvent.text = (uiEvent.text || '') + processedText;
+      this.addTextToParts(uiEvent, processedText, !!part.thought);
+      uiEvent.thought = uiEvent.textParts?.every(p => p.thought) ?? false;
       if (event?.groundingMetadata && event.groundingMetadata.searchEntryPoint &&
         event.groundingMetadata.searchEntryPoint.renderedContent) {
         uiEvent.renderedContent =
@@ -2213,9 +2251,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private buildUiEventFromEvent(event: any, reverseOrder: boolean = false): UiEvent {
     const isA2aResponse = this.isEventA2aResponse(event);
-    const parts = isA2aResponse ?
+    const rawParts = isA2aResponse ?
       this.combineA2uiDataParts(event.content?.parts) :
       event.content?.parts || [];
+    const parts = this.combineTextParts(rawParts);
     const partsToProcess = reverseOrder ? [...parts].reverse() : parts;
 
     const role = event.author === 'user' ? 'user' : 'bot';

@@ -1401,17 +1401,20 @@ describe('ChatComponent', () => {
       expect(uiEvent.text).toBe('hello world');
     });
 
-    it('should extract and parse inline <a2ui-json> block, and strip it from text', () => {
+    it('should extract and parse inline <a2ui-json> block, and strip it from text and textParts', () => {
       const payload = [{beginRendering: {surfaceId: 'cloud_dash'}}];
+      const text = `Here is the UI:\n<a2ui-json>\n${JSON.stringify(payload)}\n</a2ui-json>\nEnjoy!`;
       const uiEvent = new UiEvent({
         role: 'bot',
-        text: `Here is the UI:\n<a2ui-json>\n${JSON.stringify(payload)}\n</a2ui-json>\nEnjoy!`,
+        text,
+        textParts: [{ text, thought: false }],
         event: {} as any
       });
 
       (component as any).extractA2uiJsonFromText(uiEvent);
       expect(uiEvent.a2uiData).toEqual({beginRendering: {beginRendering: {surfaceId: 'cloud_dash'}}});
       expect(uiEvent.text).toBe('Here is the UI:\n\nEnjoy!');
+      expect(uiEvent.textParts).toEqual([{ text: 'Here is the UI:\n\nEnjoy!', thought: false }]);
     });
 
     it('should keep tags and log warning if JSON parsing fails', () => {
@@ -1424,6 +1427,75 @@ describe('ChatComponent', () => {
       (component as any).extractA2uiJsonFromText(uiEvent);
       expect(uiEvent.a2uiData).toBeUndefined();
       expect(uiEvent.text).toBe('broken tags: <a2ui-json>{broken-json}</a2ui-json>');
+    });
+  });
+
+  describe('thought and text parts processing', () => {
+    it('should build UiEvent with textParts separating thoughts and final response text', () => {
+      const event = {
+        id: 'event-thought-test',
+        author: 'bot',
+        content: {
+          parts: [
+            {
+              text: '/*PLANNING*/Thinking about the question...',
+              thought: true
+            },
+            {
+              text: 'The actual response text.',
+            }
+          ]
+        }
+      };
+
+      const uiEvent = (component as any).buildUiEventFromEvent(event);
+      
+      expect(uiEvent.text).toBe('Thinking about the question...The actual response text.');
+      expect(uiEvent.textParts).toEqual([
+        { text: 'Thinking about the question...', thought: true },
+        { text: 'The actual response text.', thought: false }
+      ]);
+    });
+
+    it('should correctly merge streaming partial updates with thought and non-thought parts', () => {
+      const initialEvent = new UiEvent({
+        role: 'bot',
+        text: 'Thinking',
+        thought: true,
+        textParts: [{ text: 'Thinking', thought: true }],
+        event: { id: 'stream-event', partial: true } as any
+      });
+
+      // Stream update 1: more thought text
+      const update1 = {
+        id: 'stream-event',
+        partial: true,
+        content: {
+          parts: [{ text: ' further...', thought: true }]
+        }
+      };
+
+      let merged = (component as any).mergePartialEvent(initialEvent, update1);
+      expect(merged.text).toBe('Thinking further...');
+      expect(merged.textParts).toEqual([
+        { text: 'Thinking further...', thought: true }
+      ]);
+
+      // Stream update 2: final answer text
+      const update2 = {
+        id: 'stream-event',
+        partial: true,
+        content: {
+          parts: [{ text: 'Here is the answer!' }]
+        }
+      };
+
+      merged = (component as any).mergePartialEvent(merged, update2);
+      expect(merged.text).toBe('Thinking further...Here is the answer!');
+      expect(merged.textParts).toEqual([
+        { text: 'Thinking further...', thought: true },
+        { text: 'Here is the answer!', thought: false }
+      ]);
     });
   });
 

@@ -27,7 +27,18 @@
     }
     @if (uiEvent.event.nodeInfo?.['messageAsOutput']) {
       <div [appJsonTooltip]="jsonOutputData" appJsonTooltipTitle="Node Output">
-        <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: uiEvent.text || rawMessageText, thought: uiEvent.thought}"></ng-container>
+        @if (uiEvent.textParts && uiEvent.textParts.length > 0) {
+          @for (part of uiEvent.textParts; track part; let first = $first) {
+            <div [class.thought-container]="part.thought && type !== 'thought'" [class.not-first-part]="!first">
+              @if (part.thought && type !== 'thought') {
+                <div class="output-chip-header">thought</div>
+              }
+              <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: part.text, thought: part.thought}"></ng-container>
+            </div>
+          }
+        } @else {
+          <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: uiEvent.text || rawMessageText, thought: uiEvent.thought}"></ng-container>
+        }
       </div>
     } @else if (uiEvent.thought || uiEvent.text || uiEvent.renderedContent || uiEvent.a2uiData || uiEvent.event.inputTranscription || uiEvent.event.outputTranscription) {
       <div>
@@ -62,7 +73,18 @@
             </div>
           </div>
           } @else {
-            <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: uiEvent.text!, thought: uiEvent.thought}"></ng-container>
+            @if (uiEvent.textParts && uiEvent.textParts.length > 0) {
+              @for (part of uiEvent.textParts; track part; let first = $first) {
+                <div [class.thought-container]="part.thought && type !== 'thought'" [class.not-first-part]="!first">
+                  @if (part.thought && type !== 'thought') {
+                    <div class="output-chip-header">thought</div>
+                  }
+                  <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: part.text, thought: part.thought}"></ng-container>
+                </div>
+              }
+            } @else {
+              <ng-container [ngComponentOutlet]="markdownComponent" [ngComponentOutletInputs]="{text: uiEvent.text!, thought: uiEvent.thought}"></ng-container>
+            }
           }
         }
         </div>

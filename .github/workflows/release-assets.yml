@@ -38,6 +38,13 @@ jobs:
         zip -r ../../../adk-web-browser.zip .
 
     - name: Upload Release Asset (Production Build)
-      run: gh release upload ${{ github.event.inputs.release_tag }} adk-web-browser.zip --clobber
+      run: |
+        if gh release view ${{ github.event.inputs.release_tag }} >/dev/null 2>&1; then
+          echo "Release exists. Uploading asset..."
+          gh release upload ${{ github.event.inputs.release_tag }} adk-web-browser.zip --clobber
+        else
+          echo "Release does not exist. Creating release and uploading asset..."
+          gh release create ${{ github.event.inputs.release_tag }} adk-web-browser.zip --title "${{ github.event.inputs.release_tag }}" --notes "Manual release built from adk-web@${{ github.sha }}"
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

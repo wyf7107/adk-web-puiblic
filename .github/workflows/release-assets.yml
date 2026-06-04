@@ -1,0 +1,43 @@
+name: Build and Package Web Assets
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to upload the zip to (e.g. v1.0.0)'
+        required: true
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Set up Node.js (Latest LTS)
+      uses: actions/setup-node@v6
+      with:
+        node-version: 'lts/*'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run unit tests
+      run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+
+    - name: Build Angular app
+      run: npm run build
+
+    - name: Zip built assets
+      run: |
+        cd dist/agent_framework_web/browser
+        zip -r ../../../adk-web-browser.zip .
+
+    - name: Upload Release Asset (Production Build)
+      run: gh release upload ${{ github.event.inputs.release_tag }} adk-web-browser.zip --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

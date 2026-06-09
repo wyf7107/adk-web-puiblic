@@ -1,0 +1,15 @@
+@if (role === 'bot') {
+  <div class="bot-avatar" [appJsonTooltip]="tooltip"
+    [class.hidden]="!author" [style.background-color]="color">
+    <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+  </div>
+} @else if (role === 'node') {
+  <div class="node-circle-icon" [style.background-color]="color"
+    [appJsonTooltip]="tooltip" [class.hidden]="!author">
+    {{ initial }}
+  </div>
+} @else if (role === 'user') {
+  <div class="user-avatar">
+    <mat-icon>person</mat-icon>
+  </div>
+}

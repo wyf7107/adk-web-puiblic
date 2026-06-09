@@ -36,6 +36,21 @@ export const DEFAULT_EVAL_METRICS: EvalMetric[] = [
   }
 ];
 
+export declare interface MetricValueInfo {
+  interval: {
+    minValue: number;
+    openAtMin: boolean;
+    maxValue: number;
+    openAtMax: boolean;
+  };
+}
+
+export declare interface MetricsInfo {
+  metricName: string;
+  description: string;
+  metricValueInfo: MetricValueInfo;
+}
+
 export declare interface Invocation {
   invocationId: string;
   userContent: Content;
@@ -52,11 +67,13 @@ export declare interface Content {
 export declare interface IntermediateData {
   toolUses: any[];
   intermediateResponses: any[];
+  invocationEvents?: any[];
 }
 
 export declare interface EvalCase {
   evalId: string;
   conversation: Invocation[];
+  events?: any[];
   sessionInput: any;
   creationTimestamp: number;
 }
@@ -67,4 +84,15 @@ export declare interface EvalSet {
   description?: string;
   evalCases: EvalCase[];
   creationTimestamp: number;
+}
+
+export declare interface EvaluationResult {
+  setId: string;
+  evalId: string;
+  finalEvalStatus: number;
+  evalMetricResults: any[];
+  overallEvalMetricResults: any[];
+  evalMetricResultPerInvocation?: any[];
+  sessionId: string;
+  sessionDetails: any;
 }

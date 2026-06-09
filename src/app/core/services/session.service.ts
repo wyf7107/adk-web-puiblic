@@ -21,7 +21,7 @@ import {Observable, of} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 import {URLUtil} from '../../../utils/url-util';
-import {Session} from '../models/Session';
+import {Session, SessionState} from '../models/Session';
 
 import {ListResponse, SessionService as SessionServiceInterface} from './interfaces/session';
 
@@ -32,13 +32,23 @@ export class SessionService implements SessionServiceInterface {
   apiServerDomain = URLUtil.getApiServerBaseUrl();
   constructor(private http: HttpClient) {}
 
-  createSession(userId: string, appName: string) {
+  createSession(userId: string, appName: string, state?: SessionState) {
     if (this.apiServerDomain != undefined) {
       const url =
           this.apiServerDomain + `/apps/${appName}/users/${userId}/sessions`;
-      return this.http.post<any>(url, null);
+      const body: any = {};
+      if (state) body.state = state;
+      else body.state = {};
+      return this.http.post<any>(url, state ? body : null);
     }
     return new Observable<Session>();
+  }
+
+  updateSession(userId: string, appName: string, sessionId: string, session: any) {
+    const url = this.apiServerDomain +
+        `/apps/${appName}/users/${userId}/sessions/${sessionId}`;
+
+    return this.http.patch<Session>(url, session);
   }
 
   listSessions(userId: string, appName: string):
@@ -74,16 +84,16 @@ export class SessionService implements SessionServiceInterface {
     return this.http.get<Session>(url);
   }
 
-  importSession(userId: string, appName: string, events: any[]) {
+  importSession(userId: string, appName: string, events: any[], state?: SessionState) {
     if (this.apiServerDomain != undefined) {
       const url =
           this.apiServerDomain + `/apps/${appName}/users/${userId}/sessions`;
 
-      return this.http.post<Session>(url, {
-        appName: appName,
-        userId: userId,
-        events: events,
-      });
+      const body: {events: any[]; state?: SessionState} = {events};
+      if (state) {
+        body.state = state;
+      }
+      return this.http.post<Session>(url, body);
     }
 
     return new Observable<Session>();

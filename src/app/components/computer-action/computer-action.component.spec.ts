@@ -136,5 +136,72 @@ describe('ComputerActionComponent', () => {
       const screenshot = component.getPreviousComputerUseScreenshot();
       expect(screenshot).toContain('img1');
     });
+
+    it('should find screenshot in parts of functionResponses', () => {
+      component.index = 1;
+      component.allMessages = [
+        {
+          functionResponses: [
+            {
+              name: 'computer',
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: 'image/png',
+                    data: 'base64data_in_parts'
+                  }
+                }
+              ]
+            } as any
+          ]
+        }
+      ];
+
+      const screenshot = component.getPreviousComputerUseScreenshot();
+      expect(screenshot).toBe('data:image/png;base64,base64data/in/parts');
+    });
+  });
+
+  describe('Fallback Display', () => {
+    it('should show fallback text when no screenshot is found', () => {
+      component.index = 0;
+      component.allMessages = [];
+      component.functionCall = {
+        name: ComputerTool.CLICK_AT,
+        args: {x: 100, y: 100}
+      };
+      fixture.detectChanges();
+      
+      const fallbackText = fixture.debugElement.query(By.css('.fallback-text'));
+      expect(fallbackText).toBeTruthy();
+      expect(fallbackText.nativeElement.textContent).toContain('No screenshot');
+    });
+  });
+
+  describe('getAllComputerUseCoordinates', () => {
+    it('should associate coordinates with the previous image', () => {
+      component.allMessages = [
+        {
+          functionResponses: [
+            {name: 'computer', response: {image: {data: 'img1'}}}
+          ]
+        },
+        {
+          functionCalls: [
+            {name: 'computer', args: {action: 'left_click', coordinate: [500, 500]}}
+          ]
+        },
+        {
+          functionResponses: [
+            {name: 'computer', response: {image: {data: 'img2'}}}
+          ]
+        }
+      ];
+
+      const coords = component.getAllComputerUseCoordinates();
+      expect(coords.length).toBe(2);
+      expect(coords[0]).toEqual({x: 500, y: 500});
+      expect(coords[1]).toBeNull();
+    });
   });
 });

@@ -58,12 +58,12 @@ describe('FeatureFlagService', () => {
          expect(isEnabled).toBeTrue();
        });
 
-    it('should return false if \'import_session\' query param is not \'true\'',
+    it('should return true (always enabled in this implementation)',
        async () => {
          activatedRoute.queryParams.next({});
          const isEnabled =
              await firstValueFrom(service.isImportSessionEnabled());
-         expect(isEnabled).toBeFalse();
+         expect(isEnabled).toBeTrue();
        });
   });
 
@@ -108,5 +108,13 @@ describe('FeatureFlagService', () => {
          const isEnabled = await firstValueFrom(service.isA2ACardEnabled());
          expect(isEnabled).toBeFalse();
        });
+  });
+
+  describe('isNewSessionButtonEnabled', () => {
+    it('should return true by default', async () => {
+      const isEnabled =
+          await firstValueFrom(service.isNewSessionButtonEnabled());
+      expect(isEnabled).toBeTrue();
+    });
   });
 });

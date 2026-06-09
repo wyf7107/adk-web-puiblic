@@ -59,6 +59,21 @@ export class ThemeService implements ThemeServiceInterface {
 
     // Save to localStorage
     window.localStorage.setItem(this.THEME_STORAGE_KEY, theme);
+
+    // Update Prism theme
+    this.updatePrismTheme(theme);
+  }
+
+  private updatePrismTheme(theme: Theme): void {
+    const linkId = 'prism-theme-style';
+    let linkElement = document.getElementById(linkId) as HTMLLinkElement;
+    if (!linkElement) {
+      linkElement = document.createElement('link');
+      linkElement.id = linkId;
+      linkElement.rel = 'stylesheet';
+      document.head.appendChild(linkElement);
+    }
+    linkElement.href = theme === 'light' ? 'prism-light.css' : 'prism-dark.css';
   }
 
   toggleTheme(): void {

@@ -87,16 +87,13 @@ describe('A2uiCanvasComponent', () => {
           {
             id: 'root-column',
             component: {
-              Column: {
-                children: {explicitList: ['chart-title', 'category-list']}
-              }
+              Column:
+                  {children: {explicitList: ['chart-title', 'category-list']}}
             }
           },
           {
             id: 'chart-title',
-            component: {
-              Text: {text: {path: 'chart.title'}, usageHint: 'h2'}
-            }
+            component: {Text: {text: {path: 'chart.title'}, usageHint: 'h2'}}
           },
           {
             id: 'category-list',
@@ -125,14 +122,8 @@ describe('A2uiCanvasComponent', () => {
               }
             }
           },
-          {
-            id: 'item-label',
-            component: {Text: {text: {path: 'label'}}}
-          },
-          {
-            id: 'item-value',
-            component: {Text: {text: {path: 'value'}}}
-          }
+          {id: 'item-label', component: {Text: {text: {path: 'label'}}}},
+          {id: 'item-value', component: {Text: {text: {path: 'value'}}}}
         ]
       }
     } as unknown as Types.ServerToClientMessage;

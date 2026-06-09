@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component, inject, Inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Inject} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -27,13 +27,14 @@ import { Router } from '@angular/router';
 import { AgentNode } from '../../core/models/AgentBuilder';
 import { YamlUtils } from '../../../utils/yaml-utils';
 import { AGENT_SERVICE } from '../../core/services/interfaces/agent';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackbarService } from '../../core/services/snackbar.service';
 import { MatFormField, MatHint } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-add-item-dialog',
   templateUrl: './add-item-dialog.component.html',
   styleUrl: './add-item-dialog.component.scss',
@@ -53,7 +54,7 @@ export class AddItemDialogComponent {
   // TODO: Replace the eval dialogs to use this common dialog component
   protected newAppName = '';
   private agentService = inject(AGENT_SERVICE);
-  private _snackBar = inject(MatSnackBar);
+  private _snackbarService = inject(SnackbarService);
   private router = inject(Router);
 
   isNameValid(): boolean {
@@ -88,7 +89,7 @@ export class AddItemDialogComponent {
 
     // Check validation first
     if (!this.isNameValid()) {
-      this._snackBar.open(
+      this._snackbarService.open(
         'App name must start with a letter or underscore and can only contain letters, digits, and underscores.',
         'OK',
       );
@@ -96,7 +97,7 @@ export class AddItemDialogComponent {
     }
 
     if (this.data.existingAppNames.includes(trimmedName)) {
-      this._snackBar.open(
+      this._snackbarService.open(
         'App name already exists. Please choose a different name.',
         'OK',
       );
@@ -117,7 +118,7 @@ export class AddItemDialogComponent {
     const allTabAgents = new Map<string, AgentNode>();
     YamlUtils.generateYamlFile(rootAgent, formData, trimmedName, allTabAgents);
 
-    this.agentService.agentBuildTmp(formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(trimmedName, formData).subscribe((success) => {
       if (success) {
         this.router.navigate(['/'], {
             queryParams: { app: trimmedName, mode: 'builder' }
@@ -126,7 +127,7 @@ export class AddItemDialogComponent {
           });
         this.dialogRef.close(true);
       } else {
-        this._snackBar.open('Something went wrong, please try again', 'OK');
+        this._snackbarService.open('Something went wrong, please try again', 'OK');
       }
     });
   }

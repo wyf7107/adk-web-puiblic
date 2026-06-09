@@ -1,0 +1,81 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="diff-dialog-container">
+  <div class="diff-dialog-header">
+    <div class="title-row">
+      <h2 mat-dialog-title class="dialog-title">
+        <mat-icon class="warning-icon">warning</mat-icon>
+        <span>System Instruction Performance Analysis</span>
+      </h2>
+      <span style="flex: 1"></span>
+      <button mat-icon-button (click)="close()" class="close-header-btn" aria-label="Close dialog">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="performance-alert-banner">
+      <mat-icon class="info-icon">info</mat-icon>
+      <span class="alert-message">
+        <strong>Performance Alert:</strong> System instructions were modified between consecutive turns in this session. 
+        This change breaks context cache alignment, resulting in a cache miss that increases generation latency for subsequent requests.
+      </span>
+    </div>
+  </div>
+
+  <div mat-dialog-content class="diff-dialog-content">
+    <div class="diff-split-container">
+      
+      <!-- Preceding Instruction Column -->
+      <div class="diff-column left-column">
+        <div class="column-title">Preceding Instruction</div>
+        <div class="code-editor-viewport">
+          @for (row of diffRows; track $index) {
+            <div class="diff-line-row" 
+                 [class.line-removed]="row.left.type === 'removed'" 
+                 [class.line-empty]="row.left.type === 'empty'"
+                 [class.line-unchanged]="row.left.type === 'unchanged'">
+              <span class="line-number-cell">{{ row.left.lineNumber || '' }}</span>
+              <span class="line-sign-cell">{{ row.left.type === 'removed' ? '-' : '' }}</span>
+              <span class="line-content-cell">@if (row.left.tokens && row.left.tokens.length > 0) {@for (token of row.left.tokens; track $index) {<span [class]="'token-' + token.type">{{ token.value }}</span>}} @else {{{ row.left.value }}}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Current Instruction Column -->
+      <div class="diff-column right-column">
+        <div class="column-title">Current Instruction</div>
+        <div class="code-editor-viewport">
+          @for (row of diffRows; track $index) {
+            <div class="diff-line-row" 
+                 [class.line-added]="row.right.type === 'added'" 
+                 [class.line-empty]="row.right.type === 'empty'"
+                 [class.line-unchanged]="row.right.type === 'unchanged'">
+              <span class="line-number-cell">{{ row.right.lineNumber || '' }}</span>
+              <span class="line-sign-cell">{{ row.right.type === 'added' ? '+' : '' }}</span>
+              <span class="line-content-cell">@if (row.right.tokens && row.right.tokens.length > 0) {@for (token of row.right.tokens; track $index) {<span [class]="'token-' + token.type">{{ token.value }}</span>}} @else {{{ row.right.value }}}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div mat-dialog-actions class="diff-dialog-actions" align="end">
+    <button mat-flat-button class="action-close-btn" (click)="close()">Close</button>
+  </div>
+</div>

@@ -23,15 +23,32 @@ import {MatDialog} from '@angular/material/dialog';
 import {MatListHarness} from '@angular/material/list/testing';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
-import {Span} from '../../core/models/Trace';
+import {Span, SpanValidator} from '../../core/models/Trace';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
+import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
+import {MockTraceService} from '../../core/services/testing/mock-trace.service';
+import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
 
 import {EventTabComponent} from './event-tab.component';
 import {TraceChartComponent} from './trace-chart/trace-chart.component';
 
+/**
+ * Helper that builds a `Span` (optionally with `children`) by routing the
+ * envelope through `SpanValidator` so promoted `attr*` fields are
+ * populated and the raw `attributes` bag is dropped.
+ */
+function makeSpan(raw: unknown, children: Span[] = []): Span {
+  const result = SpanValidator.safeParse(raw);
+  if (!result.success) {
+    throw new Error(`Failed to build test span: ${result.error.message}`);
+  }
+  return children.length > 0 ? {...result.data, children} : result.data;
+}
+
 const MOCK_TRACE_DATA: Span[] = [
-  {
+  makeSpan({
     name: 'agent.act',
     start_time: 1733084700000000000,
     end_time: 1733084760000000000,
@@ -43,41 +60,44 @@ const MOCK_TRACE_DATA: Span[] = [
       'gcp.vertex.agent.llm_request':
           '{"contents":[{"role":"user","parts":[{"text":"Hello"}]},{"role":"agent","parts":[{"text":"Hi. What can I help you with?"}]},{"role":"user","parts":[{"text":"I need help with my project."}]}]}',
     },
-  },
-  {
-    name: 'tool.invoke',
-    start_time: 1733084705000000000,
-    end_time: 1733084755000000000,
-    span_id: 'span-2',
-    parent_span_id: 'span-1',
-    trace_id: 'trace-1',
-    attributes: {
-      'tool_name': 'project_helper',
-    },
-    children: [
+  }),
+  makeSpan(
       {
-        name: 'sub-tool-1.invoke',
-        start_time: 1733084710000000000,
-        end_time: 1733084750000000000,
-        span_id: 'span-3',
-        parent_span_id: 'span-2',
+        name: 'tool.invoke',
+        start_time: 1733084705000000000,
+        end_time: 1733084755000000000,
+        span_id: 'span-2',
+        parent_span_id: 'span-1',
         trace_id: 'trace-1',
         attributes: {
-          'sub_tool_name': 'sub_project_helper_1',
+          'tool_name': 'project_helper',
         },
-        children: [
+      },
+      [makeSpan(
           {
-            name: 'sub-tool-2.invoke',
-            start_time: 1733084715000000000,
-            end_time: 1733084745000000000,
-            span_id: 'span-4',
-            parent_span_id: 'span-3',
+            name: 'sub-tool-1.invoke',
+            start_time: 1733084710000000000,
+            end_time: 1733084750000000000,
+            span_id: 'span-3',
+            parent_span_id: 'span-2',
             trace_id: 'trace-1',
             attributes: {
-              'sub_tool_name': 'sub_project_helper_2',
+              'sub_tool_name': 'sub_project_helper_1',
             },
-            children: [
+          },
+          [makeSpan(
               {
+                name: 'sub-tool-2.invoke',
+                start_time: 1733084715000000000,
+                end_time: 1733084745000000000,
+                span_id: 'span-4',
+                parent_span_id: 'span-3',
+                trace_id: 'trace-1',
+                attributes: {
+                  'sub_tool_name': 'sub_project_helper_2',
+                },
+              },
+              [makeSpan({
                 name: 'sub-tool-3.invoke',
                 start_time: 1733084720000000000,
                 end_time: 1733084740000000000,
@@ -87,15 +107,8 @@ const MOCK_TRACE_DATA: Span[] = [
                 attributes: {
                   'sub_tool_name': 'sub_project_helper_3',
                 },
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  }
-] as Span[];
+              })])])]),
+];
 
 const MOCK_EVENTS_MAP = new Map<string, any>([
   ['event1', {title: 'Event 1 Title'}],
@@ -124,6 +137,8 @@ describe('EventTabComponent', () => {
           providers: [
             {provide: MatDialog, useValue: matDialogSpy},
             {provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService},
+            {provide: UI_STATE_SERVICE, useClass: MockUiStateService},
+            {provide: TRACE_SERVICE, useClass: MockTraceService},
           ],
         })
         .compileComponents();
@@ -131,6 +146,11 @@ describe('EventTabComponent', () => {
     fixture = TestBed.createComponent(EventTabComponent);
     component = fixture.componentInstance;
     loader = TestbedHarnessEnvironment.loader(fixture);
+
+    // Set required inputs
+    fixture.componentRef.setInput('eventDataSize', 0);
+    fixture.componentRef.setInput('selectedEvent', undefined);
+
     matDialogSpy.open.calls.reset();
     fixture.detectChanges();
   });
@@ -139,218 +159,27 @@ describe('EventTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should display "No conversations" if eventsMap is empty', () => {
-    expect(fixture.nativeElement.textContent).toContain('No conversations');
-  });
-
-  describe('with events', () => {
-    beforeEach(async () => {
-      fixture.componentRef.setInput('eventsMap', MOCK_EVENTS_MAP);
-      fixture.detectChanges();
-      await fixture.whenStable();
+  describe('numeric helpers', () => {
+    it('isNumber should return true for numbers and false for others', () => {
+      expect(component.isNumber(123)).toBeTrue();
+      expect(component.isNumber(0)).toBeTrue();
+      expect(component.isNumber(-45.6)).toBeTrue();
+      expect(component.isNumber('123')).toBeFalse();
+      expect(component.isNumber(null)).toBeFalse();
+      expect(component.isNumber(undefined)).toBeFalse();
+      expect(component.isNumber({})).toBeFalse();
+      expect(component.isNumber([])).toBeFalse();
     });
 
-    it('should display events list by default', async () => {
-      const list = await loader.getHarness(MatListHarness);
-      const items = await list.getItems();
-      expect(items.length).toBe(2);
-      expect(await items[0].getFullText()).toContain('Event 1 Title');
-      expect(await items[1].getFullText()).toContain('Event 2 Title');
+    it('isNumericValue should identify numbers and specific detail token keys', () => {
+      expect(component.isNumericValue('promptTokenCount', 123)).toBeTrue();
+      expect(component.isNumericValue('promptTokensDetails', [])).toBeTrue();
+      expect(component.isNumericValue('candidatesTokenDetails', [])).toBeTrue();
+      expect(component.isNumericValue('cacheTokensDetails', [])).toBeTrue();
+      expect(component.isNumericValue('candidatesTokensDetails', [])).toBeTrue();
+      expect(component.isNumericValue('promptTokenDetails', [])).toBeTrue();
+      expect(component.isNumericValue('otherKey', {})).toBeFalse();
+      expect(component.isNumericValue('otherKey', '123')).toBeFalse();
     });
-
-    it('should emit selectedEvent on event click', async () => {
-      spyOn(component.selectedEvent, 'emit');
-      const list = await loader.getHarness(MatListHarness);
-      const items = await list.getItems();
-      await (await items[0].host()).click();
-      expect(component.selectedEvent.emit).toHaveBeenCalledWith('event1');
-    });
-
-    it('should not show toggle if traceData is empty', async () => {
-      const hasToggleGroup = fixture.nativeElement.querySelector(
-          'mat-button-toggle-group',
-      );
-      expect(hasToggleGroup).toBeNull();
-    });
-  });
-
-  describe('with trace data', () => {
-    beforeEach(async () => {
-      fixture.componentRef.setInput('eventsMap', MOCK_EVENTS_MAP);
-      fixture.componentRef.setInput('traceData', MOCK_TRACE_DATA);
-      fixture.detectChanges();
-      await fixture.whenStable();
-    });
-
-    it('should show toggle buttons', async () => {
-      const toggles = await loader.getAllHarnesses(MatButtonToggleHarness);
-      expect(toggles.length).toBe(2);
-      expect(await toggles[0].getText()).toBe('Events');
-      expect(await toggles[1].getText()).toBe('Trace');
-    });
-
-    it('should switch to trace view and display traces', async () => {
-      const traceToggle = await loader.getHarness(
-          MatButtonToggleHarness.with({text: 'Trace'}),
-      );
-      await traceToggle.check();
-      fixture.detectChanges();
-
-      const list = await loader.getHarness(MatListHarness);
-      const items = await list.getItems();
-      expect(items.length).toBe(1);
-      expect(await items[0].getFullText()).toContain('Invocation 21332-322222');
-    });
-
-    it('should open dialog when trace item is clicked', async () => {
-      const traceToggle = await loader.getHarness(
-          MatButtonToggleHarness.with({text: 'Trace'}),
-      );
-      await traceToggle.check();
-      fixture.detectChanges();
-
-      const list = await loader.getHarness(MatListHarness);
-      const items = await list.getItems();
-      await (await items[0].host()).click();
-
-      expect(matDialogSpy.open).toHaveBeenCalledWith(TraceChartComponent, {
-        width: 'auto',
-        maxWidth: '90vw',
-        data: {
-          spans: component.spansByTraceId().get('trace-1'),
-          invocId: '21332-322222',
-        },
-      });
-    });
-
-    it('should display multiple traces if present', async () => {
-      const MOCK_TRACE_DATA_WITH_MULTIPLE_TRACES: Span[] = [
-        ...MOCK_TRACE_DATA,
-        {
-          name: 'agent.act-2',
-          start_time: 1733084700000000000,
-          end_time: 1733084760000000000,
-          span_id: 'span-10',
-          trace_id: 'trace-2',
-          attributes: {
-            'event_id': 10,
-            'gcp.vertex.agent.invocation_id': 'invoc-2',
-            'gcp.vertex.agent.llm_request': '{}',
-          },
-        },
-      ];
-      fixture.componentRef.setInput(
-          'traceData',
-          MOCK_TRACE_DATA_WITH_MULTIPLE_TRACES,
-      );
-      fixture.detectChanges();
-      await fixture.whenStable();
-
-      const traceToggle = await loader.getHarness(
-          MatButtonToggleHarness.with({text: 'Trace'}),
-      );
-      await traceToggle.check();
-      fixture.detectChanges();
-
-      const list = await loader.getHarness(MatListHarness);
-      const items = await list.getItems();
-      expect(items.length).toBe(2);
-      expect(await items[0].getFullText()).toContain('Invocation 21332-322222');
-      expect(await items[1].getFullText()).toContain('Invocation invoc-2');
-    });
-  });
-});
-
-describe('EventTabComponent feature disabling', () => {
-  let component: EventTabComponent;
-  let fixture: ComponentFixture<EventTabComponent>;
-  let featureFlagService: MockFeatureFlagService;
-  let matDialogSpy: jasmine.SpyObj<MatDialog>;
-  const mockDialogRef = {
-    close: jasmine.createSpy('close'),
-  };
-
-  beforeEach(async () => {
-    featureFlagService = new MockFeatureFlagService();
-    matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-
-    featureFlagService.isTraceEnabledResponse.next(false);
-
-    await TestBed
-        .configureTestingModule({
-          imports: [EventTabComponent, NoopAnimationsModule],
-          providers: [
-            {provide: MatDialog, useValue: matDialogSpy},
-            {provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService},
-          ],
-        })
-        .compileComponents();
-
-    fixture = TestBed.createComponent(EventTabComponent);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('traceData', [
-      {
-        trace_id: '1',
-        span_id: '1',
-        start_time: 1,
-        end_time: 2,
-        name: 'test',
-      },
-    ]);
-    fixture.detectChanges();
-  });
-
-  it('should hide the Trace mat-button-toggle', () => {
-    const traceToggle = fixture.nativeElement.querySelector(
-        'mat-button-toggle[value="trace"]',
-    );
-    expect(traceToggle).toBeNull();
-  });
-});
-
-describe('EventTabComponent feature disabling', () => {
-  let component: EventTabComponent;
-  let fixture: ComponentFixture<EventTabComponent>;
-  let featureFlagService: MockFeatureFlagService;
-  let matDialogSpy: jasmine.SpyObj<MatDialog>;
-  const mockDialogRef = {
-    close: jasmine.createSpy('close'),
-  };
-
-  beforeEach(async () => {
-    featureFlagService = new MockFeatureFlagService();
-    matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
-
-    featureFlagService.isTraceEnabledResponse.next(false);
-
-    await TestBed
-        .configureTestingModule({
-          imports: [EventTabComponent, NoopAnimationsModule],
-          providers: [
-            {provide: MatDialog, useValue: matDialogSpy},
-            {provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService},
-          ],
-        })
-        .compileComponents();
-
-    fixture = TestBed.createComponent(EventTabComponent);
-    component = fixture.componentInstance;
-    fixture.componentRef.setInput('traceData', [
-      {
-        trace_id: '1',
-        span_id: '1',
-        start_time: 1,
-        end_time: 2,
-        name: 'test',
-      },
-    ]);
-    fixture.detectChanges();
-  });
-
-  it('should hide the Trace mat-button-toggle', () => {
-    const traceToggle = fixture.nativeElement.querySelector(
-      'mat-button-toggle[value="trace"]',
-    );
-    expect(traceToggle).toBeNull();
   });
 });

@@ -54,6 +54,9 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isEvalEnabledResponse = new ReplaySubject<boolean>(1);
   isEvalEnabled = jasmine.createSpy('isEvalEnabled')
                       .and.returnValue(this.isEvalEnabledResponse);
+  isEvalV2EnabledResponse = new ReplaySubject<boolean>(1);
+  isEvalV2Enabled = jasmine.createSpy('isEvalV2Enabled')
+                       .and.returnValue(this.isEvalV2EnabledResponse);
   isTokenStreamingEnabledResponse = new ReplaySubject<boolean>(1);
   isTokenStreamingEnabled =
       jasmine.createSpy('isTokenStreamingEnabled')
@@ -115,4 +118,16 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isInfinityMessageScrollingEnabled =
       jasmine.createSpy('isInfinityMessageScrollingEnabled')
           .and.returnValue(this.isInfinityMessageScrollingEnabledResponse);
+  isMoreOptionsButtonHiddenResponse = new ReplaySubject<boolean>(1);
+  isMoreOptionsButtonHidden =
+      jasmine.createSpy('isMoreOptionsButtonHidden')
+          .and.returnValue(this.isMoreOptionsButtonHiddenResponse);
+
+  isTestsEnabledResponse = new ReplaySubject<boolean>(1);
+  isTestsEnabled = jasmine.createSpy('isTestsEnabled')
+                       .and.returnValue(this.isTestsEnabledResponse);
+
+  isNewSessionButtonEnabledResponse = new ReplaySubject<boolean>(1);
+  isNewSessionButtonEnabled = jasmine.createSpy('isNewSessionButtonEnabled')
+                                .and.returnValue(this.isNewSessionButtonEnabledResponse);
 }

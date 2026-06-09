@@ -25,7 +25,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatOption, MatSelect } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackbarService } from '../../core/services/snackbar.service';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
@@ -126,7 +126,7 @@ export class BuilderTabsComponent {
   private agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   private dialog = inject(MatDialog);
   private agentService = inject(AGENT_SERVICE);
-  private snackBar = inject(MatSnackBar);
+  private snackBar = inject(SnackbarService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -798,9 +798,9 @@ export class BuilderTabsComponent {
 
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
-    this.agentService.agentBuildTmp(formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(appName, formData).subscribe((success) => {
       if (success) {
-        this.agentService.agentBuild(formData).subscribe((success) => {
+        this.agentService.agentBuild(appName, formData).subscribe((success) => {
           if (success) {
             this.router.navigate(['/'], {
               queryParams: { app: appName }

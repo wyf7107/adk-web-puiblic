@@ -27,6 +27,7 @@ export declare interface FunctionCall {
   id?: string;
   name: string;
   args: {[key: string]: any};
+  needsResponse?: boolean;
 }
 
 export declare interface FunctionResponse {
@@ -78,6 +79,31 @@ export declare interface LlmResponse {
   longRunningToolIds?: string[];
 }
 
+export enum NodeStatus {
+  INACTIVE = 0,
+  PENDING = 1,
+  RUNNING = 2,
+  COMPLETED = 3,
+  INTERRUPTED = 4,
+  FAILED = 5
+}
+
+export declare interface NodeState {
+  status: NodeStatus;
+  input?: any;
+  triggered_by?: string;
+  retry_count?: number;
+  interrupts?: string[];
+  resume_inputs?: {[key: string]: any};
+  run_id?: string;
+  parent_run_id?: string;
+  source_node_name?: string;
+}
+
+export declare interface AgentState {
+  nodes?: {[key: string]: NodeState};
+}
+
 export declare interface EventActions {
   message?: string;
   artifactDelta?: any;
@@ -85,16 +111,31 @@ export declare interface EventActions {
   functionCall?: FunctionCall;
   functionResponse?: FunctionResponse;
   finishReason?: string;
+  agentState?: AgentState;
+  endOfAgent?: boolean;
+  route?: any;
+  transferToAgent?: any;
 }
 
 export declare interface Event extends LlmResponse {
-  id?: string;
+  id: string;
   author?: string
   invocationId?: string;
   actions?: EventActions;
   longRunningToolIds?: string[];
   branch?: string;
   timestamp?: number;
+  nodeInfo?: { path?: string;[key: string]: any; };
+  data?: any;
+  output?: { result?: any; };
+  inputTranscription?: { text: string; };
+  outputTranscription?: { text: string; };
+  usageMetadata?: any;
+  interrupted?: boolean;
+  turnComplete?: boolean;
+  systemInstructionChanged?: boolean;
+  precedingSystemInstruction?: string;
+  currentSystemInstruction?: string;
 }
 
 export interface ComputerUsePayload {

@@ -62,11 +62,13 @@ describe('EvalTabComponent', () => {
       'isEditFunctionArgsEnabled',
       'isSessionUrlEnabled',
       'isA2ACardEnabled',
+      'isEvalV2Enabled',
     ]);
     featureFlagService.isImportSessionEnabled.and.returnValue(of(false));
     featureFlagService.isEditFunctionArgsEnabled.and.returnValue(of(false));
     featureFlagService.isSessionUrlEnabled.and.returnValue(of(false));
     featureFlagService.isA2ACardEnabled.and.returnValue(of(false));
+    featureFlagService.isEvalV2Enabled.and.returnValue(of(false));
 
     await TestBed.configureTestingModule({
       imports: [MatDialogModule, EvalTabComponent, NoopAnimationsModule],
@@ -92,5 +94,35 @@ describe('EvalTabComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should reset selectedEvalCase when clicking cases tab', () => {
+    component.selectedEvalSet.set('test-set');
+    component.evalsets = ['test-set'];
+    fixture.detectChanges();
+    
+    component.selectedEvalCase.set({ evalId: 'test-case' } as any);
+    
+    const buttons = fixture.nativeElement.querySelectorAll('.vertical-tabs-sidebar button');
+    const casesButton = buttons[1] as HTMLButtonElement;
+    casesButton.click();
+    fixture.detectChanges();
+    
+    expect(component.selectedEvalCase()).toBeNull();
+  });
+
+  it('should reset selectedHistoryRun when clicking history tab', () => {
+    component.selectedEvalSet.set('test-set');
+    component.evalsets = ['test-set'];
+    fixture.detectChanges();
+    
+    component.selectedHistoryRun.set('test-run');
+    
+    const buttons = fixture.nativeElement.querySelectorAll('.vertical-tabs-sidebar button');
+    const historyButton = buttons[2] as HTMLButtonElement;
+    historyButton.click();
+    fixture.detectChanges();
+    
+    expect(component.selectedHistoryRun()).toBeNull();
   });
 });

@@ -15,19 +15,24 @@
  * limitations under the License.
  */
 
-import {Component, inject, Input} from '@angular/core';
-import { NgxJsonViewerModule } from 'ngx-json-viewer';
-import { StateTabMessagesInjectionToken } from './state-tab.component.i18n';
+import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
+import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewer.component';
 
+import type {SessionState} from '../../core/models/Session';
+
+import {StateTabMessagesInjectionToken} from './state-tab.component.i18n';
+
+/** Component to display contents of a SessionState. */
 @Component({
-    selector: 'app-state-tab',
-    templateUrl: './state-tab.component.html',
-    styleUrl: './state-tab.component.scss',
-    imports: [NgxJsonViewerModule],
-    standalone: true,
+  changeDetection: ChangeDetectionStrategy.Default,
+  selector: 'app-state-tab',
+  templateUrl: './state-tab.component.html',
+  styleUrl: './state-tab.component.scss',
+  imports: [CustomJsonViewerComponent],
+  standalone: true,
 })
 export class StateTabComponent {
-  @Input() sessionState: any = {};
+  @Input() sessionState: SessionState|undefined;
   protected readonly i18n = inject(StateTabMessagesInjectionToken);
 
   get isEmptyState() {

@@ -14,38 +14,92 @@
  limitations under the License.
 -->
 <div class="dialog-container">
-  <h2 mat-dialog-title class="dialog-title">EVALUATION METRIC</h2>
+  <h2 mat-dialog-title class="dialog-title">EVALUATION METRICS</h2>
   <mat-dialog-content>
     <form [formGroup]="evalForm" class="eval-form">
-      <div class="metric-row">
-        <div class="metric-name">Tool trajectory avg score: </div>
-        <div class="flex-1 pl-4">
-          <mat-slider min="0" max="1" step="0.1" thumbLabel class="threshold-slider">
-            <input matSliderThumb formControlName="tool_trajectory_avg_score_threshold" />
-          </mat-slider>
-          <!-- Display current threshold value -->
-          <span class="threshold-value">
-            {{ evalForm.controls['tool_trajectory_avg_score_threshold'].value }}
-          </span>
+      
+      <!-- Dynamic Metrics -->
+      <div *ngIf="metricsInfo.length > 0">
+        <div *ngFor="let metric of metricsInfo" class="metric-container">
+          <div class="metric-header">
+            <mat-checkbox [formControlName]="metric.metricName + '_selected'">
+              <div style="display: flex; flex-direction: column;">
+                <span class="metric-title" [matTooltip]="metric.metricName">{{ metric.metricName | formatMetricName }}</span>
+                <span class="metric-description">{{ metric.description }}</span>
+              </div>
+            </mat-checkbox>
+            
+            <div class="metric-slider-container inline-slider" [style.visibility]="evalForm.get(metric.metricName + '_selected')?.value ? 'visible' : 'hidden'">
+              <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span class="slider-label" style="margin-right: 0; font-size: 11px; color: var(--mat-sys-on-surface-variant);">Threshold</span>
+                <div style="display: flex; align-items: center;">
+                  <mat-slider [min]="metric.metricValueInfo.interval.minValue" [max]="metric.metricValueInfo.interval.maxValue" step="0.1" thumbLabel class="threshold-slider">
+                    <input matSliderThumb [formControlName]="metric.metricName + '_threshold'" />
+                  </mat-slider>
+                  <span class="threshold-value">
+                    {{ evalForm.controls[metric.metricName + '_threshold'].value }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="metric-row">
-        <div class="metric-name">Response match score: </div>
-        <div class="flex-1 pl-4">
-          <mat-slider min="0" max="1" step="0.1" thumbLabel class="threshold-slider">
-            <input matSliderThumb formControlName="response_match_score_threshold" />
-          </mat-slider>
-          <!-- Display current threshold value -->
-          <span class="threshold-value">
-            {{ evalForm.controls['response_match_score_threshold'].value }}
-          </span>
+      <!-- Fallback if metricsInfo is empty -->
+      <div *ngIf="metricsInfo.length === 0">
+        <!-- Hardcoded Tool Trajectory -->
+        <div class="metric-container">
+          <div class="metric-header">
+            <mat-checkbox formControlName="tool_trajectory_avg_score_selected">
+              <span class="metric-title" [matTooltip]="'tool_trajectory_avg_score'">{{ 'tool_trajectory_avg_score' | formatMetricName }}</span>
+            </mat-checkbox>
+            
+            <div class="metric-slider-container inline-slider" [style.visibility]="evalForm.get('tool_trajectory_avg_score_selected')?.value ? 'visible' : 'hidden'">
+              <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span class="slider-label" style="margin-right: 0; font-size: 11px; color: var(--mat-sys-on-surface-variant);">Threshold</span>
+                <div style="display: flex; align-items: center;">
+                  <mat-slider min="0" max="1" step="0.1" thumbLabel class="threshold-slider">
+                    <input matSliderThumb formControlName="tool_trajectory_avg_score_threshold" />
+                  </mat-slider>
+                  <span class="threshold-value">
+                    {{ evalForm.controls['tool_trajectory_avg_score_threshold'].value }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hardcoded Response Match -->
+        <div class="metric-container">
+          <div class="metric-header">
+            <mat-checkbox formControlName="response_match_score_selected">
+              <span class="metric-title" [matTooltip]="'response_match_score'">{{ 'response_match_score' | formatMetricName }}</span>
+            </mat-checkbox>
+            
+            <div class="metric-slider-container inline-slider" [style.visibility]="evalForm.get('response_match_score_selected')?.value ? 'visible' : 'hidden'">
+              <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span class="slider-label" style="margin-right: 0; font-size: 11px; color: var(--mat-sys-on-surface-variant);">Threshold</span>
+                <div style="display: flex; align-items: center;">
+                  <mat-slider min="0" max="1" step="0.1" thumbLabel class="threshold-slider">
+                    <input matSliderThumb formControlName="response_match_score_threshold" />
+                  </mat-slider>
+                  <span class="threshold-value">
+                    {{ evalForm.controls['response_match_score_threshold'].value }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button (click)="onReset()" class="reset-button">Reset to Default</button>
     <button mat-button (click)="onCancel()" class="cancel-button">Cancel</button>
     <button mat-button (click)="onStart()" class="save-button">Start</button>
   </mat-dialog-actions>

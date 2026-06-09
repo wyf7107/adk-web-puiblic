@@ -16,44 +16,95 @@
  */
 
 import {SAFE_VALUES_SERVICE} from '../../core/services/interfaces/safevalues';
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy, HostListener} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SafeHtml, SafeUrl} from '@angular/platform-browser';
+import { NgStyle } from '@angular/common';
 
 export interface ViewImageDialogData {
   imageData: string|null;
+  images?: string[];
+  currentIndex?: number;
+  urls?: string[];
+  coordinates?: ({x: number, y: number} | null)[];
 }
 
 @Component({
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-view-image-dialog',
     templateUrl: './view-image-dialog.component.html',
     styleUrls: ['./view-image-dialog.component.scss'],
+    imports: [NgStyle]
 })
 export class ViewImageDialogComponent implements OnInit {
   // Property to hold the sanitized image URL or SVG HTML
   displayContent: SafeUrl|SafeHtml|null = null;
   // Flag to determine if the content is SVG
   isSvgContent: boolean = false;
+  
+  images: string[] = [];
+  currentIndex: number = 0;
+  currentUrl: string | null = null;
+  urls: string[] = [];
+  coordinates: ({x: number, y: number} | null)[] = [];
+
+  // Zoom and pan state
+  scale = 1;
+  translateX = 0;
+  translateY = 0;
+  isDragging = false;
+  startX = 0;
+  startY = 0;
 
   readonly dialogRef = inject(MatDialogRef<ViewImageDialogComponent>);
   readonly data = inject<ViewImageDialogData>(MAT_DIALOG_DATA);
   private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
 
-  /**
-   * Lifecycle hook to initialize the component.
-   * This is used to process the image data when the dialog opens.
-   */
   ngOnInit(): void {
-    this.processImageData();
+    this.images = this.data.images || [];
+    this.currentIndex = this.data.currentIndex || 0;
+    this.urls = this.data.urls || [];
+    this.coordinates = this.data.coordinates || [];
+    this.updateImage();
+  }
+
+  /**
+   * Updates the displayed image based on currentIndex.
+   */
+  updateImage(): void {
+    this.scale = 1;
+    this.translateX = 0;
+    this.translateY = 0;
+    
+    let imageData = this.data.imageData;
+    let url = '';
+    if (this.images.length > 0) {
+      imageData = this.images[this.currentIndex];
+      url = this.urls[this.currentIndex] || '';
+    }
+    this.currentUrl = url;
+    this.processImageData(imageData);
+  }
+
+  getHighlightStyle(): {[key: string]: string} {
+    const coord = this.coordinates[this.currentIndex];
+    if (!coord) return {};
+    return {
+      left: `${(coord.x / 1000) * 100}%`,
+      top: `${(coord.y / 1000) * 100}%`,
+    };
+  }
+
+  shouldShowHighlight(): boolean {
+    return !!this.coordinates[this.currentIndex];
   }
 
   /**
    * Processes the input imageData to determine if it's base64 or SVG
    * and sanitizes it for display.
    */
-  private processImageData(): void {
-    const imageData = this.data.imageData;
-
+  private processImageData(imageData: string | null): void {
     if (!imageData) {
       this.displayContent = null;
       this.isSvgContent = false;
@@ -72,6 +123,67 @@ export class ViewImageDialogComponent implements OnInit {
       this.isSvgContent = false;
       this.displayContent =
           this.safeValuesService.bypassSecurityTrustUrl(prefix + imageData);
+    }
+  }
+
+  nextImage(): void {
+    if (this.currentIndex < this.images.length - 1) {
+      this.currentIndex++;
+      this.updateImage();
+    }
+  }
+
+  prevImage(): void {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+      this.updateImage();
+    }
+  }
+
+  // Zoom and pan methods
+  onWheel(event: WheelEvent): void {
+    event.preventDefault();
+    const zoomFactor = 0.1;
+    if (event.deltaY < 0) {
+      this.scale += zoomFactor;
+    } else {
+      this.scale = Math.max(0.5, this.scale - zoomFactor);
+    }
+  }
+
+  onMouseDown(event: MouseEvent): void {
+    this.isDragging = true;
+    this.startX = event.clientX - this.translateX;
+    this.startY = event.clientY - this.translateY;
+    event.preventDefault();
+  }
+
+  onMouseMove(event: MouseEvent): void {
+    if (this.isDragging) {
+      this.translateX = event.clientX - this.startX;
+      this.translateY = event.clientY - this.startY;
+    }
+  }
+
+  onMouseUp(): void {
+    this.isDragging = false;
+  }
+
+  getTransformStyle(): {[key: string]: string} {
+    return {
+      transform: `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`,
+      transformOrigin: 'center',
+      cursor: this.isDragging ? 'grabbing' : 'grab',
+      transition: this.isDragging ? 'none' : 'transform 0.1s ease'
+    };
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'ArrowLeft') {
+      this.prevImage();
+    } else if (event.key === 'ArrowRight') {
+      this.nextImage();
     }
   }
 

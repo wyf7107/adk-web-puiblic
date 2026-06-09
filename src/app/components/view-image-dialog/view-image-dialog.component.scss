@@ -1,51 +1,61 @@
 :host {
-  display: block;
-  background-color: var(--mdc-dialog-container-color);
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.6);
+  /* Semi-transparent backdrop for lightbox effect */
 }
 
 .close-button {
   position: absolute;
   top: 5px;
   right: 10px;
-  background: none;
   border: none;
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
   transition: background-color 0.2s ease;
-  color: var(--mdc-dialog-supporting-text-color);
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10; /* Ensure button is clickable */
   margin-bottom: 15px;
+  z-index: 30;
 
   &:hover {
-    background-color: var(--builder-tool-item-hover-background-color);
+    background-color: rgba(0, 0, 0, 0.05);
   }
 
   svg {
     width: 24px;
     height: 24px;
-    fill: currentColor; /* Use current color for SVG fill */
+    fill: currentColor;
+    /* Use current color for SVG fill */
   }
 }
 
 .image-wrapper {
-  flex-grow: 1; /* Allow image wrapper to take available space */
+  flex-grow: 1;
+  /* Allow image wrapper to take available space */
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: auto; /* Allow scrolling if image is larger than dialog */
+  overflow: hidden;
+  /* Hide scrollbars, use pan to move image */
 }
 
 .image-wrapper img,
 .image-wrapper .svg-container {
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain; /* Ensure image fits within bounds without cropping */
-  border-radius: 8px; /* Rounded corners for the image */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  /* Ensure image fits within bounds without cropping */
+  border-radius: 0;
+  /* Remove rounded corners for full screen view */
 }
 
 .no-image-placeholder {
@@ -61,4 +71,108 @@
     right: 5px;
     padding: 5px;
   }
+}
+
+/* New styles for navigation */
+.nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  z-index: 10;
+
+  &:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+}
+
+.prev-button {
+  left: 20px;
+}
+
+.next-button {
+  right: 20px;
+}
+
+.image-counter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  z-index: 10;
+}
+
+.header-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 40px;
+  box-sizing: border-box;
+}
+
+.image-title {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90%;
+}
+
+.header-bar .close-button {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  color: white;
+  margin-bottom: 0;
+  background: transparent;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.highlight-circle {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(255, 0, 0, 0.5);
+  border: 2px solid red;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
 }

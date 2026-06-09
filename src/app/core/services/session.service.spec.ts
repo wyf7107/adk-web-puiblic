@@ -139,9 +139,8 @@ describe('SessionService', () => {
              API_SERVER_BASE_URL + SESSIONS_PATH,
          );
          expect(req.request.method).toEqual(METHOD_POST);
+         // appName and userId are now in the URL, not the body
          expect(req.request.body).toEqual({
-           appName: APP_NAME,
-           userId: USER_ID,
            events,
          });
          req.flush({});

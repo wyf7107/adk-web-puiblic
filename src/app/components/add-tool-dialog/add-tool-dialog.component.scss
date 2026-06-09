@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@use '@angular/material' as mat;
 
 .dialog-title {
   color: var(--mdc-dialog-supporting-text-color) !important;
@@ -29,7 +28,6 @@ mat-dialog-content {
 }
 
 .tool-info-container {
-  background-color: rgba(138, 180, 248, 0.08);
   border: 1px solid rgba(138, 180, 248, 0.2);
   border-radius: 8px;
   padding: 16px;

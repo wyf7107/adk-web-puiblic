@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 
@@ -23,14 +23,15 @@ import {ResizableDrawerDirective} from './resizable-drawer.directive';
 
 // Directive constants
 const SIDE_DRAWER_WIDTH_VAR = '--side-drawer-width';
-const INITIAL_WIDTH = 570;
-const MIN_WIDTH = 310;
+const INITIAL_WIDTH = 480;
+const MIN_WIDTH = 360;
 
 // Test constants
 const MOCKED_WINDOW_WIDTH = 2000;
 const MAX_WIDTH = MOCKED_WINDOW_WIDTH / 2;  // 1000
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Default,
   template: `
     <div appResizableDrawer>Drawer</div>
     <div class="resize-handler"></div>
@@ -90,7 +91,7 @@ describe('ResizableDrawerDirective', () => {
     body.classList.remove('resizing');
   });
 
-  it('should set initial width to 570px after view init', () => {
+  it('should set initial width to 480px after view init', () => {
     // Assert
     expect(directiveElement.style.width).toBe('var(--side-drawer-width)');
     expect(getDrawerWidth()).toBe(INITIAL_WIDTH);

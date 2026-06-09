@@ -16,7 +16,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {Component, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 import {MarkdownComponentInterface} from '../markdown.component.interface';
 
@@ -24,13 +24,12 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
  * Mock markdown component for testing.
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-markdown',
   imports: [CommonModule],
   template: `
     <div class="mock-markdown-content">
-      <span [ngStyle]="{
-              'font-style': thought() ? 'italic' : 'normal',
-            }">
+      <span>
           {{ text() }}
       </span>
     </div>
@@ -40,4 +39,5 @@ import {MarkdownComponentInterface} from '../markdown.component.interface';
 export class MockMarkdownComponent implements MarkdownComponentInterface {
   text = input<string>('');
   thought = input<boolean>(false);
+  isReadme = input<boolean>(false);
 }

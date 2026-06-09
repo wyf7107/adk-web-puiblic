@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked, inject, Type} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, OnInit, Inject, ViewChild, ElementRef, AfterViewChecked, inject, Type} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
@@ -32,6 +32,7 @@ import { YamlUtils } from '../../../utils/yaml-utils';
 import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdown.component.interface';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-builder-assistant',
   templateUrl: './builder-assistant.component.html',
   styleUrl: './builder-assistant.component.scss',
@@ -97,6 +98,17 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
+          if (chunk.errorCode) {
+            const lastMessage = this.messages[this.messages.length - 1];
+            if (lastMessage.role === 'bot' && lastMessage.isLoading) {
+              lastMessage.text = `Error Code: ${chunk.errorCode}`;
+              lastMessage.isLoading = false;
+              lastMessage.isError = true;
+              this.shouldAutoScroll = true;
+            }
+            this.isGenerating = false;
+            return;
+          }
           if (chunk.content) {
             let botText = '';
             for (let part of chunk.content.parts) {
@@ -168,8 +180,15 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
       this.agentService.runSse(req).subscribe({
         next: async (chunk) => {
-          if (chunk.errorCode && (chunk.errorCode == "MALFORMED_FUNCTION_CALL" || chunk.errorCode == "STOP")) {
-            this.sendMessage("____Something went wrong, please try again");
+          if (chunk.errorCode) {
+            const lastMessage = this.messages[this.messages.length - 1];
+            if (lastMessage.role === 'bot' && lastMessage.isLoading) {
+              lastMessage.text = `Error Code: ${chunk.errorCode}`;
+              lastMessage.isLoading = false;
+              lastMessage.isError = true;
+              this.shouldAutoScroll = true;
+            }
+            this.isGenerating = false;
             return;
           }
           if (chunk.content) {
@@ -258,7 +277,7 @@ export class BuilderAssistantComponent implements OnInit, AfterViewChecked {
 
     YamlUtils.generateYamlFile(rootAgent, formData, appName, tabAgents);
 
-    this.agentService.agentBuildTmp(formData).subscribe((success) => {
+    this.agentService.agentBuildTmp(appName, formData).subscribe((success) => {
       if (success) {
         console.log("save to tmp")
       } else {

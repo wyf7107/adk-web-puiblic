@@ -37,7 +37,7 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { CustomJsonViewerComponent } from '../custom-json-viewer/custom-json-viewer.component';
-import { combineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
+import { combineLatest, firstValueFrom, forkJoin, Observable, of, Subscription } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, first, map, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { URLUtil } from '../../../utils/url-util';
@@ -2941,10 +2941,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   private loadExistingAgentConfiguration() {
-    this.agentService.getAgentBuilderTmp(this.appName).subscribe({
-      next: (yamlContent: string) => {
-        if (yamlContent) {
-          this.canvasComponent()?.loadFromYaml(yamlContent, this.appName);
+    const rootYaml$ = this.agentService.getAgentBuilderTmp(this.appName);
+    const pluginsYaml$ = this.agentService.getSubAgentBuilder(this.appName, 'plugins.yaml').pipe(
+      catchError(() => of(''))
+    );
+
+    forkJoin([rootYaml$, pluginsYaml$]).subscribe({
+      next: ([rootContent, pluginsContent]) => {
+        if (rootContent) {
+          this.canvasComponent()?.loadFromYaml(rootContent, this.appName, pluginsContent);
         }
       },
       error: (error: any) => {

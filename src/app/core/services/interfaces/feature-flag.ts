@@ -57,4 +57,5 @@ export declare abstract class FeatureFlagService {
   abstract isNewSessionButtonEnabled(): Observable<boolean>;
   abstract isSessionsTabEnabled(): Observable<boolean>;
   abstract isStateTabEnabled(): Observable<boolean>;
+  abstract isSkipOauthRedirectUriRewriteEnabled(): Observable<boolean>;
 }

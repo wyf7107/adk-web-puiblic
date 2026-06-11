@@ -130,6 +130,10 @@ export class MockFeatureFlagService implements FeatureFlagService {
   isStateTabEnabledResponse = new ReplaySubject<boolean>(1);
   isStateTabEnabled = jasmine.createSpy('isStateTabEnabled')
                           .and.returnValue(this.isStateTabEnabledResponse);
+  isSkipOauthRedirectUriRewriteEnabledResponse = new ReplaySubject<boolean>(1);
+  isSkipOauthRedirectUriRewriteEnabled =
+      jasmine.createSpy('isSkipOauthRedirectUriRewriteEnabled')
+          .and.returnValue(this.isSkipOauthRedirectUriRewriteEnabledResponse);
 
   setNewSessionButtonEnabled(value: boolean) {
     this.isNewSessionButtonEnabledResponse.next(value);

@@ -300,6 +300,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       toSignal(this.featureFlagService.isEventFilteringEnabled());
   readonly isApplicationSelectorEnabled =
       toSignal(this.featureFlagService.isApplicationSelectorEnabled());
+  readonly isSkipOauthRedirectUriRewriteEnabled = toSignal(
+      this.featureFlagService.isSkipOauthRedirectUriRewriteEnabled(),
+      {initialValue: false});
   readonly isDeleteSessionEnabledObs: Observable<boolean> =
       this.featureFlagService.isDeleteSessionEnabled();
   readonly isUserIdOnToolbarEnabledObs: Observable<boolean> =
@@ -978,6 +981,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  private handleOAuth(func: any) {
+    // for OAuth
+    const authUri = func.args.authConfig.exchangedAuthCredential.oauth2.authUri;
+    const skipRewrite = this.isSkipOauthRedirectUriRewriteEnabled();
+    const updatedAuthUri = skipRewrite ?
+        authUri :
+        this.updateRedirectUri(authUri, this.redirectUri);
+    this.openOAuthPopup(updatedAuthUri)
+        .then((authResponseUrl) => {
+          this.sendOAuthResponse(func, authResponseUrl, this.redirectUri);
+        })
+        .catch((error) => {
+          console.error('OAuth Error:', error);
+        });
+  }
+
   private storeMessage(
       part: any, e: any, role: string, invocationIndex?: number,
       additionalIndices?: any, prepend: boolean = false) {
@@ -999,20 +1018,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (func.args.authConfig &&
             func.args.authConfig.exchangedAuthCredential &&
             func.args.authConfig.exchangedAuthCredential.oauth2) {
-          // for OAuth
-          const authUri =
-              func.args.authConfig.exchangedAuthCredential.oauth2.authUri;
-          const updatedAuthUri = this.updateRedirectUri(
-              authUri,
-              this.redirectUri,
-          );
-          this.openOAuthPopup(updatedAuthUri)
-              .then((authResponseUrl) => {
-                this.sendOAuthResponse(func, authResponseUrl, this.redirectUri);
-              })
-              .catch((error) => {
-                console.error('OAuth Error:', error);
-              });
+          this.handleOAuth(func);
           break;  // Handle one OAuth at a time
         }
       }

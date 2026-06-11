@@ -19,6 +19,7 @@ import {inject, Injectable} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {Observable, of, pipe} from 'rxjs';
 import {map} from 'rxjs/operators';
+
 import {A2A_CARD, EDIT_FUNCTION_ARGS, FeatureFlagService as FeatureFlagServiceInterface, IMPORT_SESSION, SESSION_URL} from './interfaces/feature-flag';
 
 @Injectable({
@@ -145,5 +146,9 @@ export class FeatureFlagService implements FeatureFlagServiceInterface {
 
   isStateTabEnabled(): Observable<boolean> {
     return of(true);
+  }
+
+  isSkipOauthRedirectUriRewriteEnabled(): Observable<boolean> {
+    return of(false);
   }
 }

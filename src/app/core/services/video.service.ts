@@ -111,7 +111,7 @@ export class VideoService implements VideoServiceInterface {
             resolve(blob);
           else
             reject(new Error('Failed to create image blob'));
-        }, 'image/png');
+        }, 'image/jpeg', 0.8);
       } catch (error) {
         reject(error);
       }

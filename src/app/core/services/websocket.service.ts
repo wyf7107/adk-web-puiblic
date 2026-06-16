@@ -98,16 +98,26 @@ export class WebSocketService implements WebSocketServiceInterface {
 
   private handleIncomingEvent(message: any) {
     const msg = JSON.parse(message) as Event;
-    if (
-      msg['content'] &&
-      msg['content']['parts'] &&
-      msg['content']['parts'][0]['inlineData']
-    ) {
-      const pcmBytes = this.base64ToUint8Array(
-          msg['content']['parts'][0]['inlineData']['data'],
-      );
-      this.audioBuffer.push(pcmBytes);
-    } else {
+    const parts = msg?.['content']?.['parts'];
+
+    if (!Array.isArray(parts)) {
+      this.messages$.next(message);
+      return;
+    }
+
+    // Extract audio from any part; forward the event if it has other content
+    let hasNonAudioContent = false;
+    for (const part of parts) {
+      const inlineData = part?.['inlineData'];
+      const mimeType: string|undefined = inlineData?.['mimeType'];
+      if (inlineData?.['data'] && mimeType?.startsWith('audio/')) {
+        this.audioBuffer.push(this.base64ToUint8Array(inlineData['data']));
+      } else {
+        hasNonAudioContent = true;
+      }
+    }
+
+    if (hasNonAudioContent) {
       this.messages$.next(message);
     }
   }

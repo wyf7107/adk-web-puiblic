@@ -22,7 +22,7 @@ import {AudioPlayingService as AudioPlayingServiceInterface} from './interfaces/
   providedIn: 'root',
 })
 export class AudioPlayingService implements AudioPlayingServiceInterface {
-  private audioContext = new AudioContext({sampleRate: 22000});
+  private audioContext = new AudioContext({sampleRate: 24000});
   private lastAudioTime = 0;
   private scheduledAudioSources = new Set<AudioBufferSourceNode>();
 
@@ -74,7 +74,7 @@ export class AudioPlayingService implements AudioPlayingServiceInterface {
     const buffer = this.audioContext.createBuffer(
         1,
         float32Array.length,
-        22000,
+        24000,
     );
     buffer.copyToChannel(float32Array, 0);
 

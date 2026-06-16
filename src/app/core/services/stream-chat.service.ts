@@ -99,7 +99,7 @@ export class StreamChatService implements StreamChatServiceInterface {
 
     const request: LiveRequest = {
       blob: {
-        mime_type: 'audio/pcm',
+        mime_type: 'audio/pcm;rate=16000',
         data: combinedBuffer,
       },
     };

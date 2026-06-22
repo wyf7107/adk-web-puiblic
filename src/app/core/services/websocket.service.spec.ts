@@ -55,4 +55,34 @@ describe('WebSocketService', () => {
       expect(service.urlSafeBase64ToBase64('abcd')).toEqual('abcd');
     });
   });
+
+  describe('connection restart', () => {
+    it('should reset the audio buffer when reconnecting', () => {
+      service.connect('ws://test1');
+      (service as any).audioBuffer = [new Uint8Array([1, 2, 3])];
+
+      service.connect('ws://test2');
+
+      expect((service as any).audioBuffer).toEqual([]);
+    });
+
+    it('should close the previous connection when reconnecting', () => {
+      service.connect('ws://test1');
+      const firstSocket = (service as any).socket$;
+      spyOn(firstSocket, 'complete').and.callThrough();
+
+      service.connect('ws://test2');
+
+      expect(firstSocket.complete).toHaveBeenCalled();
+    });
+
+    it('should clear the audio interval when closing the connection', () => {
+      service.connect('ws://test');
+      expect((service as any).audioIntervalId).not.toBeNull();
+
+      service.closeConnection();
+
+      expect((service as any).audioIntervalId).toBeNull();
+    });
+  });
 });

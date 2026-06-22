@@ -134,8 +134,8 @@ class CustomPaginatorIntl extends MatPaginatorIntl {
   };
 }
 
-const BIDI_STREAMING_RESTART_WARNING =
-  'Restarting bidirectional streaming is not currently supported. Please refresh the page or start a new session.';
+const BIDI_STREAMING_IN_PROGRESS_WARNING =
+  'Another streaming request is already in progress. Please stop it before starting a new one.';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
@@ -531,8 +531,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     window.localStorage.setItem('adk-hide-intermediate-events', String(newVal));
   }
 
-  // TODO: Remove this once backend supports restarting bidi streaming.
-  sessionHasUsedBidi = new Set<string>();
+  // Sessions with an in-progress bidi stream, used to block concurrent starts.
+  activeBidiSessions = new Set<string>();
 
   eventData = new Map<string, any>();
   traceData: Span[] = [];
@@ -1937,11 +1937,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   onAppSelection(event: any) {
     if (this.isAudioRecording) {
       this.stopAudioRecording();
-      this.isAudioRecording = false;
     }
     if (this.isVideoRecording) {
       this.stopVideoRecording();
-      this.isVideoRecording = false;
     }
     this.evalTab()?.resetEvalResults();
     this.traceData = [];
@@ -1953,8 +1951,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async startAudioRecording(flags?: LiveFlags) {
-    if (this.sessionId && this.sessionHasUsedBidi.has(this.sessionId)) {
-      this.openSnackBar(BIDI_STREAMING_RESTART_WARNING, 'OK');
+    if (this.sessionId && this.activeBidiSessions.has(this.sessionId)) {
+      this.openSnackBar(BIDI_STREAMING_IN_PROGRESS_WARNING, 'OK');
       return;
     }
 
@@ -1965,22 +1963,25 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.isAudioRecording = true;
+    this.activeBidiSessions.add(this.sessionId);
     void this.streamChatService.startAudioChat({
       appName: this.appName,
       userId: this.userId,
       sessionId: this.sessionId,
       flags: flags,
     });
-    this.sessionHasUsedBidi.add(this.sessionId);
+    this.changeDetectorRef.detectChanges();
   }
 
   stopAudioRecording() {
     this.audioPlayingService.stopAudio();
     this.streamChatService.stopAudioChat();
     this.isAudioRecording = false;
+    this.activeBidiSessions.delete(this.sessionId);
     if (this.isVideoRecording) {
       this.stopVideoRecording();
     }
+    this.changeDetectorRef.detectChanges();
   }
 
   toggleVideoRecording() {
@@ -1988,22 +1989,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.startVideoRecording();
   }
 
+  // Video is an add-on to an active call: it streams frames over the existing
+  // connection rather than opening its own, so it doesn't touch the session
+  // lock or the websocket.
   startVideoRecording() {
     const videoContainer = this.chatPanel()?.videoContainer;
     if (!videoContainer) {
       return;
     }
     this.isVideoRecording = true;
-    this.streamChatService.startVideoStreaming(videoContainer);
+    void this.streamChatService.startVideoStreaming(videoContainer);
+    this.changeDetectorRef.detectChanges();
   }
 
   stopVideoRecording() {
     const videoContainer = this.chatPanel()?.videoContainer;
-    if (!videoContainer) {
-      return;
+    if (videoContainer) {
+      this.streamChatService.stopVideoStreaming(videoContainer);
     }
-    this.streamChatService.stopVideoStreaming(videoContainer);
     this.isVideoRecording = false;
+    this.changeDetectorRef.detectChanges();
   }
 
   private getAsyncFunctionsFromParts(

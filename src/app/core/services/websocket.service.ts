@@ -38,6 +38,10 @@ export class WebSocketService implements WebSocketServiceInterface {
   private closeReasonSubject = new Subject<string>();
 
   connect(serverUrl: string) {
+    // Reset any previous connection/buffer so restarts start clean.
+    this.closeConnection();
+    this.audioBuffer = [];
+
     this.socket$ = new WebSocketSubject({
       url: serverUrl,
       serializer: (msg) => JSON.stringify(msg),
@@ -75,8 +79,10 @@ export class WebSocketService implements WebSocketServiceInterface {
   }
 
   closeConnection() {
-    clearInterval(this.audioIntervalId);
-    this.audioIntervalId = null;
+    if (this.audioIntervalId !== null) {
+      clearInterval(this.audioIntervalId);
+      this.audioIntervalId = null;
+    }
     if (this.socket$) {
       this.socket$.complete();
     }

@@ -1318,6 +1318,33 @@ describe('ChatComponent', () => {
             });
       });
 
+      describe('when event is an error response', () => {
+        it(
+            'should propagate eventId onto the inserted bot message',
+            async () => {
+              // Error chunks lack `content` and do not match the Event type,
+              // so cast to `any` to model the on-wire shape.
+              // tslint:disable-next-line:no-any
+              const sseEvent: any = {
+                id: 'error-event-1',
+                author: 'bot',
+                errorMessage: 'PREFILL_QUEUE_OVERLOADED',
+              };
+              component.messages.set([]);
+              component.userInput = 'test message';
+              await component.sendMessage(
+                  new KeyboardEvent('keydown', {key: 'Enter'}));
+              mockAgentService.runSseResponse.next(sseEvent);
+              fixture.detectChanges();
+
+              const botMessages =
+                  component.messages().filter(m => m.role === 'bot');
+              expect(botMessages.length).toBe(1);
+              expect(botMessages[0].text).toBe('PREFILL_QUEUE_OVERLOADED');
+              expect(botMessages[0].eventId).toBe('error-event-1');
+            });
+      });
+
       describe('when getTrace fails in sendMessage', () => {
         beforeEach(async () => {
           mockEventService.getTraceResponse.error(new Error('trace error'));

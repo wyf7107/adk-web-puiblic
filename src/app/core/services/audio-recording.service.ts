@@ -36,7 +36,8 @@ export class AudioRecordingService implements AudioRecordingServiceInterface {
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({audio: true});
 
-      this.audioContext = new AudioContext();
+      // Hint capture rate; worklet still resamples to 16 kHz if ignored
+      this.audioContext = new AudioContext({sampleRate: 16000});
       await this.audioContext.audioWorklet.addModule(
           this.audioWorkletModulePath);
 

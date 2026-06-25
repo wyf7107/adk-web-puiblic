@@ -17,7 +17,7 @@
 
 import {Location} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {ChangeDetectionStrategy, Component, ErrorHandler} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ElementRef, ErrorHandler} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 import { SnackbarService } from '../../core/services/snackbar.service';
@@ -922,6 +922,130 @@ describe('ChatComponent', () => {
       });
       it('should call toggleAudioRecording', () => {
         expect(component.toggleAudioRecording).toHaveBeenCalled();
+      });
+    });
+
+    describe('Bidi (live) streaming restart', () => {
+      const SESSION_ID = 'test-session-id';
+
+      beforeEach(() => {
+        component.sessionId = SESSION_ID;
+        component.appName = TEST_APP_1_NAME;
+        component.userId = USER_ID;
+        // Session already exists, so no lazy creation is required.
+        spyOn(component, 'ensureSessionActive').and.resolveTo(true);
+        mockSnackBar.open.calls.reset();
+      });
+
+      describe('audio', () => {
+        it('allows restarting after stopping without warning', async () => {
+          await component.startAudioRecording();
+          expect(component.activeBidiSessions.has(SESSION_ID)).toBe(true);
+
+          component.stopAudioRecording();
+          expect(component.activeBidiSessions.has(SESSION_ID)).toBe(false);
+          expect(component.isAudioRecording).toBe(false);
+
+          await component.startAudioRecording();
+          expect(component.isAudioRecording).toBe(true);
+          expect(mockStreamChatService.startAudioChat)
+              .toHaveBeenCalledTimes(2);
+          expect(mockSnackBar.open).not.toHaveBeenCalled();
+        });
+
+        it('prevents starting a second concurrent audio stream', async () => {
+          await component.startAudioRecording();
+          await component.startAudioRecording();
+
+          expect(mockStreamChatService.startAudioChat)
+              .toHaveBeenCalledTimes(1);
+          expect(mockSnackBar.open).toHaveBeenCalledWith(
+              'Another streaming request is already in progress. Please stop it before starting a new one.',
+              'OK');
+        });
+
+        it('stops video when the call ends', async () => {
+          spyOn(component, 'chatPanel').and.returnValue({
+            videoContainer: {nativeElement: document.createElement('div')},
+          } as any);
+          await component.startAudioRecording();
+          component.startVideoRecording();
+          expect(component.isVideoRecording).toBe(true);
+
+          component.stopAudioRecording();
+
+          expect(component.isVideoRecording).toBe(false);
+          expect(mockStreamChatService.stopVideoStreaming).toHaveBeenCalled();
+        });
+      });
+
+      describe('video', () => {
+        let videoContainer: ElementRef;
+        let chatPanelSpy: jasmine.Spy;
+
+        beforeEach(() => {
+          videoContainer = {nativeElement: document.createElement('div')} as
+              ElementRef;
+          chatPanelSpy = spyOn(component, 'chatPanel').and.returnValue({
+            videoContainer,
+          } as any);
+        });
+
+        it('streams frames over the existing connection without opening a new one',
+           () => {
+             component.startVideoRecording();
+             expect(mockStreamChatService.startVideoStreaming)
+                 .toHaveBeenCalledWith(videoContainer);
+             expect(mockStreamChatService.startVideoChat).not.toHaveBeenCalled();
+
+             component.stopVideoRecording();
+             expect(mockStreamChatService.stopVideoStreaming)
+                 .toHaveBeenCalledWith(videoContainer);
+           });
+
+        it('starts during an active call without tripping the in-progress warning',
+           () => {
+             // Audio call already active for this session.
+             component.activeBidiSessions.add(SESSION_ID);
+
+             component.startVideoRecording();
+
+             expect(component.isVideoRecording).toBe(true);
+             expect(mockStreamChatService.startVideoStreaming)
+                 .toHaveBeenCalledWith(videoContainer);
+             expect(mockSnackBar.open).not.toHaveBeenCalled();
+           });
+
+        it('does not touch the session lock', () => {
+          component.activeBidiSessions.add(SESSION_ID);
+
+          component.startVideoRecording();
+          component.stopVideoRecording();
+
+          // The call (audio) owns the lock; video must leave it intact.
+          expect(component.activeBidiSessions.has(SESSION_ID)).toBe(true);
+        });
+
+        it('can be toggled off and on within the same call', () => {
+          component.startVideoRecording();
+          component.stopVideoRecording();
+          component.startVideoRecording();
+
+          expect(component.isVideoRecording).toBe(true);
+          expect(mockStreamChatService.startVideoStreaming)
+              .toHaveBeenCalledTimes(2);
+          expect(mockSnackBar.open).not.toHaveBeenCalled();
+        });
+
+        it('is a no-op when videoContainer is missing', () => {
+          chatPanelSpy.and.returnValue({videoContainer: undefined} as any);
+
+          component.startVideoRecording();
+
+          expect(component.isVideoRecording).toBe(false);
+          expect(mockStreamChatService.startVideoStreaming)
+              .not.toHaveBeenCalled();
+        });
       });
     });
   });

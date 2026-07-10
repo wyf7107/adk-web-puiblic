@@ -316,6 +316,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly isChatEmpty = computed(() => this.messages().length === 0);
   readonly chatEmptyChange = output<boolean>();
 
+  // Emits when the user sends a message.
+  readonly messageSent = output<void>();
+
+  // Emits when the user starts a new session.
+  readonly newSessionStarted = output<void>();
+
   // Trace detail
   bottomPanelVisible = false;
   hoveredEventMessageIndices: number[] = [];
@@ -636,6 +642,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     };
     this.selectedFiles = [];
     this.streamingTextMessage = null;
+    this.messageSent.emit();
     this.agentService.runSse(req).subscribe({
       next: async (chunkJson: AdkEvent) => {
         if (chunkJson.error) {
@@ -1972,6 +1979,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onNewSessionClick() {
+    this.newSessionStarted.emit();
     this.createSession();
     this.eventData.clear();
     this.messages.set([]);

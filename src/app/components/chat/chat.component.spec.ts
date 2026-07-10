@@ -751,6 +751,42 @@ describe('ChatComponent', () => {
       });
     });
 
+    describe('analytics outputs', () => {
+      it(
+          'emits messageSent when the user sends a message', async () => {
+            const emitSpy = spyOn(component.messageSent, 'emit');
+            component.userInput = TEST_MESSAGE;
+
+            await component.sendMessage(
+                new KeyboardEvent('keydown', {key: 'Enter'}));
+
+            expect(emitSpy).toHaveBeenCalledTimes(1);
+          });
+
+      it(
+          'does not emit messageSent when the input is empty', async () => {
+            const emitSpy = spyOn(component.messageSent, 'emit');
+            component.userInput = '';
+            component.selectedFiles = [];
+
+            await component.sendMessage(
+                new KeyboardEvent('keydown', {key: 'Enter'}));
+
+            expect(emitSpy).not.toHaveBeenCalled();
+          });
+
+      it('emits newSessionStarted on new session click', () => {
+        mockSessionService.createSessionResponse = new ReplaySubject<Session>(1);
+        mockSessionService.createSession.and.returnValue(
+            mockSessionService.createSessionResponse);
+        const emitSpy = spyOn(component.newSessionStarted, 'emit');
+
+        component.onNewSessionClick();
+
+        expect(emitSpy).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('when deleting a session', () => {
       describe('and dialog is confirmed', () => {
         beforeEach(() => {

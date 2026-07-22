@@ -59,7 +59,7 @@ describe('TelemetryService', () => {
     const promise = service.fetchTelemetryStatus();
 
     const req = httpTestingController.expectOne(
-        `${API_SERVER_BASE_URL}/api/config/telemetry`);
+        `${API_SERVER_BASE_URL}/config/telemetry`);
     expect(req.request.method).toBe('GET');
     req.flush({telemetry: false});
 
@@ -73,7 +73,7 @@ describe('TelemetryService', () => {
     const promise = service.setTelemetry(true);
 
     const req = httpTestingController.expectOne(
-        `${API_SERVER_BASE_URL}/api/config/telemetry`);
+        `${API_SERVER_BASE_URL}/config/telemetry`);
     expect(req.request.method).toBe('POST');
     expect(req.request.headers.get('X-ADK-Telemetry-Request')).toBe('true');
     expect(req.request.body).toEqual({telemetry: true});
@@ -90,7 +90,7 @@ describe('TelemetryService', () => {
     expect(service.telemetryStatus()).toBe(true);
 
     const req = httpTestingController.expectOne(
-        `${API_SERVER_BASE_URL}/api/config/telemetry`);
+        `${API_SERVER_BASE_URL}/config/telemetry`);
     expect(req.request.method).toBe('POST');
     req.error(new ProgressEvent('Network error'));
 

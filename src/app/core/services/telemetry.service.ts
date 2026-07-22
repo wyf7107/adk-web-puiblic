@@ -61,7 +61,7 @@ export class TelemetryService {
     const baseUrl = URLUtil.getApiServerBaseUrl();
     try {
       const res = await firstValueFrom(this.http.get<TelemetryConfigResponse>(
-          `${baseUrl}/api/config/telemetry`));
+          `${baseUrl}/config/telemetry`));
       if (res && res.telemetry !== undefined) {
         this.telemetryStatus.set(res.telemetry);
         return res.telemetry;
@@ -78,7 +78,7 @@ export class TelemetryService {
     const baseUrl = URLUtil.getApiServerBaseUrl();
     try {
       await firstValueFrom(this.http.post<TelemetryConfigResponse>(
-          `${baseUrl}/api/config/telemetry`,
+          `${baseUrl}/config/telemetry`,
           {telemetry: enabled},
           {
             headers: {'X-ADK-Telemetry-Request': 'true'},

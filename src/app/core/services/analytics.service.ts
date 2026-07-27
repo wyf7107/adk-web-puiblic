@@ -26,8 +26,8 @@ declare global {
   }
 }
 
-// TODO: Replace with production GA4 Measurement ID
-export const DEFAULT_GA_MEASUREMENT_ID = '';
+// Production GA4 Measurement ID
+export const DEFAULT_GA_MEASUREMENT_ID = 'G-19SDLPJMZN';
 
 @Injectable({
   providedIn: 'root',

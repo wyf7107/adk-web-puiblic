@@ -19,13 +19,19 @@ import {ChangeDetectionStrategy, Component, Inject} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 
-import {EvalMetric, MetricsInfo, DEFAULT_EVAL_METRICS} from '../../../core/models/Eval';
+import {AUDIO_SIMULATOR_VOICES, DEFAULT_AUDIO_MODEL, EvalMetric, MetricsInfo, DEFAULT_EVAL_METRICS, UserSimulatorConfig} from '../../../core/models/Eval';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { CommonModule } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { FormatMetricNamePipe } from '../format-metric-name.pipe';
 
 /**
@@ -37,6 +43,30 @@ export interface EvalConfigData {
   evalMetrics: EvalMetric[];
   metricsInfo: MetricsInfo[];
 }
+
+/** Result emitted when the dialog is confirmed, consumed by runEval. */
+export interface RunEvalDialogResult {
+  metrics: EvalMetric[];
+  useLive: boolean;
+  // Present only when the audio user simulator is enabled for a live run.
+  userSimulatorConfig?: UserSimulatorConfig;
+}
+
+const DEFAULT_VOICE_NAME = 'Kore';
+const DEFAULT_LANGUAGE_CODE = 'en-US';
+
+/**
+ * Top-level evaluation run mode. `standard` is the default (non-live) run;
+ * `live` uses bidirectional streaming inference.
+ */
+export type EvalRunMode = 'standard'|'live';
+
+const DEFAULT_RUN_MODE: EvalRunMode = 'standard';
+
+export type LiveInputModality = 'audio'|'text';
+
+/** Default modality when live mode is enabled (audio is the common case). */
+const DEFAULT_INPUT_MODALITY: LiveInputModality = 'audio';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
@@ -56,6 +86,12 @@ export interface EvalConfigData {
         MatCheckbox,
         CommonModule,
         MatTooltip,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatSlideToggleModule,
+        MatButtonToggleModule,
+        MatIconModule,
         FormatMetricNamePipe,
     ],
 })
@@ -63,8 +99,13 @@ export class RunEvalConfigDialogComponent {
   // FormGroup to manage the dialog's form controls
   evalForm: FormGroup;
 
+  // Live run + optional audio user simulation controls.
+  runForm: FormGroup;
+
   evalMetrics: EvalMetric[] = [];
   metricsInfo: MetricsInfo[] = [];
+
+  readonly voices = AUDIO_SIMULATOR_VOICES;
 
   constructor(
       public dialogRef: MatDialogRef<RunEvalConfigDialogComponent>,
@@ -72,6 +113,13 @@ export class RunEvalConfigDialogComponent {
       @Inject(MAT_DIALOG_DATA) public data: EvalConfigData) {
     this.evalMetrics = this.data.evalMetrics || [];
     this.metricsInfo = this.data.metricsInfo || [];
+
+    this.runForm = this.fb.group({
+      runMode: [DEFAULT_RUN_MODE],
+      inputModality: [DEFAULT_INPUT_MODALITY],
+      voiceName: [DEFAULT_VOICE_NAME],
+      languageCode: [DEFAULT_LANGUAGE_CODE],
+    });
 
     // Initialize the form
     this.evalForm = this.fb.group({});
@@ -142,38 +190,62 @@ export class RunEvalConfigDialogComponent {
     }
   }
 
-  onStart(): void {
-    if (this.evalForm.valid) {
-      const resultMetrics: EvalMetric[] = [];
+  get isLive(): boolean {
+    return this.runForm.get('runMode')?.value === 'live';
+  }
 
-      if (this.metricsInfo.length > 0) {
-        this.metricsInfo.forEach(metric => {
-          const isSelected = this.evalForm.get(`${metric.metricName}_selected`)?.value;
-          if (isSelected) {
-            const threshold = this.evalForm.get(`${metric.metricName}_threshold`)?.value;
-            resultMetrics.push({
-              metricName: metric.metricName,
-              threshold: threshold
-            });
-          }
-        });
-      } else {
-        // Fallback if metricsInfo was empty
-        const defaultMetrics = ['tool_trajectory_avg_score', 'response_match_score'];
-        defaultMetrics.forEach(name => {
-          const isSelected = this.evalForm.get(`${name}_selected`)?.value;
-          if (isSelected) {
-            const threshold = this.evalForm.get(`${name}_threshold`)?.value;
-            resultMetrics.push({
-              metricName: name,
-              threshold: threshold
-            });
-          }
-        });
+  get audioSimulationEnabled(): boolean {
+    return this.isLive &&
+        this.runForm.get('inputModality')?.value === 'audio';
+  }
+
+  private collectMetrics(): EvalMetric[] {
+    const resultMetrics: EvalMetric[] = [];
+    const names = this.metricsInfo.length > 0 ?
+        this.metricsInfo.map((m) => m.metricName) :
+        ['tool_trajectory_avg_score', 'response_match_score'];
+    names.forEach((name) => {
+      if (this.evalForm.get(`${name}_selected`)?.value) {
+        const threshold = this.evalForm.get(`${name}_threshold`)?.value;
+        resultMetrics.push({metricName: name, threshold});
       }
+    });
+    return resultMetrics;
+  }
 
-      this.dialogRef.close(resultMetrics);
+  // Builds the `llm_audio` config from the audio form fields (Gemini TTS model
+  // + voice/language), or undefined when audio simulation is off.
+  private buildUserSimulatorConfig(): UserSimulatorConfig|undefined {
+    if (!this.audioSimulationEnabled) {
+      return undefined;
     }
+    const raw = this.runForm.getRawValue();
+    return {
+      type: 'llm_audio',
+      audio_model: DEFAULT_AUDIO_MODEL,
+      audio_model_configuration: {
+        response_modalities: ['AUDIO'],
+        speech_config: {
+          voice_config: {
+            prebuilt_voice_config: {
+              voice_name: raw.voiceName || DEFAULT_VOICE_NAME,
+            },
+          },
+          language_code: raw.languageCode || DEFAULT_LANGUAGE_CODE,
+        },
+      },
+    };
+  }
+
+  onStart(): void {
+    if (!this.evalForm.valid) {
+      return;
+    }
+    this.dialogRef.close({
+      metrics: this.collectMetrics(),
+      useLive: this.isLive,
+      userSimulatorConfig: this.buildUserSimulatorConfig(),
+    } as RunEvalDialogResult);
   }
 
   onCancel(): void {

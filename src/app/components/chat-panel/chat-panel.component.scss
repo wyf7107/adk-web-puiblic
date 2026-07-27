@@ -366,6 +366,34 @@ button.send-message-btn {
   }
 }
 
+.empty-eval-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .empty-eval-result-hint {
+    max-width: 360px;
+    font-size: 12px;
+    opacity: 0.85;
+  }
+}
+
 .branches-container {
   margin: 8px -20px;
   border-radius: 8px;

@@ -25,7 +25,9 @@ export class UiEvent {
   isLoading?: boolean;
   isEditing?: boolean;
   evalStatus?: number;
-  failedMetric?: boolean;
+  // The name of the metric that failed for this event (e.g.
+  // 'response_match_score'), or empty when the event passed.
+  failedMetric?: string;
   attachments?: { file: File; url: string }[];
   renderedContent?: any;
   a2uiData?: any;

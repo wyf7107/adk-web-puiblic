@@ -145,6 +145,8 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() userId: string = '';
   @Input() sessionId: string = '';
   @Input() viewMode: 'events' | 'traces' = 'events';
+  // Renders the empty-run message instead of the README when there are no events.
+  @Input() isEvalResult: boolean = false;
   @Input() shouldShowEvent?: (uiEvent: UiEvent) => boolean;
   spansByInvocationId = new Map<string, Span[]>();
   displayItems: DisplayItem[] = [];

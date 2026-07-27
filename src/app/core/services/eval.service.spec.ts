@@ -41,7 +41,8 @@ const EVAL_CASE_PATH = `${EVAL_CASES_PATH}/${EVAL_CASE_ID}`;
 const EVAL_RESULTS_PATH = `/dev/apps/${APP_NAME}/eval_results`;
 const EVAL_RESULT_PATH = `${EVAL_RESULTS_PATH}/${EVAL_RESULT_ID}`;
 const ADD_SESSION_PATH = `${EVAL_SET_PATH}/add_session`;
-const RUN_EVAL_PATH = `${EVAL_SET_PATH}/run_eval`;
+const RUN_EVAL_PATH =
+    `/dev/apps/${APP_NAME}/eval-sets/${EVAL_SET_ID}/run`;
 
 describe('EvalService', () => {
   let service: EvalService;
@@ -85,6 +86,25 @@ describe('EvalService', () => {
       req.flush(null);
       const result = await resultP;
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getEvalSet', () => {
+    it('should call GET /apps/{appName}/eval-sets/{evalSetId}', () => {
+      service.getEvalSet(APP_NAME, EVAL_SET_ID).subscribe();
+      const req = httpTestingController.expectOne(
+          API_SERVER_BASE_URL + `/dev/apps/${APP_NAME}/eval-sets/${EVAL_SET_ID}`,
+      );
+      expect(req.request.method).toEqual('GET');
+      req.flush({});
+    });
+
+    it('should return empty observable if no api domain', async () => {
+      service.apiServerDomain = '';
+      const result = service.getEvalSet(APP_NAME, EVAL_SET_ID);
+      httpTestingController.expectNone(
+          `/dev/apps/${APP_NAME}/eval-sets/${EVAL_SET_ID}`);
+      expect(result).toBeTruthy();
     });
   });
 
@@ -160,19 +180,61 @@ describe('EvalService', () => {
   });
 
   describe('runEval', () => {
-    it('should call POST /apps/{appName}/eval_sets/{evalSetId}/run_eval with correct body',
+    it('should call POST /dev/apps/{appName}/eval-sets/{evalSetId}/run with correct body',
        () => {
-         service.runEval(APP_NAME, EVAL_SET_ID, [EVAL_ID], [{}]).subscribe();
+         service.runEval(APP_NAME, EVAL_SET_ID, [EVAL_ID], [{}] as any)
+             .subscribe();
          const req = httpTestingController.expectOne(
              API_SERVER_BASE_URL + RUN_EVAL_PATH,
          );
          expect(req.request.method).toEqual('POST');
-         expect(req.request.body).toEqual({
-           evalIds: [EVAL_ID],
-           evalMetrics: [{}],
-         });
-         req.flush({});
-       });
+          expect(req.request.body).toEqual({
+            eval_case_ids: [EVAL_ID],
+            eval_metrics: [{}],
+          });
+          expect(req.request.body.live_model_config).toBeUndefined();
+          req.flush({});
+        });
+
+    it('sends live_model_config for live runs', () => {
+      service
+          .runEval(APP_NAME, EVAL_SET_ID, [EVAL_ID], [{}] as any, true)
+          .subscribe();
+      const req = httpTestingController.expectOne(
+          API_SERVER_BASE_URL + RUN_EVAL_PATH,
+      );
+      expect(req.request.body.live_model_config).toEqual({});
+      expect(req.request.body.use_live).toBeUndefined();
+      expect(req.request.body.user_simulator_config).toBeUndefined();
+      req.flush({});
+    });
+
+    it('sends user_simulator_config when supplied', () => {
+      const userSimulatorConfig = {
+        type: 'llm_audio' as const,
+        audio_model: 'cloud_tts',
+        audio_model_configuration: {
+          speech_config: {
+            voice_config: {
+              prebuilt_voice_config: {voice_name: 'en-US-Studio-O'},
+            },
+            language_code: 'en-US',
+          },
+        },
+      };
+      service
+          .runEval(
+              APP_NAME, EVAL_SET_ID, [EVAL_ID], [{}] as any, true,
+              userSimulatorConfig)
+          .subscribe();
+      const req = httpTestingController.expectOne(
+          API_SERVER_BASE_URL + RUN_EVAL_PATH,
+      );
+      expect(req.request.body.live_model_config).toEqual({});
+      expect(req.request.body.user_simulator_config)
+          .toEqual(userSimulatorConfig);
+      req.flush({});
+    });
   });
 
   describe('listEvalResults', () => {

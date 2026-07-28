@@ -1,9 +1,6 @@
-.dialog-container {
-  border-radius: 12px;
-  padding: 12px;
+.run-eval-config-dialog {
   width: 680px;
-  box-shadow: 0 8px 16px
-    var(--run-eval-config-dialog-container-box-shadow-color);
+  max-width: 90vw;
 }
 
 .metric-container {
@@ -64,6 +61,69 @@
   margin-left: 10px;
   min-width: 30px;
   text-align: right;
+}
+
+/* ---- Run mode selector (top of dialog) ---- */
+.run-mode-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--run-eval-config-dialog-border-color, #e0e0e0);
+}
+
+.run-mode-toggle {
+  width: 100%;
+}
+
+.run-mode-toggle .mat-button-toggle {
+  flex: 1;
+}
+
+/* ---- Live input modality + audio user simulation ---- */
+.run-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--run-eval-config-dialog-border-color, #e0e0e0);
+}
+
+.run-option-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-hint {
+  font-size: 0.85em;
+  color: var(--run-eval-config-dialog-description-color, #666);
+  margin-left: 2px;
+}
+
+.modality-row {
+  gap: 6px;
+}
+
+.modality-field {
+  max-width: 220px;
+}
+
+/* Trim the outline field's default bottom padding so the hint sits close. */
+.modality-field ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.audio-sim-fields {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.audio-sim-fields mat-form-field {
+  flex: 1;
 }
 
 h2[mat-dialog-title] {

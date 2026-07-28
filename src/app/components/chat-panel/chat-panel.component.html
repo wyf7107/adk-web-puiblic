@@ -55,10 +55,20 @@
       </div>
     </div>
   }
-  @if (uiEvents.length === 0 && agentReadme) {
+  @if (uiEvents.length === 0 && agentReadme && !isEvalResult) {
   <div class="readme-content">
     <ng-container [ngComponentOutlet]="markdownComponent"
       [ngComponentOutletInputs]="{text: agentReadme, thought: false, isReadme: true}"></ng-container>
+  </div>
+  }
+  @if (uiEvents.length === 0 && isEvalResult) {
+  <div class="empty-eval-result">
+    <mat-icon>info_outline</mat-icon>
+    <p>This eval run produced no conversation turns.</p>
+    <p class="empty-eval-result-hint">
+      The run likely failed before any turns were recorded. Check the run status
+      and the server logs, then try running it again.
+    </p>
   </div>
   }
   @for (item of displayItems; track item; let i = $index) {

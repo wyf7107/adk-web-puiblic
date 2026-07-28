@@ -17,7 +17,7 @@
 
 import {InjectionToken, WritableSignal} from '@angular/core';
 import {Observable} from 'rxjs';
-import {EvalCase} from '../../models/Eval';
+import {EvalCase, EvalMetric, UserSimulatorConfig} from '../../models/Eval';
 
 export const EVAL_SERVICE = new InjectionToken<EvalService>('EvalService');
 
@@ -41,8 +41,10 @@ export declare abstract class EvalService {
   abstract runEval(
     appName: string,
     evalSetId: string,
-    evalIds: string[],
-    evalMetrics: any[],
+    evalCaseIds: string[],
+    evalMetrics: EvalMetric[],
+    useLive?: boolean,
+    userSimulatorConfig?: UserSimulatorConfig,
   ): Observable<any>;
   abstract listEvalResults(appName: string): Observable<any>;
   abstract getEvalResult(appName: string, evalResultId: string): Observable<any>;

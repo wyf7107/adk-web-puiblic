@@ -201,12 +201,6 @@ export class SidePanelComponent implements AfterViewInit, OnInit {
   onTabChange(event: MatTabChangeEvent) {
     this.tabChange.emit(event);
     this.selectedIndex = event.index;
-    const label = event.tab?.textLabel?.toLowerCase() || '';
-    if (label.includes('trace')) {
-      this.analyticsService.sendEvent('trace_view_toggle');
-    } else if (label.includes('event')) {
-      this.analyticsService.sendEvent('event_view_toggle');
-    }
   }
 
   switchToEvalTab() {

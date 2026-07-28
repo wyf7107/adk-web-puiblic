@@ -536,6 +536,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (e) {
       // Ignored
     }
+    if (mode === 'events') {
+      this.analyticsService.sendEvent('event_view_toggle');
+    } else if (mode === 'traces') {
+      this.analyticsService.sendEvent('trace_view_toggle');
+    }
   }
   protected originalSessionId = '';
   hideIntermediateEvents = signal(window.localStorage.getItem('adk-hide-intermediate-events') === 'true');
@@ -1211,6 +1216,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         this.sessionService.createSession(this.userId, this.appName, initialState));
       this.currentSessionState = res.state || initialState || {};
       this.sessionId = res.id ?? '';
+      this.analyticsService.sendEvent('chat_session_create');
       this.sessionTab?.refreshSession();
       this.sessionTab?.reloadSession(this.sessionId);
       this.drawerSessionTab()?.refreshSession();

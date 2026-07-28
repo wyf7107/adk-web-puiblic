@@ -294,6 +294,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   longRunningEvents: any[] = [];
   functionCallEventId = '';
   redirectUri = URLUtil.getBaseUrlWithoutPath();
+  // Tracks the last time an Agent Identity (3LO) consent popup was opened per
+  // credential key, to suppress runaway popup loops when consent doesn't yield
+  // a sufficiently-scoped token.
+  private agentIdentityAuthAt = new Map<string, number>();
+  // The single active listener/channel for an in-flight Agent Identity consent.
+  // Tracked so a new attempt can tear down a stale one (whose closure holds an
+  // old nonce) before starting, preventing "consent nonce mismatch" errors.
+  private agentIdentityChannel: BroadcastChannel | null = null;
+  private agentIdentityMsgListener: ((e: MessageEvent) => void) | null = null;
   isMobile = signal(window.innerWidth <= 768);
   showSidePanel = window.localStorage.getItem('adk-side-panel-visible') !== 'false';
   showBuilderAssistant = true;
@@ -817,6 +826,31 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       // Send token to the main window
       window.opener?.postMessage({ authResponseUrl }, window.origin);
       // Close the popup
+      window.close();
+    } else if (searchParams.has('user_id_validation_state')) {
+      // Agent Identity Auth Manager (3LO): the connector redirects the consent
+      // popup here (the agent's continue_uri) after the user authorizes. Relay
+      // the validation state + connector name back to the app so it can call
+      // credentials:finalize, then close the popup.
+      const userIdValidationState =
+        searchParams.get('user_id_validation_state');
+      const connectorName = searchParams.get('connector_name') ||
+        searchParams.get('auth_provider_name');
+      const payload = {
+        agentIdentityCallback: { userIdValidationState, connectorName },
+      };
+      // Prefer BroadcastChannel: OAuth providers often send a
+      // Cross-Origin-Opener-Policy header that severs window.opener, so
+      // postMessage(opener) is unreliable. BroadcastChannel is same-origin and
+      // unaffected by COOP. postMessage is kept as a fallback.
+      try {
+        const channel = new BroadcastChannel('adk-agent-identity');
+        channel.postMessage(payload);
+        channel.close();
+      } catch (e) {
+        console.warn('[AgentIdentity] BroadcastChannel unavailable:', e);
+      }
+      window.opener?.postMessage(payload, window.origin);
       window.close();
     }
 
@@ -1395,6 +1429,36 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           // for OAuth
           const authUri =
             func.args.authConfig.exchangedAuthCredential.oauth2.authUri;
+          // Agent Identity Auth Manager (3LO) returns an auth_uri whose
+          // redirect_uri already targets the connector's oauthcallback (which is
+          // what the provider's OAuth app has registered), and completion
+          // happens via a separate consent callback + credentials:finalize
+          // instead of the classic code relay. Handle it on its own path.
+          if (func.args.authConfig.authScheme?.type ===
+            'gcpAuthProviderScheme') {
+            // Loop guard: if the same credential re-challenges almost
+            // immediately after an attempt, the consent isn't yielding a token
+            // with sufficient scope (e.g. the provider app is already
+            // authorized with narrower scopes and fast-redirects). Suppress the
+            // popup instead of spamming, and tell the user how to recover.
+            const credentialKey =
+              func.args.authConfig.credentialKey || authUri;
+            const now = Date.now();
+            const last = this.agentIdentityAuthAt.get(credentialKey) || 0;
+            if (now - last < 20000) {
+              console.warn(
+                '[AgentIdentity] repeated auth challenge; suppressing popup ' +
+                'to avoid a loop.', { credentialKey });
+              this.openSnackBar(
+                'Authorization did not grant the required access. Revoke the ' +
+                'app under GitHub Settings \u2192 Applications, then retry.',
+                'OK');
+              break;
+            }
+            this.agentIdentityAuthAt.set(credentialKey, now);
+            this.handleAgentIdentityAuth(func);
+            break;  // Handle one OAuth at a time
+          }
           const updatedAuthUri = this.updateRedirectUri(
             authUri,
             this.redirectUri,
@@ -2195,6 +2259,131 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
       window.addEventListener('message', listener);
     });
+  }
+
+  /**
+   * Handles the Agent Identity Auth Manager (3LO) consent flow.
+   *
+   * Unlike the classic relay flow, the auth_uri is opened verbatim (its
+   * redirect_uri already points at the connector's oauthcallback). After the
+   * user consents, the connector redirects the popup to the agent's
+   * continue_uri (which must point back at this app). The popup relays the
+   * connector-provided validation state to this window via postMessage; we then
+   * call the api_server's credentials:finalize proxy to store the token in the
+   * vault, and resume the tool by returning the unmodified auth config.
+   */
+  private teardownAgentIdentityListeners() {
+    if (this.agentIdentityChannel) {
+      this.agentIdentityChannel.close();
+      this.agentIdentityChannel = null;
+    }
+    if (this.agentIdentityMsgListener) {
+      window.removeEventListener('message', this.agentIdentityMsgListener);
+      this.agentIdentityMsgListener = null;
+    }
+  }
+
+  private handleAgentIdentityAuth(func: any) {
+    const oauth2 = func.args.authConfig.exchangedAuthCredential.oauth2;
+    const authUri = oauth2.authUri;
+    const consentNonce = oauth2.nonce;
+    const userId = this.userId;
+
+    // Tear down any listener left over from a prior (incomplete) attempt. Its
+    // closure holds an old nonce, and BroadcastChannel delivers to every open
+    // listener, so a stale one would finalize with the wrong nonce ("consent
+    // nonce mismatch"). Only the current attempt should be live.
+    this.teardownAgentIdentityListeners();
+
+    const popup = this.safeValuesService.windowOpen(
+      window, authUri, 'oauthPopup', 'width=600,height=700');
+    if (!popup) {
+      this.openSnackBar('Popup blocked! Please allow popups and retry.', 'OK');
+      return;
+    }
+
+    // The consent popup relays its result via BroadcastChannel (robust against
+    // COOP severing window.opener) and, as a fallback, postMessage. Accept
+    // whichever arrives first.
+    let handled = false;
+    const channel = new BroadcastChannel('adk-agent-identity');
+    this.agentIdentityChannel = channel;
+
+    const onCallback = (data: any) => {
+      const callback = data?.agentIdentityCallback;
+      if (!callback || handled) {
+        return;
+      }
+      handled = true;
+      this.teardownAgentIdentityListeners();
+      this.openSnackBar('Finalizing authorization\u2026', 'OK');
+      this.finalizeAgentIdentityCredential(
+        callback.connectorName, userId, callback.userIdValidationState,
+        consentNonce)
+        .then(() => {
+          // The token is now in the vault; resume the tool by returning the
+          // (unmodified) auth config. The agent re-fetches the vaulted token.
+          this.openSnackBar('Authorized. Retrieving results\u2026', 'OK');
+          this.sendAgentIdentityAuthResponse(func);
+        })
+        .catch((error) => {
+          console.error('[AgentIdentity] finalize failed:', error);
+          this.openSnackBar(
+            'Failed to finalize authorization. See console for details.', 'OK');
+        });
+    };
+
+    channel.onmessage = (event: MessageEvent) => onCallback(event.data);
+    const messageListener = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) {
+        return;  // Ignore messages from unknown sources
+      }
+      onCallback(event.data);
+    };
+    this.agentIdentityMsgListener = messageListener;
+    window.addEventListener('message', messageListener);
+  }
+
+  private async finalizeAgentIdentityCredential(
+    connectorName: string, userId: string, userIdValidationState: string,
+    consentNonce: string): Promise<void> {
+    const base = URLUtil.getApiServerBaseUrl();
+    const response = await fetch(`${base}/agent-identity/finalize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        connectorName,
+        userId,
+        userIdValidationState,
+        consentNonce,
+      }),
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`finalize HTTP ${response.status}: ${text}`);
+    }
+  }
+
+  private sendAgentIdentityAuthResponse(func: any) {
+    this.longRunningEvents.pop();
+    // Return the auth config unchanged (no authResponseUri/redirectUri). The
+    // backend re-runs the tool, which re-fetches the now-vaulted credential.
+    const authConfig = structuredClone(func.args.authConfig);
+    const content = {
+      role: 'user',
+      parts: [
+        {
+          functionResponse: {
+            id: func.id,
+            name: func.name,
+            response: authConfig,
+          },
+        },
+      ],
+      functionCallEventId: this.functionCallEventId,
+    };
+
+    this.sendMessage(content);
   }
 
   toggleSidePanel() {

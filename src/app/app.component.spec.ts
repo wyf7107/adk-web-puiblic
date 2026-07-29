@@ -65,6 +65,7 @@ import {TRACE_SERVICE} from './core/services/interfaces/trace';
 import {UI_STATE_SERVICE} from './core/services/interfaces/ui-state';
 import {VIDEO_SERVICE} from './core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from './core/services/interfaces/websocket';
+import {TelemetryService} from './core/services/telemetry.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -198,6 +199,15 @@ describe('AppComponent', () => {
             {
               provide: THEME_SERVICE,
               useClass: MockThemeService,
+            },
+            {
+              provide: TelemetryService,
+              useValue: {
+                telemetryStatus: () => false,
+                telemetryEnabled: () => false,
+                fetchTelemetryStatus: () => Promise.resolve(false),
+                setTelemetry: () => Promise.resolve(false)
+              }
             },
           ],
         })

@@ -26,6 +26,7 @@ import { EvalService } from '../../../../core/services/eval.service';
 import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import {EVAL_SERVICE} from '../../../../core/services/interfaces/eval';
+import {AnalyticsService} from '../../../../core/services/analytics.service';
 
 describe('AddEvalSessionDialogComponent', () => {
   let component: AddEvalSessionDialogComponent;
@@ -51,6 +52,7 @@ describe('AddEvalSessionDialogComponent', () => {
           useValue: {},
         },
         { provide: EVAL_SERVICE, useValue: evalService },
+        {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     }).compileComponents();
 

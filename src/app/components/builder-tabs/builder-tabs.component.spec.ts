@@ -31,6 +31,7 @@ import { SnackbarService } from '../../core/services/snackbar.service';
 import {Router} from '@angular/router';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {initTestBed} from '../../testing/utils';
+import {AnalyticsService} from '../../core/services/analytics.service';
 
 describe('BuilderTabsComponent - Callback Support', () => {
   let component: BuilderTabsComponent;
@@ -58,6 +59,7 @@ describe('BuilderTabsComponent - Callback Support', () => {
         {provide: Router, useValue: mockRouter},
         provideNoopAnimations(),
         {provide: THEME_SERVICE, useClass: MockThemeService},
+        {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     }).compileComponents();
 

@@ -27,6 +27,7 @@ import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import {EVAL_SERVICE} from '../../../../core/services/interfaces/eval';
 import {FEATURE_FLAG_SERVICE} from '../../../../core/services/interfaces/feature-flag';
+import {AnalyticsService} from '../../../../core/services/analytics.service';
 
 describe('NewEvalSetDialogComponentComponent', () => {
   let component: NewEvalSetDialogComponentComponent;
@@ -53,6 +54,7 @@ describe('NewEvalSetDialogComponentComponent', () => {
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: EVAL_SERVICE, useValue: evalService },
         { provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService },
+        {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     }).compileComponents();
 

@@ -84,6 +84,7 @@ describe('TelemetryService', () => {
   });
 
   it('should rollback telemetry status on API failure', async () => {
+    spyOn(console, 'error');
     service.telemetryStatus.set(false);
 
     const promise = service.setTelemetry(true);

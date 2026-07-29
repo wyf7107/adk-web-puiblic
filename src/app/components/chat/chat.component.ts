@@ -85,6 +85,9 @@ import { SidePanelComponent } from '../side-panel/side-panel.component';
 import { ViewImageDialogComponent } from '../view-image-dialog/view-image-dialog.component';
 import { InlineEditComponent } from '../inline-edit/inline-edit.component';
 import { FormatMetricNamePipe } from '../eval-tab/format-metric-name.pipe';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { TelemetryService } from '../../core/services/telemetry.service';
+import { TelemetryConsentDialogComponent } from '../telemetry-consent-dialog/telemetry-consent-dialog.component';
 
 import { ChatMessagesInjectionToken } from './chat.component.i18n';
 import { SidePanelMessagesInjectionToken } from '../side-panel/side-panel.component.i18n';
@@ -182,6 +185,8 @@ const BIDI_STREAMING_IN_PROGRESS_WARNING =
     SessionTabComponent,
     InlineEditComponent,
     FormatMetricNamePipe,
+    MatSlideToggleModule,
+    TelemetryConsentDialogComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -215,6 +220,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly agentBuilderService = inject(AGENT_BUILDER_SERVICE);
   protected readonly themeService = inject(THEME_SERVICE, { optional: true });
+  protected readonly telemetryService = inject(TelemetryService);
   protected readonly logoComponent: Type<Component> | null = inject(LOGO_COMPONENT, {
     optional: true,
   });
@@ -904,6 +910,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
             });
         }
       });
+    this.checkTelemetryConsent();
   }
 
   get sessionTab() {
@@ -912,6 +919,20 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   switchToTraceView() {
     this.onViewModeChange('traces');
+  }
+
+  private async checkTelemetryConsent(): Promise<void> {
+    const consent = await this.telemetryService.fetchTelemetryStatus();
+    if (consent === null) {
+      this.dialog.open(TelemetryConsentDialogComponent, {
+        disableClose: true,
+        panelClass: 'telemetry-consent-dialog-panel',
+      });
+    }
+  }
+
+  async onTelemetryToggle(checked: boolean): Promise<void> {
+    await this.telemetryService.setTelemetry(checked);
   }
 
   ngAfterViewInit() {

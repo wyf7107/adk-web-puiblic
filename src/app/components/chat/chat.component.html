@@ -480,7 +480,7 @@
       </div>
       } } @if (appName != "") {
 <div class="chat-sub-toolbar">
-  @if (!(uiEvents().length === 0 && agentReadme)) {
+  @if (!(uiEvents().length === 0 && agentReadme && chatType() !== 'eval-result')) {
   <mat-button-toggle-group [value]="viewMode()" (change)="onViewModeChange($event.value)" hideSingleSelectionIndicator>
     <mat-button-toggle value="events">Events</mat-button-toggle>
     <mat-button-toggle value="traces">Traces</mat-button-toggle>
@@ -638,6 +638,7 @@
             <app-chat-panel
               [appName]="appName"
               [agentReadme]="agentReadme"
+              [isEvalResult]="chatType() === 'eval-result'"
               [(userInput)]="userInput"
               [hideIntermediateEvents]="hideIntermediateEvents()"
               [uiEvents]="filteredUiEvents()"
@@ -683,6 +684,7 @@
             <app-chat-panel
               [appName]="appName"
               [agentReadme]="agentReadme"
+              [isEvalResult]="chatType() === 'eval-result'"
               [hideIntermediateEvents]="hideIntermediateEvents()"
               [uiEvents]="filteredUiEvents()"
               [showBranches]="showBranches()"
@@ -755,6 +757,25 @@
                             style="margin-top: 8px; border-top: 1px solid var(--mat-sys-outline-variant); padding-top: 6px; margin-bottom: 0;">
                             {{ desc }}</div>
                           }
+                          @if (metric.details?.explanation) {
+                          <div class="tooltip-explanation"
+                            style="margin-top: 8px; border-top: 1px solid var(--mat-sys-outline-variant); padding-top: 6px;">
+                            {{ metric.details.explanation }}</div>
+                          }
+                          @if (metric.details?.rubricScores?.length) {
+                          <div class="tooltip-rubrics"
+                            style="margin-top: 8px; border-top: 1px solid var(--mat-sys-outline-variant); padding-top: 6px;">
+                            <div class="tooltip-label" style="margin-bottom: 4px;">Rubrics</div>
+                            @for (rubric of metric.details.rubricScores; track $index) {
+                            <div class="tooltip-rubric" style="display: flex; gap: 6px; align-items: flex-start; margin-bottom: 4px;">
+                              <span class="material-symbols-outlined"
+                                [style.color]="rubricPassed(rubric) ? '#2e7d32' : 'var(--mat-sys-error)'"
+                                style="font-size: 14px; line-height: 16px;">{{ rubricPassed(rubric) ? 'check_circle' : 'cancel' }}</span>
+                              <span style="font-size: 11px;">{{ rubric.rationale || rubric.rubricId }}</span>
+                            </div>
+                            }
+                          </div>
+                          }
                         </div>
                       </div>
                     }
@@ -769,6 +790,7 @@
                   <app-chat-panel
                     [appName]="appName"
                     [agentReadme]="agentReadme"
+                    [isEvalResult]="chatType() === 'eval-result'"
                     [hideIntermediateEvents]="hideIntermediateEvents()"
                     [uiEvents]="filteredExpectedUiEvents()"
                     [showBranches]="showBranches()"
@@ -799,6 +821,7 @@
                   <app-chat-panel
                     [appName]="appName"
                     [agentReadme]="agentReadme"
+                    [isEvalResult]="chatType() === 'eval-result'"
                     [hideIntermediateEvents]="hideIntermediateEvents()"
                     [uiEvents]="filteredUiEvents()"
                     [showBranches]="showBranches()"
@@ -852,6 +875,7 @@
               <app-chat-panel
                 [appName]="appName"
                 [agentReadme]="agentReadme"
+                [isEvalResult]="chatType() === 'eval-result'"
                 [hideIntermediateEvents]="hideIntermediateEvents()"
                 [uiEvents]="filteredUiEvents()"
                 [showBranches]="showBranches()"

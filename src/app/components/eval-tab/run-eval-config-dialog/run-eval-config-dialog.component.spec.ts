@@ -22,138 +22,193 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import {MatRadioModule} from '@angular/material/radio';
 import {MatSliderModule} from '@angular/material/slider';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
-
 import {RunEvalConfigDialogComponent} from './run-eval-config-dialog.component';
 
-describe('RunEvalConfigDialogComponent', () => {
-  let component: RunEvalConfigDialogComponent;
-  let fixture: ComponentFixture<RunEvalConfigDialogComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<RunEvalConfigDialogComponent>>;
+const METRICS_INFO = [
+  {
+    metricName: 'tool_trajectory_avg_score',
+    description: 'Tool trajectory score',
+    metricValueInfo: {
+      interval: {minValue: 0, maxValue: 1, openAtMin: false, openAtMax: false},
+    },
+  },
+  {
+    metricName: 'response_match_score',
+    description: 'Response match score',
+    metricValueInfo: {
+      interval: {minValue: 0, maxValue: 1, openAtMin: false, openAtMax: false},
+    },
+  },
+];
 
-  // Mock MatDialogRef
+async function createComponent(data: any):
+    Promise<{
+      fixture: ComponentFixture<RunEvalConfigDialogComponent>,
+      component: RunEvalConfigDialogComponent,
+      dialogRef: jasmine.SpyObj<MatDialogRef<RunEvalConfigDialogComponent>>,
+    }> {
   const mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
-
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  await TestBed.configureTestingModule({
     imports: [
-        ReactiveFormsModule,
-        MatDialogModule,
-        MatRadioModule,
-        MatSliderModule,
-        NoopAnimationsModule,
-        RunEvalConfigDialogComponent,
+      ReactiveFormsModule,
+      MatDialogModule,
+      MatSliderModule,
+      NoopAnimationsModule,
+      RunEvalConfigDialogComponent,
     ],
     providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        {
-            provide: MAT_DIALOG_DATA,
-            useValue: {
-                evalMetrics: [
-                    {
-                        metricName: 'tool_trajectory_avg_score',
-                        threshold: 1,
-                    },
-                    {
-                        metricName: 'response_match_score',
-                        threshold: 0.7,
-                    },
-                ],
-            },
-        },
-        // Provide empty data for initial setup
+      {provide: MatDialogRef, useValue: mockDialogRef},
+      {provide: MAT_DIALOG_DATA, useValue: data},
     ],
-}).compileComponents();
-  });
+  }).compileComponents();
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(RunEvalConfigDialogComponent);
-    component = fixture.componentInstance;
-    dialogRefSpy = TestBed.inject(MatDialogRef) as jasmine.SpyObj<
-      MatDialogRef<RunEvalConfigDialogComponent>
-    >;
-    fixture.detectChanges(); // Initialize the component and trigger change
-    // detection
-  });
+  const fixture = TestBed.createComponent(RunEvalConfigDialogComponent);
+  const component = fixture.componentInstance;
+  const dialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<
+      MatDialogRef<RunEvalConfigDialogComponent>>;
+  fixture.detectChanges();
+  return {fixture, component, dialogRef};
+}
 
-  it('should initialize form with default values', () => {
-    expect(
-      component.evalForm.get('tool_trajectory_avg_score_threshold')?.value
-    ).toBe(1);
-    expect(
-      component.evalForm.get('response_match_score_threshold')?.value
-    ).toBe(0.7);
-  });
-
-  it('should close dialog with null on cancel', () => {
-    component.onCancel();
-    expect(dialogRefSpy.close).toHaveBeenCalledWith(null);
-  });
-
-  it('should update threshold value when slider changes (simulated)', () => {
-    const toolTrajectoryAvgScoreSlider = component.evalForm.get(
-      'tool_trajectory_avg_score_threshold'
-    )!;
-    const responseMatchScoreSlider = component.evalForm.get(
-      'response_match_score_threshold'
-    )!;
-
-    toolTrajectoryAvgScoreSlider.setValue(0.4); // Simulate slider value change
-    responseMatchScoreSlider.setValue(0.5); // Simulate slider value change
-    fixture.detectChanges();
-
-    expect(toolTrajectoryAvgScoreSlider.value).toBe(0.4);
-    expect(responseMatchScoreSlider.value).toBe(0.5);
-    const thresholdValueDisplays =
-      fixture.nativeElement.querySelectorAll('.threshold-value');
-    expect(thresholdValueDisplays[0].textContent).toContain('0.4');
-    expect(thresholdValueDisplays[1].textContent).toContain('0.5');
-  });
-
+describe('RunEvalConfigDialogComponent', () => {
   describe('with metricsInfo', () => {
+    let component: RunEvalConfigDialogComponent;
+    let fixture: ComponentFixture<RunEvalConfigDialogComponent>;
+    let dialogRef: jasmine.SpyObj<MatDialogRef<RunEvalConfigDialogComponent>>;
+
     beforeEach(async () => {
-      TestBed.resetTestingModule();
-      await TestBed.configureTestingModule({
-        imports: [
-          ReactiveFormsModule,
-          MatDialogModule,
-          MatRadioModule,
-          MatSliderModule,
-          NoopAnimationsModule,
-          RunEvalConfigDialogComponent,
-        ],
-        providers: [
-          { provide: MatDialogRef, useValue: mockDialogRef },
-          {
-            provide: MAT_DIALOG_DATA,
-            useValue: {
-              evalMetrics: [],
-              metricsInfo: [
-                {
-                  metricName: 'custom_metric',
-                  description: 'Custom metric description',
-                  metricValueInfo: {
-                    interval: { minValue: 0, maxValue: 10, openAtMin: false, openAtMax: false }
-                  }
-                }
-              ]
-            },
-          },
-        ],
-      }).compileComponents();
+      ({fixture, component, dialogRef} = await createComponent({
+         evalMetrics: [
+           {metricName: 'tool_trajectory_avg_score', threshold: 1},
+           {metricName: 'response_match_score', threshold: 0.7},
+         ],
+         metricsInfo: METRICS_INFO,
+       }));
     });
 
-    it('should initialize form with dynamic controls', () => {
-      const fixture2 = TestBed.createComponent(RunEvalConfigDialogComponent);
-      const component2 = fixture2.componentInstance;
-      fixture2.detectChanges();
+    it('creates per-metric controls from metricsInfo', () => {
+      expect(component.evalForm.get('tool_trajectory_avg_score_selected'))
+          .toBeTruthy();
+      expect(component.evalForm.get('tool_trajectory_avg_score_threshold')?.value)
+          .toBe(1);
+      expect(component.evalForm.get('response_match_score_threshold')?.value)
+          .toBe(0.7);
+    });
 
-      expect(component2.evalForm.get('custom_metric_selected')).toBeTruthy();
-      expect(component2.evalForm.get('custom_metric_threshold')).toBeTruthy();
-      expect(component2.evalForm.get('custom_metric_threshold')?.value).toBe(10); // Default to max
+    it('closes with null on cancel', () => {
+      component.onCancel();
+      expect(dialogRef.close).toHaveBeenCalledWith(null);
+    });
+
+    it('emits selected metrics with useLive false and no simulator config',
+       () => {
+         component.evalForm.get('tool_trajectory_avg_score_selected')
+             ?.setValue(true);
+         component.evalForm.get('tool_trajectory_avg_score_threshold')
+             ?.setValue(0.9);
+         component.evalForm.get('response_match_score_selected')?.setValue(false);
+
+         component.onStart();
+
+         const arg = dialogRef.close.calls.mostRecent().args[0] as any;
+         expect(arg.useLive).toBeFalse();
+         expect(arg.userSimulatorConfig).toBeUndefined();
+         expect(arg.metrics).toEqual([
+           {metricName: 'tool_trajectory_avg_score', threshold: 0.9},
+         ]);
+       });
+
+    it('emits useLive true without a simulator config for the text modality',
+       () => {
+         component.runForm.get('runMode')?.setValue('live');
+         component.runForm.get('inputModality')?.setValue('text');
+
+         component.onStart();
+
+         const arg = dialogRef.close.calls.mostRecent().args[0] as any;
+         expect(arg.useLive).toBeTrue();
+         expect(arg.userSimulatorConfig).toBeUndefined();
+       });
+
+    it('emits an llm_audio user simulator config for the audio modality', () => {
+      component.runForm.get('runMode')?.setValue('live');
+      component.runForm.get('inputModality')?.setValue('audio');
+      component.runForm.get('voiceName')?.setValue('Puck');
+      component.runForm.get('languageCode')?.setValue('en-GB');
+
+      component.onStart();
+
+      const arg = dialogRef.close.calls.mostRecent().args[0] as any;
+      expect(arg.useLive).toBeTrue();
+      expect(arg.userSimulatorConfig).toEqual({
+        type: 'llm_audio',
+        audio_model: 'gemini-3.1-flash-tts-preview',
+        audio_model_configuration: {
+          response_modalities: ['AUDIO'],
+          speech_config: {
+            voice_config: {
+              prebuilt_voice_config: {voice_name: 'Puck'},
+            },
+            language_code: 'en-GB',
+          },
+        },
+      });
+    });
+
+    it('enables audio simulation only for live runs with the audio modality',
+       () => {
+         // Live on, but text modality selected.
+         component.runForm.get('runMode')?.setValue('live');
+         component.runForm.get('inputModality')?.setValue('text');
+         expect(component.audioSimulationEnabled).toBeFalse();
+
+         // Audio modality but standard (non-live) mode.
+         component.runForm.get('runMode')?.setValue('standard');
+         component.runForm.get('inputModality')?.setValue('audio');
+         expect(component.audioSimulationEnabled).toBeFalse();
+
+         // Live on + audio modality.
+         component.runForm.get('runMode')?.setValue('live');
+         expect(component.audioSimulationEnabled).toBeTrue();
+       });
+  });
+
+  describe('without metricsInfo (fallback)', () => {
+    let component: RunEvalConfigDialogComponent;
+    let dialogRef: jasmine.SpyObj<MatDialogRef<RunEvalConfigDialogComponent>>;
+
+    beforeEach(async () => {
+      ({component, dialogRef} = await createComponent({
+         evalMetrics: [
+           {metricName: 'tool_trajectory_avg_score', threshold: 1},
+           {metricName: 'response_match_score', threshold: 0.7},
+         ],
+         metricsInfo: [],
+       }));
+    });
+
+    it('adds hardcoded fallback metric controls', () => {
+      expect(component.evalForm.get('tool_trajectory_avg_score_threshold')?.value)
+          .toBe(1);
+      expect(component.evalForm.get('response_match_score_threshold')?.value)
+          .toBe(0.7);
+    });
+
+    it('emits fallback metrics that are selected', () => {
+      component.evalForm.get('tool_trajectory_avg_score_selected')
+          ?.setValue(true);
+      component.evalForm.get('response_match_score_selected')?.setValue(true);
+
+      component.onStart();
+
+      const arg = dialogRef.close.calls.mostRecent().args[0] as any;
+      expect(arg.metrics.map((m: any) => m.metricName)).toEqual([
+        'tool_trajectory_avg_score',
+        'response_match_score',
+      ]);
     });
   });
 });

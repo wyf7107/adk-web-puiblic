@@ -98,6 +98,10 @@ describe('AppComponent', () => {
         .configureTestingModule({
           imports: [AppComponent, NoopAnimationsModule],
           providers: [
+            {
+              provide: TelemetryService,
+              useValue: { telemetryEnabled: () => false }
+            },
             {provide: MatDialog, useValue: {}},
             {
               provide: ActivatedRoute,

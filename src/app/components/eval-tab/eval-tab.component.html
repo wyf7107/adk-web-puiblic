@@ -63,11 +63,17 @@
         <mat-icon>refresh</mat-icon>
       </button>
     }
+
+    @if (selectedEvalSet() !== '' && selectedEvalTab() === 'cases' && !selectedEvalCase()) {
+      <button mat-icon-button (click)="listEvalCases()" matTooltip="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    }
   </div>
   @if (selectedEvalSet() == '') {
 
   }
-  @if (evalsets.length == 0) {
+  @if (evalsets.length == 0 && selectedEvalSet() == '') {
   <div>
     <div class="empty-eval-info">
       <div class="info-title">
@@ -122,8 +128,11 @@
       </div>
       <div class="vertical-tabs-content">
         @if (evalRunning()) {
-        <div style="display: flex; justify-content: center; align-items: center; padding: 20px;">
-          <mat-progress-spinner mode="indeterminate" [diameter]="28" [strokeWidth]="3"></mat-progress-spinner>
+        <div class="eval-run-progress" style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 28px 20px; text-align: center;">
+          <mat-progress-spinner mode="indeterminate" [diameter]="36" [strokeWidth]="3"></mat-progress-spinner>
+          <div class="eval-run-progress__title" style="font-weight: 500;">
+            Running eval…
+          </div>
         </div>
         } @else {
           @if (selectedEvalTab() === 'info') {
@@ -159,7 +168,8 @@
                   [checked]="selection.hasValue() && isAllSelected()"
                   [indeterminate]="selection.hasValue() && !isAllSelected()">
                 </mat-checkbox>
-                <button mat-button color="primary" (click)="openEvalConfigDialog()" [disabled]="evalCases.length == 0 || loadingMetrics()">
+                <button mat-button color="primary" (click)="runCasesFromToolbar()" [disabled]="evalCases.length == 0 || loadingMetrics()"
+                  matTooltip="Run evaluation">
                   @if (loadingMetrics()) {
                     <mat-progress-spinner mode="indeterminate" [diameter]="20" style="display: inline-block; vertical-align: middle; margin-right: 8px;"></mat-progress-spinner>
                   } @else {
@@ -169,12 +179,9 @@
                   i18n.runSelectedEvaluationButton }}
                 </button>
                 <button mat-button color="accent" (click)="openNewEvalCaseDialog()">
-                  <mat-icon>add</mat-icon> {{ i18n.addSessionToSetButtonPrefix }}
+                  <mat-icon>save_alt</mat-icon> {{ i18n.addSessionToSetButtonPrefix }}
                 </button>
                 <span class="spacer"></span>
-                <button mat-icon-button (click)="listEvalCases()" matTooltip="Refresh">
-                  <mat-icon>refresh</mat-icon>
-                </button>
               </div>
               @if (evalCases.length > 0) {
               <div class="eval-cases-list">
@@ -215,7 +222,8 @@
                       <div class="spacer"></div>
                       <div class="status-card__summary" style="width: 50px; text-align: center;">
                         <span [ngClass]="isMetricsSucceed(item.result) ? 'status-card__passed': 'status-card__failed'"
-                          style="font-family: monospace;">
+                          style="font-family: monospace;"
+                          matTooltip="Passed metrics / evaluated metrics. Color reflects the overall PASS/FAIL verdict.">
                           {{ getMetricsScore(item.result) }}
                         </span>
                       </div>
@@ -306,7 +314,8 @@
                       style="display: flex; justify-content: space-between; align-items: center;">
                       <span> {{ evalRes.evalId }} </span>
                       <span [ngClass]="isMetricsSucceed(evalRes) ? 'status-card__passed': 'status-card__failed'"
-                        style="font-family: monospace; width: 50px; text-align: center;">
+                        style="font-family: monospace; width: 50px; text-align: center;"
+                        matTooltip="Passed metrics / evaluated metrics. Color reflects the overall PASS/FAIL verdict.">
                         {{ getMetricsScore(evalRes) }}
                       </span>
                     </div>

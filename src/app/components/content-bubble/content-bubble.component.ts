@@ -33,6 +33,7 @@ import {MARKDOWN_COMPONENT, MarkdownComponentInterface} from '../markdown/markdo
 import {ChatPanelMessagesInjectionToken} from '../chat-panel/chat-panel.component.i18n';
 import { URLUtil } from '../../../utils/url-util';
 import { ARTIFACT_SERVICE } from '../../core/services/interfaces/artifact';
+import { base64ToArrayBuffer, pcmToWavBlob } from '../../core/utils/audio';
 
 @Component({
   selector: 'app-content-bubble',
@@ -205,12 +206,12 @@ export class ContentBubbleComponent implements OnChanges {
       }
 
       if (base64Data) {
-        const buffer = this.base64ToArrayBuffer(base64Data);
+        const buffer = base64ToArrayBuffer(base64Data);
         const alignedLength = buffer.byteLength - (buffer.byteLength % 2);
         const slicedBuffer = buffer.slice(0, alignedLength);
         const sampleRate = 24000;
 
-        const wavBlob = this.pcmToWav(slicedBuffer, sampleRate, 1);
+        const wavBlob = pcmToWavBlob(slicedBuffer, sampleRate, 1);
 
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -222,55 +223,5 @@ export class ContentBubbleComponent implements OnChanges {
     });
   }
 
-  base64ToArrayBuffer(base64: string): ArrayBuffer {
-    let cleanedBase64 = base64.replace(/\s/g, '');
-    const commaIndex = cleanedBase64.indexOf(',');
-    if (commaIndex !== -1) {
-      cleanedBase64 = cleanedBase64.substring(commaIndex + 1);
-    }
-    cleanedBase64 = cleanedBase64.replace(/-/g, '+').replace(/_/g, '/');
-    while (cleanedBase64.length % 4 !== 0) {
-      cleanedBase64 += '=';
-    }
-    const binaryString = window.atob(cleanedBase64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
-  }
 
-  buf2hex(buffer: ArrayBuffer): string {
-    return Array.from(new Uint8Array(buffer))
-      .map(x => x.toString(16).padStart(2, '0'))
-      .join(' ');
-  }
-
-  pcmToWav(pcmBuffer: ArrayBuffer, sampleRate: number, numChannels: number): Blob {
-    const header = new ArrayBuffer(44);
-    const view = new DataView(header);
-
-    this.writeString(view, 0, 'RIFF');
-    view.setUint32(4, 36 + pcmBuffer.byteLength, true);
-    this.writeString(view, 8, 'WAVE');
-    this.writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, numChannels, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * numChannels * 2, true);
-    view.setUint16(32, numChannels * 2, true);
-    view.setUint16(34, 16, true);
-    this.writeString(view, 36, 'data');
-    view.setUint32(40, pcmBuffer.byteLength, true);
-
-    return new Blob([header, pcmBuffer], { type: 'audio/wav' });
-  }
-
-  writeString(view: DataView, offset: number, string: string) {
-    for (let i = 0; i < string.length; i++) {
-      view.setUint8(offset + i, string.charCodeAt(i));
-    }
-  }
 }

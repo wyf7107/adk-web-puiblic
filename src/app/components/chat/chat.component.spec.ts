@@ -313,6 +313,14 @@ describe('ChatComponent', () => {
       expect(component).toBeTruthy();
     });
 
+    it('rubricPassed reads backend verdict, falling back to score', () => {
+      expect(component.rubricPassed({verdict: true})).toBe(true);
+      expect(component.rubricPassed({verdict: false, score: 1})).toBe(false);
+      expect(component.rubricPassed({score: 1})).toBe(true);
+      expect(component.rubricPassed({score: 0})).toBe(false);
+      expect(component.rubricPassed({})).toBe(false);
+    });
+
     it(
         'should pre-fill user input from "q" query param only when app is selected',
         fakeAsync(() => {
@@ -744,6 +752,208 @@ describe('ChatComponent', () => {
         expect(component.sessionId).toBe('');
         expect(component['isViewOnlySession']()).toBeFalse();
         expect(component['canEditSession']()).toBeTrue();
+      });
+    });
+
+    describe('live eval result rendering', () => {
+      // A live run's persisted session is a noisy stream of audio chunks,
+      // partial transcriptions, and turn-complete markers.
+      const noisyLiveSessionEvents = [
+        {
+          id: 'e1',
+          author: 'user',
+          content: {
+            parts: [
+              {text: 'hello'},
+              {inlineData: {mimeType: 'audio/pcm', data: 'AAAA'}},
+            ],
+          },
+        },
+        {
+          id: 'e2',
+          author: 'bot',
+          content: {parts: [{inlineData: {mimeType: 'audio/pcm', data: 'BBBB'}}]},
+        },
+        {id: 'e3', author: 'bot', outputTranscription: {text: 'hi there'}},
+        {id: 'e4', author: 'bot', content: {parts: []}},
+      ];
+
+      // A valid base64 PCM chunk (4 bytes -> 2 16-bit samples).
+      const pcmChunk = btoa('\x01\x02\x03\x04');
+
+      // The clean per-invocation view the backend also returns. The first turn
+      // streams its model audio across many chunk events (mirroring a real live
+      // run) plus one real tool call.
+      const evalCaseResult = {
+        evalMetricResultPerInvocation: [
+          {
+            actualInvocation: {
+              userContent: {
+                parts: [
+                  {text: 'hello'},
+                  {inlineData: {mimeType: 'audio/pcm', data: pcmChunk}},
+                ],
+              },
+              finalResponse: {parts: [{text: 'hi there'}]},
+              intermediateData: {
+                invocationEvents: [
+                  {
+                    id: 'ie-fc',
+                    author: 'bot',
+                    content: {
+                      parts: [{functionCall: {name: 'do_thing', args: {}}}],
+                    },
+                  },
+                  {
+                    id: 'ie-a1',
+                    author: 'bot',
+                    content: {parts: [{inlineData: {mimeType: 'audio/pcm', data: pcmChunk}}]},
+                  },
+                  {
+                    id: 'ie-a2',
+                    author: 'bot',
+                    content: {parts: [{inlineData: {mimeType: 'audio/pcm', data: pcmChunk}}]},
+                  },
+                  {
+                    id: 'ie-partial',
+                    author: 'bot',
+                    partial: true,
+                    content: {parts: [{inlineData: {mimeType: 'audio/pcm', data: pcmChunk}}]},
+                  },
+                ],
+              },
+            },
+            evalMetricResults: [
+              {metricName: 'response_match_score', evalStatus: 1, score: 1, threshold: 0.7},
+            ],
+          },
+          {
+            actualInvocation: {
+              userContent: {parts: [{text: 'and again'}]},
+              finalResponse: {parts: [{text: 'sure thing'}]},
+              intermediateData: {},
+            },
+            evalMetricResults: [
+              {metricName: 'response_match_score', evalStatus: 2, score: 0.2, threshold: 0.7},
+            ],
+          },
+        ],
+      };
+
+      function liveResultSession() {
+        return {
+          id: SESSION_1_ID,
+          state: {},
+          events: noisyLiveSessionEvents,
+          isEvalResult: true,
+          evalCaseResult: {
+            ...evalCaseResult,
+            sessionDetails: {events: noisyLiveSessionEvents},
+          },
+        };
+      }
+
+      beforeEach(() => {
+        mockEventService.getTraceResponse.next([]);
+      });
+
+      it('detects a live eval result from audio/transcription session events',
+         () => {
+           expect(component['isLiveEvalResult'](liveResultSession().evalCaseResult))
+               .toBeTrue();
+           expect(component['isLiveEvalResult']({sessionDetails: {events: []}}))
+               .toBeFalse();
+         });
+
+      it('renders one bubble per turn (+tool call), not per raw audio chunk', () => {
+        component['updateWithSelectedSession'](liveResultSession() as any);
+        fixture.detectChanges();
+
+        // Turn 1: user + tool-call bot event + response bot event.
+        // Turn 2: user + response bot event. The many raw audio-chunk events
+        // (and the partial) are folded/dropped, NOT rendered as bubbles.
+        const roles = component.uiEvents().map((e: any) => e.role);
+        expect(roles).toEqual(['user', 'bot', 'bot', 'user', 'bot']);
+      });
+
+      it('renders transcript text and the tool call', () => {
+        component['updateWithSelectedSession'](liveResultSession() as any);
+        fixture.detectChanges();
+
+        const events = component.uiEvents();
+        expect(events[0]).toEqual(jasmine.objectContaining({role: 'user', text: 'hello'}));
+        // The tool call survives; audio-only chunk events do not.
+        expect(events[1].functionCalls?.[0]?.name).toBe('do_thing');
+        expect(events[2]).toEqual(jasmine.objectContaining({role: 'bot', text: 'hi there'}));
+      });
+
+      it('folds the turn\'s PCM chunks into one playable WAV clip', () => {
+        component['updateWithSelectedSession'](liveResultSession() as any);
+        fixture.detectChanges();
+
+        const events = component.uiEvents();
+        // Exactly one audio clip in the whole conversation (turn 1's response),
+        // not one per raw chunk.
+        const audioEvents = events.filter(
+            (e: any) => e.inlineData?.mimeType?.startsWith('audio/'));
+        expect(audioEvents.length).toBe(1);
+        // It is a playable WAV data URL (not raw audio/pcm).
+        expect(audioEvents[0].inlineData!.mimeType).toBe('audio/wav');
+        expect(audioEvents[0].inlineData!.data).toContain('data:audio/wav;base64,');
+        // No unplayable raw-PCM parts leak through.
+        expect(events.some((e: any) => e.inlineData?.mimeType === 'audio/pcm'))
+            .toBeFalse();
+        // The clip rides on turn 1's response bubble (which also has text).
+        expect(audioEvents[0].text).toBe('hi there');
+      });
+
+      it('attaches per-turn PASS/FAIL to live bot bubbles, as non-live does',
+         () => {
+           component['updateWithSelectedSession'](liveResultSession() as any);
+           fixture.detectChanges();
+
+           // Bubbles: [user, bot tool call, bot response] for the passing turn
+           // 1, then [user, bot response] for the failing turn 2.
+           const events = component.uiEvents();
+           expect(events[1].evalStatus).toBe(1);
+           expect(events[2].evalStatus).toBe(1);
+           expect(events[4].evalStatus).toBe(2);
+
+           // User bubbles are never annotated.
+           expect(events[0].evalStatus).toBeUndefined();
+           expect(events[3].evalStatus).toBeUndefined();
+         });
+
+      it('attaches the failing metric detail to the live response bubble', () => {
+        component['updateWithSelectedSession'](liveResultSession() as any);
+        fixture.detectChanges();
+
+        // Turn 2's response failed response_match_score; its bubble carries the
+        // "Match score / Threshold" detail, as in a non-live result.
+        const failedResponse = component.uiEvents()[4];
+        expect(failedResponse.failedMetric).toBe('response_match_score');
+        expect(failedResponse.evalScore).toBe(0.2);
+        expect(failedResponse.evalThreshold).toBe(0.7);
+      });
+
+      it('falls back to raw session events for a non-live eval result', () => {
+        const nonLive = {
+          id: SESSION_1_ID,
+          state: {},
+          events: [
+            {id: 'u', author: 'user', content: {parts: [{text: 'q'}]}},
+            {id: 'b', author: 'bot', content: {parts: [{text: 'a'}]}},
+          ],
+          isEvalResult: true,
+          evalCaseResult: {
+            evalMetricResultPerInvocation: [],
+            sessionDetails: {events: []},
+          },
+        };
+        component['updateWithSelectedSession'](nonLive as any);
+        fixture.detectChanges();
+
+        expect(component.uiEvents().map((e: any) => e.text)).toEqual(['q', 'a']);
       });
     });
 
@@ -1232,7 +1442,7 @@ describe('ChatComponent', () => {
       it('should save message', () => {
         expect(mockMessage.text).toBe(NEW_RESPONSE);
         expect(component.hasEvalCaseChanged()).toBe(true);
-        expect(component.updatedEvalCase!.conversation[0]
+        expect(component.updatedEvalCase!.conversation![0]
                    .finalResponse!.parts![0]!.text)
             .toBe(NEW_RESPONSE);
       });
@@ -1249,7 +1459,7 @@ describe('ChatComponent', () => {
       it('should delete message', () => {
         expect(component.uiEvents().length).toBe(0);
         expect(component.hasEvalCaseChanged()).toBe(true);
-        expect(component.updatedEvalCase!.conversation[0]
+        expect(component.updatedEvalCase!.conversation![0]
                    .finalResponse!.parts!.length)
             .toBe(0);
       });

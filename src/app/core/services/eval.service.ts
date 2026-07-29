@@ -21,7 +21,7 @@ import {Observable, of} from 'rxjs';
 import {tap} from 'rxjs/operators';
 
 import {URLUtil} from '../../../utils/url-util';
-import {EvalCase} from '../models/Eval';
+import {EvalCase, EvalMetric, UserSimulatorConfig} from '../models/Eval';
 import {EvalService as EvalServiceInterface} from './interfaces/eval';
 
 @Injectable({
@@ -80,7 +80,7 @@ export class EvalService implements EvalServiceInterface {
   getEvalSet(appName: string, evalSetId: string) {
     if (this.apiServerDomain != undefined) {
       const url =
-        this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}`;
+        this.apiServerDomain + `/dev/apps/${appName}/eval-sets/${evalSetId}`;
       return this.http.get<any>(url, {});
     }
     return new Observable<any>();
@@ -112,18 +112,30 @@ export class EvalService implements EvalServiceInterface {
     });
   }
 
+  // Live mode is signalled to the backend by the presence of
+  // `live_model_config`, not a boolean; an empty object uses its default
+  // timeout. `userSimulatorConfig` (e.g. `llm_audio`) synthesizes user turns.
   runEval(
     appName: string,
     evalSetId: string,
-    evalIds: string[],
-    evalMetrics: any[],
+    evalCaseIds: string[],
+    evalMetrics: EvalMetric[],
+    useLive: boolean = false,
+    userSimulatorConfig?: UserSimulatorConfig,
   ) {
     const url =
-      this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}/run_eval`;
-    return this.http.post<any>(url, {
-      evalIds: evalIds,
-      evalMetrics: evalMetrics,
-    });
+      this.apiServerDomain + `/dev/apps/${appName}/eval-sets/${evalSetId}/run`;
+    const body: any = {
+      eval_case_ids: evalCaseIds,
+      eval_metrics: evalMetrics,
+    };
+    if (useLive) {
+      body.live_model_config = {};
+    }
+    if (userSimulatorConfig) {
+      body.user_simulator_config = userSimulatorConfig;
+    }
+    return this.http.post<any>(url, body);
   }
 
   listEvalResults(appName: string) {
@@ -174,7 +186,7 @@ export class EvalService implements EvalServiceInterface {
   }
 
   deleteEvalSet(appName: string, evalSetId: string) {
-    const url = this.apiServerDomain + `/dev/apps/${appName}/eval_sets/${evalSetId}`;
+    const url = this.apiServerDomain + `/dev/apps/${appName}/eval-sets/${evalSetId}`;
     return this.http.delete<any>(url, {});
   }
 }

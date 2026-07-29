@@ -74,6 +74,7 @@ import { ResizableDrawerDirective } from '../../directives/resizable-drawer.dire
 import { AddItemDialogComponent } from '../add-item-dialog/add-item-dialog.component';
 import { AgentStructureGraphDialogComponent } from '../agent-structure-graph-dialog/agent-structure-graph-dialog';
 import { getMediaTypeFromMimetype, MediaType } from '../artifact-tab/artifact-tab.component';
+import { pcmChunksToWavBase64 } from '../../core/utils/audio';
 import { BuilderTabsComponent } from '../builder-tabs/builder-tabs.component';
 import { CanvasComponent } from '../canvas/canvas.component';
 import { ChatPanelComponent } from '../chat-panel/chat-panel.component';
@@ -302,6 +303,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   longRunningEvents: any[] = [];
   functionCallEventId = '';
   redirectUri = URLUtil.getBaseUrlWithoutPath();
+  // Tracks the last time an Agent Identity (3LO) consent popup was opened per
+  // credential key, to suppress runaway popup loops when consent doesn't yield
+  // a sufficiently-scoped token.
+  private agentIdentityAuthAt = new Map<string, number>();
+  // The single active listener/channel for an in-flight Agent Identity consent.
+  // Tracked so a new attempt can tear down a stale one (whose closure holds an
+  // old nonce) before starting, preventing "consent nonce mismatch" errors.
+  private agentIdentityChannel: BroadcastChannel | null = null;
+  private agentIdentityMsgListener: ((e: MessageEvent) => void) | null = null;
   isMobile = signal(window.innerWidth <= 768);
   showSidePanel = window.localStorage.getItem('adk-side-panel-visible') !== 'false';
   showBuilderAssistant = true;
@@ -494,6 +504,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   getMetricDescription(metricName: string): string {
     const info = this.metricsInfo().find((m: any) => m.metricName === metricName);
     return info?.description || '';
+  }
+
+  /** Whether a single rubric result passed, per the backend verdict/score. */
+  rubricPassed(rubric: any): boolean {
+    if (rubric?.verdict !== undefined && rubric?.verdict !== null) {
+      return !!rubric.verdict;
+    }
+    // Fall back to score when no explicit boolean verdict is provided.
+    return typeof rubric?.score === 'number' && rubric.score >= 1;
   }
 
   getMetricMin(metricName: string): string {
@@ -835,6 +854,31 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       window.opener?.postMessage({ authResponseUrl }, window.origin);
       // Close the popup
       window.close();
+    } else if (searchParams.has('user_id_validation_state')) {
+      // Agent Identity Auth Manager (3LO): the connector redirects the consent
+      // popup here (the agent's continue_uri) after the user authorizes. Relay
+      // the validation state + connector name back to the app so it can call
+      // credentials:finalize, then close the popup.
+      const userIdValidationState =
+        searchParams.get('user_id_validation_state');
+      const connectorName = searchParams.get('connector_name') ||
+        searchParams.get('auth_provider_name');
+      const payload = {
+        agentIdentityCallback: { userIdValidationState, connectorName },
+      };
+      // Prefer BroadcastChannel: OAuth providers often send a
+      // Cross-Origin-Opener-Policy header that severs window.opener, so
+      // postMessage(opener) is unreliable. BroadcastChannel is same-origin and
+      // unaffected by COOP. postMessage is kept as a fallback.
+      try {
+        const channel = new BroadcastChannel('adk-agent-identity');
+        channel.postMessage(payload);
+        channel.close();
+      } catch (e) {
+        console.warn('[AgentIdentity] BroadcastChannel unavailable:', e);
+      }
+      window.opener?.postMessage(payload, window.origin);
+      window.close();
     }
 
     this.agentService.getApp().subscribe((app) => {
@@ -975,6 +1019,15 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
           const runId = `${this.appName}_${evalSetId}_${timestamp}`;
           console.log('loadSessionByUrlOrReset runId:', runId);
+
+          // Warm the metrics-info cache so metric tooltips render on direct load.
+          this.evalService.getMetricsInfo(this.appName)
+              .pipe(catchError((error) => {
+                console.error('Error fetching metrics info', error);
+                return of({metricsInfo: []});
+              }))
+              .subscribe();
+
           this.evalService.getEvalResult(this.appName, runId).subscribe((runResult) => {
             console.log('loadSessionByUrlOrReset runResult:', runResult);
             if (runResult) {
@@ -1429,6 +1482,36 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           // for OAuth
           const authUri =
             func.args.authConfig.exchangedAuthCredential.oauth2.authUri;
+          // Agent Identity Auth Manager (3LO) returns an auth_uri whose
+          // redirect_uri already targets the connector's oauthcallback (which is
+          // what the provider's OAuth app has registered), and completion
+          // happens via a separate consent callback + credentials:finalize
+          // instead of the classic code relay. Handle it on its own path.
+          if (func.args.authConfig.authScheme?.type ===
+            'gcpAuthProviderScheme') {
+            // Loop guard: if the same credential re-challenges almost
+            // immediately after an attempt, the consent isn't yielding a token
+            // with sufficient scope (e.g. the provider app is already
+            // authorized with narrower scopes and fast-redirects). Suppress the
+            // popup instead of spamming, and tell the user how to recover.
+            const credentialKey =
+              func.args.authConfig.credentialKey || authUri;
+            const now = Date.now();
+            const last = this.agentIdentityAuthAt.get(credentialKey) || 0;
+            if (now - last < 20000) {
+              console.warn(
+                '[AgentIdentity] repeated auth challenge; suppressing popup ' +
+                'to avoid a loop.', { credentialKey });
+              this.openSnackBar(
+                'Authorization did not grant the required access. Revoke the ' +
+                'app under GitHub Settings \u2192 Applications, then retry.',
+                'OK');
+              break;
+            }
+            this.agentIdentityAuthAt.set(credentialKey, now);
+            this.handleAgentIdentityAuth(func);
+            break;  // Handle one OAuth at a time
+          }
           const updatedAuthUri = this.updateRedirectUri(
             authUri,
             this.redirectUri,
@@ -2231,6 +2314,131 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  /**
+   * Handles the Agent Identity Auth Manager (3LO) consent flow.
+   *
+   * Unlike the classic relay flow, the auth_uri is opened verbatim (its
+   * redirect_uri already points at the connector's oauthcallback). After the
+   * user consents, the connector redirects the popup to the agent's
+   * continue_uri (which must point back at this app). The popup relays the
+   * connector-provided validation state to this window via postMessage; we then
+   * call the api_server's credentials:finalize proxy to store the token in the
+   * vault, and resume the tool by returning the unmodified auth config.
+   */
+  private teardownAgentIdentityListeners() {
+    if (this.agentIdentityChannel) {
+      this.agentIdentityChannel.close();
+      this.agentIdentityChannel = null;
+    }
+    if (this.agentIdentityMsgListener) {
+      window.removeEventListener('message', this.agentIdentityMsgListener);
+      this.agentIdentityMsgListener = null;
+    }
+  }
+
+  private handleAgentIdentityAuth(func: any) {
+    const oauth2 = func.args.authConfig.exchangedAuthCredential.oauth2;
+    const authUri = oauth2.authUri;
+    const consentNonce = oauth2.nonce;
+    const userId = this.userId;
+
+    // Tear down any listener left over from a prior (incomplete) attempt. Its
+    // closure holds an old nonce, and BroadcastChannel delivers to every open
+    // listener, so a stale one would finalize with the wrong nonce ("consent
+    // nonce mismatch"). Only the current attempt should be live.
+    this.teardownAgentIdentityListeners();
+
+    const popup = this.safeValuesService.windowOpen(
+      window, authUri, 'oauthPopup', 'width=600,height=700');
+    if (!popup) {
+      this.openSnackBar('Popup blocked! Please allow popups and retry.', 'OK');
+      return;
+    }
+
+    // The consent popup relays its result via BroadcastChannel (robust against
+    // COOP severing window.opener) and, as a fallback, postMessage. Accept
+    // whichever arrives first.
+    let handled = false;
+    const channel = new BroadcastChannel('adk-agent-identity');
+    this.agentIdentityChannel = channel;
+
+    const onCallback = (data: any) => {
+      const callback = data?.agentIdentityCallback;
+      if (!callback || handled) {
+        return;
+      }
+      handled = true;
+      this.teardownAgentIdentityListeners();
+      this.openSnackBar('Finalizing authorization\u2026', 'OK');
+      this.finalizeAgentIdentityCredential(
+        callback.connectorName, userId, callback.userIdValidationState,
+        consentNonce)
+        .then(() => {
+          // The token is now in the vault; resume the tool by returning the
+          // (unmodified) auth config. The agent re-fetches the vaulted token.
+          this.openSnackBar('Authorized. Retrieving results\u2026', 'OK');
+          this.sendAgentIdentityAuthResponse(func);
+        })
+        .catch((error) => {
+          console.error('[AgentIdentity] finalize failed:', error);
+          this.openSnackBar(
+            'Failed to finalize authorization. See console for details.', 'OK');
+        });
+    };
+
+    channel.onmessage = (event: MessageEvent) => onCallback(event.data);
+    const messageListener = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) {
+        return;  // Ignore messages from unknown sources
+      }
+      onCallback(event.data);
+    };
+    this.agentIdentityMsgListener = messageListener;
+    window.addEventListener('message', messageListener);
+  }
+
+  private async finalizeAgentIdentityCredential(
+    connectorName: string, userId: string, userIdValidationState: string,
+    consentNonce: string): Promise<void> {
+    const base = URLUtil.getApiServerBaseUrl();
+    const response = await fetch(`${base}/agent-identity/finalize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        connectorName,
+        userId,
+        userIdValidationState,
+        consentNonce,
+      }),
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`finalize HTTP ${response.status}: ${text}`);
+    }
+  }
+
+  private sendAgentIdentityAuthResponse(func: any) {
+    this.longRunningEvents.pop();
+    // Return the auth config unchanged (no authResponseUri/redirectUri). The
+    // backend re-runs the tool, which re-fetches the now-vaulted credential.
+    const authConfig = structuredClone(func.args.authConfig);
+    const content = {
+      role: 'user',
+      parts: [
+        {
+          functionResponse: {
+            id: func.id,
+            name: func.name,
+            response: authConfig,
+          },
+        },
+      ],
+      functionCallEventId: this.functionCallEventId,
+    };
+
+    this.sendMessage(content);
+  }
+
   toggleSidePanel() {
     if (this.showSidePanel) {
       this.sideDrawer()?.close();
@@ -2450,6 +2658,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       event
     });
 
+    // Carry eval annotations onto the UiEvent so the badge templates render.
+    const evalAnnotationKeys: Array<keyof UiEvent> = [
+      'evalStatus',
+      'failedMetric',
+      'evalScore',
+      'evalThreshold',
+      'actualInvocationToolUses',
+      'expectedInvocationToolUses',
+      'actualFinalResponse',
+      'expectedFinalResponse',
+    ];
+    for (const key of evalAnnotationKeys) {
+      if (event[key] !== undefined) {
+        (uiEvent as any)[key] = event[key];
+      }
+    }
+
     if (event.errorCode || event.errorMessage) {
       uiEvent.error = {
         errorCode: event.errorCode,
@@ -2590,7 +2815,21 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    if (session.events && session.state) {
+    // A live (audio) eval result's raw session is a stream of audio chunks,
+    // partial transcriptions, and turn-complete markers; render the clean
+    // per-invocation view instead. See buildLiveActualEvents.
+    const evalCaseResult = (session as any).evalCaseResult;
+    const renderLiveActual =
+      (session as any).isEvalResult &&
+      evalCaseResult &&
+      this.isLiveEvalResult(evalCaseResult);
+
+    if (renderLiveActual) {
+      const liveEvents = this.buildLiveActualEvents(evalCaseResult);
+      liveEvents.forEach((event: any) => {
+        this.appendEventRow(event, false);
+      });
+    } else if (session.events && session.state) {
       session.events.forEach((event: any) => {
         this.appendEventRow(event, false);
 
@@ -2617,7 +2856,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       .pipe(first())
       .subscribe((isInfinityMessageScrollingEnabled) => {
         if (!isInfinityMessageScrollingEnabled) {
-          this.populateMessages(session.events || []);
+          this.populateMessages(
+            renderLiveActual
+              ? this.buildLiveActualEvents(evalCaseResult)
+              : session.events || []);
         }
         this.loadTraceData();
       });
@@ -2646,22 +2888,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
           currentInvocationIndex++;
         } else {
           const invocationResult = invocationResults[currentInvocationIndex];
-          let evalStatus = 1;
-          let failedMetric = '';
-          let score = 1;
-          let threshold = 1;
-
-          if (invocationResult && invocationResult.evalMetricResults) {
-            for (const evalMetricResult of invocationResult.evalMetricResults) {
-              if (evalMetricResult.evalStatus === 2) {
-                evalStatus = 2;
-                failedMetric = evalMetricResult.metricName;
-                score = evalMetricResult.score;
-                threshold = evalMetricResult.threshold;
-                break;
-              }
-            }
-          }
+          const {evalStatus, failedMetric, score, threshold} =
+            this.computeInvocationVerdict(invocationResult);
 
           event.evalStatus = evalStatus;
 
@@ -2676,23 +2904,220 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     return res;
   }
 
+  // A turn fails as soon as any of its metrics fails; that metric's
+  // score/threshold feeds the bubble's detail row.
+  private computeInvocationVerdict(invocationResult: any):
+    {evalStatus: number, failedMetric: string, score: number, threshold: number} {
+    let evalStatus = 1;
+    let failedMetric = '';
+    let score = 1;
+    let threshold = 1;
+
+    for (const evalMetricResult of invocationResult?.evalMetricResults ?? []) {
+      if (evalMetricResult.evalStatus === 2) {
+        evalStatus = 2;
+        failedMetric = evalMetricResult.metricName;
+        score = evalMetricResult.score;
+        threshold = evalMetricResult.threshold;
+        break;
+      }
+    }
+
+    return {evalStatus, failedMetric, score, threshold};
+  }
+
   private addEvalFieldsToBotEvent(
     event: any, invocationResult: any, failedMetric: string, score: number,
     threshold: number) {
     event.failedMetric = failedMetric;
     event.evalScore = score;
     event.evalThreshold = threshold;
+    // expectedInvocation is absent for live (simulated-user) runs.
     if (event.failedMetric === 'tool_trajectory_avg_score') {
       event.actualInvocationToolUses = this.formatToolUses(
-        invocationResult.actualInvocation.intermediateData.toolUses);
+        invocationResult.actualInvocation?.intermediateData?.toolUses);
       event.expectedInvocationToolUses = this.formatToolUses(
-        invocationResult.expectedInvocation.intermediateData.toolUses);
+        invocationResult.expectedInvocation?.intermediateData?.toolUses);
     } else if (event.failedMetric === 'response_match_score') {
       event.actualFinalResponse =
-        invocationResult.actualInvocation.finalResponse.parts[0].text;
+        invocationResult.actualInvocation?.finalResponse?.parts?.[0]?.text;
       event.expectedFinalResponse =
-        invocationResult.expectedInvocation.finalResponse.parts[0]?.text;
+        invocationResult.expectedInvocation?.finalResponse?.parts?.[0]?.text;
     }
+  }
+
+  private isAudioPart(part: any): boolean {
+    return typeof part?.inlineData?.mimeType === 'string' &&
+      part.inlineData.mimeType.startsWith('audio/');
+  }
+
+  // A live run is inferred from audio parts or transcription events in the
+  // persisted session, which a non-live run never produces.
+  private isLiveEvalResult(evalCaseResult: any): boolean {
+    const events = evalCaseResult?.sessionDetails?.events;
+    if (!Array.isArray(events)) {
+      return false;
+    }
+    return events.some(
+      (e: any) => e?.inputTranscription || e?.outputTranscription ||
+        (e?.content?.parts ?? []).some((p: any) => this.isAudioPart(p)));
+  }
+
+  // Raw PCM parts are unplayable in a chat bubble, so keep only text/tool parts.
+  private stripAudioParts(content: any): any {
+    if (!content?.parts) {
+      return content;
+    }
+    const parts = content.parts.filter((p: any) => !this.isAudioPart(p));
+    return { ...content, parts };
+  }
+
+  // Order matters: the chunks are concatenated into a single clip.
+  private collectAudioChunks(contents: any[]): string[] {
+    const chunks: string[] = [];
+    for (const content of contents) {
+      for (const part of content?.parts ?? []) {
+        if (this.isAudioPart(part) && part.inlineData.data) {
+          chunks.push(part.inlineData.data);
+        }
+      }
+    }
+    return chunks;
+  }
+
+  // Builds chat events for a live result's actual conversation from the clean
+  // per-invocation view. Each turn contributes a user event, its intermediate
+  // (tool) events, and a response event whose many raw-PCM audio chunks are
+  // folded into one playable WAV clip; raw audio-chunk events are dropped.
+  private buildLiveActualEvents(evalCaseResult: any): any[] {
+    const invocationResults: any[] =
+      evalCaseResult?.evalMetricResultPerInvocation ?? [];
+    const events: any[] = [];
+
+    invocationResults.forEach((invocationResult, invocationIndex) => {
+      const actual = invocationResult?.actualInvocation;
+      if (!actual) {
+        return;
+      }
+
+      // Model audio for a turn is streamed across the intermediate events and
+      // (occasionally) the final response; collect every chunk to emit one clip.
+      const audioSources: any[] = [];
+
+      const turnEvents: any[] = [
+        ...this.buildLiveUserEvent(actual, invocationIndex),
+        ...this.buildLiveIntermediateEvents(actual, invocationIndex, audioSources),
+      ];
+
+      if (actual.finalResponse?.parts) {
+        audioSources.push(actual.finalResponse);
+      }
+      const responseEvent =
+        this.buildLiveResponseEvent(actual, invocationIndex, audioSources);
+      if (responseEvent) {
+        turnEvents.push(responseEvent);
+      }
+
+      // Parity with non-live results: every bot bubble in the turn carries the
+      // turn's PASS/FAIL verdict, and its final response carries the detail.
+      const {evalStatus, failedMetric, score, threshold} =
+        this.computeInvocationVerdict(invocationResult);
+      for (const turnEvent of turnEvents) {
+        if (turnEvent.author !== 'user') {
+          turnEvent.evalStatus = evalStatus;
+        }
+      }
+      if (responseEvent) {
+        this.addEvalFieldsToBotEvent(
+          responseEvent, invocationResult, failedMetric, score, threshold);
+      }
+
+      events.push(...turnEvents);
+    });
+
+    return events;
+  }
+
+  // The user turn renders transcript text only; the simulated user's audio is
+  // not surfaced here.
+  private buildLiveUserEvent(actual: any, invocationIndex: number): any[] {
+    if (!actual.userContent?.parts) {
+      return [];
+    }
+    return [{
+      author: 'user',
+      content: this.stripAudioParts(actual.userContent),
+      invocationIndex,
+    }];
+  }
+
+  // Emits the turn's tool events, appending each event's content to
+  // `audioSources`. Prefers the raw `invocationEvents` stream, falling back to
+  // the flattened `toolUses` list.
+  private buildLiveIntermediateEvents(
+    actual: any, invocationIndex: number, audioSources: any[]): any[] {
+    const events: any[] = [];
+
+    if (actual.intermediateData?.invocationEvents) {
+      let toolUseIndex = 0;
+      for (const event of actual.intermediateData.invocationEvents) {
+        // Partial transcription/audio markers are noise in the result view.
+        if (event?.partial) {
+          continue;
+        }
+        audioSources.push(event.content);
+        const stripped = this.stripAudioParts(event.content);
+        // Drop events whose only content was audio (now empty).
+        if (!stripped?.parts || stripped.parts.length === 0) {
+          continue;
+        }
+        const nextEvent: any = { ...event, content: stripped, invocationIndex };
+        if (stripped.parts[0]?.functionCall) {
+          nextEvent.toolUseIndex = toolUseIndex++;
+        }
+        events.push(nextEvent);
+      }
+    } else if (actual.intermediateData?.toolUses) {
+      let toolUseIndex = 0;
+      for (const toolUse of actual.intermediateData.toolUses) {
+        events.push({
+          author: 'bot',
+          content: { parts: [{ functionCall: { name: toolUse.name, args: toolUse.args } }] },
+          invocationIndex,
+          toolUseIndex: toolUseIndex++,
+        });
+        events.push({
+          author: 'bot',
+          content: { parts: [{ functionResponse: { name: toolUse.name } }] },
+          invocationIndex,
+        });
+      }
+    }
+
+    return events;
+  }
+
+  // Builds the response bubble, folding all of `audioSources`' PCM chunks into a
+  // single playable WAV part. Returns null when there's nothing to show. The
+  // caller annotates the returned event with the turn's eval verdict.
+  private buildLiveResponseEvent(
+    actual: any, invocationIndex: number, audioSources: any[]): any|null {
+    const wavBase64 = pcmChunksToWavBase64(this.collectAudioChunks(audioSources));
+    if (!actual.finalResponse?.parts && !wavBase64) {
+      return null;
+    }
+
+    const responseContent =
+      this.stripAudioParts(actual.finalResponse) ?? { parts: [] };
+    const parts = [...(responseContent.parts ?? [])];
+    if (wavBase64) {
+      parts.push({ inlineData: { mimeType: 'audio/wav', data: wavBase64 } });
+    }
+    return {
+      author: 'bot',
+      content: { ...responseContent, parts },
+      invocationIndex,
+    };
   }
 
   protected updateWithSelectedTest(testName: string, events: any[]) {
@@ -2766,7 +3191,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       for (const event of evalCase.events) {
         this.appendEventRow(event, false);
       }
-    } else {
+    } else if (evalCase.conversation?.length) {
       evalCase.events = [];
       let invocationIndex = 0;
 
@@ -2879,7 +3304,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         message.functionCall.args = result;
 
         this.updatedEvalCase = structuredClone(this.evalCase!);
-        this.updatedEvalCase!.conversation[message.invocationIndex]
+        this.updatedEvalCase!.conversation![message.invocationIndex]
           .intermediateData!.toolUses![message.toolUseIndex]
           .args = result;
       }
@@ -2922,7 +3347,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.userEditEvalCaseMessage ? this.userEditEvalCaseMessage : ' ';
 
     this.updatedEvalCase = structuredClone(this.evalCase!);
-    this.updatedEvalCase!.conversation[message.invocationIndex]
+    this.updatedEvalCase!.conversation![message.invocationIndex]
       .finalResponse!.parts![message.finalResponsePartIndex] = {
       text: this.userEditEvalCaseMessage
     };
@@ -2944,7 +3369,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.uiEvents.update((uiEvents) => uiEvents.filter((m, i) => i !== index));
 
     this.updatedEvalCase = structuredClone(this.evalCase!);
-    this.updatedEvalCase!.conversation[message.invocationIndex]
+    this.updatedEvalCase!.conversation![message.invocationIndex]
       .finalResponse!.parts!.splice(message.finalResponsePartIndex, 1);
   }
 

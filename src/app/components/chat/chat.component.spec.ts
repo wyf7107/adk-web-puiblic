@@ -297,8 +297,10 @@ describe('ChatComponent', () => {
             {provide: TelemetryService, useValue: mockTelemetryService},
             {provide: THEME_SERVICE, useClass: MockThemeService},
           ],
-        })
-        .compileComponents();
+        });
+
+    TestBed.overrideProvider(MatDialog, { useValue: mockDialog });
+    await TestBed.compileComponents();
 
     fixture = TestBed.createComponent(ChatComponent);
     component = fixture.componentInstance;

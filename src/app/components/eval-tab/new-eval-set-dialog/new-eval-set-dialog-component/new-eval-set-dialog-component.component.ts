@@ -27,6 +27,8 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 
+import {AnalyticsService} from '../../../../core/services/analytics.service';
+
 @Component({
     changeDetection: ChangeDetectionStrategy.Default,
     selector: 'app-new-eval-set-dialog-component',
@@ -48,6 +50,7 @@ import { MatSelectModule } from '@angular/material/select';
 export class NewEvalSetDialogComponentComponent {
   private readonly evalService = inject(EVAL_SERVICE);
   private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  private readonly analyticsService = inject(AnalyticsService);
   readonly data: {appName: string, defaultName?: string} = inject(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<NewEvalSetDialogComponentComponent>);
 
@@ -69,6 +72,7 @@ export class NewEvalSetDialogComponentComponent {
       this.evalService
         .createNewEvalSet(this.data.appName, this.newSetId, executionMode)
         .subscribe((res) => {
+          this.analyticsService.sendEvent('eval_create_click');
           this.dialogRef.close(true);
         });
     }

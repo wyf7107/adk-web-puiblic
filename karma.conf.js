@@ -38,6 +38,12 @@ module.exports = function (config) {
         { type: 'text-summary' }
       ]
     },
+    files: [
+      { pattern: 'src/assets/**/*', watched: false, included: false, served: true, nocache: false }
+    ],
+    proxies: {
+      '/karma_webpack/assets/': '/base/src/assets/'
+    },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,

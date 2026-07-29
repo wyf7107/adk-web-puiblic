@@ -206,8 +206,13 @@ describe('AppComponent', () => {
             },
             {
               provide: TelemetryService,
-              useValue: jasmine.createSpyObj('TelemetryService', ['setTelemetry', 'telemetryStatus', 'telemetryEnabled'])
-            }
+              useValue: {
+                telemetryStatus: () => false,
+                telemetryEnabled: () => false,
+                fetchTelemetryStatus: () => Promise.resolve(false),
+                setTelemetry: () => Promise.resolve(false)
+              }
+            },
           ],
         })
         .compileComponents();

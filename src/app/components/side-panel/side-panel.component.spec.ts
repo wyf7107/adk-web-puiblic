@@ -59,6 +59,7 @@ import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
 import {initTestBed} from '../../testing/utils';
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
+import {AnalyticsService} from '../../core/services/analytics.service';
 
 import {SidePanelComponent} from './side-panel.component';
 
@@ -202,7 +203,8 @@ describe('SidePanelComponent', () => {
         {provide: ActivatedRoute, useValue: mockActivatedRoute},
         {provide: Location, useValue: mockLocation},
         {provide: SAFE_VALUES_SERVICE, useClass: MockSafeValuesService},
-        {provide: THEME_SERVICE, useClass: MockThemeService}
+        {provide: THEME_SERVICE, useClass: MockThemeService},
+        {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     });
 

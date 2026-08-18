@@ -274,7 +274,7 @@ export class WorkflowGraphTooltipComponent implements OnInit {
               color: isActive ? '#42A5F5' : 'rgba(138, 180, 248, 0.8)',
             },
           },
-        } as unknown as Edge);
+        });
       }
     });
   }
@@ -338,7 +338,7 @@ export class WorkflowGraphTooltipComponent implements OnInit {
               color: isActive ? '#42A5F5' : 'rgba(138, 180, 248, 0.8)',
             },
           },
-        } as unknown as Edge);
+        });
       }
     });
 

@@ -15,14 +15,24 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, ViewChild,} from '@angular/core';
-import {python} from '@codemirror/lang-python';
+import {
+  ChangeDetectionStrategy,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import {HighlightStyle, syntaxHighlighting, syntaxTree} from '@codemirror/language';
+import {python} from '@codemirror/lang-python';
+import {tags} from '@lezer/highlight';
 import {Diagnostic, linter, lintGutter} from '@codemirror/lint';
-import {basicSetup} from 'codemirror';
 import {EditorState} from '@codemirror/state';
 import {EditorView} from '@codemirror/view';
-import {tags} from '@lezer/highlight';
+import {basicSetup} from 'codemirror';
 
 /** A dark theme for the Python syntax highlighting. */
 const pythonDarkHighlightStyle = HighlightStyle.define([

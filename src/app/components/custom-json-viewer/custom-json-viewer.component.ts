@@ -16,7 +16,7 @@
  */
 
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject, Type } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -32,6 +32,7 @@ import { MarkdownComponent } from '../markdown/markdown.component';
     MatDialogModule,
     MatIcon,
     MatIconButton,
+    MarkdownComponent
   ],
   template: `
     <div class="md-dialog-header">
@@ -82,7 +83,6 @@ import { MarkdownComponent } from '../markdown/markdown.component';
   `]
 })
 export class MarkdownPreviewDialogComponent {
-  readonly markdownComponent: Type<MarkdownComponentInterface> = inject(MARKDOWN_COMPONENT);
   dialogRef = inject(MatDialogRef<MarkdownPreviewDialogComponent>);
   data = inject(MAT_DIALOG_DATA) as { key: string; value: string };
 

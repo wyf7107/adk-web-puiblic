@@ -75,8 +75,6 @@ describe('TraceService', () => {
     });
   });
 
-
-
   describe('resetTraceService', () => {
     it('should reset eventData to undefined', async () => {
       service.setEventData(new Map<string, any>());
@@ -91,7 +89,5 @@ describe('TraceService', () => {
       const messages = await firstValueFrom(service.messages$);
       expect(messages).toEqual([]);
     });
-
-
   });
 });

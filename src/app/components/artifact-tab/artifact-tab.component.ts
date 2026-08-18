@@ -34,8 +34,13 @@ const DEFAULT_ARTIFACT_NAME = 'default_artifact_name';
 /**
  * The supported media types for artifacts.
  */
-import { MediaType } from '../../core/models/types';
-export { MediaType };
+export enum MediaType {
+  IMAGE = 'image',
+  AUDIO = 'audio',
+  VIDEO = 'video',
+  TEXT = 'text',  // for text/html
+  UNSPECIFIED = 'unspecified',
+}
 
 /*
  * Returns the media type from the mime type.

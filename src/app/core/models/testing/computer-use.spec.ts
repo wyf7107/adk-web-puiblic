@@ -63,6 +63,16 @@ describe('ComputerUse', () => {
       expect(isVisibleComputerUseClick(call)).toBeTrue();
     });
 
+    it('should return true for scroll document tool without coordinates', () => {
+      const call = {
+        name: ComputerTool.SCROLL_DOCUMENT,
+        args: {
+          direction: 'down'
+        }
+      };
+      expect(isVisibleComputerUseClick(call)).toBeTrue();
+    });
+
     it('should return false for non-visual actions in computer tool', () => {
       const call = {
         name: ComputerTool.COMPUTER,

@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import {Styles} from '@a2ui/lit/0.8';
-import {Types} from '@a2ui/lit/0.8';
+import { Types, Styles } from '@a2ui/lit/0.8';
 
 /** Elements */
 

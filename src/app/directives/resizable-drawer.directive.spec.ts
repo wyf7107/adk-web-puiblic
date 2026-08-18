@@ -23,8 +23,8 @@ import {ResizableDrawerDirective} from './resizable-drawer.directive';
 
 // Directive constants
 const SIDE_DRAWER_WIDTH_VAR = '--side-drawer-width';
-const INITIAL_WIDTH = 570;
-const MIN_WIDTH = 310;
+const INITIAL_WIDTH = 480;
+const MIN_WIDTH = 360;
 
 // Test constants
 const MOCKED_WINDOW_WIDTH = 2000;
@@ -91,7 +91,7 @@ describe('ResizableDrawerDirective', () => {
     body.classList.remove('resizing');
   });
 
-  it('should set initial width to 570px after view init', () => {
+  it('should set initial width to 480px after view init', () => {
     // Assert
     expect(directiveElement.style.width).toBe('var(--side-drawer-width)');
     expect(getDrawerWidth()).toBe(INITIAL_WIDTH);

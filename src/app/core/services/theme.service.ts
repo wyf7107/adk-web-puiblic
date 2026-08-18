@@ -18,8 +18,6 @@
 import { Injectable, signal, effect } from '@angular/core';
 import { ThemeServiceInterface, Theme } from './interfaces/theme';
 
-import {trustedResourceUrl} from 'safevalues';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -67,18 +65,15 @@ export class ThemeService implements ThemeServiceInterface {
   }
 
   private updatePrismTheme(theme: Theme): void {
-    const linkId = "prism-theme-style";
+    const linkId = 'prism-theme-style';
     let linkElement = document.getElementById(linkId) as HTMLLinkElement;
     if (!linkElement) {
-      linkElement = document.createElement("link");
+      linkElement = document.createElement('link');
       linkElement.id = linkId;
+      linkElement.rel = 'stylesheet';
       document.head.appendChild(linkElement);
     }
-    setLinkHrefAndRel(
-      linkElement,
-      theme === "light" ? trustedResourceUrl`prism-light.css` : trustedResourceUrl`prism-dark.css`,
-      "stylesheet",
-    );
+    linkElement.href = theme === 'light' ? 'prism-light.css' : 'prism-dark.css';
   }
 
   toggleTheme(): void {

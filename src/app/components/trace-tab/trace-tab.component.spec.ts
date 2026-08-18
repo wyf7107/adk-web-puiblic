@@ -91,4 +91,77 @@ describe('TraceTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should display no invocations if traceData is empty', async () => {
+    const expansionPanels = await loader.getAllHarnesses(
+        MatExpansionPanelHarness,
+    );
+    expect(expansionPanels.length).toBe(0);
+  });
+
+  // Skipped: mat-expansion-panel UI removed in UI refactor
+  xdescribe('with trace data', () => {
+    const MOCK_TRACE_DATA_WITH_MULTIPLE_TRACES: Span[] = [
+      ...MOCK_TRACE_DATA,
+      makeSpan({
+        name: 'agent.act-2',
+        start_time: 1733084700000000000,
+        end_time: 1733084760000000000,
+        span_id: 'span-10',
+        trace_id: 'trace-2',
+        attributes: {
+          'event_id': 10,
+          'gcp.vertex.agent.invocation_id': 'invoc-2',
+          'gcp.vertex.agent.llm_request':
+              '{"contents":[{"role":"user","parts":[{"text":"Another user message"}]}]}',
+        },
+      }),
+    ];
+
+    beforeEach(async () => {
+      fixture.componentRef.setInput(
+          'traceData',
+          MOCK_TRACE_DATA_WITH_MULTIPLE_TRACES,
+      );
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    it('should group traces by trace_id and display as expansion panels',
+       async () => {
+         const expansionPanels = await loader.getAllHarnesses(
+             MatExpansionPanelHarness,
+         );
+         expect(expansionPanels.length).toBe(2);
+       });
+
+    it('should display user message as panel title', async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const expansionPanels = await loader.getAllHarnesses(
+          MatExpansionPanelHarness,
+      );
+      expect(expansionPanels.length).toBe(2);
+      expect(await expansionPanels[0].getTitle())
+          .toBe(
+              'I need help with my project.',
+          );
+      expect(await expansionPanels[1].getTitle()).toBe('Another user message');
+    });
+
+    it('should pass correct data to trace-tree component', async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const expansionPanels = await loader.getAllHarnesses(
+          MatExpansionPanelHarness,
+      );
+      expect(expansionPanels.length).toBeGreaterThan(0);
+      await expansionPanels[0].expand();
+      fixture.detectChanges();
+
+      const traceTree = fixture.nativeElement.querySelector('app-trace-tree');
+      expect(traceTree).toBeTruthy();
+      // Further inspection of trace-tree inputs would require a harness or
+      // mocking TraceTreeComponent
+    });
+  });
 });

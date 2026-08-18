@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-// 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
-import {initTestBed} from '../../testing/utils';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -36,7 +34,6 @@ describe('SystemInstructionDiffDialogComponent', () => {
   beforeEach(async () => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
-    initTestBed();  // required for 1p compat
     await TestBed.configureTestingModule({
       imports: [SystemInstructionDiffDialogComponent, NoopAnimationsModule],
       providers: [

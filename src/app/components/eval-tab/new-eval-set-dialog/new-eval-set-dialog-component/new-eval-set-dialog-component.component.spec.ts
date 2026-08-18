@@ -26,6 +26,7 @@ import { EvalService } from '../../../../core/services/eval.service';
 import { of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import {EVAL_SERVICE} from '../../../../core/services/interfaces/eval';
+import {FEATURE_FLAG_SERVICE} from '../../../../core/services/interfaces/feature-flag';
 import {AnalyticsService} from '../../../../core/services/analytics.service';
 
 describe('NewEvalSetDialogComponentComponent', () => {
@@ -39,6 +40,9 @@ describe('NewEvalSetDialogComponentComponent', () => {
     const evalService = jasmine.createSpyObj<EvalService>(['createNewEvalSet']);
     evalService.createNewEvalSet.and.returnValue(of({}));
 
+    const featureFlagService = jasmine.createSpyObj('FeatureFlagService', ['isEvalV2Enabled']);
+    featureFlagService.isEvalV2Enabled.and.returnValue(of(false));
+
     await TestBed.configureTestingModule({
       imports: [
         MatDialogModule,
@@ -49,6 +53,7 @@ describe('NewEvalSetDialogComponentComponent', () => {
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: {} },
         { provide: EVAL_SERVICE, useValue: evalService },
+        { provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService },
         {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     }).compileComponents();

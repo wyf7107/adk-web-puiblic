@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, Type } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomJsonViewerComponent } from '../custom-json-viewer/custom-json-viewer.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -39,12 +38,11 @@ import { MarkdownComponent } from '../markdown/markdown.component';
     MatIconButton,
     MatButton,
     MatIcon,
-    CommonModule,
+    MarkdownComponent,
     CustomJsonViewerComponent,
   ],
 })
 export class LongRunningResponseComponent implements OnChanges {
-  readonly markdownComponent: Type<MarkdownComponentInterface> = inject(MARKDOWN_COMPONENT);
   @Input() functionCall: any;
   @Input() appName!: string;
   @Input() userId!: string;

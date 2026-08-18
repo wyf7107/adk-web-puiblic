@@ -58,7 +58,7 @@ import { MediaType, } from '../artifact-tab/artifact-tab.component';
 import { AudioPlayerComponent } from '../audio-player/audio-player.component';
 import { ComputerActionComponent } from '../computer-action/computer-action.component';
 import { LongRunningResponseComponent } from '../long-running-response/long-running-response';
-import { MarkdownComponent } from '../markdown/markdown.component';
+import { MARKDOWN_COMPONENT, MarkdownComponentInterface } from '../markdown/markdown.component.interface';
 import { MessageFeedbackComponent } from '../message-feedback/message-feedback.component';
 
 import { ChatPanelMessagesInjectionToken } from './chat-panel.component.i18n';

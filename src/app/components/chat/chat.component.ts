@@ -1832,7 +1832,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       const a2uiData: any = {};
-      (parsed as any[]).forEach((msg: any) => {
+      parsed.forEach((msg: any) => {
         if (msg.beginRendering) {
           a2uiData.beginRendering = msg;
         } else if (msg.surfaceUpdate) {
@@ -3904,7 +3904,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!allRunNodeNames || allRunNodeNames.length === 0) return svgString;
 
     const parser = new DOMParser();
-    const doc = (parser as any)['parseFromString'](svgString, 'image/svg+xml');
+    const doc = parser.parseFromString(svgString, 'image/svg+xml');
 
     const reverseAdjacencyList = new Map<string, string[]>();
     const forwardAdjacencyList = new Map<string, string[]>();
@@ -4179,7 +4179,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   private applyV1Highlighting(svgString: string, highlightPairs: [string, string][], isDarkMode: boolean): string {
     const parser = new DOMParser();
-    const doc = (parser as any)['parseFromString'](svgString, 'image/svg+xml');
+    const doc = parser.parseFromString(svgString, 'image/svg+xml');
 
     const darkGreen = '#0F5223';
     const lightGreen = '#69CB87';

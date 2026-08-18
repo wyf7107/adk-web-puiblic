@@ -17,8 +17,6 @@
 
 import { inject, Injectable, effect } from '@angular/core';
 import { TelemetryService } from './telemetry.service';
-import {setScriptSrc} from 'safevalues/dom';
-import {trustedResourceUrl} from 'safevalues';
 
 declare global {
   interface Window {
@@ -68,7 +66,7 @@ export class AnalyticsService {
       // Load GA4 script
       const script = document.createElement('script');
       script.async = true;
-      setScriptSrc(script, trustedResourceUrl`https://www.googletagmanager.com/gtag/js?id=${this.measurementId}`);
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${this.measurementId}`;
       document.head.appendChild(script);
 
       window.gtag('js', new Date());

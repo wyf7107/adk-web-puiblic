@@ -18,7 +18,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it,}
-import {BehaviorSubject, NEVER, of, throwError} from 'rxjs';
+import {BehaviorSubject, NEVER, of} from 'rxjs';
 
 import {Feedback, FEEDBACK_SERVICE} from '../../core/services/interfaces/feedback';
 import {MockFeedbackService} from '../../core/services/testing/mock-feedback.service';
@@ -113,7 +113,7 @@ describe('MessageFeedbackComponent', () => {
            .toContain('thumb_up');
      });
 
-  it('should open detailed panel without sending feedback when "up" button is clicked',
+  it('should submit "up" feedback and show detailed panel when "up" button is clicked',
      () => {
        expect(fixture.debugElement.query(By.css('.feedback-details-container')))
            .toBeFalsy();
@@ -124,12 +124,12 @@ describe('MessageFeedbackComponent', () => {
 
        expect(fixture.debugElement.query(By.css('.feedback-details-container')))
            .toBeTruthy();
-       // The thumb click MUST NOT call sendFeedback. The write is deferred to
-       // the dialog Submit so the user can attach labels in a single RPC.
-       expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
+       expect(mockFeedbackService.sendFeedback)
+           .toHaveBeenCalledWith(
+               'test-session', 'test-event', {direction: 'up'});
      });
 
-  it('should open detailed panel without sending feedback when "down" button is clicked',
+  it('should submit "down" feedback and show detailed panel when "down" button is clicked',
      () => {
        expect(fixture.debugElement.query(By.css('.feedback-details-container')))
            .toBeFalsy();
@@ -142,129 +142,70 @@ describe('MessageFeedbackComponent', () => {
            .toBeTruthy();
        expect(fixture.debugElement.query(By.css('.feedback-buttons')))
            .toBeTruthy();
-       expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
-     });
-
-  it('should toggle between detailed feedback directions without sending feedback',
-     () => {
-       fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1]
-           .nativeElement.click();  // Open down panel
-       fixture.detectChanges();
-       expect(fixture.debugElement
-                  .queryAll(By.css('.feedback-buttons button mat-icon'))[1]
-                  .nativeElement.textContent)
-           .toContain('thumb_down_filled');
-
-       fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
-           .nativeElement.click();  // Switch to up
-       fixture.detectChanges();
-
-       expect(fixture.debugElement
-                  .queryAll(By.css('.feedback-buttons button mat-icon'))[0]
-                  .nativeElement.textContent)
-           .toContain('thumb_up_filled');
-       expect(fixture.debugElement
-                  .queryAll(By.css('.feedback-buttons button mat-icon'))[1]
-                  .nativeElement.textContent)
-           .toContain('thumb_down');
-       expect(fixture.debugElement.query(By.css('.feedback-details-container')))
-           .toBeTruthy();
-       expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
-     });
-
-  it('should call sendFeedback exactly once when detailed feedback is submitted',
-     () => {
-       fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
-           .nativeElement.click();  // Click up: opens dialog, no RPC.
-       fixture.detectChanges();
-
-       expect(fixture.debugElement.query(By.css('.feedback-details-container')))
-           .toBeTruthy();
-       expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
-
-       // Fill in feedback
-       const textarea =
-           fixture.debugElement.query(By.css('textarea')).nativeElement as
-           HTMLTextAreaElement;
-       textarea.value = 'test comment';
-       textarea.dispatchEvent(new Event('input'));
-       fixture.detectChanges();
-
-       fixture.debugElement.queryAll(By.css('.actions button'))[1]
-           .nativeElement.click();  // Submit button
-       fixture.detectChanges();
-
        expect(mockFeedbackService.sendFeedback)
-           .toHaveBeenCalledOnceWith('test-session', 'test-event', {
-             direction: 'up',
-             reasons: [],
-             comment: 'test comment',
-           });
-       expect(fixture.debugElement.query(By.css('.feedback-details-container')))
-           .toBeFalsy();
-       expect(fixture.debugElement
-                  .queryAll(By.css('.feedback-buttons button mat-icon'))[0]
-                  .nativeElement.textContent)
-           .toContain('thumb_up_filled');
+           .toHaveBeenCalledWith(
+               'test-session', 'test-event', {direction: 'down'});
      });
 
-  it('should pre-populate dialog from existing feedback when thumb is clicked',
-     () => {
-       getFeedback$.next({
-         id: 'f1',
-         direction: 'up',
-         reasons: ['Factually correct'],
-         comment: 'prior comment',
-       });
-       fixture.detectChanges();
-
-       // Click DOWN to switch direction. Dialog should open pre-populated
-       // with the existing reasons + comment so Submit issues a single
-       // UpdateFeedback (no orphan CreateFeedback on the thumb click).
-       fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1]
-           .nativeElement.click();
-       fixture.detectChanges();
-
-       expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
-       const textarea =
-           fixture.debugElement.query(By.css('textarea')).nativeElement as
-           HTMLTextAreaElement;
-       expect(textarea.value).toBe('prior comment');
-
-       fixture.debugElement.queryAll(By.css('.actions button'))[1]
-           .nativeElement.click();  // Submit button
-       fixture.detectChanges();
-
-       expect(mockFeedbackService.sendFeedback)
-           .toHaveBeenCalledOnceWith('test-session', 'test-event', {
-             direction: 'down',
-             reasons: ['Factually correct'],
-             comment: 'prior comment',
-           });
-     });
-
-  it('should keep dialog open on submit failure so the user can retry', () => {
-    mockFeedbackService.sendFeedback.and.returnValue(
-        throwError(() => new Error('rpc failed')));
+  it('should toggle between detailed feedback directions', () => {
+    fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1]
+        .nativeElement.click();  // Open down panel
+    fixture.detectChanges();
+    expect(fixture.debugElement
+               .queryAll(By.css('.feedback-buttons button mat-icon'))[1]
+               .nativeElement.textContent)
+        .toContain('thumb_down_filled');
 
     fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
-        .nativeElement.click();
+        .nativeElement.click();  // Switch to up
+    fixture.detectChanges();
+
+    expect(fixture.debugElement
+               .queryAll(By.css('.feedback-buttons button mat-icon'))[0]
+               .nativeElement.textContent)
+        .toContain('thumb_up_filled');
+    expect(fixture.debugElement
+               .queryAll(By.css('.feedback-buttons button mat-icon'))[1]
+               .nativeElement.textContent)
+        .toContain('thumb_down');
+    expect(fixture.debugElement.query(By.css('.feedback-details-container')))
+        .toBeTruthy();
+    expect(mockFeedbackService.sendFeedback)
+        .toHaveBeenCalledWith('test-session', 'test-event', {direction: 'up'});
+  });
+
+  it('should call sendFeedback when detailed feedback is submitted', () => {
+    fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
+        .nativeElement.click();  // Click up
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css('.feedback-details-container')))
+        .toBeTruthy();
+
+    // Fill in feedback
+    const textarea =
+        fixture.debugElement.query(By.css('textarea')).nativeElement as
+        HTMLTextAreaElement;
+    textarea.value = 'test comment';
+    textarea.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
     fixture.debugElement.queryAll(By.css('.actions button'))[1]
         .nativeElement.click();  // Submit button
     fixture.detectChanges();
 
-    expect(mockFeedbackService.sendFeedback).toHaveBeenCalledTimes(1);
-    // Dialog stays open so the user can fix the input and resubmit.
+    expect(mockFeedbackService.sendFeedback)
+        .toHaveBeenCalledWith('test-session', 'test-event', {
+          direction: 'up',
+          reasons: [],
+          comment: 'test comment',
+        });
     expect(fixture.debugElement.query(By.css('.feedback-details-container')))
-        .toBeTruthy();
-    // Buttons re-enabled so retry is possible.
-    expect(
-        fixture.debugElement.queryAll(By.css('.actions button'))[1]
-            .nativeElement.disabled,
-        )
-        .toBeFalse();
+        .toBeFalsy();
+    expect(fixture.debugElement
+               .queryAll(By.css('.feedback-buttons button mat-icon'))[0]
+               .nativeElement.textContent)
+        .toContain('thumb_up_filled');
   });
 
   it('should allow submitting negative feedback without details', () => {
@@ -289,13 +230,17 @@ describe('MessageFeedbackComponent', () => {
         .toBeFalsy();
   });
 
-  it('should hide panel and not call sendFeedback when cancelled', () => {
+  it('should hide panel when detailed feedback is cancelled', () => {
     fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1]
         .nativeElement.click();
     fixture.detectChanges();
 
     expect(fixture.debugElement.query(By.css('.feedback-details-container')))
         .toBeTruthy();
+    expect(mockFeedbackService.sendFeedback)
+        .toHaveBeenCalledWith(
+            'test-session', 'test-event', {direction: 'down'});
+    mockFeedbackService.sendFeedback.calls.reset();
 
     fixture.debugElement.queryAll(By.css('.actions button'))[0]
         .nativeElement.click();  // Cancel button
@@ -303,7 +248,6 @@ describe('MessageFeedbackComponent', () => {
 
     expect(fixture.debugElement.query(By.css('.feedback-details-container')))
         .toBeFalsy();
-    // No write should happen on either the thumb click or the cancel click.
     expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
   });
 
@@ -412,48 +356,33 @@ describe('MessageFeedbackComponent', () => {
         .toBeTrue();
   });
 
-  it('should disable feedback and dialog buttons while sendFeedback is in flight',
-     () => {
-       mockFeedbackService.sendFeedback.and.returnValue(NEVER);
-       fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
-           .nativeElement.click();  // Click up: opens dialog, no RPC.
-       fixture.detectChanges();
-       expect(mockFeedbackService.sendFeedback).not.toHaveBeenCalled();
+  it('should disable feedback buttons when submitting feedback', () => {
+    mockFeedbackService.sendFeedback.and.returnValues(of(undefined), NEVER);
+    fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
+        .nativeElement.click();  // Click up
+    fixture.detectChanges();
 
-       fixture.debugElement.queryAll(By.css('.actions button'))[1]
-           .nativeElement.click();  // Submit button: fires RPC.
-       fixture.detectChanges();
+    fixture.debugElement.queryAll(By.css('.actions button'))[1]
+        .nativeElement.click();  // Submit button
+    fixture.detectChanges();
 
-       expect(mockFeedbackService.sendFeedback)
-           .toHaveBeenCalledWith('test-session', 'test-event', {
-             direction: 'up',
-             reasons: [],
-             comment: '',
-           });
-       expect(mockFeedbackService.sendFeedback.calls.count()).toBe(1);
-       expect(
-           fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
-               .nativeElement.disabled,
-           )
-           .toBeTrue();
-       expect(
-           fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1]
-               .nativeElement.disabled,
-           )
-           .toBeTrue();
-       // Submit and Cancel must also be disabled to prevent the user from
-       // double-submitting and racing CreateFeedback against itself.
-       expect(
-           fixture.debugElement.queryAll(By.css('.actions button'))[0]
-               .nativeElement.disabled,
-           )
-           .toBeTrue();
-       expect(
-           fixture.debugElement.queryAll(By.css('.actions button'))[1]
-               .nativeElement.disabled,
-           )
-           .toBeTrue();
-     });
+    expect(mockFeedbackService.sendFeedback)
+        .toHaveBeenCalledWith('test-session', 'test-event', {
+          direction: 'up',
+          reasons: [],
+          comment: '',
+        });
+    expect(
+        fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]
+            .nativeElement.disabled,
+        )
+        .toBeTrue();
+    expect(
+        fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[1]
+            .nativeElement.disabled,
+        )
+        .toBeTrue();
+  });
 
   it('should show positive reasons when "up" is selected', () => {
     fixture.debugElement.queryAll(By.css('.feedback-buttons button'))[0]

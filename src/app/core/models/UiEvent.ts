@@ -16,7 +16,7 @@
  */
 
 import { ExecutableCode, CodeExecutionResult, FunctionCall, FunctionResponse, Event } from './types';
-import { MediaType } from './types';
+import { MediaType } from '../../components/artifact-tab/artifact-tab.component';
 
 export class UiEvent {
   role!: 'user' | 'bot' | string;

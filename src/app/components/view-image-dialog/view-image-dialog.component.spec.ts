@@ -97,4 +97,37 @@ describe('ViewImageDialogComponent', () => {
     expect(placeholder.nativeElement.textContent)
         .toContain('No image data provided.');
   });
+
+  it('should display image title if url is provided', () => {
+    const testData = 'data:image/png;base64,xyz';
+    const testUrl = 'http://example.com';
+    mockDialogData.imageData = testData;
+    mockDialogData.images = [testData];
+    mockDialogData.urls = [testUrl];
+    mockSafeValuesService.bypassSecurityTrustUrl.and.returnValue(testData);
+
+    component.ngOnInit();
+    fixture.detectChanges();
+
+    const titleElement = fixture.debugElement.query(By.css('.image-title'));
+    expect(titleElement).not.toBeNull();
+    expect(titleElement.nativeElement.textContent).toContain(testUrl);
+  });
+  it('should display highlight circle if coordinate is provided', () => {
+    const testData = 'data:image/png;base64,xyz';
+    mockDialogData.imageData = testData;
+    mockDialogData.images = [testData];
+    mockDialogData.coordinates = [{x: 500, y: 500}];
+    mockSafeValuesService.bypassSecurityTrustUrl.and.returnValue(testData);
+
+    component.ngOnInit();
+    fixture.detectChanges();
+
+    const highlightElement = fixture.debugElement.query(By.css('.highlight-circle'));
+    expect(highlightElement).not.toBeNull();
+    
+    const style = highlightElement.nativeElement.style;
+    expect(style.left).toBe('50%');
+    expect(style.top).toBe('50%');
+  });
 });

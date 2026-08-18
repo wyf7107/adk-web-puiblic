@@ -1,0 +1,65 @@
+<div class="segment" [class.segment-expandable]="isExpandable()">
+  <div class="segment-header">
+    @if (isExpandable() && depth > 0) {
+      <span class="segment-toggler" (click)="toggleExpand($event)" [class.expanded]="isExpanded"></span>
+    }
+    
+    @if (key !== undefined) {
+      <span class="segment-key">{{ key }}</span>
+      <span class="segment-separator">:</span>
+      @if (showMarkdown && hasLineBreaks(json)) {
+        <button class="md-btn" (click)="openMarkdownDialog(key, json, $event)" matTooltip="View in Markdown">
+          MARKDOWN
+        </button>
+      }
+      <span class="segment-space">&nbsp;</span>
+    }
+
+    @if (isExpandable()) {
+      <span class="segment-value" (click)="toggleExpand($event)">
+        @if (isArray(json)) {
+          <span class="bracket">[</span>
+          @if (!isExpanded) {
+            <span class="collapsed-summary">...</span>
+            <span class="bracket">]</span>
+          }
+        } @else {
+          @if (!isExpanded) {
+            <span class="collapsed-summary">...</span>
+          }
+        }
+      </span>
+    } @else {
+      <span class="segment-value" [ngClass]="getTypeClass(json)">
+        @if (isString(json)) {
+          <span class="value-string">"{{ json }}"</span>
+        } @else if (isNumber(json)) {
+          <span class="value-number">{{ json }}</span>
+        } @else if (isBoolean(json)) {
+          <span class="value-boolean">{{ json }}</span>
+        } @else if (isNull(json)) {
+          <span class="value-null">null</span>
+        } @else if (isUndefined(json)) {
+          <span class="value-undefined">undefined</span>
+        }
+      </span>
+    }
+  </div>
+
+  @if (isExpandable() && isExpanded) {
+    <div class="segment-children" [class.root-children]="depth === 0">
+      @if (isArray(json)) {
+        @for (item of json; track $index; let last = $last) {
+          <app-custom-json-viewer [json]="item" [key]="$index" [depth]="depth + 1" [expanded]="expanded" [showMarkdown]="showMarkdown"></app-custom-json-viewer>
+        }
+      } @else {
+        @for (k of getKeys(json); track k; let last = $last) {
+          <app-custom-json-viewer [json]="json[k]" [key]="k" [depth]="depth + 1" [expanded]="expanded" [showMarkdown]="showMarkdown"></app-custom-json-viewer>
+        }
+      }
+      @if (isArray(json)) {
+        <div class="bracket close-bracket">]</div>
+      }
+    </div>
+  }
+</div>

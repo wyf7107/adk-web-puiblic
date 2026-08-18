@@ -27,10 +27,11 @@ export class InvocIdPipe implements PipeTransform {
     if (!spans) {
       return undefined;
     }
-    return spans.find(
-      (item) =>
-        item.attributes !== undefined &&
-        'gcp.vertex.agent.invocation_id' in item.attributes,
-    )?.attributes['gcp.vertex.agent.invocation_id'];
+    for (const span of spans) {
+      if (span.attrInvocationId !== undefined) {
+        return span.attrInvocationId;
+      }
+    }
+    return undefined;
   }
 }

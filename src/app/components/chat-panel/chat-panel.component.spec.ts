@@ -24,6 +24,7 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 // 1p-ONLY-IMPORTS: import {beforeEach, describe, expect, it}
 import {of} from 'rxjs';
 
+import {UiEvent} from '../../core/models/UiEvent';
 import {AGENT_SERVICE} from '../../core/services/interfaces/agent';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {FEEDBACK_SERVICE} from '../../core/services/interfaces/feedback';
@@ -42,6 +43,18 @@ import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
 import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 
 import {ChatPanelComponent} from './chat-panel.component';
+
+
+function createUiEvents(arr: any[]): UiEvent[] {
+  return arr.map(obj => {
+    if (obj instanceof UiEvent) return obj;
+    if (obj.eventId) {
+      obj.event = {id: obj.eventId};
+      delete obj.eventId;
+    }
+    return new UiEvent(obj);
+  });
+}
 
 describe('ChatPanelComponent', () => {
   let component: ChatPanelComponent;
@@ -126,10 +139,10 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should display user and bot messages', async () => {
-      component.messages = [
+      component.uiEvents = createUiEvents([
         {role: 'user', text: 'User message'},
         {role: 'bot', text: 'Bot message'},
-      ];
+      ]);
       fixture.detectChanges();
       await fixture.whenStable();
       fixture.detectChanges();
@@ -140,9 +153,9 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should display function call', () => {
-      component.messages = [
+      component.uiEvents = createUiEvents([
         {role: 'bot', functionCalls: [{name: 'test_func', args: {}}]},
-      ];
+      ]);
       fixture.detectChanges();
       const button =
           fixture.debugElement.query(By.css('.function-event-button'));
@@ -150,9 +163,9 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should display function response', () => {
-      component.messages = [
+      component.uiEvents = createUiEvents([
         {role: 'bot', functionResponses: [{name: 'test_func', response: {}}]},
-      ];
+      ]);
       fixture.detectChanges();
       const button =
           fixture.debugElement.query(By.css('.function-event-button'));
@@ -174,13 +187,13 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should display A2UI canvas', () => {
-      component.messages = [
+      component.uiEvents = createUiEvents([
         {
           role: 'bot',
           a2uiData:
               {beginRendering: true, surfaceUpdate: {}, dataModelUpdate: {}}
         },
-      ];
+      ]);
       fixture.detectChanges();
       const canvas = fixture.debugElement.query(By.css('app-a2ui-canvas'));
       expect(canvas).toBeTruthy();
@@ -188,7 +201,7 @@ describe('ChatPanelComponent', () => {
   });
 
   it('should display loading bar if message isLoading', async () => {
-    component.messages = [{role: 'bot', isLoading: true}];
+    component.uiEvents = createUiEvents([{role: 'bot', isLoading: true}]);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -197,7 +210,8 @@ describe('ChatPanelComponent', () => {
   });
 
   it('should display thought chip for thought messages', async () => {
-    component.messages = [{role: 'bot', text: 'Thinking...', thought: true}];
+    component.uiEvents =
+        createUiEvents([{role: 'bot', text: 'Thinking...', thought: true}]);
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -219,8 +233,8 @@ describe('ChatPanelComponent', () => {
 
     it(
         'should show edit/delete buttons for text messages', async () => {
-          component.messages =
-              [{role: 'bot', text: 'eval message', eventId: '1'}];
+          component.uiEvents = createUiEvents(
+              [{role: 'bot', text: 'eval message', eventId: '1'}]);
           fixture.detectChanges();
           await fixture.whenStable();
           fixture.detectChanges();
@@ -232,8 +246,8 @@ describe('ChatPanelComponent', () => {
         });
 
     it('should show edit button for function calls', async () => {
-      component.messages =
-          [{role: 'bot', functionCalls: [{name: 'func1'}], eventId: '1'}];
+      component.uiEvents = createUiEvents(
+          [{role: 'bot', functionCalls: [{name: 'func1'}], eventId: '1'}]);
       component.isEditFunctionArgsEnabled = true;
       fixture.detectChanges();
       await fixture.whenStable();
@@ -247,7 +261,7 @@ describe('ChatPanelComponent', () => {
     it(
         'should emit editEvalCaseMessage when edit is clicked', async () => {
           const message = {role: 'bot', text: 'eval message', eventId: '1'};
-          component.messages = [message];
+          component.uiEvents = createUiEvents([message]);
           spyOn(component.editEvalCaseMessage, 'emit');
           fixture.detectChanges();
           await fixture.whenStable();
@@ -263,7 +277,7 @@ describe('ChatPanelComponent', () => {
         'should emit deleteEvalCaseMessage when delete is clicked',
         async () => {
           const message = {role: 'bot', text: 'eval message', eventId: '1'};
-          component.messages = [message];
+          component.uiEvents = createUiEvents([message]);
           spyOn(component.deleteEvalCaseMessage, 'emit');
           fixture.detectChanges();
           await fixture.whenStable();
@@ -283,7 +297,7 @@ describe('ChatPanelComponent', () => {
             functionCalls: [{name: 'func1'}],
             eventId: '1'
           };
-          component.messages = [message];
+          component.uiEvents = createUiEvents([message]);
           component.isEditFunctionArgsEnabled = true;
           spyOn(component.editFunctionArgs, 'emit');
           fixture.detectChanges();
@@ -298,8 +312,8 @@ describe('ChatPanelComponent', () => {
 
   describe('Events', () => {
     it('should emit clickEvent when bot icon is clicked', () => {
-      component.messages = [{role: 'bot', text: 'message', eventId: '1'}];
-      component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
+      component.uiEvents =
+          createUiEvents([{role: 'bot', text: 'message', eventId: '1'}]);
       spyOn(component.clickEvent, 'emit');
       fixture.detectChanges();
       const botIcon =
@@ -309,7 +323,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should disable bot icon when eventId is not set', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = createUiEvents([{role: 'bot', text: 'message'}]);
       fixture.detectChanges();
       const botIcon =
           fixture.debugElement.query(By.css('button[mat-mini-fab]'));
@@ -318,9 +332,8 @@ describe('ChatPanelComponent', () => {
 
     it(
         'should emit clickEvent when function call button is clicked', () => {
-          component.messages =
-              [{role: 'bot', functionCalls: [{name: 'func1'}], eventId: '1'}];
-          component.eventData = new Map([['1', {id: '1', author: 'bot'}]]);
+          component.uiEvents = createUiEvents(
+              [{role: 'bot', functionCalls: [{name: 'func1'}], eventId: '1'}]);
           spyOn(component.clickEvent, 'emit');
           fixture.detectChanges();
           const funcButton =
@@ -356,7 +369,8 @@ describe('ChatPanelComponent', () => {
       let scrollContainerElement: HTMLElement;
 
       beforeEach(() => {
-        component.messages = [{role: 'bot', text: 'Bot message'}];
+        component.uiEvents =
+            createUiEvents([{role: 'bot', text: 'Bot message'}]);
         fixture.detectChanges();
         scrollContainerElement = component.scrollContainer.nativeElement;
       });
@@ -368,11 +382,12 @@ describe('ChatPanelComponent', () => {
             scrollContainerElement.dispatchEvent(new WheelEvent('wheel'));
             expect(component.scrollInterrupted).toBeTrue();
 
-            const oldMessages = component.messages;
-            component.messages = [...oldMessages, {role: 'user', text: 'User'}];
+            const oldMessages = component.uiEvents;
+            component.uiEvents =
+                createUiEvents([...oldMessages, {role: 'user', text: 'User'}]);
             component.ngOnChanges({
-              'messages':
-                  new SimpleChange(oldMessages, component.messages, false)
+              'uiEvents':
+                  new SimpleChange(oldMessages, component.uiEvents, false)
             });
             fixture.detectChanges();
             tick(50);
@@ -385,10 +400,10 @@ describe('ChatPanelComponent', () => {
           'should call uiStateService.lazyLoadMessages when scrolled to top',
           fakeAsync(() => {
             const initialMessageCount = 50;
-            const initialMessages = Array.from(
+            const initialMessages = createUiEvents(Array.from(
                 {length: initialMessageCount},
-                (_, i) => ({role: 'bot', text: `message ${i}`}));
-            component.messages = initialMessages;
+                (_, i) => ({role: 'bot', text: `message ${i}`})));
+            component.uiEvents = createUiEvents(initialMessages);
             fixture.detectChanges();
 
             scrollContainerElement.style.height = '100px';
@@ -408,17 +423,18 @@ describe('ChatPanelComponent', () => {
 
             mockUiStateService.lazyLoadMessagesResponse.next();
 
-            const newMessages = Array.from(
-                {length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`}));
-            component.messages = [...newMessages, ...component.messages];
+            const newMessages = createUiEvents(Array.from(
+                {length: 20}, (_, i) => ({role: 'bot', text: `new ${i}`})));
+            component.uiEvents =
+                createUiEvents([...newMessages, ...component.uiEvents]);
             mockUiStateService.newMessagesLoadedResponse.next(
                 {items: newMessages, nextPageToken: 'next'});
             tick();
             fixture.detectChanges();
 
-            expect(component.messages.length)
+            expect(component.uiEvents.length)
                 .toBe(initialMessageCount + newMessages.length);
-            expect(component.messages[0]).toEqual(newMessages[0]);
+            expect(component.uiEvents[0]).toEqual(newMessages[0]);
           }));
     });
 
@@ -537,8 +553,13 @@ describe('ChatPanelComponent', () => {
       mockFeatureFlagService.isMessageFileUploadEnabledResponse.next(false);
       fixture.detectChanges();
 
+      // Open the actions menu
+      const prefixButton = fixture.debugElement.query(By.css('.input-prefix-menu-btn'));
+      prefixButton.nativeElement.click();
+      fixture.detectChanges();
+
       const allButtons =
-          fixture.debugElement.queryAll(By.css('button[mat-icon-button]'));
+          fixture.debugElement.queryAll(By.css('button[mat-menu-item]'));
       const button = allButtons.find(
           b =>
               b.nativeElement.querySelector('mat-icon')?.textContent?.trim() ===
@@ -550,12 +571,17 @@ describe('ChatPanelComponent', () => {
       mockFeatureFlagService.isManualStateUpdateEnabledResponse.next(false);
       fixture.detectChanges();
 
+      // Open the actions menu
+      const prefixButton = fixture.debugElement.query(By.css('.input-prefix-menu-btn'));
+      prefixButton.nativeElement.click();
+      fixture.detectChanges();
+
       const allButtons =
-          fixture.debugElement.queryAll(By.css('button[mat-icon-button]'));
+          fixture.debugElement.queryAll(By.css('button[mat-menu-item]'));
       const button = allButtons.find(
           b =>
               b.nativeElement.querySelector('mat-icon')?.textContent?.trim() ===
-              'more_vert');
+              'tune');
       expect(button!.nativeElement.disabled).toBeTrue();
     });
 
@@ -670,7 +696,7 @@ describe('ChatPanelComponent', () => {
 
   describe('Feedback UI', () => {
     it('should show when feature flag is on', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = createUiEvents([{role: 'bot', text: 'message'}]);
 
       mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(true);
       fixture.detectChanges();
@@ -681,7 +707,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should hide when feature flag is off', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = createUiEvents([{role: 'bot', text: 'message'}]);
 
       mockFeatureFlagService.isFeedbackServiceEnabledResponse.next(false);
       fixture.detectChanges();
@@ -692,7 +718,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should hide when agent response is loading', () => {
-      component.messages = [{role: 'bot', text: 'message'}];
+      component.uiEvents = createUiEvents([{role: 'bot', text: 'message'}]);
 
       mockAgentService.getLoadingStateResponse.next(true);
       fixture.detectChanges();
@@ -703,13 +729,13 @@ describe('ChatPanelComponent', () => {
     });
 
     it('should show after each bot message', () => {
-      component.messages = [
+      component.uiEvents = createUiEvents([
         {role: 'bot', text: 'message 1'},
         {role: 'bot', text: 'message 1'},
         {role: 'user', text: 'message 2'},
         {role: 'bot', text: 'message 1'},
         {role: 'bot', text: 'message 1'},
-      ];
+      ]);
       fixture.detectChanges();
 
       let feedbackButtons =
@@ -718,28 +744,5 @@ describe('ChatPanelComponent', () => {
     });
   });
 
-  describe('Computer Use', () => {
-    it(
-        'isComputerUseResponse should return true when image data and url are present',
-        () => {
-          const response: any = {
-            name: 'computer_use',
-            response: {
-              image: {data: 'base64data', mimetype: 'image/png'},
-              url: 'http://example.com'
-            }
-          };
-          expect(component.isComputerUseResponse(response)).toBeTrue();
-        });
 
-    it(
-        'isComputerUseResponse should return false when image data is missing',
-        () => {
-          const response: any = {
-            name: 'computer_use',
-            response: {image: null, url: 'http://example.com'}
-          };
-          expect(component.isComputerUseResponse(response)).toBeFalse();
-        });
-  });
 });

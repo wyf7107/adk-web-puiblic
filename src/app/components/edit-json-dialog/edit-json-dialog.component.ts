@@ -18,7 +18,7 @@
 import {ChangeDetectionStrategy, Component, Inject, inject, OnInit, viewChild} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 
-import {JsonEditorComponent} from '../json-editor/json-editor.component';
+import {JsonEditorComponent} from '../json-editor/json-editor.component.google';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import {EditJsonDialogMessagesInjectionToken} from './edit-json-dialog.component.i18n';
 import { MatButton } from '@angular/material/button';

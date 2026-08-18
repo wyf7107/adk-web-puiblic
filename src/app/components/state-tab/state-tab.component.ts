@@ -16,7 +16,7 @@
  */
 
 import {ChangeDetectionStrategy, Component, inject, Input} from '@angular/core';
-import {NgxJsonViewerModule} from 'ngx-json-viewer';
+import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewer.component';
 
 import type {SessionState} from '../../core/models/Session';
 
@@ -28,7 +28,7 @@ import {StateTabMessagesInjectionToken} from './state-tab.component.i18n';
   selector: 'app-state-tab',
   templateUrl: './state-tab.component.html',
   styleUrl: './state-tab.component.scss',
-  imports: [NgxJsonViewerModule],
+  imports: [CustomJsonViewerComponent],
   standalone: true,
 })
 export class StateTabComponent {

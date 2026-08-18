@@ -28,5 +28,5 @@ export interface StringToColorService {
   /**
    * Converts a string to a color, e.g. 'my string' -> '#8c8526ff'.
    */
-  stc(str: string): string;
+  stc(str: string, theme?: string): string;
 }

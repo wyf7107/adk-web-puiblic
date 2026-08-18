@@ -61,6 +61,7 @@ import {VideoService} from '../../core/services/video.service';
 import {WebSocketService} from '../../core/services/websocket.service';
 import {initTestBed} from '../../testing/utils';
 import {EVAL_TAB_COMPONENT, EvalTabComponent} from '../eval-tab/eval-tab.component';
+import {AnalyticsService} from '../../core/services/analytics.service';
 
 import {SidePanelComponent} from './side-panel.component';
 
@@ -178,8 +179,7 @@ describe('SidePanelComponent', () => {
     mockFeatureFlagService.isApplicationSelectorEnabledResponse.next(true);
     mockFeatureFlagService.isTraceEnabledResponse.next(true);
     mockFeatureFlagService.isArtifactsTabEnabledResponse.next(true);
-    mockFeatureFlagService.isSessionsTabEnabledResponse.next(true);
-    mockFeatureFlagService.isStateTabEnabledResponse.next(true);
+
     mockFeatureFlagService.isEvalEnabledResponse.next(true);
     mockFeatureFlagService.isTokenStreamingEnabled.and.returnValue(of(true));
     mockFeatureFlagService.isMessageFileUploadEnabled.and.returnValue(of(true));
@@ -209,7 +209,8 @@ describe('SidePanelComponent', () => {
         {provide: ActivatedRoute, useValue: mockActivatedRoute},
         {provide: Location, useValue: mockLocation},
         {provide: SAFE_VALUES_SERVICE, useClass: MockSafeValuesService},
-        {provide: THEME_SERVICE, useClass: MockThemeService}
+        {provide: THEME_SERVICE, useClass: MockThemeService},
+        {provide: AnalyticsService, useValue: jasmine.createSpyObj('AnalyticsService', ['setUserProperties', 'sendEvent'])}
       ],
     });
 
@@ -232,42 +233,7 @@ describe('SidePanelComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('App Selector', () => {
-    beforeEach(() => {
-      fixture.componentRef.setInput('isApplicationSelectorEnabledObs', of(true));
-      fixture.componentRef.setInput('apps$', of(['app1', 'app2']));
-      fixture.detectChanges();
-    });
 
-    it('shows app selector', () => {
-      expect(fixture.debugElement.query(APP_SELECT_SELECTOR)).toBeTruthy();
-    });
-
-    it('shows all apps in selector', () => {
-      const appSelect = fixture.debugElement.query(APP_SELECT_SELECTOR);
-      const options = appSelect.componentInstance.options;
-      // Filter out the search option (which has value=null)
-      const appOptions = options.filter((option: MatOption) => option.value !== null);
-      expect(appOptions.map((option: MatOption) => option.value)).toEqual([
-        'app1',
-        'app2',
-      ]);
-    });
-
-    describe('when app is selected', () => {
-      beforeEach(() => {
-        spyOn(component.appSelectionChange, 'emit');
-        const appSelect = fixture.debugElement.query(APP_SELECT_SELECTOR);
-        const mockEvent =
-            new MatSelectChange(appSelect.componentInstance, 'app1');
-        appSelect.triggerEventHandler('selectionChange', mockEvent);
-      });
-      it('emits appSelectionChange event', () => {
-        expect(component.appSelectionChange.emit)
-            .toHaveBeenCalledWith(jasmine.objectContaining({value: 'app1'}));
-      });
-    });
-  });
 
   describe('Tab hiding', () => {
     it('should hide Trace tab when isTraceEnabled is false', () => {
@@ -306,30 +272,7 @@ describe('SidePanelComponent', () => {
       expect(evalLabel).toBeUndefined();
     });
 
-    it('hides State tab when isStateTabEnabled is false', () => {
-      mockFeatureFlagService.isStateTabEnabledResponse.next(false);
-      fixture.detectChanges();
-      const tabLabels = fixture.debugElement.queryAll(
-          By.css('.tab-label'),
-      );
-      const stateLabel = tabLabels.find(
-          (label) => label.nativeElement.textContent.trim() === 'State',
-      );
-      expect(stateLabel).toBeUndefined();
-    });
 
-    it(
-        'hides Sessions tab when isSessionsTabEnabled is false', () => {
-          mockFeatureFlagService.isSessionsTabEnabledResponse.next(false);
-          fixture.detectChanges();
-          const tabLabels = fixture.debugElement.queryAll(
-              By.css('.tab-label'),
-          );
-          const sessionsLabel = tabLabels.find(
-              (label) => label.nativeElement.textContent.trim() === 'Sessions',
-          );
-          expect(sessionsLabel).toBeUndefined();
-        });
   });
 
   describe('Rendering', () => {
@@ -372,27 +315,6 @@ describe('SidePanelComponent', () => {
   });
 
   describe('Tabs', () => {
-    it('when sessionsTabReordering is disabled, Session tab should be the 4th tab',
-       () => {
-         const tabGroup = fixture.debugElement.query(By.directive(MatTabGroup));
-         const tabLabels = tabGroup.queryAll(By.css('.tab-label'));
-         const sessionsLabel = tabLabels[SESSIONS_TAB_INDEX];
-         expect(sessionsLabel.nativeElement.textContent.trim())
-             .toEqual('Sessions');
-       });
-
-    it('when sessionsTabReordering is enabled, Session tab should be the 0th tab',
-       () => {
-         mockFeatureFlagService.isSessionsTabReorderingEnabledResponse.next(
-             true);
-         fixture.detectChanges();
-         const tabGroup = fixture.debugElement.query(By.directive(MatTabGroup));
-         const tabLabels = tabGroup.queryAll(By.css('.tab-label'));
-         const sessionsLabel = tabLabels[0];
-         expect(sessionsLabel.nativeElement.textContent.trim())
-             .toEqual('Sessions');
-       });
-
     describe('when tab is changed', () => {
       beforeEach(() => {
         spyOn(component.tabChange, 'emit');
@@ -406,39 +328,7 @@ describe('SidePanelComponent', () => {
       });
     });
 
-    describe('Sessions tab', () => {
-      beforeEach(async () => {
-        await switchTab(SESSIONS_TAB_INDEX);
-      });
 
-      describe('when app-session-tab emits sessionSelected', () => {
-        beforeEach(() => {
-          spyOn(component.sessionSelected, 'emit');
-          const sessionTab = fixture.debugElement.query(SESSION_TAB_SELECTOR);
-          sessionTab.triggerEventHandler(
-              'sessionSelected', {id: 'session1'} as Session);
-        });
-        it('emits sessionSelected', () => {
-          expect(component.sessionSelected.emit).toHaveBeenCalledWith({
-            id: 'session1'
-          } as Session);
-        });
-      });
-
-      describe('when app-session-tab emits sessionReloaded', () => {
-        beforeEach(() => {
-          spyOn(component.sessionReloaded, 'emit');
-          const sessionTab = fixture.debugElement.query(SESSION_TAB_SELECTOR);
-          sessionTab.triggerEventHandler(
-              'sessionReloaded', {id: 'session1'} as Session);
-        });
-        it('emits sessionReloaded', () => {
-          expect(component.sessionReloaded.emit).toHaveBeenCalledWith({
-            id: 'session1'
-          } as Session);
-        });
-      });
-    });
 
     describe('Eval tab', () => {
       describe('Interactions', () => {
@@ -597,6 +487,33 @@ describe('SidePanelComponent', () => {
         fixture.detectChanges();
         expect(fixture.debugElement.query(DETAILS_PANEL_SELECTOR)!.nativeElement.hidden).toBeFalse();
       });
+    });
+  });
+
+  describe('Dynamic Eval Tab Initialization', () => {
+    it('should initialize Eval tab dynamically when appName transitions from empty to non-empty', async () => {
+      fixture = TestBed.createComponent(SidePanelComponent);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('appName', '');
+      fixture.componentRef.setInput('showSidePanel', true);
+      fixture.detectChanges();
+
+      // Assert: Tab container is not rendered
+      expect(fixture.debugElement.query(TABS_CONTAINER_SELECTOR)).toBeNull();
+      expect(fixture.debugElement.query(EVAL_TAB_SELECTOR)).toBeNull();
+
+      // Act: Change appName to a non-empty string
+      fixture.componentRef.setInput('appName', 'my-app');
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Switch to Eval Tab to instantiate its container
+      await switchTab(EVAL_TAB_INDEX);
+
+      // Assert: Tab container is now rendered, and Eval tab component is instantiated
+      expect(fixture.debugElement.query(TABS_CONTAINER_SELECTOR)).toBeTruthy();
+      expect(fixture.debugElement.query(EVAL_TAB_SELECTOR)).toBeTruthy();
     });
   });
 });

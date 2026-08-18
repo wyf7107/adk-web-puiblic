@@ -16,18 +16,22 @@
  */
 
 import {SelectionModel} from '@angular/cdk/collections';
-import {NgClass} from '@angular/common';
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, InjectionToken, input, OnChanges, OnInit, output, signal, SimpleChanges, Type, viewChildren} from '@angular/core';
+import {DecimalPipe, NgClass} from '@angular/common';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, InjectionToken, input, OnChanges, OnInit, output, signal, SimpleChanges, Type, viewChildren} from '@angular/core';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {MatDialog} from '@angular/material/dialog';
 import {MatIcon} from '@angular/material/icon';
 import {MatProgressSpinner} from '@angular/material/progress-spinner';
 import {MatCell, MatCellDef, MatColumnDef, MatHeaderCell, MatHeaderCellDef, MatHeaderRow, MatHeaderRowDef, MatRow, MatRowDef, MatTable, MatTableDataSource} from '@angular/material/table';
 import {MatTooltip} from '@angular/material/tooltip';
-import {BehaviorSubject, of} from 'rxjs';
-import {catchError} from 'rxjs/operators';
+import {MatSelectModule} from '@angular/material/select';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {BehaviorSubject, of, forkJoin} from 'rxjs';
+import {catchError, finalize, first, switchMap} from 'rxjs/operators';
 
-import {DEFAULT_EVAL_METRICS, EvalCase, EvalMetric, Invocation} from '../../core/models/Eval';
+import {DEFAULT_EVAL_METRICS, EvalCase, EvalMetric, EvaluationResult, EvalStatus, UserSimulatorConfig} from '../../core/models/Eval';
 import {Session} from '../../core/models/Session';
 import {FeatureFlagService} from '../../core/services/feature-flag.service';
 import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
@@ -38,21 +42,15 @@ import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-
 import {EvalTabMessagesInjectionToken} from './eval-tab.component.i18n';
 import {NewEvalSetDialogComponentComponent} from './new-eval-set-dialog/new-eval-set-dialog-component/new-eval-set-dialog-component.component';
 import {RunEvalConfigDialogComponent} from './run-eval-config-dialog/run-eval-config-dialog.component';
+import {DeleteSessionDialogComponent, DeleteSessionDialogData} from '../session-tab/delete-session-dialog/delete-session-dialog.component';
+import {InfoTable} from '../info-table/info-table';
+import { FormatMetricNamePipe } from './format-metric-name.pipe';
 
 export const EVAL_TAB_COMPONENT = new InjectionToken<Type<EvalTabComponent>>(
     'EVAL_TAB_COMPONENT',
 );
 
-interface EvaluationResult {
-  setId: string;
-  evalId: string;
-  finalEvalStatus: number;
-  evalMetricResults: any[];
-  overallEvalMetricResults: any[];
-  evalMetricResultPerInvocation?: any[];
-  sessionId: string;
-  sessionDetails: any;
-}
+
 
 interface UIEvaluationResult {
   isToggled: boolean;
@@ -86,6 +84,10 @@ interface AppEvaluationResult {
   standalone: true,
   imports: [
     MatIcon,
+    MatButton,
+    MatIconButton,
+    MatButtonToggle,
+    MatButtonToggleGroup,
     MatTooltip,
     MatTable,
     MatColumnDef,
@@ -94,12 +96,18 @@ interface AppEvaluationResult {
     MatCheckbox,
     MatCellDef,
     MatCell,
+    DecimalPipe,
     NgClass,
     MatHeaderRowDef,
     MatHeaderRow,
     MatRowDef,
     MatRow,
     MatProgressSpinner,
+    DeleteSessionDialogComponent,
+    InfoTable,
+    MatSelectModule,
+    MatFormFieldModule,
+    FormatMetricNamePipe,
   ],
 })
 export class EvalTabComponent implements OnInit, OnChanges {
@@ -113,6 +121,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   readonly evalCaseSelected = output<EvalCase>();
   readonly evalSetIdSelected = output<string>();
   readonly shouldReturnToSession = output<boolean>();
+  readonly editEvalCaseRequested = output<EvalCase>();
 
   private readonly evalCasesSubject = new BehaviorSubject<string[]>([]);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
@@ -120,9 +129,38 @@ export class EvalTabComponent implements OnInit, OnChanges {
       inject<FeatureFlagService>(FEATURE_FLAG_SERVICE);
   protected readonly i18n = inject(EvalTabMessagesInjectionToken);
 
-  displayedColumns: string[] = ['select', 'evalId', 'finalEvalStatus'];
+  displayedColumns: string[] = ['select', 'evalId'];
   evalsets: any[] = [];
-  selectedEvalSet: string = '';
+  selectedEvalSet = signal<string>('');
+  currentEvalSet = signal<any>(null);
+
+  evalHistorySorted = computed(() => {
+    const evalHistory = this.appEvaluationResults[this.appName()]?.[this.selectedEvalSet()] || {};
+    const keys = Object.keys(evalHistory).sort((a, b) => b.localeCompare(a));
+    return keys.map((key) => {
+      return {timestamp: key, evaluationResults: evalHistory[key]};
+    });
+  });
+
+  currentHistoryMetrics = computed(() => {
+    const runId = this.selectedHistoryRun() || this.evalHistorySorted()[0]?.timestamp;
+    if (!runId) return this.evalMetrics;
+    const runObj = this.evalHistorySorted().find(r => r.timestamp === runId);
+    if (!runObj) return this.evalMetrics;
+    return this.getEvalMetrics(runObj);
+  });
+
+  caseHistory = computed(() => {
+    const caseObj = this.selectedEvalCase();
+    if (!caseObj) return [];
+    const evalId = caseObj.evalId;
+    const history = this.evalHistorySorted();
+    return history.map(run => {
+      const result = run.evaluationResults.evaluationResults.find((r: any) => r.evalId === evalId);
+      return { timestamp: run.timestamp, result: result };
+    }).filter(item => item.result !== undefined);
+  });
+
   evalCases: string[] = [];
   selectedEvalCase = signal<EvalCase|null>(null);
   deletedEvalCaseIndex: number = -1;
@@ -131,9 +169,16 @@ export class EvalTabComponent implements OnInit, OnChanges {
   selection = new SelectionModel<string>(true, []);
 
   showEvalHistory = signal(false);
+  selectedEvalTab = signal('cases');
+  selectedHistoryRun = signal<string|null>(null);
 
   evalRunning = signal(false);
+  loadingMetrics = signal(false);
   evalMetrics: EvalMetric[] = DEFAULT_EVAL_METRICS;
+  useLive = false;
+  // Audio user simulator config for the next run, set from the run dialog.
+  pendingUserSimulatorConfig: UserSimulatorConfig|null = null;
+  isEvalV2Enabled = signal(false);
 
   // Key: evalSetId
   // Value: EvaluationResult[]
@@ -158,13 +203,28 @@ export class EvalTabComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['appName']) {
-      this.selectedEvalSet = '';
+      this.selectedEvalSet.set('');
       this.evalCases = [];
       this.getEvalSet();
       this.getEvaluationResult();
     }
   }
-  ngOnInit(): void {}
+
+  ngOnInit(): void {
+    this.flagService.isEvalV2Enabled()
+      .pipe(first())
+      .subscribe((enabled) => this.isEvalV2Enabled.set(enabled));
+
+    const savedMetrics = window.localStorage.getItem('adk_eval_metrics_selection');
+    if (savedMetrics) {
+      try {
+        this.evalMetrics = JSON.parse(savedMetrics) as EvalMetric[];
+      } catch (e) {
+        console.error('Error parsing saved eval metrics', e);
+        this.evalMetrics = DEFAULT_EVAL_METRICS;
+      }
+    }
+  }
 
   selectNewEvalCase(evalCases: string[]) {
     let caseToSelect = this.deletedEvalCaseIndex;
@@ -195,10 +255,28 @@ export class EvalTabComponent implements OnInit, OnChanges {
     }
   }
 
+  getNextDefaultEvalSetName(): string {
+    const pattern = /^eval_set_(\d+)$/;
+    let maxNum = 0;
+    for (const set of this.evalsets) {
+      if (typeof set === 'string') {
+        const match = set.match(pattern);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) {
+            maxNum = num;
+          }
+        }
+      }
+    }
+    return `eval_set_${maxNum + 1}`;
+  }
+
   openNewEvalSetDialog() {
+    const defaultName = this.getNextDefaultEvalSetName();
     const dialogRef = this.dialog.open(NewEvalSetDialogComponentComponent, {
       width: '600px',
-      data: {appName: this.appName()},
+      data: {appName: this.appName(), defaultName: defaultName},
     });
 
     dialogRef.afterClosed().subscribe((needRefresh) => {
@@ -210,27 +288,37 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   openNewEvalCaseDialog() {
-    const dialogRef = this.dialog.open(AddEvalSessionDialogComponent, {
-      width: '600px',
-      data: {
-        appName: this.appName(),
-        userId: this.userId(),
-        sessionId: this.sessionId(),
-        evalSetId: this.selectedEvalSet,
-      },
-    });
+    if (!this.sessionId()) return;
 
-    dialogRef.afterClosed().subscribe((needRefresh) => {
-      if (needRefresh) {
-        this.listEvalCases();
-        this.changeDetectorRef.detectChanges();
-      }
-    });
+    this.sessionService.getSession(this.userId(), this.appName(), this.sessionId())
+      .subscribe((fullSession) => {
+        const displayName = (fullSession.state as any)?.['__session_metadata__']?.displayName || this.sessionId();
+        const sanitizedName = displayName.replace(/ /g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+
+        const dialogRef = this.dialog.open(AddEvalSessionDialogComponent, {
+          width: '600px',
+          data: {
+            appName: this.appName(),
+            userId: this.userId(),
+            sessionId: this.sessionId(),
+            evalSetId: this.selectedEvalSet(),
+            defaultName: sanitizedName,
+            existingCases: this.evalCases,
+          },
+        });
+
+        dialogRef.afterClosed().subscribe((needRefresh) => {
+          if (needRefresh) {
+            this.listEvalCases();
+            this.changeDetectorRef.detectChanges();
+          }
+        });
+      });
   }
 
   listEvalCases() {
     this.evalCases = [];
-    this.evalService.listEvalCases(this.appName(), this.selectedEvalSet)
+    this.evalService.listEvalCases(this.appName(), this.selectedEvalSet())
         .subscribe((res) => {
           this.evalCases = res;
           this.dataSource = new MatTableDataSource<string>(this.evalCases);
@@ -239,46 +327,80 @@ export class EvalTabComponent implements OnInit, OnChanges {
         });
   }
 
+  /** Cases-tab Run button. */
+  protected runCasesFromToolbar() {
+    this.openEvalConfigDialog();
+  }
+
   runEval() {
     this.evalRunning.set(true);
-    if (this.selection.selected.length == 0) {
-      alert('No case selected!');
-      this.evalRunning.set(false);
-      return;
-    }
+    const evalSetId = this.selectedEvalSet();
+    let runFailed = false;
     this.evalService
         .runEval(
             this.appName(),
-            this.selectedEvalSet,
-            this.selection.selected,
+            evalSetId,
+            this.selection.selected.length === 0 ? this.dataSource.data : this.selection.selected,
             this.evalMetrics,
+            this.useLive,
+            this.pendingUserSimulatorConfig ?? undefined,
             )
         .pipe(catchError((error) => {
+          runFailed = true;
           if (error.error?.detail?.includes('not installed')) {
             this.evalNotInstalledMsg.emit(error.error.detail);
           }
           return of([]);
         }))
         .subscribe((res) => {
-          this.evalRunning.set(false);
-          this.currentEvalResultBySet.set(this.selectedEvalSet, res);
-
-          this.getEvaluationResult();
+          // On failure, stop the spinner here; otherwise getEvaluationResult
+          // clears it once results are loaded.
+          if (runFailed) {
+            this.evalRunning.set(false);
+            this.changeDetectorRef.detectChanges();
+            return;
+          }
+          this.currentEvalResultBySet.set(evalSetId, res);
+          this.getEvaluationResult(true);
           this.changeDetectorRef.detectChanges();
         });
   }
 
   selectEvalSet(set: string) {
-    this.selectedEvalSet = set;
+    this.selectedEvalSet.set(set);
     this.listEvalCases();
+    if (this.isEvalV2Enabled()) {
+      this.evalService.getEvalSet(this.appName(), set)
+        .pipe(catchError((error) => {
+          console.error('Error fetching eval set details', error);
+          return of(null);
+        }))
+        .subscribe((res) => {
+          this.currentEvalSet.set(res);
+          this.changeDetectorRef.detectChanges();
+        });
+    }
   }
 
   clearSelectedEvalSet() {
-    if (!!this.showEvalHistory()) {
-      this.toggleEvalHistoryButton();
+    if (this.selectedEvalTab() !== 'cases') {
+      this.selectedEvalTab.set('cases');
       return;
     }
-    this.selectedEvalSet = '';
+    this.selectedEvalSet.set('');
+    this.currentEvalSet.set(null);
+  }
+
+  clearAllNavigation() {
+    this.selectedEvalSet.set('');
+    this.selectedHistoryRun.set(null);
+    this.selectedEvalCase.set(null);
+    this.currentEvalSet.set(null);
+  }
+
+  goToEvalSet() {
+    this.selectedHistoryRun.set(null);
+    this.selectedEvalCase.set(null);
   }
 
   isAllSelected() {
@@ -297,7 +419,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   getEvalResultForCase(caseId: string) {
-    const el = this.currentEvalResultBySet.get(this.selectedEvalSet)
+    const el = this.currentEvalResultBySet.get(this.selectedEvalSet())
                    ?.filter((c) => c.evalId == caseId);
     if (!el || el.length == 0) {
       return undefined;
@@ -306,6 +428,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
   }
 
   private formatToolUses(toolUses: any[]): any[] {
+    if (!toolUses || !Array.isArray(toolUses)) {
+      return [];
+    }
     const formattedToolUses = [];
     for (const toolUse of toolUses) {
       formattedToolUses.push({name: toolUse.name, args: toolUse.args});
@@ -318,7 +443,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
     const invocationResults = evalCaseResult.evalMetricResultPerInvocation!;
     let currentInvocationIndex = -1;
 
-    if (invocationResults) {
+    if (invocationResults && res?.events) {
       for (let i = 0; i < res.events.length; i++) {
         const event = res.events[i];
         if (event.author === 'user') {
@@ -329,19 +454,23 @@ export class EvalTabComponent implements OnInit, OnChanges {
           let failedMetric = '';
           let score = 1;
           let threshold = 1;
-          for (const evalMetricResult of invocationResult.evalMetricResults) {
-            if (evalMetricResult.evalStatus === 2) {
-              evalStatus = 2;
-              failedMetric = evalMetricResult.metricName;
-              score = evalMetricResult.score;
-              threshold = evalMetricResult.threshold;
-              break;
+          
+          if (invocationResult && invocationResult.evalMetricResults) {
+            for (const evalMetricResult of invocationResult.evalMetricResults) {
+              if (evalMetricResult.evalStatus === EvalStatus.FAILED) {
+                evalStatus = EvalStatus.FAILED;
+                failedMetric = evalMetricResult.metricName;
+                score = evalMetricResult.score;
+                threshold = evalMetricResult.threshold;
+                break;
+              }
             }
           }
+          
           event.evalStatus = evalStatus;
 
-          if (i === res.events.length - 1 ||
-              res.events[i + 1].author === 'user') {
+          if (invocationResult && (i === res.events.length - 1 ||
+              res.events[i + 1].author === 'user')) {
             this.addEvalFieldsToBotEvent(
                 event, invocationResult, failedMetric, score, threshold);
           }
@@ -364,9 +493,9 @@ export class EvalTabComponent implements OnInit, OnChanges {
           invocationResult.expectedInvocation.intermediateData.toolUses);
     } else if (event.failedMetric === 'response_match_score') {
       event.actualFinalResponse =
-          invocationResult.actualInvocation.finalResponse?.parts?.[0]?.text;
+          invocationResult.actualInvocation.finalResponse.parts[0].text;
       event.expectedFinalResponse =
-          invocationResult.expectedInvocation.finalResponse?.parts?.[0]?.text;
+          invocationResult.expectedInvocation.finalResponse.parts[0]?.text;
     }
   }
 
@@ -377,16 +506,25 @@ export class EvalTabComponent implements OnInit, OnChanges {
       userId: res?.userId ?? '',
       state: res?.state ?? [],
       events: res?.events ?? [],
-    };
+      isEvalResult: true,
+    } as any;
   }
 
   getSession(evalId: string) {
     const evalCaseResult =
-        this.currentEvalResultBySet.get(this.selectedEvalSet)
+        this.currentEvalResultBySet.get(this.selectedEvalSet())
             ?.filter((c) => c.evalId == evalId)[0];
     const sessionId = evalCaseResult!.sessionId;
-    this.sessionService.getSession(this.userId(), this.appName(), sessionId)
+    const sessionUserId = this.evalSessionUserId(evalCaseResult);
+    this.sessionService.getSession(sessionUserId, this.appName(), sessionId)
+        .pipe(catchError((error) => {
+          console.error('Error fetching eval session', error);
+          return of(null);
+        }))
         .subscribe((res) => {
+          if (!res) {
+            return;
+          }
           this.addEvalCaseResultToEvents(res, evalCaseResult!);
           const session = this.fromApiResultToSession(res);
 
@@ -394,16 +532,27 @@ export class EvalTabComponent implements OnInit, OnChanges {
         });
   }
 
+  /** Eval sessions are saved under the user id the eval ran as, not the chat default. */
+  private evalSessionUserId(evalCaseResult: any): string {
+    return evalCaseResult?.userId || this.userId();
+  }
+
   toggleEvalHistoryButton() {
     this.showEvalHistory.set(!this.showEvalHistory());
   }
 
   protected getEvalHistoryOfCurrentSet() {
-    return this.appEvaluationResults[this.appName()][this.selectedEvalSet];
+    if (!this.appEvaluationResults[this.appName()]) {
+      return {};
+    }
+    return this.appEvaluationResults[this.appName()][this.selectedEvalSet()] || {};
   }
 
   protected getEvalHistoryOfCurrentSetSorted(): any[] {
     const evalHistory = this.getEvalHistoryOfCurrentSet();
+    if (!evalHistory) {
+      return [];
+    }
     const evalHistorySorted =
         Object.keys(evalHistory).sort((a, b) => b.localeCompare(a));
 
@@ -420,6 +569,44 @@ export class EvalTabComponent implements OnInit, OnChanges {
 
   protected getFailCountForCurrentResult(result: any[]) {
     return result.filter((r: any) => r.finalEvalStatus == 2).length;
+  }
+
+  private getMetricsCounts(evalRes: any): {passed: number, total: number} {
+    if (!evalRes) return {passed: 0, total: 0};
+
+    let passed = 0;
+    let total = 0;
+
+    // Excludes NOT_EVALUATED so the ratio reads "passed / evaluated".
+    const tally = (results: any[]) => {
+      for (const r of results) {
+        if (r.evalStatus === EvalStatus.NOT_EVALUATED) continue;
+        total += 1;
+        if (r.evalStatus === EvalStatus.PASSED) passed += 1;
+      }
+    };
+
+    if (evalRes.evalMetricResults && evalRes.evalMetricResults.length > 0) {
+      tally(evalRes.evalMetricResults);
+    } else if (evalRes.evalMetricResultPerInvocation) {
+      for (const inv of evalRes.evalMetricResultPerInvocation) {
+        if (inv.evalMetricResults) {
+          tally(inv.evalMetricResults);
+        }
+      }
+    }
+    return {passed, total};
+  }
+
+  protected getMetricsScore(evalRes: any): string {
+    const {passed, total} = this.getMetricsCounts(evalRes);
+    return `${passed}/${total}`;
+  }
+
+  // Uses the backend verdict so the score color stays in sync with the
+  // PASS/FAIL status, rather than recomputing from counts.
+  protected isMetricsSucceed(evalRes: any): boolean {
+    return evalRes?.finalEvalStatus === EvalStatus.PASSED;
   }
 
   protected formatTimestamp(timestamp: number|string): string {
@@ -466,21 +653,59 @@ export class EvalTabComponent implements OnInit, OnChanges {
     return this.getEvalHistoryOfCurrentSet()[timestamp].evaluationResults;
   }
 
-  getHistorySession(evalCaseResult: EvaluationResult) {
-    this.addEvalCaseResultToEvents(
-        evalCaseResult.sessionDetails, evalCaseResult);
+  getHistorySession(
+      evalCaseResult: EvaluationResult, timestamp: string,
+      evalSetId: string = this.selectedEvalSet()) {
+    const sessionId = evalCaseResult.sessionId;
+    const evalId = evalCaseResult.evalId;
 
-    const session = this.fromApiResultToSession(evalCaseResult.sessionDetails);
+    this.selectedHistoryRun.set(timestamp);
 
-    this.sessionSelected.emit(session);
+    // Warm the metrics-info cache so metric tooltips render on direct load.
+    this.evalService.getMetricsInfo(this.appName())
+        .pipe(catchError((error) => {
+          console.error('Error fetching metrics info', error);
+          return of({metricsInfo: []});
+        }))
+        .subscribe();
+
+    this.evalService.getEvalCase(this.appName(), evalSetId, evalId)
+        .subscribe((evalCase) => {
+          const sessionUserId = this.evalSessionUserId(evalCaseResult);
+          this.sessionService.getSession(sessionUserId, this.appName(), sessionId)
+              .pipe(catchError((error) => {
+                console.error('Error fetching eval session', error);
+                return of(null);
+              }))
+              .subscribe((res) => {
+                if (!res) {
+                  // Surface the result (metrics/status) even when the session
+                  // can't be loaded, rather than falling back to the README.
+                  const session = this.fromApiResultToSession(
+                      {id: sessionId, userId: sessionUserId, events: []});
+                  (session as any).evalCase = evalCase;
+                  (session as any).evalCaseResult = evalCaseResult;
+                  (session as any).timestamp = timestamp;
+                  this.sessionSelected.emit(session);
+                  return;
+                }
+                this.addEvalCaseResultToEvents(res, evalCaseResult);
+                const session = this.fromApiResultToSession(res);
+                (session as any).evalCase = evalCase;
+                (session as any).evalCaseResult = evalCaseResult;
+                (session as any).timestamp = timestamp;
+                this.sessionSelected.emit(session);
+              });
+        });
   }
 
+
   protected getEvalCase(element: any) {
-    this.evalService.getEvalCase(this.appName(), this.selectedEvalSet, element)
+    this.evalService.getEvalCase(this.appName(), this.selectedEvalSet(), element)
         .subscribe((res) => {
           this.selectedEvalCase.set(res);
           this.evalCaseSelected.emit(res);
-          this.evalSetIdSelected.emit(this.selectedEvalSet);
+          this.evalSetIdSelected.emit(this.selectedEvalSet());
         });
   }
 
@@ -492,9 +717,41 @@ export class EvalTabComponent implements OnInit, OnChanges {
     this.currentEvalResultBySet.clear();
   }
 
+  confirmDeleteEvalCase(event: Event, evalCaseId: string) {
+    event.stopPropagation();
+    const dialogData: DeleteSessionDialogData = {
+      title: 'Confirm delete',
+      message: `Are you sure you want to delete ${evalCaseId}?`,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    };
+
+    const dialogRef = this.dialog.open(DeleteSessionDialogComponent, {
+      width: '600px',
+      data: dialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.deleteEvalCase(evalCaseId);
+      }
+    });
+  }
+
+  requestEditEvalCase(event: Event, element: string) {
+    event.stopPropagation();
+    this.evalService.getEvalCase(this.appName(), this.selectedEvalSet(), element)
+        .subscribe((res) => {
+          this.selectedEvalCase.set(res);
+          this.evalCaseSelected.emit(res);
+          this.evalSetIdSelected.emit(this.selectedEvalSet());
+          this.editEvalCaseRequested.emit(res);
+        });
+  }
+
   deleteEvalCase(evalCaseId: string) {
     this.evalService
-        .deleteEvalCase(this.appName(), this.selectedEvalSet, evalCaseId)
+        .deleteEvalCase(this.appName(), this.selectedEvalSet(), evalCaseId)
         .subscribe((res) => {
           this.deletedEvalCaseIndex = this.evalCases.indexOf(evalCaseId);
           this.selectedEvalCase.set(null);
@@ -503,85 +760,159 @@ export class EvalTabComponent implements OnInit, OnChanges {
         });
   }
 
-  protected getEvaluationResult() {
-    this.evalService.listEvalResults(this.appName())
-        .pipe(catchError((error) => {
-          if (error.status === 404 && error.statusText === 'Not Found') {
-            this.shouldShowTab.emit(false);
-            return of(null);
-          }
-          return of([]);
-        }))
+  confirmDeleteEvalSet(event: Event, evalSetId: string) {
+    event.stopPropagation();
+    const dialogData: DeleteSessionDialogData = {
+      title: 'Confirm delete',
+      message: `Are you sure you want to delete eval set ${evalSetId}?`,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+    };
+
+    const dialogRef = this.dialog.open(DeleteSessionDialogComponent, {
+      width: '600px',
+      data: dialogData,
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.deleteEvalSet(evalSetId);
+      }
+    });
+  }
+
+  deleteEvalSet(evalSetId: string) {
+    this.evalService
+        .deleteEvalSet(this.appName(), evalSetId)
         .subscribe((res) => {
-          for (const evalResultId of res) {
-            this.evalService.getEvalResult(this.appName(), evalResultId)
-                .subscribe((res) => {
-                  if (!this.appEvaluationResults[this.appName()]) {
-                    this.appEvaluationResults[this.appName()] = {};
-                  }
+          this.getEvalSet();
+          this.changeDetectorRef.detectChanges();
+        });
+  }
 
-                  if (!this.appEvaluationResults[this.appName()]
-                                                [res.evalSetId]) {
-                    this.appEvaluationResults[this.appName()][res.evalSetId] =
-                        {};
-                  }
+  protected getEvaluationResult(navigateToLatest = false) {
+    this.evalService.listEvalResults(this.appName())
+        .pipe(
+          catchError((error) => {
+            if (error.status === 404 && error.statusText === 'Not Found') {
+              this.shouldShowTab.emit(false);
+              return of(null);
+            }
+            return of([]);
+          }),
+          switchMap((ids: string[] | null) => {
+            if (!ids || ids.length === 0) return of([]);
+            const observables = ids.map(id => this.evalService.getEvalResult(this.appName(), id));
+            return forkJoin(observables);
+          }),
+          // Always clear the running state, even on empty/error paths, so the
+          // spinner never gets stuck.
+          finalize(() => {
+            this.evalRunning.set(false);
+            this.changeDetectorRef.detectChanges();
+          }),
+        )
+        .subscribe((results: any[]) => {
+          if (results.length === 0) return;
 
-                  const timeStamp = res.creationTimestamp;
+          let latestTimestamp = '';
+          let latestEvalSetId = '';
 
-                  if (!this.appEvaluationResults[this.appName()][res.evalSetId]
-                                                [timeStamp]) {
-                    this.appEvaluationResults[this.appName()][res.evalSetId][timeStamp] =
-                        {isToggled: false, evaluationResults: []};
-                  }
+          for (const res of results) {
+            if (!this.appEvaluationResults[this.appName()]) {
+              this.appEvaluationResults[this.appName()] = {};
+            }
 
-                  const uiEvaluationResult: UIEvaluationResult = {
-                    isToggled: false,
-                    evaluationResults:
-                        res.evalCaseResults.map((result: any) => {
-                          return {
-                            setId: result.id,
-                            evalId: result.evalId,
-                            finalEvalStatus: result.finalEvalStatus,
-                            evalMetricResults: result.evalMetricResults,
-                            evalMetricResultPerInvocation:
-                                result.evalMetricResultPerInvocation,
-                            sessionId: result.sessionId,
-                            sessionDetails: result.sessionDetails,
-                            overallEvalMetricResults:
-                                result.overallEvalMetricResults ?? [],
-                          };
-                        }),
-                  };
+            if (!this.appEvaluationResults[this.appName()][res.evalSetId]) {
+              this.appEvaluationResults[this.appName()][res.evalSetId] = {};
+            }
 
-                  this.appEvaluationResults[this.appName()][res.evalSetId][timeStamp] =
-                      uiEvaluationResult;
-                  this.changeDetectorRef.detectChanges();
-                });
+            const timeStamp = res.creationTimestamp;
+            if (!latestTimestamp || timeStamp > latestTimestamp) {
+              latestTimestamp = timeStamp;
+              latestEvalSetId = res.evalSetId;
+            }
+
+            const uiEvaluationResult: UIEvaluationResult = {
+              isToggled: false,
+              evaluationResults: res.evalCaseResults.map((result: any) => {
+                return {
+                  setId: result.id,
+                  evalId: result.evalId,
+                  finalEvalStatus: result.finalEvalStatus,
+                  evalMetricResults: result.evalMetricResults,
+                  evalMetricResultPerInvocation: result.evalMetricResultPerInvocation,
+                  sessionId: result.sessionId,
+                  sessionDetails: result.sessionDetails,
+                  overallEvalMetricResults: result.overallEvalMetricResults ?? [],
+                  userId: result.userId,
+                };
+              }),
+            };
+
+            this.appEvaluationResults[this.appName()][res.evalSetId][timeStamp] = uiEvaluationResult;
+          }
+
+          this.changeDetectorRef.detectChanges();
+
+          if (navigateToLatest && latestTimestamp) {
+            this.selectedEvalTab.set('history');
+            this.selectedHistoryRun.set(latestTimestamp);
+            // Open the latest run directly so the result shows without an
+            // extra click, replacing the in-progress indicator.
+            this.openLatestRunResult(latestEvalSetId, latestTimestamp);
           }
         });
   }
 
-  protected openEvalConfigDialog() {
-    if (this.selection.selected.length == 0) {
-      alert('No case selected!');
+  // Opens the latest run's result in the chat window, but only for a
+  // single-case set (for multi-case sets, stay on the history list).
+  private openLatestRunResult(evalSetId: string, timestamp: string) {
+    const uiResult =
+        this.appEvaluationResults[this.appName()]?.[evalSetId]?.[timestamp];
+    const caseResults = uiResult?.evaluationResults ?? [];
+    if (caseResults.length !== 1) {
       return;
     }
+    this.getHistorySession(
+        caseResults[0] as EvaluationResult, timestamp, evalSetId);
+  }
 
-    const dialogRef = this.dialog.open(RunEvalConfigDialogComponent, {
-      maxWidth: '90vw',
-      maxHeight: '90vh',
-      data: {
-        evalMetrics: this.evalMetrics,
-      },
-    });
+  protected openEvalConfigDialog() {
+    this.loadingMetrics.set(true);
+    this.evalService.getMetricsInfo(this.appName())
+      .pipe(catchError((error) => {
+        console.error('Error fetching metrics info', error);
+        return of({ metricsInfo: [] });
+      }))
+      .subscribe((res) => {
+        this.loadingMetrics.set(false);
+        const dialogRef = this.dialog.open(RunEvalConfigDialogComponent, {
+          maxWidth: '90vw',
+          maxHeight: '90vh',
+          data: {
+            evalMetrics: this.evalMetrics,
+            metricsInfo: res.metricsInfo || [],
+          },
+        });
 
-    dialogRef.afterClosed().subscribe((evalMetrics) => {
-      if (!!evalMetrics) {
-        this.evalMetrics = evalMetrics;
+        dialogRef.afterClosed().subscribe((result) => {
+          if (!result) {
+            return;
+          }
 
-        this.runEval();
-      }
-    });
+          this.evalMetrics = result.metrics;
+          this.useLive = !!result.useLive;
+          this.pendingUserSimulatorConfig = result.userSimulatorConfig ?? null;
+
+          // Persist the user's metric selection so it is remembered next time.
+          window.localStorage.setItem(
+              'adk_eval_metrics_selection',
+              JSON.stringify(result.metrics));
+
+          this.runEval();
+        });
+      });
   }
 
   protected getEvalMetrics(evalResult: any|undefined) {

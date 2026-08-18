@@ -27,12 +27,10 @@ export const TRACE_SERVICE = new InjectionToken<TraceService>('TraceService');
 export declare abstract class TraceService {
   abstract selectedTraceRow$: Observable<Span | undefined>;
   abstract eventData$: Observable<Map<string, any> | undefined>;
-  abstract hoveredMessageIndices$: Observable<number[]>;
   abstract messages$: Observable<any[]>;
 
   abstract selectedRow(span: Span | undefined): void;
   abstract setEventData(data: Map<string, any> | undefined): void;
   abstract setMessages(messages: any[]): void;
-  abstract setHoveredMessages(span: Span | undefined, invocationId: string): void;
   abstract resetTraceService(): void;
 }

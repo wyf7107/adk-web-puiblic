@@ -3,7 +3,7 @@
     <button
       mat-icon-button
       [matTooltip]="i18n.goodResponseTooltip"
-      (click)="onThumbClicked('up')"
+      (click)="sendFeedback('up')"
       [disabled]="isLoading()"
     >
       @if (feedbackDirection() === 'up') {
@@ -15,7 +15,7 @@
     <button
       mat-icon-button
       [matTooltip]="i18n.badResponseTooltip"
-      (click)="onThumbClicked('down')"
+      (click)="sendFeedback('down')"
       [disabled]="isLoading()"
     >
       @if (feedbackDirection() === 'down') {
@@ -45,19 +45,10 @@
     </div>
 
     <div class="actions">
-      <button
-        mat-stroked-button
-        (click)="onDetailedFeedbackCancelled()"
-        [disabled]="isLoading()"
-      >
+      <button mat-stroked-button (click)="onDetailedFeedbackCancelled()">
         {{ i18n.feedbackCancelButton }}
       </button>
-      <button
-        mat-flat-button
-        color="primary"
-        (click)="onDetailedFeedbackSubmitted()"
-        [disabled]="isLoading()"
-      >
+      <button mat-flat-button color="primary" (click)="onDetailedFeedbackSubmitted()">
         {{ i18n.feedbackSubmitButton }}
       </button>
     </div>

@@ -37,15 +37,13 @@ export class AudioPlayerComponent implements OnChanges {
     }
   }
 
-  private setAudioSource(base64: string): void {
-    // Check if the base64 data already has the 'data:audio/mpeg;base64,' prefix
-    // You might want to adjust the MIME type based on your actual audio data
-    // (e.g., audio/wav, audio/ogg)
-    if (base64.startsWith('data:')) {
-      this.audioSrc = base64;
+  private setAudioSource(src: string): void {
+    // Check if the source is a data URI, HTTP URL, or blob URL
+    if (src.startsWith('data:') || src.startsWith('http') || src.startsWith('blob:')) {
+      this.audioSrc = src;
     } else {
-      // Assuming it's MP3 data, adjust if necessary
-      this.audioSrc = `data:audio/mpeg;base64,${base64}`;
+      // Assuming it's base64 MP3 data, adjust if necessary
+      this.audioSrc = `data:audio/mpeg;base64,${src}`;
     }
 
     // If the audio element is already rendered, load the new source

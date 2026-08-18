@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content>
+  <mat-form-field class="full-width">
+    <mat-label>{{ data.label }}</mat-label>
+    <input matInput [(ngModel)]="inputValue" [disabled]="loading()">
+  </mat-form-field>
+
+  <div *ngIf="loading()" class="spinner-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="loading()">Cancel</button>
+  <button mat-button color="primary" (click)="onSubmitClick()" [disabled]="loading() || !inputValue">Submit</button>
+</mat-dialog-actions>

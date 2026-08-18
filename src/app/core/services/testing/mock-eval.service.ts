@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-import {Injectable} from '@angular/core';
+import {Injectable, signal} from '@angular/core';
 import {of, ReplaySubject} from 'rxjs';
 
 import {EvalService} from '../eval.service';
 
 @Injectable()
 export class MockEvalService implements Partial<EvalService> {
+  metricsInfo = signal<any[]>([]);
   getEvalSetsResponse = new ReplaySubject<any[]>(1);
   getEvalSets = jasmine.createSpy('getEvalSets')
                     .and.returnValue(this.getEvalSetsResponse);
@@ -51,4 +52,6 @@ export class MockEvalService implements Partial<EvalService> {
   deleteEvalCaseResponse = new ReplaySubject<any>(1);
   deleteEvalCase = jasmine.createSpy('deleteEvalCase')
                        .and.returnValue(this.deleteEvalCaseResponse);
+  getMetricsInfo = jasmine.createSpy('getMetricsInfo')
+                       .and.returnValue(of({metricsInfo: []}));
 }

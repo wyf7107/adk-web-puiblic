@@ -63,6 +63,7 @@ import {TRACE_SERVICE} from './core/services/interfaces/trace';
 import {UI_STATE_SERVICE} from './core/services/interfaces/ui-state';
 import {VIDEO_SERVICE} from './core/services/interfaces/video';
 import {WEBSOCKET_SERVICE} from './core/services/interfaces/websocket';
+import {TelemetryService} from './core/services/telemetry.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -95,6 +96,10 @@ describe('AppComponent', () => {
         .configureTestingModule({
           imports: [AppComponent, NoopAnimationsModule],
           providers: [
+            {
+              provide: TelemetryService,
+              useValue: { telemetryEnabled: () => false }
+            },
             {provide: MatDialog, useValue: {}},
             {
               provide: ActivatedRoute,
@@ -192,6 +197,15 @@ describe('AppComponent', () => {
             {
               provide: AGENT_BUILDER_SERVICE,
               useValue: mockAgentBuilderService,
+            },
+            {
+              provide: TelemetryService,
+              useValue: {
+                telemetryStatus: () => false,
+                telemetryEnabled: () => false,
+                fetchTelemetryStatus: () => Promise.resolve(false),
+                setTelemetry: () => Promise.resolve(false)
+              }
             },
           ],
         })

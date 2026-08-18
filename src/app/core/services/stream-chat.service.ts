@@ -42,16 +42,17 @@ export class StreamChatService implements StreamChatServiceInterface {
 
   constructor() {}
 
+  private getWsUrl(appName: string, userId: string, sessionId: string): string {
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    return `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${appName}&user_id=${userId}&session_id=${sessionId}`;
+  }
+
   async startAudioChat({
     appName,
     userId,
     sessionId,
   }: {appName: string; userId: string; sessionId: string;}) {
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    this.webSocketService.connect(
-        `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${
-            appName}&user_id=${userId}&session_id=${sessionId}`,
-    );
+    this.webSocketService.connect(this.getWsUrl(appName, userId, sessionId));
 
     await this.startAudioStreaming();
   }
@@ -64,7 +65,7 @@ export class StreamChatService implements StreamChatServiceInterface {
   private async startAudioStreaming() {
     try {
       await this.audioRecordingService.startRecording();
-      this.audioIntervalId = setInterval(() => this.sendBufferedAudio(), 250);
+      this.audioIntervalId = window.setInterval(() => this.sendBufferedAudio(), 250);
     } catch (error) {
       console.error('Error accessing microphone:', error);
     }
@@ -82,7 +83,7 @@ export class StreamChatService implements StreamChatServiceInterface {
 
     const request: LiveRequest = {
       blob: {
-        mime_type: 'audio/pcm',
+        mime_type: 'audio/pcm;rate=16000',
         data: combinedBuffer,
       },
     };
@@ -97,13 +98,9 @@ export class StreamChatService implements StreamChatServiceInterface {
     videoContainer,
   }: {
     appName: string; userId: string; sessionId: string;
-    videoContainer: ElementRef
+    videoContainer: ElementRef;
   }) {
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    this.webSocketService.connect(
-        `${protocol}://${URLUtil.getWSServerUrl()}/run_live?app_name=${
-            appName}&user_id=${userId}&session_id=${sessionId}`,
-    );
+    this.webSocketService.connect(this.getWsUrl(appName, userId, sessionId));
 
     await this.startAudioStreaming();
     await this.startVideoStreaming(videoContainer);
@@ -115,10 +112,10 @@ export class StreamChatService implements StreamChatServiceInterface {
     this.webSocketService.closeConnection();
   }
 
-  private async startVideoStreaming(videoContainer: ElementRef) {
+  async startVideoStreaming(videoContainer: ElementRef) {
     try {
       await this.videoService.startRecording(videoContainer);
-      this.videoIntervalId = setInterval(
+      this.videoIntervalId = window.setInterval(
           async () => await this.sendCapturedFrame(),
           1000,
       );
@@ -140,7 +137,7 @@ export class StreamChatService implements StreamChatServiceInterface {
     this.webSocketService.sendMessage(request);
   }
 
-  private stopVideoStreaming(videoContainer: ElementRef) {
+  stopVideoStreaming(videoContainer: ElementRef) {
     clearInterval(this.videoIntervalId);
     this.videoIntervalId = undefined;
     this.videoService.stopRecording(videoContainer);

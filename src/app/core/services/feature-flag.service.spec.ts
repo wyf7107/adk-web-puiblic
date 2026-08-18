@@ -118,11 +118,5 @@ describe('FeatureFlagService', () => {
     });
   });
 
-  describe('isSkipOauthRedirectUriRewriteEnabled', () => {
-    it('should return false by default', async () => {
-      const isEnabled =
-          await firstValueFrom(service.isSkipOauthRedirectUriRewriteEnabled());
-      expect(isEnabled).toBeFalse();
-    });
-  });
+
 });

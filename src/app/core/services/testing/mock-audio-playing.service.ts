@@ -22,4 +22,5 @@ import {AudioPlayingService} from '../audio-playing.service';
 @Injectable()
 export class MockAudioPlayingService implements Partial<AudioPlayingService> {
   playAudio = jasmine.createSpy('playAudio');
+  stopAudio = jasmine.createSpy('stopAudio');
 }

@@ -145,6 +145,7 @@ describe('AgentService', () => {
               [HEADER_ACCEPT]: TEXT_EVENT_STREAM,
             },
             body: JSON.stringify(RUN_SSE_PAYLOAD),
+            signal: jasmine.any(AbortSignal),
           });
     });
 
@@ -220,6 +221,47 @@ describe('AgentService', () => {
       );
 
       expect(results).toEqual([fakeResponse]);
+    });
+  });
+
+  describe('Agent Builder Endpoints', () => {
+    it('should call getAgentBuilder with correct URL structure', () => {
+      service.getAgentBuilder(TEST_APP_NAME).subscribe();
+      const req = httpTestingController.expectOne(req => 
+        req.url.startsWith(`${API_SERVER_BASE_URL}/dev/apps/${TEST_APP_NAME}/builder`) && !req.url.includes('tmp=true')
+      );
+      expect(req.request.method).toEqual('GET');
+      req.flush('builder-data');
+    });
+
+    it('should call getAgentBuilderTmp with correct URL structure and tmp flag', () => {
+      service.getAgentBuilderTmp(TEST_APP_NAME).subscribe();
+      const req = httpTestingController.expectOne(req => 
+        req.url.startsWith(`${API_SERVER_BASE_URL}/dev/apps/${TEST_APP_NAME}/builder`) && req.url.includes('tmp=true')
+      );
+      expect(req.request.method).toEqual('GET');
+      req.flush('builder-data-tmp');
+    });
+
+    it('should call getSubAgentBuilder with correct URL structure, tmp, and file_path parameters', () => {
+      const relativePath = 'subagents/my-subagent.py';
+      service.getSubAgentBuilder(TEST_APP_NAME, relativePath).subscribe();
+      const req = httpTestingController.expectOne(req => 
+        req.url.startsWith(`${API_SERVER_BASE_URL}/dev/apps/${TEST_APP_NAME}/builder`) &&
+        req.url.includes('tmp=true') &&
+        req.url.includes(`file_path=${relativePath}`)
+      );
+      expect(req.request.method).toEqual('GET');
+      req.flush('subagent-builder-data');
+    });
+
+    it('should call agentChangeCancel with correct URL structure and POST method', () => {
+      service.agentChangeCancel(TEST_APP_NAME).subscribe();
+      const req = httpTestingController.expectOne(
+        `${API_SERVER_BASE_URL}/dev/apps/${TEST_APP_NAME}/builder/cancel`
+      );
+      expect(req.request.method).toEqual('POST');
+      req.flush(true);
     });
   });
 });

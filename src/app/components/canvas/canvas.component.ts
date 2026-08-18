@@ -20,15 +20,15 @@ import { DiagramConnection, AgentNode, ToolNode, CallbackNode, YamlConfig } from
 import { MatDialog } from '@angular/material/dialog';
 import { AgentService } from '../../core/services/agent.service';
 import {AGENT_BUILDER_SERVICE} from '../../core/services/interfaces/agent-builder';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackbarService } from '../../core/services/snackbar.service';
 import { Router } from '@angular/router';
 import { Vflow, HtmlTemplateDynamicNode, Edge, TemplateDynamicGroupNode } from 'ngx-vflow';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from "@angular/material/menu";
 import * as YAML from 'yaml';
-import { firstValueFrom, Observable } from "rxjs";
-import { take, filter } from "rxjs/operators";
+import { firstValueFrom, Observable, forkJoin, of } from "rxjs";
+import { take, filter, catchError } from "rxjs/operators";
 import { YamlUtils } from "../../../utils/yaml-utils";
 import { ConfirmationDialogComponent } from "../confirmation-dialog/confirmation-dialog.component";
 import { AddToolDialogComponent } from "../add-tool-dialog/add-tool-dialog.component";
@@ -55,7 +55,7 @@ import { BuilderAssistantComponent } from "../builder-assistant/builder-assistan
   ],
 })
 export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
-  private _snackBar = inject(MatSnackBar);
+  private _snackbarService = inject(SnackbarService);
   @ViewChild("canvas", { static: false })
   canvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild("svgCanvas", { static: false })
@@ -841,7 +841,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       callback
     );
     if (!result.success) {
-      this._snackBar.open(result.error || "Failed to add callback", "Close", {
+      this._snackbarService.open(result.error || "Failed to add callback", "Close", {
         duration: 3000,
         panelClass: ["error-snackbar"],
       });
@@ -923,7 +923,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
           callback
         );
         if (!deleteResult.success) {
-          this._snackBar.open(
+          this._snackbarService.open(
             deleteResult.error || "Failed to delete callback",
             "Close",
             {
@@ -1220,7 +1220,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
       this.agentBuilderService.getRootNode();
 
     if (!rootAgent) {
-      this._snackBar.open("Please create an agent first.", "OK");
+      this._snackbarService.open("Please create an agent first.", "OK");
       return;
     }
 
@@ -1229,7 +1229,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     const agentToolBoards = this.agentToolBoards();
     YamlUtils.generateYamlFile(rootAgent, formData, appName, agentToolBoards);
 
-    this.agentService.agentBuild(formData).subscribe((success) => {
+    this.agentService.agentBuild(appName, formData).subscribe((success) => {
       if (success) {
         this.router
           .navigate(["/"], {
@@ -1239,7 +1239,7 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
             window.location.reload();
           });
       } else {
-        this._snackBar.open("Something went wrong, please try again", "OK");
+        this._snackbarService.open("Something went wrong, please try again", "OK");
       }
     });
   }
@@ -1378,10 +1378,21 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
     return toolsMap.get(nodeName) ?? [];
   }
 
-  loadFromYaml(yamlContent: string, appName: string) {
+  loadFromYaml(yamlContent: string, appName: string, pluginsContent?: string) {
     try {
       // Parse the YAML content
       const yamlData = YAML.parse(yamlContent);
+
+      if (pluginsContent) {
+        try {
+          const pluginsData = YAML.parse(pluginsContent);
+          if (pluginsData && pluginsData.bigquery_agent_analytics) {
+            yamlData.logging = pluginsData.bigquery_agent_analytics;
+          }
+        } catch (e) {
+          // It's fine if plugins.yaml is not valid YAML or doesn't exist
+        }
+      }
 
       this.agentBuilderService.clear();
       this.nodePositions.clear();
@@ -1403,6 +1414,13 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
         sub_agents: yamlData.sub_agents || [],
         tools: this.parseToolsFromYaml(yamlData.tools || []),
         callbacks: this.parseCallbacksFromYaml(yamlData),
+        logging: yamlData.logging ? {
+          enabled: true,
+          project_id: yamlData.logging.project_id,
+          dataset_id: yamlData.logging.dataset_id,
+          table_id: yamlData.logging.table_id,
+          dataset_location: yamlData.logging.dataset_location,
+        } : undefined
       };
 
       // Add to agent builder service
@@ -2041,10 +2059,15 @@ export class CanvasComponent implements AfterViewInit, OnInit, OnChanges {
 
   reloadCanvasFromYaml(): void {
     if (this.appNameInput) {
-      this.agentService.getAgentBuilderTmp(this.appNameInput).subscribe({
-        next: (yamlContent: string) => {
-          if (yamlContent) {
-            this.loadFromYaml(yamlContent, this.appNameInput);
+      const rootYaml$ = this.agentService.getAgentBuilderTmp(this.appNameInput);
+      const pluginsYaml$ = this.agentService.getSubAgentBuilder(this.appNameInput, 'plugins.yaml').pipe(
+        catchError(() => of(''))
+      );
+
+      forkJoin([rootYaml$, pluginsYaml$]).subscribe({
+        next: ([rootContent, pluginsContent]) => {
+          if (rootContent) {
+            this.loadFromYaml(rootContent, this.appNameInput, pluginsContent);
           }
         },
         error: (error) => {

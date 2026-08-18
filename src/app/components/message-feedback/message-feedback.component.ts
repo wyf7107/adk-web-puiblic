@@ -89,9 +89,7 @@ export class MessageFeedbackComponent {
   readonly comment = new FormControl('');
   readonly isLoading = signal(false);
 
-  onThumbClicked(direction: Feedback['direction']) {
-    // Create / update is deferred to the dialog Submit handler. Posting
-    // here races with that Submit and trips the duplicate-contribution check.
+  sendFeedback(direction: Feedback['direction']) {
     if (this.feedbackDirection() === direction) {
       this.isLoading.set(true);
       this.feedbackService.deleteFeedback(this.sessionName(), this.eventId())
@@ -100,14 +98,19 @@ export class MessageFeedbackComponent {
             this.selectedFeedbackDirection.set(undefined);
             this.resetDetailedFeedback();
           });
-      return;
+    } else {
+      this.selectedReasons.reset();
+      this.isLoading.set(true);
+      this.feedbackService
+          .sendFeedback(this.sessionName(), this.eventId(), {
+            direction,
+          })
+          .subscribe(() => {
+            this.isLoading.set(false);
+            this.isDetailedFeedbackVisible.set(true);
+            this.selectedFeedbackDirection.set(direction);
+          });
     }
-
-    this.selectedFeedbackDirection.set(direction);
-    const existing = this.existingFeedback.value();
-    this.selectedReasons.setValue(existing?.reasons ?? []);
-    this.comment.setValue(existing?.comment ?? '');
-    this.isDetailedFeedbackVisible.set(true);
   }
 
   onDetailedFeedbackSubmitted() {
@@ -121,21 +124,13 @@ export class MessageFeedbackComponent {
           reasons: this.selectedReasons.value ?? [],
           comment: this.comment.value ?? undefined,
         })
-        .subscribe({
-          next: () => {
-            this.isLoading.set(false);
-            this.resetDetailedFeedback();
-          },
-          // Keep the dialog open on failure so the user can retry.
-          error: () => {
-            this.isLoading.set(false);
-          },
+        .subscribe(() => {
+          this.isLoading.set(false);
+          this.resetDetailedFeedback();
         });
   }
 
   onDetailedFeedbackCancelled() {
-    // Clearing the staged direction lets feedbackDirection() fall back to
-    // the persisted value (or undefined if no feedback exists yet).
     this.selectedFeedbackDirection.set(undefined);
     this.resetDetailedFeedback();
   }

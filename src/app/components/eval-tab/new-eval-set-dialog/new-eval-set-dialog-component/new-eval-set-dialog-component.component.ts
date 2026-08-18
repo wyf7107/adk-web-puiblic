@@ -19,11 +19,15 @@ import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose } from '@angular/material/dialog';
 import {uuidv4} from 'uuidv7';
 import {EVAL_SERVICE} from '../../../../core/services/interfaces/eval';
+import {FEATURE_FLAG_SERVICE} from '../../../../core/services/interfaces/feature-flag';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatFormField } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+
+import {AnalyticsService} from '../../../../core/services/analytics.service';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.Default,
@@ -40,24 +44,35 @@ import { MatButton } from '@angular/material/button';
         MatDialogActions,
         MatButton,
         MatDialogClose,
+        MatSelectModule,
     ],
 })
 export class NewEvalSetDialogComponentComponent {
   private readonly evalService = inject(EVAL_SERVICE);
-  readonly data: {appName: string} = inject(MAT_DIALOG_DATA);
+  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
+  private readonly analyticsService = inject(AnalyticsService);
+  readonly data: {appName: string, defaultName?: string} = inject(MAT_DIALOG_DATA);
   readonly dialogRef = inject(MatDialogRef<NewEvalSetDialogComponentComponent>);
 
-  newSetId: string = 'evalset' + uuidv4().slice(0, 6);
+  newSetId: string = this.data.defaultName || ('evalset_' + uuidv4().slice(0, 6));
+  executionMode: 'live' | 'replay' = 'live';
+  isEvalV2Enabled: boolean = false;
 
-  constructor() {}
+  constructor() {
+    this.featureFlagService.isEvalV2Enabled().subscribe((enabled) => {
+      this.isEvalV2Enabled = enabled;
+    });
+  }
 
   createNewEvalSet() {
     if (!this.newSetId || this.newSetId == '') {
       alert('Cannot create eval set with empty id!');
     } else {
+      const executionMode = this.isEvalV2Enabled ? this.executionMode : undefined;
       this.evalService
-        .createNewEvalSet(this.data.appName, this.newSetId)
+        .createNewEvalSet(this.data.appName, this.newSetId, executionMode)
         .subscribe((res) => {
+          this.analyticsService.sendEvent('eval_create_click');
           this.dialogRef.close(true);
         });
     }

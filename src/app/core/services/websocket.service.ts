@@ -38,6 +38,10 @@ export class WebSocketService implements WebSocketServiceInterface {
   private closeReasonSubject = new Subject<string>();
 
   connect(serverUrl: string) {
+    // Reset any previous connection/buffer so restarts start clean.
+    this.closeConnection();
+    this.audioBuffer = [];
+
     this.socket$ = new WebSocketSubject({
       url: serverUrl,
       serializer: (msg) => JSON.stringify(msg),
@@ -51,7 +55,7 @@ export class WebSocketService implements WebSocketServiceInterface {
 
     this.socket$.subscribe(
         (message) => {
-          this.handleIncomingAudio(message), this.messages$.next(message);
+          this.handleIncomingEvent(message);
         },
         (error) => {
           console.error('WebSocket error:', error);
@@ -75,8 +79,10 @@ export class WebSocketService implements WebSocketServiceInterface {
   }
 
   closeConnection() {
-    clearInterval(this.audioIntervalId);
-    this.audioIntervalId = null;
+    if (this.audioIntervalId !== null) {
+      clearInterval(this.audioIntervalId);
+      this.audioIntervalId = null;
+    }
     if (this.socket$) {
       this.socket$.complete();
     }
@@ -96,17 +102,29 @@ export class WebSocketService implements WebSocketServiceInterface {
     return btoa(binary);
   }
 
-  private handleIncomingAudio(message: any) {
+  private handleIncomingEvent(message: any) {
     const msg = JSON.parse(message) as Event;
-    if (
-      msg['content'] &&
-      msg['content']['parts'] &&
-      msg['content']['parts'][0]['inlineData']
-    ) {
-      const pcmBytes = this.base64ToUint8Array(
-          msg['content']['parts'][0]['inlineData']['data'],
-      );
-      this.audioBuffer.push(pcmBytes);
+    const parts = msg?.['content']?.['parts'];
+
+    if (!Array.isArray(parts)) {
+      this.messages$.next(message);
+      return;
+    }
+
+    // Extract audio from any part; forward the event if it has other content
+    let hasNonAudioContent = false;
+    for (const part of parts) {
+      const inlineData = part?.['inlineData'];
+      const mimeType: string|undefined = inlineData?.['mimeType'];
+      if (inlineData?.['data'] && mimeType?.startsWith('audio/')) {
+        this.audioBuffer.push(this.base64ToUint8Array(inlineData['data']));
+      } else {
+        hasNonAudioContent = true;
+      }
+    }
+
+    if (hasNonAudioContent) {
+      this.messages$.next(message);
     }
   }
 

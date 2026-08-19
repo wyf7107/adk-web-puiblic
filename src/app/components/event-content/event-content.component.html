@@ -44,6 +44,22 @@
       [tooltipTitle]="'Turn Complete'"
     ></app-hover-info-button>
     }
+    @if (uiEvent.event.voiceActivity?.voiceActivityType === 'ACTIVITY_START') {
+    <app-hover-info-button
+      [icon]="'mic'"
+      [text]="'Voice Activity Start'"
+      [tooltipContent]="uiEvent.event.voiceActivity?.audioOffset ? 'Started at ' + uiEvent.event.voiceActivity!.audioOffset : 'Started'"
+      [tooltipTitle]="'Voice Activity Start'"
+    ></app-hover-info-button>
+    }
+    @if (uiEvent.event.voiceActivity?.voiceActivityType === 'ACTIVITY_END') {
+    <app-hover-info-button
+      [icon]="'mic_off'"
+      [text]="'Voice Activity End'"
+      [tooltipContent]="uiEvent.event.voiceActivity?.audioOffset ? 'Ended at ' + uiEvent.event.voiceActivity!.audioOffset : 'Ended'"
+      [tooltipTitle]="'Voice Activity End'"
+    ></app-hover-info-button>
+    }
     @if (uiEvent.event.interrupted) {
     <app-hover-info-button
       [icon]="'report'"

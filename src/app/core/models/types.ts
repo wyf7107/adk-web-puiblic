@@ -71,12 +71,18 @@ export declare interface LlmRequest {
   contents: GenAiContent[];
 }
 
+export declare interface VoiceActivity {
+  voiceActivityType?: string;
+  audioOffset?: string;
+}
+
 export declare interface LlmResponse {
   content: GenAiContent;
   error?: string;
   errorMessage?: string;
   errorCode?: string;
   longRunningToolIds?: string[];
+  voiceActivity?: VoiceActivity;
 }
 
 export enum NodeStatus {

@@ -1407,6 +1407,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       && apiEvent.output === undefined
       && apiEvent.inputTranscription === undefined
       && apiEvent.outputTranscription === undefined
+      && apiEvent.voiceActivity === undefined
       && !apiEvent.errorMessage
       && !apiEvent.errorCode
       && !apiEvent.systemInstructionChanged

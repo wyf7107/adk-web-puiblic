@@ -1985,6 +1985,17 @@ describe('ChatComponent', () => {
         };
         expect((component as any).isEmptyMetadataEvent(event)).toBeFalse();
       });
+
+      it('returns false when a marker event signals voiceActivity', () => {
+        const event = {
+          id: 'vad-1',
+          author: 'agent',
+          usageMetadata: {totalTokenCount: 1},
+          voiceActivity: {voiceActivityType: 'ACTIVITY_START'},
+          actions: {...EMPTY_ACTIONS},
+        };
+        expect((component as any).isEmptyMetadataEvent(event)).toBeFalse();
+      });
     });
 
     describe('actionsAreEmpty', () => {

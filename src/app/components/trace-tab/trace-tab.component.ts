@@ -24,6 +24,7 @@ import {CustomJsonViewerComponent} from '../custom-json-viewer/custom-json-viewe
 import {InfoTable} from '../info-table/info-table';
 
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {STORAGE_SERVICE} from '../../core/services/interfaces/storage';
 import {Span} from '../../core/models/Trace';
 
 @Injectable()
@@ -97,6 +98,7 @@ export class TraceTabComponent {
   }
 
   protected readonly traceService = inject(TRACE_SERVICE);
+  private readonly storageService = inject(STORAGE_SERVICE);
   selectedSpan = toSignal(this.traceService.selectedTraceRow$);
 
   private static getValidTraceTab(tab: string | null): 'info' | 'attributes' | 'raw' {
@@ -107,14 +109,14 @@ export class TraceTabComponent {
   }
 
   selectedDetailTab = signal<'info' | 'attributes' | 'raw'>(
-    TraceTabComponent.getValidTraceTab(window.localStorage.getItem('adk-trace-tab-selected-tab'))
+    TraceTabComponent.getValidTraceTab(this.storageService.getItem('adk-trace-tab-selected-tab'))
   );
 
   switchToEvent = output<string>();
 
   constructor() {
     effect(() => {
-      window.localStorage.setItem('adk-trace-tab-selected-tab', this.selectedDetailTab());
+      this.storageService.setItem('adk-trace-tab-selected-tab', this.selectedDetailTab());
     });
   }
 

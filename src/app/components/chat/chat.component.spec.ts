@@ -46,6 +46,7 @@ import {SESSION_SERVICE, SessionService,} from '../../core/services/interfaces/s
 import {STREAM_CHAT_SERVICE} from '../../core/services/interfaces/stream-chat';
 import {STRING_TO_COLOR_SERVICE} from '../../core/services/interfaces/string-to-color';
 import {TRACE_SERVICE, TraceService} from '../../core/services/interfaces/trace';
+import {STORAGE_SERVICE} from '../../core/services/interfaces/storage';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {VIDEO_SERVICE, VideoService} from '../../core/services/interfaces/video';
 import {WEBSOCKET_SERVICE, WebSocketService,} from '../../core/services/interfaces/websocket';
@@ -62,6 +63,7 @@ import {MockGraphService} from '../../core/services/testing/mock-graph.service';
 import {MockLocalFileService} from '../../core/services/testing/mock-local-file.service';
 import {MockSafeValuesService} from '../../core/services/testing/mock-safevalues.service';
 import {MockSessionService} from '../../core/services/testing/mock-session.service';
+import {MockStorageService} from '../../core/services/testing/mock-storage.service';
 import {MockStreamChatService} from '../../core/services/testing/mock-stream-chat.service';
 import {MockStringToColorService} from '../../core/services/testing/mock-string-to-color.service';
 import {MockTraceService} from '../../core/services/testing/mock-trace.service';
@@ -284,6 +286,7 @@ describe('ChatComponent', () => {
             },
             {provide: GRAPH_SERVICE, useValue: graphService},
             {provide: SAFE_VALUES_SERVICE, useValue: mockSafeValuesService},
+            {provide: STORAGE_SERVICE, useClass: MockStorageService},
             {provide: LOCAL_FILE_SERVICE, useValue: mockLocalFileService},
             {provide: MatDialog, useValue: mockDialog},
             {provide: SnackbarService, useValue: mockSnackBar},

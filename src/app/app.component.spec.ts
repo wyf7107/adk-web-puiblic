@@ -37,6 +37,7 @@ import {FEATURE_FLAG_SERVICE} from './core/services/interfaces/feature-flag';
 import {GRAPH_SERVICE} from './core/services/interfaces/graph';
 import {LOCAL_FILE_SERVICE} from './core/services/interfaces/localfile';
 import {SAFE_VALUES_SERVICE} from './core/services/interfaces/safevalues';
+import {STORAGE_SERVICE} from './core/services/interfaces/storage';
 import {STRING_TO_COLOR_SERVICE} from './core/services/interfaces/string-to-color';
 import {THEME_SERVICE} from './core/services/interfaces/theme';
 import {LOCATION_SERVICE} from './core/services/location.service';
@@ -54,6 +55,7 @@ import {MockGraphService} from './core/services/testing/mock-graph.service';
 import {MockLocalFileService} from './core/services/testing/mock-local-file.service';
 import {MockSafeValuesService} from './core/services/testing/mock-safevalues.service';
 import {MockSessionService} from './core/services/testing/mock-session.service';
+import {MockStorageService} from './core/services/testing/mock-storage.service';
 import {MockStreamChatService} from './core/services/testing/mock-stream-chat.service';
 import {MockStringToColorService} from './core/services/testing/mock-string-to-color.service';
 import {MockThemeService} from './core/services/testing/mock-theme.service';
@@ -179,6 +181,10 @@ describe('AppComponent', () => {
             {
               provide: SAFE_VALUES_SERVICE,
               useValue: safeValuesService,
+            },
+            {
+              provide: STORAGE_SERVICE,
+              useClass: MockStorageService,
             },
             {
               provide: LOCAL_FILE_SERVICE,

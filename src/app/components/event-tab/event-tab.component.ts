@@ -33,6 +33,7 @@ import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
 import {Span} from '../../core/models/Trace';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {STORAGE_SERVICE} from '../../core/services/interfaces/storage';
 import {addSvgNodeHoverEffects} from '../../utils/svg-interaction.utils';
 export type SpanNode = Span & {
   children: SpanNode[];
@@ -159,6 +160,7 @@ export class EventTabComponent {
 
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly traceService = inject(TRACE_SERVICE);
+  private readonly storageService = inject(STORAGE_SERVICE);
   readonly i18n = inject(SidePanelMessagesInjectionToken);
 
   readonly isEventRequestResponseLoadingSignal = toSignal(
@@ -220,7 +222,7 @@ export class EventTabComponent {
 
   set selectedDetailTab(tab: 'event' | 'raw' | 'request' | 'response' | 'graph' | 'metadata' | 'state') {
     this._selectedDetailTab = tab;
-    window.localStorage.setItem('adk-event-tab-selected-tab', tab);
+    this.storageService.setItem('adk-event-tab-selected-tab', tab);
     if (tab === 'graph') {
       setTimeout(() => {
         if (this.graphContainer?.nativeElement) {
@@ -294,7 +296,7 @@ export class EventTabComponent {
   });
 
   constructor() {
-    const savedTab = window.localStorage.getItem('adk-event-tab-selected-tab');
+    const savedTab = this.storageService.getItem('adk-event-tab-selected-tab');
     if (savedTab && ['event', 'raw', 'request', 'response', 'graph', 'metadata', 'state'].includes(savedTab)) {
       this._selectedDetailTab = savedTab as 'event' | 'raw' | 'request' | 'response' | 'graph' | 'metadata' | 'state';
     }

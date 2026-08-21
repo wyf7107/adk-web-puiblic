@@ -60,6 +60,7 @@ import {GRAPH_SERVICE} from './app/core/services/interfaces/graph';
 import {LOCAL_FILE_SERVICE} from './app/core/services/interfaces/localfile';
 import {SAFE_VALUES_SERVICE} from './app/core/services/interfaces/safevalues';
 import {SESSION_SERVICE} from './app/core/services/interfaces/session';
+import {STORAGE_SERVICE} from './app/core/services/interfaces/storage';
 import {STREAM_CHAT_SERVICE} from './app/core/services/interfaces/stream-chat';
 import {STRING_TO_COLOR_SERVICE} from './app/core/services/interfaces/string-to-color';
 import {THEME_SERVICE} from './app/core/services/interfaces/theme';
@@ -71,6 +72,7 @@ import {LocalFileServiceImpl} from './app/core/services/local-file.service';
 import {LOCATION_SERVICE} from './app/core/services/location.service';
 import {SafeValuesServiceImpl} from './app/core/services/safevalues.service';
 import {SessionService} from './app/core/services/session.service';
+import {LocalStorageService} from './app/core/services/storage.service';
 import {StreamChatService} from './app/core/services/stream-chat.service';
 import {StringToColorServiceImpl} from './app/core/services/string-to-color.service';
 import {ThemeService} from './app/core/services/theme.service';
@@ -114,6 +116,7 @@ fetch('./assets/config/runtime-config.json')
             useClass: StringToColorServiceImpl
           },
           {provide: SAFE_VALUES_SERVICE, useClass: SafeValuesServiceImpl},
+          {provide: STORAGE_SERVICE, useClass: LocalStorageService},
           {provide: LOCAL_FILE_SERVICE, useClass: LocalFileServiceImpl},
           {provide: Catalog, useValue: DEFAULT_CATALOG},
           {provide: Theme, useValue: A2UI_THEME},

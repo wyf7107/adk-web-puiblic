@@ -26,8 +26,10 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {Span, SpanValidator} from '../../core/models/Trace';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {STORAGE_SERVICE} from '../../core/services/interfaces/storage';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
 import {MockFeatureFlagService} from '../../core/services/testing/mock-feature-flag.service';
+import {MockStorageService} from '../../core/services/testing/mock-storage.service';
 import {MockTraceService} from '../../core/services/testing/mock-trace.service';
 import {MockUiStateService} from '../../core/services/testing/mock-ui-state.service';
 
@@ -139,6 +141,7 @@ describe('EventTabComponent', () => {
             {provide: FEATURE_FLAG_SERVICE, useValue: featureFlagService},
             {provide: UI_STATE_SERVICE, useClass: MockUiStateService},
             {provide: TRACE_SERVICE, useClass: MockTraceService},
+            {provide: STORAGE_SERVICE, useClass: MockStorageService},
           ],
         })
         .compileComponents();

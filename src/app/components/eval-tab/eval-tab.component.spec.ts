@@ -28,6 +28,8 @@ import {
 } from '../../core/services/feature-flag.service';
 import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
+import {STORAGE_SERVICE} from '../../core/services/interfaces/storage';
+import {MockStorageService} from '../../core/services/testing/mock-storage.service';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 
 describe('EvalTabComponent', () => {
@@ -80,6 +82,7 @@ describe('EvalTabComponent', () => {
         { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
         { provide: EVAL_SERVICE, useValue: evalService },
         { provide: SESSION_SERVICE, useValue: sessionService },
+        { provide: STORAGE_SERVICE, useClass: MockStorageService },
         {
           provide: ActivatedRoute,
           useValue: {

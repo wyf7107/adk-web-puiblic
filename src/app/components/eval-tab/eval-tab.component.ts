@@ -37,6 +37,7 @@ import {FeatureFlagService} from '../../core/services/feature-flag.service';
 import {EVAL_SERVICE} from '../../core/services/interfaces/eval';
 import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SESSION_SERVICE} from '../../core/services/interfaces/session';
+import {STORAGE_SERVICE} from '../../core/services/interfaces/storage';
 
 import {AddEvalSessionDialogComponent} from './add-eval-session-dialog/add-eval-session-dialog/add-eval-session-dialog.component';
 import {EvalTabMessagesInjectionToken} from './eval-tab.component.i18n';
@@ -188,6 +189,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
   protected appEvaluationResults: AppEvaluationResult = {};
   private readonly evalService = inject(EVAL_SERVICE);
   private readonly sessionService = inject(SESSION_SERVICE);
+  private readonly storageService = inject(STORAGE_SERVICE);
 
   constructor() {
     this.evalCasesSubject.subscribe((evalCases: string[]) => {
@@ -215,7 +217,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
       .pipe(first())
       .subscribe((enabled) => this.isEvalV2Enabled.set(enabled));
 
-    const savedMetrics = window.localStorage.getItem('adk_eval_metrics_selection');
+    const savedMetrics = this.storageService.getItem('adk_eval_metrics_selection');
     if (savedMetrics) {
       try {
         this.evalMetrics = JSON.parse(savedMetrics) as EvalMetric[];
@@ -906,7 +908,7 @@ export class EvalTabComponent implements OnInit, OnChanges {
           this.pendingUserSimulatorConfig = result.userSimulatorConfig ?? null;
 
           // Persist the user's metric selection so it is remembered next time.
-          window.localStorage.setItem(
+          this.storageService.setItem(
               'adk_eval_metrics_selection',
               JSON.stringify(result.metrics));
 

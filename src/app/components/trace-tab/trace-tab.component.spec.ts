@@ -22,7 +22,9 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 
 import {Span, SpanValidator} from '../../core/models/Trace';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
+import {STORAGE_SERVICE} from '../../core/services/interfaces/storage';
 
+import {MockStorageService} from './../../core/services/testing/mock-storage.service';
 import {MockTraceService} from './../../core/services/testing/mock-trace.service';
 import {TraceTabComponent} from './trace-tab.component';
 
@@ -77,6 +79,7 @@ describe('TraceTabComponent', () => {
           imports: [TraceTabComponent, NoopAnimationsModule],
           providers: [
             {provide: TRACE_SERVICE, useClass: MockTraceService},
+            {provide: STORAGE_SERVICE, useClass: MockStorageService},
           ],
         })
         .compileComponents();

@@ -57,6 +57,7 @@ import { GRAPH_SERVICE } from '../../core/services/interfaces/graph';
 import { LOCAL_FILE_SERVICE } from '../../core/services/interfaces/localfile';
 import { SAFE_VALUES_SERVICE } from '../../core/services/interfaces/safevalues';
 import { SESSION_SERVICE } from '../../core/services/interfaces/session';
+import { STORAGE_SERVICE } from '../../core/services/interfaces/storage';
 import { STREAM_CHAT_SERVICE } from '../../core/services/interfaces/stream-chat';
 import { AUDIO_RECORDING_SERVICE } from '../../core/services/interfaces/audio-recording';
 import { AUDIO_PLAYING_SERVICE } from '../../core/services/interfaces/audio-playing';
@@ -210,6 +211,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly renderer = inject(Renderer2);
   private readonly router = inject(Router);
   private readonly safeValuesService = inject(SAFE_VALUES_SERVICE);
+  private readonly storageService = inject(STORAGE_SERVICE);
   private readonly testsService = inject(TestsService);
   private readonly sessionService = inject(SESSION_SERVICE);
   private readonly streamChatService = inject(STREAM_CHAT_SERVICE);
@@ -313,11 +315,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private agentIdentityChannel: BroadcastChannel | null = null;
   private agentIdentityMsgListener: ((e: MessageEvent) => void) | null = null;
   isMobile = signal(window.innerWidth <= 768);
-  showSidePanel = window.localStorage.getItem('adk-side-panel-visible') !== 'false';
+  showSidePanel = this.storageService.getItem('adk-side-panel-visible') !== 'false';
   showBuilderAssistant = true;
   showAppSelectorDrawer = false;
   showSessionSelectorDrawer = false;
-  useSse = signal(window.localStorage.getItem('adk-use-sse') === 'true');
+  useSse = signal(this.storageService.getItem('adk-use-sse') === 'true');
   currentSessionState: SessionState | undefined = {};
   root_agent = ROOT_AGENT;
   updatedSessionState: WritableSignal<any> = signal(null);
@@ -332,7 +334,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly isSideBySide = signal(false);
   protected readonly showBranches = signal(false);
   protected readonly expectedUiEvents = signal<UiEvent[]>([]);
-  protected readonly viewMode = signal<'events' | 'traces'>((window.localStorage.getItem('chat-view-mode') as 'events' | 'traces') || 'events');
+  protected readonly viewMode = signal<'events' | 'traces'>((this.storageService.getItem('chat-view-mode') as 'events' | 'traces') || 'events');
   protected readonly invocationIdFilterActive = signal<boolean>(false);
   protected readonly nodePathFilterActive = signal<boolean>(false);
   protected readonly invocationIdFilter = signal<string>('');
@@ -551,7 +553,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   onViewModeChange(mode: 'events' | 'traces') {
     this.viewMode.set(mode);
     try {
-      window.localStorage.setItem('chat-view-mode', mode);
+      this.storageService.setItem('chat-view-mode', mode);
     } catch (e) {
       // Ignored
     }
@@ -562,12 +564,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
   protected originalSessionId = '';
-  hideIntermediateEvents = signal(window.localStorage.getItem('adk-hide-intermediate-events') === 'true');
+  hideIntermediateEvents = signal(this.storageService.getItem('adk-hide-intermediate-events') === 'true');
 
   toggleHideIntermediateEvents() {
     const newVal = !this.hideIntermediateEvents();
     this.hideIntermediateEvents.set(newVal);
-    window.localStorage.setItem('adk-hide-intermediate-events', String(newVal));
+    this.storageService.setItem('adk-hide-intermediate-events', String(newVal));
   }
 
   // Sessions with an in-progress bidi stream, used to block concurrent starts.
@@ -778,7 +780,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isMobile()) {
       this.showSidePanel = false;
     } else {
-      this.showSidePanel = window.localStorage.getItem('adk-side-panel-visible') !== 'false';
+      this.showSidePanel = this.storageService.getItem('adk-side-panel-visible') !== 'false';
     }
 
     this.apps$.subscribe((apps) => {
@@ -896,7 +898,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (!this.showSidePanel) {
           this.showSidePanel = true;
-          window.localStorage.setItem('adk-side-panel-visible', 'true');
+          this.storageService.setItem('adk-side-panel-visible', 'true');
           this.sideDrawer()?.open();
         }
 
@@ -2143,7 +2145,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.selectedMessageIndex === i) {
       this.sideDrawer()?.open();
       this.showSidePanel = true;
-      window.localStorage.setItem('adk-side-panel-visible', 'true');
+      this.storageService.setItem('adk-side-panel-visible', 'true');
       return;
     }
 
@@ -2156,7 +2158,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.llmResponse = undefined;
       this.sideDrawer()?.open();
       this.showSidePanel = true;
-      window.localStorage.setItem('adk-side-panel-visible', 'true');
+      this.storageService.setItem('adk-side-panel-visible', 'true');
       this.updateRenderedGraph();
       if (this.viewMode() !== 'events') {
         this.onViewModeChange('events');
@@ -2166,7 +2168,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.sideDrawer()?.open();
     this.showSidePanel = true;
-    window.localStorage.setItem('adk-side-panel-visible', 'true');
+    this.storageService.setItem('adk-side-panel-visible', 'true');
     this.selectEvent(key, i);
   }
 
@@ -2451,7 +2453,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.sideDrawer()?.open();
     }
     this.showSidePanel = !this.showSidePanel;
-    window.localStorage.setItem('adk-side-panel-visible', this.showSidePanel.toString());
+    this.storageService.setItem('adk-side-panel-visible', this.showSidePanel.toString());
   }
 
   toggleAppSelectorDrawer() {
@@ -3533,7 +3535,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleSse() {
     this.useSse.set(!this.useSse());
-    window.localStorage.setItem('adk-use-sse', String(this.useSse()));
+    this.storageService.setItem('adk-use-sse', String(this.useSse()));
   }
 
   enterBuilderMode() {

@@ -25,6 +25,8 @@ import type {Event as AdkEvent} from '../../core/models/types';
 import {UiEvent} from '../../core/models/UiEvent';
 import {initTestBed} from '../../testing/utils';
 import {ChatPanelMessagesInjectionToken, CHAT_PANEL_MESSAGES} from '../chat-panel/chat-panel.component.i18n';
+import {MARKDOWN_COMPONENT} from '../markdown/markdown.component.interface';
+import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component';
 import {EventContentComponent} from './event-content.component';
 
 describe('EventContentComponent', () => {
@@ -45,6 +47,7 @@ describe('EventContentComponent', () => {
           provide: MatDialog,
           useValue: {open: () => ({afterClosed: () => ({subscribe: () => {}})})},
         },
+        {provide: MARKDOWN_COMPONENT, useValue: MockMarkdownComponent},
       ],
     }).compileComponents();
 
@@ -156,6 +159,50 @@ describe('EventContentComponent', () => {
       expect(output.nativeElement.textContent).toContain('hi');
       // The output comes right after the chip, so it renders underneath it.
       expect(chip.nativeElement.nextElementSibling).toBe(output.nativeElement);
+    });
+  });
+
+  describe('Code execution', () => {
+    it('renders a result sent in its own event under the chips', () => {
+      const codeExecutionResult = {outcome: 'OUTCOME_OK' as const, output: '42\n'};
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {
+          id: 'result-1',
+          actions: {stateDelta: {'_code_execution_context': {}}},
+        } as AdkEvent,
+        codeExecutionResult,
+        codeExecutionSegments: [{kind: 'result', codeExecutionResult}],
+      });
+      component.index = 0;
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('app-content-bubble'))).toBeNull();
+      const chips = fixture.debugElement.query(By.css('.event-chips-container'));
+      expect(chips.query(By.css('app-hover-info-button')).componentInstance.text)
+          .toBe('State: _code_execution_context');
+      const result = fixture.debugElement.query(By.css('app-code-execution'));
+      expect(result.nativeElement.textContent).toContain('42');
+      expect(chips.nativeElement.nextElementSibling).toBe(result.nativeElement);
+    });
+
+    it('keeps code and results that follow it in the message card', () => {
+      const uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'code-1'} as AdkEvent,
+        executableCode: {code: 'print(42)', language: 'PYTHON'},
+        codeExecutionResult: {outcome: 'OUTCOME_OK', output: '42\n'},
+        codeExecutionSegments: [
+          {kind: 'code', executableCode: {code: 'print(42)', language: 'PYTHON'}},
+          {
+            kind: 'result',
+            codeExecutionResult: {outcome: 'OUTCOME_OK', output: '42\n'},
+          },
+        ],
+      });
+
+      expect(component.shouldShowMessageCard(uiEvent)).toBeTrue();
+      expect(component.getStandaloneCodeResults(uiEvent)).toEqual([]);
     });
   });
 });

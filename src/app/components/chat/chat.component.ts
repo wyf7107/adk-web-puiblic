@@ -42,6 +42,7 @@ import { catchError, distinctUntilChanged, filter, first, map, shareReplay, star
 
 import { URLUtil } from '../../../utils/url-util';
 import { AgentRunRequest } from '../../core/models/AgentRunRequest';
+import { appendCodeExecutionSegments } from '../../core/models/CodeExecution';
 import { EvalCase, EvaluationResult, EvalStatus } from '../../core/models/Eval';
 import { Session, SessionState } from '../../core/models/Session';
 import { Event as AdkEvent, Part } from '../../core/models/types';
@@ -433,6 +434,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   shouldShowEvent(uiEvent: UiEvent): boolean {
+    if (this.isEmptyEvent(uiEvent)) {
+      return false;
+    }
+
     const invFilter = this.invocationIdFilter();
     if (invFilter) {
       const eventInvId = uiEvent.event?.invocationId || '';
@@ -496,6 +501,26 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   shouldShowEventFn = this.shouldShowEvent.bind(this);
+
+  /**
+   * Whether an agent event has nothing to render, such as the event with no
+   * content and no actions that ADK sends with built-in code execution.
+   */
+  private isEmptyEvent(uiEvent: UiEvent): boolean {
+    const event = uiEvent.event;
+    if (uiEvent.role === 'user' || uiEvent.isLoading || !event) {
+      return false;
+    }
+    const hasActions = Object.values(event.actions ?? {}).some(
+        value => value !== undefined && value !== null && value !== false &&
+            !(typeof value === 'object' && Object.keys(value).length === 0));
+    return !event.content?.parts?.length && !hasActions && !uiEvent.error &&
+        !uiEvent.inlineData && uiEvent.evalStatus === undefined &&
+        event.output === undefined && event.inputTranscription === undefined &&
+        event.outputTranscription === undefined && !event.voiceActivity &&
+        !event.turnComplete && !event.interrupted &&
+        !event.systemInstructionChanged;
+  }
 
   getMetricTooltip(metricName: string, score: any, threshold: any): string {
     const info = this.metricsInfo().find((m: any) => m.metricName === metricName);
@@ -1655,6 +1680,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     parts = this.combineTextParts(parts);
 
+    updatedEvent.codeExecutionSegments = appendCodeExecutionSegments(
+        lastEvent.codeExecutionSegments, parts, lastEvent.textParts,
+        this.formatPartText);
+
     parts.forEach((part: any) => {
       if (part.text !== undefined && part.text !== null) {
         const processedText = part.thought ? this.processThoughtText(part.text) : part.text;
@@ -2779,6 +2808,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       this.processPartIntoMessage(part, event, uiEvent);
     });
+    // Built from `parts`, which keeps the event's order even when
+    // `partsToProcess` is reversed.
+    uiEvent.codeExecutionSegments =
+        appendCodeExecutionSegments(undefined, parts, [], this.formatPartText);
 
     this.extractA2uiJsonFromText(uiEvent);
 
@@ -4840,6 +4873,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private processThoughtText(text: string) {
     return text.replace('/*PLANNING*/', '').replace('/*ACTION*/', '');
   }
+
+  private readonly formatPartText = (text: string, thought: boolean) =>
+      thought ? this.processThoughtText(text) : text;
 
   openLink(url: string) {
     this.safeValuesService.windowOpen(window, url, '_blank');

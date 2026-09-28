@@ -42,13 +42,19 @@ export declare interface FileData {
 }
 
 export declare interface ExecutableCode {
-  language: 'UNKNOWN'|'PYTHON';
+  /** The genai enum only defines these values. The Java ADK leaves it unset. */
+  language?: 'LANGUAGE_UNSPECIFIED'|'PYTHON';
   code: string;
 }
 
 export declare interface CodeExecutionResult {
-  outcome: 'UNKNOWN'|'OK'|'FAILED'|'DEADLINE_EXCEEDED';
-  output: string;
+  /**
+   * The Python and TypeScript ADKs send the `OUTCOME_` values; the Java ADK
+   * sends them without the prefix.
+   */
+  outcome?: 'OUTCOME_UNSPECIFIED'|'OUTCOME_OK'|'OUTCOME_FAILED'|
+      'OUTCOME_DEADLINE_EXCEEDED'|'OK'|'FAILED'|'DEADLINE_EXCEEDED';
+  output?: string;
 }
 
 export declare interface Part {

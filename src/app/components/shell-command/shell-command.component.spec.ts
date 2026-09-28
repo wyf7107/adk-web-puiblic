@@ -44,7 +44,7 @@ describe('ShellCommandComponent', () => {
     expect(query('.shell-command-line')?.textContent).toBe('$ echo hi');
     expect(query('.shell-token-command')?.textContent).toBe('echo');
     expect(query('.shell-token-arg')?.textContent).toBe('hi');
-    expect(query('.shell-output')).toBeNull();
+    expect(query('app-terminal-output')).toBeNull();
   });
 
   it('renders a function response as the command output', () => {
@@ -54,9 +54,9 @@ describe('ShellCommandComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(query('.shell-stdout')?.textContent).toBe('hi');
-    expect(query('.shell-stderr')).toBeNull();
-    expect(query('.shell-status')).toBeNull();
+    expect(query('.terminal-stdout')?.textContent).toBe('hi');
+    expect(query('.terminal-stderr')).toBeNull();
+    expect(query('.terminal-status')).toBeNull();
     expect(query('.shell-command')).toBeNull();
   });
 
@@ -71,9 +71,9 @@ describe('ShellCommandComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(query('.shell-stdout')).toBeNull();
-    expect(query('.shell-stderr')?.textContent).toBe('ls: cannot access');
-    expect(query('.shell-status')?.textContent).toBe('Exit code 2');
+    expect(query('.terminal-stdout')).toBeNull();
+    expect(query('.terminal-stderr')?.textContent).toBe('ls: cannot access');
+    expect(query('.terminal-status')?.textContent).toBe('Exit code 2');
   });
 
   it('shows the tool error when the command did not run', () => {
@@ -83,9 +83,9 @@ describe('ShellCommandComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(query('.shell-error')?.textContent)
+    expect(query('.terminal-error')?.textContent)
         .toBe('This tool call is rejected.');
-    expect(query('.shell-empty')).toBeNull();
+    expect(query('.terminal-empty')).toBeNull();
   });
 
   it('shows a placeholder when the command printed nothing', () => {
@@ -95,7 +95,7 @@ describe('ShellCommandComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(query('.shell-empty')?.textContent).toBe('(no output)');
+    expect(query('.terminal-empty')?.textContent).toBe('(no output)');
   });
 
   it('marks timed out commands', () => {
@@ -105,6 +105,6 @@ describe('ShellCommandComponent', () => {
     });
     fixture.detectChanges();
 
-    expect(query('.shell-status')?.textContent).toBe('Timed out');
+    expect(query('.terminal-status')?.textContent).toBe('Timed out');
   });
 });

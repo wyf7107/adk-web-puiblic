@@ -15,26 +15,15 @@
 -->
 
 @if (command()) {
-  <div class="shell-block shell-command">
+  <div class="shell-command">
     <!-- Kept on one line: whitespace between the spans would show up in the command. -->
     <div class="shell-command-line"><span class="shell-prompt">$ </span>@for (token of tokens(); track $index) {<span [class]="'shell-token-' + token.type">{{ token.text }}</span>}</div>
   </div>
 } @else if (result(); as shellResult) {
-  <div class="shell-block shell-output">
-    @if (stdout()) {
-      <pre class="shell-stream shell-stdout">{{ stdout() }}</pre>
-    }
-    @if (stderr()) {
-      <pre class="shell-stream shell-stderr">{{ stderr() }}</pre>
-    }
-    @if (shellResult.error) {
-      <pre class="shell-stream shell-error">{{ shellResult.error }}</pre>
-    }
-    @if (!hasOutput()) {
-      <div class="shell-empty">(no output)</div>
-    }
-    @if (status()) {
-      <div class="shell-status">{{ status() }}</div>
-    }
-  </div>
+  <app-terminal-output
+    [stdout]="shellResult.stdout"
+    [stderr]="shellResult.stderr"
+    [error]="shellResult.error"
+    [status]="status()"
+  ></app-terminal-output>
 }

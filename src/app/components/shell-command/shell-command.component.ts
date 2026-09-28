@@ -17,8 +17,9 @@
 
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 
-import {getShellCommand, getShellResult, stripAnsi, tokenizeShellCommand} from '../../core/models/ShellCommand';
+import {getShellCommand, getShellResult, tokenizeShellCommand} from '../../core/models/ShellCommand';
 import type {FunctionCall, FunctionResponse} from '../../core/models/types';
+import {TerminalOutputComponent} from '../terminal-output/terminal-output.component';
 
 /**
  * Renders a shell tool call as a terminal prompt line (`$ command`), or a shell
@@ -30,6 +31,7 @@ import type {FunctionCall, FunctionResponse} from '../../core/models/types';
   templateUrl: './shell-command.component.html',
   styleUrl: './shell-command.component.scss',
   standalone: true,
+  imports: [TerminalOutputComponent],
 })
 export class ShellCommandComponent {
   readonly functionCall = input<FunctionCall>();
@@ -42,10 +44,6 @@ export class ShellCommandComponent {
   });
 
   protected readonly result = computed(() => getShellResult(this.functionResponse()));
-  protected readonly stdout = computed(() => formatStream(this.result()?.stdout));
-  protected readonly stderr = computed(() => formatStream(this.result()?.stderr));
-  protected readonly hasOutput = computed(
-      () => !!(this.stdout() || this.stderr() || this.result()?.error));
   protected readonly status = computed(() => {
     const result = this.result();
     if (!result) return '';
@@ -55,8 +53,4 @@ export class ShellCommandComponent {
     }
     return '';
   });
-}
-
-function formatStream(text: string|undefined): string {
-  return text ? stripAnsi(text).replace(/\s+$/, '') : '';
 }

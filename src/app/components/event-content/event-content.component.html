@@ -181,6 +181,10 @@
     ></app-hover-info-button>
     }
     </div>
+    <!-- Results sent in their own event show under the chips, like shell output. -->
+    @for (codeResult of getStandaloneCodeResults(uiEvent); track $index) {
+      <app-code-execution [codeExecutionResult]="codeResult"></app-code-execution>
+    }
     @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
       @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
         @if (functionCall.needsResponse && !hasFunctionResponse(functionCall.id)) {

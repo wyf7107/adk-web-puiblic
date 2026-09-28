@@ -22,11 +22,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
-import { FunctionCall, FunctionResponse } from '../../core/models/types';
+import { CodeExecutionResult, FunctionCall, FunctionResponse } from '../../core/models/types';
 import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
 
 import { AgentRunRequest } from '../../core/models/AgentRunRequest';
 import { isComputerUseResponse, isVisibleComputerUseClick } from '../../core/models/ComputerUse';
+import { getStandaloneCodeResults } from '../../core/models/CodeExecution';
 import type { EvalCase } from '../../core/models/Eval';
 import { isShellCommandCall, isShellCommandResponse } from '../../core/models/ShellCommand';
 import { UiEvent } from '../../core/models/UiEvent';
@@ -36,6 +37,7 @@ import { ComputerActionComponent } from '../computer-action/computer-action.comp
 import { HoverInfoButtonComponent } from '../hover-info-button/hover-info-button.component';
 import { LongRunningResponseComponent } from '../long-running-response/long-running-response';
 import { ChatPanelMessagesInjectionToken } from '../chat-panel/chat-panel.component.i18n';
+import { CodeExecutionComponent } from '../code-execution/code-execution.component';
 import { ContentBubbleComponent } from '../content-bubble/content-bubble.component';
 import { ShellCommandComponent } from '../shell-command/shell-command.component';
 import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff-dialog/system-instruction-diff-dialog.component';
@@ -55,6 +57,7 @@ import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff
     ComputerActionComponent,
     LongRunningResponseComponent,
     HoverInfoButtonComponent,
+    CodeExecutionComponent,
     ContentBubbleComponent,
     MatMenuModule,
     JsonTooltipDirective,
@@ -161,10 +164,16 @@ export class EventContentComponent {
   shouldShowMessageCard(message: any): boolean {
     return !!(
       message.text || message.attachments || message.inlineData ||
-      message.executableCode || message.codeExecutionResult ||
+      message.executableCode ||
+      (message.codeExecutionResult && !this.getStandaloneCodeResults(message).length) ||
       message.a2uiData || message.renderedContent || message.isLoading ||
       (message.failedMetric && message.evalStatus === 2) ||
       message.event?.content?.parts?.some((part: any) => part.fileData));
+  }
+
+  /** Code results that show under the chips instead of in the message card. */
+  getStandaloneCodeResults(uiEvent: UiEvent): CodeExecutionResult[] {
+    return getStandaloneCodeResults(uiEvent);
   }
 
   isComputerUseClick(input: any): boolean {

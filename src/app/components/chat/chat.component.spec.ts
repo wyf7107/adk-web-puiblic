@@ -2215,4 +2215,84 @@ describe('ChatComponent', () => {
       });
     });
   });
+
+  describe('code execution events', () => {
+    it('keeps text, code, and results in the order the model sent them', () => {
+      const uiEvent: UiEvent = component['buildUiEventFromEvent']({
+        id: 'builtin-1',
+        author: 'agent',
+        content: {
+          role: 'model',
+          parts: [
+            {text: 'I will compute both values.'},
+            {executableCode: {code: 'print(1)', language: 'PYTHON'}},
+            {codeExecutionResult: {outcome: 'OUTCOME_OK', output: '1\n'}},
+            {executableCode: {code: 'print(2)', language: 'PYTHON'}},
+            {codeExecutionResult: {outcome: 'OUTCOME_OK', output: '2\n'}},
+            {text: 'Done.'},
+          ],
+        },
+      });
+
+      expect(uiEvent.codeExecutionSegments?.map(segment => segment.kind))
+          .toEqual(['text', 'code', 'result', 'code', 'result', 'text']);
+    });
+
+    it('does not add segments to events without code execution', () => {
+      const uiEvent: UiEvent = component['buildUiEventFromEvent']({
+        id: 'text-1',
+        author: 'agent',
+        content: {role: 'model', parts: [{text: 'Hello'}]},
+      });
+
+      expect(uiEvent.codeExecutionSegments).toBeUndefined();
+    });
+
+    it('keeps earlier streamed text when a later chunk brings code', () => {
+      const first: UiEvent = component['buildUiEventFromEvent']({
+        id: 'stream-1',
+        author: 'agent',
+        partial: true,
+        content: {role: 'model', parts: [{text: 'Let me run that.'}]},
+      });
+      const merged: UiEvent = component['mergePartialEvent'](first, {
+        id: 'stream-1',
+        author: 'agent',
+        partial: true,
+        content: {
+          role: 'model',
+          parts: [{executableCode: {code: 'x = 1', language: 'PYTHON'}}],
+        },
+      });
+
+      expect(merged.codeExecutionSegments).toEqual([
+        {kind: 'text', text: 'Let me run that.', thought: false},
+        {kind: 'code', executableCode: {code: 'x = 1', language: 'PYTHON'}},
+      ]);
+    });
+
+    it('hides agent events that have nothing to show', () => {
+      const empty = new UiEvent({
+        role: 'bot',
+        event: {
+          id: 'empty-1',
+          author: 'agent',
+          content: {role: 'model', parts: []},
+          actions: {stateDelta: {}, artifactDelta: {}},
+        },
+      });
+      const stateUpdate = new UiEvent({
+        role: 'bot',
+        event: {
+          id: 'state-1',
+          author: 'agent',
+          content: {role: 'model', parts: []},
+          actions: {stateDelta: {count: 1}},
+        },
+      });
+
+      expect(component.shouldShowEvent(empty)).toBeFalse();
+      expect(component.shouldShowEvent(stateUpdate)).toBeTrue();
+    });
+  });
 });

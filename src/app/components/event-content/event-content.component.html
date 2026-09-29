@@ -85,6 +85,8 @@
             <app-computer-action [functionCall]="functionCall" [allMessages]="uiEvents" [index]="index" (clickEvent)="clickEvent.emit($event)" (openImage)="openViewImageDialog.emit($event)"></app-computer-action>
           } @else if (isShellCommandCall(functionCall)) {
             <app-shell-command [functionCall]="functionCall"></app-shell-command>
+          } @else if (isFileEditCall(functionCall)) {
+            <app-file-edit [functionCall]="functionCall"></app-file-edit>
           }
         }
       </div>
@@ -114,6 +116,8 @@
           </div>
           @if (isShellCommandResponse(functionResponse)) {
             <app-shell-command [functionResponse]="functionResponse"></app-shell-command>
+          } @else if (isFailedFileEdit(functionResponse)) {
+            <app-file-edit [functionResponse]="functionResponse"></app-file-edit>
           }
         }
       }

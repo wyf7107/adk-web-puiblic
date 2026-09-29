@@ -29,6 +29,7 @@ import { AgentRunRequest } from '../../core/models/AgentRunRequest';
 import { isComputerUseResponse, isVisibleComputerUseClick } from '../../core/models/ComputerUse';
 import { getStandaloneCodeResults } from '../../core/models/CodeExecution';
 import type { EvalCase } from '../../core/models/Eval';
+import { getFileEditError, isFileEditCall } from '../../core/models/FileEdit';
 import { isShellCommandCall, isShellCommandResponse } from '../../core/models/ShellCommand';
 import { UiEvent } from '../../core/models/UiEvent';
 import { WorkflowGraphTooltipDirective } from '../../directives/workflow-graph-tooltip.directive';
@@ -39,6 +40,7 @@ import { LongRunningResponseComponent } from '../long-running-response/long-runn
 import { ChatPanelMessagesInjectionToken } from '../chat-panel/chat-panel.component.i18n';
 import { CodeExecutionComponent } from '../code-execution/code-execution.component';
 import { ContentBubbleComponent } from '../content-bubble/content-bubble.component';
+import { FileEditComponent } from '../file-edit/file-edit.component';
 import { ShellCommandComponent } from '../shell-command/shell-command.component';
 import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff-dialog/system-instruction-diff-dialog.component';
 
@@ -59,6 +61,7 @@ import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff
     HoverInfoButtonComponent,
     CodeExecutionComponent,
     ContentBubbleComponent,
+    FileEditComponent,
     MatMenuModule,
     JsonTooltipDirective,
     ShellCommandComponent,
@@ -190,6 +193,15 @@ export class EventContentComponent {
 
   isShellCommandResponse(functionResponse: FunctionResponse): boolean {
     return isShellCommandResponse(functionResponse);
+  }
+
+  isFileEditCall(functionCall: FunctionCall): boolean {
+    return isFileEditCall(functionCall);
+  }
+
+  /** Whether a function response is a file edit that failed. */
+  isFailedFileEdit(functionResponse: FunctionResponse): boolean {
+    return getFileEditError(functionResponse) !== null;
   }
 
   getFilteredStateKeys(stateDelta: any): string[] {

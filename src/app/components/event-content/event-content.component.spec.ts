@@ -205,4 +205,60 @@ describe('EventContentComponent', () => {
       expect(component.getStandaloneCodeResults(uiEvent)).toEqual([]);
     });
   });
+
+  describe('File edits', () => {
+    it('renders an EditFile call as a diff under its chip', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'edit-call'} as AdkEvent,
+        functionCalls: [{
+          id: 'fc-1',
+          name: 'EditFile',
+          args: {path: 'app.py', old_string: 'a = 1\n', new_string: 'a = 2\n'},
+        }],
+      });
+      component.index = 0;
+      fixture.detectChanges();
+
+      const edit = fixture.debugElement.query(By.css('app-file-edit'));
+      expect(edit.query(By.css('.file-edit-path')).nativeElement.textContent)
+          .toBe('app.py');
+      expect(edit.queryAll(By.css('.diff-line')).length).toBe(2);
+    });
+
+    it('renders a failed edit as an error under its response chip', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'edit-response'} as AdkEvent,
+        functionResponses: [{
+          id: 'fc-1',
+          name: 'EditFile',
+          response: {status: 'error', error: 'File not found: app.py'},
+        }],
+      });
+      component.index = 1;
+      fixture.detectChanges();
+
+      const chip = fixture.debugElement.query(By.css('.function-response-chip-container'));
+      const edit = fixture.debugElement.query(By.css('app-file-edit'));
+      expect(edit.nativeElement.textContent).toContain('File not found: app.py');
+      expect(chip.nativeElement.nextElementSibling).toBe(edit.nativeElement);
+    });
+
+    it('renders nothing extra for a successful edit response', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'edit-ok'} as AdkEvent,
+        functionResponses: [{
+          id: 'fc-1',
+          name: 'EditFile',
+          response: {status: 'ok', message: 'Edited app.py'},
+        }],
+      });
+      component.index = 1;
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('app-file-edit'))).toBeNull();
+    });
+  });
 });

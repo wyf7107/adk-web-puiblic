@@ -228,6 +228,7 @@ describe('ChatComponent', () => {
     mockFeatureFlagService.isInfinityMessageScrollingEnabledResponse.next(
         false);
     mockFeatureFlagService.isNewSessionButtonEnabledResponse.next(true);
+    mockFeatureFlagService.isTraceEnabledResponse.next(true);
 
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockDialog.open.and.returnValue({
@@ -1088,6 +1089,74 @@ describe('ChatComponent', () => {
           const deleteButton = fixture.debugElement.query(
               By.css('#toolbar-delete-session-button'));
           expect(deleteButton).toBeFalsy();
+        });
+      });
+    });
+
+    describe('Events/Traces toggle', () => {
+      const toggleSelector =
+          By.css('.chat-sub-toolbar mat-button-toggle-group');
+
+      describe('when isTraceEnabled is true', () => {
+        beforeEach(() => {
+          fixture.detectChanges();
+        });
+
+        it('should be visible', () => {
+          expect(fixture.debugElement.query(toggleSelector)).toBeTruthy();
+        });
+      });
+
+      describe('when isTraceEnabled is false', () => {
+        beforeEach(() => {
+          mockFeatureFlagService.isTraceEnabledResponse.next(false);
+          fixture.detectChanges();
+        });
+
+        it('should not be visible', () => {
+          expect(fixture.debugElement.query(toggleSelector)).toBeFalsy();
+        });
+      });
+    });
+
+    describe('trace view', () => {
+      function chatPanelViewMode() {
+        return fixture.debugElement.query(By.directive(ChatPanelComponent))
+            .componentInstance.viewMode;
+      }
+
+      describe('when switched to while traces are enabled', () => {
+        beforeEach(() => {
+          component.switchToTraceView();
+          fixture.detectChanges();
+        });
+
+        it('should be shown', () => {
+          expect(chatPanelViewMode()).toBe('traces');
+        });
+
+        describe('and traces are then disabled', () => {
+          beforeEach(() => {
+            mockFeatureFlagService.isTraceEnabledResponse.next(false);
+            fixture.detectChanges();
+          });
+
+          it('should fall back to events', () => {
+            expect(chatPanelViewMode()).toBe('events');
+          });
+        });
+      });
+
+      describe('when switched to while traces are disabled', () => {
+        beforeEach(() => {
+          mockFeatureFlagService.isTraceEnabledResponse.next(false);
+          component.switchToTraceView();
+          mockFeatureFlagService.isTraceEnabledResponse.next(true);
+          fixture.detectChanges();
+        });
+
+        it('should not be selected', () => {
+          expect(chatPanelViewMode()).toBe('events');
         });
       });
     });

@@ -489,10 +489,12 @@
       } } @if (appName != "") {
 <div class="chat-sub-toolbar">
   @if (!(uiEvents().length === 0 && agentReadme && chatType() !== 'eval-result')) {
-  <mat-button-toggle-group [value]="viewMode()" (change)="onViewModeChange($event.value)" hideSingleSelectionIndicator>
+  @if (isTraceEnabled()) {
+  <mat-button-toggle-group [value]="effectiveViewMode()" (change)="onViewModeChange($event.value)" hideSingleSelectionIndicator>
     <mat-button-toggle value="events">Events</mat-button-toggle>
     <mat-button-toggle value="traces">Traces</mat-button-toggle>
   </mat-button-toggle-group>
+  }
 
   <div class="filter-bar-container" (click)="openAddFilterMenu($event)">
     @if (invocationIdFilterActive()) {
@@ -601,7 +603,7 @@
   </button>
   }
 
-  @let hasBranchesOption = viewMode() !== 'traces';
+  @let hasBranchesOption = effectiveViewMode() !== 'traces';
   @let hasStreamingOption = (isTokenStreamingEnabledObs | async) && canEditSession();
   @if (hasBranchesOption || hasStreamingOption) {
   <button
@@ -684,7 +686,7 @@
               (longRunningResponseComplete)="sendMessage($event)"
               [sessionName]="sessionId"
               [invocationDisplayMap]="invocationDisplayMap()"
-              [viewMode]="viewMode()"
+              [viewMode]="effectiveViewMode()"
               [shouldShowEvent]="shouldShowEventFn"
               (manualScroll)="onManualScroll()"
             ></app-chat-panel>
@@ -719,7 +721,7 @@
               (editFunctionArgs)="editFunctionArgs($event)"
               [sessionName]="sessionId"
               [invocationDisplayMap]="invocationDisplayMap()"
-              [viewMode]="viewMode()"
+              [viewMode]="effectiveViewMode()"
               [shouldShowEvent]="shouldShowEventFn"
             ></app-chat-panel>
           }
@@ -825,7 +827,7 @@
                     [sessionId]="sessionId"
                     [sessionName]="sessionId"
                     [invocationDisplayMap]="invocationDisplayMap()"
-                    [viewMode]="viewMode()"
+                    [viewMode]="effectiveViewMode()"
                     [shouldShowEvent]="shouldShowEventFn"
                     (manualScroll)="onManualScroll()"
                   ></app-chat-panel>
@@ -880,7 +882,7 @@
                     (longRunningResponseComplete)="sendMessage($event)"
                     [sessionName]="sessionId"
                     [invocationDisplayMap]="invocationDisplayMap()"
-                    [viewMode]="viewMode()"
+                    [viewMode]="effectiveViewMode()"
                     [shouldShowEvent]="shouldShowEventFn"
                     (manualScroll)="onManualScroll()"
                   ></app-chat-panel>
@@ -903,7 +905,7 @@
                 [sessionId]="sessionId"
                 [sessionName]="sessionId"
                 [invocationDisplayMap]="invocationDisplayMap()"
-                [viewMode]="viewMode()"
+                [viewMode]="effectiveViewMode()"
                 [shouldShowEvent]="shouldShowEventFn"
                 (manualScroll)="onManualScroll()"
               ></app-chat-panel>

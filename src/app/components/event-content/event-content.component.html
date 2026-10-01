@@ -142,12 +142,6 @@
         ></app-hover-info-button>
       }
     }
-    @if (uiEvent.error) {
-    <app-content-bubble
-      type="error"
-      [uiEvent]="uiEvent"
-    ></app-content-bubble>
-    }
     @if (uiEvent.route) {
     <app-hover-info-button
       [icon]="'route'"
@@ -185,6 +179,13 @@
     ></app-hover-info-button>
     }
     </div>
+    <!-- Errors show under the chips rather than beside them. -->
+    @if (uiEvent.error) {
+    <app-content-bubble
+      type="error"
+      [uiEvent]="uiEvent"
+    ></app-content-bubble>
+    }
     <!-- Results sent in their own event show under the chips, like shell output. -->
     @for (codeResult of getStandaloneCodeResults(uiEvent); track $index) {
       <app-code-execution [codeExecutionResult]="codeResult"></app-code-execution>

@@ -261,4 +261,36 @@ describe('EventContentComponent', () => {
       expect(fixture.debugElement.query(By.css('app-file-edit'))).toBeNull();
     });
   });
+
+  describe('Skills', () => {
+    it('renders a skill tool response under its chip', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'skill-response'} as AdkEvent,
+        functionResponses: [{
+          id: 'fc-1',
+          name: 'load_skill',
+          response: {
+            skill_name: 'text-skill',
+            instructions: 'Use format.sh.',
+            frontmatter: {description: 'Formats text.'},
+          },
+        }],
+      });
+      component.index = 1;
+      fixture.detectChanges();
+
+      const chip = fixture.debugElement.query(By.css('.function-response-chip-container'));
+      const skill = fixture.debugElement.query(By.css('app-skill-tool'));
+      expect(skill.nativeElement.textContent).toContain('Loaded skill');
+      expect(chip.nativeElement.nextElementSibling).toBe(skill.nativeElement);
+    });
+
+    it('shows the resource path in the load_skill_resource chip', () => {
+      expect(component.getFunctionCallButtonText({
+        name: 'load_skill_resource',
+        args: {skill_name: 'text-skill', file_path: 'scripts/format.sh'},
+      })).toBe('load_skill_resource("scripts/format.sh", …)');
+    });
+  });
 });

@@ -31,6 +31,7 @@ import { getStandaloneCodeResults } from '../../core/models/CodeExecution';
 import type { EvalCase } from '../../core/models/Eval';
 import { getFileEditError, isFileEditCall } from '../../core/models/FileEdit';
 import { isShellCommandCall, isShellCommandResponse } from '../../core/models/ShellCommand';
+import { isSkillToolResponse } from '../../core/models/SkillTool';
 import { UiEvent } from '../../core/models/UiEvent';
 import { WorkflowGraphTooltipDirective } from '../../directives/workflow-graph-tooltip.directive';
 import { JsonTooltipDirective } from '../../directives/html-tooltip.directive';
@@ -42,6 +43,7 @@ import { CodeExecutionComponent } from '../code-execution/code-execution.compone
 import { ContentBubbleComponent } from '../content-bubble/content-bubble.component';
 import { FileEditComponent } from '../file-edit/file-edit.component';
 import { ShellCommandComponent } from '../shell-command/shell-command.component';
+import { SkillToolComponent } from '../skill-tool/skill-tool.component';
 import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff-dialog/system-instruction-diff-dialog.component';
 
 @Component({
@@ -65,6 +67,7 @@ import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff
     MatMenuModule,
     JsonTooltipDirective,
     ShellCommandComponent,
+    SkillToolComponent,
   ],
 })
 export class EventContentComponent {
@@ -121,6 +124,7 @@ export class EventContentComponent {
       const specialFuncArgMap: Record<string, string> = {
         'EditFile': 'path',
         'WriteFile': 'path',
+        'load_skill_resource': 'file_path',
       };
       if (functionCall.name in specialFuncArgMap) {
         const argKey = specialFuncArgMap[functionCall.name];
@@ -197,6 +201,10 @@ export class EventContentComponent {
 
   isFileEditCall(functionCall: FunctionCall): boolean {
     return isFileEditCall(functionCall);
+  }
+
+  isSkillToolResponse(functionResponse: FunctionResponse): boolean {
+    return isSkillToolResponse(functionResponse);
   }
 
   /** Whether a function response is a file edit that failed. */

@@ -118,6 +118,8 @@
             <app-shell-command [functionResponse]="functionResponse"></app-shell-command>
           } @else if (isFailedFileEdit(functionResponse)) {
             <app-file-edit [functionResponse]="functionResponse"></app-file-edit>
+          } @else if (isSkillToolResponse(functionResponse)) {
+            <app-skill-tool [functionResponse]="functionResponse"></app-skill-tool>
           }
         }
       }

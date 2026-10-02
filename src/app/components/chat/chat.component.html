@@ -16,7 +16,9 @@
 
 <mat-toolbar class="app-toolbar">
   <div class="toolbar-group toolbar-agent-group">
-    <button mat-icon-button class="toolbar-icon-button" (click)="toggleSidePanel()" aria-label="Toggle side panel">
+    <button mat-icon-button class="toolbar-icon-button" (click)="toggleLeftNav()"
+      [matTooltip]="showLeftNav() ? 'Hide navigation' : 'Show navigation'" matTooltipPosition="below"
+      [attr.aria-expanded]="showLeftNav()" aria-label="Toggle navigation">
       <mat-icon>menu</mat-icon>
     </button>
     <div class="toolbar-logo">
@@ -78,16 +80,48 @@
             <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
           </button>
         </span>
+        <span matTooltip="Talk to a deployed version of this agent" matTooltipPosition="below">
+          <button mat-icon-button class="toolbar-icon-button"
+            [class.toolbar-icon-active]="!!deployedTarget()"
+            [disabled]="!appName"
+            (click)="openTryDeployedDialog()"
+            aria-label="Talk to a deployed version of this agent">
+            <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+          </button>
+        </span>
       }
     </div>
   </div>
   @if (appName) {
   <div class="toolbar-group toolbar-session-group">
+    @if (activeView() === 'build') {
     @if (isViewOnlySession()) {
       <div class="readonly-chip">
+        @if (readonlyReturnView() === 'sessions') {
+          <button mat-icon-button class="chip-back-button" (click)="returnFromReadonlySession()"
+            matTooltip="Back to Sessions" aria-label="Back to Sessions">
+            <mat-icon style="font-size: 18px; width: 18px; height: 18px;">arrow_back</mat-icon>
+          </button>
+        }
         <mat-icon fontSet="material-symbols-outlined" style="font-size: 18px; width: 18px; height: 18px; line-height: 18px;">visibility</mat-icon>
         <span class="chip-label">{{ readonlySessionType() }}: {{ readonlySessionName() }}</span>
         <button mat-icon-button class="chip-close-button" (click)="closeReadonlySession()" aria-label="Close readonly view">
+          <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
+        </button>
+      </div>
+    } @else if (deployedTarget(); as target) {
+      <div class="deployed-chip" [matTooltip]="'Messages go to ' + deploymentName(target.deployment) + ' in Google Cloud, as ' + target.userId">
+        <mat-icon fontSet="material-symbols-outlined" class="deployed-chip-icon">cloud</mat-icon>
+        <span class="deployed-chip-label">Deployed</span>
+        <span class="deployed-chip-name">{{ deploymentName(target.deployment) }}</span>
+        @if (sessionId) {
+          <button mat-icon-button class="chip-close-button" (click)="onNewSessionClick()"
+            matTooltip="New conversation" aria-label="New conversation">
+            <mat-icon fontSet="material-symbols-outlined" style="font-size: 16px; width: 16px; height: 16px;">add_comment</mat-icon>
+          </button>
+        }
+        <button mat-icon-button class="chip-close-button" (click)="exitDeployed()"
+          matTooltip="Back to the local agent" aria-label="Back to the local agent">
           <mat-icon style="font-size: 16px; width: 16px; height: 16px;">close</mat-icon>
         </button>
       </div>
@@ -166,6 +200,7 @@
     </div>
     }
   </div>
+    }
   <div class="toolbar-actions">
     @let isSessionLoadingActions = uiStateService.isSessionLoading() | async;
     @if (isSessionLoadingActions === false) {
@@ -225,6 +260,14 @@
   </mat-menu>
 </mat-toolbar>
 
+<div class="workspace-layout">
+@if (showLeftNav()) {
+  <app-left-nav [activeView]="activeView()" (navigate)="setActiveView($event)" (manageCloud)="openCloudConnectDialog()"></app-left-nav>
+}
+<div class="workspace-main">
+  <!-- Build: everything the dev UI had before the left navigation. Kept
+       mounted while another section is shown, so the session survives. -->
+  <div class="workspace-view" [class.workspace-view-hidden]="activeView() !== 'build'">
 <mat-drawer-container class="drawer-container" autosize>
   <mat-drawer
     class="selector-drawer"
@@ -361,7 +404,8 @@
   </mat-drawer>
 
   <mat-drawer-container class="side-panel-container" autosize>
-  <mat-drawer class="side-drawer" #sideDrawer [mode]="isMobile() ? 'over' : 'side'" appResizableDrawer>
+  <mat-drawer class="side-drawer" #sideDrawer [mode]="isMobile() ? 'over' : 'side'" appResizableDrawer
+    (resizeHandleClick)="toggleSidePanel()">
     @if (!isBuilderMode()) {
     <app-side-panel
       [isApplicationSelectorEnabledObs]="isApplicationSelectorEnabledObs"
@@ -418,6 +462,15 @@
     <div class="resize-handler"></div>
     }
   </mat-drawer>
+
+  <!-- With the panel hidden, the edge it collapsed into reopens it. The canvas
+       has its own toggle in builder mode. -->
+  @if (!showSidePanel && !isBuilderMode() && appName) {
+    <button type="button" class="side-panel-open-handle" (click)="toggleSidePanel()"
+      title="Show panel" aria-label="Show panel">
+      <mat-icon fontSet="material-symbols-outlined">chevron_right</mat-icon>
+    </button>
+  }
 
   <!-- Builder Mode Layout - Canvas for Diagrams -->
   @if (isBuilderMode()) {
@@ -641,9 +694,25 @@
   }
 </div>
 
+        @if (deployedTarget(); as target) {
+          <div class="deployed-banner" role="status">
+            <mat-icon fontSet="material-symbols-outlined" class="deployed-banner-icon">cloud</mat-icon>
+            <div class="deployed-banner-text">
+              <strong>You're talking to the deployed agent, not your local code</strong>
+              <span>
+                {{ deploymentName(target.deployment) }} &middot; {{ targetLabel(target.deployment) }} &middot;
+                {{ target.deployment.region }} &middot; as <span class="mono">{{ target.userId }}</span>.
+                Replies come from production, and the conversation is stored in its sessions.
+              </span>
+            </div>
+            <button mat-button (click)="openTryDeployedDialog()">Change</button>
+            <button mat-stroked-button (click)="exitDeployed()">Back to local agent</button>
+          </div>
+        }
         @switch (chatType()) {
           @case ('session') {
             <app-chat-panel
+              [deployedName]="deployedTarget() ? deploymentName(deployedTarget()!.deployment) : ''"
               [appName]="appName"
               [agentReadme]="agentReadme"
               [isEvalResult]="chatType() === 'eval-result'"
@@ -925,6 +994,35 @@
 
   </mat-drawer-container>
 </mat-drawer-container>
+  </div>
+
+  @if (activeView() === 'deployments') {
+    <app-deployments class="workspace-view" [appName]="appName" (backToPlayground)="setActiveView('build')"
+      (tryDeployment)="openTryDeployedDialog($event.id)"></app-deployments>
+  }
+  <!-- Sessions, Logs and Monitoring stay mounted once opened, so coming back
+       keeps the chosen deployment and filters. -->
+  @if (sessionsViewOpened()) {
+    <app-cloud-sessions class="workspace-view" [class.workspace-view-hidden]="activeView() !== 'sessions'"
+      [appName]="appName"
+      (backToPlayground)="setActiveView('build')"
+      (goToDeployments)="setActiveView('deployments')"
+      (openSession)="viewCloudSession($event)"></app-cloud-sessions>
+  }
+  @if (logsViewOpened()) {
+    <app-cloud-logs class="workspace-view" [class.workspace-view-hidden]="activeView() !== 'logs'"
+      [appName]="appName" [active]="activeView() === 'logs'"
+      (backToPlayground)="setActiveView('build')"
+      (goToDeployments)="setActiveView('deployments')"></app-cloud-logs>
+  }
+  @if (monitoringViewOpened()) {
+    <app-cloud-monitoring class="workspace-view" [class.workspace-view-hidden]="activeView() !== 'monitoring'"
+      [appName]="appName" [active]="activeView() === 'monitoring'"
+      (backToPlayground)="setActiveView('build')"
+      (goToDeployments)="setActiveView('deployments')"></app-cloud-monitoring>
+  }
+</div>
+</div>
 
 @if (showAgentStructureOverlay) {
   <app-agent-structure-graph-dialog 

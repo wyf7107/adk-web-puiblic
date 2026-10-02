@@ -18,7 +18,7 @@
 import {InjectionToken} from '@angular/core';
 import {Observable} from 'rxjs';
 
-import {DeployConfig, DeployDefaults, DeployEvent, DeployTarget} from '../../models/Deploy';
+import {DeployConfig, DeployDefaults, DeployEvent, DeploymentLive, DeploymentsResponse, DeployTarget} from '../../models/Deploy';
 
 /**
  * Deploys agents to a hosted environment.
@@ -48,6 +48,20 @@ export declare abstract class DeployService {
       target: DeployTarget,
       config: DeployConfig,
       ): Observable<DeployEvent>;
+
+  /**
+   * Discovers deployments in the connected cloud project, marking the app's
+   * own, alongside the app's deploy history. Errors with HTTP 409 when the UI
+   * is not connected to a project.
+   */
+  abstract listDeployments(appName: string): Observable<DeploymentsResponse>;
+
+  /**
+   * Asks the cloud for a deployment's current state. Cloud errors arrive in
+   * the result's `error` field rather than as an observable error.
+   */
+  abstract getDeploymentLive(appName: string, deploymentId: string):
+      Observable<DeploymentLive>;
 }
 
 /** Injection token for deploy service. */

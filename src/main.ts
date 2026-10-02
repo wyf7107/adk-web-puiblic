@@ -42,6 +42,7 @@ import {AgentService} from './app/core/services/agent.service';
 import {ArtifactService} from './app/core/services/artifact.service';
 import {AudioPlayingService} from './app/core/services/audio-playing.service';
 import {AudioRecordingService} from './app/core/services/audio-recording.service';
+import {CloudService} from './app/core/services/cloud.service';
 import {DeployService} from './app/core/services/deploy.service';
 import {DownloadService} from './app/core/services/download.service';
 import {EvalService} from './app/core/services/eval.service';
@@ -53,6 +54,7 @@ import {AGENT_SERVICE} from './app/core/services/interfaces/agent';
 import {AGENT_BUILDER_SERVICE} from './app/core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from './app/core/services/interfaces/artifact';
 import {AUDIO_PLAYING_SERVICE} from './app/core/services/interfaces/audio-playing';
+import {CLOUD_SERVICE} from './app/core/services/interfaces/cloud';
 import {DEPLOY_SERVICE} from './app/core/services/interfaces/deploy';
 import {AUDIO_RECORDING_SERVICE, AUDIO_WORKLET_MODULE_PATH} from './app/core/services/interfaces/audio-recording';
 import {DOWNLOAD_SERVICE} from './app/core/services/interfaces/download';
@@ -106,6 +108,7 @@ fetch('./assets/config/runtime-config.json')
           {provide: SESSION_SERVICE, useClass: SessionService},
           {provide: AGENT_SERVICE, useClass: AgentService},
           {provide: DEPLOY_SERVICE, useClass: DeployService},
+          {provide: CLOUD_SERVICE, useClass: CloudService},
           {provide: FEEDBACK_SERVICE, useClass: FeedbackService},
           {provide: WEBSOCKET_SERVICE, useClass: WebSocketService},
           {

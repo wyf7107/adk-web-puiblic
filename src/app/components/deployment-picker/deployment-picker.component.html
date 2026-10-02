@@ -1,0 +1,81 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<mat-menu #menu="matMenu" class="source-menu" xPosition="after">
+  @if (mine().length) {
+    <div class="menu-group">This agent</div>
+    @for (deployment of mine(); track deployment.id) {
+      <ng-container *ngTemplateOutlet="option; context: {deployment}"></ng-container>
+    }
+  }
+  @if (others().length) {
+    <div class="menu-group">Rest of project</div>
+    @for (deployment of others(); track deployment.id) {
+      <ng-container *ngTemplateOutlet="option; context: {deployment}"></ng-container>
+    }
+  }
+</mat-menu>
+
+<ng-template #option let-deployment="deployment">
+  <button mat-menu-item class="source-option" [class.selected]="deployment.id === selectedId()"
+    (click)="select(deployment)">
+    <mat-icon fontSet="material-symbols-outlined">{{ targetIcon(deployment) }}</mat-icon>
+    <span class="source-option-text">
+      <span class="source-option-name">{{ name(deployment) }}</span>
+      <span class="source-option-meta">
+        {{ targetLabel(deployment) }} &middot; {{ deployment.region }}
+        @if (shortId(deployment)) { &middot; <span class="mono">{{ shortId(deployment) }}</span> }
+        @if (optionNote()(deployment); as note) { &middot; {{ note }} }
+      </span>
+    </span>
+    @if (deployment.id === selectedId()) {
+      <mat-icon class="source-option-check">check</mat-icon>
+    }
+  </button>
+</ng-template>
+
+<span class="source-label">{{ label() }}</span>
+<button type="button" class="source-picker" [matMenuTriggerFor]="menu"
+  [attr.aria-label]="selected() ? 'Change the deployment' : 'Choose a deployment'">
+  @if (selected(); as deployment) {
+    <span class="source-icon">
+      <mat-icon fontSet="material-symbols-outlined">{{ targetIcon(deployment) }}</mat-icon>
+    </span>
+    <span class="source-text">
+      <span class="source-name">{{ name(deployment) }}</span>
+      <span class="source-meta">
+        {{ targetLabel(deployment) }} &middot; {{ deployment.region }}
+        @if (shortId(deployment)) { &middot; <span class="mono source-id">{{ shortId(deployment) }}</span> }
+      </span>
+    </span>
+  } @else {
+    <span class="source-icon">
+      <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+    </span>
+    <span class="source-text">
+      <span class="source-name placeholder">Choose a deployment</span>
+    </span>
+  }
+  <span class="source-change">
+    {{ selected() ? 'Change' : 'Choose' }}
+    <mat-icon>expand_more</mat-icon>
+  </span>
+</button>
+@if (showCount()) {
+  <span class="source-count">
+    {{ deployments().length }} {{ deployments().length === 1 ? 'deployment' : 'deployments' }} available
+  </span>
+}

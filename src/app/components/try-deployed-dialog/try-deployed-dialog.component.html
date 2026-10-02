@@ -1,0 +1,85 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<h2 mat-dialog-title class="try-title">Talk to a deployed agent</h2>
+
+<mat-dialog-content class="try-content">
+  <p class="try-supporting">
+    Send messages to the version of <strong>{{ data.appName }}</strong> running in Google Cloud,
+    instead of the code on this machine. The Playground shows its replies as usual.
+  </p>
+
+  @if (deployments() === null) {
+    <div class="inline-loading">
+      <mat-spinner diameter="16"></mat-spinner>
+      <span>Looking for deployments in {{ status()?.project }}&hellip;</span>
+    </div>
+  } @else if (error()) {
+    <div class="banner">{{ error() }}</div>
+  } @else if (!deployments()?.length) {
+    <div class="banner">
+      There's nothing in {{ status()?.project }} &middot; {{ status()?.region }} to talk to yet.
+      Deploy this agent to Agent Runtime or Cloud Run first.
+    </div>
+  } @else {
+    <app-deployment-picker label="Deployment" [showCount]="false" [deployments]="deployments() ?? []"
+      [selectedId]="selectedId()" (selectedChange)="select($event)"></app-deployment-picker>
+
+    @if (selected(); as deployment) {
+      <section class="consequences" aria-label="What this means">
+        <div class="consequences-title">This is production traffic</div>
+        <ul>
+          <li>
+            <mat-icon fontSet="material-symbols-outlined">deployed_code</mat-icon>
+            <span>
+              It runs the code last deployed to {{ name(deployment) }}.
+              <strong>Changes on this machine aren't included.</strong>
+            </span>
+          </li>
+          <li>
+            <mat-icon fontSet="material-symbols-outlined">payments</mat-icon>
+            <span>Model calls use the deployment's quota and are billed to {{ deployment.project }}.</span>
+          </li>
+          <li>
+            <mat-icon fontSet="material-symbols-outlined">build</mat-icon>
+            <span>Tools run with the deployment's identity and can change real data.</span>
+          </li>
+          <li>
+            <mat-icon fontSet="material-symbols-outlined">database</mat-icon>
+            <span>
+              The conversation is stored in the deployment's sessions under the user ID below, and
+              shows up in Sessions, Logs and Monitoring.
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <mat-form-field appearance="outline" class="user-field" subscriptSizing="dynamic">
+        <mat-label>Talk as user ID</mat-label>
+        <input matInput [(ngModel)]="userId" maxlength="128" autocomplete="off" (keydown.enter)="start()" />
+        <mat-hint>Pick one you'll recognize in Sessions.</mat-hint>
+      </mat-form-field>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions class="try-actions">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button class="start-button" [disabled]="!canStart()" (click)="start()">
+    <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+    Talk to deployed agent
+  </button>
+</mat-dialog-actions>

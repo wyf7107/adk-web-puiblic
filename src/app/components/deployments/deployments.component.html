@@ -1,0 +1,499 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<header class="page-header">
+  <div class="page-title">
+    <h2>Deployments</h2>
+    <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
+  </div>
+
+  @if (checking()) {
+    <span class="connection-chip connection-chip-muted">
+      <mat-icon fontSet="material-symbols-outlined" class="spin chip-spinner">progress_activity</mat-icon>
+      Checking connection&hellip;
+    </span>
+  } @else if (connected()) {
+    <button type="button" class="connection-chip" (click)="connect()" matTooltip="Change connection">
+      <span class="dot dot-success"></span>
+      <span>Google Cloud</span>
+      <span class="chip-sep">&middot;</span>
+      <span class="mono">{{ status()?.project }}</span>
+      <span class="chip-sep">&middot;</span>
+      <span class="chip-region">{{ status()?.region }}</span>
+      <mat-icon fontSet="material-symbols-outlined" class="chip-edit">edit</mat-icon>
+    </button>
+  } @else {
+    <span class="connection-chip connection-chip-muted">
+      <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+      Not connected
+    </span>
+  }
+
+  @if (connected() && appName()) {
+    <div class="page-refresh">
+      <span>{{ updatedText() }}</span>
+      <button mat-icon-button (click)="refresh()" [disabled]="loading()" matTooltip="Refresh" aria-label="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  }
+  @if (appName()) {
+    <button mat-flat-button class="new-deploy" (click)="newDeploy()">
+      <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
+      New deploy
+    </button>
+  }
+</header>
+
+@if (refreshing() || firstLoad()) {
+  <mat-progress-bar mode="indeterminate" class="header-progress"></mat-progress-bar>
+} @else {
+  <div class="header-divider"></div>
+}
+
+<div class="page-content">
+  @if (checking()) {
+    <ng-container *ngTemplateOutlet="skeletons; context: {label: 'Checking the cloud connection…'}"></ng-container>
+  } @else if (!connected()) {
+    <!-- Not connected -->
+    <section class="not-connected">
+      <div class="tile-icon">
+        <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+      </div>
+      <h3>Connect to Google Cloud to see your deployments</h3>
+      <p>
+        @if (status()?.credentialsFound) {
+          You're signed in{{ status()?.account ? ' as ' + status()?.account : '' }}. Choose a project
+          and region, and adk web will list the Agent Runtime and Cloud Run deployments there,
+          with this agent's first.
+        } @else {
+          Sign in to Google Cloud and choose a project and region. adk web will list the Agent
+          Runtime and Cloud Run deployments there, with this agent's first.
+        }
+        Credentials stay on your local adk web server; the browser never sees them.
+      </p>
+      @if (statusFailed()) {
+        <p class="muted">Cloud connections are only available on a local <code>adk web</code> server.</p>
+      }
+      <div class="actions">
+        <button mat-flat-button (click)="connect()">Connect to Google Cloud</button>
+        <button mat-button (click)="backToPlayground.emit()">Back to Playground</button>
+      </div>
+    </section>
+  } @else if (!appName()) {
+    <!-- No app selected -->
+    <div class="select-app-prompt">
+      <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+      <span>Select an agent in the toolbar to see its deployments.</span>
+    </div>
+  } @else {
+    @if (data()?.deployInProgress) {
+      <div class="banner banner-progress in-progress">
+        <div class="banner-row">
+          <mat-icon fontSet="material-symbols-outlined" class="spin banner-spinner">progress_activity</mat-icon>
+          <div class="banner-text">
+            <div class="banner-title">Deploying {{ appName() }}</div>
+            <div class="banner-sub">This page refreshes every 10 s until the deploy finishes.</div>
+          </div>
+        </div>
+        <mat-progress-bar mode="indeterminate" class="banner-progress-bar"></mat-progress-bar>
+      </div>
+    }
+
+    @if (loadError()) {
+      <div class="banner banner-error">
+        <div class="banner-row">
+          <mat-icon>error</mat-icon>
+          <div class="banner-text">{{ loadError() }}</div>
+          <button mat-button (click)="refresh()">Retry</button>
+        </div>
+      </div>
+    }
+
+    @if (errorRows().length) {
+      <div class="banner banner-lookups discovery-errors">
+        <div class="banner-row">
+          <mat-icon fontSet="material-symbols-outlined" class="warning-icon">info</mat-icon>
+          <div class="banner-text">
+            <span class="banner-title">
+              {{ errorRows().length }} {{ errorRows().length === 1 ? 'lookup' : 'lookups' }} didn't complete.
+            </span>
+            <span class="banner-sub"> Everything that loaded is shown below.</span>
+          </div>
+          <button mat-button (click)="refresh()" [disabled]="loading()">Retry all</button>
+        </div>
+        @for (row of errorRows(); track row.scope) {
+          <div class="lookup-error discovery-error">
+            <span class="lookup-scope">{{ row.scope }}</span>
+            <div class="lookup-message">
+              <div>{{ row.message }}</div>
+              <div class="lookup-hint">{{ row.hint }}</div>
+            </div>
+            <button mat-stroked-button class="small-button" (click)="refresh()" [disabled]="loading()">Retry</button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (firstLoad()) {
+      <ng-container *ngTemplateOutlet="skeletons; context: {label: 'Looking up Agent Runtime and Cloud Run in ' + status()?.region + '…'}"></ng-container>
+    } @else if (data()) {
+      <!-- This agent -->
+      <section class="section">
+        <div class="section-heading">
+          <h3>This agent</h3>
+          <span class="section-count">{{ mine().length }}</span>
+          <span class="section-note">
+            Matched by adk web deploy records, the <code>adk-app</code> label, or name
+          </span>
+        </div>
+
+        @if (errorRows().length && mine().length) {
+          <div class="incomplete-note">
+            <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            Some lookups failed, so this list may be incomplete.
+          </div>
+        }
+
+        @if (mine().length === 0) {
+          <div class="empty-card">
+            <div class="empty-title">{{ appName() }} isn't deployed in this project yet</div>
+            <p>
+              We looked for Agent Runtime instances and Cloud Run services in
+              <strong>{{ data()?.project }} &middot; {{ data()?.region }}</strong> that were deployed
+              from adk web, labeled <code>adk-app={{ appName() }}</code>, or named after the agent.
+            </p>
+            <div class="actions">
+              <button mat-flat-button (click)="newDeploy()">Deploy {{ appName() }}</button>
+              <button mat-button (click)="connect()">Change project or region</button>
+            </div>
+          </div>
+        }
+
+        <div class="cards">
+          @for (deployment of mine(); track deployment.id) {
+            <div class="deployment-card">
+              <div class="card-main">
+                <div class="target-icon">
+                  <mat-icon fontSet="material-symbols-outlined">{{ targetIcon(deployment.target) }}</mat-icon>
+                </div>
+
+                <div class="card-info">
+                  <div class="card-name-row">
+                    <span class="deployment-name">{{ deploymentName(deployment) }}</span>
+                    @if (statusChip(deployment); as chip) {
+                      <ng-container *ngTemplateOutlet="statusChipTpl; context: {chip}"></ng-container>
+                    }
+                  </div>
+                  <div class="card-meta deployment-meta">
+                    <span>{{ targetLabel(deployment.target) }}</span>
+                    <span class="sep">&middot;</span>
+                    <span>{{ deployment.region }}</span>
+                    <span class="sep">&middot;</span>
+                    @if (deployment.serviceUrl) {
+                      <a class="mono locator" href="{{ deployment.serviceUrl }}" target="_blank" rel="noopener">{{ locator(deployment) }}</a>
+                    } @else {
+                      <span class="mono locator">{{ locator(deployment) }}</span>
+                    }
+                    <button type="button" class="inline-copy" (click)="copy(deployment.serviceUrl || deployment.resourceName)"
+                      matTooltip="Copy" aria-label="Copy">
+                      <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+                @if (matchChip(deployment); as match) {
+                  <span class="match-chip">
+                    <mat-icon fontSet="material-symbols-outlined">{{ match.icon }}</mat-icon>
+                    {{ match.label }}
+                  </span>
+                }
+
+                <div class="card-times">
+                  @if (deployment.updateTime) {
+                    <span [title]="deployment.updateTime">Updated {{ relativeTime(deployment.updateTime) }}</span>
+                  }
+                  @if (deployment.createTime) {
+                    <span class="muted" [title]="deployment.createTime">Created {{ shortDate(deployment.createTime) }}</span>
+                  }
+                </div>
+
+                <div class="card-actions">
+                  @if (isTryable(deployment)) {
+                    <button mat-stroked-button class="try-button" (click)="tryDeployment.emit(deployment)"
+                      matTooltip="Send messages to this deployment from the Playground">
+                      <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+                      Try it
+                    </button>
+                  }
+                  @if (deployment.consoleUrl) {
+                    <button mat-icon-button (click)="open(deployment.consoleUrl)" matTooltip="Open in Cloud console"
+                      aria-label="Open in Cloud console">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  }
+                  <button mat-icon-button class="deployment-toggle" (click)="toggle(deployment)"
+                    [attr.aria-expanded]="isExpanded(deployment)"
+                    [matTooltip]="deployment.target === 'cloud_run' ? 'Revisions' : 'Deploy history'"
+                    [attr.aria-label]="deployment.target === 'cloud_run' ? 'Revisions' : 'Deploy history'">
+                    <mat-icon>{{ isExpanded(deployment) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              @if (lastFailedDeploy(deployment); as failed) {
+                <div class="card-subrow last-failed">
+                  <mat-icon class="error-icon">error</mat-icon>
+                  <span>
+                    <strong>Last deploy from adk web failed</strong>
+                    &middot; {{ relativeTime(failed.finishedAt) }}
+                    @if (failed.message) { &middot; {{ failed.message }} }
+                  </span>
+                </div>
+              }
+
+              @if (isExpanded(deployment)) {
+                <div class="card-expanded deployment-details">
+                  @if (liveOf(deployment); as live) {
+                    @if (live === 'loading') {
+                      <div class="inline-loading">
+                        <mat-spinner diameter="16"></mat-spinner>
+                        <span>Loading&hellip;</span>
+                      </div>
+                    } @else {
+                      @if (live.error) {
+                        <div class="inline-note live-error">
+                          <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+                          {{ live.error }}
+                        </div>
+                      }
+                      @if (deployment.target === 'cloud_run' && live.revisions.length) {
+                        <div class="revisions-heading">
+                          <span class="expanded-title">Revisions</span>
+                          <div class="traffic-bar" aria-hidden="true">
+                            @for (segment of trafficSegments(live.revisions, live.latestRevision); track segment.name) {
+                              <span class="traffic-segment" [class.latest]="segment.latest"
+                                [style.flex-grow]="segment.percent" [title]="segment.name + ' ' + segment.percent + '%'"></span>
+                            }
+                          </div>
+                          <span class="muted">Traffic split {{ trafficSummary(live.revisions) }}</span>
+                        </div>
+                        <div class="grid-table revisions" role="table">
+                          <div class="grid-row grid-head" role="row">
+                            <span role="columnheader">Revision</span>
+                            <span role="columnheader">Created</span>
+                            <span role="columnheader">Traffic</span>
+                            <span role="columnheader">Ready</span>
+                            <span role="columnheader">Image</span>
+                          </div>
+                          @for (revision of live.revisions; track revision.name) {
+                            <div class="grid-row revision-row" role="row" [class.serving]="revision.trafficPercent > 0">
+                              <span role="cell" class="mono">
+                                {{ revision.name }}
+                                @if (revision.name === live.latestRevision) {
+                                  <span class="latest-tag">latest</span>
+                                }
+                              </span>
+                              <span role="cell" [title]="revision.createTime || ''">{{ relativeTime(revision.createTime) }}</span>
+                              <span role="cell" class="traffic-cell">
+                                <span class="mini-bar"><span [style.width.%]="revision.trafficPercent"
+                                  [class.latest]="revision.name === live.latestRevision"></span></span>
+                                {{ revision.trafficPercent }}%
+                              </span>
+                              <span role="cell">
+                                @if (revision.ready === true) {
+                                  <mat-icon class="success-icon">check_circle</mat-icon>
+                                } @else if (revision.ready === false) {
+                                  <mat-icon class="error-icon">error</mat-icon>
+                                }
+                              </span>
+                              <span role="cell" class="mono ellipsis" [title]="revision.image || ''">{{ revision.image }}</span>
+                            </div>
+                          }
+                        </div>
+                      } @else if (deployment.target === 'agent_engine') {
+                        <div class="expanded-title">Deploys from adk web</div>
+                        <p class="muted expanded-note">
+                          Agent Runtime doesn't keep revisions, so this shows the deploys adk web made
+                          to this instance.
+                        </p>
+                        @if (historyOf(deployment).length) {
+                          <div class="grid-table card-history" role="table">
+                            @for (entry of historyOf(deployment); track $index) {
+                              <div class="grid-row history-row" role="row">
+                                <ng-container *ngTemplateOutlet="statusCell; context: {entry}"></ng-container>
+                                <span role="cell" [title]="entry.startedAt">{{ startedAt(entry.startedAt) }}</span>
+                                <span role="cell" class="tabular">{{ duration(entry) }}</span>
+                                <span role="cell" class="ellipsis">{{ entry.message }}</span>
+                              </div>
+                            }
+                          </div>
+                        } @else {
+                          <p class="muted">No deploys to this instance from adk web yet.</p>
+                        }
+                      }
+                    }
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Rest of project -->
+      <section class="section">
+        <button type="button" class="section-heading section-toggle" (click)="othersCollapsed.set(!othersCollapsed())"
+          [attr.aria-expanded]="!othersCollapsed()">
+          <mat-icon class="section-chevron">{{ othersCollapsed() ? 'chevron_right' : 'expand_more' }}</mat-icon>
+          <h3>Rest of project</h3>
+          <span class="section-count">{{ others().length }}</span>
+          <span class="section-note">Other agents and services in {{ data()?.project }} &middot; {{ data()?.region }}</span>
+        </button>
+        @if (!othersCollapsed()) {
+          @if (others().length) {
+            <div class="grid-table bordered others" role="table">
+              <div class="grid-row grid-head" role="row">
+                <span role="columnheader">Name</span>
+                <span role="columnheader">Target</span>
+                <span role="columnheader">Region</span>
+                <span role="columnheader">State</span>
+                <span role="columnheader">Updated</span>
+                <span role="columnheader"></span>
+              </div>
+              @for (deployment of others(); track deployment.id) {
+                <div class="grid-row other-row" role="row">
+                  <span role="cell" class="name-cell">
+                    <mat-icon fontSet="material-symbols-outlined">{{ targetIcon(deployment.target) }}</mat-icon>
+                    <span class="other-name">{{ deploymentName(deployment) }}</span>
+                  </span>
+                  <span role="cell">{{ targetLabel(deployment.target) }}</span>
+                  <span role="cell">{{ deployment.region }}</span>
+                  <span role="cell">
+                    @if (statusChip(deployment); as chip) {
+                      <ng-container *ngTemplateOutlet="statusChipTpl; context: {chip}"></ng-container>
+                    }
+                  </span>
+                  <span role="cell" [title]="deployment.updateTime || ''">{{ relativeTime(deployment.updateTime) }}</span>
+                  <span role="cell">
+                    @if (deployment.consoleUrl) {
+                      <button mat-icon-button class="row-action" (click)="open(deployment.consoleUrl)"
+                        matTooltip="Open in Cloud console" aria-label="Open in Cloud console">
+                        <mat-icon>open_in_new</mat-icon>
+                      </button>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="muted">No other deployments in {{ data()?.project }} &middot; {{ data()?.region }}.</p>
+          }
+        }
+      </section>
+
+      <!-- Deploy activity -->
+      <section class="section">
+        <button type="button" class="section-heading section-toggle" (click)="activityCollapsed.set(!activityCollapsed())"
+          [attr.aria-expanded]="!activityCollapsed()">
+          <mat-icon class="section-chevron">{{ activityCollapsed() ? 'chevron_right' : 'expand_more' }}</mat-icon>
+          <h3>Deploy activity</h3>
+          <span class="section-count">{{ history().length }}</span>
+          <span class="section-note">Deploys of {{ appName() }} started from adk web, including attempts that created nothing</span>
+        </button>
+        @if (!activityCollapsed()) {
+          @if (history().length) {
+            <div class="grid-table bordered activity" role="table">
+              <div class="grid-row grid-head" role="row">
+                <span role="columnheader">Status</span>
+                <span role="columnheader">Started</span>
+                <span role="columnheader">Target</span>
+                <span role="columnheader">Region</span>
+                <span role="columnheader">Duration</span>
+                <span role="columnheader">Message</span>
+                <span role="columnheader">Local log</span>
+              </div>
+              @for (entry of history(); track $index) {
+                <div class="grid-row activity-row" role="row">
+                  <ng-container *ngTemplateOutlet="statusCell; context: {entry}"></ng-container>
+                  <span role="cell" [title]="entry.startedAt">{{ startedAt(entry.startedAt) }}</span>
+                  <span role="cell">{{ targetLabel(entry.target) }}</span>
+                  <span role="cell">{{ entry.region }}</span>
+                  <span role="cell" class="tabular">{{ duration(entry) }}</span>
+                  <span role="cell" class="message-cell">
+                    <span class="ellipsis" [title]="entry.message || ''">{{ entry.message || deploymentName(entry) }}</span>
+                    @if (entry.status !== 'succeeded' && !entry.resourceName) {
+                      <span class="nothing-tag">nothing created</span>
+                    }
+                  </span>
+                  <span role="cell" class="log-cell">
+                    @if (entry.logPath) {
+                      <span class="mono ellipsis" [title]="entry.logPath">{{ entry.logPath }}</span>
+                      <button type="button" class="inline-copy" (click)="copy(entry.logPath)" matTooltip="Copy path"
+                        aria-label="Copy path">
+                        <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+                      </button>
+                    }
+                  </span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="muted">No deploys of {{ appName() }} from adk web to {{ data()?.project }} yet.</p>
+          }
+        }
+      </section>
+    }
+  }
+</div>
+
+<ng-template #statusChipTpl let-chip="chip">
+  <span class="status-chip status-{{ chip.kind }}" [title]="chip.detail || ''">
+    @if (chip.kind === 'live') {
+      <span class="dot dot-success small-dot"></span>
+    } @else {
+      <mat-icon fontSet="material-symbols-outlined" [class.spin]="chip.kind === 'updating'">{{ chip.icon }}</mat-icon>
+    }
+    {{ chip.label }}
+  </span>
+</ng-template>
+
+<ng-template #statusCell let-entry="entry">
+  <span role="cell" class="status-cell" [class.failed]="entry.status !== 'succeeded'">
+    <mat-icon [class.success-icon]="entry.status === 'succeeded'" [class.error-icon]="entry.status !== 'succeeded'">
+      {{ entry.status === 'succeeded' ? 'check_circle' : 'error' }}
+    </mat-icon>
+    {{ entry.status === 'succeeded' ? 'Succeeded' : 'Failed' }}
+  </span>
+</ng-template>
+
+<ng-template #skeletons let-label="label">
+  <div class="skeletons">
+    <div class="inline-loading">
+      <mat-spinner diameter="16"></mat-spinner>
+      <span>{{ label }}</span>
+    </div>
+    @for (width of [28, 22, 32]; track $index) {
+      <div class="skeleton-card">
+        <span class="skeleton-icon"></span>
+        <span class="skeleton-lines">
+          <span class="skeleton-line" [style.width.%]="width"></span>
+          <span class="skeleton-line thin" [style.width.%]="width + 18"></span>
+        </span>
+      </div>
+    }
+  </div>
+</ng-template>

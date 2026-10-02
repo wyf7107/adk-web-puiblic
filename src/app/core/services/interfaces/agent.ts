@@ -29,7 +29,13 @@ export abstract class AgentService {
   abstract getApp(): Observable<string>;
   abstract setApp(name: string): void;
   abstract getLoadingState(): BehaviorSubject<boolean>;
-  abstract runSse(req: AgentRunRequest): Observable<LlmResponse>;
+  /**
+   * Runs the agent and streams its events. `path` defaults to the local
+   * agent's `/run_sse`; another server route that streams the same events,
+   * such as a deployed agent's, can stand in.
+   */
+  abstract runSse(req: AgentRunRequest, path?: string):
+      Observable<LlmResponse>;
   abstract listApps(): Observable<string[]>;
   abstract getAppInfo(name: string): Observable<any>;
   abstract getAppGraphImage(name: string, darkMode: boolean, node?: string): Observable<any>;

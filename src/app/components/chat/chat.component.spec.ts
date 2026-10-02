@@ -79,6 +79,11 @@ import {MockMarkdownComponent} from '../markdown/testing/mock-markdown.component
 import {SidePanelComponent} from '../side-panel/side-panel.component';
 import {THEME_SERVICE} from '../../core/services/interfaces/theme';
 import {MockThemeService} from '../../core/services/testing/mock-theme.service';
+import {CLOUD_SERVICE} from '../../core/services/interfaces/cloud';
+import {CloudConnectDialogComponent} from '../cloud-connect-dialog/cloud-connect-dialog.component';
+import {TryDeployedDialogComponent} from '../try-deployed-dialog/try-deployed-dialog.component';
+import {DEPLOY_SERVICE} from '../../core/services/interfaces/deploy';
+import {CONNECTED_STATUS, MockCloudService} from '../../core/services/testing/mock-cloud.service';
 import {TelemetryService} from '../../core/services/telemetry.service';
 import {TelemetryConsentDialogComponent} from '../telemetry-consent-dialog/telemetry-consent-dialog.component';
 import {computed, signal} from '@angular/core';
@@ -317,6 +322,8 @@ describe('ChatComponent', () => {
             {provide: AGENT_BUILDER_SERVICE, useValue: mockAgentBuilderService},
             {provide: TelemetryService, useValue: mockTelemetryService},
             {provide: THEME_SERVICE, useClass: MockThemeService},
+            {provide: CLOUD_SERVICE, useClass: MockCloudService},
+            {provide: DEPLOY_SERVICE, useValue: {listDeployments: () => NEVER}},
           ],
         });
 
@@ -806,6 +813,128 @@ describe('ChatComponent', () => {
         expect(component.sessionId).toBe('');
         expect(component['isViewOnlySession']()).toBeFalse();
         expect(component['canEditSession']()).toBeTrue();
+      });
+
+      it('should go back to Sessions from a cloud session', () => {
+        spyOn(component as any, 'createSessionAndReset');
+        component.setActiveView('sessions');
+        component.viewCloudSession(
+            {session: {events: []} as any, label: 'my_agent · bob'});
+
+        expect(component.activeView()).toBe('build');
+        expect(component['readonlySessionType']()).toBe('Cloud session');
+        expect(component['readonlyReturnView']()).toBe('sessions');
+
+        component['returnFromReadonlySession']();
+
+        expect(component['isViewOnlySession']()).toBeFalse();
+        expect(component['readonlyReturnView']()).toBeNull();
+        expect(component.activeView()).toBe('sessions');
+      });
+
+      it('should not offer to go back from a file', () => {
+        component.viewCloudSession(
+            {session: {events: []} as any, label: 'my_agent · bob'});
+        component['performViewSessionLoading']({events: []} as any, 'my-file.json');
+
+        expect(component['readonlyReturnView']()).toBeNull();
+      });
+    });
+
+    describe('Talking to a deployed agent', () => {
+      const DEPLOYMENT = {
+        id: 'dep1',
+        target: 'cloud_run',
+        region: 'us-central1',
+        project: 'adk-demo',
+        resourceName: 'my-agent',
+        displayName: 'my-agent',
+        serviceUrl: 'https://my-agent.a.run.app',
+        labels: {},
+        matchesApp: true,
+      } as any;
+      let cloud: MockCloudService;
+
+      function start() {
+        cloud = TestBed.inject(CLOUD_SERVICE) as unknown as MockCloudService;
+        cloud.setStatus(CONNECTED_STATUS);
+        mockDialog.open.and.returnValue({
+          afterClosed: () => of({
+            appName: TEST_APP_1_NAME,
+            deployment: DEPLOYMENT,
+            userId: 'adk-web-dev',
+          }),
+        } as any);
+        component.setActiveView('deployments');
+        component.openTryDeployedDialog('dep1');
+        fixture.detectChanges();
+      }
+
+      it('asks to connect first when not connected', () => {
+        component.openTryDeployedDialog();
+        expect(mockDialog.open)
+            .toHaveBeenCalledWith(CloudConnectDialogComponent, jasmine.anything());
+      });
+
+      it('explains what it means before switching', () => {
+        start();
+        expect(mockDialog.open).toHaveBeenCalledWith(
+            TryDeployedDialogComponent,
+            jasmine.objectContaining({
+              data: jasmine.objectContaining(
+                  {appName: TEST_APP_1_NAME, deploymentId: 'dep1'}),
+            }));
+        expect(component['deployedTarget']()?.deployment).toBe(DEPLOYMENT);
+        expect(component.activeView()).toBe('build');
+      });
+
+      it('says plainly that messages go to the deployment', () => {
+        start();
+        const banner = fixture.nativeElement.querySelector('.deployed-banner');
+        expect(banner.textContent).toContain(
+            'You\'re talking to the deployed agent, not your local code');
+        expect(banner.textContent).toContain('adk-web-dev');
+        expect(fixture.nativeElement.querySelector('.deployed-chip').textContent)
+            .toContain('my-agent');
+        expect(fixture.nativeElement.querySelector('.toolbar-session-group .selector-group')).toBeNull();
+      });
+
+      it('sends messages to the deployment, in its own session', async () => {
+        start();
+        component.updatedSessionState.set({local: true});
+        await component.sendMessage({role: 'user', parts: [{text: 'hi'}]});
+
+        expect(cloud.createTrySession)
+            .toHaveBeenCalledWith(TEST_APP_1_NAME, 'dep1', 'adk-web-dev');
+        expect(mockSessionService.createSession).not.toHaveBeenCalled();
+        const [req, path] = mockAgentService.runSse.calls.mostRecent().args;
+        expect(path).toBe(`/dev/apps/${TEST_APP_1_NAME}/deployments/dep1/try/run_sse`);
+        expect(req).toEqual(jasmine.objectContaining({
+          sessionId: 'remote-1',
+          userId: 'adk-web-dev',
+          stateDelta: null,
+        }));
+      });
+
+      it('goes back to the local agent', async () => {
+        start();
+        await component.sendMessage({role: 'user', parts: [{text: 'hi'}]});
+        component['exitDeployed']();
+        fixture.detectChanges();
+
+        expect(component['deployedTarget']()).toBeNull();
+        expect(component.sessionId).toBe('');
+        expect(fixture.nativeElement.querySelector('.deployed-banner')).toBeNull();
+
+        await component.sendMessage({role: 'user', parts: [{text: 'local'}]});
+        // The local /run_sse again.
+        expect(mockAgentService.runSse.calls.mostRecent().args.length).toBe(1);
+      });
+
+      it('stops when another agent is selected', () => {
+        start();
+        mockAgentService.setApp('other_app');
+        expect(component['deployedTarget']()).toBeNull();
       });
     });
 

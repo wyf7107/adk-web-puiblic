@@ -81,6 +81,15 @@ import { BuilderTabsComponent } from '../builder-tabs/builder-tabs.component';
 import { CanvasComponent } from '../canvas/canvas.component';
 import { ChatPanelComponent } from '../chat-panel/chat-panel.component';
 import { DeployDialogComponent } from '../deploy-dialog/deploy-dialog.component';
+import { DeploymentsComponent } from '../deployments/deployments.component';
+import { CloudLogsComponent } from '../cloud-logs/cloud-logs.component';
+import { deploymentName, targetLabel } from '../deployment-picker/deployment-picker.component';
+import { DeployedTarget, TryDeployedDialogComponent } from '../try-deployed-dialog/try-deployed-dialog.component';
+import { CloudMonitoringComponent } from '../cloud-monitoring/cloud-monitoring.component';
+import { CloudSessionsComponent, OpenSessionRequest } from '../cloud-sessions/cloud-sessions.component';
+import { AppView, CLOUD_VIEWS, LeftNavComponent } from '../left-nav/left-nav.component';
+import { CloudConnectDialogComponent } from '../cloud-connect-dialog/cloud-connect-dialog.component';
+import { CLOUD_SERVICE } from '../../core/services/interfaces/cloud';
 import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
 import { EvalTabComponent } from '../eval-tab/eval-tab.component';
 import { DeleteSessionDialogComponent, DeleteSessionDialogData, } from '../session-tab/delete-session-dialog/delete-session-dialog.component';
@@ -191,6 +200,11 @@ const BIDI_STREAMING_IN_PROGRESS_WARNING =
     FormatMetricNamePipe,
     MatSlideToggleModule,
     TelemetryConsentDialogComponent,
+    LeftNavComponent,
+    DeploymentsComponent,
+    CloudLogsComponent,
+    CloudMonitoringComponent,
+    CloudSessionsComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -202,6 +216,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly artifactService = inject(ARTIFACT_SERVICE);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly dialog = inject(MatDialog);
+  private readonly cloudService = inject(CLOUD_SERVICE);
   private readonly document = inject(DOCUMENT);
   private readonly downloadService = inject(DOWNLOAD_SERVICE);
   private readonly evalService = inject(EVAL_SERVICE);
@@ -322,6 +337,16 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   private agentIdentityMsgListener: ((e: MessageEvent) => void) | null = null;
   isMobile = signal(window.innerWidth <= 768);
   showSidePanel = this.storageService.getItem('adk-side-panel-visible') !== 'false';
+  /** The section navigation on the left, toggled by the toolbar menu button. */
+  showLeftNav = signal(this.storageService.getItem('adk-left-nav-visible') !== 'false');
+  /** Which section fills the main area. Build is everything the UI had before. */
+  activeView = signal<AppView>('build');
+  /** The Sessions section has been opened; it then stays mounted. */
+  protected readonly sessionsViewOpened = signal(false);
+  /** The Logs section has been opened; it then stays mounted. */
+  protected readonly logsViewOpened = signal(false);
+  /** The Monitoring section has been opened; it then stays mounted. */
+  protected readonly monitoringViewOpened = signal(false);
   showBuilderAssistant = true;
   showAppSelectorDrawer = false;
   showSessionSelectorDrawer = false;
@@ -337,6 +362,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly unavailableAppName = signal('');
   protected readonly readonlySessionType = signal('');
   protected readonly readonlySessionName = signal('');
+  /** The section a read-only session was opened from, to go back to. */
+  protected readonly readonlyReturnView = signal<AppView|null>(null);
+  /**
+   * The deployed agent the Playground talks to instead of the local one, or
+   * null for the local agent.
+   */
+  protected readonly deployedTarget = signal<DeployedTarget|null>(null);
+  /** The user ID last used to talk to a deployed agent, offered again. */
+  private lastDeployedUserId = '';
+  protected readonly deploymentName = deploymentName;
+  protected readonly targetLabel = targetLabel;
   protected readonly isSideBySide = signal(false);
   protected readonly showBranches = signal(false);
   protected readonly expectedUiEvents = signal<UiEvent[]>([]);
@@ -827,6 +863,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.checkScreenSize();
     if (this.isMobile()) {
       this.showSidePanel = false;
+      this.showLeftNav.set(false);
     } else {
       this.showSidePanel = this.storageService.getItem('adk-side-panel-visible') !== 'false';
     }
@@ -932,6 +969,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.agentService.getApp().subscribe((app) => {
+      // A deployment belongs to one agent.
+      if (this.deployedTarget() && this.deployedTarget()!.appName !== app) {
+        this.exitDeployed();
+      }
       this.appName = app;
       this.evalService.metricsInfo.set([]);
     });
@@ -1302,6 +1343,23 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       return true;
     }
 
+    const target = this.deployedTarget();
+    if (target) {
+      try {
+        const res = await firstValueFrom(this.cloudService.createTrySession(
+            target.appName, target.deployment.id, target.userId));
+        this.sessionId = res.id ?? '';
+        this.currentSessionState = res.state || {};
+        return true;
+      } catch (err: any) {
+        this.openSnackBar(
+            err?.error?.detail ??
+                'Could not start a session on the deployed agent.',
+            'OK');
+        return false;
+      }
+    }
+
     try {
       let displayName = '';
       if (content?.parts && content.parts[0]?.text) {
@@ -1358,13 +1416,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.eventData.set(userEventId, apiEvent);
     this.eventData = new Map(this.eventData);
 
+    const target = this.deployedTarget();
     const req: AgentRunRequest = {
       appName: this.appName,
-      userId: this.userId,
+      userId: target?.userId ?? this.userId,
       sessionId: this.sessionId,
       newMessage: content,
       streaming: this.useSse(),
-      stateDelta: this.updatedSessionState(),
+      stateDelta: target ? null : this.updatedSessionState(),
     };
     if (functionCallEventId) {
       req.functionCallEventId = functionCallEventId;
@@ -1377,7 +1436,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   submitAgentRunRequest(req: AgentRunRequest) {
     this.autoSelectLatestEvent = true;
 
-    this.activeSseSubscription = this.agentService.runSse(req).subscribe({
+    const target = this.deployedTarget();
+    const events = target ?
+        this.agentService.runSse(
+            req,
+            this.cloudService.tryRunPath(target.appName, target.deployment.id)) :
+        this.agentService.runSse(req);
+    this.activeSseSubscription = events.subscribe({
       next: async (chunkJson: any) => {
         if (chunkJson.error) {
           this.openSnackBar(chunkJson.error, 'OK');
@@ -1407,6 +1472,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       complete: () => {
         this.activeSseSubscription = undefined;
+        if (target) {
+          // Its sessions and traces live in the cloud, not on this server.
+          return;
+        }
         if (this.updatedSessionState()) {
           this.currentSessionState = this.updatedSessionState();
           this.updatedSessionState.set(null);
@@ -2560,6 +2629,103 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.showSidePanel = !this.showSidePanel;
     this.storageService.setItem('adk-side-panel-visible', this.showSidePanel.toString());
+  }
+
+  toggleLeftNav() {
+    this.showLeftNav.update((shown) => !shown);
+    this.storageService.setItem('adk-left-nav-visible', String(this.showLeftNav()));
+  }
+
+  setActiveView(view: AppView) {
+    this.activeView.set(view);
+    if (view === 'sessions') {
+      this.sessionsViewOpened.set(true);
+    }
+    if (view === 'logs') {
+      this.logsViewOpened.set(true);
+    }
+    if (view === 'monitoring') {
+      this.monitoringViewOpened.set(true);
+    }
+    if (view !== 'build') {
+      // The selectors slide over the Build area, which is now hidden.
+      this.showAppSelectorDrawer = false;
+      this.showSessionSelectorDrawer = false;
+    }
+    if (CLOUD_VIEWS.has(view)) {
+      // A cloud view without a connection has nothing to show, so ask for one
+      // straight away. The view itself also offers to connect if dismissed.
+      const status = this.cloudService.status();
+      if (status) {
+        if (!status.connected) this.openCloudConnectDialog();
+      } else {
+        this.cloudService.refreshStatus().subscribe({
+          next: (fresh) => {
+            if (!fresh.connected && this.activeView() === view) {
+              this.openCloudConnectDialog();
+            }
+          },
+          error: () => {},
+        });
+      }
+    }
+  }
+
+  openCloudConnectDialog() {
+    this.dialog.open(CloudConnectDialogComponent, { maxWidth: '90vw' });
+  }
+
+  /**
+   * Asks which deployed agent to talk to, after explaining what that means,
+   * and switches the Playground to it.
+   */
+  openTryDeployedDialog(deploymentId?: string) {
+    if (!this.cloudService.status()?.connected) {
+      this.openCloudConnectDialog();
+      return;
+    }
+    const current = this.deployedTarget();
+    this.dialog
+        .open(TryDeployedDialogComponent, {
+          maxWidth: '90vw',
+          data: {
+            appName: this.appName,
+            deploymentId: deploymentId ?? current?.deployment.id,
+            userId: current?.userId || this.lastDeployedUserId,
+          },
+        })
+        .afterClosed()
+        .subscribe((target?: DeployedTarget) => {
+          if (target) {
+            this.startDeployed(target);
+          }
+        });
+  }
+
+  private startDeployed(target: DeployedTarget) {
+    this.handleStopMessage();
+    this.lastDeployedUserId = target.userId;
+    this.readonlyReturnView.set(null);
+    this.readonlySessionType.set('');
+    this.readonlySessionName.set('');
+    this.evalCase = null;
+    this.createSessionAndReset();
+    this.traceData = [];
+    this.deployedTarget.set(target);
+    this.setActiveView('build');
+    this.changeDetectorRef.detectChanges();
+    this.chatPanel()?.focusInput();
+  }
+
+  /** Goes back to talking to the local agent, in a new session. */
+  protected exitDeployed() {
+    if (!this.deployedTarget()) {
+      return;
+    }
+    this.handleStopMessage();
+    this.deployedTarget.set(null);
+    this.createSessionAndReset();
+    this.traceData = [];
   }
 
   toggleAppSelectorDrawer() {
@@ -5072,15 +5238,33 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private performViewSessionLoading(sessionData: Session, filename: string) {
+  /** Replays a session stored by a deployed agent, read-only, in Build. */
+  viewCloudSession(request: OpenSessionRequest) {
+    this.setActiveView('build');
+    this.performViewSessionLoading(request.session, request.label, 'Cloud session');
+    this.readonlyReturnView.set('sessions');
+  }
+
+  /** Leaves a replayed cloud session for the Sessions section it came from. */
+  protected returnFromReadonlySession() {
+    const view = this.readonlyReturnView();
+    this.closeReadonlySession();
+    if (view) {
+      this.setActiveView(view);
+    }
+  }
+
+  private performViewSessionLoading(
+      sessionData: Session, filename: string, type = 'File') {
+    this.readonlyReturnView.set(null);
     this.traceService.resetTraceService();
     this.traceData = [];
     if (!this.isViewOnlySession()) {
       this.originalSessionId = this.sessionId;
     }
-    this.readonlySessionType.set('File');
+    this.readonlySessionType.set(type);
     this.readonlySessionName.set(filename);
-    this.sessionId = `File: ${filename}`;
+    this.sessionId = `${type}: ${filename}`;
     this.currentSessionState = sessionData.state || {};
     this.evalCase = null;
     this.chatType.set('session');
@@ -5106,6 +5290,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected closeReadonlySession() {
+    this.readonlyReturnView.set(null);
     this.isViewOnlySession.set(false);
     this.readonlySessionType.set('');
     this.readonlySessionName.set('');

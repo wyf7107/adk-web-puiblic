@@ -332,6 +332,9 @@
   font-size: 13px;
   padding: 0 8px !important;
   z-index: 1;
+  // The left nav shares the toolbar's background, so the edge needs a line.
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  box-sizing: border-box;
 }
 
 .toolbar-group {
@@ -382,13 +385,71 @@
   min-width: 0;
 }
 
-.drawer-container {
+.workspace-layout {
+  display: flex;
   height: calc(100% - 48px);
+}
+
+.workspace-main {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+}
+
+// No display here: each section component's own :host decides it, and this
+// rule is more specific than :host, so setting one would override them.
+.workspace-view {
+  height: 100%;
+}
+
+// Hidden rather than destroyed, so a chat session survives a visit to
+// another section.
+.workspace-view-hidden {
+  display: none;
+}
+
+.drawer-container {
+  height: 100%;
 }
 
 .side-panel-container {
   width: 100%;
   height: 100%;
+}
+
+// Where the hidden side panel collapsed to; click to bring it back.
+.side-panel-open-handle {
+  align-items: center;
+  background: transparent;
+  border: none;
+  bottom: 0;
+  color: var(--mat-sys-on-surface-variant);
+  cursor: pointer;
+  display: flex;
+  justify-content: flex-start;
+  left: 0;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  width: 14px;
+  z-index: 10;
+
+  mat-icon {
+    background: var(--mat-sys-surface-container-highest);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    font-size: 16px;
+    height: 36px;
+    line-height: 36px;
+    width: 14px;
+  }
+
+  &:hover,
+  &:focus-visible {
+    background: var(--mat-sys-outline-variant);
+    outline: none;
+  }
 }
 
 .toolbar-actions {
@@ -437,6 +498,7 @@
     font-family: 'Google Sans Mono', monospace;
   }
 
+  .chip-back-button,
   .chip-close-button {
     width: 24px !important;
     height: 24px !important;
@@ -453,6 +515,10 @@
       opacity: 1;
       background-color: rgba(255, 255, 255, 0.2) !important;
     }
+  }
+
+  .chip-back-button {
+    margin-left: -6px;
   }
 }
 
@@ -1418,4 +1484,95 @@ app-canvas {
 
 .spinning {
   animation: spin 1s linear infinite;
+}
+
+// --- Talking to a deployed agent -------------------------------------------
+
+// Tertiary rather than primary throughout, so the Playground looks
+// different when replies come from production.
+.deployed-chip {
+  align-items: center;
+  background: var(--mat-sys-tertiary-container);
+  border-radius: 16px;
+  color: var(--mat-sys-on-tertiary-container);
+  display: inline-flex;
+  font-size: 13px;
+  gap: 6px;
+  max-width: 360px;
+  padding: 2px 6px 2px 12px;
+
+  .chip-close-button {
+    color: inherit !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    padding: 0 !important;
+    width: 24px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.deployed-chip-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.deployed-chip-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.deployed-chip-name {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar-icon-active mat-icon {
+  color: var(--mat-sys-tertiary);
+}
+
+.deployed-banner {
+  align-items: center;
+  background: var(--mat-sys-tertiary-container);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  color: var(--mat-sys-on-tertiary-container);
+  display: flex;
+  gap: 12px;
+  padding: 10px 16px;
+
+  .mono {
+    font-family: 'Roboto Mono', ui-monospace, monospace;
+    font-size: 12px;
+  }
+
+  button {
+    color: inherit;
+    flex: none;
+  }
+}
+
+.deployed-banner-icon {
+  flex: none;
+}
+
+.deployed-banner-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font-size: 12px;
+  gap: 2px;
+  line-height: 17px;
+  min-width: 0;
+
+  strong {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+  }
 }

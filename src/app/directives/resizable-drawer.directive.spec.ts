@@ -154,6 +154,49 @@ describe('ResizableDrawerDirective', () => {
     dispatchMouseEvent(document, 'mouseup', moveClientX);
   });
 
+  describe('handle click', () => {
+    let clicks: number;
+
+    beforeEach(() => {
+      clicks = 0;
+      fixture.debugElement.query(By.directive(ResizableDrawerDirective))
+          .injector.get(ResizableDrawerDirective)
+          .resizeHandleClick.subscribe(() => clicks++);
+    });
+
+    it('emits when the handle is pressed and released in place', () => {
+      dispatchMouseEvent(resizeHandle, 'mousedown', 600);
+      dispatchMouseEvent(document, 'mousemove', 601);  // within tolerance
+      dispatchMouseEvent(document, 'mouseup', 601);
+
+      expect(clicks).toBe(1);
+      expect(getDrawerWidth()).toBe(INITIAL_WIDTH);
+    });
+
+    it('does not emit after a drag', () => {
+      dispatchMouseEvent(resizeHandle, 'mousedown', 600);
+      dispatchMouseEvent(document, 'mousemove', 650);
+      dispatchMouseEvent(document, 'mouseup', 650);
+
+      expect(clicks).toBe(0);
+    });
+
+    it('does not emit for a mouseup that did not start on the handle', () => {
+      dispatchMouseEvent(document, 'mouseup', 600);
+
+      expect(clicks).toBe(0);
+    });
+
+    it('emits on Enter, and is focusable', () => {
+      resizeHandle.dispatchEvent(
+          new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+
+      expect(clicks).toBe(1);
+      expect(resizeHandle.getAttribute('tabindex')).toBe('0');
+      expect(resizeHandle.getAttribute('role')).toBe('button');
+    });
+  });
+
   it('should re-clamp width on window resize if current width exceeds new max width',
      () => {
        // Arrange

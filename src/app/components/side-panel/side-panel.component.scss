@@ -55,9 +55,38 @@
   right: 0;
   z-index: 100;
   cursor: ew-resize;
+  outline: none;
 
-  &:hover {
+  // A collapse affordance on hover: drag to resize, click to hide.
+  &::after {
+    align-items: center;
+    background: var(--mat-sys-surface-container-highest);
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: 8px 0 0 8px;
+    color: var(--mat-sys-on-surface-variant);
+    content: 'chevron_left';
+    cursor: pointer;
+    display: flex;
+    font-family: 'Material Symbols Outlined';
+    font-size: 16px;
+    height: 36px;
+    justify-content: center;
+    opacity: 0;
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: opacity 120ms;
+    width: 14px;
+  }
+
+  &:hover,
+  &:focus-visible {
     background-color: var(--mat-sys-outline-variant);
+
+    &::after {
+      opacity: 1;
+    }
   }
 }
 

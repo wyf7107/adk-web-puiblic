@@ -1,0 +1,464 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Shares its header, banners and empty states with the Logs page.
+
+:host {
+  background: var(--mat-sys-surface);
+  box-sizing: border-box;
+  color: var(--mat-sys-on-surface);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+$mono: 'Roboto Mono', ui-monospace, monospace;
+
+.mono {
+  font-family: $mono;
+  font-size: 12px;
+}
+
+code {
+  font-family: $mono;
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dot {
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+  height: 8px;
+  width: 8px;
+}
+
+.dot-success {
+  background: var(--adk-success);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+// --- Header --------------------------------------------------------------
+
+.page-header {
+  align-items: center;
+  display: flex;
+  flex: none;
+  gap: 16px;
+  padding: 20px 32px 16px;
+}
+
+.page-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  h2 {
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 28px;
+    margin: 0;
+  }
+}
+
+.page-subtitle {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.connection-chip {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 8px;
+  height: 32px;
+  line-height: 18px;
+  padding: 0 8px 0 10px;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-high);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+
+  .mono {
+    font-weight: 400;
+  }
+}
+
+.connection-chip-muted {
+  color: var(--mat-sys-on-surface-variant);
+  cursor: default;
+  padding-right: 12px;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+.chip-sep {
+  color: var(--mat-sys-outline);
+}
+
+.chip-edit {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.chip-spinner {
+  color: var(--mat-sys-primary);
+}
+
+.page-refresh {
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  font-size: 12px;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.header-divider {
+  border-top: 1px solid var(--mat-sys-outline-variant);
+  flex: none;
+}
+
+.header-progress {
+  flex: none;
+  height: 4px;
+}
+
+// --- Content -------------------------------------------------------------
+
+// Grows with the charts; the page scrolls as a whole.
+.page-content {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0 auto;
+  max-width: 1440px;
+  min-height: 0;
+  padding: 24px 32px;
+  width: 100%;
+}
+
+.inline-loading {
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.banner {
+  align-items: center;
+  border-radius: 12px;
+  display: flex;
+  font-size: 13px;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.banner-error {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+.not-connected {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 560px;
+  padding-top: 40px;
+
+  h3 {
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 28px;
+    margin: 4px 0 0;
+  }
+
+  p {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 14px;
+    line-height: 22px;
+    margin: 0;
+  }
+
+  .actions {
+    margin-top: 8px;
+  }
+}
+
+.tile-icon {
+  align-items: center;
+  background: var(--mat-sys-surface-container-high);
+  border-radius: 16px;
+  display: flex;
+  height: 56px;
+  justify-content: center;
+  width: 56px;
+
+  mat-icon {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+  }
+}
+
+.select-app-prompt {
+  align-items: center;
+  border: 1px dashed var(--mat-sys-outline);
+  border-radius: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  font-size: 14px;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+.empty-card {
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  padding: 28px;
+
+  p {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 14px;
+    line-height: 22px;
+    margin: 6px 0 16px;
+    max-width: 720px;
+  }
+}
+
+.empty-title {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.banner-neutral {
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+
+  mat-icon {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+// --- Toolbar -------------------------------------------------------------
+
+.toolbar {
+  align-items: center;
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.segmented {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 20px;
+  display: inline-flex;
+  height: 36px;
+  overflow: hidden;
+}
+
+.segment {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-left: 1px solid var(--mat-sys-outline-variant);
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 6px;
+  padding: 0 14px;
+
+  &:first-child {
+    border-left: none;
+  }
+
+  &:hover {
+    background: var(--mat-sys-surface-container-high);
+  }
+
+  &.active {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+}
+
+// --- Summary tiles -------------------------------------------------------
+
+.summaries {
+  display: grid;
+  flex: none;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.summary {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+}
+
+.summary-label {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 32px;
+}
+
+.summary-detail {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 12px;
+}
+
+.summary-bad .summary-value {
+  color: var(--mat-sys-error);
+}
+
+// --- Charts --------------------------------------------------------------
+
+.charts {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-bottom: 24px;
+}
+
+.chart-card {
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 14px 16px 10px;
+}
+
+.chart-requests {
+  grid-column: 1 / -1;
+}
+
+.skeleton-chart {
+  animation: pulse 1.4s ease-in-out infinite;
+  background: var(--mat-sys-surface-container-low);
+  height: 222px;
+}
+
+.skeleton-line {
+  animation: pulse 1.4s ease-in-out infinite;
+  background: var(--mat-sys-surface-container-high);
+  border-radius: 4px;
+  display: block;
+  height: 10px;
+
+  &.tall {
+    height: 24px;
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 960px) {
+  .page-header {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .page-content {
+    padding: 16px;
+  }
+
+  .summaries,
+  .charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

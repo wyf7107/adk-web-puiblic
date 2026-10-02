@@ -81,13 +81,14 @@ export declare type DeployConfig =
 export declare interface DeployDefaults {
   project?: string|null;
   /**
-   * Where `project` came from: the agent's `.env`, an environment variable
-   * exported to the server, gcloud config, or null when nothing supplied it.
+   * Where `project` came from: the cloud project the UI is connected to, the
+   * agent's `.env`, an environment variable exported to the server, gcloud
+   * config, or null when nothing supplied it.
    */
-  projectSource?: 'dotenv'|'environment'|'gcloud'|null;
+  projectSource?: 'connection'|'dotenv'|'environment'|'gcloud'|null;
   region?: string|null;
   /** Where `region` came from. There is no gcloud fallback for region. */
-  regionSource?: 'dotenv'|'environment'|null;
+  regionSource?: 'connection'|'dotenv'|'environment'|null;
   displayName?: string|null;
   description?: string|null;
   /** The agent name in Cloud Run / GKE form: lower-case, hyphens. */
@@ -129,3 +130,91 @@ export declare type DeployEvent = {
   kind: 'result';
   result: DeployResult;
 };
+
+/** One recorded deploy from the agent's `.adk/deployments.jsonl`. */
+export declare interface DeployHistoryEntry {
+  target: DeployTarget;
+  status: string;
+  /** ISO 8601, UTC. */
+  startedAt: string;
+  finishedAt: string;
+  region: string;
+  project?: string|null;
+  exitCode?: number|null;
+  /** Agent Runtime resource name, or the Cloud Run / GKE service name. */
+  resourceName?: string|null;
+  displayName?: string|null;
+  serviceName?: string|null;
+  clusterName?: string|null;
+  consoleUrl?: string|null;
+  serviceUrl?: string|null;
+  message?: string|null;
+  logPath?: string|null;
+  /** The deployment it belongs to; null when it named none. */
+  deploymentId?: string|null;
+}
+
+/** One deployed resource found in the connected project. */
+export declare interface Deployment {
+  id: string;
+  target: DeployTarget;
+  region: string;
+  project: string;
+  /** Agent Runtime resource name, or the Cloud Run service name. */
+  resourceName: string;
+  displayName?: string|null;
+  serviceUrl?: string|null;
+  consoleUrl?: string|null;
+  createTime?: string|null;
+  updateTime?: string|null;
+  state?: 'ready'|'updating'|'failed'|null;
+  labels: Record<string, string>;
+  /** Attributed to the selected agent. */
+  matchesApp: boolean;
+  /** Why it is attributed: deployed from here, labeled, or named after it. */
+  matchReason?: 'history'|'label'|'name'|null;
+  /** Outcome of its latest deploy from the dev UI, if any. */
+  lastDeployStatus?: string|null;
+}
+
+/** A lookup in the project that failed, e.g. an API not enabled. */
+export declare interface DiscoveryError {
+  target: DeployTarget;
+  region: string;
+  message: string;
+}
+
+export declare interface DeploymentsResponse {
+  project: string;
+  region: string;
+  /** The agent's deployments first, then the rest of the project's. */
+  deployments: Deployment[];
+  /** The agent's deploys from the dev UI, newest first. */
+  history: DeployHistoryEntry[];
+  /** A deploy of this app is running and not yet finished. */
+  deployInProgress: boolean;
+  errors: DiscoveryError[];
+}
+
+/** A Cloud Run revision. */
+export declare interface DeploymentRevision {
+  name: string;
+  createTime?: string|null;
+  image?: string|null;
+  ready?: boolean|null;
+  trafficPercent: number;
+}
+
+/** What the cloud reports about a deployment right now. */
+export declare interface DeploymentLive {
+  /** False for targets the server cannot inspect yet (GKE). */
+  supported: boolean;
+  state?: 'ready'|'updating'|'failed'|'not_found'|null;
+  url?: string|null;
+  createTime?: string|null;
+  updateTime?: string|null;
+  latestRevision?: string|null;
+  revisions: DeploymentRevision[];
+  /** A cloud error, reported in place of or alongside partial state. */
+  error?: string|null;
+}

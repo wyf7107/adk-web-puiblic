@@ -1,0 +1,114 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.try-title {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+}
+
+.try-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  min-width: 520px;
+}
+
+.try-supporting {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 14px;
+  line-height: 20px;
+  margin: 0;
+
+  strong {
+    color: var(--mat-sys-on-surface);
+    font-weight: 500;
+  }
+}
+
+.inline-loading {
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.banner {
+  background: var(--mat-sys-surface-container-high);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 19px;
+  padding: 12px 16px;
+}
+
+.consequences {
+  background: var(--adk-warning-container);
+  border-radius: 12px;
+  color: var(--adk-on-warning-container);
+  padding: 12px 16px;
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+  }
+
+  li {
+    align-items: flex-start;
+    display: flex;
+    font-size: 13px;
+    gap: 10px;
+    line-height: 19px;
+  }
+
+  mat-icon {
+    flex: none;
+    font-size: 18px;
+    height: 18px;
+    margin-top: 1px;
+    width: 18px;
+  }
+
+  strong {
+    font-weight: 500;
+  }
+}
+
+.consequences-title {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.user-field {
+  width: 100%;
+}
+
+.try-actions {
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.start-button mat-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}

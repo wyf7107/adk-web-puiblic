@@ -293,6 +293,8 @@ export class DeployDialogComponent {
       return '';
     }
     switch (source) {
+      case 'connection':
+        return 'From your cloud connection';
       case 'dotenv':
         return `From ${defaults.envFile ?? '.env'}`;
       case 'environment':

@@ -20,7 +20,7 @@ import {inject, Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs';
 
 import {URLUtil} from '../../../utils/url-util';
-import {DeployConfig, DeployDefaults, DeployEvent, DeployResult, DeployTarget} from '../models/Deploy';
+import {DeployConfig, DeployDefaults, DeployEvent, DeploymentLive, DeploymentsResponse, DeployResult, DeployTarget} from '../models/Deploy';
 
 import {DeployService as DeployServiceInterface} from './interfaces/deploy';
 
@@ -42,6 +42,17 @@ export class DeployService implements DeployServiceInterface {
     const url =
         `${this.apiServerDomain}/dev/apps/${appName}/deploy/defaults`;
     return this.http.get<DeployDefaults>(url);
+  }
+
+  listDeployments(appName: string): Observable<DeploymentsResponse> {
+    return this.http.get<DeploymentsResponse>(
+        `${this.apiServerDomain}/dev/apps/${appName}/deployments`);
+  }
+
+  getDeploymentLive(appName: string, deploymentId: string):
+      Observable<DeploymentLive> {
+    return this.http.get<DeploymentLive>(`${this.apiServerDomain}/dev/apps/${
+        appName}/deployments/${deploymentId}/live`);
   }
 
   deploy(appName: string, target: DeployTarget, config: DeployConfig):

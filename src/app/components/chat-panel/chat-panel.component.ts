@@ -144,6 +144,11 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
   @Input() isVideoRecording: boolean = false;
   @Input() isVideoCall: boolean = false;
   @Input() userId: string = '';
+  /**
+   * The deployed agent messages go to instead of the local one, if any. Hides
+   * what only the local agent supports: live calls and state edits.
+   */
+  @Input() deployedName: string = '';
   @Input() sessionId: string = '';
   @Input() viewMode: 'events' | 'traces' = 'events';
   // Renders the empty-run message instead of the README when there are no events.

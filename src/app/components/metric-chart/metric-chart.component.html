@@ -1,0 +1,81 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<div class="chart-head">
+  <span class="chart-title">{{ chart().title }}</span>
+  @if (chart().series.length > 1) {
+    <span class="legend">
+      @for (series of chart().series; track series.name) {
+        <span class="legend-item">
+          <span class="swatch" [style.background]="seriesColor(series)"></span>
+          {{ series.name }}
+        </span>
+      }
+    </span>
+  }
+</div>
+
+@if (chart().error) {
+  <div class="chart-message chart-error">{{ chart().error }}</div>
+} @else {
+  <div class="chart-body">
+    <svg [attr.width]="width()" [attr.height]="height" [attr.viewBox]="'0 0 ' + width() + ' ' + height"
+      role="img" [attr.aria-label]="chart().title + ' over time'"
+      (mousemove)="onMove($event)" (mouseleave)="onLeave()">
+      @for (tick of yTicks().ticks; track tick.value) {
+        <line class="grid" [attr.x1]="pad.left" [attr.x2]="width() - pad.right" [attr.y1]="tick.y" [attr.y2]="tick.y"></line>
+        <text class="axis y-axis" [attr.x]="pad.left - 8" [attr.y]="tick.y" dy="0.32em" text-anchor="end">{{ tick.label }}</text>
+      }
+      @for (label of xLabels(); track $index) {
+        <text class="axis" [attr.x]="label.x" [attr.y]="height - 6" [attr.text-anchor]="label.anchor">{{ label.label }}</text>
+      }
+      @for (bar of bars(); track $index) {
+        <rect class="bar" [attr.x]="bar.x" [attr.y]="bar.y" [attr.width]="bar.width" [attr.height]="bar.height"
+          [attr.fill]="bar.color"></rect>
+      }
+      @for (line of lines(); track $index) {
+        <path class="line" [attr.d]="line.d" [attr.stroke]="line.color"></path>
+        @for (dot of line.dots; track $index) {
+          <circle [attr.cx]="dot.x" [attr.cy]="dot.y" r="3" [attr.fill]="line.color"></circle>
+        }
+      }
+      @if (hover(); as h) {
+        <line class="guide" [attr.x1]="h.x" [attr.x2]="h.x" [attr.y1]="pad.top" [attr.y2]="height - pad.bottom"></line>
+      }
+    </svg>
+    @if (!hasData()) {
+      <div class="chart-message no-data">No data in this range</div>
+    }
+    @if (hover(); as h) {
+      <div class="tooltip" [class.flip]="h.left" [style.left.px]="h.x">
+        <div class="tooltip-time">{{ h.label }}</div>
+        @for (row of h.rows; track row.name) {
+          <div class="tooltip-row">
+            <span class="swatch" [style.background]="row.color"></span>
+            <span class="tooltip-name">{{ row.name }}</span>
+            <span class="tooltip-value">{{ row.value }}</span>
+          </div>
+        }
+        @if (h.total) {
+          <div class="tooltip-row tooltip-total">
+            <span class="tooltip-name">Total</span>
+            <span class="tooltip-value">{{ h.total }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

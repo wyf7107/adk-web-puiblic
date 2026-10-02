@@ -1,0 +1,233 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<h2 mat-dialog-title class="connect-title">{{ editing() ? 'Cloud connection' : 'Connect to cloud' }}</h2>
+
+<mat-dialog-content class="connect-content">
+  <p class="connect-supporting">
+    See what's deployed for your agents and deploy new versions from adk web.
+  </p>
+
+  <div class="connect-providers" role="radiogroup" aria-label="Cloud provider">
+    @for (provider of providers; track provider.id) {
+      <button type="button" role="radio" class="connect-provider"
+        [class.selected]="provider.id === 'gcp'"
+        [attr.aria-checked]="provider.id === 'gcp'"
+        [disabled]="!provider.available">
+        <span class="connect-provider-label">{{ provider.label }}</span>
+        @if (!provider.available) {
+          <span class="connect-soon">Soon</span>
+        }
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="connect-banner connect-banner-error">
+      <mat-icon>error</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  @if (loadingStatus()) {
+    <div class="connect-loading">
+      <mat-spinner diameter="18"></mat-spinner>
+      <span>Checking your Google Cloud credentials&hellip;</span>
+    </div>
+  } @else {
+    <div class="stepper">
+      <!-- Step 1: sign in -->
+      <section class="step" [class.done]="signInDone()" [class.active]="!signInDone()">
+        <div class="step-rail">
+          <span class="step-circle">
+            @if (signInDone()) { <mat-icon>check</mat-icon> } @else { 1 }
+          </span>
+          <span class="step-line"></span>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Sign in</div>
+
+          @if (enteringCode()) {
+            <p class="step-hint">
+              Finish signing in on the Google page that opened in a new tab, then paste the
+              verification code it shows.
+            </p>
+            <mat-form-field appearance="outline" class="connect-field" subscriptSizing="dynamic"
+              [class.code-error]="signInPhase() === 'error'">
+              <mat-label>Verification code</mat-label>
+              <input matInput class="connect-code" [(ngModel)]="code" autocomplete="off"
+                [disabled]="signInPhase() === 'verifying'" (keydown.enter)="continueSignIn()" />
+              @if (signInPhase() === 'verifying') {
+                <mat-spinner matSuffix diameter="18" class="field-suffix"></mat-spinner>
+              } @else if (signInPhase() === 'error') {
+                <mat-icon matSuffix class="field-suffix field-error-icon">error</mat-icon>
+              }
+              @if (signInPhase() === 'verifying') {
+                <mat-hint>Verifying&hellip;</mat-hint>
+              }
+            </mat-form-field>
+            @if (signInPhase() === 'error') {
+              <div class="code-error-text connect-banner-error-text">{{ signInError() }}</div>
+            }
+            <div class="step-actions">
+              <button mat-flat-button class="connect-submit-code"
+                [disabled]="signInPhase() === 'verifying' || (signInPhase() !== 'error' && !code.trim())"
+                (click)="continueSignIn()">
+                {{ signInPhase() === 'error' ? 'Try again' : 'Continue' }}
+              </button>
+              <button mat-button (click)="openSignInPage()" [disabled]="signInPhase() === 'error'">
+                <mat-icon>open_in_new</mat-icon> Open the sign-in page again
+              </button>
+              <button mat-button (click)="cancelSignIn()">Cancel</button>
+            </div>
+          } @else if (signedIn() && usingServiceAccount()) {
+            <div class="account-row">
+              <span class="avatar avatar-service">
+                <mat-icon fontSet="material-symbols-outlined">settings_account_box</mat-icon>
+              </span>
+              <div class="account-text">
+                <span>Signed in as a service account</span>
+                @if (status()?.account) {
+                  <span class="mono muted">{{ status()?.account }}</span>
+                }
+              </div>
+              @if (keepServiceAccount()) {
+                <button mat-button class="connect-switch" (click)="signIn()"
+                  [disabled]="signInPhase() === 'starting'">Use another account</button>
+              }
+            </div>
+            @if (!keepServiceAccount()) {
+              <div class="recommendation">
+                <mat-icon fontSet="material-symbols-outlined">lightbulb</mat-icon>
+                <div>
+                  <p>
+                    These are this machine's default credentials. We recommend signing in with your
+                    personal account so you see the projects and permissions that are yours.
+                  </p>
+                  <div class="step-actions">
+                    <button mat-stroked-button class="connect-switch" (click)="signIn()"
+                      [disabled]="signInPhase() === 'starting'">Sign in with Google</button>
+                    <button mat-button (click)="keepServiceAccount.set(true)">Keep using service account</button>
+                  </div>
+                </div>
+              </div>
+            }
+          } @else if (signedIn()) {
+            <div class="account-row">
+              <span class="avatar">{{ accountInitial() }}</span>
+              <div class="account-text">
+                <span>Signed in as <strong>{{ status()?.account || 'your Google account' }}</strong></span>
+              </div>
+              <button mat-button class="connect-switch" (click)="signIn()"
+                [disabled]="signInPhase() === 'starting'">Use another account</button>
+            </div>
+          } @else {
+            <p class="step-hint">
+              Google's sign-in page opens in a new tab. When you finish, it shows a code to paste
+              back here.
+            </p>
+            <button mat-flat-button class="connect-sign-in" (click)="signIn()"
+              [disabled]="signInPhase() === 'starting'">
+              @if (signInPhase() === 'starting') {
+                <mat-spinner diameter="16" class="inline-spinner"></mat-spinner>
+              } @else {
+                <mat-icon fontSet="material-symbols-outlined">login</mat-icon>
+              }
+              Sign in with Google
+            </button>
+          }
+        </div>
+      </section>
+
+      <!-- Step 2: choose a project -->
+      <section class="step step-last" [class.active]="signInDone()" [class.inactive]="!signInDone()">
+        <div class="step-rail">
+          <span class="step-circle">2</span>
+        </div>
+        <div class="step-body">
+          <div class="step-title">
+            Choose a project
+            @if (!signInDone()) { <span class="step-after">after you sign in</span> }
+          </div>
+          @if (signInDone()) {
+            <mat-form-field appearance="outline" class="connect-field" subscriptSizing="dynamic">
+              <mat-label>Project</mat-label>
+              <mat-icon matPrefix class="field-prefix">search</mat-icon>
+              <input matInput class="connect-project" [ngModel]="projectQuery()"
+                (ngModelChange)="onProjectInput($event)" [matAutocomplete]="projectPicker"
+                placeholder="Search by project ID or name" autocomplete="off" />
+              @if (projectQuery()) {
+                <button mat-icon-button matSuffix class="field-clear" (click)="clearProject()" aria-label="Clear">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              <mat-autocomplete #projectPicker="matAutocomplete" class="project-panel"
+                (optionSelected)="projectQuery.set($event.option.value)">
+                @for (project of projects(); track project.projectId) {
+                  <mat-option [value]="project.projectId" class="project-option">
+                    @let id = highlight(project.projectId);
+                    <span class="project-id mono">{{ id.before }}<strong>{{ id.match }}</strong>{{ id.after }}</span>
+                    @if (project.name && project.name !== project.projectId) {
+                      <span class="project-name">{{ project.name }}</span>
+                    }
+                  </mat-option>
+                }
+                @if (loadingProjects()) {
+                  <mat-option disabled class="project-searching">
+                    <mat-spinner diameter="14"></mat-spinner>
+                    Searching all projects by ID or name&hellip;
+                  </mat-option>
+                }
+              </mat-autocomplete>
+              @if (projectsError()) {
+                <mat-hint>{{ projectsError() }}</mat-hint>
+              } @else {
+                <mat-hint>Searches every project your account can see.</mat-hint>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="connect-field" subscriptSizing="dynamic">
+              <mat-label>Default region</mat-label>
+              <input matInput class="connect-region" [(ngModel)]="region" [matAutocomplete]="regionPicker" autocomplete="off" />
+              <mat-autocomplete #regionPicker="matAutocomplete">
+                @for (option of regions; track option) {
+                  <mat-option [value]="option">{{ option }}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-hint>Where deployments are looked for and where new deploys go.</mat-hint>
+            </mat-form-field>
+          }
+        </div>
+      </section>
+    </div>
+  }
+
+  <div class="reassurance">
+    <mat-icon fontSet="material-symbols-outlined">lock</mat-icon>
+    Credentials stay on your local adk web server. The browser never sees them.
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="connect-actions">
+  @if (editing()) {
+    <button mat-button class="connect-disconnect" (click)="disconnect()">Disconnect</button>
+  }
+  <span class="spacer"></span>
+  <button mat-button (click)="close()">Cancel</button>
+  <button mat-flat-button class="connect-save" [disabled]="!canConnect" (click)="connect()">
+    {{ editing() ? 'Save' : 'Connect' }}
+  </button>
+</mat-dialog-actions>

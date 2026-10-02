@@ -49,8 +49,8 @@ export class AgentService implements AgentServiceInterface {
     return this.isLoading;
   }
 
-  runSse(req: AgentRunRequest): Observable<LlmResponse> {
-    const url = this.apiServerDomain + `/run_sse`;
+  runSse(req: AgentRunRequest, path = '/run_sse'): Observable<LlmResponse> {
+    const url = this.apiServerDomain + path;
     this.isLoading.next(true);
     return new Observable<LlmResponse>((observer) => {
       const self = this;

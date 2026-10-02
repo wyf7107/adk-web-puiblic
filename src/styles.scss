@@ -51,6 +51,14 @@ html {
   --mat-sys-surface-container-low: #1a1a1a;
   --mat-sys-surface-container-high: #2a2a2a;
   --mat-sys-surface-container-highest: #3a3a3a;
+
+  // Extended status roles (success, warning) not in the M3 palette.
+  --adk-success: #6dd58c;
+  --adk-success-container: #123d22;
+  --adk-on-success-container: #b6f0c6;
+  --adk-warning: #f2c14e;
+  --adk-warning-container: #3f3000;
+  --adk-on-warning-container: #ffdf99;
 }
 
 // Light theme override
@@ -88,6 +96,14 @@ html.light-theme {
   --mat-sys-surface-container-low: #fafafa;
   --mat-sys-surface-container-high: #eeeeee;
   --mat-sys-surface-container-highest: #e0e0e0;
+
+  // Extended status roles (success, warning) not in the M3 palette.
+  --adk-success: #188038;
+  --adk-success-container: #d4f0dc;
+  --adk-on-success-container: #0b3d1c;
+  --adk-warning: #946200;
+  --adk-warning-container: #fbefc9;
+  --adk-on-warning-container: #3a2800;
 }
 
 // Dark theme explicit class (for consistency)
@@ -125,6 +141,14 @@ html.dark-theme {
   --mat-sys-surface-container-low: #1a1a1a;
   --mat-sys-surface-container-high: #2a2a2a;
   --mat-sys-surface-container-highest: #3a3a3a;
+
+  // Extended status roles (success, warning) not in the M3 palette.
+  --adk-success: #6dd58c;
+  --adk-success-container: #123d22;
+  --adk-on-success-container: #b6f0c6;
+  --adk-warning: #f2c14e;
+  --adk-warning-container: #3f3000;
+  --adk-on-warning-container: #ffdf99;
 }
 
 body {

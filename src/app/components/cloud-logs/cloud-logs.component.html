@@ -1,0 +1,276 @@
+<!--
+ Copyright 2026 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<header class="page-header">
+  <div class="page-title">
+    <h2>Logs</h2>
+    <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
+  </div>
+
+  @if (checking()) {
+    <span class="connection-chip connection-chip-muted">
+      <mat-icon fontSet="material-symbols-outlined" class="spin chip-spinner">progress_activity</mat-icon>
+      Checking connection&hellip;
+    </span>
+  } @else if (connected()) {
+    <button type="button" class="connection-chip" (click)="connect()" matTooltip="Change connection">
+      <span class="dot dot-success"></span>
+      <span>Google Cloud</span>
+      <span class="chip-sep">&middot;</span>
+      <span class="mono">{{ status()?.project }}</span>
+      <mat-icon fontSet="material-symbols-outlined" class="chip-edit">edit</mat-icon>
+    </button>
+  } @else {
+    <span class="connection-chip connection-chip-muted">
+      <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+      Not connected
+    </span>
+  }
+
+  @if (selectedSourceId()) {
+    <div class="page-refresh">
+      <span [class.live-text]="live()">{{ updatedText() }}</span>
+      <button mat-icon-button (click)="refresh()" [disabled]="loading()" matTooltip="Refresh" aria-label="Refresh">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  }
+</header>
+
+@if (loading() || (connected() && appName() && sources() === null)) {
+  <mat-progress-bar mode="indeterminate" class="header-progress"></mat-progress-bar>
+} @else {
+  <div class="header-divider"></div>
+}
+
+<div class="page-content">
+  @if (checking()) {
+    <div class="inline-loading">
+      <mat-spinner diameter="16"></mat-spinner>
+      <span>Checking the cloud connection&hellip;</span>
+    </div>
+  } @else if (!connected()) {
+    <section class="not-connected">
+      <div class="tile-icon">
+        <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+      </div>
+      <h3>Connect to Google Cloud to see your agent's logs</h3>
+      <p>
+        Logs are what your deployed agent writes while it runs, read from Cloud Logging.
+        Choose a project and region to browse and tail them here.
+        Credentials stay on your local adk web server; the browser never sees them.
+      </p>
+      @if (statusFailed()) {
+        <p class="muted">Cloud connections are only available on a local <code>adk web</code> server.</p>
+      }
+      <div class="actions">
+        <button mat-flat-button (click)="connect()">Connect to Google Cloud</button>
+        <button mat-button (click)="backToPlayground.emit()">Back to Playground</button>
+      </div>
+    </section>
+  } @else if (!appName()) {
+    <div class="select-app-prompt">
+      <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+      <span>Select an agent in the toolbar to see its logs.</span>
+    </div>
+  } @else if (sources() === null) {
+    <div class="inline-loading">
+      <mat-spinner diameter="16"></mat-spinner>
+      <span>Looking for deployments in {{ status()?.project }}&hellip;</span>
+    </div>
+  } @else if (sourcesError()) {
+    <div class="banner banner-neutral">
+      <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+      <span class="banner-text">{{ sourcesError() }}</span>
+      <button mat-button (click)="refresh()">Retry</button>
+    </div>
+  } @else {
+    @if (sources()?.length) {
+      <app-deployment-picker label="Showing logs from" [deployments]="sources() ?? []"
+        [selectedId]="selectedSourceId()" (selectedChange)="selectSource($event)"></app-deployment-picker>
+    }
+    @if (!selectedSourceId()) {
+      <div class="empty-card no-deployment">
+        <div class="empty-title">{{ appName() }} isn't deployed in this project yet</div>
+        <p>
+          Logs are read for this agent's Agent Runtime or Cloud Run deployments. We looked in
+          <strong>{{ status()?.project }} &middot; {{ status()?.region }}</strong> and found none.
+          @if (sources()?.length) { You can still choose another deployment in the project above. }
+        </p>
+        <div class="actions">
+          <button mat-flat-button (click)="goToDeployments.emit()">Go to Deployments</button>
+        </div>
+      </div>
+    } @else {
+      <div class="toolbar">
+        <div class="segmented" role="radiogroup" aria-label="Minimum severity">
+          @for (option of severityFilters; track option.id) {
+            <button type="button" role="radio" class="segment" [class.active]="severity() === option.id"
+              [attr.aria-checked]="severity() === option.id" (click)="setSeverity(option.id)">
+              @if (option.id) { <span class="sev-dot sev-{{ option.id === 'INFO' ? 'info' : option.id === 'WARNING' ? 'warning' : 'error' }}"></span> }
+              {{ option.label }}
+            </button>
+          }
+        </div>
+
+        <mat-menu #rangeMenu="matMenu">
+          @for (option of timeRanges; track option.id) {
+            <button mat-menu-item (click)="setRange(option)">
+              <span>{{ option.label }}</span>
+              @if (option.id === rangeId()) { <mat-icon class="menu-check">check</mat-icon> }
+            </button>
+          }
+        </mat-menu>
+        <button type="button" class="range-button" [matMenuTriggerFor]="rangeMenu">
+          <mat-icon fontSet="material-symbols-outlined">schedule</mat-icon>
+          {{ range().label }}
+          <mat-icon>expand_more</mat-icon>
+        </button>
+
+        <form class="filter" (ngSubmit)="applyQuery()">
+          <mat-icon class="filter-icon">search</mat-icon>
+          <input class="filter-input" name="queryText" [(ngModel)]="queryText"
+            placeholder="Search logs, then press Enter" aria-label="Search logs" autocomplete="off" />
+          @if (queryText) {
+            <button type="button" class="filter-clear" (click)="clearQuery()" aria-label="Clear search">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </form>
+
+        <span class="toolbar-spacer"></span>
+
+        <button type="button" class="live-button" [class.on]="live()" (click)="toggleLive()"
+          [attr.aria-pressed]="live()" [matTooltip]="live() ? 'Stop live updates' : 'Show new entries as they arrive'">
+          <span class="live-dot"></span>
+          Live
+        </button>
+        <button mat-icon-button (click)="openConsole()" [disabled]="!consoleUrl()"
+          matTooltip="Open in Logs Explorer" aria-label="Open in Logs Explorer">
+          <mat-icon>open_in_new</mat-icon>
+        </button>
+      </div>
+
+      @if (error()) {
+        <div class="banner banner-neutral logs-error">
+          <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+          <span class="banner-text">{{ error() }}</span>
+          <button mat-button (click)="refresh()">Retry</button>
+        </div>
+      }
+
+      @if (entries() || loading()) {
+      <section class="log-pane">
+        @if (entries(); as list) {
+          @if (list.length === 0) {
+            <div class="list-empty">
+              <mat-icon fontSet="material-symbols-outlined">receipt_long</mat-icon>
+              <span>
+                No log entries in the {{ loadedRange().label.toLowerCase() }}@if (severity()) { at {{ severity().toLowerCase() }} or above}@if (appliedQuery()) { matching &ldquo;{{ appliedQuery() }}&rdquo;}.
+              </span>
+              @if (rangeId() !== '7d') {
+                <button mat-button (click)="setRange(timeRanges[timeRanges.length - 1])">Search the last 7 days</button>
+              }
+            </div>
+          } @else {
+            <div class="log-table" role="table" aria-label="Log entries">
+              <div class="log-row log-head" role="row">
+                <span role="columnheader"></span>
+                <span role="columnheader">Time</span>
+                <span role="columnheader">Severity</span>
+                <span role="columnheader">Log</span>
+                <span role="columnheader">Message</span>
+              </div>
+              @for (entry of list; track key(entry)) {
+                <div class="log-entry" [class.expanded]="isExpanded(entry)">
+                  <div class="log-row" role="row" tabindex="0" [attr.aria-expanded]="isExpanded(entry)"
+                    (click)="toggle(entry)" (keydown.enter)="toggle(entry)">
+                    <span role="cell" class="sev-bar sev-{{ level(entry) }}"></span>
+                    <span role="cell" class="time-cell mono" [title]="fullTime(entry)">{{ time(entry) }}</span>
+                    <span role="cell" class="sev-cell sev-text-{{ level(entry) }}" [class.inferred]="entry.severityInferred"
+                      [title]="entry.severityInferred ? 'Read from the message; the entry has no severity' : ''">{{ entry.severity === 'DEFAULT' ? '—' : entry.severity }}</span>
+                    <span role="cell" class="log-cell">{{ entry.log }}</span>
+                    <span role="cell" class="message-cell">
+                      @if (entry.httpRequest; as http) {
+                        <span class="http-method">{{ http.method }}</span>
+                        <span class="http-status {{ statusClass(http.status) }}">{{ http.status }}</span>
+                        <span class="mono message-text">{{ http.path }}</span>
+                        @if (http.latencyMs !== undefined && http.latencyMs !== null) {
+                          <span class="http-latency">{{ http.latencyMs }} ms</span>
+                        }
+                      } @else {
+                        <span class="mono message-text">{{ firstLine(entry) }}</span>
+                        @if (extraLines(entry)) {
+                          <span class="more-lines">+{{ extraLines(entry) }} lines</span>
+                        }
+                      }
+                    </span>
+                  </div>
+                  @if (isExpanded(entry)) {
+                    <div class="log-detail">
+                      <div class="detail-actions">
+                        <button mat-button (click)="copy(entry.message)">
+                          <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+                          Copy message
+                        </button>
+                      </div>
+                      @if (entry.message) {
+                        <pre class="detail-message">{{ entry.message }}</pre>
+                      }
+                      <dl class="detail-facts">
+                        <dt>Time</dt><dd>{{ fullTime(entry) }}</dd>
+                        <dt>Severity</dt><dd>{{ entry.severity }}@if (entry.severityInferred) {<span class="muted inferred-note">(read from the message)</span>}</dd>
+                        @if (entry.log) { <dt>Log</dt><dd>{{ entry.log }}</dd> }
+                        @if (entry.revision) { <dt>Revision</dt><dd class="mono">{{ entry.revision }}</dd> }
+                        @if (entry.instance) { <dt>Instance</dt><dd class="mono">{{ entry.instance }}</dd> }
+                        @if (entry.trace) { <dt>Trace</dt><dd class="mono">{{ entry.trace }}</dd> }
+                        @for (label of labelList(entry); track label[0]) {
+                          <dt>{{ label[0] }}</dt><dd class="mono">{{ label[1] }}</dd>
+                        }
+                      </dl>
+                      @if (entry.payload) {
+                        <pre class="detail-payload">{{ payloadJson(entry) }}</pre>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+            <div class="list-footer">
+              <span>{{ list.length }} {{ list.length === 1 ? 'entry' : 'entries' }} &middot; {{ loadedRange().label.toLowerCase() }}</span>
+              @if (nextPageToken()) {
+                <button mat-button class="load-older" (click)="loadOlder()" [disabled]="loadingOlder()">
+                  @if (loadingOlder()) { <mat-spinner diameter="16"></mat-spinner> }
+                  Load older
+                </button>
+              }
+            </div>
+          }
+        } @else if (loading()) {
+          <div aria-hidden="true">
+            @for (i of [0, 1, 2, 3, 4, 5, 6, 7]; track i) {
+              <div class="skeleton-row">
+                <span class="skeleton-line" style="width: 90px"></span>
+                <span class="skeleton-line" [style.width.%]="30 + (i * 17) % 50"></span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+      }
+    }
+  }
+</div>

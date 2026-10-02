@@ -1,0 +1,365 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+$mono: 'Roboto Mono', ui-monospace, monospace;
+
+.mono {
+  font-family: $mono;
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.connect-title {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+}
+
+.connect-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 560px;
+  min-width: 512px;
+}
+
+.connect-supporting {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 14px;
+  line-height: 20px;
+  margin: 0;
+}
+
+.connect-providers {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1.4fr 1fr 1fr;
+}
+
+.connect-provider {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-sizing: border-box;
+  color: inherit;
+  display: flex;
+  font: inherit;
+  gap: 8px;
+  height: 48px;
+  justify-content: space-between;
+  padding: 0 14px;
+  text-align: left;
+
+  &.selected {
+    background: var(--mat-sys-surface-container-highest);
+    border: 2px solid var(--mat-sys-primary);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+  }
+}
+
+.connect-provider-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.connect-soon {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.connect-loading {
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.connect-banner {
+  align-items: flex-start;
+  border-radius: 12px;
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  padding: 12px;
+}
+
+.connect-banner-error {
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
+
+// --- Stepper -------------------------------------------------------------
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+}
+
+.step {
+  display: flex;
+  gap: 16px;
+}
+
+.step-rail {
+  align-items: center;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 24px;
+}
+
+.step-circle {
+  align-items: center;
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: 50%;
+  box-sizing: border-box;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  flex: none;
+  font-size: 12px;
+  font-weight: 500;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+
+  mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
+}
+
+.step.active .step-circle,
+.step.done .step-circle {
+  background: var(--mat-sys-primary);
+  border-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
+.step-line {
+  background: var(--mat-sys-outline-variant);
+  flex: 1;
+  margin: 4px 0;
+  min-height: 16px;
+  width: 1px;
+}
+
+.step-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 2px 0 24px;
+}
+
+.step-last .step-body {
+  padding-bottom: 0;
+}
+
+.step-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.step.inactive .step-title {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.step-after {
+  color: var(--mat-sys-on-surface-variant);
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+.step-hint {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 13px;
+  line-height: 18px;
+  margin: 0;
+}
+
+.step-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.account-row {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  gap: 12px;
+}
+
+.account-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.avatar {
+  align-items: center;
+  background: var(--mat-sys-primary-container);
+  border-radius: 50%;
+  color: var(--mat-sys-on-primary-container);
+  display: flex;
+  flex: none;
+  font-size: 14px;
+  font-weight: 500;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}
+
+.avatar-service {
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.connect-switch {
+  white-space: nowrap;
+}
+
+.recommendation {
+  background: var(--adk-warning-container);
+  border-radius: 12px;
+  color: var(--adk-on-warning-container);
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+
+  > mat-icon {
+    flex: none;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+
+  p {
+    font-size: 13px;
+    line-height: 18px;
+    margin: 0 0 8px;
+  }
+}
+
+.connect-sign-in {
+  align-self: flex-start;
+}
+
+.inline-spinner {
+  display: inline-block;
+  margin-right: 6px;
+}
+
+// --- Fields --------------------------------------------------------------
+
+.connect-field {
+  width: 100%;
+}
+
+.connect-code {
+  font-family: $mono;
+}
+
+.field-prefix {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 4px 0 12px;
+}
+
+.field-suffix {
+  margin-right: 12px;
+}
+
+.field-error-icon {
+  color: var(--mat-sys-error);
+}
+
+.code-error-text {
+  color: var(--mat-sys-error);
+  font-size: 12px;
+  line-height: 16px;
+  margin-top: -8px;
+}
+
+:host ::ng-deep .code-error .mdc-notched-outline > * {
+  border-color: var(--mat-sys-error) !important;
+}
+
+.project-id strong {
+  font-weight: 700;
+}
+
+.project-name {
+  color: var(--mat-sys-on-surface-variant);
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.project-searching {
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+}
+
+.reassurance {
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  display: flex;
+  font-size: 12px;
+  gap: 6px;
+  line-height: 16px;
+
+  mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
+}
+
+.connect-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.connect-disconnect {
+  color: var(--mat-sys-error);
+}

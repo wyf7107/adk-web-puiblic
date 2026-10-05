@@ -245,6 +245,45 @@ describe('EventContentComponent', () => {
       expect(chip.nativeElement.nextElementSibling).toBe(edit.nativeElement);
     });
 
+    it('renders a read under its response chip, with the path from its call', () => {
+      const readCall = new UiEvent({
+        role: 'bot',
+        event: {id: 'read-call'} as AdkEvent,
+        functionCalls: [{
+          id: 'fc-read',
+          name: 'ReadFile',
+          args: {path: 'app.py', start_line: 4, end_line: 4},
+        }],
+      });
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'read-response'} as AdkEvent,
+        functionResponses: [{
+          id: 'fc-read',
+          name: 'ReadFile',
+          response: {status: 'ok', content: '     4\tx = 1\n', total_lines: 9},
+        }],
+      });
+      component.uiEvents = [readCall, component.uiEvent];
+      component.index = 1;
+      fixture.detectChanges();
+
+      const chip = fixture.debugElement.query(By.css('.function-response-chip-container'));
+      const read = fixture.debugElement.query(By.css('app-file-edit'));
+      expect(chip.nativeElement.nextElementSibling).toBe(read.nativeElement);
+      expect(read.query(By.css('.file-edit-path')).nativeElement.textContent)
+          .toBe('app.py');
+      expect(read.query(By.css('.file-read-range')).nativeElement.textContent)
+          .toBe('Lines 4-4 of 9');
+    });
+
+    it('shows the path in the ReadFile chip when a range is passed', () => {
+      expect(component.getFunctionCallButtonText({
+        name: 'ReadFile',
+        args: {path: 'app.py', start_line: 4, end_line: 6},
+      })).toBe('ReadFile("app.py", …)');
+    });
+
     it('renders nothing extra for a successful edit response', () => {
       component.uiEvent = new UiEvent({
         role: 'bot',

@@ -29,7 +29,7 @@ import { AgentRunRequest } from '../../core/models/AgentRunRequest';
 import { isComputerUseResponse, isVisibleComputerUseClick } from '../../core/models/ComputerUse';
 import { getStandaloneCodeResults } from '../../core/models/CodeExecution';
 import type { EvalCase } from '../../core/models/Eval';
-import { getFileEditError, isFileEditCall } from '../../core/models/FileEdit';
+import { getFileRead, getFileToolError, isFileEditCall } from '../../core/models/FileEdit';
 import { isShellCommandCall, isShellCommandResponse } from '../../core/models/ShellCommand';
 import { isSkillToolResponse } from '../../core/models/SkillTool';
 import { UiEvent } from '../../core/models/UiEvent';
@@ -124,6 +124,7 @@ export class EventContentComponent {
       const specialFuncArgMap: Record<string, string> = {
         'EditFile': 'path',
         'WriteFile': 'path',
+        'ReadFile': 'path',
         'load_skill_resource': 'file_path',
       };
       if (functionCall.name in specialFuncArgMap) {
@@ -207,9 +208,24 @@ export class EventContentComponent {
     return isSkillToolResponse(functionResponse);
   }
 
-  /** Whether a function response is a file edit that failed. */
-  isFailedFileEdit(functionResponse: FunctionResponse): boolean {
-    return getFileEditError(functionResponse) !== null;
+  /**
+   * Whether a function response gets a file view under its chip: the content
+   * of a read, or the error of a failed file tool call.
+   */
+  hasFileToolView(functionResponse: FunctionResponse): boolean {
+    return getFileRead(functionResponse) !== null ||
+        getFileToolError(functionResponse) !== null;
+  }
+
+  /** Returns the call a function response answers, matched by id. */
+  findFunctionCall(functionResponse: FunctionResponse): FunctionCall|undefined {
+    if (!functionResponse.id) return undefined;
+    for (const event of this.uiEvents) {
+      const call =
+          event.functionCalls?.find(fc => fc.id === functionResponse.id);
+      if (call) return call;
+    }
+    return undefined;
   }
 
   getFilteredStateKeys(stateDelta: any): string[] {

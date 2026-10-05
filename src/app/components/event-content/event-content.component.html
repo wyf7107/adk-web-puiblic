@@ -116,8 +116,8 @@
           </div>
           @if (isShellCommandResponse(functionResponse)) {
             <app-shell-command [functionResponse]="functionResponse"></app-shell-command>
-          } @else if (isFailedFileEdit(functionResponse)) {
-            <app-file-edit [functionResponse]="functionResponse"></app-file-edit>
+          } @else if (hasFileToolView(functionResponse)) {
+            <app-file-edit [functionResponse]="functionResponse" [functionCall]="findFunctionCall(functionResponse)"></app-file-edit>
           } @else if (isSkillToolResponse(functionResponse)) {
             <app-skill-tool [functionResponse]="functionResponse"></app-skill-tool>
           }

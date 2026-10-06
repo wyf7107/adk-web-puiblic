@@ -32,6 +32,7 @@ import type { EvalCase } from '../../core/models/Eval';
 import { getFileRead, getFileToolError, isFileEditCall } from '../../core/models/FileEdit';
 import { isShellCommandCall, isShellCommandResponse } from '../../core/models/ShellCommand';
 import { isSkillToolResponse } from '../../core/models/SkillTool';
+import { getGroundingSummary, getWebPageResult } from '../../core/models/WebTool';
 import { UiEvent } from '../../core/models/UiEvent';
 import { WorkflowGraphTooltipDirective } from '../../directives/workflow-graph-tooltip.directive';
 import { JsonTooltipDirective } from '../../directives/html-tooltip.directive';
@@ -42,8 +43,10 @@ import { ChatPanelMessagesInjectionToken } from '../chat-panel/chat-panel.compon
 import { CodeExecutionComponent } from '../code-execution/code-execution.component';
 import { ContentBubbleComponent } from '../content-bubble/content-bubble.component';
 import { FileEditComponent } from '../file-edit/file-edit.component';
+import { GroundingSourcesComponent } from '../grounding-sources/grounding-sources.component';
 import { ShellCommandComponent } from '../shell-command/shell-command.component';
 import { SkillToolComponent } from '../skill-tool/skill-tool.component';
+import { WebPageComponent } from '../web-page/web-page.component';
 import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff-dialog/system-instruction-diff-dialog.component';
 
 @Component({
@@ -64,10 +67,12 @@ import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff
     CodeExecutionComponent,
     ContentBubbleComponent,
     FileEditComponent,
+    GroundingSourcesComponent,
     MatMenuModule,
     JsonTooltipDirective,
     ShellCommandComponent,
     SkillToolComponent,
+    WebPageComponent,
   ],
 })
 export class EventContentComponent {
@@ -206,6 +211,15 @@ export class EventContentComponent {
 
   isSkillToolResponse(functionResponse: FunctionResponse): boolean {
     return isSkillToolResponse(functionResponse);
+  }
+
+  isWebPageResponse(functionResponse: FunctionResponse): boolean {
+    return getWebPageResult(functionResponse) !== null;
+  }
+
+  /** Whether the event is a grounded response with searches or sources. */
+  hasGroundingSources(uiEvent: UiEvent): boolean {
+    return getGroundingSummary(uiEvent.event?.groundingMetadata) !== null;
   }
 
   /**

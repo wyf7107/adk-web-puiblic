@@ -332,4 +332,61 @@ describe('EventContentComponent', () => {
       })).toBe('load_skill_resource("scripts/format.sh", …)');
     });
   });
+
+  describe('Web and search', () => {
+    it('renders the sources of a grounded response', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {
+          id: 'grounded',
+          groundingMetadata: {
+            webSearchQueries: ['what is ADK'],
+            groundingChunks: [{web: {uri: 'https://example.com/', title: 'Example'}}],
+          },
+        } as AdkEvent,
+      });
+      component.index = 0;
+      fixture.detectChanges();
+
+      const sources = fixture.debugElement.query(By.css('app-grounding-sources'));
+      expect(sources.nativeElement.textContent).toContain('what is ADK');
+      expect(sources.nativeElement.textContent).toContain('Example');
+    });
+
+    it('renders nothing for a response without grounding', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'plain'} as AdkEvent,
+      });
+      component.index = 0;
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('app-grounding-sources'))).toBeNull();
+    });
+
+    it('renders a fetched page under its response chip, with the URL from its call', () => {
+      const call = new UiEvent({
+        role: 'bot',
+        event: {id: 'fetch-call'} as AdkEvent,
+        functionCalls: [{id: 'fc-web', name: 'load_web_page', args: {url: 'https://example.com'}}],
+      });
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'fetch-response'} as AdkEvent,
+        functionResponses: [{
+          id: 'fc-web',
+          name: 'load_web_page',
+          response: {result: 'Example text.'},
+        }],
+      });
+      component.uiEvents = [call, component.uiEvent];
+      component.index = 1;
+      fixture.detectChanges();
+
+      const chip = fixture.debugElement.query(By.css('.function-response-chip-container'));
+      const page = fixture.debugElement.query(By.css('app-web-page'));
+      expect(chip.nativeElement.nextElementSibling).toBe(page.nativeElement);
+      expect(page.nativeElement.textContent).toContain('https://example.com');
+    });
+  });
 });

@@ -13,6 +13,9 @@
       (openBase64InNewTab)="openBase64InNewTab.emit($event)"
     ></app-content-bubble>
     }
+    @if (hasGroundingSources(uiEvent)) {
+      <app-grounding-sources [groundingMetadata]="uiEvent.event.groundingMetadata"></app-grounding-sources>
+    }
     @if (uiEvent.event.output) {
     <app-content-bubble
       type="output"
@@ -120,6 +123,8 @@
             <app-file-edit [functionResponse]="functionResponse" [functionCall]="findFunctionCall(functionResponse)"></app-file-edit>
           } @else if (isSkillToolResponse(functionResponse)) {
             <app-skill-tool [functionResponse]="functionResponse"></app-skill-tool>
+          } @else if (isWebPageResponse(functionResponse)) {
+            <app-web-page [functionResponse]="functionResponse" [functionCall]="findFunctionCall(functionResponse)"></app-web-page>
           }
         }
       }

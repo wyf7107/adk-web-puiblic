@@ -389,4 +389,46 @@ describe('EventContentComponent', () => {
       expect(page.nativeElement.textContent).toContain('https://example.com');
     });
   });
+
+  describe('Tool confirmation', () => {
+    it('renders an approval card for a confirmation request', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'confirm-request'} as AdkEvent,
+        functionCalls: [{
+          id: 'confirm-1',
+          name: 'adk_request_confirmation',
+          args: {
+            originalFunctionCall: {id: 'fc-1', name: 'execute_bash', args: {command: 'ls'}},
+            toolConfirmation: {hint: 'Run ls?', confirmed: false},
+          },
+          needsResponse: true,
+        }],
+      });
+      component.index = 0;
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('app-tool-confirmation .confirmation-card')))
+          .toBeTruthy();
+      expect(fixture.debugElement.query(By.css('app-long-running-response'))).toBeNull();
+    });
+
+    it('shows a tool\'s approval placeholder as a status, not as shell output', () => {
+      component.uiEvent = new UiEvent({
+        role: 'bot',
+        event: {id: 'placeholder'} as AdkEvent,
+        functionResponses: [{
+          id: 'fc-1',
+          name: 'execute_bash',
+          response: {error: 'This tool call requires confirmation, please approve or reject.'},
+        }],
+      });
+      component.index = 1;
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css('app-tool-confirmation')).nativeElement.textContent)
+          .toContain('Approval requested');
+      expect(fixture.debugElement.query(By.css('app-shell-command'))).toBeNull();
+    });
+  });
 });

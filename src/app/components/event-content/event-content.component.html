@@ -117,7 +117,9 @@
               </button>
             </mat-menu>
           </div>
-          @if (isShellCommandResponse(functionResponse)) {
+          @if (hasConfirmationStatus(functionResponse)) {
+            <app-tool-confirmation [functionResponse]="functionResponse"></app-tool-confirmation>
+          } @else if (isShellCommandResponse(functionResponse)) {
             <app-shell-command [functionResponse]="functionResponse"></app-shell-command>
           } @else if (hasFileToolView(functionResponse)) {
             <app-file-edit [functionResponse]="functionResponse" [functionCall]="findFunctionCall(functionResponse)"></app-file-edit>
@@ -199,7 +201,12 @@
     }
     @if (uiEvent.functionCalls && uiEvent.functionCalls.length > 0) {
       @for (functionCall of uiEvent.functionCalls; track functionCall.id) {
-        @if (functionCall.needsResponse && !hasFunctionResponse(functionCall.id)) {
+        @if (functionCall.needsResponse && !hasFunctionResponse(functionCall.id) && isConfirmationRequest(functionCall)) {
+          <app-tool-confirmation
+            [functionCall]="functionCall"
+            (responseComplete)="longRunningResponseComplete.emit($event)"
+          ></app-tool-confirmation>
+        } @else if (functionCall.needsResponse && !hasFunctionResponse(functionCall.id)) {
           <app-long-running-response
             [functionCall]="functionCall"
             [appName]="appName"

@@ -32,6 +32,7 @@ import type { EvalCase } from '../../core/models/Eval';
 import { getFileRead, getFileToolError, isFileEditCall } from '../../core/models/FileEdit';
 import { isShellCommandCall, isShellCommandResponse } from '../../core/models/ShellCommand';
 import { isSkillToolResponse } from '../../core/models/SkillTool';
+import { getConfirmationRequest, getConfirmationStatus } from '../../core/models/ToolConfirmation';
 import { getGroundingSummary, getWebPageResult } from '../../core/models/WebTool';
 import { UiEvent } from '../../core/models/UiEvent';
 import { WorkflowGraphTooltipDirective } from '../../directives/workflow-graph-tooltip.directive';
@@ -46,6 +47,7 @@ import { FileEditComponent } from '../file-edit/file-edit.component';
 import { GroundingSourcesComponent } from '../grounding-sources/grounding-sources.component';
 import { ShellCommandComponent } from '../shell-command/shell-command.component';
 import { SkillToolComponent } from '../skill-tool/skill-tool.component';
+import { ToolConfirmationComponent } from '../tool-confirmation/tool-confirmation.component';
 import { WebPageComponent } from '../web-page/web-page.component';
 import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff-dialog/system-instruction-diff-dialog.component';
 
@@ -72,6 +74,7 @@ import { SystemInstructionDiffDialogComponent } from '../system-instruction-diff
     JsonTooltipDirective,
     ShellCommandComponent,
     SkillToolComponent,
+    ToolConfirmationComponent,
     WebPageComponent,
   ],
 })
@@ -211,6 +214,19 @@ export class EventContentComponent {
 
   isSkillToolResponse(functionResponse: FunctionResponse): boolean {
     return isSkillToolResponse(functionResponse);
+  }
+
+  /** Whether a call asks the user to approve another tool call. */
+  isConfirmationRequest(functionCall: FunctionCall): boolean {
+    return getConfirmationRequest(functionCall) !== null;
+  }
+
+  /**
+   * Whether a response reports an approval status: the user's answer, or a
+   * tool's placeholder while its call waited for approval.
+   */
+  hasConfirmationStatus(functionResponse: FunctionResponse): boolean {
+    return getConfirmationStatus(functionResponse) !== null;
   }
 
   isWebPageResponse(functionResponse: FunctionResponse): boolean {

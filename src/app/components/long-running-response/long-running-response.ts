@@ -38,7 +38,7 @@ import {isImeComposing} from '../../utils/keyboard-event.utils';
     MatIconButton,
     MatButton,
     MatIcon,
-    CommonModule,
+    MarkdownComponent,
   ],
 })
 export class LongRunningResponseComponent implements OnChanges {

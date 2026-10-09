@@ -30,6 +30,7 @@ import {InfoTable} from '../info-table/info-table';
 
 import {Event, Part} from '../../core/models/types';
 import {UI_STATE_SERVICE} from '../../core/services/interfaces/ui-state';
+import {FEATURE_FLAG_SERVICE} from '../../core/services/interfaces/feature-flag';
 import {SidePanelMessagesInjectionToken} from '../side-panel/side-panel.component.i18n';
 import {Span} from '../../core/models/Trace';
 import {TRACE_SERVICE} from '../../core/services/interfaces/trace';
@@ -161,12 +162,16 @@ export class EventTabComponent {
   protected readonly uiStateService = inject(UI_STATE_SERVICE);
   protected readonly traceService = inject(TRACE_SERVICE);
   private readonly storageService = inject(STORAGE_SERVICE);
+  private readonly featureFlagService = inject(FEATURE_FLAG_SERVICE);
   readonly i18n = inject(SidePanelMessagesInjectionToken);
 
   readonly isEventRequestResponseLoadingSignal = toSignal(
       this.uiStateService.isEventRequestResponseLoading(), {initialValue: false});
+  readonly isTraceEnabled = toSignal(this.featureFlagService.isTraceEnabled());
 
+  // Each span links to the trace view, so none are listed while traces are disabled.
   readonly associatedSpans = computed(() => {
+    if (!this.isTraceEnabled()) return [];
     const ev = this.selectedEvent();
     if (!ev || !ev.id) return [];
 

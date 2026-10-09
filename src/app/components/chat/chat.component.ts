@@ -377,6 +377,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly showBranches = signal(false);
   protected readonly expectedUiEvents = signal<UiEvent[]>([]);
   protected readonly viewMode = signal<'events' | 'traces'>((this.storageService.getItem('chat-view-mode') as 'events' | 'traces') || 'events');
+  /** The view shown; a stored `traces` choice is ignored while traces are disabled. */
+  protected readonly effectiveViewMode = computed(() => this.isTraceEnabled() ? this.viewMode() : 'events');
   protected readonly invocationIdFilterActive = signal<boolean>(false);
   protected readonly nodePathFilterActive = signal<boolean>(false);
   protected readonly invocationIdFilter = signal<string>('');
@@ -836,6 +838,8 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.featureFlagService.isNewSessionButtonEnabled();
   readonly isEventFilteringEnabled =
     toSignal(this.featureFlagService.isEventFilteringEnabled());
+  readonly isTraceEnabled =
+    toSignal(this.featureFlagService.isTraceEnabled());
   readonly isApplicationSelectorEnabled =
     toSignal(this.featureFlagService.isApplicationSelectorEnabled());
   readonly isDeleteSessionEnabledObs: Observable<boolean> =
@@ -1020,6 +1024,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   switchToTraceView() {
+    if (!this.isTraceEnabled()) return;
     this.onViewModeChange('traces');
   }
 

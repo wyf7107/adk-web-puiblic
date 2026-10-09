@@ -123,8 +123,8 @@ We welcome contributions from the community! Whether it's bug reports, feature r
 
 ### Testing quirks
 
-To maintain compatibility with upstream 1p code, testing code in this repo must
-follow a few rules:
+The tests in this repo also run in Google's internal test environment, so
+testing code must follow a few rules:
 
 - `initTestBed()` from `./src/app/testing/utils.ts` must be called before `TestBed.configureTestingModule()`
 

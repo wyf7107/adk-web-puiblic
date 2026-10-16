@@ -168,3 +168,77 @@
   color: var(--mat-sys-on-surface-variant);
   font-weight: 400;
 }
+
+// --- Pill appearance (Operate pages' toolbar) ----------------------------
+
+.source-picker.pill {
+  align-items: center;
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 7%, transparent);
+  border: none;
+  border-radius: 18px;
+  box-sizing: border-box;
+  color: var(--mat-sys-on-surface);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
+  font-size: 14px;
+  gap: 8px;
+  height: 36px;
+  max-width: 420px;
+  min-width: 0;
+  padding: 0 8px 0 14px;
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 11%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
+
+  mat-icon {
+    color: var(--mat-sys-on-surface-variant);
+    flex: none;
+  }
+
+  .pill-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+
+  .pill-arrow {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+
+  .pill-name {
+    flex: none;
+    white-space: nowrap;
+
+    &.placeholder {
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  .pill-meta {
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 12px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.sr-only {
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

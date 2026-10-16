@@ -68,11 +68,11 @@ export const NAV_SECTIONS: readonly NavSection[] = [
     items: [
       {
         label: 'Sessions',
-        icon: 'question_answer',
+        icon: 'chat_bubble',
         view: 'sessions',
         cloud: true,
       },
-      {label: 'Logs', icon: 'receipt_long', view: 'logs', cloud: true},
+      {label: 'Logs', icon: 'article', view: 'logs', cloud: true},
       {label: 'Monitoring', icon: 'monitoring', view: 'monitoring', cloud: true},
     ],
   },

@@ -15,21 +15,53 @@
  */
 
 :host {
+  // Series colors: a blue, a quiet grey and full ink for latency and resource
+  // lines; green, amber and red for HTTP classes.
+  --chart-primary: #4c8df6;
+  --chart-secondary: #9aa0a6;
+  --chart-tertiary: var(--mat-sys-on-surface);
+  --chart-success: #1ea446;
+  --chart-warning: #f2a60c;
+  --chart-error: #ec4f43;
+  --chart-neutral: #9aa0a6;
+
   display: block;
   min-width: 0;
+  font-family: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
+}
+
+:host-context(html.light-theme) {
+  --chart-primary: #1a73e8;
+  --chart-secondary: #80868b;
+  --chart-success: #188038;
+  --chart-warning: #e37400;
+  --chart-error: #d93025;
+  --chart-neutral: #80868b;
 }
 
 .chart-head {
-  align-items: center;
+  align-items: flex-start;
   display: flex;
   gap: 12px;
   justify-content: space-between;
   margin-bottom: 8px;
 }
 
+.chart-heading {
+  display: flex;
+  flex-direction: column;
+}
+
 .chart-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
+  line-height: 22px;
+}
+
+.chart-unit {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 12px;
+  line-height: 16px;
 }
 
 .legend {
@@ -47,7 +79,7 @@
 }
 
 .swatch {
-  border-radius: 2px;
+  border-radius: 3px;
   display: inline-block;
   flex: none;
   height: 10px;
@@ -64,19 +96,19 @@ svg {
 }
 
 .grid {
-  stroke: var(--mat-sys-outline-variant);
+  stroke: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
   stroke-width: 1;
 }
 
 .axis {
   fill: var(--mat-sys-on-surface-variant);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .line {
   fill: none;
   stroke-linejoin: round;
-  stroke-width: 2;
+  stroke-width: 1.5;
 }
 
 .guide {

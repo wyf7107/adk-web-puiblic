@@ -1,0 +1,656 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Shared styling for the Ship and Operate pages (Deployments, Sessions, Logs,
+ * Monitoring): a centered column under a large title, flat tables separated by
+ * hairlines, pill-shaped controls, and small tinted status badges.
+ *
+ * Every role is derived from the app theme (`--mat-sys-*`, `--adk-*`), so the
+ * pages follow the light and dark themes. Tints are mixed from on-surface so
+ * they read the same on either background.
+ */
+
+@mixin host {
+  --ops-ink: var(--mat-sys-on-surface);
+  --ops-ink-muted: var(--mat-sys-on-surface-variant);
+  --ops-accent-ink: var(--mat-sys-primary);
+  --ops-bg: var(--mat-sys-surface);
+  --ops-surface: var(--mat-sys-surface-container-low);
+  --ops-fill: color-mix(in srgb, var(--mat-sys-on-surface) 7%, transparent);
+  --ops-fill-hover: color-mix(in srgb, var(--mat-sys-on-surface) 11%, transparent);
+  --ops-fill-selected: color-mix(in srgb, var(--mat-sys-on-surface) 16%, transparent);
+  --ops-hairline: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
+  --ops-state-hover: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
+  --ops-font: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
+  --ops-mono: 'Google Sans Mono', 'Roboto Mono', monospace;
+
+  display: block;
+  position: relative;
+  background: var(--ops-bg);
+  color: var(--ops-ink);
+  font-family: var(--ops-font);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+// ---------------------------------------------------------------------------
+// Page frame
+
+.ops-progress {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  height: 2px;
+}
+
+.ops-page {
+  box-sizing: border-box;
+  max-width: 1168px;
+  margin: 0 auto;
+  padding: 32px 40px 56px;
+}
+
+.ops-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ops-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ops-title {
+  margin: 0;
+  font-family: var(--ops-font);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 400;
+  color: var(--ops-ink);
+}
+
+.ops-context {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--ops-ink-muted);
+  font-size: 14px;
+
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+  }
+}
+
+.ops-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  min-height: 36px;
+}
+
+.ops-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ops-ink-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+// ---------------------------------------------------------------------------
+// Buttons
+
+.ops-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ops-ink-muted);
+  cursor: pointer;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--ops-state-hover);
+    color: var(--ops-ink);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+    cursor: default;
+  }
+
+  &.small {
+    width: 28px;
+    height: 28px;
+
+    mat-icon {
+      width: 16px;
+      height: 16px;
+      font-size: 16px;
+    }
+  }
+}
+
+.ops-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: none;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 18px;
+  font-family: var(--ops-font);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.38;
+    cursor: default;
+  }
+
+  // The page's primary action.
+  &.filled {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 20px;
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--mat-sys-primary-container) 88%, var(--mat-sys-on-primary-container));
+    }
+  }
+
+  // A row or secondary action.
+  &.tonal {
+    background: var(--ops-fill);
+    color: var(--ops-ink);
+
+    &:hover:not(:disabled) {
+      background: var(--ops-fill-hover);
+    }
+  }
+
+  // Text that acts: full ink, muted until hovered when quiet.
+  &.text {
+    padding: 0 8px;
+    background: transparent;
+    color: var(--ops-ink);
+
+    &:hover:not(:disabled) {
+      background: var(--ops-state-hover);
+    }
+  }
+}
+
+.ops-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ops-accent-ink);
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Toolbar controls
+
+.ops-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 28px 0 16px;
+}
+
+.ops-toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.ops-toolbar-note {
+  margin-left: auto;
+  color: var(--ops-ink-muted);
+  font-size: 12px;
+}
+
+.ops-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 18px;
+  background: var(--ops-fill);
+  color: var(--ops-ink);
+  font-family: var(--ops-font);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  > mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--ops-ink-muted);
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--ops-fill-hover);
+  }
+}
+
+.ops-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 2px;
+  border-radius: 18px;
+  background: var(--ops-fill);
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 16px;
+    background: transparent;
+    color: var(--ops-ink);
+    font-family: var(--ops-font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover:not(.selected) {
+      background: var(--ops-state-hover);
+    }
+
+    &.selected {
+      background: var(--ops-fill-selected);
+    }
+  }
+}
+
+.ops-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 36px;
+  min-width: 240px;
+  padding: 0 14px;
+  border-radius: 18px;
+  background: var(--ops-fill);
+  color: var(--ops-ink-muted);
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--ops-ink);
+    font-family: var(--ops-font);
+    font-size: 14px;
+
+    &::placeholder {
+      color: var(--ops-ink-muted);
+    }
+  }
+
+  &:focus-within {
+    box-shadow: inset 0 0 0 1px var(--ops-accent-ink);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sections and tables
+
+.ops-section {
+  margin-top: 40px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.ops-section-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ops-ink);
+  font-family: var(--ops-font);
+  text-align: left;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 400;
+  }
+
+  .ops-count {
+    color: var(--ops-ink-muted);
+    font-size: 14px;
+  }
+
+  .ops-chevron {
+    align-self: center;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    color: var(--ops-ink-muted);
+  }
+
+  .ops-note {
+    margin-left: auto;
+    color: var(--ops-ink-muted);
+    font-size: 12px;
+  }
+}
+
+button.ops-section-heading {
+  cursor: pointer;
+
+  &:hover h2,
+  &:hover .ops-chevron {
+    color: var(--ops-ink);
+  }
+}
+
+// A flat table: a header row in muted ink, then rows separated by hairlines.
+// Each page sets `grid-template-columns` on its rows.
+.ops-table {
+  width: 100%;
+}
+
+.ops-row {
+  display: grid;
+  align-items: center;
+  column-gap: 16px;
+  box-sizing: border-box;
+  min-height: 56px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ops-hairline);
+
+  > * {
+    min-width: 0;
+  }
+
+  &.head {
+    min-height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+    color: var(--ops-ink-muted);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  &.clickable {
+    cursor: pointer;
+
+    &:hover .ops-row-chevron {
+      color: var(--ops-ink);
+    }
+  }
+}
+
+.ops-row-chevron {
+  justify-self: end;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: var(--ops-ink-muted);
+}
+
+.ops-primary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ops-ink);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.ops-secondary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ops-ink-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.ops-mono {
+  font-family: var(--ops-mono);
+}
+
+.ops-muted {
+  color: var(--ops-ink-muted);
+}
+
+.ops-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ops-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+// ---------------------------------------------------------------------------
+// Status badges: a small tinted pill. Color only carries status.
+
+.ops-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+  background: var(--ops-fill);
+  color: var(--ops-ink-muted);
+
+  mat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+  }
+
+  &.positive {
+    background: var(--adk-success-container);
+    color: var(--adk-on-success-container);
+  }
+
+  &.error {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+
+  &.warning {
+    background: var(--adk-warning-container);
+    color: var(--adk-on-warning-container);
+  }
+
+  &.info {
+    background: color-mix(in srgb, var(--mat-sys-primary) 16%, transparent);
+    color: var(--mat-sys-primary);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Cards, banners and empty states
+
+.ops-card {
+  box-sizing: border-box;
+  border: 1px solid var(--ops-hairline);
+  border-radius: 24px;
+  background: var(--ops-surface);
+  padding: 20px 24px;
+}
+
+.ops-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--ops-fill);
+  color: var(--ops-ink);
+
+  > mat-icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+  }
+
+  &.error {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+}
+
+.ops-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 32px 16px;
+  color: var(--ops-ink-muted);
+
+  h3 {
+    margin: 0;
+    color: var(--ops-ink);
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+    max-width: 640px;
+  }
+
+  .ops-empty-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+}
+
+.ops-spin {
+  animation: ops-spin 1s linear infinite;
+}
+
+@keyframes ops-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ops-skeleton {
+  display: block;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--ops-fill);
+  animation: ops-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes ops-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ops-spin,
+  .ops-skeleton {
+    animation: none;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

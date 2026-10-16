@@ -14,160 +14,161 @@
  limitations under the License.
 -->
 
-<header class="page-header">
-  <div class="page-title">
-    <h2>Monitoring</h2>
-    <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
-  </div>
-
-  @if (checking()) {
-    <span class="connection-chip connection-chip-muted">
-      <mat-icon fontSet="material-symbols-outlined" class="spin chip-spinner">progress_activity</mat-icon>
-      Checking connection&hellip;
-    </span>
-  } @else if (connected()) {
-    <button type="button" class="connection-chip" (click)="connect()" matTooltip="Change connection">
-      <span class="dot dot-success"></span>
-      <span>Google Cloud</span>
-      <span class="chip-sep">&middot;</span>
-      <span class="mono">{{ status()?.project }}</span>
-      <mat-icon fontSet="material-symbols-outlined" class="chip-edit">edit</mat-icon>
-    </button>
-  } @else {
-    <span class="connection-chip connection-chip-muted">
-      <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
-      Not connected
-    </span>
-  }
-
-  @if (selectedSourceId()) {
-    <div class="page-refresh">
-      <span>{{ updatedText() }}</span>
-      <button mat-icon-button (click)="refresh()" [disabled]="loading()" matTooltip="Refresh" aria-label="Refresh">
-        <mat-icon>refresh</mat-icon>
-      </button>
-    </div>
-  }
-</header>
-
 @if (loading() || (connected() && appName() && sources() === null)) {
-  <mat-progress-bar mode="indeterminate" class="header-progress"></mat-progress-bar>
-} @else {
-  <div class="header-divider"></div>
+  <mat-progress-bar mode="indeterminate" class="ops-progress header-progress"></mat-progress-bar>
 }
 
-<div class="page-content">
-  @if (checking()) {
-    <div class="inline-loading">
-      <mat-spinner diameter="16"></mat-spinner>
-      <span>Checking the cloud connection&hellip;</span>
-    </div>
-  } @else if (!connected()) {
-    <section class="not-connected">
-      <div class="tile-icon">
-        <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+<div class="ops-page">
+  <header class="ops-header page-header">
+    <div class="ops-title-block">
+      <h1 class="ops-title">Monitoring</h1>
+      <div class="ops-context">
+        <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+        <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
+        @if (checking()) {
+          <span class="connection-chip">
+            &middot;
+            <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
+            Checking connection&hellip;
+          </span>
+        } @else if (connected()) {
+          <span class="connection-chip">&middot; {{ status()?.project }}</span>
+          <button type="button" class="ops-link" (click)="connect()">Change project or region</button>
+        } @else {
+          <span class="connection-chip">&middot; Not connected</span>
+        }
       </div>
-      <h3>Connect to Google Cloud to monitor your agent</h3>
-      <p>
-        See how your deployed agent is doing: requests, errors, latency and the resources it uses,
-        read from Cloud Monitoring. Credentials stay on your local adk web server; the browser
-        never sees them.
-      </p>
-      @if (statusFailed()) {
-        <p class="muted">Cloud connections are only available on a local <code>adk web</code> server.</p>
+    </div>
+
+    <div class="ops-header-actions">
+      @if (selectedSourceId()) {
+        <span class="ops-updated page-refresh">
+          {{ updatedText() }}
+          <button type="button" class="ops-icon-button" (click)="refresh()" [disabled]="loading()"
+            matTooltip="Refresh" aria-label="Refresh">
+            <mat-icon fontSet="material-symbols-outlined">refresh</mat-icon>
+          </button>
+        </span>
+        @if (selectedSource()?.consoleUrl) {
+          <button type="button" class="ops-button text console-link" (click)="openConsole()">
+            Open in Cloud console
+            <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+          </button>
+        }
       }
-      <div class="actions">
-        <button mat-flat-button (click)="connect()">Connect to Google Cloud</button>
-        <button mat-button (click)="backToPlayground.emit()">Back to Playground</button>
+    </div>
+  </header>
+
+  <div class="page-content">
+    @if (checking()) {
+      <div class="inline-loading">
+        <mat-spinner diameter="16"></mat-spinner>
+        <span>Checking the cloud connection&hellip;</span>
       </div>
-    </section>
-  } @else if (!appName()) {
-    <div class="select-app-prompt">
-      <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-      <span>Select an agent in the toolbar to monitor it.</span>
-    </div>
-  } @else if (sources() === null) {
-    <div class="inline-loading">
-      <mat-spinner diameter="16"></mat-spinner>
-      <span>Looking for deployments in {{ status()?.project }}&hellip;</span>
-    </div>
-  } @else if (sourcesError()) {
-    <div class="banner banner-neutral">
-      <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
-      <span class="banner-text">{{ sourcesError() }}</span>
-      <button mat-button (click)="refresh()">Retry</button>
-    </div>
-  } @else {
-    @if (sources()?.length) {
-      <app-deployment-picker label="Showing metrics for" [deployments]="sources() ?? []"
-        [selectedId]="selectedSourceId()" (selectedChange)="selectSource($event)"></app-deployment-picker>
-    }
-    @if (!selectedSourceId()) {
-      <div class="empty-card no-deployment">
-        <div class="empty-title">{{ appName() }} isn't deployed in this project yet</div>
+    } @else if (!connected()) {
+      <section class="ops-empty not-connected">
+        <mat-icon fontSet="material-symbols-outlined" class="empty-icon">cloud_off</mat-icon>
+        <h3>Connect to Google Cloud to monitor your agent</h3>
         <p>
-          Metrics are read for this agent's Agent Runtime or Cloud Run deployments. We looked in
-          <strong>{{ status()?.project }} &middot; {{ status()?.region }}</strong> and found none.
-          @if (sources()?.length) { You can still choose another deployment in the project above. }
+          See how your deployed agent is doing: requests, errors, latency and the resources it uses,
+          read from Cloud Monitoring. Credentials stay on your local adk web server; the browser
+          never sees them.
         </p>
-        <div class="actions">
-          <button mat-flat-button (click)="goToDeployments.emit()">Go to Deployments</button>
+        @if (statusFailed()) {
+          <p>Cloud connections are only available on a local <code>adk web</code> server.</p>
+        }
+        <div class="ops-empty-actions actions">
+          <button type="button" class="ops-button filled" (click)="connect()">Connect to Google Cloud</button>
+          <button type="button" class="ops-button text" (click)="backToPlayground.emit()">Back to Playground</button>
         </div>
+      </section>
+    } @else if (!appName()) {
+      <div class="ops-empty select-app-prompt">
+        <mat-icon fontSet="material-symbols-outlined" class="empty-icon">robot_2</mat-icon>
+        <span>Select an agent in the toolbar to monitor it.</span>
+      </div>
+    } @else if (sources() === null) {
+      <div class="inline-loading">
+        <mat-spinner diameter="16"></mat-spinner>
+        <span>Looking for deployments in {{ status()?.project }}&hellip;</span>
+      </div>
+    } @else if (sourcesError()) {
+      <div class="ops-banner">
+        <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+        <span class="banner-text">{{ sourcesError() }}</span>
+        <button type="button" class="ops-button text banner-action" (click)="refresh()">Retry</button>
       </div>
     } @else {
-      <div class="toolbar">
-        <div class="segmented" role="radiogroup" aria-label="Time range">
-          @for (option of ranges; track option.id) {
-            <button type="button" role="radio" class="segment" [class.active]="range() === option.id"
-              [attr.aria-checked]="range() === option.id" (click)="setRange(option.id)">{{ option.label }}</button>
-          }
-        </div>
-        <span class="toolbar-spacer"></span>
-        @if (selectedSource()?.consoleUrl) {
-          <button mat-button (click)="openConsole()">
-            <mat-icon>open_in_new</mat-icon>
-            Open in Cloud console
-          </button>
+      <div class="ops-toolbar">
+        @if (sources()?.length) {
+          <app-deployment-picker appearance="pill" label="Showing metrics for" [deployments]="sources() ?? []"
+            [selectedId]="selectedSourceId()" (selectedChange)="selectSource($event)"></app-deployment-picker>
+        }
+        @if (selectedSourceId()) {
+          <div class="ops-segmented segmented" role="radiogroup" aria-label="Time range">
+            @for (option of ranges; track option.id) {
+              <button type="button" role="radio" class="segment" [class.selected]="range() === option.id"
+                [class.active]="range() === option.id" [attr.aria-checked]="range() === option.id"
+                (click)="setRange(option.id)">{{ option.label }}</button>
+            }
+          </div>
         }
       </div>
 
-      @if (error()) {
-        <div class="banner banner-neutral metrics-error">
-          <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
-          <span class="banner-text">{{ error() }}</span>
-          <button mat-button (click)="refresh()">Retry</button>
+      @if (!selectedSourceId()) {
+        <div class="ops-empty no-deployment">
+          <h3>{{ appName() }} isn't deployed in this project yet</h3>
+          <p>
+            Metrics are read for this agent's Agent Runtime or Cloud Run deployments. We looked in
+            <strong>{{ status()?.project }} &middot; {{ status()?.region }}</strong> and found none.
+            @if (sources()?.length) { You can still choose another deployment in the project above. }
+          </p>
+          <div class="ops-empty-actions actions">
+            <button type="button" class="ops-button filled" (click)="goToDeployments.emit()">Go to Deployments</button>
+          </div>
         </div>
-      }
+      } @else {
+        @if (error()) {
+          <div class="ops-banner metrics-error">
+            <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            <span class="banner-text">{{ error() }}</span>
+            <button type="button" class="ops-button text banner-action" (click)="refresh()">Retry</button>
+          </div>
+        }
 
-      @if (metrics(); as m) {
-        <div class="summaries">
-          @for (summary of m.summaries; track summary.id) {
-            <div class="summary summary-{{ summary.id }}"
-              [class.summary-bad]="summary.id === 'errors' && (summary.value ?? 0) > 0">
-              <span class="summary-label">{{ summary.label }}</span>
-              <span class="summary-value">{{ formatSummary(summary) }}</span>
-              <span class="summary-detail">{{ summary.detail || 'last ' + rangeLabel() }}</span>
-            </div>
-          }
-        </div>
-        <div class="charts">
-          @for (chart of m.charts; track chart.id) {
-            <app-metric-chart class="chart-card chart-{{ chart.id }}" [chart]="chart"
-              [bucketSeconds]="m.bucketSeconds"></app-metric-chart>
-          }
-        </div>
-      } @else if (loading()) {
-        <div class="summaries" aria-hidden="true">
-          @for (i of [0, 1, 2, 3]; track i) {
-            <div class="summary"><span class="skeleton-line" style="width: 60%"></span><span class="skeleton-line tall" style="width: 40%"></span></div>
-          }
-        </div>
-        <div class="charts" aria-hidden="true">
-          @for (i of [0, 1, 2, 3]; track i) {
-            <div class="chart-card skeleton-chart"></div>
-          }
-        </div>
+        @if (metrics(); as m) {
+          <div class="summaries">
+            @for (summary of m.summaries; track summary.id) {
+              <div class="ops-card summary summary-{{ summary.id }}"
+                [class.summary-bad]="summary.id === 'errors' && (summary.value ?? 0) > 0">
+                <span class="summary-label">{{ summary.label }}</span>
+                <span class="summary-value">{{ formatSummary(summary) }}</span>
+                <span class="summary-detail">{{ summary.detail || 'last ' + rangeLabel() }}</span>
+              </div>
+            }
+          </div>
+          <div class="charts">
+            @for (chart of m.charts; track chart.id) {
+              <app-metric-chart class="ops-card chart-card chart-{{ chart.id }}" [chart]="chart"
+                [bucketSeconds]="m.bucketSeconds"></app-metric-chart>
+            }
+          </div>
+        } @else if (loading()) {
+          <div class="summaries" aria-hidden="true">
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div class="ops-card summary">
+                <span class="ops-skeleton" style="width: 60%"></span>
+                <span class="ops-skeleton tall" style="width: 40%"></span>
+              </div>
+            }
+          </div>
+          <div class="charts" aria-hidden="true">
+            @for (i of [0, 1, 2, 3]; track i) {
+              <div class="ops-card chart-card skeleton-chart"></div>
+            }
+          </div>
+        }
       }
     }
-  }
+  </div>
 </div>

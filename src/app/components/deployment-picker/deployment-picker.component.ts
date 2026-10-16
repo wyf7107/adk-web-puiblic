@@ -79,6 +79,12 @@ export class DeploymentPickerComponent {
   readonly optionNote = input<(deployment: Deployment) => string>(() => '');
   /** Shows "N deployments available"; off where space is short. */
   readonly showCount = input(true);
+  /**
+   * `card` labels the picker and shows the selection as a card; `pill` is the
+   * compact toolbar control of the Operate pages, where the label is only read
+   * by screen readers and the count moves into the menu.
+   */
+  readonly appearance = input<'card'|'pill'>('card');
   readonly selectedChange = output<Deployment>();
 
   readonly mine = computed(() => this.deployments().filter((d) => d.matchesApp));

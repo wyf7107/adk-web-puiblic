@@ -17,61 +17,60 @@
 <nav class="left-nav" aria-label="Sections">
   <div class="nav-sections">
     @for (section of sections; track section.title) {
-      <div class="nav-section-title">{{ section.title }}</div>
-      @for (item of section.items; track item.label) {
-        @if (item.view) {
-          <button
-            type="button"
-            class="nav-item"
-            [class.active]="item.view === activeView()"
-            [attr.aria-current]="item.view === activeView() ? 'page' : null"
-            (click)="select(item)">
-            <mat-icon fontSet="material-symbols-outlined" class="nav-item-icon">{{ item.icon }}</mat-icon>
-            <span class="nav-item-label">{{ item.label }}</span>
-            @if (item.cloud && disconnected()) {
-              <mat-icon fontSet="material-symbols-outlined" class="nav-item-cloud"
-                title="Needs Google Cloud" aria-label="Needs Google Cloud">cloud</mat-icon>
-            }
-          </button>
-        } @else {
-          <div class="nav-item nav-item-soon" aria-disabled="true">
-            <mat-icon fontSet="material-symbols-outlined" class="nav-item-icon">{{ item.icon }}</mat-icon>
-            <span class="nav-item-label">{{ item.label }}</span>
-            <span class="nav-item-soon-label">Soon</span>
-          </div>
+      <div class="nav-group" role="group" [attr.aria-label]="section.title">
+        @for (item of section.items; track item.label) {
+          @if (item.view) {
+            <button
+              type="button"
+              class="nav-item"
+              [class.active]="item.view === activeView()"
+              [attr.aria-current]="item.view === activeView() ? 'page' : null"
+              [title]="item.cloud && disconnected() ? item.label + ' (needs Google Cloud)' : item.label"
+              (click)="select(item)">
+              <span class="nav-item-indicator">
+                <mat-icon fontSet="material-symbols-outlined" class="nav-item-icon">{{ item.icon }}</mat-icon>
+                @if (item.cloud && disconnected()) {
+                  <mat-icon fontSet="material-symbols-outlined" class="nav-item-cloud"
+                    aria-label="Needs Google Cloud">cloud_off</mat-icon>
+                }
+              </span>
+              <span class="nav-item-label">{{ item.label }}</span>
+            </button>
+          } @else {
+            <div class="nav-item nav-item-soon" aria-disabled="true" [title]="item.label + ' (coming soon)'">
+              <span class="nav-item-indicator">
+                <mat-icon fontSet="material-symbols-outlined" class="nav-item-icon">{{ item.icon }}</mat-icon>
+              </span>
+              <span class="nav-item-label">{{ item.label }}</span>
+              <span class="sr-only">Soon</span>
+            </div>
+          }
         }
-      }
+      </div>
     }
   </div>
 
   <div class="nav-footer">
     @if (checking()) {
-      <div class="nav-cloud-checking">
+      <div class="nav-cloud nav-cloud-checking" title="Checking the cloud connection">
         <mat-icon fontSet="material-symbols-outlined" class="nav-spin">progress_activity</mat-icon>
-        <span>Checking connection&hellip;</span>
+        <span class="sr-only">Checking connection&hellip;</span>
       </div>
     } @else if (cloudStatus()?.connected) {
-      <button type="button" class="nav-cloud-connected" (click)="manageCloud.emit()"
-        title="Change the cloud connection">
+      <button type="button" class="nav-cloud nav-cloud-connected" (click)="manageCloud.emit()"
+        [title]="'Google Cloud · ' + cloudStatus()?.project + ' · ' + cloudStatus()?.region + '. Change the cloud connection'">
+        <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
         <span class="nav-cloud-dot"></span>
-        <span class="nav-cloud-text">
-          <span class="nav-cloud-provider">Google Cloud</span>
-          <span class="nav-cloud-project">{{ cloudStatus()?.project }}</span>
-          <span class="nav-cloud-region">{{ cloudStatus()?.region }}</span>
+        <span class="sr-only">
+          Google Cloud {{ cloudStatus()?.project }} {{ cloudStatus()?.region }}. Change the cloud connection
         </span>
-        <mat-icon fontSet="material-symbols-outlined" class="nav-cloud-settings">settings</mat-icon>
       </button>
     } @else {
-      <div class="nav-cloud-disconnected">
-        <div class="nav-cloud-state">
-          <span class="nav-cloud-ring"></span>
-          <span>Not connected</span>
-        </div>
-        <button type="button" class="nav-cloud-connect" (click)="manageCloud.emit()">
-          <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
-          Connect to cloud
-        </button>
-      </div>
+      <button type="button" class="nav-cloud nav-cloud-connect" (click)="manageCloud.emit()"
+        title="Not connected. Connect to cloud">
+        <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+        <span class="sr-only">Not connected. Connect to cloud</span>
+      </button>
     }
   </div>
 </nav>

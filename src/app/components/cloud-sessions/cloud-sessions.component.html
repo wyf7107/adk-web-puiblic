@@ -14,163 +14,159 @@
  limitations under the License.
 -->
 
-<header class="page-header">
-  <div class="page-title">
-    <h2>Sessions</h2>
-    <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
-  </div>
-
-  @if (checking()) {
-    <span class="connection-chip connection-chip-muted">
-      <mat-icon fontSet="material-symbols-outlined" class="spin chip-spinner">progress_activity</mat-icon>
-      Checking connection&hellip;
-    </span>
-  } @else if (connected()) {
-    <button type="button" class="connection-chip" (click)="connect()" matTooltip="Change connection">
-      <span class="dot dot-success"></span>
-      <span>Google Cloud</span>
-      <span class="chip-sep">&middot;</span>
-      <span class="mono">{{ status()?.project }}</span>
-      <mat-icon fontSet="material-symbols-outlined" class="chip-edit">edit</mat-icon>
-    </button>
-  } @else {
-    <span class="connection-chip connection-chip-muted">
-      <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
-      Not connected
-    </span>
-  }
-
-  @if (selectedSourceId()) {
-    <div class="page-refresh">
-      <span>{{ updatedText() }}</span>
-      <button mat-icon-button (click)="refresh()" [disabled]="loadingSessions()" matTooltip="Refresh" aria-label="Refresh">
-        <mat-icon>refresh</mat-icon>
-      </button>
-    </div>
-  }
-</header>
-
 @if (loadingSessions() || (connected() && appName() && sources() === null)) {
-  <mat-progress-bar mode="indeterminate" class="header-progress"></mat-progress-bar>
-} @else {
-  <div class="header-divider"></div>
+  <mat-progress-bar mode="indeterminate" class="ops-progress header-progress"></mat-progress-bar>
 }
 
-<div class="page-content">
-  @if (checking()) {
-    <div class="inline-loading">
-      <mat-spinner diameter="16"></mat-spinner>
-      <span>Checking the cloud connection&hellip;</span>
-    </div>
-  } @else if (!connected()) {
-    <section class="not-connected">
-      <div class="tile-icon">
-        <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+<div class="ops-page">
+  <header class="ops-header page-header">
+    <div class="ops-title-block">
+      <h1 class="ops-title">Sessions</h1>
+      <div class="ops-context">
+        <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+        <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
+        @if (checking()) {
+          <span class="connection-chip">
+            &middot;
+            <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
+            Checking connection&hellip;
+          </span>
+        } @else if (connected()) {
+          <span class="connection-chip">&middot; {{ status()?.project }}</span>
+          <button type="button" class="ops-link" (click)="connect()">Change project or region</button>
+        } @else {
+          <span class="connection-chip">&middot; Not connected</span>
+        }
       </div>
-      <h3>Connect to Google Cloud to see your agent's sessions</h3>
-      <p>
-        Sessions are the conversations your deployed agent has had in production. Choose a project
-        and region to browse them and replay any of them in the Playground.
-        Credentials stay on your local adk web server; the browser never sees them.
-      </p>
-      @if (statusFailed()) {
-        <p class="muted">Cloud connections are only available on a local <code>adk web</code> server.</p>
+    </div>
+
+    <div class="ops-header-actions">
+      @if (selectedSourceId()) {
+        <span class="ops-updated page-refresh">
+          {{ updatedText() }}
+          <button type="button" class="ops-icon-button" (click)="refresh()" [disabled]="loadingSessions()"
+            matTooltip="Refresh" aria-label="Refresh">
+            <mat-icon fontSet="material-symbols-outlined">refresh</mat-icon>
+          </button>
+        </span>
       }
-      <div class="actions">
-        <button mat-flat-button (click)="connect()">Connect to Google Cloud</button>
-        <button mat-button (click)="backToPlayground.emit()">Back to Playground</button>
+    </div>
+  </header>
+
+  <div class="page-content">
+    @if (checking()) {
+      <div class="inline-loading">
+        <mat-spinner diameter="16"></mat-spinner>
+        <span>Checking the cloud connection&hellip;</span>
       </div>
-    </section>
-  } @else if (!appName()) {
-    <div class="select-app-prompt">
-      <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
-      <span>Select an agent in the toolbar to see its sessions.</span>
-    </div>
-  } @else if (sources() === null) {
-    <div class="inline-loading">
-      <mat-spinner diameter="16"></mat-spinner>
-      <span>Looking for deployments in {{ status()?.project }}&hellip;</span>
-    </div>
-  } @else if (sourcesError()) {
-    <div class="banner banner-error">
-      <mat-icon>error</mat-icon>
-      <span class="banner-text">{{ sourcesError() }}</span>
-      <button mat-button (click)="refresh()">Retry</button>
-    </div>
-  } @else {
-    @if (sources()?.length) {
-      <app-deployment-picker label="Reading sessions from" [deployments]="sources() ?? []"
-        [selectedId]="selectedSourceId()" [optionNote]="sourceNote"
-        (selectedChange)="selectSource($event)"></app-deployment-picker>
-    }
-    @if (!selectedSourceId()) {
-      <!-- Nothing of this agent's to read sessions from -->
-      <div class="empty-card no-runtime">
-        <div class="empty-title">{{ appName() }} isn't deployed in this project yet</div>
+    } @else if (!connected()) {
+      <section class="ops-empty not-connected">
+        <mat-icon fontSet="material-symbols-outlined" class="empty-icon">cloud_off</mat-icon>
+        <h3>Connect to Google Cloud to see your agent's sessions</h3>
         <p>
-          Sessions are read from this agent's Agent Runtime or Cloud Run deployments. We looked in
-          <strong>{{ status()?.project }} &middot; {{ status()?.region }}</strong> and found none.
-          @if (sources()?.length) { You can still choose another deployment in the project above. }
+          Sessions are the conversations your deployed agent has had in production. Choose a project
+          and region to browse them and replay any of them in the Playground.
+          Credentials stay on your local adk web server; the browser never sees them.
         </p>
-        <div class="actions">
-          <button mat-flat-button (click)="goToDeployments.emit()">Go to Deployments</button>
+        @if (statusFailed()) {
+          <p>Cloud connections are only available on a local <code>adk web</code> server.</p>
+        }
+        <div class="ops-empty-actions actions">
+          <button type="button" class="ops-button filled" (click)="connect()">Connect to Google Cloud</button>
+          <button type="button" class="ops-button text" (click)="backToPlayground.emit()">Back to Playground</button>
         </div>
+      </section>
+    } @else if (!appName()) {
+      <div class="ops-empty select-app-prompt">
+        <mat-icon fontSet="material-symbols-outlined" class="empty-icon">robot_2</mat-icon>
+        <span>Select an agent in the toolbar to see its sessions.</span>
+      </div>
+    } @else if (sources() === null) {
+      <div class="inline-loading">
+        <mat-spinner diameter="16"></mat-spinner>
+        <span>Looking for deployments in {{ status()?.project }}&hellip;</span>
+      </div>
+    } @else if (sourcesError()) {
+      <div class="ops-banner error">
+        <mat-icon fontSet="material-symbols-outlined">error</mat-icon>
+        <span class="banner-text">{{ sourcesError() }}</span>
+        <button type="button" class="ops-button text banner-action" (click)="refresh()">Retry</button>
       </div>
     } @else {
-      @if (needsUser()) {
-        <div class="cloud-run-note">
-          <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
-          <span>
-            Cloud Run lists sessions one user at a time, through the service's own API. If the
-            service keeps sessions in memory, only the instance that answers is searched, and
-            sessions are lost when it restarts.
-          </span>
-        </div>
-      }
-      <div class="toolbar">
-        <form class="filter" (ngSubmit)="applyFilter()">
-          <mat-icon class="filter-icon">person_search</mat-icon>
-          <input class="filter-input" name="userFilter" [(ngModel)]="userFilter"
-            [placeholder]="needsUser() ? 'Enter a user ID, then press Enter' : 'Filter by user ID'"
-            aria-label="User ID" autocomplete="off" />
-          @if (userFilter) {
-            <button type="button" class="filter-clear" (click)="clearFilter()" aria-label="Clear filter">
-              <mat-icon>close</mat-icon>
-            </button>
+      <div class="ops-toolbar">
+        @if (sources()?.length) {
+          <app-deployment-picker appearance="pill" label="Reading sessions from" [deployments]="sources() ?? []"
+            [selectedId]="selectedSourceId()" [optionNote]="sourceNote"
+            (selectedChange)="selectSource($event)"></app-deployment-picker>
+        }
+        @if (selectedSourceId()) {
+          <form class="ops-search filter" (ngSubmit)="applyFilter()">
+            <mat-icon fontSet="material-symbols-outlined">person_search</mat-icon>
+            <input class="filter-input" name="userFilter" [(ngModel)]="userFilter"
+              [placeholder]="needsUser() ? 'Enter a user ID, then press Enter' : 'Filter by user ID'"
+              aria-label="User ID" autocomplete="off" />
+            @if (userFilter) {
+              <button type="button" class="ops-icon-button small filter-clear" (click)="clearFilter()" aria-label="Clear filter">
+                <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+              </button>
+            }
+          </form>
+          @if (sessions(); as list) {
+            <span class="ops-toolbar-note list-meta">
+              {{ list.sessions.length }} {{ list.sessions.length === 1 ? 'session' : 'sessions' }}
+              @if (appliedFilter()) { for <strong>{{ appliedFilter() }}</strong> }
+              @if (list.truncated) { &middot; Latest {{ list.sessions.length }} shown; filter by user to find older ones }
+            </span>
           }
-        </form>
-        @if (sessions(); as list) {
-          <span class="list-meta">
-            {{ list.sessions.length }} {{ list.sessions.length === 1 ? 'session' : 'sessions' }}
-            @if (appliedFilter()) { for <strong>{{ appliedFilter() }}</strong> }
-            @if (list.truncated) { &middot; latest {{ list.sessions.length }} shown; filter by user to find older ones }
-          </span>
         }
       </div>
 
-      @if (sessionsError()) {
-        <div class="banner banner-error list-error">
-          <mat-icon>error</mat-icon>
-          <span class="banner-text">{{ sessionsError() }}</span>
+      @if (!selectedSourceId()) {
+        <!-- Nothing of this agent's to read sessions from -->
+        <div class="ops-empty no-runtime">
+          <h3>{{ appName() }} isn't deployed in this project yet</h3>
+          <p>
+            Sessions are read from this agent's Agent Runtime or Cloud Run deployments. We looked in
+            <strong>{{ status()?.project }} &middot; {{ status()?.region }}</strong> and found none.
+            @if (sources()?.length) { You can still choose another deployment in the project above. }
+          </p>
+          <div class="ops-empty-actions actions">
+            <button type="button" class="ops-button filled" (click)="goToDeployments.emit()">Go to Deployments</button>
+          </div>
         </div>
-      }
-      @if (openError()) {
-        <div class="banner banner-error open-error">
-          <mat-icon>error</mat-icon>
-          <span class="banner-text">{{ openError() }}</span>
-          <button mat-icon-button (click)="openError.set('')" aria-label="Dismiss">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      }
+      } @else {
+        @if (needsUser()) {
+          <div class="ops-banner cloud-run-note">
+            <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
+            <span class="banner-text">
+              Cloud Run lists sessions one user at a time, through the service's own API. If the
+              service keeps sessions in memory, only the instance that answers is searched, and
+              sessions are lost when it restarts.
+            </span>
+          </div>
+        }
 
-      <div class="content-split">
-        <!-- Sessions table -->
+        @if (sessionsError()) {
+          <div class="ops-banner error list-error">
+            <mat-icon fontSet="material-symbols-outlined">error</mat-icon>
+            <span class="banner-text">{{ sessionsError() }}</span>
+          </div>
+        }
+        @if (openError()) {
+          <div class="ops-banner error open-error">
+            <mat-icon fontSet="material-symbols-outlined">error</mat-icon>
+            <span class="banner-text">{{ openError() }}</span>
+            <button type="button" class="ops-icon-button small banner-action" (click)="openError.set('')" aria-label="Dismiss">
+              <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+            </button>
+          </div>
+        }
+
         <section class="table-pane">
           @if (sessions(); as list) {
             @if (list.sessions.length === 0) {
-              <div class="list-empty">
-                <mat-icon fontSet="material-symbols-outlined">forum</mat-icon>
+              <div class="ops-empty list-empty">
+                <mat-icon fontSet="material-symbols-outlined" class="empty-icon">forum</mat-icon>
                 @if (appliedFilter()) {
                   <span>No sessions for {{ appliedFilter() }}.</span>
                 } @else {
@@ -178,49 +174,49 @@
                 }
               </div>
             } @else {
-              <div class="sessions-table" role="table" aria-label="Sessions">
-                <div class="t-row t-head" role="row">
+              <div class="ops-table sessions-table" role="table" aria-label="Sessions">
+                <div class="ops-row head" role="row">
                   <span role="columnheader">Conversation</span>
                   <span role="columnheader">User</span>
                   <span role="columnheader" class="num wide-only">Events</span>
                   <span role="columnheader">Outcome</span>
                   <span role="columnheader" class="wide-only">Started</span>
                   <span role="columnheader">Last activity</span>
-                  <span role="columnheader"></span>
+                  <span role="columnheader"><span class="sr-only">Open</span></span>
                 </div>
                 @for (row of rows(); track row.key) {
-                  <div class="t-row session-row" role="row" tabindex="0"
+                  <div class="ops-row clickable session-row" role="row" tabindex="0"
                     [class.opening]="openingKey() === row.key"
                     [attr.aria-label]="'Open ' + (row.overview?.title || row.summary.id) + ' in the Playground'"
                     (click)="openRow(row)" (keydown.enter)="openRow(row)">
                     <span role="cell" class="conv-cell">
                       @if (row.overview; as o) {
-                        <span class="conv-title" [class.untitled]="!o.title" [title]="o.title">{{ o.title || 'No user message' }}</span>
+                        <span class="ops-primary conv-title" [class.untitled]="!o.title" [title]="o.title">{{ o.title || 'No user message' }}</span>
                       } @else if (row.previewFailed) {
-                        <span class="conv-title untitled">Preview unavailable</span>
+                        <span class="ops-primary conv-title untitled">Preview unavailable</span>
                       } @else {
-                        <span class="skeleton-line conv-skeleton"></span>
+                        <span class="ops-skeleton conv-skeleton"></span>
                       }
-                      <span class="conv-id mono">{{ row.summary.id }}</span>
+                      <span class="ops-secondary ops-mono conv-id">{{ row.summary.id }}</span>
                     </span>
                     <span role="cell" class="user-cell">
                       <button type="button" class="user-chip" (click)="filterByUser(row.summary.userId, $event)"
                         [matTooltip]="'Only show ' + row.summary.userId + '\'s sessions'">
                         <span class="avatar">{{ initial(row.summary.userId) }}</span>
-                        <span class="ellipsis">{{ row.summary.userId }}</span>
+                        <span class="ops-ellipsis">{{ row.summary.userId }}</span>
                       </button>
                     </span>
-                    <span role="cell" class="num wide-only">
-                      @if (row.overview; as o) { {{ o.eventCount }} } @else if (!row.previewFailed) { <span class="skeleton-line short"></span> }
+                    <span role="cell" class="num wide-only ops-tabular">
+                      @if (row.overview; as o) { {{ o.eventCount }} } @else if (!row.previewFailed) { <span class="ops-skeleton short"></span> }
                     </span>
                     <span role="cell">
                       @if (row.overview; as o) {
-                        <span class="outcome outcome-{{ o.outcome }}" [matTooltip]="o.errorMessage || ''">
-                          <span class="outcome-dot"></span>
+                        <span class="ops-badge outcome outcome-{{ o.outcome }}" [class.positive]="o.outcome === 'replied'"
+                          [class.error]="o.outcome === 'error'" [matTooltip]="o.errorMessage || ''">
                           {{ outcomeLabel(o.outcome) }}
                         </span>
                       } @else if (!row.previewFailed) {
-                        <span class="skeleton-line short"></span>
+                        <span class="ops-skeleton short"></span>
                       }
                     </span>
                     <span role="cell" class="time-cell wide-only" [title]="fullTime(row.overview?.startTime)">
@@ -233,37 +229,39 @@
                       @if (openingKey() === row.key) {
                         <mat-spinner diameter="18"></mat-spinner>
                       } @else {
-                        <mat-icon fontSet="material-symbols-outlined" matTooltip="Open in Playground">chevron_right</mat-icon>
+                        <mat-icon fontSet="material-symbols-outlined" class="ops-row-chevron" matTooltip="Open in Playground">chevron_right</mat-icon>
                       }
                     </span>
                   </div>
                 }
               </div>
               @if (hiddenCount() > 0) {
-                <button mat-button class="show-more" (click)="showMore()">
-                  Show {{ hiddenCount() < 25 ? hiddenCount() : 25 }} more
-                </button>
+                <div class="show-more-row">
+                  <button type="button" class="ops-button tonal show-more" (click)="showMore()">
+                    Show {{ hiddenCount() < 25 ? hiddenCount() : 25 }} more
+                  </button>
+                </div>
               }
             }
           } @else if (loadingSessions()) {
-            <div class="sessions-table" aria-hidden="true">
+            <div class="ops-table sessions-table" aria-hidden="true">
               @for (i of [0, 1, 2, 3, 4]; track i) {
-                <div class="t-row skeleton-row">
+                <div class="ops-row skeleton-row">
                   <span class="skeleton-lines">
-                    <span class="skeleton-line" style="width: 55%"></span>
-                    <span class="skeleton-line thin" style="width: 30%"></span>
+                    <span class="ops-skeleton" style="width: 55%"></span>
+                    <span class="ops-skeleton thin" style="width: 30%"></span>
                   </span>
                 </div>
               }
             </div>
           } @else if (needsUser()) {
-            <div class="list-empty user-prompt">
-              <mat-icon fontSet="material-symbols-outlined">person_search</mat-icon>
+            <div class="ops-empty list-empty user-prompt">
+              <mat-icon fontSet="material-symbols-outlined" class="empty-icon">person_search</mat-icon>
               <span>Enter a user ID above to list that user's sessions on this service.</span>
             </div>
           }
         </section>
-      </div>
+      }
     }
-  }
+  </div>
 </div>

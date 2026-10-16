@@ -14,258 +14,209 @@
  * limitations under the License.
  */
 
+// A navigation rail: each entry is its icon over its label, and the selected
+// entry's icon sits on a pill. Groups are separated by space, not titles.
+
 :host {
   display: block;
   height: 100%;
 }
 
 .left-nav {
-  background: var(--mat-sys-surface);
-  border-right: 1px solid var(--mat-sys-outline-variant);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  width: 80px;
   height: 100%;
-  padding: 8px 8px 0;
-  width: 208px;
+  padding: 12px 0;
+  border-right: 1px solid color-mix(in srgb, var(--mat-sys-on-surface) 10%, transparent);
+  background: var(--mat-sys-surface);
+  font-family: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
 }
 
 .nav-sections {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
   min-height: 0;
   overflow-y: auto;
 }
 
-.nav-section-title {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.6px;
-  line-height: 16px;
-  padding: 16px 12px 4px;
-  text-transform: uppercase;
-
-  &:first-child {
-    padding-top: 12px;
-  }
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
 }
 
 .nav-item {
-  align-items: center;
-  background: transparent;
-  border: none;
-  border-radius: 18px;
-  box-sizing: border-box;
-  color: var(--mat-sys-on-surface);
-  cursor: pointer;
   display: flex;
-  flex: none;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  gap: 12px;
-  height: 36px;
-  line-height: 20px;
-  padding: 0 12px;
-  text-align: left;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
   width: 100%;
-
-  .nav-item-icon {
-    color: var(--mat-sys-on-surface-variant);
-    font-size: 20px;
-    height: 20px;
-    width: 20px;
-  }
-
-  &:hover {
-    background: var(--mat-sys-surface-container-high);
-  }
+  padding: 4px 0;
+  border: none;
+  background: transparent;
+  color: var(--mat-sys-on-surface-variant);
+  font: inherit;
+  cursor: pointer;
 
   &:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
-    outline-offset: -2px;
+    outline: none;
+
+    .nav-item-indicator {
+      box-shadow: 0 0 0 2px var(--mat-sys-primary);
+    }
+  }
+
+  &:hover:not(.active):not(.nav-item-soon) {
+    color: var(--mat-sys-on-surface);
+
+    .nav-item-indicator {
+      background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
+    }
   }
 
   &.active {
-    background: var(--mat-sys-secondary-container);
-    color: var(--mat-sys-on-secondary-container);
+    color: var(--mat-sys-on-surface);
 
-    .nav-item-icon {
-      color: inherit;
+    .nav-item-indicator {
+      background: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
     }
   }
 }
 
-.nav-item-label {
-  flex: 1;
+.nav-item-indicator {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 32px;
+  border-radius: 16px;
+  transition: background 150ms ease;
 }
 
+.nav-item-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+  font-variation-settings: 'wght' 300;
+}
+
+// Shown on cloud entries while not connected.
 .nav-item-cloud {
+  position: absolute;
+  top: 2px;
+  right: 8px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface-variant);
-  font-size: 16px;
-  height: 16px;
-  width: 16px;
+  font-size: 12px;
 }
 
-// Not built yet: present, but recedes and does nothing.
-.nav-item-soon {
-  cursor: default;
-  font-weight: 400;
-  opacity: 0.45;
-
-  &:hover {
-    background: transparent;
-  }
-
-  .nav-item-icon {
-    color: inherit;
-  }
-}
-
-.nav-item-soon-label {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.3px;
+.nav-item-label {
+  max-width: 76px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
   line-height: 16px;
 }
 
-.nav-footer {
-  border-top: 1px solid var(--mat-sys-outline-variant);
-  margin: 12px -8px 0;
-  padding: 8px;
+.nav-item-soon {
+  cursor: default;
+  opacity: 0.55;
 }
 
-.nav-cloud-connected {
-  align-items: center;
-  background: transparent;
-  border: none;
-  border-radius: 12px;
-  color: var(--mat-sys-on-surface);
-  cursor: pointer;
+// --- Cloud connection ----------------------------------------------------
+
+.nav-footer {
   display: flex;
-  font: inherit;
-  gap: 10px;
-  padding: 8px 8px 8px 12px;
-  text-align: left;
+  justify-content: center;
   width: 100%;
+  padding-top: 8px;
+}
+
+.nav-cloud {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 22px;
+    font-variation-settings: 'wght' 300;
+  }
+}
+
+button.nav-cloud {
+  cursor: pointer;
 
   &:hover {
-    background: var(--mat-sys-surface-container-high);
+    background: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);
+    color: var(--mat-sys-on-surface);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
   }
 }
 
 .nav-cloud-dot {
+  position: absolute;
+  right: 8px;
+  bottom: 9px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--mat-sys-surface);
+  border-radius: 50%;
   background: var(--adk-success);
-  border-radius: 50%;
-  flex: none;
-  height: 8px;
-  width: 8px;
-}
-
-.nav-cloud-text {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.nav-cloud-provider,
-.nav-cloud-region {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 11px;
-  line-height: 16px;
-}
-
-.nav-cloud-project {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 18px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.nav-cloud-settings {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 18px;
-  height: 18px;
-  width: 18px;
-}
-
-.nav-cloud-disconnected {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px 8px 8px 12px;
-}
-
-.nav-cloud-state {
-  align-items: center;
-  color: var(--mat-sys-on-surface-variant);
-  display: flex;
-  font-size: 13px;
-  gap: 10px;
-  line-height: 18px;
-  white-space: nowrap;
-}
-
-.nav-cloud-ring {
-  border: 1.5px solid var(--mat-sys-outline);
-  border-radius: 50%;
-  box-sizing: border-box;
-  flex: none;
-  height: 8px;
-  width: 8px;
-}
-
-.nav-cloud-connect {
-  align-items: center;
-  background: transparent;
-  border: 1px solid var(--mat-sys-outline);
-  border-radius: 16px;
-  color: var(--mat-sys-primary);
-  cursor: pointer;
-  display: flex;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  gap: 6px;
-  height: 32px;
-  justify-content: center;
-
-  mat-icon {
-    font-size: 18px;
-    height: 18px;
-    width: 18px;
-  }
-
-  &:hover {
-    background: color-mix(in srgb, var(--mat-sys-primary) 8%, transparent);
-  }
-}
-
-.nav-cloud-checking {
-  align-items: center;
-  color: var(--mat-sys-on-surface-variant);
-  display: flex;
-  font-size: 13px;
-  gap: 10px;
-  padding: 12px 8px 12px 12px;
 }
 
 .nav-spin {
   animation: nav-spin 1s linear infinite;
-  color: var(--mat-sys-primary);
-  font-size: 14px;
-  height: 14px;
-  width: 14px;
 }
 
 @keyframes nav-spin {
   to {
     transform: rotate(360deg);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-spin {
+    animation: none;
+  }
+
+  .nav-item-indicator {
+    transition: none;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

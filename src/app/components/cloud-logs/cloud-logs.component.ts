@@ -18,7 +18,6 @@
 import {CommonModule} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, output, signal, untracked} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
@@ -140,7 +139,6 @@ function errorText(err: any, fallback: string): string {
     CommonModule,
     DeploymentPickerComponent,
     FormsModule,
-    MatButtonModule,
     MatIconModule,
     MatMenuModule,
     MatProgressBarModule,

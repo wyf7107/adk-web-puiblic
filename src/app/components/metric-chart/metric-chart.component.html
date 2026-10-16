@@ -15,7 +15,12 @@
 -->
 
 <div class="chart-head">
-  <span class="chart-title">{{ chart().title }}</span>
+  <span class="chart-heading">
+    <span class="chart-title">{{ chart().title }}</span>
+    @if (axisUnit().unit) {
+      <span class="chart-unit">{{ axisUnit().unit }}</span>
+    }
+  </span>
   @if (chart().series.length > 1) {
     <span class="legend">
       @for (series of chart().series; track series.name) {

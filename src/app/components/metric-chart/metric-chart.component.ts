@@ -24,14 +24,15 @@ const PAD = {top: 10, right: 12, bottom: 24, left: 52};
 const TICKS = 4;
 const X_LABELS = 5;
 
+// Defined in the component's stylesheet for each theme.
 const COLORS: Record<string, string> = {
-  'primary': 'var(--mat-sys-primary)',
-  'secondary': 'var(--mat-sys-secondary)',
-  'tertiary': 'var(--mat-sys-tertiary)',
-  'success': 'var(--adk-success)',
-  'warning': 'var(--adk-warning)',
-  'error': 'var(--mat-sys-error)',
-  'neutral': 'var(--mat-sys-outline)',
+  'primary': 'var(--chart-primary)',
+  'secondary': 'var(--chart-secondary)',
+  'tertiary': 'var(--chart-tertiary)',
+  'success': 'var(--chart-success)',
+  'warning': 'var(--chart-warning)',
+  'error': 'var(--chart-error)',
+  'neutral': 'var(--chart-neutral)',
 };
 
 export function seriesColor(series: MetricSeries): string {
@@ -161,7 +162,8 @@ export class MetricChartComponent {
   });
 
   /** The axis counts MiB rather than fractions of a GiB for small agents. */
-  private readonly axisUnit = computed(() => {
+  /** The unit the axis is drawn in; small GiB values read as MiB. */
+  protected readonly axisUnit = computed(() => {
     const unit = this.chart().unit;
     return unit === 'GiB' && this.max() < 1 ? {unit: 'MiB', factor: 1024} :
                                               {unit, factor: 1};

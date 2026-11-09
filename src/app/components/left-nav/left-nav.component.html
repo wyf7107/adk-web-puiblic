@@ -18,6 +18,7 @@
   <div class="nav-sections">
     @for (section of sections; track section.title) {
       <div class="nav-group" role="group" [attr.aria-label]="section.title">
+        <div class="nav-group-title" aria-hidden="true">{{ section.title }}</div>
         @for (item of section.items; track item.label) {
           @if (item.view) {
             <button
@@ -42,7 +43,7 @@
                 <mat-icon fontSet="material-symbols-outlined" class="nav-item-icon">{{ item.icon }}</mat-icon>
               </span>
               <span class="nav-item-label">{{ item.label }}</span>
-              <span class="sr-only">Soon</span>
+              <span class="nav-item-badge">Soon</span>
             </div>
           }
         }
@@ -53,23 +54,37 @@
   <div class="nav-footer">
     @if (checking()) {
       <div class="nav-cloud nav-cloud-checking" title="Checking the cloud connection">
-        <mat-icon fontSet="material-symbols-outlined" class="nav-spin">progress_activity</mat-icon>
-        <span class="sr-only">Checking connection&hellip;</span>
+        <span class="nav-cloud-glyph">
+          <mat-icon fontSet="material-symbols-outlined" class="nav-spin">progress_activity</mat-icon>
+        </span>
+        <span class="nav-cloud-text">
+          <span class="nav-cloud-headline">Checking connection&hellip;</span>
+        </span>
       </div>
     } @else if (cloudStatus()?.connected) {
       <button type="button" class="nav-cloud nav-cloud-connected" (click)="manageCloud.emit()"
         [title]="'Google Cloud · ' + cloudStatus()?.project + ' · ' + cloudStatus()?.region + '. Change the cloud connection'">
-        <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
-        <span class="nav-cloud-dot"></span>
-        <span class="sr-only">
-          Google Cloud {{ cloudStatus()?.project }} {{ cloudStatus()?.region }}. Change the cloud connection
+        <span class="nav-cloud-glyph">
+          <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+          <span class="nav-cloud-dot"></span>
         </span>
+        <span class="nav-cloud-text">
+          <span class="nav-cloud-headline">{{ cloudStatus()?.project }}</span>
+          <span class="nav-cloud-supporting">{{ cloudStatus()?.region }}</span>
+        </span>
+        <span class="sr-only">Google Cloud. Change the cloud connection</span>
       </button>
     } @else {
       <button type="button" class="nav-cloud nav-cloud-connect" (click)="manageCloud.emit()"
         title="Not connected. Connect to cloud">
-        <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
-        <span class="sr-only">Not connected. Connect to cloud</span>
+        <span class="nav-cloud-glyph">
+          <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+          <span class="nav-cloud-dot nav-cloud-dot-off"></span>
+        </span>
+        <span class="nav-cloud-text">
+          <span class="nav-cloud-headline">Connect to Google Cloud</span>
+          <span class="nav-cloud-supporting">Not connected</span>
+        </span>
       </button>
     }
   </div>

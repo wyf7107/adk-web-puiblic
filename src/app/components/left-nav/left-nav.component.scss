@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-// A navigation rail: each entry is its icon over its label, and the selected
-// entry's icon sits on a pill. Groups are separated by space, not titles.
+// The command center's sidebar, in the Luminous design (the ACC prototype's
+// expanded nav rail): each group is a muted Body S title over 32px rows; a row
+// is a 20px glyph and a Body S emphasized label on a full-round pill. Hover
+// draws the state layer, the selected row sits on surface-dim, and pages not
+// built yet use the disabled ink with a "Soon" label. Colors come from the
+// --lumi-* tokens in styles.scss, so both themes follow the design.
 
 :host {
   display: block;
@@ -26,69 +30,103 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 80px;
+  width: 256px;
   height: 100%;
-  padding: 12px 0;
-  border-right: 1px solid color-mix(in srgb, var(--mat-sys-on-surface) 10%, transparent);
-  background: var(--mat-sys-surface);
-  font-family: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
+  border-right: 0.5px solid var(--lumi-sys-color-on-surface-low);
+  background: var(--lumi-sys-color-surface);
+  color: var(--lumi-sys-color-on-surface);
+  font-family: var(--lumi-font-family);
 }
 
 .nav-sections {
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  gap: 16px;
+  box-sizing: border-box;
   width: 100%;
   min-height: 0;
+  padding: 4px 8px 12px;
   overflow-y: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .nav-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
   width: 100%;
+  // 16px above the first group's title, 12px between groups.
+  padding-top: 12px;
+
+  &:first-child {
+    padding-top: 16px;
+  }
 }
 
-.nav-item {
+// Body S, muted. Static: no hover pill.
+.nav-group-title {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  height: 32px;
+  padding: 0 8px;
+  overflow: hidden;
+  color: var(--lumi-sys-color-on-surface-variant);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 17px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+
+// --- Rows ------------------------------------------------------------------
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   box-sizing: border-box;
   width: 100%;
-  padding: 4px 0;
+  height: 32px;
+  padding: 0 8px;
   border: none;
+  border-radius: 16px;
+  outline: none;
   background: transparent;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--lumi-sys-color-on-surface);
   font: inherit;
+  text-align: left;
   cursor: pointer;
+  transition: background-color var(--lumi-motion-standard);
+  -webkit-tap-highlight-color: transparent;
 
   &:focus-visible {
-    outline: none;
-
-    .nav-item-indicator {
-      box-shadow: 0 0 0 2px var(--mat-sys-primary);
-    }
+    outline: 2px solid var(--lumi-sys-color-on-surface);
+    outline-offset: 2px;
   }
 
-  &:hover:not(.active):not(.nav-item-soon) {
-    color: var(--mat-sys-on-surface);
+  &:not(.nav-item-soon):hover {
+    background: var(--lumi-sys-color-state-hover);
+  }
 
-    .nav-item-indicator {
-      background: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
-    }
+  &:not(.nav-item-soon):active {
+    background: var(--lumi-sys-color-state-pressed);
   }
 
   &.active {
-    color: var(--mat-sys-on-surface);
+    background: var(--lumi-sys-color-surface-dim);
 
-    .nav-item-indicator {
-      background: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
+    &:hover {
+      background: var(--lumi-sys-color-state-hover);
+    }
+
+    .nav-item-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 300, 'opsz' 20;
     }
   }
 }
@@ -96,99 +134,181 @@
 .nav-item-indicator {
   position: relative;
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 32px;
-  border-radius: 16px;
-  transition: background 150ms ease;
+  width: 20px;
+  height: 20px;
+  color: var(--lumi-sys-color-on-surface);
 }
 
 .nav-item-icon {
-  width: 22px;
-  height: 22px;
-  font-size: 22px;
-  font-variation-settings: 'wght' 300;
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 20px;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'opsz' 20;
 }
 
 // Shown on cloud entries while not connected.
 .nav-item-cloud {
   position: absolute;
-  top: 2px;
-  right: 8px;
+  top: -3px;
+  right: -5px;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface-variant);
+  background: var(--lumi-sys-color-surface);
+  color: var(--lumi-sys-color-on-surface-variant);
   font-size: 12px;
+  line-height: 12px;
 }
 
+// Body S emphasized.
 .nav-item-label {
-  max-width: 76px;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
+  color: var(--lumi-sys-color-on-surface);
+  font-size: 13px;
+  font-weight: 540;
+  line-height: 17px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 540;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
-  line-height: 16px;
 }
 
+// A page not built yet: disabled ink, no state layer, and a "Soon" label.
 .nav-item-soon {
   cursor: default;
-  opacity: 0.55;
+
+  .nav-item-indicator,
+  .nav-item-label {
+    color: var(--lumi-sys-color-state-disabled-label);
+  }
 }
 
-// --- Cloud connection ----------------------------------------------------
+.nav-item-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 12px;
+  background: var(--lumi-sys-color-on-surface-low);
+  color: var(--lumi-sys-color-on-surface);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+}
+
+// --- Cloud connection (the footer row) --------------------------------------
 
 .nav-footer {
-  display: flex;
-  justify-content: center;
+  box-sizing: border-box;
   width: 100%;
-  padding-top: 8px;
+  padding: 12px 8px;
 }
 
 .nav-cloud {
-  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 42px;
+  padding: 0 8px;
   border: none;
-  border-radius: 50%;
+  border-radius: 21px;
+  outline: none;
   background: transparent;
-  color: var(--mat-sys-on-surface-variant);
-
-  mat-icon {
-    width: 22px;
-    height: 22px;
-    font-size: 22px;
-    font-variation-settings: 'wght' 300;
-  }
+  color: var(--lumi-sys-color-on-surface);
+  font: inherit;
+  text-align: left;
+  transition: background-color var(--lumi-motion-standard);
 }
 
 button.nav-cloud {
   cursor: pointer;
 
   &:hover {
-    background: color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent);
-    color: var(--mat-sys-on-surface);
+    background: var(--lumi-sys-color-state-hover);
+  }
+
+  &:active {
+    background: var(--lumi-sys-color-state-pressed);
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
+    outline: 2px solid var(--lumi-sys-color-on-surface);
+    outline-offset: 2px;
   }
 }
 
+.nav-cloud-glyph {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+
+  mat-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    line-height: 20px;
+    font-variation-settings: 'wght' 300, 'opsz' 20;
+  }
+}
+
+// Status color sits on a small mark only, ringed in the rail surface.
 .nav-cloud-dot {
   position: absolute;
-  right: 8px;
-  bottom: 9px;
+  right: 0;
+  bottom: 2px;
   width: 8px;
   height: 8px;
-  border: 2px solid var(--mat-sys-surface);
   border-radius: 50%;
-  background: var(--adk-success);
+  box-shadow: 0 0 0 2px var(--lumi-sys-color-surface);
+  background: var(--lumi-sys-color-positive);
+}
+
+.nav-cloud-dot-off {
+  background: var(--lumi-sys-color-on-surface-variant);
+}
+
+.nav-cloud-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+// Body M over Body S.
+.nav-cloud-headline,
+.nav-cloud-supporting {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-cloud-headline {
+  color: var(--lumi-sys-color-on-surface);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+}
+
+.nav-cloud-supporting {
+  color: var(--lumi-sys-color-on-surface-variant);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 17px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 400;
 }
 
 .nav-spin {
@@ -206,7 +326,8 @@ button.nav-cloud {
     animation: none;
   }
 
-  .nav-item-indicator {
+  .nav-item,
+  .nav-cloud {
     transition: none;
   }
 }

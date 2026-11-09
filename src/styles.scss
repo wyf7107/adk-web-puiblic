@@ -151,6 +151,43 @@ html.dark-theme {
   --adk-on-warning-container: #ffdf99;
 }
 
+// Luminous design tokens (the Agent Command Center design), as the prototype
+// defines them. The command-center chrome (left nav first) reads these, so it
+// matches the design in both themes. Dark is the default, as above.
+html,
+html.dark-theme {
+  --lumi-sys-color-surface: #0f0f0f;
+  --lumi-sys-color-surface-dim: #171717;
+  --lumi-sys-color-surface-bright: #1f1f1f;
+  --lumi-sys-color-on-surface: #e6e6e6;
+  --lumi-sys-color-on-surface-variant: rgba(255, 255, 255, 0.55);
+  --lumi-sys-color-on-surface-low: rgba(255, 255, 255, 0.12);
+  --lumi-sys-color-state-hover: rgba(255, 255, 255, 0.08);
+  --lumi-sys-color-state-pressed: rgba(255, 255, 255, 0.12);
+  --lumi-sys-color-state-disabled-label: rgba(255, 255, 255, 0.38);
+  --lumi-sys-color-positive: #0ebc5f;
+}
+
+html.light-theme {
+  --lumi-sys-color-surface: #fdfcfc;
+  --lumi-sys-color-surface-dim: #f2f0f0;
+  --lumi-sys-color-surface-bright: #ffffff;
+  --lumi-sys-color-on-surface: #000000;
+  --lumi-sys-color-on-surface-variant: rgba(0, 0, 0, 0.55);
+  --lumi-sys-color-on-surface-low: rgba(0, 0, 0, 0.08);
+  --lumi-sys-color-state-hover: rgba(0, 0, 0, 0.08);
+  --lumi-sys-color-state-pressed: rgba(0, 0, 0, 0.12);
+  --lumi-sys-color-state-disabled-label: rgba(0, 0, 0, 0.38);
+  --lumi-sys-color-positive: #008052;
+}
+
+html {
+  --lumi-font-family: 'Google Sans Flex', 'Google Sans', Roboto, sans-serif;
+  // Luminous body text runs Google Sans Flex slightly condensed.
+  --lumi-font-variation: 'wdth' 92;
+  --lumi-motion-standard: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 body {
   height: 100vh;
   margin: 0;

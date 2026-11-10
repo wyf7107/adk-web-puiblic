@@ -14,7 +14,7 @@
  limitations under the License.
 -->
 
-<mat-toolbar class="app-toolbar">
+<mat-toolbar class="app-toolbar lumi-playground">
   <div class="toolbar-group toolbar-agent-group">
     <button mat-icon-button class="toolbar-icon-button" (click)="toggleLeftNav()"
       [matTooltip]="showLeftNav() ? 'Hide navigation' : 'Show navigation'" matTooltipPosition="below"
@@ -267,7 +267,7 @@
 <div class="workspace-main">
   <!-- Build: everything the dev UI had before the left navigation. Kept
        mounted while another section is shown, so the session survives. -->
-  <div class="workspace-view" [class.workspace-view-hidden]="activeView() !== 'build'">
+  <div class="workspace-view lumi-playground" [class.workspace-view-hidden]="activeView() !== 'build'">
 <mat-drawer-container class="drawer-container" autosize>
   <mat-drawer
     class="selector-drawer"

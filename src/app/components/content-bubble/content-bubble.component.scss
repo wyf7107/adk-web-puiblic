@@ -72,6 +72,32 @@
   box-shadow: none;
 }
 
+// The classic playground in the Luminous style: the user's message on a
+// surface-dim bubble (radius 32px, 16px x 20px), the agent's reply as plain
+// Body M text with no bubble.
+:host-context(.lumi-playground) {
+  .content-bubble {
+    font-family: var(--lumi-font-family);
+    font-size: 15px;
+    line-height: 20px;
+    font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+  }
+
+  .content-bubble.type-message.role-user {
+    padding: 16px 20px;
+    border-radius: 32px;
+    background-color: var(--lumi-sys-color-surface-dim);
+    color: var(--lumi-sys-color-on-surface);
+  }
+
+  .content-bubble.type-message.role-bot {
+    padding: 4px 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--lumi-sys-color-on-surface);
+  }
+}
+
 /* Max size for inline images */
 .content-bubble img {
   max-width: min(400px, 100%);

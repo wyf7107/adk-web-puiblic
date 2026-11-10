@@ -784,12 +784,12 @@ app-canvas {
   border-radius: 8px;
 }
 
-// Shared Selector Styles
+// Shared Selector Styles: Luminous picker pills (a hairline, fully round).
 .selector-group {
   display: flex;
   align-items: center;
-  border-radius: 6px;
-  border: 1px solid var(--mat-sys-outline-variant, #c4c7c5);
+  border-radius: 9999px;
+  border: 1px solid var(--lumi-sys-color-on-surface-low);
   margin-right: 8px;
   flex-shrink: 0;
   height: 32px;
@@ -805,7 +805,7 @@ app-canvas {
     flex-shrink: 0;
 
     ::ng-deep .mdc-icon-button__ripple {
-      border-radius: 4px;
+      border-radius: 50%;
       top: 1px;
       left: 1px;
       right: 1px;
@@ -823,7 +823,7 @@ app-canvas {
 .selector-group-divider {
   width: 1px;
   height: 16px;
-  background-color: var(--mat-sys-outline-variant, #c4c7c5);
+  background-color: var(--lumi-sys-color-on-surface-low);
   flex-shrink: 0;
 }
 
@@ -833,14 +833,15 @@ app-canvas {
   gap: 6px;
   padding: 4px 12px;
   margin-right: 1px;
-  border-radius: 6px;
+  border-radius: 9999px;
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--chat-toolbar-icon-color);
-  font-family: 'Google Sans', sans-serif;
+  color: var(--lumi-sys-color-on-surface);
+  font-family: var(--lumi-font-family);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 540;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 540;
   height: 100%;
   flex-shrink: 0;
   white-space: nowrap;
@@ -858,7 +859,7 @@ app-canvas {
     left: 1px;
     right: 1px;
     bottom: 1px;
-    border-radius: 4px;
+    border-radius: 9999px;
     background-color: var(
       --mat-icon-button-state-layer-color,
       var(--mat-sys-on-surface-variant)
@@ -1218,6 +1219,9 @@ app-canvas {
   }
 }
 
+// The Events | Traces strip, in the Luminous canvas-toolbar style: on the
+// page surface with a hairline under it; the segmented toggle on its
+// surface-dim track; filters as 32px Body S pills.
 .chat-sub-toolbar {
   display: flex;
   justify-content: flex-start;
@@ -1225,12 +1229,12 @@ app-canvas {
   height: 48px;
   flex-shrink: 0;
   padding: 0 8px 0 20px;
-  background-color: var(--mat-sys-surface-container);
-  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background-color: var(--lumi-sys-color-surface);
+  border-bottom: 1px solid var(--lumi-sys-color-on-surface-low);
 
   mat-button-toggle-group {
-    border-radius: 16px;
-    height: 28px;
+    border-radius: 9999px;
+    height: 32px;
     align-items: center;
 
     ::ng-deep .mat-button-toggle-label-content {
@@ -1246,28 +1250,31 @@ app-canvas {
     gap: 8px;
     background-color: transparent;
     border: none;
-    margin-left: 16px;
+    margin-left: 12px;
   }
 
   .filter-chip {
     display: flex;
     align-items: center;
-    background-color: var(--mat-sys-surface-container-highest);
-    border: 1px solid var(--mat-sys-outline-variant);
-    border-radius: 14px;
-    padding: 0 10px;
+    gap: 4px;
+    background-color: var(--lumi-sys-color-surface-dim);
+    border: none;
+    border-radius: 9999px;
+    padding: 0 8px 0 12px;
+    font-family: var(--lumi-font-family);
     font-size: 13px;
-    height: 28px;
+    line-height: 17px;
+    height: 32px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--lumi-motion-standard);
 
     &:hover {
-      background-color: var(--mat-sys-surface-variant);
+      background-color: var(--lumi-sys-color-state-pressed);
     }
 
     .chip-label {
-      font-weight: 500;
-      color: var(--mat-sys-on-surface-variant);
+      font-variation-settings: var(--lumi-font-variation), 'wght' 540;
+      color: var(--lumi-sys-color-on-surface);
     }
 
     .chip-remove {
@@ -1277,18 +1284,18 @@ app-canvas {
       background: none;
       border: none;
       cursor: pointer;
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--lumi-sys-color-on-surface-variant);
       padding: 0;
-      margin-left: 4px;
+      margin-left: 2px;
 
       mat-icon {
-        font-size: 14px;
-        width: 14px;
-        height: 14px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
       }
 
       &:hover {
-        color: var(--mat-sys-on-surface);
+        color: var(--lumi-sys-color-on-surface);
       }
     }
   }
@@ -1296,28 +1303,32 @@ app-canvas {
   .add-filter-btn {
     display: flex;
     align-items: center;
+    gap: 4px;
     background-color: transparent;
-    border: 1px dashed var(--mat-sys-outline-variant);
-    border-radius: 14px;
-    padding: 0 10px;
+    border: 1px solid var(--lumi-sys-color-on-surface-low);
+    border-radius: 9999px;
+    padding: 0 12px 0 8px;
+    font-family: var(--lumi-font-family);
     font-size: 13px;
-    font-weight: 500;
-    height: 28px;
+    line-height: 17px;
+    font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+    height: 32px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    color: var(--mat-sys-on-surface-variant);
+    transition:
+      background-color var(--lumi-motion-standard),
+      border-color var(--lumi-motion-standard);
+    color: var(--lumi-sys-color-on-surface);
 
     &:hover {
-      background-color: var(--mat-sys-surface-variant);
-      border-color: var(--mat-sys-outline);
-      color: var(--mat-sys-on-surface);
+      background-color: var(--lumi-sys-color-state-hover);
+      border-color: var(--lumi-sys-color-on-surface-variant);
     }
 
     mat-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-      margin-right: 4px;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: var(--lumi-sys-color-on-surface-variant);
     }
   }
 }

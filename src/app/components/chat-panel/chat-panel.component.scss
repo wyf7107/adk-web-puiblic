@@ -236,56 +236,83 @@
   }
 }
 
+// The composer, in the Luminous prompt-input style: a surface-bright card
+// with a 28px radius, a soft shadow and no outline; Body L text; round 40px
+// buttons, the send (or stop) button filled with the accent.
 .input-field {
   flex-grow: 1;
   position: relative;
 
   textarea {
-    color: var(--mat-sys-on-surface);
+    color: var(--lumi-sys-color-on-surface);
     border: none;
     box-sizing: content-box;
-    caret-color: var(--mat-sys-primary);
+    caret-color: var(--lumi-sys-color-accent-fixed);
+    font-family: var(--lumi-font-family);
+    font-size: 17px;
+    line-height: 24px;
+    font-variation-settings: var(--lumi-font-variation), 'wght' 400;
 
     &::placeholder {
-      color: var(--mat-sys-on-surface-variant);
+      color: var(--lumi-sys-color-on-surface-variant);
     }
   }
 
-  button:not(:disabled):not(.stop-message-btn) {
-    color: var(--mat-sys-primary) !important;
+  button:not(:disabled):not(.stop-message-btn):not(.send-message-btn) {
+    color: var(--lumi-sys-color-on-surface) !important;
   }
 
   ::ng-deep {
+    .mat-mdc-text-field-wrapper {
+      min-height: 56px;
+      border-radius: 28px;
+      background: var(--lumi-sys-color-surface-bright);
+      box-shadow: 0 0 20px 0 var(--lumi-sys-color-elevation-1);
+    }
+    // No outline, in any state.
+    .mdc-notched-outline {
+      display: none;
+    }
     .mat-mdc-form-field-flex {
       align-items: flex-end !important;
+    }
+    .mat-mdc-form-field-infix {
+      padding-top: 16px !important;
+      padding-bottom: 16px !important;
     }
     .mat-mdc-form-field-icon-prefix,
     .mat-mdc-form-field-icon-suffix {
       align-self: flex-end !important;
       margin-bottom: 8px !important;
     }
+    .mat-mdc-icon-button {
+      --mat-icon-button-state-layer-size: 40px;
+      --mat-icon-button-state-layer-color: var(--lumi-sys-color-on-surface);
+      --mat-icon-button-hover-state-layer-opacity: 0.08;
+      --mat-icon-button-pressed-state-layer-opacity: 0.12;
+      width: 40px;
+      height: 40px;
+      padding: 8px;
+    }
   }
 }
 
+button.send-message-btn:not(:disabled),
 button.stop-message-btn:not(:disabled) {
-  color: #ea4335 !important;
-
-  &:hover {
-    background-color: rgba(234, 67, 53, 0.08) !important;
-  }
+  background-color: var(--lumi-sys-color-accent) !important;
+  color: var(--lumi-sys-color-on-surface) !important;
 }
 
 button:disabled {
-  color: var(--mat-sys-on-surface-variant) !important;
-  opacity: 0.38 !important;
+  color: var(--lumi-sys-color-state-disabled-label) !important;
   cursor: not-allowed;
 }
 
 button.input-prefix-menu-btn {
-  margin-left: 12px !important;
+  margin-left: 8px !important;
 
   &:not(:disabled) {
-    color: var(--mat-sys-on-surface-variant) !important;
+    color: var(--lumi-sys-color-on-surface) !important;
   }
 }
 
@@ -293,7 +320,7 @@ button.input-prefix-menu-btn {
   display: flex;
   align-items: flex-end;
   gap: 8px;
-  margin-right: 12px !important;
+  margin-right: 8px !important;
 }
 
 .file-preview {
@@ -355,7 +382,7 @@ button.input-prefix-menu-btn {
 }
 
 .chat-input-box {
-  caret-color: white;
+  caret-color: var(--lumi-sys-color-accent-fixed);
 }
 
 button.send-message-btn {

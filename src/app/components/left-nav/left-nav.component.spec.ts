@@ -77,6 +77,31 @@ describe('LeftNavComponent', () => {
     expect(item('Datasets').textContent).toContain('Soon');
   });
 
+  it('switches the Playground between Classic and Luminous', () => {
+    const options: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll('.nav-ui-option'));
+    expect(options.map((o) => o.textContent?.trim())).toEqual([
+      'Classic', 'Luminous'
+    ]);
+    expect(options[0].getAttribute('aria-checked')).toBe('true');
+
+    const picked: string[] = [];
+    const views: AppView[] = [];
+    fixture.componentInstance.playgroundUiChange.subscribe(
+        (ui) => picked.push(ui));
+    fixture.componentInstance.navigate.subscribe((v) => views.push(v));
+    options[1].click();
+    options[0].click();  // already selected
+    expect(picked).toEqual(['luminous']);
+    // The switch is not the row: it doesn't navigate by itself.
+    expect(views).toEqual([]);
+
+    fixture.componentRef.setInput('playgroundUi', 'luminous');
+    fixture.detectChanges();
+    expect(options[1].getAttribute('aria-checked')).toBe('true');
+    expect(item('Playground').textContent).not.toContain('Luminous');
+  });
+
   it('marks cloud-only entries only while disconnected', () => {
     expect(item('Deployments').querySelector('.nav-item-cloud')).toBeNull();
 

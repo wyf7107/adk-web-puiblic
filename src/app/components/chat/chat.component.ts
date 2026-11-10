@@ -87,7 +87,8 @@ import { deploymentName, targetLabel } from '../deployment-picker/deployment-pic
 import { DeployedTarget, TryDeployedDialogComponent } from '../try-deployed-dialog/try-deployed-dialog.component';
 import { CloudMonitoringComponent } from '../cloud-monitoring/cloud-monitoring.component';
 import { CloudSessionsComponent, OpenSessionRequest } from '../cloud-sessions/cloud-sessions.component';
-import { AppView, CLOUD_VIEWS, LeftNavComponent } from '../left-nav/left-nav.component';
+import { AppView, CLOUD_VIEWS, LeftNavComponent, PlaygroundUi } from '../left-nav/left-nav.component';
+import { LuminousPlaygroundComponent, LuminousSession } from '../luminous-playground/luminous-playground.component';
 import { CloudConnectDialogComponent } from '../cloud-connect-dialog/cloud-connect-dialog.component';
 import { CLOUD_SERVICE } from '../../core/services/interfaces/cloud';
 import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
@@ -114,6 +115,8 @@ export interface ListAppsResult {
 export const NESTED_APP_SEPARATOR = '.';
 
 const ROOT_AGENT = 'root_agent';
+/** Where the Playground's design (classic or Luminous) is kept. */
+const PLAYGROUND_UI_STORAGE_KEY = 'adk-playground-ui';
 /** Query parameter for pre-filling user input. */
 export const INITIAL_USER_INPUT_QUERY_PARAM = 'q';
 /** Query parameter for hiding the side panel. */
@@ -205,6 +208,7 @@ const BIDI_STREAMING_IN_PROGRESS_WARNING =
     CloudLogsComponent,
     CloudMonitoringComponent,
     CloudSessionsComponent,
+    LuminousPlaygroundComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -341,6 +345,13 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   showLeftNav = signal(this.storageService.getItem('adk-left-nav-visible') !== 'false');
   /** Which section fills the main area. Build is everything the UI had before. */
   activeView = signal<AppView>('build');
+  /**
+   * The Playground's design: the classic dev UI or Luminous (the command
+   * center's new design, `LuminousPlaygroundComponent`). Picked on the left
+   * nav's Playground row and kept across reloads.
+   */
+  playgroundUi = signal<PlaygroundUi>(
+      this.storageService.getItem(PLAYGROUND_UI_STORAGE_KEY) === 'luminous' ? 'luminous' : 'classic');
   /** The Sessions section has been opened; it then stays mounted. */
   protected readonly sessionsViewOpened = signal(false);
   /** The Logs section has been opened; it then stays mounted. */
@@ -2635,6 +2646,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.showSidePanel = !this.showSidePanel;
     this.storageService.setItem('adk-side-panel-visible', this.showSidePanel.toString());
+  }
+
+  setPlaygroundUi(ui: PlaygroundUi) {
+    this.playgroundUi.set(ui);
+    this.storageService.setItem(PLAYGROUND_UI_STORAGE_KEY, ui);
+    // The switch is on the Playground row, so picking a design opens it.
+    this.setActiveView('build');
+  }
+
+  /**
+   * The Luminous playground moved to another session itself (a first message
+   * created one, or it started over); the classic one follows, so both
+   * designs show the same conversation.
+   */
+  protected onLuminousSessionChange(change: LuminousSession) {
+    // Only a real session moves the classic playground. An empty one ("no
+    // session yet") can be the frame's state from before it applied our last
+    // context, and following it would reset the conversation shown here.
+    if (change.app !== this.appName || !change.session) {
+      return;
+    }
+    if (change.session !== this.sessionId) {
+      this.loadSession(change.session);
+    }
   }
 
   toggleLeftNav() {

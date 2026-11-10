@@ -23,6 +23,18 @@ import {CLOUD_SERVICE} from '../../core/services/interfaces/cloud';
 /** A top-level view the app can show in its main area. */
 export type AppView = 'build'|'deployments'|'sessions'|'logs'|'monitoring';
 
+/**
+ * Which design the Playground shows: the classic dev UI, or Luminous (the
+ * command center's new design).
+ */
+export type PlaygroundUi = 'classic'|'luminous';
+
+/** The choices of the Playground's design switch, in display order. */
+export const PLAYGROUND_UIS: ReadonlyArray<{value: PlaygroundUi, label: string}> = [
+  {value: 'classic', label: 'Classic'},
+  {value: 'luminous', label: 'Luminous'},
+];
+
 /** One entry in the left navigation. */
 export interface NavItem {
   label: string;
@@ -31,6 +43,8 @@ export interface NavItem {
   view?: AppView;
   /** Needs a connection to a cloud project. */
   cloud?: boolean;
+  /** Carries the Classic / Luminous design switch. */
+  uiSwitch?: boolean;
 }
 
 export interface NavSection {
@@ -45,7 +59,7 @@ export interface NavSection {
 export const NAV_SECTIONS: readonly NavSection[] = [
   {
     title: 'Build',
-    items: [{label: 'Playground', icon: 'forum', view: 'build'}],
+    items: [{label: 'Playground', icon: 'forum', view: 'build', uiSwitch: true}],
   },
   {
     title: 'Evaluate',
@@ -96,6 +110,10 @@ export const CLOUD_VIEWS: ReadonlySet<AppView> = new Set(
 export class LeftNavComponent {
   readonly activeView = input<AppView>('build');
   readonly navigate = output<AppView>();
+  /** The Playground's design, and its switch on the Playground row. */
+  readonly playgroundUi = input<PlaygroundUi>('classic');
+  readonly playgroundUiChange = output<PlaygroundUi>();
+  readonly playgroundUis = PLAYGROUND_UIS;
   /** The connection footer was clicked. */
   readonly manageCloud = output<void>();
 
@@ -114,6 +132,13 @@ export class LeftNavComponent {
     inject(CLOUD_SERVICE).refreshStatus().subscribe({
       error: () => this.checkFailed.set(true),
     });
+  }
+
+  /** Picks the Playground's design; picking the current one does nothing. */
+  selectPlaygroundUi(ui: PlaygroundUi): void {
+    if (ui !== this.playgroundUi()) {
+      this.playgroundUiChange.emit(ui);
+    }
   }
 
   select(item: NavItem): void {

@@ -21,22 +21,35 @@
         <div class="nav-group-title" aria-hidden="true">{{ section.title }}</div>
         @for (item of section.items; track item.label) {
           @if (item.view) {
-            <button
-              type="button"
-              class="nav-item"
-              [class.active]="item.view === activeView()"
-              [attr.aria-current]="item.view === activeView() ? 'page' : null"
-              [title]="item.cloud && disconnected() ? item.label + ' (needs Google Cloud)' : item.label"
-              (click)="select(item)">
-              <span class="nav-item-indicator">
-                <mat-icon fontSet="material-symbols-outlined" class="nav-item-icon">{{ item.icon }}</mat-icon>
-                @if (item.cloud && disconnected()) {
-                  <mat-icon fontSet="material-symbols-outlined" class="nav-item-cloud"
-                    aria-label="Needs Google Cloud">cloud_off</mat-icon>
-                }
-              </span>
-              <span class="nav-item-label">{{ item.label }}</span>
-            </button>
+            <div class="nav-row" [class.nav-row-with-switch]="item.uiSwitch">
+              <button
+                type="button"
+                class="nav-item"
+                [class.active]="item.view === activeView()"
+                [attr.aria-current]="item.view === activeView() ? 'page' : null"
+                [title]="item.cloud && disconnected() ? item.label + ' (needs Google Cloud)' : item.label"
+                (click)="select(item)">
+                <span class="nav-item-indicator">
+                  <mat-icon fontSet="material-symbols-outlined" class="nav-item-icon">{{ item.icon }}</mat-icon>
+                  @if (item.cloud && disconnected()) {
+                    <mat-icon fontSet="material-symbols-outlined" class="nav-item-cloud"
+                      aria-label="Needs Google Cloud">cloud_off</mat-icon>
+                  }
+                </span>
+                <span class="nav-item-label">{{ item.label }}</span>
+              </button>
+              @if (item.uiSwitch) {
+                <div class="nav-ui-switch" role="radiogroup" aria-label="Playground design">
+                  @for (ui of playgroundUis; track ui.value) {
+                    <button type="button" role="radio" class="nav-ui-option"
+                      [class.selected]="ui.value === playgroundUi()"
+                      [attr.aria-checked]="ui.value === playgroundUi()"
+                      [title]="ui.label + ' playground'"
+                      (click)="selectPlaygroundUi(ui.value)">{{ ui.label }}</button>
+                  }
+                </div>
+              }
+            </div>
           } @else {
             <div class="nav-item nav-item-soon" aria-disabled="true" [title]="item.label + ' (coming soon)'">
               <span class="nav-item-indicator">

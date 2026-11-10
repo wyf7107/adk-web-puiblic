@@ -38,3 +38,7 @@ adk-env/
 adk-samples/
 
 venv/
+
+# The Luminous playground: a build of the ACC prototype (go/acc-prototype) in
+# embed mode, made locally with `npm run build` there and copied here.
+/public/luminous/

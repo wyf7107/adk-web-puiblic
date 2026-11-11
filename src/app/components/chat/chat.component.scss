@@ -485,14 +485,9 @@
   flex-shrink: 0;
 }
 
-// The Classic | Luminous switch, first of the bar's right-hand actions.
-.toolbar-design-switch {
-  margin-right: 8px;
-}
-
-// Classic's Builder / Manager menu, last in the bar, right of the user avatar.
+// Classic's Builder / Manager menu, between the ADK title and the app picker.
 .toolbar-mode-menu {
-  margin-left: 4px;
+  margin: 0 4px;
 }
 
 .toolbar-session-text {

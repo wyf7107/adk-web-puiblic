@@ -88,7 +88,7 @@ import {TelemetryService} from '../../core/services/telemetry.service';
 import {TelemetryConsentDialogComponent} from '../telemetry-consent-dialog/telemetry-consent-dialog.component';
 import {computed, signal} from '@angular/core';
 
-import {ChatComponent, HIDE_SIDE_PANEL_QUERY_PARAM, INITIAL_USER_INPUT_QUERY_PARAM} from './chat.component';
+import {ChatComponent, designFromUrl, HIDE_SIDE_PANEL_QUERY_PARAM, INITIAL_USER_INPUT_QUERY_PARAM} from './chat.component';
 
 // Mock EvalTabComponent to satisfy the required viewChild in ChatComponent
 @Component({
@@ -2596,5 +2596,15 @@ describe('ChatComponent', () => {
       expect(component.shouldShowEvent(empty)).toBeFalse();
       expect(component.shouldShowEvent(stateUpdate)).toBeTrue();
     });
+  });
+});
+
+describe('designFromUrl', () => {
+  it('picks Luminous only for ?ui=luminous', () => {
+    expect(designFromUrl('?ui=luminous&app=a')).toBe('luminous');
+    expect(designFromUrl('?app=a&ui=luminous')).toBe('luminous');
+    expect(designFromUrl('?ui=classic')).toBe('classic');
+    expect(designFromUrl('?ui=other')).toBe('classic');
+    expect(designFromUrl('')).toBe('classic');
   });
 });

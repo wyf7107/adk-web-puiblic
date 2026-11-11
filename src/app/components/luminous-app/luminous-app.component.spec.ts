@@ -20,7 +20,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {initTestBed} from '../../testing/utils';
 
-import {LuminousAppComponent, luminousAppFragment} from './luminous-app.component';
+import {appFromUrl, LuminousAppComponent, luminousAppFragment} from './luminous-app.component';
 
 describe('LuminousAppComponent', () => {
   let fixture: ComponentFixture<LuminousAppComponent>;
@@ -93,21 +93,16 @@ describe('LuminousAppComponent', () => {
     expect(posted).toEqual([]);
   });
   it('relays the host controls in the frame\'s top bar', () => {
-    let classic = 0;
     const themes: string[] = [];
     const points: Array<{x: number, y: number}> = [];
-    fixture.componentInstance.classicRequested.subscribe(() => classic++);
     fixture.componentInstance.themeRequested.subscribe((t) => themes.push(t));
     fixture.componentInstance.userMenuRequested.subscribe((p) => points.push(p));
 
-    fromFrame({type: 'acc:set-design', design: 'classic'});
-    fromFrame({type: 'acc:set-design', design: 'luminous'});  // already on
     fromFrame({type: 'acc:set-theme', theme: 'light'});
     fromFrame({type: 'acc:set-theme', theme: 'blue'});  // not a theme
     fromFrame({type: 'acc:open-user-menu', x: 10, y: 20});
     fromFrame({type: 'acc:open-user-menu', x: 'a', y: 20});  // not a point
 
-    expect(classic).toBe(1);
     expect(themes).toEqual(['light']);
     const box = (fixture.nativeElement.querySelector('iframe') as HTMLIFrameElement)
                     .getBoundingClientRect();
@@ -115,10 +110,14 @@ describe('LuminousAppComponent', () => {
   });
 
   it('ignores host-control messages from other windows', () => {
-    let classic = 0;
-    fixture.componentInstance.classicRequested.subscribe(() => classic++);
-    fromFrame({type: 'acc:set-design', design: 'classic'}, window.location.origin, window);
-    fromFrame({type: 'acc:set-design', design: 'classic'}, 'https://evil.example');
-    expect(classic).toBe(0);
+    const themes: string[] = [];
+    fixture.componentInstance.themeRequested.subscribe((t) => themes.push(t));
+    fromFrame({type: 'acc:set-theme', theme: 'light'}, window.location.origin, window);
+    fromFrame({type: 'acc:set-theme', theme: 'light'}, 'https://evil.example');
+    expect(themes).toEqual([]);
+  });
+  it('reads the agent from the page URL', () => {
+    expect(appFromUrl('?ui=luminous&app=billing_assistant')).toBe('billing_assistant');
+    expect(appFromUrl('?ui=luminous')).toBe('');
   });
 });

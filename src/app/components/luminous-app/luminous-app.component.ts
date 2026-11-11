@@ -36,6 +36,11 @@ const LUMINOUS_APP_ENTRY = trustedResourceUrl`luminous-app/index.html`;
 /** The route the frame opens on (a hash route): Builder's Playground. */
 const LANDING_ROUTE = '/ge-web/dev-tools/adk/playground';
 
+/** The agent the page's URL names (`?app=`), or ''. */
+export function appFromUrl(search: string): string {
+  return new URLSearchParams(search).get('app') ?? '';
+}
+
 /** A point in the page, in CSS pixels. */
 export interface PagePoint {
   x: number;
@@ -45,8 +50,8 @@ export interface PagePoint {
 /**
  * The frame's initial hash route, in hosted mode, for `context`. With
  * `hostControls`, the frame's top bar also carries the host's controls (the
- * design switch, the theme toggle and the user menu), since the host hides
- * its own top bar while the Luminous design is shown.
+ * theme toggle and the user menu), since the host hides its own top bar
+ * while the Luminous design is shown.
  */
 export function luminousAppFragment(context: LuminousAppContext): string {
   const params = new URLSearchParams();
@@ -69,7 +74,6 @@ export function luminousAppFragment(context: LuminousAppContext): string {
  *   - host -> frame `acc:context {theme, app, hostControls}` then, and
  *     whenever the theme changes here;
  *   - frame -> host, from the host controls in the frame's top bar:
- *     `acc:set-design {design: 'classic'}` (back to the classic design),
  *     `acc:set-theme {theme}` (the host applies it and echoes the context),
  *     and `acc:open-user-menu {x, y}` (open the host's user menu at that
  *     point of the frame).
@@ -88,8 +92,6 @@ export class LuminousAppComponent implements AfterViewInit {
   readonly theme = input<'dark'|'light'>('dark');
   readonly appName = input('');
 
-  /** The frame's design switch picked the classic design. */
-  readonly classicRequested = output<void>();
   /** The frame's theme toggle asked for this theme. */
   readonly themeRequested = output<'dark'|'light'>();
   /** The frame's avatar was clicked: open the user menu at this point. */
@@ -119,9 +121,12 @@ export class LuminousAppComponent implements AfterViewInit {
       if (!this.loaded) {
         this.loaded = true;
         this.lastTheme = context.theme;
+        // The host may not have resolved its agent yet; the page's own
+        // `?app=` names it, so the frame's first paint is already that agent.
+        const start = {...context, app: context.app || appFromUrl(window.location.search)};
         setIframeSrc(
             this.frame().nativeElement,
-            replaceFragment(LUMINOUS_APP_ENTRY, luminousAppFragment(context)));
+            replaceFragment(LUMINOUS_APP_ENTRY, luminousAppFragment(start)));
         return;
       }
       // Only the theme follows the host after the start: the frame has its
@@ -159,11 +164,6 @@ export class LuminousAppComponent implements AfterViewInit {
       case 'acc:ready':
         this.ready = true;
         this.post(this.context());
-        break;
-      case 'acc:set-design':
-        if (data.design === 'classic') {
-          this.classicRequested.emit();
-        }
         break;
       case 'acc:set-theme':
         if (data.theme === 'dark' || data.theme === 'light') {

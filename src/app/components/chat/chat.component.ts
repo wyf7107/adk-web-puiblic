@@ -88,7 +88,6 @@ import { DeployedTarget, TryDeployedDialogComponent } from '../try-deployed-dial
 import { CloudMonitoringComponent } from '../cloud-monitoring/cloud-monitoring.component';
 import { CloudSessionsComponent, OpenSessionRequest } from '../cloud-sessions/cloud-sessions.component';
 import { ACC_MODE_LANDING, AccMode, AppView, CLOUD_VIEWS, LeftNavComponent, MANAGER_VIEWS } from '../left-nav/left-nav.component';
-import { AccDesign, DesignSwitchComponent } from '../design-switch/design-switch.component';
 import { AccModeMenuComponent } from '../acc-mode-menu/acc-mode-menu.component';
 import { FleetHealthComponent } from '../fleet-health/fleet-health.component';
 import { LuminousAppComponent, PagePoint } from '../luminous-app/luminous-app.component';
@@ -118,8 +117,20 @@ export interface ListAppsResult {
 export const NESTED_APP_SEPARATOR = '.';
 
 const ROOT_AGENT = 'root_agent';
-/** Where the design (classic or Luminous) is kept. */
-const DESIGN_STORAGE_KEY = 'adk-playground-ui';
+/**
+ * The design: the classic dev UI, or Luminous (the command center's new app,
+ * whole, in `LuminousAppComponent`).
+ */
+export type AccDesign = 'classic'|'luminous';
+/** Query parameter picking the design: `?ui=luminous`. Classic otherwise. */
+export const UI_QUERY_PARAM = 'ui';
+
+/** The design the page's URL asks for. */
+export function designFromUrl(search: string): AccDesign {
+  return new URLSearchParams(search).get(UI_QUERY_PARAM) === 'luminous' ?
+      'luminous' :
+      'classic';
+}
 /** Where the command center's mode (Builder or Manager) is kept. */
 const ACC_MODE_STORAGE_KEY = 'adk-acc-mode';
 /** Query parameter for pre-filling user input. */
@@ -214,7 +225,6 @@ const BIDI_STREAMING_IN_PROGRESS_WARNING =
     CloudMonitoringComponent,
     CloudSessionsComponent,
     LuminousAppComponent,
-    DesignSwitchComponent,
     AccModeMenuComponent,
     FleetHealthComponent,
   ],
@@ -361,12 +371,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Which section fills the main area. Build is everything the UI had before. */
   activeView = signal<AppView>(ACC_MODE_LANDING[this.accMode()]);
   /**
-   * The design: the classic dev UI, or Luminous (the command center's new
-   * app, whole, in `LuminousAppComponent`). Picked in the top bar and kept
-   * across reloads.
+   * The design, from the page's URL (`?ui=luminous`); it stays for the life
+   * of the page. The other query parameters are merged into the URL as the
+   * app moves, so it survives in-app navigation and reloads.
    */
-  design = signal<AccDesign>(
-      this.storageService.getItem(DESIGN_STORAGE_KEY) === 'luminous' ? 'luminous' : 'classic');
+  readonly design = signal<AccDesign>(designFromUrl(window.location.search));
   /** The Sessions section has been opened; it then stays mounted. */
   protected readonly sessionsViewOpened = signal(false);
   /** The Logs section has been opened; it then stays mounted. */
@@ -2671,11 +2680,6 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.showSidePanel = !this.showSidePanel;
     this.storageService.setItem('adk-side-panel-visible', this.showSidePanel.toString());
-  }
-
-  setDesign(design: AccDesign) {
-    this.design.set(design);
-    this.storageService.setItem(DESIGN_STORAGE_KEY, design);
   }
 
   /**

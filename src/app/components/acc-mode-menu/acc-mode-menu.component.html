@@ -20,7 +20,7 @@
   <mat-icon fontSet="material-symbols-outlined" class="mode-trigger-caret">arrow_drop_down</mat-icon>
 </button>
 
-<mat-menu #modeMenu="matMenu" xPosition="before" class="acc-mode-menu-panel">
+<mat-menu #modeMenu="matMenu" xPosition="after" class="acc-mode-menu-panel">
   @for (m of modes; track m.id) {
     <button mat-menu-item type="button" role="menuitemradio"
       class="mode-option" [class.selected]="m.id === mode()"

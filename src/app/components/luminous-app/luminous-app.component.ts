@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, signal, viewChild} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, output, signal, viewChild} from '@angular/core';
 import {replaceFragment, trustedResourceUrl} from 'safevalues';
 import {setIframeSrc} from 'safevalues/dom';
 
@@ -36,10 +36,22 @@ const LUMINOUS_APP_ENTRY = trustedResourceUrl`luminous-app/index.html`;
 /** The route the frame opens on (a hash route): Builder's Playground. */
 const LANDING_ROUTE = '/ge-web/dev-tools/adk/playground';
 
-/** The frame's initial hash route, in hosted mode, for `context`. */
+/** A point in the page, in CSS pixels. */
+export interface PagePoint {
+  x: number;
+  y: number;
+}
+
+/**
+ * The frame's initial hash route, in hosted mode, for `context`. With
+ * `hostControls`, the frame's top bar also carries the host's controls (the
+ * design switch, the theme toggle and the user menu), since the host hides
+ * its own top bar while the Luminous design is shown.
+ */
 export function luminousAppFragment(context: LuminousAppContext): string {
   const params = new URLSearchParams();
   params.set('embed', 'app');
+  params.set('hostControls', '1');
   params.set('theme', context.theme);
   if (context.app) params.set('app', context.app);
   return `${LANDING_ROUTE}?${params.toString()}`;
@@ -54,8 +66,13 @@ export function luminousAppFragment(context: LuminousAppContext): string {
  * through the same origin, and talks to this host over `postMessage`:
  *
  *   - frame -> host `acc:ready` once it can take a context;
- *   - host -> frame `acc:context {theme, app}` then, and whenever the
- *     theme changes here.
+ *   - host -> frame `acc:context {theme, app, hostControls}` then, and
+ *     whenever the theme changes here;
+ *   - frame -> host, from the host controls in the frame's top bar:
+ *     `acc:set-design {design: 'classic'}` (back to the classic design),
+ *     `acc:set-theme {theme}` (the host applies it and echoes the context),
+ *     and `acc:open-user-menu {x, y}` (open the host's user menu at that
+ *     point of the frame).
  *
  * Messages from any other origin or window are ignored.
  */
@@ -70,6 +87,13 @@ export function luminousAppFragment(context: LuminousAppContext): string {
 export class LuminousAppComponent implements AfterViewInit {
   readonly theme = input<'dark'|'light'>('dark');
   readonly appName = input('');
+
+  /** The frame's design switch picked the classic design. */
+  readonly classicRequested = output<void>();
+  /** The frame's theme toggle asked for this theme. */
+  readonly themeRequested = output<'dark'|'light'>();
+  /** The frame's avatar was clicked: open the user menu at this point. */
+  readonly userMenuRequested = output<PagePoint>();
 
   private readonly frame =
       viewChild.required<ElementRef<HTMLIFrameElement>>('frame');
@@ -128,15 +152,40 @@ export class LuminousAppComponent implements AfterViewInit {
       return;
     }
     const data = event.data;
-    if (data && typeof data === 'object' && data.type === 'acc:ready') {
-      this.ready = true;
-      this.post(this.context());
+    if (!data || typeof data !== 'object' || typeof data.type !== 'string') {
+      return;
+    }
+    switch (data.type) {
+      case 'acc:ready':
+        this.ready = true;
+        this.post(this.context());
+        break;
+      case 'acc:set-design':
+        if (data.design === 'classic') {
+          this.classicRequested.emit();
+        }
+        break;
+      case 'acc:set-theme':
+        if (data.theme === 'dark' || data.theme === 'light') {
+          this.themeRequested.emit(data.theme);
+        }
+        break;
+      case 'acc:open-user-menu':
+        if (Number.isFinite(data.x) && Number.isFinite(data.y)) {
+          // The frame reports its own viewport's coordinates.
+          const box = this.frame().nativeElement.getBoundingClientRect();
+          this.userMenuRequested.emit({x: box.left + data.x, y: box.top + data.y});
+        }
+        break;
+      default:
+        break;
     }
   }
 
   private post(context: LuminousAppContext) {
     this.lastTheme = context.theme;
     this.frame().nativeElement.contentWindow?.postMessage(
-        {type: 'acc:context', ...context}, window.location.origin);
+        {type: 'acc:context', ...context, hostControls: true},
+        window.location.origin);
   }
 }

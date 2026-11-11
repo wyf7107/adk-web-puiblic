@@ -57,6 +57,7 @@ describe('LuminousAppComponent', () => {
     const iframe: HTMLIFrameElement =
         fixture.nativeElement.querySelector('iframe');
     expect(iframe.src).toContain('luminous-app/index.html#');
+    expect(iframe.src).toContain('hostControls=1');
     expect(iframe.src)
         .toContain(luminousAppFragment({theme: 'dark', app: 'billing_assistant'}));
     expect(luminousAppFragment({theme: 'light', app: ''})).toContain('theme=light');
@@ -69,8 +70,12 @@ describe('LuminousAppComponent', () => {
     expect(posted).toEqual([]);  // not ready yet
 
     fromFrame({type: 'acc:ready'});
-    expect(posted).toEqual(
-        [{type: 'acc:context', theme: 'light', app: 'billing_assistant'}]);
+    expect(posted).toEqual([{
+      type: 'acc:context',
+      theme: 'light',
+      app: 'billing_assistant',
+      hostControls: true
+    }]);
 
     fixture.componentRef.setInput('appName', 'other');
     fixture.detectChanges();
@@ -78,12 +83,42 @@ describe('LuminousAppComponent', () => {
 
     fixture.componentRef.setInput('theme', 'dark');
     fixture.detectChanges();
-    expect(posted[1]).toEqual({type: 'acc:context', theme: 'dark', app: 'other'});
+    expect(posted[1]).toEqual(
+        {type: 'acc:context', theme: 'dark', app: 'other', hostControls: true});
   });
 
   it('ignores messages from other origins or windows', () => {
     fromFrame({type: 'acc:ready'}, 'https://evil.example');
     fromFrame({type: 'acc:ready'}, window.location.origin, window);
     expect(posted).toEqual([]);
+  });
+  it('relays the host controls in the frame\'s top bar', () => {
+    let classic = 0;
+    const themes: string[] = [];
+    const points: Array<{x: number, y: number}> = [];
+    fixture.componentInstance.classicRequested.subscribe(() => classic++);
+    fixture.componentInstance.themeRequested.subscribe((t) => themes.push(t));
+    fixture.componentInstance.userMenuRequested.subscribe((p) => points.push(p));
+
+    fromFrame({type: 'acc:set-design', design: 'classic'});
+    fromFrame({type: 'acc:set-design', design: 'luminous'});  // already on
+    fromFrame({type: 'acc:set-theme', theme: 'light'});
+    fromFrame({type: 'acc:set-theme', theme: 'blue'});  // not a theme
+    fromFrame({type: 'acc:open-user-menu', x: 10, y: 20});
+    fromFrame({type: 'acc:open-user-menu', x: 'a', y: 20});  // not a point
+
+    expect(classic).toBe(1);
+    expect(themes).toEqual(['light']);
+    const box = (fixture.nativeElement.querySelector('iframe') as HTMLIFrameElement)
+                    .getBoundingClientRect();
+    expect(points).toEqual([{x: box.left + 10, y: box.top + 20}]);
+  });
+
+  it('ignores host-control messages from other windows', () => {
+    let classic = 0;
+    fixture.componentInstance.classicRequested.subscribe(() => classic++);
+    fromFrame({type: 'acc:set-design', design: 'classic'}, window.location.origin, window);
+    fromFrame({type: 'acc:set-design', design: 'classic'}, 'https://evil.example');
+    expect(classic).toBe(0);
   });
 });

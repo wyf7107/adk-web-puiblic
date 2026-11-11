@@ -14,7 +14,9 @@
  limitations under the License.
 -->
 
-<mat-toolbar class="app-toolbar lumi-playground">
+<!-- Hidden while the Luminous design is shown: its own top bar carries the
+     design switch, the theme toggle and the user menu (see LuminousAppComponent). -->
+<mat-toolbar class="app-toolbar lumi-playground" [class.app-toolbar-hidden]="design() === 'luminous'">
   <div class="toolbar-group toolbar-agent-group">
     @if (design() === 'classic' && accMode() === 'manager') {
     <button mat-icon-button class="toolbar-icon-button" (click)="toggleLeftNav()"
@@ -305,7 +307,11 @@
   </mat-menu>
 </mat-toolbar>
 
-<div class="workspace-layout">
+<!-- Where the user menu opens when the Luminous frame's avatar asks for it. -->
+<div class="user-menu-anchor" #userMenuAnchor="matMenuTrigger" [matMenuTriggerFor]="userMenu"
+  [style.left.px]="userMenuPoint().x" [style.top.px]="userMenuPoint().y" aria-hidden="true"></div>
+
+<div class="workspace-layout" [class.workspace-layout-full]="design() === 'luminous'">
 @if (design() === 'classic' && accMode() === 'manager' && showLeftNav()) {
   <app-left-nav [activeView]="activeView()" (navigate)="setActiveView($event)" (manageCloud)="openCloudConnectDialog()"></app-left-nav>
 }
@@ -315,7 +321,10 @@
   @if (design() === 'luminous') {
     <app-luminous-app class="luminous-app"
       [theme]="themeService?.currentTheme() === 'light' ? 'light' : 'dark'"
-      [appName]="appName"></app-luminous-app>
+      [appName]="appName"
+      (classicRequested)="setDesign('classic')"
+      (themeRequested)="themeService?.setTheme($event)"
+      (userMenuRequested)="openUserMenuAt($event)"></app-luminous-app>
   }
   <!-- Build: everything the dev UI had before the left navigation. Kept
        mounted while another section is shown, so the session survives. -->

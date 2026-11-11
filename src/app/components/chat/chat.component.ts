@@ -91,7 +91,7 @@ import { ACC_MODE_LANDING, AccMode, AppView, CLOUD_VIEWS, LeftNavComponent, MANA
 import { AccDesign, DesignSwitchComponent } from '../design-switch/design-switch.component';
 import { AccModeMenuComponent } from '../acc-mode-menu/acc-mode-menu.component';
 import { FleetHealthComponent } from '../fleet-health/fleet-health.component';
-import { LuminousAppComponent } from '../luminous-app/luminous-app.component';
+import { LuminousAppComponent, PagePoint } from '../luminous-app/luminous-app.component';
 import { CloudConnectDialogComponent } from '../cloud-connect-dialog/cloud-connect-dialog.component';
 import { CLOUD_SERVICE } from '../../core/services/interfaces/cloud';
 import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
@@ -428,6 +428,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   });
 
   readonly invChipMenuTrigger = viewChild<MatMenuTrigger>('invChipMenuTrigger');
+  /** Opens the user menu for the Luminous frame's avatar. */
+  private readonly userMenuAnchor = viewChild<MatMenuTrigger>('userMenuAnchor');
+  /** Where the user menu opens for the Luminous frame, in page pixels. */
+  protected readonly userMenuPoint = signal<PagePoint>({x: 0, y: 0});
   readonly nodeChipMenuTrigger = viewChild<MatMenuTrigger>('nodeChipMenuTrigger');
   readonly addMenuTrigger = viewChild<MatMenuTrigger>('addMenuTrigger');
 
@@ -2672,6 +2676,17 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   setDesign(design: AccDesign) {
     this.design.set(design);
     this.storageService.setItem(DESIGN_STORAGE_KEY, design);
+  }
+
+  /**
+   * Opens the user menu at `point`: the Luminous frame's avatar, which stands
+   * in for ours while our top bar is hidden. The menu opens below and left of
+   * it, as it does from our avatar.
+   */
+  openUserMenuAt(point: PagePoint) {
+    this.userMenuPoint.set(point);
+    this.changeDetectorRef.detectChanges();
+    this.userMenuAnchor()?.openMenu();
   }
 
   toggleLeftNav() {

@@ -390,6 +390,24 @@
   height: calc(100% - 48px);
 }
 
+// The Luminous design has the whole window: its own top bar replaces ours.
+.app-toolbar.app-toolbar-hidden {
+  display: none;
+}
+
+.workspace-layout-full {
+  height: 100%;
+}
+
+// An invisible point the user menu opens from, placed where the Luminous
+// frame's avatar is.
+.user-menu-anchor {
+  position: fixed;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
 .workspace-main {
   flex: 1;
   min-width: 0;

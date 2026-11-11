@@ -49,7 +49,7 @@
       }
     </div>
     @if (design() === 'classic') {
-    <app-acc-mode-menu class="toolbar-mode-menu" [mode]="accMode()" (modeChange)="setAccMode($event)"></app-acc-mode-menu>
+    <app-acc-mode-toggle class="toolbar-mode-toggle" [mode]="accMode()" (modeChange)="setAccMode($event)"></app-acc-mode-toggle>
     }
     @if (design() === 'classic' && accMode() === 'builder') {
     <div class="selector-group">
@@ -103,8 +103,8 @@
     </div>
     }
     @if (design() === 'classic' && accMode() === 'manager') {
-    <!-- Manager's pages are about one agent, picked here. (Builder's drawer
-         slides over the Playground, which Manager doesn't show.) -->
+    <!-- Manage's pages are about one agent, picked here. (Build's drawer
+         slides over the Playground, which Manage doesn't show.) -->
     <div class="selector-group">
       <button class="selector-button manager-app-button" [matMenuTriggerFor]="managerAppMenu"
         matTooltip="Select an agent" aria-label="Select an agent">

@@ -88,7 +88,7 @@ import { DeployedTarget, TryDeployedDialogComponent } from '../try-deployed-dial
 import { CloudMonitoringComponent } from '../cloud-monitoring/cloud-monitoring.component';
 import { CloudSessionsComponent, OpenSessionRequest } from '../cloud-sessions/cloud-sessions.component';
 import { ACC_MODE_LANDING, AccMode, AppView, CLOUD_VIEWS, LeftNavComponent, MANAGER_VIEWS } from '../left-nav/left-nav.component';
-import { AccModeMenuComponent } from '../acc-mode-menu/acc-mode-menu.component';
+import { AccModeToggleComponent } from '../acc-mode-toggle/acc-mode-toggle.component';
 import { FleetHealthComponent } from '../fleet-health/fleet-health.component';
 import { LuminousAppComponent, PagePoint } from '../luminous-app/luminous-app.component';
 import { CloudConnectDialogComponent } from '../cloud-connect-dialog/cloud-connect-dialog.component';
@@ -225,7 +225,7 @@ const BIDI_STREAMING_IN_PROGRESS_WARNING =
     CloudMonitoringComponent,
     CloudSessionsComponent,
     LuminousAppComponent,
-    AccModeMenuComponent,
+    AccModeToggleComponent,
     FleetHealthComponent,
   ],
 })

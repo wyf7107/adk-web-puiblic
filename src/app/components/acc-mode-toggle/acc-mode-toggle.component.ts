@@ -15,47 +15,44 @@
  * limitations under the License.
  */
 
-import {ChangeDetectionStrategy, Component, computed, input, output} from '@angular/core';
-import {MatIconModule} from '@angular/material/icon';
-import {MatMenuModule} from '@angular/material/menu';
+import {ChangeDetectionStrategy, Component, input, output} from '@angular/core';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 import {AccMode} from '../left-nav/left-nav.component';
 
-/** The modes, in the menu's order: who the person is, and what they get. */
+/** The modes, in the toggle's order: the label, and what that mode is for. */
 export const ACC_MODES: ReadonlyArray<{id: AccMode, label: string, description: string}> = [
   {
     id: 'builder',
-    label: 'Builder',
+    label: 'Build',
     description: 'Build, evaluate and ship your agents',
   },
   {
     id: 'manager',
-    label: 'Manager',
+    label: 'Manage',
     description: 'Watch the fleet: health, cost, quality and governance',
   },
 ];
 
 /**
- * The top bar's mode switch, in the Luminous style: the mode's name with a
- * caret, no fill or border at rest, opening a menu of the two modes (the
- * name over what that mode is for), the current one checked.
+ * The classic top bar's Build | Manage toggle: the same segmented toggle as
+ * the chat's Events | Traces (a sunken pill track, the current mode raised).
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-acc-mode-menu',
-  templateUrl: './acc-mode-menu.component.html',
-  styleUrl: './acc-mode-menu.component.scss',
+  selector: 'app-acc-mode-toggle',
+  templateUrl: './acc-mode-toggle.component.html',
+  styleUrl: './acc-mode-toggle.component.scss',
   standalone: true,
-  imports: [MatIconModule, MatMenuModule],
+  imports: [MatButtonToggleModule, MatTooltipModule],
 })
-export class AccModeMenuComponent {
+export class AccModeToggleComponent {
   readonly mode = input<AccMode>('builder');
   /** A different mode was picked. */
   readonly modeChange = output<AccMode>();
 
   readonly modes = ACC_MODES;
-  readonly label = computed(
-      () => ACC_MODES.find((m) => m.id === this.mode())?.label ?? '');
 
   pick(mode: AccMode): void {
     if (mode !== this.mode()) {

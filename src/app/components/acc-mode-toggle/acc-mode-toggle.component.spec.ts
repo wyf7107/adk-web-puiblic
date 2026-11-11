@@ -22,53 +22,45 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {AccMode} from '../left-nav/left-nav.component';
 import {initTestBed} from '../../testing/utils';
 
-import {AccModeMenuComponent} from './acc-mode-menu.component';
+import {AccModeToggleComponent} from './acc-mode-toggle.component';
 
-describe('AccModeMenuComponent', () => {
-  let fixture: ComponentFixture<AccModeMenuComponent>;
+describe('AccModeToggleComponent', () => {
+  let fixture: ComponentFixture<AccModeToggleComponent>;
 
   initTestBed();  // required for 1p compat
 
   beforeEach(async () => {
     await TestBed
         .configureTestingModule({
-          imports: [AccModeMenuComponent, NoopAnimationsModule],
+          imports: [AccModeToggleComponent, NoopAnimationsModule],
         })
         .compileComponents();
-    fixture = TestBed.createComponent(AccModeMenuComponent);
+    fixture = TestBed.createComponent(AccModeToggleComponent);
     fixture.detectChanges();
   });
 
-  function trigger(): HTMLButtonElement {
-    return fixture.nativeElement.querySelector('.mode-trigger');
+  function options(): HTMLButtonElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.mode-option button'));
   }
 
-  function openOptions(): HTMLButtonElement[] {
-    trigger().click();
-    fixture.detectChanges();
-    return Array.from(document.querySelectorAll('.mode-option'));
+  function checked(): boolean[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.mode-option'))
+        .map((t) => (t as HTMLElement).classList.contains('mat-button-toggle-checked'));
   }
 
-  it('names the current mode', () => {
-    expect(trigger().textContent).toContain('Builder');
+  it('offers Build and Manage, the current one selected', () => {
+    expect(options().map((o) => o.textContent?.trim())).toEqual(['Build', 'Manage']);
+    expect(checked()).toEqual([true, false]);
     fixture.componentRef.setInput('mode', 'manager');
     fixture.detectChanges();
-    expect(trigger().textContent).toContain('Manager');
-  });
-
-  it('lists both modes, the current one checked', () => {
-    const options = openOptions();
-    expect(options.map((o) => o.querySelector('.mode-option-label')!.textContent))
-        .toEqual(['Builder', 'Manager']);
-    expect(options.map((o) => o.getAttribute('aria-checked')))
-        .toEqual(['true', 'false']);
+    expect(checked()).toEqual([false, true]);
   });
 
   it('emits only a different mode', () => {
     const picked: AccMode[] = [];
     fixture.componentInstance.modeChange.subscribe((m) => picked.push(m));
-    openOptions()[0].click();  // Builder, already current
-    openOptions()[1].click();
+    options()[0].click();  // Build, already current
+    options()[1].click();
     expect(picked).toEqual(['manager']);
   });
 });

@@ -412,10 +412,9 @@
   height: 100%;
 }
 
-// The Luminous playground covers the classic one (which stays mounted below
-// it). It sits in the drawer container's content, so the app and session
-// selector drawers still open over it.
-.luminous-playground {
+// The Luminous app covers the whole main area; the classic UI stays mounted
+// below it, so switching back keeps its state.
+.luminous-app {
   position: absolute;
   inset: 0;
   z-index: 10;
@@ -466,6 +465,16 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+}
+
+// The Classic | Luminous switch, first of the bar's right-hand actions.
+.toolbar-design-switch {
+  margin-right: 8px;
+}
+
+// Classic's Builder / Manager menu, last in the bar, right of the user avatar.
+.toolbar-mode-menu {
+  margin-left: 4px;
 }
 
 .toolbar-session-text {
@@ -593,6 +602,12 @@
 .user-avatar-button {
   margin-left: auto;
   flex-shrink: 0;
+
+  // With no app (so no session group), the actions before it already sit
+  // right; a second auto margin would split the space and strand them mid-bar.
+  .toolbar-actions + & {
+    margin-left: 0;
+  }
 
   mat-icon {
     font-size: 24px;

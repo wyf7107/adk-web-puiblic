@@ -1,0 +1,111 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+:host {
+  display: inline-flex;
+}
+
+// One quiet text trigger: the mode's name in Body M emphasized and a muted
+// caret; no fill or border at rest, the state layer on hover and while open.
+.mode-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 0 4px 0 10px;
+  border: none;
+  border-radius: 9999px;
+  outline: none;
+  background: transparent;
+  color: var(--lumi-sys-color-on-surface);
+  font-family: var(--lumi-font-family);
+  font-size: 15px;
+  line-height: 20px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 540;
+  cursor: pointer;
+  transition: background-color var(--lumi-motion-standard);
+
+  &:hover {
+    background: var(--lumi-sys-color-state-hover);
+  }
+
+  &[aria-expanded='true'],
+  &:active {
+    background: var(--lumi-sys-color-state-pressed);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lumi-sys-color-on-surface);
+    outline-offset: 2px;
+  }
+}
+
+.mode-trigger-caret {
+  width: 20px;
+  height: 20px;
+  color: var(--lumi-sys-color-on-surface-variant);
+  font-size: 20px;
+  line-height: 20px;
+}
+
+// The menu renders in the overlay, outside this component.
+::ng-deep .acc-mode-menu-panel {
+  min-width: 300px !important;
+
+  .mode-option.mat-mdc-menu-item {
+    min-height: 56px;
+    padding: 8px 12px;
+
+    .mat-mdc-menu-item-text {
+      display: flex;
+      flex: 1;
+      align-items: center;
+      gap: 12px;
+    }
+
+    &.selected {
+      background: var(--lumi-sys-color-surface-dim);
+    }
+  }
+
+  .mode-option-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .mode-option-label {
+    color: var(--lumi-sys-color-on-surface);
+    font-family: var(--lumi-font-family);
+    font-size: 15px;
+    line-height: 20px;
+    font-variation-settings: var(--lumi-font-variation), 'wght' 540;
+  }
+
+  .mode-option-description {
+    color: var(--lumi-sys-color-on-surface-variant);
+    font-family: var(--lumi-font-family);
+    font-size: 13px;
+    line-height: 17px;
+    font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+  }
+
+  .mode-option-check {
+    margin: 0;
+    color: var(--lumi-sys-color-on-surface);
+  }
+}

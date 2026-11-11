@@ -28,6 +28,7 @@ import {EVAL_TAB_COMPONENT, EvalTabComponent} from './components/eval-tab/eval-t
 import {AGENT_SERVICE} from './core/services/interfaces/agent';
 import {AGENT_BUILDER_SERVICE} from './core/services/interfaces/agent-builder';
 import {ARTIFACT_SERVICE} from './core/services/interfaces/artifact';
+import {CLOUD_SERVICE} from './core/services/interfaces/cloud';
 import {AUDIO_PLAYING_SERVICE} from './core/services/interfaces/audio-playing';
 import {AUDIO_RECORDING_SERVICE} from './core/services/interfaces/audio-recording';
 import {DOWNLOAD_SERVICE} from './core/services/interfaces/download';
@@ -47,6 +48,7 @@ import {MockAgentService} from './core/services/testing/mock-agent.service';
 import {MockArtifactService} from './core/services/testing/mock-artifact.service';
 import {MockAudioPlayingService} from './core/services/testing/mock-audio-playing.service';
 import {MockAudioRecordingService} from './core/services/testing/mock-audio-recording.service';
+import {MockCloudService} from './core/services/testing/mock-cloud.service';
 import {MockDownloadService} from './core/services/testing/mock-download.service';
 import {MockEvalService} from './core/services/testing/mock-eval.service';
 import {MockEventService} from './core/services/testing/mock-event.service';
@@ -209,6 +211,10 @@ describe('AppComponent', () => {
             {
               provide: THEME_SERVICE,
               useClass: MockThemeService,
+            },
+            {
+              provide: CLOUD_SERVICE,
+              useClass: MockCloudService,
             },
             {
               provide: TelemetryService,

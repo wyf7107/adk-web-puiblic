@@ -87,8 +87,11 @@ import { deploymentName, targetLabel } from '../deployment-picker/deployment-pic
 import { DeployedTarget, TryDeployedDialogComponent } from '../try-deployed-dialog/try-deployed-dialog.component';
 import { CloudMonitoringComponent } from '../cloud-monitoring/cloud-monitoring.component';
 import { CloudSessionsComponent, OpenSessionRequest } from '../cloud-sessions/cloud-sessions.component';
-import { AppView, CLOUD_VIEWS, LeftNavComponent, PlaygroundUi } from '../left-nav/left-nav.component';
-import { LuminousPlaygroundComponent, LuminousSession } from '../luminous-playground/luminous-playground.component';
+import { ACC_MODE_LANDING, AccMode, AppView, CLOUD_VIEWS, LeftNavComponent, MANAGER_VIEWS } from '../left-nav/left-nav.component';
+import { AccDesign, DesignSwitchComponent } from '../design-switch/design-switch.component';
+import { AccModeMenuComponent } from '../acc-mode-menu/acc-mode-menu.component';
+import { FleetHealthComponent } from '../fleet-health/fleet-health.component';
+import { LuminousAppComponent } from '../luminous-app/luminous-app.component';
 import { CloudConnectDialogComponent } from '../cloud-connect-dialog/cloud-connect-dialog.component';
 import { CLOUD_SERVICE } from '../../core/services/interfaces/cloud';
 import { EditJsonDialogComponent } from '../edit-json-dialog/edit-json-dialog.component';
@@ -115,8 +118,10 @@ export interface ListAppsResult {
 export const NESTED_APP_SEPARATOR = '.';
 
 const ROOT_AGENT = 'root_agent';
-/** Where the Playground's design (classic or Luminous) is kept. */
-const PLAYGROUND_UI_STORAGE_KEY = 'adk-playground-ui';
+/** Where the design (classic or Luminous) is kept. */
+const DESIGN_STORAGE_KEY = 'adk-playground-ui';
+/** Where the command center's mode (Builder or Manager) is kept. */
+const ACC_MODE_STORAGE_KEY = 'adk-acc-mode';
 /** Query parameter for pre-filling user input. */
 export const INITIAL_USER_INPUT_QUERY_PARAM = 'q';
 /** Query parameter for hiding the side panel. */
@@ -208,7 +213,10 @@ const BIDI_STREAMING_IN_PROGRESS_WARNING =
     CloudLogsComponent,
     CloudMonitoringComponent,
     CloudSessionsComponent,
-    LuminousPlaygroundComponent,
+    LuminousAppComponent,
+    DesignSwitchComponent,
+    AccModeMenuComponent,
+    FleetHealthComponent,
   ],
 })
 export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -343,15 +351,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   showSidePanel = this.storageService.getItem('adk-side-panel-visible') !== 'false';
   /** The section navigation on the left, toggled by the toolbar menu button. */
   showLeftNav = signal(this.storageService.getItem('adk-left-nav-visible') !== 'false');
-  /** Which section fills the main area. Build is everything the UI had before. */
-  activeView = signal<AppView>('build');
   /**
-   * The Playground's design: the classic dev UI or Luminous (the command
-   * center's new design, `LuminousPlaygroundComponent`). Picked on the left
-   * nav's Playground row and kept across reloads.
+   * Who the classic design is serving: Builder (the Playground alone) or
+   * Manager (every other page, in the left nav). Picked in the top bar and
+   * kept across reloads. The Luminous design has modes of its own.
    */
-  playgroundUi = signal<PlaygroundUi>(
-      this.storageService.getItem(PLAYGROUND_UI_STORAGE_KEY) === 'luminous' ? 'luminous' : 'classic');
+  accMode = signal<AccMode>(
+      this.storageService.getItem(ACC_MODE_STORAGE_KEY) === 'manager' ? 'manager' : 'builder');
+  /** Which section fills the main area. Build is everything the UI had before. */
+  activeView = signal<AppView>(ACC_MODE_LANDING[this.accMode()]);
+  /**
+   * The design: the classic dev UI, or Luminous (the command center's new
+   * app, whole, in `LuminousAppComponent`). Picked in the top bar and kept
+   * across reloads.
+   */
+  design = signal<AccDesign>(
+      this.storageService.getItem(DESIGN_STORAGE_KEY) === 'luminous' ? 'luminous' : 'classic');
   /** The Sessions section has been opened; it then stays mounted. */
   protected readonly sessionsViewOpened = signal(false);
   /** The Logs section has been opened; it then stays mounted. */
@@ -924,6 +939,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       const error =
         'Please check server log for full details: \n' + closeReason;
       this.openSnackBar(error, 'OK');
+      // The server ended the live connection under a running call (a hang-up
+      // has already cleared the flag): hang up here too, rather than leave
+      // the call controls and the camera running on a dead connection.
+      if (this.isAudioRecording) {
+        this.stopAudioRecording();
+      }
     });
 
     this.webSocketService.getMessages().subscribe((message) => {
@@ -2648,28 +2669,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.storageService.setItem('adk-side-panel-visible', this.showSidePanel.toString());
   }
 
-  setPlaygroundUi(ui: PlaygroundUi) {
-    this.playgroundUi.set(ui);
-    this.storageService.setItem(PLAYGROUND_UI_STORAGE_KEY, ui);
-    // The switch is on the Playground row, so picking a design opens it.
-    this.setActiveView('build');
-  }
-
-  /**
-   * The Luminous playground moved to another session itself (a first message
-   * created one, or it started over); the classic one follows, so both
-   * designs show the same conversation.
-   */
-  protected onLuminousSessionChange(change: LuminousSession) {
-    // Only a real session moves the classic playground. An empty one ("no
-    // session yet") can be the frame's state from before it applied our last
-    // context, and following it would reset the conversation shown here.
-    if (change.app !== this.appName || !change.session) {
-      return;
-    }
-    if (change.session !== this.sessionId) {
-      this.loadSession(change.session);
-    }
+  setDesign(design: AccDesign) {
+    this.design.set(design);
+    this.storageService.setItem(DESIGN_STORAGE_KEY, design);
   }
 
   toggleLeftNav() {
@@ -2677,7 +2679,22 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.storageService.setItem('adk-left-nav-visible', String(this.showLeftNav()));
   }
 
+  /** Switches mode, opening the new mode's landing page. */
+  setAccMode(mode: AccMode) {
+    if (mode === this.accMode()) {
+      return;
+    }
+    this.setActiveView(ACC_MODE_LANDING[mode]);
+  }
+
   setActiveView(view: AppView) {
+    // Each page belongs to one mode, so going to a page from the other mode
+    // (a "Back to Playground" link, say) switches the mode along with it.
+    const mode: AccMode = MANAGER_VIEWS.has(view) ? 'manager' : 'builder';
+    if (mode !== this.accMode()) {
+      this.accMode.set(mode);
+      this.storageService.setItem(ACC_MODE_STORAGE_KEY, mode);
+    }
     this.activeView.set(view);
     if (view === 'sessions') {
       this.sessionsViewOpened.set(true);
@@ -2721,10 +2738,30 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
    * and switches the Playground to it.
    */
   openTryDeployedDialog(deploymentId?: string) {
-    if (!this.cloudService.status()?.connected) {
+    const status = this.cloudService.status();
+    if (!status) {
+      // Not looked up yet (Builder never shows the nav footer that does), so
+      // check first rather than asking an already connected user to connect.
+      this.cloudService.refreshStatus().subscribe({
+        next: (fresh) => {
+          if (fresh.connected) {
+            this.showTryDeployedDialog(deploymentId);
+          } else {
+            this.openCloudConnectDialog();
+          }
+        },
+        error: () => this.openCloudConnectDialog(),
+      });
+      return;
+    }
+    if (!status.connected) {
       this.openCloudConnectDialog();
       return;
     }
+    this.showTryDeployedDialog(deploymentId);
+  }
+
+  private showTryDeployedDialog(deploymentId?: string) {
     const current = this.deployedTarget();
     this.dialog
         .open(TryDeployedDialogComponent, {
@@ -4934,8 +4971,14 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
         if (app === selectedAgent) {
           return;
         }
+        // Switching from another app starts a fresh session (see selectApp),
+        // so drop the old app's session from the URL too; a reload would
+        // otherwise look it up under the new app.
+        const staleSession = selectedAgent ?
+            {'session': null, 'evalCase': null, 'evalResult': null, 'file': null} :
+            {};
         this.router.navigate([], {
-          queryParams: { 'app': app, 'mode': null },
+          queryParams: { 'app': app, 'mode': null, ...staleSession },
           queryParamsHandling: 'merge',
         });
       });

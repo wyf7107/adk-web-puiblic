@@ -16,11 +16,13 @@
 
 <mat-toolbar class="app-toolbar lumi-playground">
   <div class="toolbar-group toolbar-agent-group">
+    @if (design() === 'classic' && accMode() === 'manager') {
     <button mat-icon-button class="toolbar-icon-button" (click)="toggleLeftNav()"
       [matTooltip]="showLeftNav() ? 'Hide navigation' : 'Show navigation'" matTooltipPosition="below"
       [attr.aria-expanded]="showLeftNav()" aria-label="Toggle navigation">
       <mat-icon>menu</mat-icon>
     </button>
+    }
     <div class="toolbar-logo">
       @if (logoComponent) {
         <ng-container *ngComponentOutlet="logoComponent"></ng-container>
@@ -44,6 +46,7 @@
         <span class="toolbar-logo-text logo-narrow">ADK</span>
       }
     </div>
+    @if (design() === 'classic' && accMode() === 'builder') {
     <div class="selector-group">
       <button class="selector-button" (click)="toggleAppSelectorDrawer()" matTooltip="Select an app">
         <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
@@ -56,23 +59,25 @@
       @if (!isBuilderMode()) {
         <div class="selector-group-divider"></div>
         @if (graphsAvailable()) {
-          <span [matTooltip]="!graphsAvailable() ? 'Agent structure graph is not available for this agent' : 'View Agent Structure Graph'" matTooltipPosition="below">
+          <span [matTooltip]="!appName ? 'Select an app to view its agent structure graph' : !graphsAvailable() ? 'Agent structure graph is not available for this agent' : 'View Agent Structure Graph'" matTooltipPosition="below">
             <button mat-icon-button class="toolbar-icon-button"
-              [disabled]="!graphsAvailable()"
+              [disabled]="!graphsAvailable() || !appName"
               (click)="openAgentStructureGraphDialog()"
+              aria-label="View Agent Structure Graph"
               matTooltipPosition="below">
               <mat-icon>account_tree</mat-icon>
             </button>
           </span>
         }
-        <span [matTooltip]="disableBuilderSwitch ? 'Editing is not available for this agent because it was not built by the builder' : 'Edit in Builder Mode'" matTooltipPosition="below">
+        <span [matTooltip]="!appName ? 'Select an app to edit it' : disableBuilderSwitch ? 'Editing is not available for this agent because it was not built by the builder' : 'Edit in Builder Mode'" matTooltipPosition="below">
           <button mat-icon-button class="toolbar-icon-button"
-            [disabled]="disableBuilderSwitch"
-            (click)="enterBuilderMode()">
+            [disabled]="disableBuilderSwitch || !appName"
+            (click)="enterBuilderMode()"
+            aria-label="Edit in Builder Mode">
             <mat-icon>edit</mat-icon>
           </button>
         </span>
-        <span matTooltip="Deploy this agent" matTooltipPosition="below">
+        <span [matTooltip]="appName ? 'Deploy this agent' : 'Select an app to deploy it'" matTooltipPosition="below">
           <button mat-icon-button class="toolbar-icon-button"
             [disabled]="!appName"
             (click)="openDeployDialog()"
@@ -80,7 +85,7 @@
             <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
           </button>
         </span>
-        <span matTooltip="Talk to a deployed version of this agent" matTooltipPosition="below">
+        <span [matTooltip]="appName ? 'Talk to a deployed version of this agent' : 'Select an app to talk to its deployed version'" matTooltipPosition="below">
           <button mat-icon-button class="toolbar-icon-button"
             [class.toolbar-icon-active]="!!deployedTarget()"
             [disabled]="!appName"
@@ -91,10 +96,33 @@
         </span>
       }
     </div>
+    }
+    @if (design() === 'classic' && accMode() === 'manager') {
+    <!-- Manager's pages are about one agent, picked here. (Builder's drawer
+         slides over the Playground, which Manager doesn't show.) -->
+    <div class="selector-group">
+      <button class="selector-button manager-app-button" [matMenuTriggerFor]="managerAppMenu"
+        matTooltip="Select an agent" aria-label="Select an agent">
+        <mat-icon fontSet="material-symbols-outlined">robot_2</mat-icon>
+        <span class="selector-label">{{ appName || 'Select an agent' }}</span>
+        <mat-icon class="selector-caret" fontSet="material-symbols-outlined">arrow_drop_down</mat-icon>
+      </button>
+    </div>
+    <mat-menu #managerAppMenu="matMenu" class="manager-app-menu">
+      @for (app of allApps(); track app) {
+        <button mat-menu-item class="manager-app-option" (click)="selectAppFromDrawer(app)">
+          <mat-icon fontSet="material-symbols-outlined">{{ app === appName ? 'check' : 'robot_2' }}</mat-icon>
+          <span>{{ app }}</span>
+        </button>
+      } @empty {
+        <button mat-menu-item disabled>No agents found</button>
+      }
+    </mat-menu>
+    }
   </div>
   @if (appName) {
   <div class="toolbar-group toolbar-session-group">
-    @if (activeView() === 'build') {
+    @if (design() === 'classic' && activeView() === 'build') {
     @if (isViewOnlySession()) {
       <div class="readonly-chip">
         @if (readonlyReturnView() === 'sessions') {
@@ -202,6 +230,7 @@
   </div>
     }
   <div class="toolbar-actions">
+    <app-design-switch class="toolbar-design-switch" [design]="design()" (designChange)="setDesign($event)"></app-design-switch>
     @let isSessionLoadingActions = uiStateService.isSessionLoading() | async;
     @if (isSessionLoadingActions === false) {
 
@@ -216,6 +245,19 @@
     }
   </div>
   </div>
+  } @else {
+  <!-- No app yet (so no session group): the design switch and theme toggle. -->
+  <div class="toolbar-actions">
+    <app-design-switch class="toolbar-design-switch" [design]="design()" (designChange)="setDesign($event)"></app-design-switch>
+    <button
+      mat-icon-button
+      class="toolbar-icon-button"
+      (click)="themeService?.toggleTheme()"
+      [matTooltip]="themeService?.currentTheme() === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+    >
+      <mat-icon>{{ themeService?.currentTheme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+  </div>
   }
   <button
     mat-icon-button
@@ -226,6 +268,9 @@
   >
     <mat-icon>account_circle</mat-icon>
   </button>
+  @if (design() === 'classic') {
+    <app-acc-mode-menu class="toolbar-mode-menu" [mode]="accMode()" (modeChange)="setAccMode($event)"></app-acc-mode-menu>
+  }
   <mat-menu #userMenu="matMenu" xPosition="before" panelClass="user-avatar-menu">
     <div class="user-menu-panel" (click)="$event.stopPropagation()">
       <div class="user-menu-header">
@@ -261,11 +306,17 @@
 </mat-toolbar>
 
 <div class="workspace-layout">
-@if (showLeftNav()) {
-  <app-left-nav [activeView]="activeView()" (navigate)="setActiveView($event)" (manageCloud)="openCloudConnectDialog()"
-    [playgroundUi]="playgroundUi()" (playgroundUiChange)="setPlaygroundUi($event)"></app-left-nav>
+@if (design() === 'classic' && accMode() === 'manager' && showLeftNav()) {
+  <app-left-nav [activeView]="activeView()" (navigate)="setActiveView($event)" (manageCloud)="openCloudConnectDialog()"></app-left-nav>
 }
 <div class="workspace-main">
+  <!-- Luminous: the command center's new app, whole, over the classic UI
+       (kept mounted underneath, so switching back keeps its state). -->
+  @if (design() === 'luminous') {
+    <app-luminous-app class="luminous-app"
+      [theme]="themeService?.currentTheme() === 'light' ? 'light' : 'dark'"
+      [appName]="appName"></app-luminous-app>
+  }
   <!-- Build: everything the dev UI had before the left navigation. Kept
        mounted while another section is shown, so the session survives. -->
   <div class="workspace-view lumi-playground" [class.workspace-view-hidden]="activeView() !== 'build'">
@@ -403,16 +454,6 @@
     </div>
     }
   </mat-drawer>
-
-  <!-- Luminous: the new design, over the classic playground (kept mounted
-       underneath, so switching back keeps its state). Inside this container
-       so the toolbar's app and session drawers still slide over it. -->
-  @if (playgroundUi() === 'luminous') {
-    <app-luminous-playground class="luminous-playground"
-      [appName]="appName" [userId]="userId" [sessionId]="sessionId"
-      [theme]="themeService?.currentTheme() === 'light' ? 'light' : 'dark'"
-      (sessionChange)="onLuminousSessionChange($event)"></app-luminous-playground>
-  }
 
   <mat-drawer-container class="side-panel-container" autosize>
   <mat-drawer class="side-drawer" #sideDrawer [mode]="isMobile() ? 'over' : 'side'" appResizableDrawer
@@ -1009,6 +1050,9 @@
 </mat-drawer-container>
   </div>
 
+  @if (activeView() === 'fleet-health') {
+    <app-fleet-health class="workspace-view"></app-fleet-health>
+  }
   @if (activeView() === 'deployments') {
     <app-deployments class="workspace-view" [appName]="appName" (backToPlayground)="setActiveView('build')"
       (tryDeployment)="openTryDeployedDialog($event.id)"></app-deployments>

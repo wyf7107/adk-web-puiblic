@@ -71,7 +71,7 @@
     </p>
   </div>
   }
-  @for (item of displayItems; track item; let i = $index) {
+  @for (item of displayItems; track displayItemKey(item); let i = $index) {
     @if (item.type === 'event') {
       @let uiEvent = item.event;
       @let show = shouldShowEvent ? shouldShowEvent(uiEvent) : true;

@@ -21,19 +21,22 @@ import {MatIconModule} from '@angular/material/icon';
 import {CLOUD_SERVICE} from '../../core/services/interfaces/cloud';
 
 /** A top-level view the app can show in its main area. */
-export type AppView = 'build'|'deployments'|'sessions'|'logs'|'monitoring';
+export type AppView =
+    'build'|'deployments'|'sessions'|'logs'|'monitoring'|'fleet-health';
 
 /**
- * Which design the Playground shows: the classic dev UI, or Luminous (the
- * command center's new design).
+ * Who the command center is serving, picked in the top bar's mode menu.
+ * In the classic design a Builder gets just the Playground, and a Manager
+ * gets every other page (shipping, operating, quality and governance) in the
+ * left nav. The Luminous design has modes of its own.
  */
-export type PlaygroundUi = 'classic'|'luminous';
+export type AccMode = 'builder'|'manager';
 
-/** The choices of the Playground's design switch, in display order. */
-export const PLAYGROUND_UIS: ReadonlyArray<{value: PlaygroundUi, label: string}> = [
-  {value: 'classic', label: 'Classic'},
-  {value: 'luminous', label: 'Luminous'},
-];
+/** The page each mode opens on. */
+export const ACC_MODE_LANDING: Readonly<Record<AccMode, AppView>> = {
+  builder: 'build',
+  manager: 'fleet-health',
+};
 
 /** One entry in the left navigation. */
 export interface NavItem {
@@ -43,23 +46,27 @@ export interface NavItem {
   view?: AppView;
   /** Needs a connection to a cloud project. */
   cloud?: boolean;
-  /** Carries the Classic / Luminous design switch. */
-  uiSwitch?: boolean;
 }
 
 export interface NavSection {
+  /** Empty for a leading group with no title (the fleet's home pages). */
   title: string;
   items: NavItem[];
 }
 
 /**
- * Everything the dev UI has today lives under Build. The entries without a
- * view sketch where the command center is heading and are shown disabled.
+ * Manager's nav: the fleet, then the dev UI's pages past the Playground in
+ * their stages, joined by the command center's fleet pages. The entries
+ * without a view sketch where the command center is heading and are shown
+ * disabled ("Soon").
  */
-export const NAV_SECTIONS: readonly NavSection[] = [
+export const MANAGER_NAV_SECTIONS: readonly NavSection[] = [
   {
-    title: 'Build',
-    items: [{label: 'Playground', icon: 'forum', view: 'build', uiSwitch: true}],
+    title: '',
+    items: [
+      {label: 'Fleet health', icon: 'dashboard', view: 'fleet-health'},
+      {label: 'Fleet', icon: 'grid_view'},
+    ],
   },
   {
     title: 'Evaluate',
@@ -80,25 +87,57 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   {
     title: 'Operate',
     items: [
-      {
-        label: 'Sessions',
-        icon: 'chat_bubble',
-        view: 'sessions',
-        cloud: true,
-      },
+      {label: 'Sessions', icon: 'chat_bubble', view: 'sessions', cloud: true},
       {label: 'Logs', icon: 'article', view: 'logs', cloud: true},
       {label: 'Monitoring', icon: 'monitoring', view: 'monitoring', cloud: true},
+      {label: 'Alerts', icon: 'notifications'},
+      {label: 'Production health', icon: 'ecg_heart'},
+      {label: 'Cost and budgets', icon: 'attach_money'},
     ],
+  },
+  {
+    title: 'Quality',
+    items: [
+      {label: 'Eval trends', icon: 'trending_up'},
+      {label: 'Eval coverage', icon: 'task_alt'},
+    ],
+  },
+  {
+    title: 'Govern',
+    items: [
+      {label: 'Policy', icon: 'policy'},
+      {label: 'Gates', icon: 'checklist'},
+      {label: 'Agent Gateway', icon: 'router'},
+      {label: 'Agent Identity', icon: 'badge'},
+      {label: 'Agent Registry', icon: 'travel_explore'},
+      {label: 'Audit log', icon: 'receipt_long'},
+    ],
+  },
+  {
+    title: 'Extensions',
+    items: [{label: 'Extension adoption', icon: 'extension'}],
   },
 ];
 
+/**
+ * The pages that belong to Manager: all but the Playground. Opening the
+ * Playground (from a "Back to Playground" link, say) means building again.
+ */
+export const MANAGER_VIEWS: ReadonlySet<AppView> = new Set(
+    MANAGER_NAV_SECTIONS.flatMap((s) => s.items)
+        .filter((item) => item.view)
+        .map((item) => item.view!));
+
 /** Views that need a cloud connection, derived from the entries above. */
 export const CLOUD_VIEWS: ReadonlySet<AppView> = new Set(
-    NAV_SECTIONS.flatMap((s) => s.items)
+    MANAGER_NAV_SECTIONS.flatMap((s) => s.items)
         .filter((item) => item.cloud && item.view)
         .map((item) => item.view!));
 
-/** The command center's section navigation, shown left of the main area. */
+/**
+ * The command center's section navigation, shown left of the main area in
+ * the classic design's Manager mode (Builder is the Playground alone).
+ */
 @Component({
   changeDetection: ChangeDetectionStrategy.Default,
   selector: 'app-left-nav',
@@ -110,14 +149,10 @@ export const CLOUD_VIEWS: ReadonlySet<AppView> = new Set(
 export class LeftNavComponent {
   readonly activeView = input<AppView>('build');
   readonly navigate = output<AppView>();
-  /** The Playground's design, and its switch on the Playground row. */
-  readonly playgroundUi = input<PlaygroundUi>('classic');
-  readonly playgroundUiChange = output<PlaygroundUi>();
-  readonly playgroundUis = PLAYGROUND_UIS;
   /** The connection footer was clicked. */
   readonly manageCloud = output<void>();
 
-  readonly sections = NAV_SECTIONS;
+  readonly sections = MANAGER_NAV_SECTIONS;
   readonly cloudStatus = inject(CLOUD_SERVICE).status;
   /** The status lookup failed, e.g. a server without cloud support. */
   private readonly checkFailed = signal(false);
@@ -132,13 +167,6 @@ export class LeftNavComponent {
     inject(CLOUD_SERVICE).refreshStatus().subscribe({
       error: () => this.checkFailed.set(true),
     });
-  }
-
-  /** Picks the Playground's design; picking the current one does nothing. */
-  selectPlaygroundUi(ui: PlaygroundUi): void {
-    if (ui !== this.playgroundUi()) {
-      this.playgroundUiChange.emit(ui);
-    }
   }
 
   select(item: NavItem): void {

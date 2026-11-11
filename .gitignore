@@ -42,3 +42,7 @@ venv/
 # The Luminous playground: a build of the ACC prototype (go/acc-prototype) in
 # embed mode, made locally with `npm run build` there and copied here.
 /public/luminous/
+
+# The Luminous app: a build of the ACC prototype (personal/acc-prototype) in
+# hosted mode, made there with `npm run build:adkweb -- <this dir>/public/luminous-app`.
+/public/luminous-app/

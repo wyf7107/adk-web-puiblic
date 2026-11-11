@@ -22,7 +22,7 @@ import {CLOUD_SERVICE} from '../../core/services/interfaces/cloud';
 import {CONNECTED_STATUS, MockCloudService} from '../../core/services/testing/mock-cloud.service';
 import {initTestBed} from '../../testing/utils';
 
-import {AppView, CLOUD_VIEWS, LeftNavComponent} from './left-nav.component';
+import {AppView, CLOUD_VIEWS, LeftNavComponent, MANAGER_VIEWS} from './left-nav.component';
 
 describe('LeftNavComponent', () => {
   let fixture: ComponentFixture<LeftNavComponent>;
@@ -55,51 +55,53 @@ describe('LeftNavComponent', () => {
         '';
   }
 
+  function groupTitles(): string[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.nav-group-title'))
+        .map((t) => (t as HTMLElement).textContent!.trim());
+  }
+
+  it('lists every page but the Playground, in its stages', () => {
+    expect(groupTitles()).toEqual(
+        ['Evaluate', 'Ship', 'Operate', 'Quality', 'Govern', 'Extensions']);
+    expect(item('Fleet health')).toBeTruthy();
+    expect(item('Deployments')).toBeTruthy();
+    expect(item('Alerts')).toBeTruthy();
+    expect(item('Playground')).toBeUndefined();
+  });
+
   it('marks the active view', () => {
-    expect(item('Playground').classList).toContain('active');
+    fixture.componentRef.setInput('activeView', 'fleet-health');
+    fixture.detectChanges();
+    expect(item('Fleet health').classList).toContain('active');
     fixture.componentRef.setInput('activeView', 'deployments');
     fixture.detectChanges();
     expect(item('Deployments').classList).toContain('active');
-    expect(item('Playground').classList).not.toContain('active');
+    expect(item('Fleet health').classList).not.toContain('active');
   });
 
   it('emits the view of a clicked entry', () => {
+    fixture.componentRef.setInput('activeView', 'fleet-health');
+    fixture.detectChanges();
     const emitted: AppView[] = [];
     fixture.componentInstance.navigate.subscribe((v) => emitted.push(v));
     item('Deployments').click();
-    item('Playground').click();  // already active
+    item('Fleet health').click();  // already active
     expect(emitted).toEqual(['deployments']);
   });
 
   it('shows entries that are not built yet as inert "Soon" rows', () => {
-    expect(item('Datasets').tagName).not.toBe('BUTTON');
-    expect(item('Datasets').getAttribute('aria-disabled')).toBe('true');
-    expect(item('Datasets').textContent).toContain('Soon');
+    for (const label of ['Datasets', 'Alerts', 'Agent Registry']) {
+      expect(item(label).tagName).not.toBe('BUTTON');
+      expect(item(label).getAttribute('aria-disabled')).toBe('true');
+      expect(item(label).textContent).toContain('Soon');
+    }
   });
 
-  it('switches the Playground between Classic and Luminous', () => {
-    const options: HTMLButtonElement[] = Array.from(
-        fixture.nativeElement.querySelectorAll('.nav-ui-option'));
-    expect(options.map((o) => o.textContent?.trim())).toEqual([
-      'Classic', 'Luminous'
-    ]);
-    expect(options[0].getAttribute('aria-checked')).toBe('true');
-
-    const picked: string[] = [];
-    const views: AppView[] = [];
-    fixture.componentInstance.playgroundUiChange.subscribe(
-        (ui) => picked.push(ui));
-    fixture.componentInstance.navigate.subscribe((v) => views.push(v));
-    options[1].click();
-    options[0].click();  // already selected
-    expect(picked).toEqual(['luminous']);
-    // The switch is not the row: it doesn't navigate by itself.
-    expect(views).toEqual([]);
-
-    fixture.componentRef.setInput('playgroundUi', 'luminous');
-    fixture.detectChanges();
-    expect(options[1].getAttribute('aria-checked')).toBe('true');
-    expect(item('Playground').textContent).not.toContain('Luminous');
+  it('puts every page but the Playground in Manager', () => {
+    expect(MANAGER_VIEWS.has('build')).toBeFalse();
+    for (const view of ['fleet-health', 'deployments', 'sessions', 'logs', 'monitoring'] as AppView[]) {
+      expect(MANAGER_VIEWS.has(view)).toBeTrue();
+    }
   });
 
   it('marks cloud-only entries only while disconnected', () => {
@@ -108,7 +110,7 @@ describe('LeftNavComponent', () => {
     cloud.setStatus({...CONNECTED_STATUS, connected: false});
     fixture.detectChanges();
     expect(item('Deployments').querySelector('.nav-item-cloud')).not.toBeNull();
-    expect(item('Playground').querySelector('.nav-item-cloud')).toBeNull();
+    expect(item('Fleet health').querySelector('.nav-item-cloud')).toBeNull();
     expect(CLOUD_VIEWS.has('deployments')).toBeTrue();
     expect(CLOUD_VIEWS.has('build')).toBeFalse();
   });

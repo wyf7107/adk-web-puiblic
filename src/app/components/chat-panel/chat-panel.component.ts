@@ -406,6 +406,14 @@ export class ChatPanelComponent implements OnChanges, AfterViewInit {
     }
   }
 
+  /**
+   * Keeps a row's DOM across recomputes: the items are rebuilt whenever the
+   * events change, so tracking the item itself re-created every row.
+   */
+  displayItemKey(item: DisplayItem): unknown {
+    return item.type === 'event' ? item.event : `branches-${item.startIndex}`;
+  }
+
   computeDisplayItems() {
     if (!this.showBranches || this.viewMode === 'traces') {
       this.displayItems = this.uiEvents.map((event, index) => ({

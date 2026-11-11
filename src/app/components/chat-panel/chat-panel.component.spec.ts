@@ -342,6 +342,17 @@ describe('ChatPanelComponent', () => {
         });
   });
 
+  describe('displayItemKey', () => {
+    it('keys an event row by its event, so rebuilt items keep their rows', () => {
+      const event = {role: 'bot'} as any;
+      expect(component.displayItemKey({type: 'event', event, index: 0}))
+          .toBe(component.displayItemKey({type: 'event', event, index: 3}));
+      expect(component.displayItemKey(
+                 {type: 'branches', branches: [], startIndex: 2}))
+          .toBe('branches-2');
+    });
+  });
+
   describe('State Updates', () => {
     it(
         'should show updated state chip and emit removeStateUpdate',

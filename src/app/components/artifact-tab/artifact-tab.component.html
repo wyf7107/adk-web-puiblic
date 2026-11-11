@@ -50,7 +50,7 @@
               class="compact-select"
               panelClass="compact-select-panel"
             >
-              @for (artifact of getSortedArtifactsFromId(artifactId); track artifact) {
+              @for (artifact of getSortedArtifactsFromId(artifactId); track artifact.versionId) {
                 <mat-option [value]="artifact">{{ artifact.versionId }}</mat-option>
               }
             </mat-select>

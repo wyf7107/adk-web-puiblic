@@ -1,0 +1,97 @@
+/**
+ * Copyright 2026 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@use '../ops-shared';
+
+:host {
+  @include ops-shared.host;
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--lumi-sys-color-surface);
+}
+
+// A Luminous card: surface-bright, a hairline edge, generous padding.
+.fleet-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 32px;
+  padding: 32px;
+  border: 1px solid var(--lumi-sys-color-on-surface-low);
+  border-radius: 24px;
+  background: var(--lumi-sys-color-surface-bright);
+  font-family: var(--lumi-font-family);
+}
+
+.fleet-placeholder-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--lumi-sys-color-on-surface-variant);
+  font-size: 32px;
+  line-height: 32px;
+  font-variation-settings: 'wght' 300, 'opsz' 40;
+}
+
+.fleet-placeholder-title {
+  margin: 8px 0 0;
+  color: var(--lumi-sys-color-on-surface);
+  font-size: 20px;
+  font-weight: 470;
+  line-height: 24px;
+  font-variation-settings: 'wdth' 94, 'wght' 470;
+}
+
+.fleet-placeholder-text {
+  max-width: 640px;
+  margin: 0;
+  color: var(--lumi-sys-color-on-surface-variant);
+  font-size: 15px;
+  line-height: 20px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+}
+
+.fleet-upcoming {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fleet-upcoming-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px 0 8px;
+  border-radius: 9999px;
+  background: var(--lumi-sys-color-surface-dim);
+  color: var(--lumi-sys-color-on-surface);
+  font-size: 13px;
+  line-height: 17px;
+  font-variation-settings: var(--lumi-font-variation), 'wght' 400;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--lumi-sys-color-on-surface-variant);
+    font-size: 18px;
+    line-height: 18px;
+  }
+}

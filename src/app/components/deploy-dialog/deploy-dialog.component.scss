@@ -35,6 +35,9 @@
 
 .deploy-field {
   width: 100%;
+  // Room for a hint below the field, so it clears the next field's
+  // floating label.
+  margin-bottom: 8px;
 }
 
 .deploy-targets {

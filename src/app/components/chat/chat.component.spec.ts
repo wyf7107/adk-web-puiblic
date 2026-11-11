@@ -872,9 +872,25 @@ describe('ChatComponent', () => {
       }
 
       it('asks to connect first when not connected', () => {
+        cloud = TestBed.inject(CLOUD_SERVICE) as unknown as MockCloudService;
+        cloud.setStatus({...CONNECTED_STATUS, connected: false});
         component.openTryDeployedDialog();
         expect(mockDialog.open)
             .toHaveBeenCalledWith(CloudConnectDialogComponent, jasmine.anything());
+      });
+
+      it('checks the connection first when it is not known yet', () => {
+        // Builder has no nav footer to look the connection up, so the status
+        // can still be unknown; a connected user goes straight to the picker.
+        cloud = TestBed.inject(CLOUD_SERVICE) as unknown as MockCloudService;
+        expect(cloud.status()).toBeNull();
+        mockDialog.open.and.returnValue({afterClosed: () => of(undefined)} as any);
+        component.openTryDeployedDialog();
+        expect(cloud.refreshStatus).toHaveBeenCalled();
+        expect(mockDialog.open)
+            .toHaveBeenCalledWith(TryDeployedDialogComponent, jasmine.anything());
+        expect(mockDialog.open)
+            .not.toHaveBeenCalledWith(CloudConnectDialogComponent, jasmine.anything());
       });
 
       it('explains what it means before switching', () => {
@@ -1205,7 +1221,82 @@ describe('ChatComponent', () => {
       });
     });
 
+    describe('classic top bar', () => {
+      it('lets Manager pick the agent its pages are about', () => {
+        component.setAccMode('manager');
+        fixture.detectChanges();
+        const trigger = fixture.nativeElement.querySelector(
+            'button.manager-app-button') as HTMLButtonElement;
+        expect(trigger).toBeTruthy();
+        trigger.click();
+        fixture.detectChanges();
+        const options = Array.from(document.querySelectorAll<HTMLButtonElement>(
+            'button.manager-app-option'));
+        expect(options.map((o) => o.textContent!.trim()))
+            .toEqual(jasmine.arrayContaining(
+                [jasmine.stringContaining(TEST_APP_1_NAME),
+                 jasmine.stringContaining(TEST_APP_2_NAME)]));
+        options.find((o) => o.textContent!.includes(TEST_APP_2_NAME))!.click();
+        expect(component['selectedAppControl'].value).toBe(TEST_APP_2_NAME);
+      });
 
+      it('shows no Manager agent picker in Builder', () => {
+        fixture.detectChanges();
+        expect(fixture.nativeElement.querySelector('button.manager-app-button'))
+            .toBeNull();
+      });
+
+      describe('with no app selected', () => {
+        beforeEach(() => {
+          component.appName = '';
+          fixture.detectChanges();
+        });
+
+        it('disables the app actions', () => {
+          for (const label of ['View Agent Structure Graph', 'Edit in Builder Mode',
+                               'Deploy this agent',
+                               'Talk to a deployed version of this agent']) {
+            const button = fixture.nativeElement.querySelector(
+                `button[aria-label="${label}"]`) as HTMLButtonElement | null;
+            if (button) {
+              expect(button.disabled).withContext(label).toBeTrue();
+            }
+          }
+        });
+
+        it('still offers the theme toggle', () => {
+          const icons = Array.from(fixture.nativeElement.querySelectorAll(
+              '.toolbar-actions mat-icon') as NodeListOf<HTMLElement>)
+              .map((i) => i.textContent!.trim());
+          expect(icons.some((i) => i === 'light_mode' || i === 'dark_mode'))
+              .toBeTrue();
+        });
+      });
+    });
+
+    describe('switching apps', () => {
+      it('drops the previous app\'s session from the URL', () => {
+        mockActivatedRoute.snapshot!.queryParams = {
+          [APP_QUERY_PARAM]: TEST_APP_1_NAME,
+          session: 'old-session',
+        };
+        mockRouter.navigate.calls.reset();
+        component['selectedAppControl'].setValue(TEST_APP_2_NAME);
+        expect(mockRouter.navigate).toHaveBeenCalledWith([], jasmine.objectContaining({
+          queryParams: jasmine.objectContaining(
+              {[APP_QUERY_PARAM]: TEST_APP_2_NAME, session: null}),
+        }));
+      });
+
+      it('keeps the URL session when the first app is picked', () => {
+        mockActivatedRoute.snapshot!.queryParams = {session: 'url-session'};
+        mockRouter.navigate.calls.reset();
+        component['selectedAppControl'].setValue(TEST_APP_2_NAME);
+        const params = mockRouter.navigate.calls.mostRecent().args[1]!.queryParams!;
+        expect(params[APP_QUERY_PARAM]).toBe(TEST_APP_2_NAME);
+        expect('session' in params).toBeFalse();
+      });
+    });
 
     describe('delete session button', () => {
       describe('when isDeleteSessionEnabled is false', () => {
@@ -1457,6 +1548,19 @@ describe('ChatComponent', () => {
 
           expect(component.isVideoRecording).toBe(false);
           expect(mockStreamChatService.stopVideoStreaming).toHaveBeenCalled();
+        });
+
+        it('hangs up when the server closes the connection mid-call', async () => {
+          await component.startAudioRecording();
+          expect(component.isAudioRecording).toBe(true);
+
+          mockStreamChatService.onStreamCloseResponse.next('1007 bad setup');
+
+          expect(component.isAudioRecording).toBe(false);
+          expect(component.activeBidiSessions.has(SESSION_ID)).toBe(false);
+          expect(mockStreamChatService.stopAudioChat).toHaveBeenCalled();
+          expect(mockSnackBar.open).toHaveBeenCalledWith(
+              jasmine.stringContaining('1007 bad setup'), 'OK');
         });
       });
 

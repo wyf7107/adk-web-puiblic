@@ -19,40 +19,79 @@
 }
 
 <div class="ops-page">
+  <!-- The title, then quiet controls: search, Logs Explorer, refresh, the
+       time range, the deployment the logs come from, and the cloud project. -->
   <header class="ops-header page-header">
-    <div class="ops-title-block">
-      <h1 class="ops-title">Logs</h1>
-      <div class="ops-context">
-        <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
-        <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
-        @if (checking()) {
-          <span class="connection-chip">
-            &middot;
-            <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
-            Checking connection&hellip;
-          </span>
-        } @else if (connected()) {
-          <span class="connection-chip">&middot; {{ status()?.project }}</span>
-          <button type="button" class="ops-link" (click)="connect()">Change project or region</button>
-        } @else {
-          <span class="connection-chip">&middot; Not connected</span>
-        }
-      </div>
-    </div>
+    <h1 class="ops-title">Logs</h1>
+    <span class="page-subtitle sr-only">{{ appName() || 'No agent selected' }}</span>
 
     <div class="ops-header-actions">
-      @if (selectedSourceId()) {
-        <span class="ops-updated page-refresh">
-          <span [class.live-text]="live()">{{ updatedText() }}</span>
+      @if (connected() && appName() && selectedSourceId()) {
+        @if (searchShown()) {
+          <form class="ops-search filter" (ngSubmit)="applyQuery()">
+            <mat-icon fontSet="material-symbols-outlined">search</mat-icon>
+            <input #queryInput class="filter-input" name="queryText" [(ngModel)]="queryText"
+              placeholder="Search logs" aria-label="Search logs, then press Enter" autocomplete="off"
+              (keydown.escape)="closeSearch()" />
+            @if (queryText) {
+              <button type="button" class="ops-icon-button small filter-clear" (click)="clearQuery()" aria-label="Clear search">
+                <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+              </button>
+            }
+          </form>
+        } @else {
+          <button type="button" class="ops-icon-button search-button" (click)="openSearch()"
+            matTooltip="Search logs" aria-label="Search logs">
+            <mat-icon fontSet="material-symbols-outlined">search</mat-icon>
+          </button>
+        }
+        <button type="button" class="ops-icon-button console-link" (click)="openConsole()" [disabled]="!consoleUrl()"
+          matTooltip="Open in Logs Explorer" aria-label="Open in Logs Explorer">
+          <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+        </button>
+        <span class="page-refresh">
+          <span class="ops-updated" [class.live-text]="live()">{{ updatedText() }}</span>
           <button type="button" class="ops-icon-button" (click)="refresh()" [disabled]="loading()"
             matTooltip="Refresh" aria-label="Refresh">
             <mat-icon fontSet="material-symbols-outlined">refresh</mat-icon>
           </button>
         </span>
-        <button type="button" class="ops-button text console-link" (click)="openConsole()" [disabled]="!consoleUrl()">
-          Open in Logs Explorer
-          <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+
+        <mat-menu #rangeMenu="matMenu" xPosition="before">
+          @for (option of timeRanges; track option.id) {
+            <button mat-menu-item (click)="setRange(option)">
+              <span>{{ option.label }}</span>
+              @if (option.id === rangeId()) { <mat-icon class="menu-check">check</mat-icon> }
+            </button>
+          }
+        </mat-menu>
+        <button type="button" class="ops-quiet range-button" [matMenuTriggerFor]="rangeMenu"
+          aria-label="Time range">
+          <span class="ops-quiet-text">{{ range().label }}</span>
+          <mat-icon fontSet="material-symbols-outlined" class="ops-caret">arrow_drop_down</mat-icon>
         </button>
+      }
+      @if (connected() && appName() && sources()?.length) {
+        <app-deployment-picker appearance="pill" label="Showing logs from" [deployments]="sources() ?? []"
+          [selectedId]="selectedSourceId()" (selectedChange)="selectSource($event)"></app-deployment-picker>
+      }
+      @if (checking()) {
+        <span class="ops-quiet connection-chip">
+          <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
+          <span class="ops-quiet-text">Checking connection&hellip;</span>
+        </span>
+      } @else if (connected()) {
+        <button type="button" class="ops-quiet connection-chip project-button" (click)="connect()"
+          matTooltip="Change project or region" aria-label="Google Cloud project. Change project or region">
+          <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+          <span class="ops-quiet-text">{{ status()?.project }}</span>
+          <mat-icon fontSet="material-symbols-outlined" class="ops-caret">arrow_drop_down</mat-icon>
+        </button>
+      } @else {
+        <span class="ops-quiet connection-chip">
+          <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+          <span class="ops-quiet-text">Not connected</span>
+        </span>
       }
     </div>
   </header>
@@ -97,12 +136,9 @@
         <button type="button" class="ops-button text banner-action" (click)="refresh()">Retry</button>
       </div>
     } @else {
-      <div class="ops-toolbar">
-        @if (sources()?.length) {
-          <app-deployment-picker appearance="pill" label="Showing logs from" [deployments]="sources() ?? []"
-            [selectedId]="selectedSourceId()" (selectedChange)="selectSource($event)"></app-deployment-picker>
-        }
-        @if (selectedSourceId()) {
+      @if (selectedSourceId()) {
+        <!-- Severity and Live: a slim row over the table. -->
+        <div class="ops-toolbar log-toolbar">
           <div class="ops-segmented segmented" role="radiogroup" aria-label="Minimum severity">
             @for (option of severityFilters; track option.id) {
               <button type="button" role="radio" class="segment" [class.selected]="severity() === option.id"
@@ -112,39 +148,13 @@
               </button>
             }
           </div>
-
-          <mat-menu #rangeMenu="matMenu">
-            @for (option of timeRanges; track option.id) {
-              <button mat-menu-item (click)="setRange(option)">
-                <span>{{ option.label }}</span>
-                @if (option.id === rangeId()) { <mat-icon class="menu-check">check</mat-icon> }
-              </button>
-            }
-          </mat-menu>
-          <button type="button" class="ops-pill range-button" [matMenuTriggerFor]="rangeMenu">
-            <mat-icon fontSet="material-symbols-outlined">schedule</mat-icon>
-            {{ range().label }}
-            <mat-icon fontSet="material-symbols-outlined" class="pill-arrow">arrow_drop_down</mat-icon>
-          </button>
-
-          <form class="ops-search filter" (ngSubmit)="applyQuery()">
-            <mat-icon fontSet="material-symbols-outlined">search</mat-icon>
-            <input class="filter-input" name="queryText" [(ngModel)]="queryText"
-              placeholder="Search logs" aria-label="Search logs, then press Enter" autocomplete="off" />
-            @if (queryText) {
-              <button type="button" class="ops-icon-button small filter-clear" (click)="clearQuery()" aria-label="Clear search">
-                <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
-              </button>
-            }
-          </form>
-
           <button type="button" class="live-button" [class.on]="live()" (click)="toggleLive()"
             [attr.aria-pressed]="live()" [matTooltip]="live() ? 'Stop live updates' : 'Show new entries as they arrive'">
             Live
             <span class="live-track" aria-hidden="true"><span class="live-thumb"></span></span>
           </button>
-        }
-      </div>
+        </div>
+      }
 
       @if (!selectedSourceId()) {
         <div class="ops-empty no-deployment">
@@ -152,7 +162,7 @@
           <p>
             Logs are read for this agent's Agent Runtime or Cloud Run deployments. We looked in
             <strong>{{ status()?.project }} &middot; {{ status()?.region }}</strong> and found none.
-            @if (sources()?.length) { You can still choose another deployment in the project above. }
+            @if (sources()?.length) { You can still choose another of the project's deployments at the top right. }
           </p>
           <div class="ops-empty-actions actions">
             <button type="button" class="ops-button filled" (click)="goToDeployments.emit()">Go to Deployments</button>
@@ -171,14 +181,19 @@
           <section class="log-pane">
             @if (entries(); as list) {
               @if (list.length === 0) {
-                <div class="ops-empty list-empty">
-                  <mat-icon fontSet="material-symbols-outlined" class="empty-icon">receipt_long</mat-icon>
-                  <span>
-                    No log entries in the {{ loadedRange().label.toLowerCase() }}@if (severity()) { at {{ severity().toLowerCase() }} or above}@if (appliedQuery()) { matching &ldquo;{{ appliedQuery() }}&rdquo;}.
-                  </span>
-                  @if (rangeId() !== '7d') {
-                    <button type="button" class="ops-button tonal" (click)="setRange(timeRanges[timeRanges.length - 1])">Search the last 7 days</button>
-                  }
+                <div class="ops-table log-table empty-table">
+                  <div class="ops-row head log-row log-head" aria-hidden="true">
+                    <span>Time</span><span>Severity</span><span>Log</span><span>Message</span>
+                  </div>
+                  <div class="ops-empty list-empty">
+                    <mat-icon fontSet="material-symbols-outlined" class="empty-icon">receipt_long</mat-icon>
+                    <span>
+                      No log entries in the {{ loadedRange().label.toLowerCase() }}@if (severity()) { at {{ severity().toLowerCase() }} or above}@if (appliedQuery()) { matching &ldquo;{{ appliedQuery() }}&rdquo;}.
+                    </span>
+                    @if (rangeId() !== '7d') {
+                      <button type="button" class="ops-button tonal" (click)="setRange(timeRanges[timeRanges.length - 1])">Search the last 7 days</button>
+                    }
+                  </div>
                 </div>
               } @else {
                 <div class="ops-table log-table" role="table" aria-label="Log entries">
@@ -195,7 +210,7 @@
                         <span role="cell" class="time-cell ops-mono" [title]="fullTime(entry)">{{ time(entry) }}</span>
                         <span role="cell" class="sev-cell sev-text-{{ level(entry) }}" [class.inferred]="entry.severityInferred"
                           [title]="entry.severityInferred ? 'Read from the message; the entry has no severity' : ''">
-                          <span class="sev-bar sev-{{ level(entry) }}"></span>
+                          <span class="sev-dot sev-{{ level(entry) }}" aria-hidden="true"></span>
                           {{ entry.severity === 'DEFAULT' ? '—' : entry.severity }}
                         </span>
                         <span role="cell" class="log-cell ops-ellipsis">{{ entry.log }}</span>
@@ -244,19 +259,19 @@
                       }
                     </div>
                   }
-                </div>
-                <div class="list-footer">
-                  <span>{{ list.length }} {{ list.length === 1 ? 'entry' : 'entries' }} &middot; {{ loadedRange().label.toLowerCase() }}</span>
-                  @if (nextPageToken()) {
-                    <button type="button" class="ops-button tonal load-older" (click)="loadOlder()" [disabled]="loadingOlder()">
-                      @if (loadingOlder()) { <mat-spinner diameter="16"></mat-spinner> }
-                      Load older
-                    </button>
-                  }
+                  <div class="list-footer">
+                    <span>{{ list.length }} {{ list.length === 1 ? 'entry' : 'entries' }} &middot; {{ loadedRange().label.toLowerCase() }}</span>
+                    @if (nextPageToken()) {
+                      <button type="button" class="ops-button tonal load-older" (click)="loadOlder()" [disabled]="loadingOlder()">
+                        @if (loadingOlder()) { <mat-spinner diameter="16"></mat-spinner> }
+                        Load older
+                      </button>
+                    }
+                  </div>
                 </div>
               }
             } @else if (loading()) {
-              <div aria-hidden="true">
+              <div class="ops-table" aria-hidden="true">
                 @for (i of [0, 1, 2, 3, 4, 5, 6, 7]; track i) {
                   <div class="ops-row skeleton-row">
                     <span class="ops-skeleton" style="width: 90px"></span>

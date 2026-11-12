@@ -19,12 +19,13 @@ import {CommonModule} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, output, signal, untracked} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {interval, Subscription} from 'rxjs';
 
-import {MetricsRange, MetricsResponse, MetricSummary} from '../../core/models/Cloud';
+import {MetricChart, MetricsRange, MetricsResponse, MetricSummary} from '../../core/models/Cloud';
 import {Deployment} from '../../core/models/Deploy';
 import {CLOUD_SERVICE} from '../../core/services/interfaces/cloud';
 import {DEPLOY_SERVICE} from '../../core/services/interfaces/deploy';
@@ -64,6 +65,7 @@ function errorText(err: any, fallback: string): string {
     CommonModule,
     DeploymentPickerComponent,
     MatIconModule,
+    MatMenuModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
@@ -166,6 +168,17 @@ export class CloudMonitoringComponent {
     return formatMetric(summary.value, summary.unit);
   }
 
+  /**
+   * A summary's sparkline, from the chart that holds its series: the total
+   * requests, the 5xx share, p95 latency, or the first series of a resource
+   * chart. Null when there is nothing to draw.
+   */
+  sparkline(summary: MetricSummary, metrics: MetricsResponse):
+      {d: string, x: number, y: number}|null {
+    const values = sparkValues(summary.id, metrics.charts);
+    return sparkPath(values, 244, 32);
+  }
+
   rangeLabel(): string {
     return METRICS_RANGES.find((r) => r.id === this.range())?.label ?? '';
   }
@@ -262,4 +275,60 @@ export class CloudMonitoringComponent {
           },
         });
   }
+}
+
+/** The series a summary tile draws as its sparkline. */
+export function sparkValues(id: string, charts: MetricChart[]): Array<number|undefined> {
+  const chart = (chartId: string) => charts.find((c) => c.id === chartId && !c.error);
+  const sumAt = (c: MetricChart, filter: (name: string) => boolean = () => true) =>
+      (c.series[0]?.points ?? []).map((_, i) => {
+        const parts = c.series.filter((s) => filter(s.name))
+                          .map((s) => s.points[i]?.value)
+                          .filter((v): v is number => v !== undefined);
+        return parts.length ? parts.reduce((a, b) => a + b, 0) : undefined;
+      });
+  switch (id) {
+    case 'requests': {
+      const c = chart('requests');
+      return c ? sumAt(c) : [];
+    }
+    case 'errors': {
+      const c = chart('requests');
+      if (!c) return [];
+      const total = sumAt(c);
+      const bad = sumAt(c, (name) => name.startsWith('5'));
+      return total.map((t, i) => t ? (bad[i] ?? 0) / t : (t === 0 ? 0 : undefined));
+    }
+    case 'p95': {
+      const series = chart('latency')?.series.find((s) => s.name.includes('95')) ??
+          chart('latency')?.series[0];
+      return series?.points.map((p) => p.value) ?? [];
+    }
+    default: {
+      const c = id.includes('cpu') ? chart('cpu') :
+          id.includes('mem') ? chart('memory') : chart(id);
+      return c?.series[0]?.points.map((p) => p.value) ?? [];
+    }
+  }
+}
+
+/** An SVG path through the values, scaled into a width x height box. */
+export function sparkPath(values: Array<number|undefined>, width: number, height: number):
+    {d: string, x: number, y: number}|null {
+  const known = values.map((v, i) => ({v, i})).filter((p): p is {v: number, i: number} =>
+      p.v !== undefined && Number.isFinite(p.v));
+  if (known.length < 2) {
+    return null;
+  }
+  const max = Math.max(...known.map((p) => p.v));
+  const min = Math.min(0, ...known.map((p) => p.v));
+  const span = max - min || 1;
+  const step = width / Math.max(1, values.length - 1);
+  const pad = 4;
+  const pts = known.map((p) => ({
+    x: Math.round(p.i * step * 10) / 10,
+    y: Math.round((pad + (1 - (p.v - min) / span) * (height - 2 * pad)) * 10) / 10,
+  }));
+  const last = pts[pts.length - 1];
+  return {d: 'M' + pts.map((p) => `${p.x},${p.y}`).join(' L'), x: last.x, y: last.y};
 }

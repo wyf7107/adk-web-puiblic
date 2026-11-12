@@ -15,28 +15,21 @@
  */
 
 :host {
-  // Series colors: a blue, a quiet grey and full ink for latency and resource
-  // lines; green, amber and red for HTTP classes.
-  --chart-primary: #4c8df6;
-  --chart-secondary: #9aa0a6;
-  --chart-tertiary: var(--mat-sys-on-surface);
-  --chart-success: #1ea446;
-  --chart-warning: #f2a60c;
-  --chart-error: #ec4f43;
-  --chart-neutral: #9aa0a6;
+  // Series colors, after the Luminous design: full ink for the line that
+  // matters, a quiet grey for the rest and for successful requests, amber and
+  // red only for 4xx and 5xx.
+  --chart-primary: var(--lumi-sys-color-on-surface, var(--mat-sys-on-surface));
+  --chart-secondary: var(--lumi-sys-color-on-surface-variant, var(--mat-sys-on-surface-variant));
+  --chart-tertiary: var(--lumi-sys-color-on-surface-variant, var(--mat-sys-on-surface-variant));
+  --chart-success: color-mix(in srgb, var(--lumi-sys-color-on-surface, #000) 22%, transparent);
+  --chart-warning: var(--lumi-sys-color-warning, #b06000);
+  --chart-error: var(--lumi-sys-color-negative, #de2d29);
+  --chart-neutral: var(--lumi-sys-color-on-surface-variant, var(--mat-sys-on-surface-variant));
 
   display: block;
   min-width: 0;
-  font-family: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
-}
-
-:host-context(html.light-theme) {
-  --chart-primary: #1a73e8;
-  --chart-secondary: #80868b;
-  --chart-success: #188038;
-  --chart-warning: #e37400;
-  --chart-error: #d93025;
-  --chart-neutral: #80868b;
+  font-family: var(--lumi-font-family, 'Google Sans', Roboto, sans-serif);
+  font-variation-settings: 'wdth' 92;
 }
 
 .chart-head {
@@ -54,14 +47,15 @@
 
 .chart-title {
   font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
+  font-weight: 540;
+  font-variation-settings: 'wdth' 92, 'wght' 540;
+  line-height: 20px;
 }
 
 .chart-unit {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 12px;
-  line-height: 16px;
+  color: var(--lumi-sys-color-on-surface-variant, var(--mat-sys-on-surface-variant));
+  font-size: 15px;
+  line-height: 20px;
 }
 
 .legend {
@@ -72,18 +66,18 @@
 
 .legend-item {
   align-items: center;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--lumi-sys-color-on-surface-variant, var(--mat-sys-on-surface-variant));
   display: inline-flex;
-  font-size: 12px;
+  font-size: 15px;
   gap: 6px;
 }
 
 .swatch {
-  border-radius: 3px;
+  border-radius: 1px;
   display: inline-block;
   flex: none;
-  height: 10px;
-  width: 10px;
+  height: 8px;
+  width: 8px;
 }
 
 .chart-body {
@@ -96,13 +90,14 @@ svg {
 }
 
 .grid {
-  stroke: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
+  stroke: var(--lumi-sys-color-on-surface-low, color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent));
+  stroke-dasharray: 3 3;
   stroke-width: 1;
 }
 
 .axis {
-  fill: var(--mat-sys-on-surface-variant);
-  font-size: 12px;
+  fill: var(--lumi-sys-color-on-surface-variant, var(--mat-sys-on-surface-variant));
+  font-size: 13px;
 }
 
 .line {

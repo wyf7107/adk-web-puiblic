@@ -19,6 +19,7 @@ import {CommonModule} from '@angular/common';
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, output, signal, untracked} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
+import {MatMenuModule} from '@angular/material/menu';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -204,6 +205,7 @@ export function describeLookupError(error: DiscoveryError): ErrorRow {
   imports: [
     CommonModule,
     MatIconModule,
+    MatMenuModule,
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
@@ -234,8 +236,9 @@ export class DeploymentsComponent {
   readonly lastUpdated = signal<number|null>(null);
   readonly live = signal<Record<string, LiveEntry>>({});
   readonly expanded = signal<ReadonlySet<string>>(new Set());
-  readonly othersCollapsed = signal(false);
-  readonly activityCollapsed = signal(false);
+  /** The project's other deployments and the deploy log start folded away. */
+  readonly othersCollapsed = signal(true);
+  readonly activityCollapsed = signal(true);
   /** Ticks so relative times stay current. */
   private readonly now = signal(Date.now());
 
@@ -327,6 +330,18 @@ export class DeploymentsComponent {
     const parts = deployment.resourceName.split('/');
     return parts.length >= 2 ? parts.slice(-2).join('/') :
                                deployment.resourceName;
+  }
+
+  /**
+   * What the Revision column shows: Cloud Run's latest revision once looked
+   * up, else the resource's own id (Agent Runtime keeps no revisions).
+   */
+  revisionOf(deployment: Deployment): string {
+    const live = this.liveOf(deployment);
+    if (live && live !== 'loading' && live.latestRevision) {
+      return live.latestRevision;
+    }
+    return deployment.resourceName?.split('/').pop() ?? '';
   }
 
   relativeTime(iso: string|null|undefined): string {

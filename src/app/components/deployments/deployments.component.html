@@ -19,42 +19,42 @@
 }
 
 <div class="ops-page">
+  <!-- The title, then quiet controls: refresh, the cloud project (opens the
+       connection dialog) and the page's one filled action, Deploy. -->
   <header class="ops-header page-header">
-    <div class="ops-title-block">
-      <h1 class="ops-title">Deployments</h1>
-      <div class="ops-context">
-        <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
-        <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
-        @if (checking()) {
-          <span class="connection-chip">
-            &middot;
-            <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
-            Checking connection&hellip;
-          </span>
-        } @else if (connected()) {
-          <span class="connection-chip">&middot; {{ status()?.project }} &middot; {{ status()?.region }}</span>
-          <button type="button" class="ops-link" (click)="connect()">Change project or region</button>
-        } @else {
-          <span class="connection-chip">&middot; Not connected</span>
-        }
-      </div>
-    </div>
+    <h1 class="ops-title">Deployments</h1>
+    <span class="page-subtitle sr-only">{{ appName() || 'No agent selected' }}</span>
 
     <div class="ops-header-actions">
       @if (connected() && appName()) {
-        <span class="ops-updated page-refresh">
-          {{ updatedText() }}
+        <span class="page-refresh">
+          <span class="ops-updated">{{ updatedText() }}</span>
           <button type="button" class="ops-icon-button" (click)="refresh()" [disabled]="loading()"
             matTooltip="Refresh" aria-label="Refresh">
             <mat-icon fontSet="material-symbols-outlined">refresh</mat-icon>
           </button>
         </span>
       }
-      @if (appName()) {
-        <button type="button" class="ops-button filled new-deploy" (click)="newDeploy()">
-          <mat-icon fontSet="material-symbols-outlined">rocket_launch</mat-icon>
-          New deploy
+      @if (checking()) {
+        <span class="ops-quiet connection-chip" aria-live="polite">
+          <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
+          <span class="ops-quiet-text">Checking connection&hellip;</span>
+        </span>
+      } @else if (connected()) {
+        <button type="button" class="ops-quiet connection-chip project-button" (click)="connect()"
+          matTooltip="Change project or region" aria-label="Google Cloud project. Change project or region">
+          <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+          <span class="ops-quiet-text">{{ status()?.project }} &middot; {{ status()?.region }}</span>
+          <mat-icon fontSet="material-symbols-outlined" class="ops-caret">arrow_drop_down</mat-icon>
         </button>
+      } @else {
+        <span class="ops-quiet connection-chip">
+          <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+          <span class="ops-quiet-text">Not connected</span>
+        </span>
+      }
+      @if (appName()) {
+        <button type="button" class="ops-button filled new-deploy" (click)="newDeploy()">Deploy</button>
       }
     </div>
   </header>
@@ -137,14 +137,8 @@
       @if (firstLoad()) {
         <ng-container *ngTemplateOutlet="skeletons; context: {label: 'Looking up Agent Runtime and Cloud Run in ' + status()?.region + '…'}"></ng-container>
       } @else if (data()) {
-        <!-- This agent -->
-        <section class="ops-section">
-          <div class="ops-section-heading">
-            <h2>This agent</h2>
-            <span class="ops-count">{{ mine().length }}</span>
-            <span class="ops-note">Matched by adk web deploy records, the <code>adk-app</code> label, or name</span>
-          </div>
-
+        <!-- This agent: its deployments in one card table. -->
+        <section class="ops-section mine-section">
           @if (errorRows().length && mine().length) {
             <div class="incomplete-note">
               <mat-icon fontSet="material-symbols-outlined">info</mat-icon>
@@ -153,87 +147,57 @@
           }
 
           @if (mine().length === 0) {
-            <div class="ops-empty empty-card">
-              <h3>{{ appName() }} isn't deployed in this project yet</h3>
-              <p>
-                We looked for Agent Runtime instances and Cloud Run services in
-                <strong>{{ data()?.project }} &middot; {{ data()?.region }}</strong> that were deployed
-                from adk web, labeled <code>adk-app={{ appName() }}</code>, or named after the agent.
-              </p>
-              <div class="ops-empty-actions">
-                <button type="button" class="ops-button filled" (click)="newDeploy()">Deploy {{ appName() }}</button>
-                <button type="button" class="ops-button text" (click)="connect()">Change project or region</button>
+            <div class="ops-table mine">
+              <ng-container *ngTemplateOutlet="mineHead"></ng-container>
+              <div class="ops-empty empty-card">
+                <h3>{{ appName() }} isn't deployed in this project yet</h3>
+                <p>
+                  We looked for Agent Runtime instances and Cloud Run services in
+                  <strong>{{ data()?.project }} &middot; {{ data()?.region }}</strong> that were deployed
+                  from adk web, labeled <code>adk-app={{ appName() }}</code>, or named after the agent.
+                </p>
+                <div class="ops-empty-actions">
+                  <button type="button" class="ops-button filled" (click)="newDeploy()">Deploy {{ appName() }}</button>
+                  <button type="button" class="ops-button text" (click)="connect()">Change project or region</button>
+                </div>
               </div>
             </div>
           } @else {
-            <div class="ops-table mine" role="table">
-              <div class="ops-row head" role="row">
-                <span role="columnheader">Name</span>
-                <span role="columnheader">Target</span>
-                <span role="columnheader">State</span>
-                <span role="columnheader">Updated</span>
-                <span role="columnheader"><span class="sr-only">Actions</span></span>
-              </div>
+            <div class="ops-table mine" role="table" aria-label="This agent's deployments">
+              <ng-container *ngTemplateOutlet="mineHead"></ng-container>
 
               @for (deployment of mine(); track deployment.id) {
                 <div class="deployment-card" role="rowgroup">
                   <div class="ops-row deployment-row deployment-meta" role="row">
-                    <div role="cell" class="name-cell">
-                      <div class="ops-primary deployment-name">{{ deploymentName(deployment) }}</div>
-                      <div class="locator-line">
-                        @if (deployment.serviceUrl) {
-                          <a class="ops-secondary ops-mono locator" href="{{ deployment.serviceUrl }}" target="_blank"
-                            rel="noopener">{{ locator(deployment) }}</a>
-                        } @else {
-                          <span class="ops-secondary ops-mono locator">{{ locator(deployment) }}</span>
-                        }
-                        <button type="button" class="ops-icon-button small inline-copy"
-                          (click)="copy(deployment.serviceUrl || deployment.resourceName)" matTooltip="Copy" aria-label="Copy">
-                          <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div role="cell" class="target-cell">
-                      <div class="target-line">
-                        <mat-icon fontSet="material-symbols-outlined">{{ targetIcon(deployment.target) }}</mat-icon>
-                        <span>{{ targetLabel(deployment.target) }}</span>
-                      </div>
-                      <div class="ops-secondary">
-                        {{ deployment.region }}
-                        @if (matchChip(deployment); as match) {
-                          &middot; <span class="match-chip">{{ match.label }}</span>
-                        }
-                      </div>
-                    </div>
-
-                    <div role="cell">
+                    <span role="cell" class="name-cell">
+                      <span class="ops-primary deployment-name" [title]="locator(deployment)">{{ deploymentName(deployment) }}</span>
+                      @if (matchChip(deployment); as match) {
+                        <span class="match-chip sr-only">{{ match.label }}</span>
+                      }
+                      <span class="locator sr-only">{{ locator(deployment) }}</span>
+                    </span>
+                    <span role="cell" class="ops-ellipsis">{{ deployment.region }}</span>
+                    <span role="cell" class="ops-mono ops-muted ops-ellipsis revision-cell" [title]="revisionOf(deployment)">
+                      {{ revisionOf(deployment) }}
+                    </span>
+                    <span role="cell">
                       @if (statusChip(deployment); as chip) {
                         <ng-container *ngTemplateOutlet="statusChipTpl; context: {chip}"></ng-container>
                       }
-                    </div>
-
-                    <div role="cell" class="times-cell">
-                      @if (deployment.updateTime) {
-                        <div [title]="deployment.updateTime">{{ relativeTime(deployment.updateTime) }}</div>
-                      }
-                      @if (deployment.createTime) {
-                        <div class="ops-secondary" [title]="deployment.createTime">Created {{ shortDate(deployment.createTime) }}</div>
-                      }
-                    </div>
-
-                    <div role="cell" class="card-actions">
+                    </span>
+                    <span role="cell" class="runtime-cell">
+                      <mat-icon fontSet="material-symbols-outlined">{{ targetIcon(deployment.target) }}</mat-icon>
+                      <span class="ops-ellipsis">{{ targetLabel(deployment.target) }}</span>
+                    </span>
+                    <span role="cell" class="ops-muted ops-ellipsis times-cell" [title]="deployment.updateTime || ''">
+                      {{ relativeTime(deployment.updateTime) }}
+                    </span>
+                    <span role="cell" class="card-actions">
                       @if (isTryable(deployment)) {
-                        <button type="button" class="ops-button tonal try-button" (click)="tryDeployment.emit(deployment)"
-                          matTooltip="Send messages to this deployment from the Playground">
-                          <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
-                          Try it
-                        </button>
-                      }
-                      @if (deployment.consoleUrl) {
-                        <button type="button" class="ops-icon-button" (click)="open(deployment.consoleUrl)"
-                          matTooltip="Open in Cloud console" aria-label="Open in Cloud console">
-                          <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+                        <button type="button" class="ops-icon-button try-button" (click)="tryDeployment.emit(deployment)"
+                          matTooltip="Try it: send messages to this deployment from the Playground"
+                          aria-label="Try it">
+                          <mat-icon fontSet="material-symbols-outlined">play_arrow</mat-icon>
                         </button>
                       }
                       <button type="button" class="ops-icon-button deployment-toggle" (click)="toggle(deployment)"
@@ -242,7 +206,11 @@
                         [attr.aria-label]="deployment.target === 'cloud_run' ? 'Revisions' : 'Deploy history'">
                         <mat-icon fontSet="material-symbols-outlined">{{ isExpanded(deployment) ? 'expand_less' : 'expand_more' }}</mat-icon>
                       </button>
-                    </div>
+                      <button type="button" class="ops-icon-button row-menu-button" [matMenuTriggerFor]="rowMenu"
+                        [matMenuTriggerData]="{deployment}" matTooltip="More" aria-label="More actions">
+                        <mat-icon fontSet="material-symbols-outlined">more_vert</mat-icon>
+                      </button>
+                    </span>
                   </div>
 
                   @if (lastFailedDeploy(deployment); as failed) {
@@ -347,7 +315,7 @@
         </section>
 
         <!-- Rest of project -->
-        <section class="ops-section">
+        <section class="ops-section secondary-section">
           <button type="button" class="ops-section-heading section-toggle" (click)="othersCollapsed.set(!othersCollapsed())"
             [attr.aria-expanded]="!othersCollapsed()">
             <h2>Rest of project</h2>
@@ -398,7 +366,7 @@
         </section>
 
         <!-- Deploy activity -->
-        <section class="ops-section">
+        <section class="ops-section secondary-section">
           <button type="button" class="ops-section-heading section-toggle" (click)="activityCollapsed.set(!activityCollapsed())"
             [attr.aria-expanded]="!activityCollapsed()">
             <h2>Deploy activity</h2>
@@ -454,14 +422,44 @@
   </div>
 </div>
 
-<ng-template #statusChipTpl let-chip="chip">
-  <span class="ops-badge status-chip status-{{ chip.kind }}" [class.positive]="chip.kind === 'live'"
-    [class.error]="chip.kind === 'unhealthy'" [title]="chip.detail || ''">
-    @if (chip.kind !== 'live') {
-      <mat-icon fontSet="material-symbols-outlined" [class.ops-spin]="chip.kind === 'updating'">{{ chip.icon }}</mat-icon>
+<ng-template #mineHead>
+  <div class="ops-row head deployment-head" role="row">
+    <span role="columnheader">Name</span>
+    <span role="columnheader">Region</span>
+    <span role="columnheader">Revision</span>
+    <span role="columnheader">State</span>
+    <span role="columnheader">Runtime</span>
+    <span role="columnheader">Updated</span>
+    <span role="columnheader"><span class="sr-only">Actions</span></span>
+  </div>
+</ng-template>
+
+<!-- A deployment row's ⋮ menu: where it lives, and how to reach it. -->
+<mat-menu #rowMenu="matMenu" xPosition="before" class="deployment-row-menu">
+  <ng-template matMenuContent let-deployment="deployment">
+    @if (deployment.consoleUrl) {
+      <button mat-menu-item class="console-item" (click)="open(deployment.consoleUrl)">
+        <mat-icon fontSet="material-symbols-outlined">open_in_new</mat-icon>
+        <span>Open in Cloud console</span>
+      </button>
     }
-    {{ chip.label }}
-  </span>
+    @if (deployment.serviceUrl) {
+      <button mat-menu-item (click)="open(deployment.serviceUrl)">
+        <mat-icon fontSet="material-symbols-outlined">link</mat-icon>
+        <span>Open service URL</span>
+      </button>
+    }
+    <button mat-menu-item (click)="copy(deployment.serviceUrl || deployment.resourceName)">
+      <mat-icon fontSet="material-symbols-outlined">content_copy</mat-icon>
+      <span>{{ deployment.serviceUrl ? 'Copy URL' : 'Copy resource name' }}</span>
+    </button>
+  </ng-template>
+</mat-menu>
+
+<ng-template #statusChipTpl let-chip="chip">
+  <span class="ops-state status-chip status-{{ chip.kind }}" [class.positive]="chip.kind === 'live'"
+    [class.error]="chip.kind === 'unhealthy'" [class.faint]="chip.kind === 'deleted'"
+    [title]="chip.detail || ''">{{ chip.label }}</span>
 </ng-template>
 
 <!-- Deploy history in a card's details: the status in its own cell. -->

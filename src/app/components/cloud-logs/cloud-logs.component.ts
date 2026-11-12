@@ -16,7 +16,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, output, signal, untracked} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, output, signal, untracked, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
@@ -184,6 +184,9 @@ export class CloudLogsComponent {
       () => TIME_RANGES.find((r) => r.id === this.loadedRangeId()) ??
           TIME_RANGES[1]);
   queryText = '';
+  /** The header's search field was opened from its search button. */
+  readonly searchOpen = signal(false);
+  private readonly queryInput = viewChild<ElementRef<HTMLInputElement>>('queryInput');
   /** The text the current entries were fetched with. */
   readonly appliedQuery = signal('');
 
@@ -356,6 +359,23 @@ export class CloudLogsComponent {
   clearQuery(): void {
     this.queryText = '';
     this.load();
+  }
+
+  /** The search shows as a button until opened or holding a search. */
+  searchShown(): boolean {
+    return this.searchOpen() || !!this.queryText;
+  }
+
+  openSearch(): void {
+    this.searchOpen.set(true);
+    setTimeout(() => this.queryInput()?.nativeElement.focus());
+  }
+
+  /** Escape folds an empty field back into its button. */
+  closeSearch(): void {
+    if (!this.queryText) {
+      this.searchOpen.set(false);
+    }
   }
 
   toggleLive(): void {

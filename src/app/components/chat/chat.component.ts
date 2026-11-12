@@ -133,6 +133,10 @@ export function designFromUrl(search: string): AccDesign {
 }
 /** Where the command center's mode (Builder or Manager) is kept. */
 const ACC_MODE_STORAGE_KEY = 'adk-acc-mode';
+/** The read-only label of a session replayed from a deployed agent. */
+const CLOUD_SESSION_TYPE = 'Cloud session';
+/** Where the last Manage page is kept, so a reload comes back to it. */
+const MANAGE_VIEW_STORAGE_KEY = 'adk-manage-view';
 /** Query parameter for pre-filling user input. */
 export const INITIAL_USER_INPUT_QUERY_PARAM = 'q';
 /** Query parameter for hiding the side panel. */
@@ -368,8 +372,12 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   accMode = signal<AccMode>(
       this.storageService.getItem(ACC_MODE_STORAGE_KEY) === 'manager' ? 'manager' : 'builder');
-  /** Which section fills the main area. Build is everything the UI had before. */
-  activeView = signal<AppView>(ACC_MODE_LANDING[this.accMode()]);
+  /**
+   * Which section fills the main area. Build is everything the UI had before.
+   * Manage opens on the page it was last on.
+   */
+  activeView = signal<AppView>(this.accMode() === 'manager' ?
+      this.lastManageView() : ACC_MODE_LANDING.builder);
   /**
    * The design, from the page's URL (`?ui=luminous`); it stays for the life
    * of the page. The other query parameters are merged into the URL as the
@@ -909,6 +917,10 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
       this.showLeftNav.set(false);
     } else {
       this.showSidePanel = this.storageService.getItem('adk-side-panel-visible') !== 'false';
+    }
+    if (this.design() === 'classic' && this.accMode() === 'manager') {
+      // Reopened on a Manage page: mount it and check what it needs.
+      this.setActiveView(this.activeView());
     }
 
     this.apps$.subscribe((apps) => {
@@ -2698,12 +2710,19 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.storageService.setItem('adk-left-nav-visible', String(this.showLeftNav()));
   }
 
-  /** Switches mode, opening the new mode's landing page. */
+  /** Switches mode: Build opens the Playground, Manage its last page. */
   setAccMode(mode: AccMode) {
     if (mode === this.accMode()) {
       return;
     }
-    this.setActiveView(ACC_MODE_LANDING[mode]);
+    this.setActiveView(
+        mode === 'manager' ? this.lastManageView() : ACC_MODE_LANDING.builder);
+  }
+
+  /** The Manage page last shown, or Manage's landing page. */
+  private lastManageView(): AppView {
+    const stored = this.storageService.getItem(MANAGE_VIEW_STORAGE_KEY) as AppView;
+    return MANAGER_VIEWS.has(stored) ? stored : ACC_MODE_LANDING.manager;
   }
 
   setActiveView(view: AppView) {
@@ -2713,6 +2732,9 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     if (mode !== this.accMode()) {
       this.accMode.set(mode);
       this.storageService.setItem(ACC_MODE_STORAGE_KEY, mode);
+    }
+    if (mode === 'manager') {
+      this.storageService.setItem(MANAGE_VIEW_STORAGE_KEY, view);
     }
     this.activeView.set(view);
     if (view === 'sessions') {
@@ -5344,7 +5366,7 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   /** Replays a session stored by a deployed agent, read-only, in Build. */
   viewCloudSession(request: OpenSessionRequest) {
     this.setActiveView('build');
-    this.performViewSessionLoading(request.session, request.label, 'Cloud session');
+    this.performViewSessionLoading(request.session, request.label, CLOUD_SESSION_TYPE);
     this.readonlyReturnView.set('sessions');
   }
 
@@ -5371,7 +5393,11 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
     this.currentSessionState = sessionData.state || {};
     this.evalCase = null;
     this.chatType.set('session');
-    this.updateSelectedSessionUrl();
+    if (type !== CLOUD_SESSION_TYPE) {
+      this.updateSelectedSessionUrl();
+    }
+    // (A cloud replay keeps the Playground's session in the URL: its own id is
+    // not a local session, so a reload could not find it.)
     this.showSessionSelectorDrawer = false;
     this.resetEventsAndMessages();
 
@@ -5393,16 +5419,24 @@ export class ChatComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected closeReadonlySession() {
+    // A cloud session is replayed over the Playground from a Manage page, so
+    // closing it goes back to the conversation that was open, not a new one.
+    const restore = this.readonlySessionType() === CLOUD_SESSION_TYPE ?
+        this.originalSessionId : '';
     this.readonlyReturnView.set(null);
     this.isViewOnlySession.set(false);
     this.readonlySessionType.set('');
     this.readonlySessionName.set('');
     this.evalCase = null;
+    this.originalSessionId = '';
+    if (restore) {
+      this.loadSession(restore, /* isFromUrl= */ true);
+      return;
+    }
 
     this.router.navigate([], { queryParams: { session: null, evalCase: null, evalResult: null, file: null }, queryParamsHandling: 'merge' });
 
     this.createSessionAndReset();
-    this.originalSessionId = '';
   }
 
   private doImportSession(sessionData: Session) {

@@ -188,13 +188,19 @@ describe('CloudSessionsComponent', () => {
     expect(fixture.componentInstance.selectedSourceId()).toBe(MINE.id);
   });
 
-  it('reads Cloud Run one user at a time', () => {
+  it('reads Cloud Run one user at a time, starting on the Try user', () => {
     create([CLOUD_RUN]);
 
     expect(text('.source-meta')).toContain('Cloud Run');
     expect(query('.cloud-run-note')).not.toBeNull();
+    // The user "Talk to a deployed version" chats as (dev@example.com).
+    expect(fixture.componentInstance.userFilter).toBe('adk-web-dev');
+    expect(cloud.listSessions)
+        .toHaveBeenCalledWith('my_agent', CLOUD_RUN.id, 'adk-web-dev');
+
+    fixture.componentInstance.clearFilter();
+    fixture.detectChanges();
     expect(text('.user-prompt')).toContain('Enter a user ID');
-    expect(cloud.listSessions).not.toHaveBeenCalled();
 
     fixture.componentInstance.userFilter = 'bob';
     fixture.componentInstance.applyFilter();
@@ -202,6 +208,38 @@ describe('CloudSessionsComponent', () => {
     expect(cloud.listSessions)
         .toHaveBeenCalledWith('my_agent', CLOUD_RUN.id, 'bob');
     expect(queryAll('.session-row').length).toBe(2);
+  });
+
+  it('keeps the user filter behind a search button until it is wanted', () => {
+    create();
+    expect(query('.search-button')).not.toBeNull();
+    expect(query('.filter-input')).toBeNull();
+
+    (query('.search-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(query('.filter-input')).not.toBeNull();
+
+    fixture.componentInstance.closeSearch();
+    fixture.detectChanges();
+    expect(query('.search-button')).not.toBeNull();
+  });
+
+  it('always shows the user field for Cloud Run, which needs one', () => {
+    create([CLOUD_RUN]);
+    expect(query('.filter-input')).not.toBeNull();
+    expect(query('.search-button')).toBeNull();
+  });
+
+  it('does not ask for a user ID again when looking one up failed', () => {
+    create([CLOUD_RUN]);
+    cloud.listSessions.and.returnValue(
+        throwError(() => ({status: 502, error: {detail: 'Read timed out'}})));
+    fixture.componentInstance.userFilter = 'bob';
+    fixture.componentInstance.applyFilter();
+    fixture.detectChanges();
+
+    expect(text('.list-error')).toContain('Read timed out');
+    expect(query('.user-prompt')).toBeNull();
   });
 
   it('opens a clicked session in the Playground', () => {

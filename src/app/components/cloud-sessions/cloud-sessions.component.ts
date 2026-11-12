@@ -16,7 +16,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, output, signal, untracked} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, output, signal, untracked, viewChild} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {MatDialog} from '@angular/material/dialog';
 import {MatIconModule} from '@angular/material/icon';
@@ -35,6 +35,7 @@ import {DEPLOY_SERVICE} from '../../core/services/interfaces/deploy';
 import {CloudConnectDialogComponent} from '../cloud-connect-dialog/cloud-connect-dialog.component';
 import {deploymentName, DeploymentPickerComponent} from '../deployment-picker/deployment-picker.component';
 import {relativeTime} from '../deployments/deployments.component';
+import {defaultUserId} from '../try-deployed-dialog/try-deployed-dialog.component';
 
 /** How often "Updated 12s ago" and relative times are recomputed. */
 const CLOCK_TICK_MS = 5_000;
@@ -246,6 +247,9 @@ export class CloudSessionsComponent {
   readonly sessionsError = signal('');
   readonly lastUpdated = signal<number|null>(null);
   userFilter = '';
+  /** The header's search field was opened from its search button. */
+  readonly searchOpen = signal(false);
+  private readonly filterInput = viewChild<ElementRef<HTMLInputElement>>('filterInput');
   /** The filter the current list was fetched with. */
   readonly appliedFilter = signal('');
 
@@ -374,12 +378,38 @@ export class CloudSessionsComponent {
       return;
     }
     this.selectedSourceId.set(deployment.id);
+    // Cloud Run lists one user's sessions at a time. Start on the user ID
+    // "Talk to a deployed version" chats as, so those sessions show up
+    // without typing it.
+    if (deployment.target === 'cloud_run' && !this.userFilter.trim()) {
+      this.userFilter = defaultUserId(this.status()?.account);
+    }
     this.clearSessions();
     this.loadSessions();
   }
 
   applyFilter(): void {
     this.loadSessions();
+  }
+
+  /**
+   * The user filter shows as a search button until wanted: opened, holding a
+   * filter, or needed (Cloud Run lists one user's sessions at a time).
+   */
+  searchShown(): boolean {
+    return this.searchOpen() || !!this.userFilter || this.needsUser();
+  }
+
+  openSearch(): void {
+    this.searchOpen.set(true);
+    setTimeout(() => this.filterInput()?.nativeElement.focus());
+  }
+
+  /** Escape folds an empty field back into its button. */
+  closeSearch(): void {
+    if (!this.userFilter) {
+      this.searchOpen.set(false);
+    }
   }
 
   clearFilter(): void {

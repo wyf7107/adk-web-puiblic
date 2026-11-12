@@ -29,7 +29,7 @@ import {CONNECTED_STATUS, MockCloudService} from '../../core/services/testing/mo
 import {fakeAsync, initTestBed, tick} from '../../testing/utils';
 import {CloudConnectDialogComponent} from '../cloud-connect-dialog/cloud-connect-dialog.component';
 
-import {CloudMonitoringComponent} from './cloud-monitoring.component';
+import {CloudMonitoringComponent, sparkPath, sparkValues} from './cloud-monitoring.component';
 
 function deployment(fields: Partial<Deployment>): Deployment {
   return {
@@ -140,7 +140,10 @@ describe('CloudMonitoringComponent', () => {
   it('summarizes the window in tiles', () => {
     create();
     const tiles = Array.from(fixture.nativeElement.querySelectorAll('.summary') as NodeListOf<HTMLElement>)
-                      .map((tile) => Array.from(tile.children).map((c) => c.textContent!.trim()).join(' '));
+                      .map((tile) => ['.summary-label', '.summary-value', '.summary-detail']
+                                         .map((sel) => tile.querySelector(sel)!.textContent!
+                                                           .replace('·', '').trim())
+                                         .join(' '));
     expect(tiles).toEqual([
       'Requests 40 last 1 day',
       'Server errors 5% 2 5xx',
@@ -158,8 +161,12 @@ describe('CloudMonitoringComponent', () => {
 
   it('changes the range on the server', () => {
     create();
-    const week = Array.from(fixture.nativeElement.querySelectorAll('.segment') as NodeListOf<HTMLElement>)
-                     .find((b) => b.textContent!.trim() === '7 days')!;
+    const trigger = query('.range-button') as HTMLButtonElement;
+    expect(trigger.textContent).toContain('Last 1 day');
+    trigger.click();
+    fixture.detectChanges();
+    const week = Array.from(document.querySelectorAll('.range-option') as NodeListOf<HTMLElement>)
+                     .find((b) => b.textContent!.trim() === 'Last 7 days')!;
     week.click();
     expect(cloud.getMetrics).toHaveBeenCalledWith('my_agent', MINE.id, '7d');
   });
@@ -190,7 +197,7 @@ describe('CloudMonitoringComponent', () => {
     })));
     create();
     expect(texts('.metrics-error')[0]).toContain('Monitoring Viewer');
-    expect(query('.segmented')).not.toBeNull();
+    expect(query('.range-button')).not.toBeNull();
   });
 
   it('opens the deployment in the Cloud console', () => {
@@ -211,5 +218,50 @@ describe('CloudMonitoringComponent', () => {
     create();
     (query('.not-connected .actions button') as HTMLButtonElement).click();
     expect(dialog.open).toHaveBeenCalledWith(CloudConnectDialogComponent, jasmine.anything());
+  });
+
+  it('draws a sparkline under a tile from its chart', () => {
+    create();
+    const tile = query('.summary-requests')!;
+    expect(tile.querySelectorAll('.sparkline path, .spark-empty').length).toBe(1);
+  });
+});
+
+describe('summary sparklines', () => {
+  const points = (values: Array<number|undefined>) =>
+      values.map((value, i) => ({time: `2026-10-01T0${i}:00:00Z`, value}));
+
+  it('totals the request classes, and takes the 5xx share for errors', () => {
+    const charts = [{
+      id: 'requests', title: 'Requests', unit: 'requests', kind: 'bars' as const,
+      series: [
+        {name: '2xx', color: 'success', points: points([8, 9])},
+        {name: '5xx', color: 'error', points: points([2, 0])},
+      ],
+    }];
+    expect(sparkValues('requests', charts)).toEqual([10, 9]);
+    expect(sparkValues('errors', charts)).toEqual([0.2, 0]);
+  });
+
+  it('follows p95 for latency and the first series of a resource chart', () => {
+    const charts = [
+      {id: 'latency', title: 'Latency', unit: 'ms', kind: 'lines' as const, series: [
+        {name: 'p50', color: 'secondary', points: points([1, 2])},
+        {name: 'p95', color: 'primary', points: points([5, 6])},
+      ]},
+      {id: 'cpu', title: 'CPU', unit: 'vCPU', kind: 'lines' as const, series: [
+        {name: 'vCPU', color: 'primary', points: points([0.1, 0.3])},
+      ]},
+    ];
+    expect(sparkValues('p95', charts)).toEqual([5, 6]);
+    expect(sparkValues('peak_cpu', charts)).toEqual([0.1, 0.3]);
+    expect(sparkValues('nothing', charts)).toEqual([]);
+  });
+
+  it('draws a path through the known points, ending on the last', () => {
+    expect(sparkPath([1], 100, 20)).toBeNull();
+    const path = sparkPath([0, undefined, 10], 100, 20)!;
+    expect(path.d).toBe('M0,16 L100,4');
+    expect([path.x, path.y]).toEqual([100, 4]);
   });
 });

@@ -34,10 +34,18 @@ code {
   color: var(--ops-ink-muted);
 }
 
-.page-content > .inline-loading,
-.page-content > .ops-empty:first-child,
-.page-content > .ops-banner:first-child {
-  margin-top: 28px;
+.page-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-button .ops-quiet-text {
+  max-width: 200px;
+}
+
+.menu-check {
+  margin-left: 16px;
 }
 
 .inline-loading {
@@ -62,38 +70,84 @@ code {
   color: var(--ops-ink-muted);
 }
 
-// --- Summary tiles -------------------------------------------------------
+// --- Summary tiles: a label, the value with a muted note, a sparkline ----
 
 .summaries {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .summary {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-height: 140px;
+  min-height: 128px;
+  padding: 16px;
+  border-color: transparent;
 }
 
 .summary-label {
-  color: var(--ops-ink-muted);
-  font-size: 14px;
+  color: var(--ops-ink);
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 540;
+  font-variation-settings: 'wdth' 92, 'wght' 540;
+}
+
+.summary-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
 }
 
 .summary-value {
-  margin-top: 8px;
-  font-size: 32px;
-  line-height: 40px;
-  font-weight: 400;
+  flex: none;
+  font-size: 24px;
+  line-height: 28px;
+  font-weight: 380;
+  font-variation-settings: 'ROND' 20, 'wdth' 100, 'wght' 380;
   font-variant-numeric: tabular-nums;
 }
 
 .summary-detail {
-  margin-top: auto;
+  overflow: hidden;
   color: var(--ops-ink-muted);
-  font-size: 12px;
+  font-size: 15px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-bad .summary-value {
+  color: var(--ops-negative);
+}
+
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 32px;
+  margin-top: auto;
+  overflow: visible;
+}
+
+.spark-line {
+  fill: none;
+  stroke: var(--ops-ink-muted);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.spark-dot {
+  fill: var(--ops-ink);
+}
+
+.spark-empty {
+  border-bottom: 1px dashed var(--ops-hairline);
+  height: 16px;
+  margin-bottom: 16px;
 }
 
 .ops-skeleton.tall {
@@ -101,19 +155,20 @@ code {
   margin-top: 12px;
 }
 
-// --- Charts --------------------------------------------------------------
+// --- Charts: Requests across the page, the rest two to a row -------------
 
 .charts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 20px;
+  gap: 16px;
+  margin-top: 16px;
   padding-bottom: 24px;
 }
 
 .chart-card {
   display: block;
-  padding: 20px 20px 12px;
+  padding: 16px 16px 12px;
+  border-color: transparent;
 }
 
 .chart-requests {

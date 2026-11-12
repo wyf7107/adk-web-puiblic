@@ -34,10 +34,19 @@ code {
   color: var(--ops-ink-muted);
 }
 
-.page-content > .inline-loading,
-.page-content > .ops-empty:first-child,
-.page-content > .ops-banner:first-child {
-  margin-top: 28px;
+.page-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-button .ops-quiet-text {
+  max-width: 200px;
+}
+
+.list-meta-line {
+  display: flex;
+  margin: -12px 4px 12px;
 }
 
 .inline-loading {
@@ -66,7 +75,10 @@ code {
 // --- Toolbar -------------------------------------------------------------
 
 .filter {
-  width: 280px;
+  width: 260px;
+  min-width: 0;
+  height: 36px;
+  font-size: 15px;
 }
 
 .filter-clear {
@@ -80,13 +92,9 @@ code {
 
 // --- Table ---------------------------------------------------------------
 
+// Conversation, User, Events, Outcome, Last activity, then the chevron.
 .sessions-table .ops-row {
-  grid-template-columns: minmax(0, 3fr) minmax(0, 1.4fr) 60px 100px 140px 140px 32px;
-  min-height: 62px;
-
-  &.head {
-    min-height: 44px;
-  }
+  grid-template-columns: minmax(0, 4fr) minmax(0, 1.3fr) 72px 120px 140px 24px;
 }
 
 .num {
@@ -109,8 +117,8 @@ code {
 
 .conv-cell {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  min-width: 0;
 }
 
 .conv-title.untitled {
@@ -180,7 +188,7 @@ code {
 }
 
 .skeleton-row {
-  min-height: 62px;
+  min-height: 48px;
 }
 
 .skeleton-lines {
@@ -198,7 +206,7 @@ code {
 
 @media (max-width: 1100px) {
   .sessions-table .ops-row {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 1.4fr) 100px 120px 32px;
+    grid-template-columns: minmax(0, 3fr) 64px 110px 120px 24px;
   }
 
   .wide-only {

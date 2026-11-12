@@ -173,13 +173,27 @@ describe('CloudLogsComponent', () => {
     expect(first.querySelector('.more-lines')?.textContent).toBe('+2 lines');
   });
 
+  it('keeps the search behind a button until opened or used', () => {
+    create();
+    expect(query('.filter-input')).toBeNull();
+    (query('.search-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(query('.filter-input')).not.toBeNull();
+
+    fixture.componentInstance.queryText = 'boom';
+    fixture.componentInstance.closeSearch();
+    fixture.detectChanges();
+    // A field holding a search stays open.
+    expect(query('.filter-input')).not.toBeNull();
+  });
+
   it('shows requests with their method, status and latency', () => {
     create();
     const request = queryAll('.log-entry')[1];
     expect(request.querySelector('.http-method')?.textContent).toBe('GET');
     expect(request.querySelector('.http-status')?.className).toContain('http-error');
     expect(request.querySelector('.http-latency')?.textContent).toBe('12 ms');
-    expect(request.querySelector('.sev-bar')?.className).toContain('sev-error');
+    expect(request.querySelector('.sev-dot')?.className).toContain('sev-error');
   });
 
   it('expands an entry to show everything about it', () => {

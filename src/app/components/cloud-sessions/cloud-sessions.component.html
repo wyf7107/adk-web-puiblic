@@ -19,35 +19,61 @@
 }
 
 <div class="ops-page">
+  <!-- The title, then quiet controls: search by user, refresh, the
+       deployment the sessions are read from, and the cloud project. -->
   <header class="ops-header page-header">
-    <div class="ops-title-block">
-      <h1 class="ops-title">Sessions</h1>
-      <div class="ops-context">
-        <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
-        <span class="page-subtitle">{{ appName() || 'No agent selected' }}</span>
-        @if (checking()) {
-          <span class="connection-chip">
-            &middot;
-            <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
-            Checking connection&hellip;
-          </span>
-        } @else if (connected()) {
-          <span class="connection-chip">&middot; {{ status()?.project }}</span>
-          <button type="button" class="ops-link" (click)="connect()">Change project or region</button>
-        } @else {
-          <span class="connection-chip">&middot; Not connected</span>
-        }
-      </div>
-    </div>
+    <h1 class="ops-title">Sessions</h1>
+    <span class="page-subtitle sr-only">{{ appName() || 'No agent selected' }}</span>
 
     <div class="ops-header-actions">
-      @if (selectedSourceId()) {
-        <span class="ops-updated page-refresh">
-          {{ updatedText() }}
+      @if (connected() && appName() && selectedSourceId()) {
+        @if (searchShown()) {
+          <form class="ops-search filter" (ngSubmit)="applyFilter()">
+            <mat-icon fontSet="material-symbols-outlined">person_search</mat-icon>
+            <input #filterInput class="filter-input" name="userFilter" [(ngModel)]="userFilter"
+              [placeholder]="needsUser() ? 'Enter a user ID, then press Enter' : 'Filter by user ID'"
+              aria-label="User ID" autocomplete="off" (keydown.escape)="closeSearch()" />
+            @if (userFilter) {
+              <button type="button" class="ops-icon-button small filter-clear" (click)="clearFilter()" aria-label="Clear filter">
+                <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+              </button>
+            }
+          </form>
+        } @else {
+          <button type="button" class="ops-icon-button search-button" (click)="openSearch()"
+            matTooltip="Filter by user ID" aria-label="Filter by user ID">
+            <mat-icon fontSet="material-symbols-outlined">search</mat-icon>
+          </button>
+        }
+        <span class="page-refresh">
+          <span class="ops-updated">{{ updatedText() }}</span>
           <button type="button" class="ops-icon-button" (click)="refresh()" [disabled]="loadingSessions()"
             matTooltip="Refresh" aria-label="Refresh">
             <mat-icon fontSet="material-symbols-outlined">refresh</mat-icon>
           </button>
+        </span>
+      }
+      @if (connected() && appName() && sources()?.length) {
+        <app-deployment-picker appearance="pill" label="Reading sessions from" [deployments]="sources() ?? []"
+          [selectedId]="selectedSourceId()" [optionNote]="sourceNote"
+          (selectedChange)="selectSource($event)"></app-deployment-picker>
+      }
+      @if (checking()) {
+        <span class="ops-quiet connection-chip">
+          <mat-icon fontSet="material-symbols-outlined" class="ops-spin">progress_activity</mat-icon>
+          <span class="ops-quiet-text">Checking connection&hellip;</span>
+        </span>
+      } @else if (connected()) {
+        <button type="button" class="ops-quiet connection-chip project-button" (click)="connect()"
+          matTooltip="Change project or region" aria-label="Google Cloud project. Change project or region">
+          <mat-icon fontSet="material-symbols-outlined">cloud</mat-icon>
+          <span class="ops-quiet-text">{{ status()?.project }}</span>
+          <mat-icon fontSet="material-symbols-outlined" class="ops-caret">arrow_drop_down</mat-icon>
+        </button>
+      } @else {
+        <span class="ops-quiet connection-chip">
+          <mat-icon fontSet="material-symbols-outlined">cloud_off</mat-icon>
+          <span class="ops-quiet-text">Not connected</span>
         </span>
       }
     </div>
@@ -93,33 +119,17 @@
         <button type="button" class="ops-button text banner-action" (click)="refresh()">Retry</button>
       </div>
     } @else {
-      <div class="ops-toolbar">
-        @if (sources()?.length) {
-          <app-deployment-picker appearance="pill" label="Reading sessions from" [deployments]="sources() ?? []"
-            [selectedId]="selectedSourceId()" [optionNote]="sourceNote"
-            (selectedChange)="selectSource($event)"></app-deployment-picker>
-        }
-        @if (selectedSourceId()) {
-          <form class="ops-search filter" (ngSubmit)="applyFilter()">
-            <mat-icon fontSet="material-symbols-outlined">person_search</mat-icon>
-            <input class="filter-input" name="userFilter" [(ngModel)]="userFilter"
-              [placeholder]="needsUser() ? 'Enter a user ID, then press Enter' : 'Filter by user ID'"
-              aria-label="User ID" autocomplete="off" />
-            @if (userFilter) {
-              <button type="button" class="ops-icon-button small filter-clear" (click)="clearFilter()" aria-label="Clear filter">
-                <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
-              </button>
-            }
-          </form>
-          @if (sessions(); as list) {
+      @if (selectedSourceId()) {
+        @if (sessions(); as list) {
+          <div class="list-meta-line">
             <span class="ops-toolbar-note list-meta">
               {{ list.sessions.length }} {{ list.sessions.length === 1 ? 'session' : 'sessions' }}
               @if (appliedFilter()) { for <strong>{{ appliedFilter() }}</strong> }
               @if (list.truncated) { &middot; Latest {{ list.sessions.length }} shown; filter by user to find older ones }
             </span>
-          }
+          </div>
         }
-      </div>
+      }
 
       @if (!selectedSourceId()) {
         <!-- Nothing of this agent's to read sessions from -->
@@ -128,7 +138,7 @@
           <p>
             Sessions are read from this agent's Agent Runtime or Cloud Run deployments. We looked in
             <strong>{{ status()?.project }} &middot; {{ status()?.region }}</strong> and found none.
-            @if (sources()?.length) { You can still choose another deployment in the project above. }
+            @if (sources()?.length) { You can still choose another of the project's deployments at the top right. }
           </p>
           <div class="ops-empty-actions actions">
             <button type="button" class="ops-button filled" (click)="goToDeployments.emit()">Go to Deployments</button>
@@ -177,10 +187,9 @@
               <div class="ops-table sessions-table" role="table" aria-label="Sessions">
                 <div class="ops-row head" role="row">
                   <span role="columnheader">Conversation</span>
-                  <span role="columnheader">User</span>
-                  <span role="columnheader" class="num wide-only">Events</span>
+                  <span role="columnheader" class="wide-only">User</span>
+                  <span role="columnheader" class="num">Events</span>
                   <span role="columnheader">Outcome</span>
-                  <span role="columnheader" class="wide-only">Started</span>
                   <span role="columnheader">Last activity</span>
                   <span role="columnheader"><span class="sr-only">Open</span></span>
                 </div>
@@ -189,7 +198,7 @@
                     [class.opening]="openingKey() === row.key"
                     [attr.aria-label]="'Open ' + (row.overview?.title || row.summary.id) + ' in the Playground'"
                     (click)="openRow(row)" (keydown.enter)="openRow(row)">
-                    <span role="cell" class="conv-cell">
+                    <span role="cell" class="conv-cell" [title]="row.overview?.startTime ? 'Started ' + fullTime(row.overview?.startTime) : ''">
                       @if (row.overview; as o) {
                         <span class="ops-primary conv-title" [class.untitled]="!o.title" [title]="o.title">{{ o.title || 'No user message' }}</span>
                       } @else if (row.previewFailed) {
@@ -197,30 +206,27 @@
                       } @else {
                         <span class="ops-skeleton conv-skeleton"></span>
                       }
-                      <span class="ops-secondary ops-mono conv-id">{{ row.summary.id }}</span>
+                      <span class="conv-id sr-only">{{ row.summary.id }}</span>
                     </span>
-                    <span role="cell" class="user-cell">
+                    <span role="cell" class="user-cell wide-only">
                       <button type="button" class="user-chip" (click)="filterByUser(row.summary.userId, $event)"
                         [matTooltip]="'Only show ' + row.summary.userId + '\'s sessions'">
                         <span class="avatar">{{ initial(row.summary.userId) }}</span>
                         <span class="ops-ellipsis">{{ row.summary.userId }}</span>
                       </button>
                     </span>
-                    <span role="cell" class="num wide-only ops-tabular">
+                    <span role="cell" class="num ops-tabular ops-muted">
                       @if (row.overview; as o) { {{ o.eventCount }} } @else if (!row.previewFailed) { <span class="ops-skeleton short"></span> }
                     </span>
                     <span role="cell">
                       @if (row.overview; as o) {
-                        <span class="ops-badge outcome outcome-{{ o.outcome }}" [class.positive]="o.outcome === 'replied'"
+                        <span class="ops-state outcome outcome-{{ o.outcome }}" [class.positive]="o.outcome === 'replied'"
                           [class.error]="o.outcome === 'error'" [matTooltip]="o.errorMessage || ''">
                           {{ outcomeLabel(o.outcome) }}
                         </span>
                       } @else if (!row.previewFailed) {
                         <span class="ops-skeleton short"></span>
                       }
-                    </span>
-                    <span role="cell" class="time-cell wide-only" [title]="fullTime(row.overview?.startTime)">
-                      {{ relativeTime(row.overview?.startTime) }}
                     </span>
                     <span role="cell" class="time-cell" [title]="fullTime(row.summary.lastUpdateTime)">
                       {{ relativeTime(row.summary.lastUpdateTime) }}
@@ -254,7 +260,8 @@
                 </div>
               }
             </div>
-          } @else if (needsUser()) {
+          } @else if (needsUser() && !sessionsError()) {
+            <!-- Not once a lookup has failed: the error says what went wrong. -->
             <div class="ops-empty list-empty user-prompt">
               <mat-icon fontSet="material-symbols-outlined" class="empty-icon">person_search</mat-icon>
               <span>Enter a user ID above to list that user's sessions on this service.</span>

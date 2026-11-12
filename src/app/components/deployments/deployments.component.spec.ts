@@ -216,13 +216,18 @@ describe('DeploymentsComponent', () => {
     expect(deployService.getDeploymentLive).not.toHaveBeenCalled();
   });
 
-  it('lists the rest of the project in a collapsible table', () => {
+  it('lists the rest of the project in a folded table', () => {
     create();
+    const toggle = queryAll('.section-toggle')
+                       .find((b) => b.textContent?.includes('Rest of project'))!;
+    expect(queryAll('.other-row').length).toBe(0);
 
+    toggle.click();
+    fixture.detectChanges();
     expect(queryAll('.other-row').length).toBe(1);
     expect(text('.other-row')).toContain('someone_else');
-    queryAll('.section-toggle')
-        .find((b) => b.textContent?.includes('Rest of project'))!.click();
+
+    toggle.click();
     fixture.detectChanges();
     expect(queryAll('.other-row').length).toBe(0);
   });
@@ -264,6 +269,9 @@ describe('DeploymentsComponent', () => {
   it('lists every deploy in Deploy activity, tagging ones that created nothing',
      () => {
        create();
+       queryAll('.section-toggle')
+           .find((b) => b.textContent?.includes('Deploy activity'))!.click();
+       fixture.detectChanges();
 
        expect(queryAll('.activity-row').length).toBe(3);
        expect(queryAll('.nothing-tag').length).toBe(1);
@@ -309,11 +317,23 @@ describe('DeploymentsComponent', () => {
 
   it('opens the console through the safe values service', () => {
     create();
-    (query('.card-actions button[aria-label="Open in Cloud console"]') as HTMLButtonElement).click();
+    // In the row's ⋮ menu.
+    (query('.card-actions .row-menu-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    (document.querySelector('.console-item') as HTMLButtonElement).click();
 
     expect(safeValues.windowOpen)
         .toHaveBeenCalledWith(
             window, MINE.consoleUrl, '_blank', 'noopener');
+  });
+
+  it('shows a revision: Cloud Run\'s latest once looked up, else the resource id', () => {
+    create();
+    const c = fixture.componentInstance;
+    const runtime = {...MINE, target: 'agent_engine', resourceName: 'projects/1/locations/x/reasoningEngines/42'} as Deployment;
+    expect(c.revisionOf(runtime)).toBe('42');
+    c.live.set({[MINE.id]: {supported: true, state: 'ready', revisions: [], latestRevision: 'my-agent-00007-abc'} as any});
+    expect(c.revisionOf(MINE)).toBe('my-agent-00007-abc');
   });
 
   it('offers to try a deployment from the Playground', () => {
@@ -333,7 +353,7 @@ describe('DeploymentsComponent', () => {
     (query('.deployment-toggle') as HTMLButtonElement).click();
     fixture.detectChanges();
 
-    expect(text('.status-deleted')).toBe('delete Deleted');
+    expect(text('.status-deleted')).toBe('Deleted');
   });
 
   it('reports a running deploy', () => {

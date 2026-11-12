@@ -169,36 +169,42 @@
   font-weight: 400;
 }
 
-// --- Pill appearance (Operate pages' toolbar) ----------------------------
+// --- Pill appearance (Operate pages' header) ------------------------------
+// The Luminous design's quiet dropdown: the runtime icon and the deployment's
+// name on no fill, a caret, and a state layer on hover. The target, region and
+// id stay for screen readers and the menu.
 
 .source-picker.pill {
   align-items: center;
-  background: color-mix(in srgb, var(--mat-sys-on-surface) 7%, transparent);
+  background: transparent;
   border: none;
-  border-radius: 18px;
+  border-radius: 9999px;
   box-sizing: border-box;
-  color: var(--mat-sys-on-surface);
+  color: var(--lumi-sys-color-on-surface, var(--mat-sys-on-surface));
   cursor: pointer;
   display: inline-flex;
-  font-family: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
-  font-size: 14px;
+  font-family: var(--lumi-font-family, 'Google Sans', Roboto, sans-serif);
+  font-size: 15px;
+  font-variation-settings: 'wdth' 92;
   gap: 8px;
   height: 36px;
-  max-width: 420px;
+  line-height: 20px;
+  max-width: 320px;
   min-width: 0;
-  padding: 0 8px 0 14px;
+  padding: 0 8px 0 12px;
 
-  &:hover {
-    background: color-mix(in srgb, var(--mat-sys-on-surface) 11%, transparent);
+  &:hover,
+  &[aria-expanded='true'] {
+    background: var(--lumi-sys-color-state-hover, color-mix(in srgb, var(--mat-sys-on-surface) 8%, transparent));
   }
 
   &:focus-visible {
-    outline: 2px solid var(--mat-sys-primary);
+    outline: 2px solid var(--lumi-sys-color-on-surface, var(--mat-sys-primary));
     outline-offset: 2px;
   }
 
   mat-icon {
-    color: var(--mat-sys-on-surface-variant);
+    color: var(--lumi-sys-color-on-surface-variant, var(--mat-sys-on-surface-variant));
     flex: none;
   }
 
@@ -211,25 +217,29 @@
   .pill-arrow {
     font-size: 20px;
     height: 20px;
+    margin-left: -4px;
     width: 20px;
   }
 
   .pill-name {
-    flex: none;
-    white-space: nowrap;
-
-    &.placeholder {
-      color: var(--mat-sys-on-surface-variant);
-    }
-  }
-
-  .pill-meta {
-    color: var(--mat-sys-on-surface-variant);
-    font-size: 12px;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    &.placeholder {
+      color: var(--lumi-sys-color-on-surface, var(--mat-sys-on-surface));
+    }
+  }
+
+  .pill-meta {
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
   }
 }
 

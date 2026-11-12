@@ -36,12 +36,8 @@ code {
 
 // --- Banners -------------------------------------------------------------
 
-.ops-banner {
-  margin-top: 28px;
-
-  + .ops-banner {
-    margin-top: 0;
-  }
+.ops-banner + .ops-banner {
+  margin-top: 0;
 }
 
 .banner-text {
@@ -89,73 +85,52 @@ code {
   }
 }
 
-.page-content > .ops-section:first-of-type,
-.page-content > .ops-empty:first-child,
-.page-content > .skeletons:first-child {
-  margin-top: 28px;
+.page-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.project-button .ops-quiet-text {
+  max-width: 240px;
 }
 
 // --- This agent ----------------------------------------------------------
 
 // Each row is its own grid, so every column needs a width that doesn't
-// depend on the row's content, or the header drifts from the cells.
+// depend on the row's content, or the header drifts from the cells. The
+// columns follow the design: Name, Region (its Environment), Revision, State,
+// Runtime, Updated, then the row's actions.
 .mine .ops-row {
-  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1.6fr) 120px 140px 196px;
+  grid-template-columns:
+      minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr)
+      minmax(0, 1.4fr) minmax(0, 1fr) 124px;
 }
 
-.deployment-row {
-  min-height: 64px;
-}
-
-.deployment-card {
-  border-bottom: 1px solid var(--ops-hairline);
+// A row and its details share one hairline; the details hang under the row.
+.deployment-card + .deployment-card {
+  border-top: 1px solid var(--ops-hairline);
 
   .deployment-row {
-    border-bottom: none;
+    border-top-color: transparent;
   }
 }
 
-.name-cell,
-.target-cell,
-.times-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.deployment-card:first-of-type .deployment-row {
+  border-top-color: transparent;
 }
 
-.locator-line {
+.name-cell {
   display: flex;
   align-items: center;
-  gap: 2px;
   min-width: 0;
-
-  .locator {
-    min-width: 0;
-  }
-
-  a.locator {
-    color: var(--ops-ink-muted);
-    text-decoration: none;
-
-    &:hover {
-      color: var(--ops-accent-ink);
-      text-decoration: underline;
-    }
-  }
-
-  // The copy button shows on the row's hover or focus, so the line reads
-  // as text until it is needed.
-  .inline-copy {
-    opacity: 0;
-  }
 }
 
-.deployment-row:hover .inline-copy,
-.inline-copy:focus-visible {
-  opacity: 1;
+.revision-cell {
+  font-size: 13px;
 }
 
-.target-line {
+.runtime-cell {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -178,17 +153,20 @@ code {
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
+  margin-right: -8px;
+}
 
-  .try-button {
-    margin-right: 4px;
-  }
+// The empty state sits inside the card, under the header row.
+.mine .empty-card {
+  padding: 20px 0 24px;
+  border-top: 1px solid var(--ops-hairline);
 }
 
 .last-failed {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 0 16px 14px;
+  padding: 0 0 14px;
   color: var(--ops-ink-muted);
   font-size: 13px;
   line-height: 18px;
@@ -218,7 +196,7 @@ code {
 // --- Expanded details ----------------------------------------------------
 
 .deployment-details {
-  margin: 0 16px 16px;
+  margin: 0 0 16px;
   padding: 16px 20px;
   border-radius: 16px;
   background: var(--ops-fill);
@@ -228,14 +206,14 @@ code {
   .ops-row {
     min-height: 40px;
     padding: 6px 0;
+    column-gap: 16px;
+    font-size: 13px;
 
     &.head {
       min-height: 32px;
-      font-size: 12px;
-    }
-
-    &:last-child {
-      border-bottom: none;
+      padding: 0;
+      align-items: center;
+      font-size: 13px;
     }
   }
 }
@@ -354,10 +332,28 @@ code {
   }
 }
 
+// --- Rest of project and Deploy activity: folded sections under the card --
+
+.secondary-section {
+  margin-top: 32px;
+
+  .ops-section-heading {
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 0 4px;
+
+    h2 {
+      font-size: 22px;
+      line-height: 28px;
+      font-weight: 400;
+    }
+  }
+}
+
 // --- Rest of project -----------------------------------------------------
 
 .others .ops-row {
-  grid-template-columns: minmax(0, 2fr) 140px 120px 120px 130px 48px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 40px;
 }
 
 .other-name-cell {
@@ -420,8 +416,15 @@ code {
   margin-bottom: 8px;
 }
 
+.skeletons {
+  padding: 16px 24px;
+  border: 1px solid var(--ops-card-edge);
+  border-radius: 28.8px;
+  background: var(--ops-surface);
+}
+
 .skeleton-card {
-  min-height: 64px;
+  min-height: 56px;
 }
 
 .skeleton-lines {
@@ -438,9 +441,10 @@ code {
 
 @media (max-width: 1100px) {
   .mine .ops-row {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) 110px 196px;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 124px;
 
-    > :nth-child(4) {
+    > :nth-child(2),
+    > :nth-child(3) {
       display: none;
     }
   }

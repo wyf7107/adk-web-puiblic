@@ -16,34 +16,41 @@
 
 /**
  * Shared styling for the Ship and Operate pages (Deployments, Sessions, Logs,
- * Monitoring): a centered column under a large title, flat tables separated by
- * hairlines, pill-shaped controls, and small tinted status badges.
+ * Monitoring), after the Luminous design's pages: a large light title with
+ * quiet controls at its right, then rounded card tables (a plain header row,
+ * 48px rows split by hairlines) and dot-and-label states.
  *
- * Every role is derived from the app theme (`--mat-sys-*`, `--adk-*`), so the
- * pages follow the light and dark themes. Tints are mixed from on-surface so
- * they read the same on either background.
+ * Every role comes from the Luminous tokens (`--lumi-sys-*`, set for both
+ * themes in styles/_luminous.scss), so the pages follow light and dark.
  */
 
 @mixin host {
-  --ops-ink: var(--mat-sys-on-surface);
-  --ops-ink-muted: var(--mat-sys-on-surface-variant);
-  --ops-accent-ink: var(--mat-sys-primary);
-  --ops-bg: var(--mat-sys-surface);
-  --ops-surface: var(--mat-sys-surface-container-low);
-  --ops-fill: color-mix(in srgb, var(--mat-sys-on-surface) 7%, transparent);
-  --ops-fill-hover: color-mix(in srgb, var(--mat-sys-on-surface) 11%, transparent);
-  --ops-fill-selected: color-mix(in srgb, var(--mat-sys-on-surface) 16%, transparent);
-  --ops-hairline: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
-  --ops-state-hover: color-mix(in srgb, var(--mat-sys-on-surface) 6%, transparent);
-  --ops-font: 'Google Sans', 'Google Sans Text', Roboto, sans-serif;
-  --ops-mono: 'Google Sans Mono', 'Roboto Mono', monospace;
+  --ops-ink: var(--lumi-sys-color-on-surface);
+  --ops-ink-muted: var(--lumi-sys-color-on-surface-variant);
+  --ops-accent-ink: var(--lumi-sys-color-accent-fixed);
+  --ops-bg: var(--lumi-sys-color-surface);
+  --ops-surface: var(--lumi-sys-color-surface-bright);
+  --ops-card-edge: color-mix(in srgb, var(--lumi-sys-color-on-surface) 6%, transparent);
+  --ops-fill: color-mix(in srgb, var(--lumi-sys-color-on-surface) 6%, transparent);
+  --ops-fill-hover: color-mix(in srgb, var(--lumi-sys-color-on-surface) 10%, transparent);
+  --ops-fill-selected: color-mix(in srgb, var(--lumi-sys-color-on-surface) 14%, transparent);
+  --ops-hairline: var(--lumi-sys-color-on-surface-low);
+  --ops-state-hover: var(--lumi-sys-color-state-hover);
+  --ops-positive: var(--lumi-sys-color-positive);
+  --ops-negative: var(--lumi-sys-color-negative);
+  --ops-warning: var(--lumi-sys-color-warning);
+  --ops-neutral: var(--lumi-sys-color-on-surface-variant);
+  --ops-font: var(--lumi-font-family, 'Google Sans Flex', 'Google Sans', Roboto, sans-serif);
+  --ops-font-variation: 'wdth' 92;
+  --ops-mono: 'Google Sans Code', 'Google Sans Mono', 'Roboto Mono', monospace;
 
   display: block;
   position: relative;
   background: var(--ops-bg);
   color: var(--ops-ink);
   font-family: var(--ops-font);
-  font-size: 14px;
+  font-variation-settings: var(--ops-font-variation);
+  font-size: 15px;
   line-height: 20px;
 }
 
@@ -59,15 +66,17 @@
 
 .ops-page {
   box-sizing: border-box;
-  max-width: 1168px;
-  margin: 0 auto;
-  padding: 32px 40px 56px;
+  padding: 24px 24px 56px;
 }
 
+// The title row: the page title, and the page's quiet controls at its right.
 .ops-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
+  min-height: 44px;
+  margin-bottom: 24px;
+  padding: 0 4px;
 }
 
 .ops-title-block {
@@ -80,10 +89,12 @@
 .ops-title {
   margin: 0;
   font-family: var(--ops-font);
-  font-size: 28px;
-  line-height: 36px;
-  font-weight: 400;
+  font-size: 36px;
+  line-height: 44px;
+  font-weight: 320;
+  font-variation-settings: 'ROND' 100, 'wdth' 100, 'wght' 320;
   color: var(--ops-ink);
+  white-space: nowrap;
 }
 
 .ops-context {
@@ -104,9 +115,63 @@
 .ops-header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 12px;
   margin-left: auto;
   min-height: 36px;
+}
+
+// A quiet header control: text and icons on no fill, a state layer on hover.
+// Dropdowns (a deployment, a time range) end in a caret.
+.ops-quiet {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 36px;
+  max-width: 320px;
+  padding: 0 8px 0 12px;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ops-ink);
+  font-family: var(--ops-font);
+  font-variation-settings: var(--ops-font-variation);
+  font-size: 15px;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  > mat-icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    color: var(--ops-ink-muted);
+  }
+
+  .ops-caret {
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    margin-left: -4px;
+  }
+
+  > .ops-quiet-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover:not(:disabled),
+  &[aria-expanded='true'] {
+    background: var(--ops-state-hover);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+    cursor: default;
+  }
 }
 
 .ops-updated {
@@ -192,16 +257,19 @@
     cursor: default;
   }
 
-  // The page's primary action.
+  // The page's primary action: a filled accent pill.
   &.filled {
-    height: 40px;
-    padding: 0 20px;
-    border-radius: 20px;
-    background: var(--mat-sys-primary-container);
-    color: var(--mat-sys-on-primary-container);
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 9999px;
+    background: var(--lumi-sys-color-accent);
+    color: var(--ops-ink);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
 
     &:hover:not(:disabled) {
-      background: color-mix(in srgb, var(--mat-sys-primary-container) 88%, var(--mat-sys-on-primary-container));
+      background: color-mix(in srgb, var(--lumi-sys-color-accent) 88%, var(--ops-ink));
     }
   }
 
@@ -426,32 +494,54 @@ button.ops-section-heading {
   }
 }
 
-// A flat table: a header row in muted ink, then rows separated by hairlines.
-// Each page sets `grid-template-columns` on its rows.
+// A card table: a rounded card holding a plain header row, then 48px rows
+// split by hairlines (none under the header). Each page sets
+// `grid-template-columns` on its rows. A table inside a row's details is flat.
 .ops-table {
+  box-sizing: border-box;
   width: 100%;
+  padding: 0 24px 4px;
+  border: 1px solid var(--ops-card-edge);
+  border-radius: 28.8px;
+  background: var(--ops-surface);
+
+  .ops-table {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  }
 }
 
 .ops-row {
   display: grid;
   align-items: center;
-  column-gap: 16px;
+  column-gap: 32px;
   box-sizing: border-box;
-  min-height: 56px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--ops-hairline);
+  min-height: 48px;
+  padding: 1px 0;
+  border-top: 1px solid var(--ops-hairline);
+  font-size: 15px;
+  line-height: 20px;
 
   > * {
     min-width: 0;
   }
 
+  &:first-child,
+  &.head + & {
+    border-top-color: transparent;
+  }
+
   &.head {
-    min-height: 44px;
-    padding-top: 0;
-    padding-bottom: 0;
-    color: var(--ops-ink-muted);
-    font-size: 14px;
-    font-weight: 500;
+    align-items: end;
+    min-height: 51px;
+    padding: 19px 0 12px;
+    color: var(--ops-ink);
+    font-size: 15px;
+    font-weight: 540;
+    font-variation-settings: 'wdth' 92, 'wght' 540;
+    white-space: nowrap;
   }
 
   &.clickable {
@@ -477,7 +567,7 @@ button.ops-section-heading {
   white-space: nowrap;
   color: var(--ops-ink);
   font-size: 15px;
-  line-height: 22px;
+  line-height: 20px;
 }
 
 .ops-secondary {
@@ -491,6 +581,30 @@ button.ops-section-heading {
 
 .ops-mono {
   font-family: var(--ops-mono);
+  font-size: 13px;
+}
+
+// A state as a small colored dot and a plain label (Live, Replied, INFO...).
+.ops-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  color: var(--ops-ink);
+
+  &::before {
+    content: '';
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--ops-neutral);
+  }
+
+  &.positive::before { background: var(--ops-positive); }
+  &.error::before { background: var(--ops-negative); }
+  &.warning::before { background: var(--ops-warning); }
+  &.faint::before { background: var(--ops-hairline); }
 }
 
 .ops-muted {
@@ -557,10 +671,10 @@ button.ops-section-heading {
 
 .ops-card {
   box-sizing: border-box;
-  border: 1px solid var(--ops-hairline);
-  border-radius: 24px;
+  border: 1px solid var(--ops-card-edge);
+  border-radius: 28.8px;
   background: var(--ops-surface);
-  padding: 20px 24px;
+  padding: 16px 16px 12px;
 }
 
 .ops-banner {
@@ -581,8 +695,12 @@ button.ops-section-heading {
   }
 
   &.error {
-    background: var(--mat-sys-error-container);
-    color: var(--mat-sys-on-error-container);
+    background: var(--lumi-sys-color-negative-container);
+    color: var(--ops-ink);
+
+    > mat-icon {
+      color: var(--ops-negative);
+    }
   }
 }
 

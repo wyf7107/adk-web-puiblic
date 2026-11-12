@@ -833,6 +833,24 @@ describe('ChatComponent', () => {
         expect(component.activeView()).toBe('sessions');
       });
 
+      it('goes back to the Playground conversation after a cloud session', () => {
+        component.sessionId = SESSION_1_ID;
+        spyOn(component as any, 'loadSession');
+        spyOn(component as any, 'createSessionAndReset');
+        mockLocation.replaceState.calls.reset();
+        component.viewCloudSession(
+            {session: {events: []} as any, label: 'my_agent · bob'});
+        // The replay's id is not a local session, so the URL keeps this one.
+        expect(mockLocation.replaceState).not.toHaveBeenCalled();
+
+        component['returnFromReadonlySession']();
+
+        expect((component as any).loadSession)
+            .toHaveBeenCalledWith(SESSION_1_ID, true);
+        expect((component as any).createSessionAndReset).not.toHaveBeenCalled();
+        expect(component['originalSessionId']).toBe('');
+      });
+
       it('should not offer to go back from a file', () => {
         component.viewCloudSession(
             {session: {events: []} as any, label: 'my_agent · bob'});
@@ -1218,6 +1236,40 @@ describe('ChatComponent', () => {
               By.css('#toolbar-new-session-button'));
           expect(newSessionButton).toBeTruthy();
         });
+      });
+    });
+
+    describe('Manage page memory', () => {
+      it('goes back to the last Manage page after a trip to Build', () => {
+        component.setActiveView('logs');
+        component.setAccMode('builder');
+        expect(component.activeView()).toBe('build');
+        component.setAccMode('manager');
+        expect(component.activeView()).toBe('logs');
+      });
+
+      it('opens Manage on its landing page the first time', () => {
+        component.setAccMode('manager');
+        expect(component.activeView()).toBe('fleet-health');
+      });
+
+      it('reopens on the last Manage page after a reload', () => {
+        const storage = TestBed.inject(STORAGE_SERVICE);
+        storage.setItem('adk-acc-mode', 'manager');
+        storage.setItem('adk-manage-view', 'monitoring');
+        const reloaded = TestBed.createComponent(ChatComponent);
+        reloaded.detectChanges();
+        expect(reloaded.componentInstance.accMode()).toBe('manager');
+        expect(reloaded.componentInstance.activeView()).toBe('monitoring');
+        expect(reloaded.componentInstance['monitoringViewOpened']()).toBeTrue();
+      });
+
+      it('ignores a stored page that is not a Manage page', () => {
+        const storage = TestBed.inject(STORAGE_SERVICE);
+        storage.setItem('adk-acc-mode', 'manager');
+        storage.setItem('adk-manage-view', 'build');
+        const reloaded = TestBed.createComponent(ChatComponent);
+        expect(reloaded.componentInstance.activeView()).toBe('fleet-health');
       });
     });
 
